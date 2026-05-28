@@ -2,7 +2,9 @@
 
 import { useEditor } from './EditorProvider'
 import { schemaRegistry } from './schemas'
-import type { FieldDef } from './schemas/types'
+import { localizeLabel, type FieldDef } from './schemas/types'
+import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import type { Lang } from '@/lib/i18n'
 import TextField from './fields/TextField'
 import TextareaField from './fields/TextareaField'
 import DatetimeField from './fields/DatetimeField'
@@ -19,9 +21,11 @@ interface Props {
 
 export default function FieldEditor({ slug }: Props) {
   const { selectedSection, updateField, removeSection } = useEditor()
+  const t = useDashboardDict().editor
+  const lang = useDashboardLang()
 
   if (!selectedSection) {
-    return <div style={empty}>Pilih section di panel kiri untuk mulai edit.</div>
+    return <div style={empty}>{t.selectPrompt}</div>
   }
 
   const schema = schemaRegistry[selectedSection.type]
@@ -31,29 +35,25 @@ export default function FieldEditor({ slug }: Props) {
     return (
       <div style={fallback}>
         <header style={{ borderBottom: '1px solid rgba(42,33,24,0.08)', paddingBottom: 12, marginBottom: 16 }}>
-          <p style={kicker}>Section</p>
-          <h3 style={h3}>Section tidak dikenal</h3>
+          <p style={kicker}>{t.sectionKicker}</p>
+          <h3 style={h3}>{t.unknownSection}</h3>
         </header>
         <div style={legacyCard}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
             <span style={legacyIcon}>⚠</span>
             <div style={{ display: 'grid', gap: 10, flex: 1 }}>
-              <p style={legacyTitle}>Section <code>{selectedSection.type}</code> sudah tidak tersedia</p>
-              <p style={legacyDesc}>
-                Tipe section ini sudah dihapus atau dipindah ke fitur lain
-                (mis. musik kini ada di tab <strong>Music</strong>). Section ini
-                aman untuk dihapus — tidak ditampilkan di halaman undangan.
-              </p>
+              <p style={legacyTitle}>{t.legacyTitlePrefix} <code>{selectedSection.type}</code> {t.legacyTitleSuffix}</p>
+              <p style={legacyDesc}>{t.legacyDesc}</p>
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm(`Hapus section "${selectedSection.type}"?`)) {
+                  if (confirm(`${t.removeConfirmPrefix}"${selectedSection.type}"${t.removeConfirmSuffix}`)) {
                     removeSection(selectedSection.id)
                   }
                 }}
                 style={legacyBtn}
               >
-                Hapus section ini
+                {t.removeThisSection}
               </button>
             </div>
           </div>
@@ -65,11 +65,11 @@ export default function FieldEditor({ slug }: Props) {
   return (
     <div style={wrap}>
       <header style={hdr}>
-        <p style={kicker}>Section</p>
-        <h3 style={h3}>{schema.label}</h3>
+        <p style={kicker}>{t.sectionKicker}</p>
+        <h3 style={h3}>{localizeLabel(schema.label, lang)}</h3>
       </header>
       <div style={form}>
-        {schema.fields.map((f) => renderField(f, props[f.key], (v) => updateField(selectedSection.id, f.key, v), slug))}
+        {schema.fields.map((f) => renderField(f, props[f.key], (v) => updateField(selectedSection.id, f.key, v), slug, lang))}
       </div>
     </div>
   )
@@ -80,24 +80,28 @@ function renderField(
   value: any,
   onChange: (v: unknown) => void,
   slug: string,
+  lang: Lang,
 ) {
+  const label = localizeLabel(f.label, lang)
+  const help = f.help ? localizeLabel(f.help, lang) : undefined
   switch (f.type) {
-    case 'text':       return <TextField     key={f.key} label={f.label} value={value ?? ''} onChange={(v) => onChange(v)} help={f.help} />
-    case 'textarea':   return <TextareaField key={f.key} label={f.label} value={value ?? ''} rows={f.rows} onChange={(v) => onChange(v)} help={f.help} />
-    case 'datetime':   return <DatetimeField key={f.key} label={f.label} value={value ?? ''} onChange={(v) => onChange(v)} help={f.help} />
-    case 'boolean':    return <BooleanField  key={f.key} label={f.label} value={!!value} onChange={(v) => onChange(v)} help={f.help} />
-    case 'select':     return <SelectField   key={f.key} label={f.label} value={value ?? ''} options={f.options} onChange={(v) => onChange(v)} help={f.help} />
-    case 'image':      return <ImageField    key={f.key} label={f.label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={f.help} />
-    case 'audio':      return <AudioField    key={f.key} label={f.label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={f.help} />
-    case 'imageArray': return <ImageArrayField key={f.key} label={f.label} value={Array.isArray(value) ? value : []} slug={slug} onChange={(v) => onChange(v)} help={f.help} />
+    case 'text':       return <TextField     key={f.key} label={label} value={value ?? ''} onChange={(v) => onChange(v)} help={help} />
+    case 'textarea':   return <TextareaField key={f.key} label={label} value={value ?? ''} rows={f.rows} onChange={(v) => onChange(v)} help={help} />
+    case 'datetime':   return <DatetimeField key={f.key} label={label} value={value ?? ''} onChange={(v) => onChange(v)} help={help} />
+    case 'boolean':    return <BooleanField  key={f.key} label={label} value={!!value} onChange={(v) => onChange(v)} help={help} />
+    case 'select':     return <SelectField   key={f.key} label={label} value={value ?? ''} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={(v) => onChange(v)} help={help} />
+    case 'image':      return <ImageField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
+    case 'audio':      return <AudioField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
+    case 'imageArray': return <ImageArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} slug={slug} onChange={(v) => onChange(v)} help={help} />
     case 'objectArray':return <ObjectArrayField
                                 key={f.key}
-                                label={f.label}
+                                label={label}
                                 value={Array.isArray(value) ? value : []}
                                 itemFields={f.itemFields}
                                 newItem={f.newItem}
                                 itemLabelKey={f.itemLabelKey}
                                 slug={slug}
+                                lang={lang}
                                 onChange={(v) => onChange(v)}
                               />
   }

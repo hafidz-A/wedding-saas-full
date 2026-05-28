@@ -5,6 +5,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { SectionEntry } from './EditorProvider'
 import { useEditor } from './EditorProvider'
+import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 
 interface Props {
   section: SectionEntry
@@ -18,6 +19,7 @@ interface Props {
 export default function SectionRow({ section, label, isSelected, onSelect, onToggleEnabled, onRemove }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
   const { renameSectionNav } = useEditor()
+  const t = useDashboardDict().editor
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(section.navLabel || '')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -68,7 +70,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         {...listeners}
         onClick={(e) => e.stopPropagation()}
         style={{ cursor: 'grab', color: 'rgba(42,33,24,0.4)', fontSize: 14, padding: '0 4px' }}
-        aria-label="Drag to reorder"
+        aria-label={t.dragReorder}
       >
         ⠿
       </span>
@@ -94,7 +96,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         )}
         <span style={typeStyle}>
           {editing
-            ? `${wordCount}/4 kata — Enter simpan, Esc batal`
+            ? `${wordCount}${t.renameHint}`
             : section.navLabel
               ? <span style={{ color: 'rgba(42,33,24,0.45)' }}>({label})</span>
               : null}
@@ -105,9 +107,9 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); setEditing(true) }}
-          title="Rename navbar label"
+          title={t.renameTitle}
           style={iconBtn}
-          aria-label="Rename"
+          aria-label={t.renameAria}
         >
           ✏️
         </button>
@@ -115,7 +117,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggleEnabled() }}
-        title={section.enabled === false ? 'Disabled — click to enable' : 'Enabled — click to disable'}
+        title={section.enabled === false ? t.enableTitle : t.disableTitle}
         style={{
           width: 12, height: 12, borderRadius: 999,
           border: 'none', cursor: 'pointer',
@@ -125,9 +127,9 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
       />
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); if (confirm(`Remove section "${displayLabel}"?`)) onRemove() }}
+        onClick={(e) => { e.stopPropagation(); if (confirm(`${t.removeConfirmPrefix}"${displayLabel}"${t.removeConfirmSuffix}`)) onRemove() }}
         style={{ border: 'none', background: 'transparent', color: 'rgba(42,33,24,0.4)', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
-        aria-label="Remove section"
+        aria-label={t.removeAria}
       >
         ×
       </button>

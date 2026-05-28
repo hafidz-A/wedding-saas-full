@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useEditor } from './EditorProvider'
+import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 
 interface Props {
   slug: string
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function SaveBar({ slug, initialIsPublished }: Props) {
+  const t = useDashboardDict().editor
   const { isDirty, isSaving, saveError, save, lastSavedAt } = useEditor()
   const [isPublished, setIsPublished] = useState(initialIsPublished)
   const [publishBusy, setPublishBusy] = useState(false)
@@ -39,13 +41,13 @@ export default function SaveBar({ slug, initialIsPublished }: Props) {
     <div style={wrap}>
       <div style={status}>
         {isSaving ? (
-          <span style={savingTxt}>Saving…</span>
+          <span style={savingTxt}>{t.saving}</span>
         ) : isDirty ? (
-          <span style={dirtyTxt}>● Unsaved changes</span>
+          <span style={dirtyTxt}>{t.unsaved}</span>
         ) : lastSavedAt ? (
-          <span style={savedTxt}>Saved {new Date(lastSavedAt).toLocaleTimeString()}</span>
+          <span style={savedTxt}>{t.savedPrefix} {new Date(lastSavedAt).toLocaleTimeString()}</span>
         ) : (
-          <span style={savedTxt}>All up to date</span>
+          <span style={savedTxt}>{t.upToDate}</span>
         )}
         {saveError && <span style={errTxt}>{saveError}</span>}
         {publishErr && <span style={errTxt}>{publishErr}</span>}
@@ -57,7 +59,7 @@ export default function SaveBar({ slug, initialIsPublished }: Props) {
         onClick={togglePublish}
         style={isPublished ? pillOn : pillOff}
       >
-        {isPublished ? 'Published ●' : 'Draft ○'}
+        {isPublished ? t.published : t.draft}
       </button>
 
       <button
@@ -66,7 +68,7 @@ export default function SaveBar({ slug, initialIsPublished }: Props) {
         onClick={save}
         style={{ ...saveBtn, opacity: !isDirty || isSaving ? 0.4 : 1, cursor: !isDirty || isSaving ? 'default' : 'pointer' }}
       >
-        Save
+        {t.save}
       </button>
     </div>
   )

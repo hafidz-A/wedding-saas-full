@@ -11,8 +11,10 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from './EditorProvider'
 import { schemaRegistry } from './schemas'
+import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
+import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 
 interface Props {
   slug: string
@@ -24,6 +26,8 @@ export default function SectionList({ slug, template }: Props) {
     config, selectedSectionId,
     reorderSections, toggleSectionEnabled, selectSection, addSection, removeSection,
   } = useEditor()
+  const t = useDashboardDict().editor
+  const lang = useDashboardLang()
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
@@ -39,7 +43,7 @@ export default function SectionList({ slug, template }: Props) {
   return (
     <aside style={wrap}>
       <header style={hdr}>
-        <p style={kicker}>Sections</p>
+        <p style={kicker}>{t.sectionsHeader}</p>
       </header>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -49,7 +53,7 @@ export default function SectionList({ slug, template }: Props) {
               <SectionRow
                 key={s.id}
                 section={s}
-                label={schemaRegistry[s.type]?.label ?? s.type}
+                label={localizeLabel(schemaRegistry[s.type]?.label ?? s.type, lang)}
                 isSelected={s.id === selectedSectionId}
                 onSelect={() => selectSection(s.id)}
                 onToggleEnabled={() => toggleSectionEnabled(s.id)}
@@ -71,7 +75,7 @@ export default function SectionList({ slug, template }: Props) {
           rel="noopener noreferrer"
           style={previewLink}
         >
-          Open preview ↗
+          {t.openPreview}
         </a>
       </footer>
     </aside>

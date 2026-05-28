@@ -6,6 +6,7 @@ import SectionList from './SectionList'
 import FieldEditor from './FieldEditor'
 import SaveBar from './SaveBar'
 import PreviewPane from './PreviewPane'
+import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import styles from './EditorRoot.module.css'
 
 interface Props {
@@ -22,6 +23,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   }
 
   const [previewOpen, setPreviewOpen] = useState(true)
+  const t = useDashboardDict().editor
 
   return (
     <EditorProvider slug={slug} initialConfig={safeConfig}>
@@ -31,9 +33,9 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
             type="button"
             onClick={() => setPreviewOpen((p) => !p)}
             style={previewToggle}
-            title={previewOpen ? 'Hide preview' : 'Show preview'}
+            title={previewOpen ? t.hidePreviewTitle : t.showPreviewTitle}
           >
-            {previewOpen ? '▲ Hide preview' : '▼ Show preview'}
+            {previewOpen ? t.hidePreview : t.showPreview}
           </button>
           <SaveBar slug={slug} initialIsPublished={initialIsPublished} />
         </div>

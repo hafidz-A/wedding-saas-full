@@ -15,10 +15,23 @@ export type FieldType =
   | 'objectArray'
   | 'audio'
 
+/** Bilingual label/help. The id/en toggle picks one at render time — this is
+ *  editor "keterangan" only; it never touches the couple's invitation content.
+ *  `LabelText` accepts a plain string too, so schemas can be converted to the
+ *  {id,en} form incrementally — a plain string just shows the same text in both
+ *  languages (graceful English fallback). */
+export type Localized = { id: string; en: string }
+export type LabelText = string | Localized
+
+export function localizeLabel(label: LabelText, lang: 'id' | 'en'): string {
+  if (typeof label === 'string') return label
+  return label[lang] ?? label.en
+}
+
 export interface BaseField {
   key: string
-  label: string
-  help?: string
+  label: LabelText
+  help?: LabelText
 }
 
 export interface TextField extends BaseField {
@@ -36,7 +49,7 @@ export interface BooleanField extends BaseField {
 }
 export interface SelectField extends BaseField {
   type: 'select'
-  options: { value: string; label: string }[]
+  options: { value: string; label: LabelText }[]
 }
 export interface ImageField extends BaseField {
   type: 'image'
@@ -75,7 +88,7 @@ export type FieldDef =
 
 export interface SectionSchema {
   type: string
-  label: string
+  label: LabelText
   fields: FieldDef[]
   /** Initial props applied when this section is added via "+ Add section".
    *  Should be representative placeholder content (couple-name placeholder,

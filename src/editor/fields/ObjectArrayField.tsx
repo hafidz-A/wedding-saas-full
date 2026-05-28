@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import type { FieldDef } from '../schemas/types'
+import { localizeLabel, type FieldDef } from '../schemas/types'
 import TextField from './TextField'
 import TextareaField from './TextareaField'
 import DatetimeField from './DatetimeField'
 import BooleanField from './BooleanField'
 import SelectField from './SelectField'
 import ImageField from './ImageField'
+import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import type { Lang } from '@/lib/i18n'
 
 interface Props {
   label: string
@@ -16,12 +18,14 @@ interface Props {
   newItem: Record<string, unknown>
   itemLabelKey?: string
   slug: string
+  lang: Lang
   onChange: (next: Record<string, unknown>[]) => void
 }
 
 export default function ObjectArrayField({
-  label, value, itemFields, newItem, itemLabelKey, slug, onChange,
+  label, value, itemFields, newItem, itemLabelKey, slug, lang, onChange,
 }: Props) {
+  const t = useDashboardDict().editor
   const items = Array.isArray(value) ? value : []
   const [openIdx, setOpenIdx] = useState<number | null>(items.length === 1 ? 0 : null)
 
@@ -32,7 +36,7 @@ export default function ObjectArrayField({
   }
 
   function remove(idx: number) {
-    if (!confirm('Remove this item?')) return
+    if (!confirm(t.removeItemConfirm)) return
     const next = items.slice()
     next.splice(idx, 1)
     onChange(next)
@@ -59,18 +63,18 @@ export default function ObjectArrayField({
     <div style={wrap}>
       <div style={head}>
         <span style={lbl}>{label}</span>
-        <button type="button" style={btn} onClick={add}>+ Add</button>
+        <button type="button" style={btn} onClick={add}>{t.addItem}</button>
       </div>
 
       <div style={list}>
         {items.map((item, i) => {
-          const headerLabel = (itemLabelKey && String(item[itemLabelKey] ?? '')) || `Item ${i + 1}`
+          const headerLabel = (itemLabelKey && String(item[itemLabelKey] ?? '')) || `${t.itemFallback} ${i + 1}`
           const open = openIdx === i
           return (
             <div key={String((item as any).id ?? i)} style={card}>
               <div style={rowHead} onClick={() => setOpenIdx(open ? null : i)}>
                 <span style={chev}>{open ? '▾' : '▸'}</span>
-                <span style={rowLbl}>{headerLabel || `Item ${i + 1}`}</span>
+                <span style={rowLbl}>{headerLabel || `${t.itemFallback} ${i + 1}`}</span>
                 <div style={rowBtns} onClick={(e) => e.stopPropagation()}>
                   <button type="button" style={iconBtn} onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
                   <button type="button" style={iconBtn} onClick={() => move(i, +1)} disabled={i === items.length - 1}>↓</button>
@@ -82,15 +86,17 @@ export default function ObjectArrayField({
                   {itemFields.map((f) => {
                     const v = (item[f.key] as any) ?? defaultForField(f)
                     const onChange = (val: unknown) => updateItem(i, f.key, val)
+                    const fLabel = localizeLabel(f.label, lang)
+                    const fHelp = f.help ? localizeLabel(f.help, lang) : undefined
                     switch (f.type) {
-                      case 'text':     return <TextField     key={f.key} label={f.label} value={v} onChange={onChange} help={f.help} />
-                      case 'textarea': return <TextareaField key={f.key} label={f.label} value={v} rows={f.rows} onChange={onChange} help={f.help} />
-                      case 'datetime': return <DatetimeField key={f.key} label={f.label} value={v} onChange={onChange} help={f.help} />
-                      case 'boolean':  return <BooleanField  key={f.key} label={f.label} value={v} onChange={onChange} help={f.help} />
-                      case 'select':   return <SelectField   key={f.key} label={f.label} value={v} options={f.options} onChange={onChange} help={f.help} />
-                      case 'image':    return <ImageField    key={f.key} label={f.label} value={v} slug={slug} onChange={onChange} help={f.help} />
+                      case 'text':     return <TextField     key={f.key} label={fLabel} value={v} onChange={onChange} help={fHelp} />
+                      case 'textarea': return <TextareaField key={f.key} label={fLabel} value={v} rows={f.rows} onChange={onChange} help={fHelp} />
+                      case 'datetime': return <DatetimeField key={f.key} label={fLabel} value={v} onChange={onChange} help={fHelp} />
+                      case 'boolean':  return <BooleanField  key={f.key} label={fLabel} value={v} onChange={onChange} help={fHelp} />
+                      case 'select':   return <SelectField   key={f.key} label={fLabel} value={v} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={onChange} help={fHelp} />
+                      case 'image':    return <ImageField    key={f.key} label={fLabel} value={v} slug={slug} onChange={onChange} help={fHelp} />
                       default:
-                        return <div key={f.key} style={{ fontSize: 12, color: '#E8553E' }}>Unsupported nested field: {f.type}</div>
+                        return <div key={f.key} style={{ fontSize: 12, color: '#E8553E' }}>{t.unsupportedField} {f.type}</div>
                     }
                   })}
                 </div>
@@ -98,7 +104,7 @@ export default function ObjectArrayField({
             </div>
           )
         })}
-        {items.length === 0 && <div style={empty}>No items yet — click + Add to create one.</div>}
+        {items.length === 0 && <div style={empty}>{t.noItems}</div>}
       </div>
     </div>
   )

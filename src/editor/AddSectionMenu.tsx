@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { schemaRegistry } from './schemas'
+import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { localizeLabel } from './schemas/types'
 
 interface Props {
   onAdd: (sectionType: string, label: string, defaults?: Record<string, unknown>) => void
 }
 
 export default function AddSectionMenu({ onAdd }: Props) {
+  const t = useDashboardDict().editor
+  const lang = useDashboardLang()
   const [open, setOpen] = useState(false)
   const entries = Object.entries(schemaRegistry)
 
@@ -34,7 +38,7 @@ export default function AddSectionMenu({ onAdd }: Props) {
           textTransform: 'uppercase', cursor: 'pointer',
         }}
       >
-        + Add section
+        {t.addSection}
       </button>
       {open && (
         <div
@@ -49,7 +53,7 @@ export default function AddSectionMenu({ onAdd }: Props) {
             <button
               key={type}
               type="button"
-              onClick={() => { onAdd(type, schema.label, schema.defaults); setOpen(false) }}
+              onClick={() => { onAdd(type, localizeLabel(schema.label, lang), schema.defaults); setOpen(false) }}
               style={{
                 display: 'block', width: '100%', textAlign: 'left',
                 padding: '10px 14px', border: 'none', background: 'transparent',
@@ -58,7 +62,7 @@ export default function AddSectionMenu({ onAdd }: Props) {
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(42,33,24,0.05)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              {schema.label}
+              {localizeLabel(schema.label, lang)}
             </button>
           ))}
         </div>

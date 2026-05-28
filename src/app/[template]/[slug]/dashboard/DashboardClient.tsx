@@ -11,7 +11,7 @@ import NotesTab, { type NoteRow } from './NotesTab'
 import GuestsTab from './GuestsTab'
 import { type GuestRow } from './guests/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
-import type { Dict } from '@/lib/i18n'
+import type { Dict, Lang } from '@/lib/i18n'
 import styles from './dashboard.module.css'
 
 /**
@@ -56,6 +56,7 @@ export default function DashboardClient({
   notes = [],
   guests = [],
   dict,
+  lang,
 }: {
   slug: string
   template: string
@@ -65,6 +66,7 @@ export default function DashboardClient({
   notes?: NoteRow[]
   guests?: GuestRow[]
   dict: Dict['dashboard']
+  lang: Lang
 }) {
   useRefreshLogoutGuard(template, slug)
   const [tab, setTab] = useState<
@@ -72,7 +74,7 @@ export default function DashboardClient({
   >('rsvps')
 
   return (
-    <DashboardI18nProvider dict={dict}>
+    <DashboardI18nProvider dict={dict} lang={lang}>
     <main
       style={{
         minHeight: '100vh',
