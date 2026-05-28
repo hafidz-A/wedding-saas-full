@@ -2,22 +2,22 @@ import type { SectionSchema } from './types'
 
 export const rsvpSchema: SectionSchema = {
   type: 'rsvp',
-  label: 'RSVP',
+  label: { id: 'RSVP', en: 'RSVP' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'mealOptions',
-      label: 'Meal options',
+      label: { id: 'Pilihan menu', en: 'Meal options' },
       type: 'objectArray',
       itemLabelKey: 'label',
       newItem: { value: '', label: '' },
       itemFields: [
-        { key: 'value', label: 'Value (machine)', type: 'text' },
-        { key: 'label', label: 'Label (display)', type: 'text' },
+        { key: 'value', label: { id: 'Value (sistem)', en: 'Value (machine)' }, type: 'text' },
+        { key: 'label', label: { id: 'Label (tampilan)', en: 'Label (display)' }, type: 'text' },
       ],
     },
-    { key: 'maxGuests', label: 'Max guests per RSVP', type: 'text' },
+    { key: 'maxGuests', label: { id: 'Maks tamu per RSVP', en: 'Max guests per RSVP' }, type: 'text' },
   ],
   defaults: {
     title: 'Will You Join Us?',

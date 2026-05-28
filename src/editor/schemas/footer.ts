@@ -2,20 +2,20 @@ import type { SectionSchema } from './types'
 
 export const footerSchema: SectionSchema = {
   type: 'footer',
-  label: 'Footer',
+  label: { id: 'Footer', en: 'Footer' },
   fields: [
-    { key: 'hashtag',    label: 'Hashtag',    type: 'text' },
-    { key: 'message',    label: 'Message',    type: 'textarea', rows: 2 },
-    { key: 'coupleName', label: 'Couple name', type: 'text' },
+    { key: 'hashtag',    label: { id: 'Tagar', en: 'Hashtag' },         type: 'text' },
+    { key: 'message',    label: { id: 'Pesan', en: 'Message' },         type: 'textarea', rows: 2 },
+    { key: 'coupleName', label: { id: 'Nama pasangan', en: 'Couple name' }, type: 'text' },
     {
       key: 'socials',
-      label: 'Socials',
+      label: { id: 'Media sosial', en: 'Socials' },
       type: 'objectArray',
       itemLabelKey: 'label',
       newItem: { id: '', label: '', url: '' },
       itemFields: [
-        { key: 'label', label: 'Label', type: 'text' },
-        { key: 'url',   label: 'URL',   type: 'text' },
+        { key: 'label', label: { id: 'Label', en: 'Label' }, type: 'text' },
+        { key: 'url',   label: { id: 'URL', en: 'URL' },     type: 'text' },
       ],
     },
   ],

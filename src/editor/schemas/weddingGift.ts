@@ -1,39 +1,39 @@
 import type { SectionSchema } from './types'
 
 const ACCENTS = [
-  { value: 'coral',   label: 'Coral' },
-  { value: 'emerald', label: 'Emerald' },
-  { value: 'gold',    label: 'Gold' },
-  { value: 'sky',     label: 'Sky' },
-  { value: 'purple',  label: 'Purple' },
+  { value: 'coral',   label: { id: 'Coral', en: 'Coral' } },
+  { value: 'emerald', label: { id: 'Emerald', en: 'Emerald' } },
+  { value: 'gold',    label: { id: 'Gold', en: 'Gold' } },
+  { value: 'sky',     label: { id: 'Sky', en: 'Sky' } },
+  { value: 'purple',  label: { id: 'Purple', en: 'Purple' } },
 ]
 
 export const weddingGiftSchema: SectionSchema = {
   type: 'weddingGift',
-  label: 'Wedding Gift',
+  label: { id: 'Hadiah Pernikahan', en: 'Wedding Gift' },
   fields: [
-    { key: 'title',               label: 'Title',                 type: 'text' },
-    { key: 'subtitle',            label: 'Subtitle',              type: 'text' },
-    { key: 'intro',               label: 'Intro',                 type: 'textarea', rows: 3 },
-    { key: 'confirmationEnabled', label: 'Show confirmation form', type: 'boolean' },
+    { key: 'title',               label: { id: 'Judul', en: 'Title' },                 type: 'text' },
+    { key: 'subtitle',            label: { id: 'Subjudul', en: 'Subtitle' },           type: 'text' },
+    { key: 'intro',               label: { id: 'Pengantar', en: 'Intro' },             type: 'textarea', rows: 3 },
+    { key: 'confirmationEnabled', label: { id: 'Tampilkan form konfirmasi', en: 'Show confirmation form' }, type: 'boolean' },
     {
       key: 'accounts',
-      label: 'Accounts',
+      label: { id: 'Rekening', en: 'Accounts' },
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { id: '', type: 'bank', name: '', accountNumber: '', accountHolder: '', accent: 'coral' },
       itemFields: [
-        { key: 'type',          label: 'Type', type: 'select', options: [
-          { value: 'bank',    label: 'Bank' },
-          { value: 'ewallet', label: 'E-wallet' },
+        { key: 'type',          label: { id: 'Jenis', en: 'Type' }, type: 'select', options: [
+          { value: 'bank',    label: { id: 'Bank', en: 'Bank' } },
+          { value: 'ewallet', label: { id: 'E-wallet', en: 'E-wallet' } },
         ] },
-        { key: 'name',          label: 'Bank / wallet name', type: 'text' },
-        { key: 'accountNumber', label: 'Account number',     type: 'text' },
-        { key: 'accountHolder', label: 'Account holder',     type: 'text' },
-        { key: 'accent',        label: 'Accent',             type: 'select', options: ACCENTS },
+        { key: 'name',          label: { id: 'Nama bank / dompet', en: 'Bank / wallet name' }, type: 'text' },
+        { key: 'accountNumber', label: { id: 'Nomor rekening', en: 'Account number' },         type: 'text' },
+        { key: 'accountHolder', label: { id: 'Atas nama', en: 'Account holder' },              type: 'text' },
+        { key: 'accent',        label: { id: 'Warna aksen', en: 'Accent' },                    type: 'select', options: ACCENTS },
       ],
     },
-    { key: 'giftAddress', label: 'Physical-gift address', type: 'textarea', rows: 3 },
+    { key: 'giftAddress', label: { id: 'Alamat kado fisik', en: 'Physical-gift address' }, type: 'textarea', rows: 3 },
   ],
   defaults: {
     title: 'Wedding Gift',

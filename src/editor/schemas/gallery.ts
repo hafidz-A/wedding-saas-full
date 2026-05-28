@@ -2,20 +2,20 @@ import type { SectionSchema } from './types'
 
 export const gallerySchema: SectionSchema = {
   type: 'gallery',
-  label: 'Gallery',
+  label: { id: 'Galeri', en: 'Gallery' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'images',
-      label: 'Images',
+      label: { id: 'Gambar', en: 'Images' },
       type: 'objectArray',
       itemLabelKey: 'caption',
       newItem: { id: '', src: '', caption: '', tall: false },
       itemFields: [
-        { key: 'src',     label: 'Image',     type: 'image' },
-        { key: 'caption', label: 'Caption',   type: 'text' },
-        { key: 'tall',    label: 'Tall (2-row)', type: 'boolean' },
+        { key: 'src',     label: { id: 'Gambar', en: 'Image' },        type: 'image' },
+        { key: 'caption', label: { id: 'Keterangan', en: 'Caption' },  type: 'text' },
+        { key: 'tall',    label: { id: 'Tinggi (2 baris)', en: 'Tall (2-row)' }, type: 'boolean' },
       ],
     },
   ],

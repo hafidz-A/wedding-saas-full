@@ -2,20 +2,20 @@ import type { SectionSchema } from './types'
 
 export const weddingPartySchema: SectionSchema = {
   type: 'weddingParty',
-  label: 'Wedding Party',
+  label: { id: 'Pendamping Mempelai', en: 'Wedding Party' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'people',
-      label: 'People',
+      label: { id: 'Anggota', en: 'People' },
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { id: '', name: '', role: '', photo: '' },
       itemFields: [
-        { key: 'name',  label: 'Name',  type: 'text' },
-        { key: 'role',  label: 'Role',  type: 'text' },
-        { key: 'photo', label: 'Photo', type: 'image' },
+        { key: 'name',  label: { id: 'Nama', en: 'Name' },   type: 'text' },
+        { key: 'role',  label: { id: 'Peran', en: 'Role' },  type: 'text' },
+        { key: 'photo', label: { id: 'Foto', en: 'Photo' },  type: 'image' },
       ],
     },
   ],

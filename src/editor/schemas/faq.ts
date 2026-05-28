@@ -2,19 +2,19 @@ import type { SectionSchema } from './types'
 
 export const faqSchema: SectionSchema = {
   type: 'faq',
-  label: 'FAQ',
+  label: { id: 'Tanya Jawab', en: 'FAQ' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'items',
-      label: 'Questions',
+      label: { id: 'Pertanyaan', en: 'Questions' },
       type: 'objectArray',
       itemLabelKey: 'q',
       newItem: { id: '', q: '', a: '' },
       itemFields: [
-        { key: 'q', label: 'Question', type: 'text' },
-        { key: 'a', label: 'Answer',   type: 'textarea', rows: 3 },
+        { key: 'q', label: { id: 'Pertanyaan', en: 'Question' }, type: 'text' },
+        { key: 'a', label: { id: 'Jawaban', en: 'Answer' },      type: 'textarea', rows: 3 },
       ],
     },
   ],

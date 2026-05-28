@@ -2,19 +2,19 @@ import type { SectionSchema } from './types'
 
 export const playlistSchema: SectionSchema = {
   type: 'playlist',
-  label: 'Playlist',
+  label: { id: 'Playlist', en: 'Playlist' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'initialSongs',
-      label: 'Seeded songs',
+      label: { id: 'Lagu awal', en: 'Seeded songs' },
       type: 'objectArray',
       itemLabelKey: 'song',
       newItem: { id: '', song: '', artist: '' },
       itemFields: [
-        { key: 'song',   label: 'Song',   type: 'text' },
-        { key: 'artist', label: 'Artist', type: 'text' },
+        { key: 'song',   label: { id: 'Lagu', en: 'Song' },    type: 'text' },
+        { key: 'artist', label: { id: 'Artis', en: 'Artist' }, type: 'text' },
       ],
     },
   ],

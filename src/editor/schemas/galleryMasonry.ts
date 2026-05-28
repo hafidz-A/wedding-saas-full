@@ -2,20 +2,20 @@ import type { SectionSchema } from './types'
 
 export const galleryMasonrySchema: SectionSchema = {
   type: 'galleryMasonry',
-  label: 'Gallery (Masonry)',
+  label: { id: 'Galeri (Masonry)', en: 'Gallery (Masonry)' },
   fields: [
-    { type: 'text', key: 'eyebrow',         label: 'Eyebrow', help: 'Teks kecil di atas judul' },
-    { type: 'text', key: 'sectionTitle',    label: 'Title' },
-    { type: 'text', key: 'sectionSubtitle', label: 'Subtitle' },
+    { type: 'text', key: 'eyebrow',         label: { id: 'Teks kecil atas', en: 'Eyebrow' }, help: { id: 'Teks kecil di atas judul', en: 'Small text above the title' } },
+    { type: 'text', key: 'sectionTitle',    label: { id: 'Judul', en: 'Title' } },
+    { type: 'text', key: 'sectionSubtitle', label: { id: 'Subjudul', en: 'Subtitle' } },
     {
       type: 'objectArray',
       key: 'photos',
-      label: 'Photos',
+      label: { id: 'Foto', en: 'Photos' },
       itemLabelKey: 'alt',
       newItem: { src: '', alt: '' },
       itemFields: [
-        { type: 'image', key: 'src', label: 'Photo' },
-        { type: 'text',  key: 'alt', label: 'Caption' },
+        { type: 'image', key: 'src', label: { id: 'Foto', en: 'Photo' } },
+        { type: 'text',  key: 'alt', label: { id: 'Keterangan', en: 'Caption' } },
       ],
     },
   ],

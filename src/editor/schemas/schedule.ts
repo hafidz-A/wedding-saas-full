@@ -1,31 +1,31 @@
 import type { SectionSchema } from './types'
 
 const ACCENTS = [
-  { value: 'coral',   label: 'Coral' },
-  { value: 'emerald', label: 'Emerald' },
-  { value: 'gold',    label: 'Gold' },
-  { value: 'sky',     label: 'Sky' },
-  { value: 'purple',  label: 'Purple' },
+  { value: 'coral',   label: { id: 'Coral', en: 'Coral' } },
+  { value: 'emerald', label: { id: 'Emerald', en: 'Emerald' } },
+  { value: 'gold',    label: { id: 'Gold', en: 'Gold' } },
+  { value: 'sky',     label: { id: 'Sky', en: 'Sky' } },
+  { value: 'purple',  label: { id: 'Purple', en: 'Purple' } },
 ]
 
 export const scheduleSchema: SectionSchema = {
   type: 'schedule',
-  label: 'Schedule',
+  label: { id: 'Rangkaian Acara', en: 'Schedule' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'events',
-      label: 'Schedule items',
+      label: { id: 'Item acara', en: 'Schedule items' },
       type: 'objectArray',
       itemLabelKey: 'title',
       newItem: { id: '', time: '', title: '', description: '', accent: 'coral', icon: '' },
       itemFields: [
-        { key: 'time',        label: 'Time',        type: 'text' },
-        { key: 'title',       label: 'Title',       type: 'text' },
-        { key: 'description', label: 'Description', type: 'textarea', rows: 2 },
-        { key: 'accent',      label: 'Accent',      type: 'select', options: ACCENTS },
-        { key: 'icon',        label: 'Icon',        type: 'text' },
+        { key: 'time',        label: { id: 'Waktu', en: 'Time' },        type: 'text' },
+        { key: 'title',       label: { id: 'Judul', en: 'Title' },       type: 'text' },
+        { key: 'description', label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 2 },
+        { key: 'accent',      label: { id: 'Warna aksen', en: 'Accent' }, type: 'select', options: ACCENTS },
+        { key: 'icon',        label: { id: 'Ikon', en: 'Icon' },         type: 'text' },
       ],
     },
   ],

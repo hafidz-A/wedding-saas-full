@@ -2,19 +2,19 @@ import type { SectionSchema } from './types'
 
 export const galleryHelixSchema: SectionSchema = {
   type: 'galleryHelix',
-  label: 'Gallery (Helix)',
+  label: { id: 'Galeri (Helix)', en: 'Gallery (Helix)' },
   fields: [
-    { key: 'sectionTitle',    label: 'Title',    type: 'text' },
-    { key: 'sectionSubtitle', label: 'Subtitle', type: 'text' },
+    { key: 'sectionTitle',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'sectionSubtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'photos',
-      label: 'Photos',
+      label: { id: 'Foto', en: 'Photos' },
       type: 'objectArray',
       itemLabelKey: 'caption',
       newItem: { src: '', caption: '' },
       itemFields: [
-        { key: 'src',     label: 'Image',   type: 'image' },
-        { key: 'caption', label: 'Caption', type: 'text' },
+        { key: 'src',     label: { id: 'Gambar', en: 'Image' },       type: 'image' },
+        { key: 'caption', label: { id: 'Keterangan', en: 'Caption' }, type: 'text' },
       ],
     },
   ],

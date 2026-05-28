@@ -1,29 +1,29 @@
 import type { SectionSchema } from './types'
 
 const COLORS = [
-  { value: 'coral',  label: 'Coral' },
-  { value: 'gold',   label: 'Gold' },
-  { value: 'sky',    label: 'Sky' },
-  { value: 'mint',   label: 'Mint' },
-  { value: 'purple', label: 'Purple' },
+  { value: 'coral',  label: { id: 'Coral', en: 'Coral' } },
+  { value: 'gold',   label: { id: 'Gold', en: 'Gold' } },
+  { value: 'sky',    label: { id: 'Sky', en: 'Sky' } },
+  { value: 'mint',   label: { id: 'Mint', en: 'Mint' } },
+  { value: 'purple', label: { id: 'Purple', en: 'Purple' } },
 ]
 
 export const guestbookSchema: SectionSchema = {
   type: 'guestbook',
-  label: 'Guestbook',
+  label: { id: 'Buku Tamu', en: 'Guestbook' },
   fields: [
-    { key: 'title',    label: 'Title',    type: 'text' },
-    { key: 'subtitle', label: 'Subtitle', type: 'text' },
+    { key: 'title',    label: { id: 'Judul', en: 'Title' },       type: 'text' },
+    { key: 'subtitle', label: { id: 'Subjudul', en: 'Subtitle' }, type: 'text' },
     {
       key: 'initialNotes',
-      label: 'Seeded notes',
+      label: { id: 'Ucapan awal', en: 'Seeded notes' },
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { id: '', name: '', message: '', color: 'gold' },
       itemFields: [
-        { key: 'name',    label: 'Name',    type: 'text' },
-        { key: 'message', label: 'Message', type: 'textarea', rows: 2 },
-        { key: 'color',   label: 'Color',   type: 'select', options: COLORS },
+        { key: 'name',    label: { id: 'Nama', en: 'Name' },     type: 'text' },
+        { key: 'message', label: { id: 'Pesan', en: 'Message' }, type: 'textarea', rows: 2 },
+        { key: 'color',   label: { id: 'Warna', en: 'Color' },   type: 'select', options: COLORS },
       ],
     },
   ],
