@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { downloadCsv } from './lib/csv'
+import { useDashboardDict } from './DashboardI18nProvider'
 import tabs from './dashboardTabs.module.css'
 
 export interface GiftRow {
@@ -29,6 +30,9 @@ const fmtAmount = (n: number | null, currency: string | null) => {
 }
 
 export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
+  const dd = useDashboardDict()
+  const t = dd.tabs.gifts
+  const tc = dd.tabs.common
   const [query, setQuery] = useState('')
   const router = useRouter()
   const [refreshing, startTransition] = useTransition()
@@ -49,7 +53,7 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
   return (
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
-        <h2>Konfirmasi Hadiah</h2>
+        <h2>{t.title}</h2>
         <div className={tabs.headerActions}>
           <button
             type="button"
@@ -57,27 +61,27 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
             disabled={refreshing}
             style={ghostBtn}
           >
-            {refreshing ? '…' : '↻ Refresh'}
+            {refreshing ? '…' : tc.refresh}
           </button>
           <button
             type="button"
             onClick={() => downloadCsv(`gifts-${new Date().toISOString().slice(0, 10)}.csv`, gifts as unknown as Record<string, unknown>[])}
             style={primaryBtn}
           >
-            Download CSV
+            {tc.downloadCsv}
           </button>
         </div>
       </header>
 
       <div className={tabs.statsRow}>
-        <Stat label="Konfirmasi" value={String(gifts.length)} />
-        <Stat label="Total disclosed" value={fmtAmount(totalAmount || null, 'IDR')} accent="#E8553E" />
+        <Stat label={t.statConfirmations} value={String(gifts.length)} />
+        <Stat label={t.statTotal} value={fmtAmount(totalAmount || null, 'IDR')} accent="#E8553E" />
       </div>
 
       <div className={tabs.filterRow}>
         <input
           type="search"
-          placeholder="Cari nama, akun, atau pesan…"
+          placeholder={t.searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           style={searchInput}
@@ -85,29 +89,29 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
       </div>
 
       {gifts.length === 0 ? (
-        <div className={tabs.empty}>Belum ada konfirmasi hadiah.</div>
+        <div className={tabs.empty}>{t.emptyNone}</div>
       ) : filtered.length === 0 ? (
-        <div className={tabs.empty}>Tidak ada konfirmasi yang cocok.</div>
+        <div className={tabs.empty}>{t.emptyFilter}</div>
       ) : (
         <div className={tabs.tableWrap}>
           <table className={tabs.table}>
             <thead>
               <tr>
-                <th>Nama</th>
-                <th>Akun</th>
-                <th>Jumlah</th>
-                <th>Pesan</th>
-                <th>Diterima</th>
+                <th>{t.colName}</th>
+                <th>{t.colAccount}</th>
+                <th>{t.colAmount}</th>
+                <th>{t.colMessage}</th>
+                <th>{t.colReceived}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((g) => (
                 <tr key={g.id}>
-                  <td data-label="Nama">{g.guest_name}</td>
-                  <td data-label="Akun">{g.account_used}</td>
-                  <td data-label="Jumlah">{fmtAmount(g.amount, g.currency)}</td>
-                  <td data-label="Pesan" className={tabs.tdEllipsis} title={g.message || ''}>{g.message || '—'}</td>
-                  <td data-label="Diterima">{new Date(g.created_at).toLocaleString('id-ID')}</td>
+                  <td data-label={t.colName}>{g.guest_name}</td>
+                  <td data-label={t.colAccount}>{g.account_used}</td>
+                  <td data-label={t.colAmount}>{fmtAmount(g.amount, g.currency)}</td>
+                  <td data-label={t.colMessage} className={tabs.tdEllipsis} title={g.message || ''}>{g.message || '—'}</td>
+                  <td data-label={t.colReceived}>{new Date(g.created_at).toLocaleString('id-ID')}</td>
                 </tr>
               ))}
             </tbody>

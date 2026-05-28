@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useDashboardDict } from './DashboardI18nProvider'
 import tabs from './dashboardTabs.module.css'
 
 export interface NoteRow {
@@ -26,6 +27,9 @@ const COLOR_DOT: Record<string, string> = {
 }
 
 export default function NotesTab({ slug, notes }: Props) {
+  const dd = useDashboardDict()
+  const t = dd.tabs.notes
+  const tc = dd.tabs.common
   const [query, setQuery] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const router = useRouter()
@@ -42,7 +46,7 @@ export default function NotesTab({ slug, notes }: Props) {
   }, [notes, query])
 
   async function deleteNote(id: string) {
-    if (!confirm('Hapus note ini? Tindakan tidak bisa dibatalkan.')) return
+    if (!confirm(t.deleteConfirm)) return
     setDeletingId(id)
     try {
       const res = await fetch(`/api/guestbook/${id}?slug=${encodeURIComponent(slug)}`, {
@@ -50,13 +54,13 @@ export default function NotesTab({ slug, notes }: Props) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        alert(data.error || `Gagal hapus (${res.status})`)
+        alert(data.error || `${t.deleteFailed} (${res.status})`)
         return
       }
       // Refresh server data so the list updates without manual reload
       startTransition(() => router.refresh())
     } catch (err: any) {
-      alert(err?.message || 'Network error')
+      alert(err?.message || t.networkError)
     } finally {
       setDeletingId(null)
     }
@@ -66,12 +70,8 @@ export default function NotesTab({ slug, notes }: Props) {
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
         <div>
-          <h2>Guestbook Notes</h2>
-          <p style={sub}>
-            Note dari tamu yang submit di section "Leave a Note". Auto-publish
-            ke halaman undangan — kamu bisa hapus dari sini kalau ada yang
-            tidak pantas.
-          </p>
+          <h2>{t.title}</h2>
+          <p style={sub}>{t.subtitle}</p>
         </div>
         <div className={tabs.headerActions}>
           <button
@@ -81,20 +81,20 @@ export default function NotesTab({ slug, notes }: Props) {
             style={ghostBtn}
             title="Refetch from Supabase"
           >
-            {refreshing ? '…' : '↻ Refresh'}
+            {refreshing ? '…' : tc.refresh}
           </button>
         </div>
       </header>
 
       <div className={tabs.statsRow}>
-        <Stat label="Total notes" value={String(notes.length)} />
-        <Stat label="Latest" value={notes[0] ? new Date(notes[0].created_at).toLocaleDateString('id-ID') : '—'} />
+        <Stat label={t.statTotal} value={String(notes.length)} />
+        <Stat label={t.statLatest} value={notes[0] ? new Date(notes[0].created_at).toLocaleDateString('id-ID') : '—'} />
       </div>
 
       <div className={tabs.filterRow}>
         <input
           type="search"
-          placeholder="Cari nama atau pesan…"
+          placeholder={t.searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           style={searchInput}
@@ -102,9 +102,9 @@ export default function NotesTab({ slug, notes }: Props) {
       </div>
 
       {notes.length === 0 ? (
-        <div className={tabs.empty}>Belum ada note. Tamu yang submit di section "Leave a Note" akan muncul di sini.</div>
+        <div className={tabs.empty}>{t.emptyNone}</div>
       ) : filtered.length === 0 ? (
-        <div className={tabs.empty}>Tidak ada note yang cocok dengan pencarian.</div>
+        <div className={tabs.empty}>{t.emptyFilter}</div>
       ) : (
         <div style={grid}>
           {filtered.map((n) => (
@@ -128,8 +128,8 @@ export default function NotesTab({ slug, notes }: Props) {
                 onClick={() => deleteNote(n.id)}
                 disabled={deletingId === n.id}
                 style={deleteBtn}
-                aria-label="Hapus note"
-                title="Hapus note"
+                aria-label={t.deleteAria}
+                title={t.deleteAria}
               >
                 {deletingId === n.id ? '…' : '×'}
               </button>

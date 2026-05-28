@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { downloadCsv } from './lib/csv'
+import { useDashboardDict } from './DashboardI18nProvider'
 import tabs from './dashboardTabs.module.css'
 
 export interface RsvpRow {
@@ -16,6 +17,9 @@ export interface RsvpRow {
 }
 
 export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
+  const dd = useDashboardDict()
+  const t = dd.tabs.rsvps
+  const tc = dd.tabs.common
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'yes' | 'no'>('all')
   const router = useRouter()
@@ -44,7 +48,7 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
   return (
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
-        <h2>RSVPs</h2>
+        <h2>{t.title}</h2>
         <div className={tabs.headerActions}>
           <button
             type="button"
@@ -53,29 +57,29 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
             style={ghostBtn}
             title="Refetch from Supabase"
           >
-            {refreshing ? '…' : '↻ Refresh'}
+            {refreshing ? '…' : tc.refresh}
           </button>
           <button
             type="button"
             onClick={() => downloadCsv(`rsvps-${new Date().toISOString().slice(0, 10)}.csv`, rsvps as unknown as Record<string, unknown>[])}
             style={primaryBtn}
           >
-            Download CSV
+            {tc.downloadCsv}
           </button>
         </div>
       </header>
 
       <div className={tabs.statsRow}>
-        <Stat label="Responses" value={String(rsvps.length)} />
-        <Stat label="Attending" value={String(yesCount)} accent="#2D8C4E" />
-        <Stat label="Declined" value={String(noCount)} accent="#999" />
-        <Stat label="Est. guests" value={String(totalGuests)} accent="#E8553E" />
+        <Stat label={t.statResponses} value={String(rsvps.length)} />
+        <Stat label={t.statAttending} value={String(yesCount)} accent="#2D8C4E" />
+        <Stat label={t.statDeclined} value={String(noCount)} accent="#999" />
+        <Stat label={t.statGuests} value={String(totalGuests)} accent="#E8553E" />
       </div>
 
       <div className={tabs.filterRow}>
         <input
           type="search"
-          placeholder="Cari nama, meal, atau pesan…"
+          placeholder={t.searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           style={searchInput}
@@ -88,42 +92,42 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
               onClick={() => setFilter(f)}
               style={filter === f ? tabActive : tabBtn}
             >
-              {f === 'all' ? 'Semua' : f === 'yes' ? 'Hadir' : 'Tidak'}
+              {f === 'all' ? t.filterAll : f === 'yes' ? t.filterYes : t.filterNo}
             </button>
           ))}
         </div>
       </div>
 
       {rsvps.length === 0 ? (
-        <div className={tabs.empty}>Belum ada RSVP. Tamu yang submit form akan muncul di sini.</div>
+        <div className={tabs.empty}>{t.emptyNone}</div>
       ) : filtered.length === 0 ? (
-        <div className={tabs.empty}>Tidak ada RSVP yang cocok dengan filter.</div>
+        <div className={tabs.empty}>{t.emptyFilter}</div>
       ) : (
         <div className={tabs.tableWrap}>
           <table className={tabs.table}>
             <thead>
               <tr>
-                <th>Nama</th>
-                <th>Hadir</th>
-                <th>Tamu</th>
-                <th>Meal</th>
-                <th>Pesan</th>
-                <th>Diterima</th>
+                <th>{t.colName}</th>
+                <th>{t.colAttending}</th>
+                <th>{t.colGuests}</th>
+                <th>{t.colMeal}</th>
+                <th>{t.colMessage}</th>
+                <th>{t.colReceived}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((r) => (
                 <tr key={r.id}>
-                  <td data-label="Nama">{r.guest_name}</td>
-                  <td data-label="Hadir">
+                  <td data-label={t.colName}>{r.guest_name}</td>
+                  <td data-label={t.colAttending}>
                     <span style={r.attending ? pillYes : pillNo}>
-                      {r.attending ? 'Ya' : 'Tidak'}
+                      {r.attending ? t.yes : t.no}
                     </span>
                   </td>
-                  <td data-label="Jumlah tamu">{r.attending ? r.guest_count ?? 1 : '—'}</td>
-                  <td data-label="Meal">{r.meal_choice || '—'}</td>
-                  <td data-label="Pesan" className={tabs.tdEllipsis} title={r.message || ''}>{r.message || '—'}</td>
-                  <td data-label="Diterima">{new Date(r.created_at).toLocaleString('id-ID')}</td>
+                  <td data-label={t.colGuests}>{r.attending ? r.guest_count ?? 1 : '—'}</td>
+                  <td data-label={t.colMeal}>{r.meal_choice || '—'}</td>
+                  <td data-label={t.colMessage} className={tabs.tdEllipsis} title={r.message || ''}>{r.message || '—'}</td>
+                  <td data-label={t.colReceived}>{new Date(r.created_at).toLocaleString('id-ID')}</td>
                 </tr>
               ))}
             </tbody>
