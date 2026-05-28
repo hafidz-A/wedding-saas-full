@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { completeOnboarding, checkSlugAvailable } from './actions'
 import { templateCatalog } from '@/config/templateCatalog'
+import type { Dict } from '@/lib/i18n'
 
 function firstWord(s: string): string {
   return s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
@@ -11,7 +12,7 @@ function firstWord(s: string): string {
 
 const TEMPLATE_IDS = templateCatalog.map((t) => t.id)
 
-export default function OnboardingForm({ email }: { email: string }) {
+export default function OnboardingForm({ email, dict }: { email: string; dict: Dict['onboarding'] }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryTemplate = searchParams.get('template') || ''
@@ -68,7 +69,7 @@ export default function OnboardingForm({ email }: { email: string }) {
         venue,
       })
       if (!result.ok) {
-        setError(result.error || 'Gagal membuat undangan')
+        setError(result.error || dict.form.errFail)
         return
       }
       setDone({
@@ -83,25 +84,25 @@ export default function OnboardingForm({ email }: { email: string }) {
     return (
       <main style={panel}>
         <div style={card}>
-          <p style={kicker}>Undangan siap</p>
-          <h1 style={h1}>Selamat 🎉</h1>
+          <p style={kicker}>{dict.done.kicker}</p>
+          <h1 style={h1}>{dict.done.title}</h1>
           <p style={muted}>
-            Undangan kamu sudah dibuat di <b>{done.slug}</b>. Buka link berikut:
+            {dict.done.bodyPrefix} <b>{done.slug}</b>{dict.done.bodySuffix}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
             <a href={done.publicUrl} target="_blank" rel="noopener noreferrer" style={primaryLink}>
-              Buka preview undangan →
+              {dict.done.openPreview}
             </a>
             <button
               type="button"
               onClick={() => router.push(done.dashboardUrl)}
               style={ghostBtn}
             >
-              Masuk ke dashboard
+              {dict.done.toDashboard}
             </button>
           </div>
           <p style={{ ...muted, fontSize: 13, marginTop: 18 }}>
-            Tip: di dashboard kamu bisa edit semua section (foto, jadwal, RSVP, gift, dll).
+            {dict.done.tip}
           </p>
         </div>
       </main>
@@ -114,16 +115,15 @@ export default function OnboardingForm({ email }: { email: string }) {
     <main style={panel}>
       <form onSubmit={onSubmit} style={card}>
         <header>
-          <p style={kicker}>Setup undangan</p>
-          <h1 style={h1}>Data dasar</h1>
+          <p style={kicker}>{dict.form.kicker}</p>
+          <h1 style={h1}>{dict.form.title}</h1>
           <p style={muted}>
-            Login sebagai <b>{email}</b>. Isi 5 data ini, sisanya bisa kamu edit
-            kapan saja di dashboard.
+            {dict.form.subtitlePrefix} <b>{email}</b>{dict.form.subtitleSuffix}
           </p>
         </header>
 
         <div style={field}>
-          <span style={lbl}>Pilih template</span>
+          <span style={lbl}>{dict.form.pickTemplate}</span>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {templateCatalog.map((t) => {
               const active = t.id === template
@@ -156,29 +156,29 @@ export default function OnboardingForm({ email }: { email: string }) {
         </div>
 
         <label style={field}>
-          <span style={lbl}>Nama mempelai perempuan</span>
+          <span style={lbl}>{dict.form.bride}</span>
           <input
             value={bride}
             onChange={(e) => setBride(e.target.value)}
-            placeholder="Apan Teh"
+            placeholder={dict.form.bridePlaceholder}
             required
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Nama mempelai pria</span>
+          <span style={lbl}>{dict.form.groom}</span>
           <input
             value={groom}
             onChange={(e) => setGroom(e.target.value)}
-            placeholder="Apin Toh"
+            placeholder={dict.form.groomPlaceholder}
             required
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Tanggal & jam acara</span>
+          <span style={lbl}>{dict.form.date}</span>
           <input
             type="datetime-local"
             value={date}
@@ -189,18 +189,18 @@ export default function OnboardingForm({ email }: { email: string }) {
         </label>
 
         <label style={field}>
-          <span style={lbl}>Lokasi / venue</span>
+          <span style={lbl}>{dict.form.venue}</span>
           <input
             value={venue}
             onChange={(e) => setVenue(e.target.value)}
-            placeholder="Mason Pine, Bandung"
+            placeholder={dict.form.venuePlaceholder}
             required
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>URL undangan kamu</span>
+          <span style={lbl}>{dict.form.url}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ color: '#5C4A3A', fontSize: 14 }}>weddingsite/</span>
             <input
@@ -209,7 +209,7 @@ export default function OnboardingForm({ email }: { email: string }) {
                 setSlugTouched(true)
                 setSlug(e.target.value.toLowerCase())
               }}
-              placeholder="apan-apin"
+              placeholder={dict.form.urlPlaceholder}
               required
               minLength={3}
               maxLength={40}
@@ -231,17 +231,17 @@ export default function OnboardingForm({ email }: { email: string }) {
               marginTop: 4,
             }}
           >
-            {slug && slugStatus.checking && 'Mengecek ketersediaan…'}
-            {slug && !slugStatus.checking && slugStatus.available && '✓ URL ini tersedia'}
+            {slug && slugStatus.checking && dict.form.checking}
+            {slug && !slugStatus.checking && slugStatus.available && dict.form.available}
             {slug && !slugStatus.checking && slugStatus.reason && `✗ ${slugStatus.reason}`}
-            {!slug && 'Huruf kecil, angka, dan tanda hubung. Contoh: apan-apin'}
+            {!slug && dict.form.urlHelp}
           </span>
         </label>
 
         {error && <p style={errorStyle}>{error}</p>}
 
         <button type="submit" disabled={pending || !slugOk} style={submitBtn}>
-          {pending ? 'Membuat undangan…' : 'Buat undangan & preview'}
+          {pending ? dict.form.submitting : dict.form.submit}
         </button>
       </form>
     </main>

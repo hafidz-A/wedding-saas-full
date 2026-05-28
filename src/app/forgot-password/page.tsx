@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { getDict } from '@/lib/i18n'
+import { useClientLang } from '@/lib/i18n/useClientLang'
 
 /**
  * /forgot-password — sends a Supabase Auth password reset email.
@@ -19,6 +21,7 @@ function ForgotPasswordInner() {
   const searchParams = useSearchParams()
   const slug = searchParams.get('slug') || ''
   const template = searchParams.get('template') || 'lovebirds'
+  const t = getDict(useClientLang()).auth.forgot
 
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -48,7 +51,7 @@ function ForgotPasswordInner() {
     })
 
     if (resetErr) {
-      setError(resetErr.message || 'Gagal kirim email reset')
+      setError(resetErr.message || t.errSend)
       setSubmitting(false)
       return
     }
@@ -61,50 +64,45 @@ function ForgotPasswordInner() {
     <main style={page}>
       <div style={card}>
         <header style={{ textAlign: 'center', marginBottom: 8 }}>
-          <p style={kicker}>Reset Password</p>
-          <h1 style={title}>Lupa password?</h1>
+          <p style={kicker}>{t.kicker}</p>
+          <h1 style={title}>{t.title}</h1>
         </header>
 
         {sent ? (
           <div style={{ display: 'grid', gap: 16 }}>
             <p style={hint}>
-              Jika email <strong>{email}</strong> terdaftar, kamu akan menerima
-              email berisi <strong>kode 6 digit</strong>. Kode berlaku 1 jam.
-              Cek folder spam kalau tidak muncul.
+              {t.sentHintPrefix} <strong>{email}</strong> {t.sentHintSuffix}
             </p>
             <Link
               href={`/reset-password?email=${encodeURIComponent(email)}${slug ? `&slug=${encodeURIComponent(slug)}&template=${encodeURIComponent(template)}` : ''}`}
               style={{ ...primaryBtn, textAlign: 'center', textDecoration: 'none', display: 'block' }}
             >
-              Lanjut: masukkan token →
+              {t.continueToken}
             </Link>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
               {slug && (
                 <Link href={`/${template}/${slug}/dashboard`} style={ghostBtn}>
-                  ← Kembali ke login
+                  {t.backLogin}
                 </Link>
               )}
               <button type="button" onClick={() => { setSent(false); setEmail('') }} style={ghostBtn}>
-                Kirim ke email lain
+                {t.resendOther}
               </button>
             </div>
           </div>
         ) : (
           <form onSubmit={onSubmit} style={{ display: 'grid', gap: 18 }}>
-            <p style={hint}>
-              Masukkan email yang terdaftar. Kami kirim <strong>kode 6 digit</strong>{' '}
-              ke email kamu — pakai kode itu untuk reset password.
-            </p>
+            <p style={hint}>{t.hintForm}</p>
 
             <label style={{ display: 'grid', gap: 6 }}>
-              <span style={label}>Email</span>
+              <span style={label}>{t.email}</span>
               <input
                 type="email"
                 required
                 autoFocus
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="kamu@email.com"
+                placeholder={t.emailPlaceholder}
                 style={input}
               />
             </label>
@@ -112,14 +110,14 @@ function ForgotPasswordInner() {
             {error && <p style={errorStyle}>{error}</p>}
 
             <button type="submit" disabled={submitting} style={primaryBtn}>
-              {submitting ? 'Mengirim…' : 'Kirim tautan reset'}
+              {submitting ? t.submitting : t.submit}
             </button>
 
             <p style={{ textAlign: 'center', margin: 0 }}>
               {slug ? (
-                <Link href={`/${template}/${slug}/dashboard`} style={linkStyle}>← Kembali ke login</Link>
+                <Link href={`/${template}/${slug}/dashboard`} style={linkStyle}>{t.backLogin}</Link>
               ) : (
-                <Link href="/" style={linkStyle}>← Kembali ke beranda</Link>
+                <Link href="/" style={linkStyle}>{t.backHome}</Link>
               )}
             </p>
           </form>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import type { Dict } from '@/lib/i18n'
 
 /**
  * /login — slug-agnostic password login.
@@ -12,7 +13,7 @@ import { createBrowserClient } from '@supabase/ssr'
  * idempotent — returning users get auto-redirected to /<slug>/dashboard,
  * brand-new accounts get the 5-field wizard.
  */
-export default function LoginForm() {
+export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,7 +25,7 @@ export default function LoginForm() {
     setError('')
 
     if (!email.trim() || !password) {
-      setError('Mohon isi email dan password')
+      setError(dict.errFill)
       return
     }
 
@@ -42,9 +43,9 @@ export default function LoginForm() {
     if (signInError) {
       const msg = signInError.message.toLowerCase()
       if (msg.includes('invalid') || msg.includes('credentials')) {
-        setError('Email atau password salah.')
+        setError(dict.errInvalid)
       } else if (msg.includes('not confirmed')) {
-        setError('Email belum terverifikasi. Cek inbox atau hubungi admin.')
+        setError(dict.errNotConfirmed)
       } else {
         setError(signInError.message)
       }
@@ -62,32 +63,32 @@ export default function LoginForm() {
     <main style={panel}>
       <form onSubmit={onSubmit} style={card}>
         <header style={{ marginBottom: 4 }}>
-          <p style={kicker}>Masuk</p>
-          <h1 style={h1}>Login akun</h1>
-          <p style={muted}>Masuk ke dashboard undangan kamu.</p>
+          <p style={kicker}>{dict.kicker}</p>
+          <h1 style={h1}>{dict.title}</h1>
+          <p style={muted}>{dict.subtitle}</p>
         </header>
 
         <label style={field}>
-          <span style={lbl}>Email</span>
+          <span style={lbl}>{dict.email}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoFocus
-            placeholder="kamu@example.com"
+            placeholder={dict.emailPlaceholder}
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Password</span>
+          <span style={lbl}>{dict.password}</span>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder="Password kamu"
+            placeholder={dict.passwordPlaceholder}
             style={input}
           />
         </label>
@@ -95,24 +96,24 @@ export default function LoginForm() {
         {error && <p style={errorStyle}>{error}</p>}
 
         <button type="submit" disabled={submitting} style={submitBtn}>
-          {submitting ? 'Masuk…' : 'Login'}
+          {submitting ? dict.submitting : dict.submit}
         </button>
 
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 14 }}>
-          Lupa password?{' '}
+          {dict.forgotPrompt}{' '}
           <Link href="/forgot-password" style={{ color: '#E8553E', textDecoration: 'underline' }}>
-            Reset di sini
+            {dict.forgotLink}
           </Link>
         </p>
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
-          Belum punya akun?{' '}
+          {dict.noAccount}{' '}
           <Link href="/signup" style={{ color: '#E8553E', textDecoration: 'underline' }}>
-            Daftar di sini
+            {dict.signupLink}
           </Link>
         </p>
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
           <Link href="/" style={{ color: 'rgba(42,33,24,0.55)', textDecoration: 'underline' }}>
-            ← Kembali ke beranda
+            {dict.back}
           </Link>
         </p>
       </form>

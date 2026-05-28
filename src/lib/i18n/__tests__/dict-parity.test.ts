@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { common } from '../dictionaries/common'
 import { landing } from '../dictionaries/landing'
+import { auth } from '../dictionaries/auth'
+import { onboarding } from '../dictionaries/onboarding'
+import { templates } from '../dictionaries/templates'
 
 function keyPaths(obj: unknown, prefix = ''): string[] {
   if (Array.isArray(obj)) {
@@ -18,6 +21,9 @@ describe('i18n dictionary parity (id ⟷ en)', () => {
   const dicts: Array<[string, { id: unknown; en: unknown }]> = [
     ['common', common],
     ['landing', landing],
+    ['auth', auth],
+    ['onboarding', onboarding],
+    ['templates', templates],
   ]
   it.each(dicts)('%s has identical id/en key paths', (_name, d) => {
     expect(keyPaths(d.en).sort()).toEqual(keyPaths(d.id).sort())

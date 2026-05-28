@@ -4,6 +4,8 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { getDict } from '@/lib/i18n'
+import { useClientLang } from '@/lib/i18n/useClientLang'
 
 /**
  * /verify-signup — 6-digit token entry after signUp.
@@ -29,6 +31,7 @@ function VerifySignupInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const presetEmail = searchParams.get('email') || ''
+  const t = getDict(useClientLang()).auth.verify
 
   const [email, setEmail] = useState(presetEmail)
   const [token, setToken] = useState('')
@@ -42,11 +45,11 @@ function VerifySignupInner() {
     setError(null)
 
     if (!email.trim()) {
-      setError('Email kosong')
+      setError(t.errEmail)
       return
     }
     if (!token.trim()) {
-      setError('Kode verifikasi kosong')
+      setError(t.errCode)
       return
     }
 
@@ -63,7 +66,7 @@ function VerifySignupInner() {
     })
 
     if (verifyErr) {
-      setError(verifyErr.message || 'Kode salah atau sudah kadaluarsa')
+      setError(verifyErr.message || t.errWrong)
       setSubmitting(false)
       return
     }
@@ -87,7 +90,7 @@ function VerifySignupInner() {
     })
     setResending(false)
     if (resendErr) {
-      setError(resendErr.message || 'Gagal kirim ulang kode')
+      setError(resendErr.message || t.errResend)
       return
     }
     setResent(true)
@@ -97,28 +100,25 @@ function VerifySignupInner() {
     <main style={page}>
       <form onSubmit={onSubmit} style={card}>
         <header style={{ textAlign: 'center', marginBottom: 4 }}>
-          <p style={kicker}>Verifikasi email</p>
-          <h1 style={title}>Masukkan kode 6 digit</h1>
-          <p style={hint}>
-            Kami baru saja mengirim <b>kode 6 digit</b> ke email kamu.
-            Kode berlaku 1 jam. Cek folder spam kalau tidak muncul.
-          </p>
+          <p style={kicker}>{t.kicker}</p>
+          <h1 style={title}>{t.title}</h1>
+          <p style={hint}>{t.hint}</p>
         </header>
 
         <label style={field}>
-          <span style={label}>Email</span>
+          <span style={label}>{t.email}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="kamu@example.com"
+            placeholder={t.emailPlaceholder}
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={label}>Kode verifikasi</span>
+          <span style={label}>{t.code}</span>
           <input
             type="text"
             inputMode="numeric"
@@ -136,12 +136,12 @@ function VerifySignupInner() {
         {error && <p style={errorStyle}>{error}</p>}
         {resent && !error && (
           <p style={{ ...hint, color: '#2D8C4E', margin: 0 }}>
-            ✓ Kode baru sudah dikirim. Cek email kamu.
+            {t.resent}
           </p>
         )}
 
         <button type="submit" disabled={submitting} style={primaryBtn}>
-          {submitting ? 'Memverifikasi…' : 'Verifikasi & lanjutkan'}
+          {submitting ? t.submitting : t.submit}
         </button>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: 4 }}>
@@ -151,10 +151,10 @@ function VerifySignupInner() {
             disabled={resending || !email.trim()}
             style={linkBtn}
           >
-            {resending ? 'Mengirim…' : 'Kirim ulang kode'}
+            {resending ? t.resending : t.resend}
           </button>
           <Link href="/signup" style={{ ...linkBtn, textDecoration: 'none' }}>
-            ← Ganti email
+            {t.changeEmail}
           </Link>
         </div>
       </form>

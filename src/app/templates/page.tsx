@@ -18,19 +18,17 @@ export const metadata = {
 
 export default function TemplatesPage() {
   const lang = getLang()
-  const t = getDict(lang)
+  const dict = getDict(lang)
+  const tt = dict.templates
   return (
     <>
-      <SiteNav lang={lang} t={t.common} />
+      <SiteNav lang={lang} t={dict.common} />
       <main style={page}>
       <div style={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}>
         <header style={{ textAlign: 'center', marginBottom: 'clamp(32px, 6vw, 56px)' }}>
-          <p style={kicker}>Template Gallery</p>
-          <h1 style={h1}>Pilih gaya undangan kamu</h1>
-          <p style={lede}>
-            Setiap template punya karakter sendiri. Lihat preview lengkapnya dulu,
-            lalu pilih yang paling cocok dengan cerita kalian.
-          </p>
+          <p style={kicker}>{tt.kicker}</p>
+          <h1 style={h1}>{tt.title}</h1>
+          <p style={lede}>{tt.lede}</p>
         </header>
 
         <div style={grid}>
@@ -42,7 +40,7 @@ export default function TemplatesPage() {
                 aria-label={`Preview ${t.label}`}
               >
                 <span style={thumbLabel}>{t.label}</span>
-                <span style={thumbHint}>Klik untuk preview →</span>
+                <span style={thumbHint}>{tt.thumbHint}</span>
               </Link>
 
               <div style={cardBody}>
@@ -51,17 +49,17 @@ export default function TemplatesPage() {
                   <span style={{ ...dot, background: t.accent }} />
                   <span style={tagRow}>{t.tags.join(' · ')}</span>
                 </div>
-                <p style={desc}>{t.description}</p>
+                <p style={desc}>{tt.byTemplate[t.id as keyof typeof tt.byTemplate] ?? t.description}</p>
 
                 <div style={actions}>
                   <Link href={`/${t.id}/${t.demoSlug}`} target="_blank" style={previewBtn}>
-                    Lihat preview ↗
+                    {tt.previewBtn}
                   </Link>
                   <Link
                     href={`/onboarding?template=${t.id}`}
                     style={{ ...useBtn, background: t.accent }}
                   >
-                    Gunakan template ini →
+                    {tt.useBtn}
                   </Link>
                 </div>
               </div>
@@ -70,9 +68,9 @@ export default function TemplatesPage() {
         </div>
 
         <p style={{ textAlign: 'center', marginTop: 40, fontSize: 13, color: 'rgba(42,33,24,0.6)' }}>
-          Sudah punya akun?{' '}
+          {tt.haveAccount}{' '}
           <Link href="/login" style={{ color: '#2A2118', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 4 }}>
-            Login di sini →
+            {tt.loginLink}
           </Link>
         </p>
       </div>

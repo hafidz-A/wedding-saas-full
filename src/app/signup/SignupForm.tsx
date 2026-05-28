@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import type { Dict } from '@/lib/i18n'
 
 /**
  * /signup — email + password + repeat. Supabase Auth signUp() sends an
@@ -23,7 +24,7 @@ import { createBrowserClient } from '@supabase/ssr'
  *      include {{ .Token }} (the 6-digit code). Default template uses
  *      only {{ .ConfirmationURL }} which is the link, not the code.
  */
-export default function SignupForm() {
+export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,15 +37,15 @@ export default function SignupForm() {
     setError('')
 
     if (!email.trim() || !password) {
-      setError('Mohon isi email dan password')
+      setError(dict.errFill)
       return
     }
     if (password.length < 8) {
-      setError('Password minimal 8 karakter')
+      setError(dict.errMin8)
       return
     }
     if (password !== repeat) {
-      setError('Password dan ulangan password tidak sama')
+      setError(dict.errMismatch)
       return
     }
 
@@ -63,12 +64,9 @@ export default function SignupForm() {
     if (signUpError) {
       const msg = signUpError.message.toLowerCase()
       if (msg.includes('already') || msg.includes('registered')) {
-        setError('Email ini sudah terdaftar. Coba login di /login.')
+        setError(dict.errAlready)
       } else if (msg.includes('rate limit') || msg.includes('too many')) {
-        setError(
-          'Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi, ' +
-          'atau setup Custom SMTP di Supabase Dashboard.',
-        )
+        setError(dict.errRate)
       } else {
         setError(signUpError.message)
       }
@@ -83,48 +81,45 @@ export default function SignupForm() {
     <main style={panel}>
       <form onSubmit={onSubmit} style={card}>
         <header style={{ marginBottom: 4 }}>
-          <p style={kicker}>Buat Undangan</p>
-          <h1 style={h1}>Daftar akun</h1>
-          <p style={muted}>
-            Buat akun untuk mulai menyusun undangan pernikahan kamu. Kami kirim
-            kode 6 digit ke email untuk verifikasi.
-          </p>
+          <p style={kicker}>{dict.kicker}</p>
+          <h1 style={h1}>{dict.title}</h1>
+          <p style={muted}>{dict.subtitle}</p>
         </header>
 
         <label style={field}>
-          <span style={lbl}>Email</span>
+          <span style={lbl}>{dict.email}</span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoFocus
-            placeholder="kamu@example.com"
+            placeholder={dict.emailPlaceholder}
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Password</span>
+          <span style={lbl}>{dict.password}</span>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            placeholder="Minimal 8 karakter"
+            placeholder={dict.passwordPlaceholder}
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Ulangi password</span>
+          <span style={lbl}>{dict.repeat}</span>
           <input
             type="password"
             value={repeat}
             onChange={(e) => setRepeat(e.target.value)}
             required
-            placeholder="Sama persis dengan di atas"
+            placeholder={dict.repeatPlaceholder}
             style={input}
           />
         </label>
@@ -132,18 +127,18 @@ export default function SignupForm() {
         {error && <p style={errorStyle}>{error}</p>}
 
         <button type="submit" disabled={submitting} style={submitBtn}>
-          {submitting ? 'Mendaftar…' : 'Daftar & kirim verifikasi'}
+          {submitting ? dict.submitting : dict.submit}
         </button>
 
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 14 }}>
-          Sudah punya akun?{' '}
+          {dict.haveAccount}{' '}
           <Link href="/login" style={{ color: '#E8553E', textDecoration: 'underline' }}>
-            Login di sini
+            {dict.loginLink}
           </Link>
         </p>
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
           <Link href="/" style={{ color: 'rgba(42,33,24,0.55)', textDecoration: 'underline' }}>
-            ← Kembali ke beranda
+            {dict.back}
           </Link>
         </p>
       </form>

@@ -30,12 +30,9 @@ export default async function OnboardingPage() {
         <SiteNav lang={lang} t={t.common} />
         <main style={panel}>
         <div style={card}>
-          <p style={kicker}>Sesi tidak ditemukan</p>
-          <h1 style={h1}>Silakan login dulu</h1>
-          <p style={muted}>
-            Sepertinya link verifikasi email kamu sudah kedaluwarsa, atau kamu
-            membuka halaman ini tanpa daftar dulu.
-          </p>
+          <p style={kicker}>{t.onboarding.noSession.kicker}</p>
+          <h1 style={h1}>{t.onboarding.noSession.title}</h1>
+          <p style={muted}>{t.onboarding.noSession.body}</p>
           <Link
             href="/signup"
             style={{
@@ -51,7 +48,7 @@ export default async function OnboardingPage() {
               textTransform: 'uppercase',
             }}
           >
-            Kembali ke pendaftaran
+            {t.onboarding.noSession.backToSignup}
           </Link>
         </div>
         </main>
@@ -78,7 +75,7 @@ export default async function OnboardingPage() {
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <OnboardingForm email={user.email ?? ''} />
+      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} />
     </>
   )
 }

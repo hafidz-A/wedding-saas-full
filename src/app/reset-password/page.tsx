@@ -4,6 +4,8 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { getDict } from '@/lib/i18n'
+import { useClientLang } from '@/lib/i18n/useClientLang'
 
 /**
  * /reset-password — TOKEN-based password reset.
@@ -31,6 +33,7 @@ function ResetPasswordInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const presetEmail = searchParams.get('email') || ''
+  const t = getDict(useClientLang()).auth.reset
 
   const [email, setEmail] = useState(presetEmail)
   const [token, setToken] = useState('')
@@ -45,19 +48,19 @@ function ResetPasswordInner() {
     setError(null)
 
     if (!email.trim()) {
-      setError('Email kosong')
+      setError(t.errEmail)
       return
     }
     if (!token.trim()) {
-      setError('Token kosong')
+      setError(t.errToken)
       return
     }
     if (password.length < 6) {
-      setError('Password minimal 6 karakter')
+      setError(t.errMin6)
       return
     }
     if (password !== confirm) {
-      setError('Konfirmasi password tidak sama')
+      setError(t.errMismatch)
       return
     }
 
@@ -76,7 +79,7 @@ function ResetPasswordInner() {
     })
 
     if (verifyErr) {
-      setError(verifyErr.message || 'Token salah atau sudah kadaluarsa')
+      setError(verifyErr.message || t.errVerify)
       setSubmitting(false)
       return
     }
@@ -84,7 +87,7 @@ function ResetPasswordInner() {
     // 2. Set the new password using the now-active recovery session
     const { error: updErr } = await supabase.auth.updateUser({ password })
     if (updErr) {
-      setError(updErr.message || 'Gagal update password')
+      setError(updErr.message || t.errUpdate)
       setSubmitting(false)
       return
     }
@@ -115,10 +118,10 @@ function ResetPasswordInner() {
     return (
       <div style={card}>
         <header style={{ textAlign: 'center', marginBottom: 8 }}>
-          <p style={kicker}>Berhasil</p>
-          <h1 style={title}>Password sudah diubah</h1>
+          <p style={kicker}>{t.doneKicker}</p>
+          <h1 style={title}>{t.doneTitle}</h1>
         </header>
-        <p style={hint}>Kamu otomatis login. Mengarahkan ke dashboard…</p>
+        <p style={hint}>{t.doneHint}</p>
       </div>
     )
   }
@@ -126,31 +129,28 @@ function ResetPasswordInner() {
   return (
     <div style={card}>
       <header style={{ textAlign: 'center', marginBottom: 8 }}>
-        <p style={kicker}>Reset Password</p>
-        <h1 style={title}>Masukkan token</h1>
+        <p style={kicker}>{t.kicker}</p>
+        <h1 style={title}>{t.title}</h1>
       </header>
 
       <form onSubmit={onSubmit} style={{ display: 'grid', gap: 16 }}>
-        <p style={hint}>
-          Cek inbox email — kami mengirim kode 6 digit. Paste di sini bersama
-          email & password baru.
-        </p>
+        <p style={hint}>{t.hint}</p>
 
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={label}>Email</span>
+          <span style={label}>{t.email}</span>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="kamu@email.com"
+            placeholder={t.emailPlaceholder}
             style={input}
             autoComplete="email"
           />
         </label>
 
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={label}>Token (6 digit)</span>
+          <span style={label}>{t.token}</span>
           <input
             type="text"
             required
@@ -166,7 +166,7 @@ function ResetPasswordInner() {
         </label>
 
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={label}>Password baru (min 6 karakter)</span>
+          <span style={label}>{t.password}</span>
           <input
             type="password"
             required
@@ -179,7 +179,7 @@ function ResetPasswordInner() {
         </label>
 
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={label}>Konfirmasi password</span>
+          <span style={label}>{t.confirm}</span>
           <input
             type="password"
             required
@@ -194,11 +194,11 @@ function ResetPasswordInner() {
         {error && <p style={errorStyle}>{error}</p>}
 
         <button type="submit" disabled={submitting} style={primaryBtn}>
-          {submitting ? 'Memproses…' : 'Set password baru'}
+          {submitting ? t.submitting : t.submit}
         </button>
 
         <p style={{ textAlign: 'center', margin: 0 }}>
-          <Link href="/forgot-password" style={linkStyle}>← Belum dapat token? Kirim ulang</Link>
+          <Link href="/forgot-password" style={linkStyle}>{t.resend}</Link>
         </p>
       </form>
     </div>

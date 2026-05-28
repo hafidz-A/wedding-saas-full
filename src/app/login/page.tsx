@@ -19,7 +19,7 @@ export default function LoginPage() {
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <LoginForm />
+      <LoginForm dict={t.auth.login} />
     </>
   )
 }

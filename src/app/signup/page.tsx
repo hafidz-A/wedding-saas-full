@@ -20,7 +20,7 @@ export default function SignupPage() {
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <SignupForm />
+      <SignupForm dict={t.auth.signup} />
     </>
   )
 }
