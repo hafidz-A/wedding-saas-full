@@ -1,0 +1,89 @@
+*, *::before, *::after { box-sizing: border-box; }
+/* Let the document grow with content so the window is the scroll container.
+   (Previously height:100% on html+body forced body to be its own scroll
+   container, which broke page-level vertical scroll + Lenis smooth scroll.) */
+html { min-height: 100%; overflow-x: hidden; }
+body { min-height: 100%; }
+#root { min-height: 100%; }
+body {
+  margin: 0;
+  background-color: var(--color-bg, #06061a);
+  background-image: var(--bg-radial-gradient), var(--grid-dots);
+  background-size: 100% 100%, 28px 28px;
+  background-attachment: fixed, scroll;
+  color: var(--color-fg, #ece5f6);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Multi-template override: the shared app shell (root layout + global.css)
+   forces a cream body background on every route. When the Solary Shell mounts
+   it adds `.solary-route` to <body>; this higher-specificity !important rule
+   restores Solary's dark cosmic background regardless of CSS load order. */
+body.solary-route {
+  background-color: var(--color-bg, #06061a) !important;
+  background-image: var(--bg-radial-gradient), var(--grid-dots) !important;
+  background-size: 100% 100%, 28px 28px !important;
+  background-attachment: fixed, scroll !important;
+  background-repeat: no-repeat, repeat !important;
+  color: var(--color-fg, #ece5f6) !important;
+}
+/* The shared global.css colours headings with a dark ink (var(--color-charcoal))
+   and that leaks onto Solary's light-on-dark headings. Re-assert Solary's
+   foreground colour with higher specificity. Solary components that want an
+   accent colour set it via their own class, which still wins. */
+body.solary-route h1, body.solary-route h2, body.solary-route h3,
+body.solary-route h4, body.solary-route h5, body.solary-route h6 {
+  color: var(--color-fg, #ece5f6);
+}
+
+a { color: inherit; text-decoration: none; }
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+img { max-width: 100%; display: block; }
+button { background: none; border: 0; font: inherit; color: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
+
+::selection { background: var(--color-accent, #7D53DE); color: #fff; }
+
+#galactic-canvas {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+main { position: relative; z-index: 1; }
+
+/* Custom global scrollbar (page) — slim, accent-tinted, glowing */
+* { scrollbar-color: rgba(var(--color-glow)/0.6) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(var(--color-glow)/0.55), rgba(var(--color-glow)/0.85));
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(var(--color-glow)/0.5);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(var(--color-glow)/0.85), rgba(var(--color-glow)/1));
+}
+
+/* Tap target accessibility on touch devices */
+@media (pointer: coarse) {
+  button, a, [role="button"] { min-height: 44px; min-width: 44px; }
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

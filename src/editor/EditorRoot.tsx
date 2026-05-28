@@ -10,11 +10,12 @@ import styles from './EditorRoot.module.css'
 
 interface Props {
   slug: string
+  template: string
   initialConfig: PageConfig
   initialIsPublished: boolean
 }
 
-export default function EditorRoot({ slug, initialConfig, initialIsPublished }: Props) {
+export default function EditorRoot({ slug, template, initialConfig, initialIsPublished }: Props) {
   const safeConfig: PageConfig = {
     meta: initialConfig?.meta ?? {},
     sections: Array.isArray(initialConfig?.sections) ? initialConfig.sections : [],
@@ -39,14 +40,14 @@ export default function EditorRoot({ slug, initialConfig, initialIsPublished }: 
 
         <div className={styles.editorRow}>
           <div className={styles.sectionList}>
-            <SectionList slug={slug} />
+            <SectionList slug={slug} template={template} />
           </div>
           <main className={styles.fieldPane}>
             <FieldEditor slug={slug} />
           </main>
         </div>
 
-        {previewOpen && <PreviewPane slug={slug} />}
+        {previewOpen && <PreviewPane slug={slug} template={template} />}
       </div>
     </EditorProvider>
   )

@@ -1,16 +1,24 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { completeOnboarding, checkSlugAvailable } from './actions'
+import { templateCatalog } from '@/config/templateCatalog'
 
 function firstWord(s: string): string {
   return s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
 }
 
+const TEMPLATE_IDS = templateCatalog.map((t) => t.id)
+
 export default function OnboardingForm({ email }: { email: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const queryTemplate = searchParams.get('template') || ''
+  const initialTemplate = TEMPLATE_IDS.includes(queryTemplate) ? queryTemplate : templateCatalog[0].id
+
   const [pending, startTransition] = useTransition()
+  const [template, setTemplate] = useState(initialTemplate)
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
   const [bride, setBride] = useState('')
@@ -53,6 +61,7 @@ export default function OnboardingForm({ email }: { email: string }) {
     startTransition(async () => {
       const result = await completeOnboarding({
         slug,
+        template,
         brideName: bride,
         groomName: groom,
         weddingDate: date,
@@ -112,6 +121,39 @@ export default function OnboardingForm({ email }: { email: string }) {
             kapan saja di dashboard.
           </p>
         </header>
+
+        <div style={field}>
+          <span style={lbl}>Pilih template</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {templateCatalog.map((t) => {
+              const active = t.id === template
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTemplate(t.id)}
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 12,
+                    border: active
+                      ? `2px solid ${t.accent || '#2A2118'}`
+                      : '1px solid rgba(42,33,24,0.18)',
+                    background: active ? 'rgba(42,33,24,0.04)' : 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span style={{ display: 'block', fontWeight: 600, color: '#2A2118', fontSize: 15 }}>
+                    {t.label}
+                  </span>
+                  <span style={{ display: 'block', fontSize: 12, color: '#5C4A3A', marginTop: 4, lineHeight: 1.4 }}>
+                    {t.tags.join(' · ')}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <label style={field}>
           <span style={lbl}>Nama mempelai perempuan</span>

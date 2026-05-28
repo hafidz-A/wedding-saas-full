@@ -16,9 +16,10 @@ import AddSectionMenu from './AddSectionMenu'
 
 interface Props {
   slug: string
+  template: string
 }
 
-export default function SectionList({ slug }: Props) {
+export default function SectionList({ slug, template }: Props) {
   const {
     config, selectedSectionId,
     reorderSections, toggleSectionEnabled, selectSection, addSection, removeSection,
@@ -65,7 +66,7 @@ export default function SectionList({ slug }: Props) {
 
       <footer style={ftr}>
         <a
-          href={`/${slug}?preview=1`}
+          href={`/${template}/${slug}?preview=1`}
           target="_blank"
           rel="noopener noreferrer"
           style={previewLink}

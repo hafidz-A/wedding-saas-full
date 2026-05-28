@@ -48,7 +48,7 @@ export default function HomePage() {
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center' }}>
           <Link
-            href="/rizky-amara"
+            href="/templates"
             style={{
               padding: '16px 32px',
               borderRadius: 999,
@@ -61,7 +61,7 @@ export default function HomePage() {
               textDecoration: 'none',
             }}
           >
-            View live demo →
+            Lihat semua template →
           </Link>
           <Link
             href="/signup"
@@ -96,7 +96,7 @@ export default function HomePage() {
           </Link>
         </p>
         <p style={{ marginTop: 16, fontSize: 13, color: 'rgba(42,33,24,0.55)' }}>
-          Try the demo invitation at <code>/rizky-amara</code>
+          Preview template di <code>/templates</code>
         </p>
       </div>
     </main>

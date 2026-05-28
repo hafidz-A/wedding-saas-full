@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import OnboardingForm from './OnboardingForm'
 
 /**
@@ -54,12 +55,16 @@ export default async function OnboardingPage() {
   const admin = createSupabaseAdminClient()
   const { data: existing } = (await admin
     .from('invitations')
-    .select('slug')
+    .select('slug, template_id')
     .eq('owner_user_id', user.id)
-    .maybeSingle()) as { data: { slug: string } | null }
+    .maybeSingle()) as { data: { slug: string; template_id: string | null } | null }
 
   if (existing?.slug) {
-    redirect(`/${existing.slug}/dashboard`)
+    const t =
+      existing.template_id && isValidTemplate(existing.template_id)
+        ? existing.template_id
+        : DEFAULT_TEMPLATE_ID
+    redirect(`/${t}/${existing.slug}/dashboard`)
   }
 
   return <OnboardingForm email={user.email ?? ''} />

@@ -1,0 +1,315 @@
+/* themes.css — Theme definitions and dynamic shifting mode tokens
+   2026-05-27: Synced with style-guide-addadd.html.
+   Real palette values are also written to :root dynamically, but the body classes
+   are used to switch the shifting structural design tokens. */
+
+/* Smooth palette transition */
+html {
+  transition: background-color 600ms var(--ease-glide);
+}
+body {
+  transition: background-color 600ms var(--ease-glide), color 600ms var(--ease-glide);
+}
+
+/* ================== DARK THEME PALETTES ================== */
+.theme-cosmic-dark {
+  --color-bg: #06061a;
+  --color-bg-soft: #0e0c24;
+  --color-surface: rgba(14, 12, 36, 0.65);
+  --color-fg: #ece5f6;
+  --color-fg-mute: rgba(236, 229, 246, 0.72);
+  --color-fg-faint: rgba(236, 229, 246, 0.45);
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-soft: rgba(255, 255, 255, 0.04);
+  --color-accent: #c19bff;
+  --color-glow-rgb: 193, 155, 255;
+  --color-star: #e8d3ff;
+}
+
+.theme-nebula-dark {
+  --color-bg: #0d0a07;
+  --color-bg-soft: #1a1410;
+  --color-surface: rgba(26, 20, 16, 0.65);
+  --color-fg: #f8efd9;
+  --color-fg-mute: rgba(248, 239, 217, 0.72);
+  --color-fg-faint: rgba(248, 239, 217, 0.45);
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-soft: rgba(255, 255, 255, 0.04);
+  --color-accent: #e8b86a;
+  --color-glow-rgb: 232, 184, 106;
+  --color-star: #fff0c0;
+}
+
+.theme-rose-dark {
+  --color-bg: #100608;
+  --color-bg-soft: #1f0d12;
+  --color-surface: rgba(31, 13, 18, 0.65);
+  --color-fg: #fae8ea;
+  --color-fg-mute: rgba(250, 232, 234, 0.72);
+  --color-fg-faint: rgba(250, 232, 234, 0.45);
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-soft: rgba(255, 255, 255, 0.04);
+  --color-accent: #f08aa6;
+  --color-glow-rgb: 240, 138, 166;
+  --color-star: #ffd8e0;
+}
+
+.theme-emerald-dark {
+  --color-bg: #04100b;
+  --color-bg-soft: #0c1f17;
+  --color-surface: rgba(12, 31, 23, 0.65);
+  --color-fg: #e3f3ec;
+  --color-fg-mute: rgba(227, 243, 236, 0.72);
+  --color-fg-faint: rgba(227, 243, 236, 0.45);
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-soft: rgba(255, 255, 255, 0.04);
+  --color-accent: #7be0a9;
+  --color-glow-rgb: 123, 224, 169;
+  --color-star: #d3f7e1;
+}
+
+/* ================== LIGHT THEME PALETTES ================== */
+.theme-lavender-light {
+  --color-bg: #e5dbf0;
+  --color-bg-soft: #d2c4e3;
+  --color-surface: rgba(255, 255, 255, 0.75);
+  --color-fg: #1d0f3a;
+  --color-fg-mute: #48396b;
+  --color-fg-faint: #7a6a9f;
+  --color-line: #1d0f3a;
+  --color-line-soft: rgba(29, 15, 58, 0.08);
+  --color-accent: #7D53DE;
+  --color-glow-rgb: 125, 83, 222;
+  --color-star: #e9b306;
+}
+
+.theme-sunburst-light {
+  --color-bg: #eedfc8;
+  --color-bg-soft: #decbb0;
+  --color-surface: rgba(255, 255, 255, 0.78);
+  --color-fg: #301700;
+  --color-fg-mute: #613b14;
+  --color-fg-faint: #9c734c;
+  --color-line: #301700;
+  --color-line-soft: rgba(48, 23, 0, 0.08);
+  --color-accent: #d97706;
+  --color-glow-rgb: 217, 119, 6;
+  --color-star: #e11d48;
+}
+
+.theme-rose-light {
+  --color-bg: #ead5d8;
+  --color-bg-soft: #dab8bd;
+  --color-surface: rgba(255, 255, 255, 0.75);
+  --color-fg: #3b0512;
+  --color-fg-mute: #6e2637;
+  --color-fg-faint: #a66271;
+  --color-line: #3b0512;
+  --color-line-soft: rgba(59, 5, 18, 0.08);
+  --color-accent: #e64980;
+  --color-glow-rgb: 230, 73, 128;
+  --color-star: #d97706;
+}
+
+.theme-botanical-light {
+  --color-bg: #dceae0;
+  --color-bg-soft: #c4dcd0;
+  --color-surface: rgba(255, 255, 255, 0.78);
+  --color-fg: #082618;
+  --color-fg-mute: #2a523d;
+  --color-fg-faint: #65997d;
+  --color-line: #082618;
+  --color-line-soft: rgba(8, 38, 24, 0.08);
+  --color-accent: #0f9f8e;
+  --color-glow-rgb: 15, 159, 142;
+  --color-star: #f43f5e;
+}
+
+/* ================== SHIFTING MODE TOKENS ================== */
+
+/* Dark Modes: Sleek, thin lines, glowing boxes, blurred effects */
+.theme-cosmic-dark, .theme-nebula-dark, .theme-rose-dark, .theme-emerald-dark {
+  --theme-mode: dark;
+  --shadow-card: 0 20px 50px -15px rgba(0, 0, 0, 0.6), 0 0 40px -10px rgba(var(--color-glow-rgb), 0.22);
+  --shadow-card-hover: 0 30px 60px -10px rgba(0, 0, 0, 0.7), 0 0 50px -5px rgba(var(--color-glow-rgb), 0.35);
+  --border-card: 1px solid rgba(255, 255, 255, 0.1);
+  --border-thick: 1px solid rgba(255, 255, 255, 0.14);
+  --bg-polaroid: #fdfbf7;
+  --color-polaroid-border: transparent;
+  --shadow-polaroid: 0 14px 36px -8px rgba(0,0,0,0.55);
+  --btn-border: 1px solid var(--color-accent);
+  --btn-shadow: 0 10px 24px -10px rgba(var(--color-glow-rgb), 0.6);
+  --btn-shadow-hover: 0 14px 30px -6px rgba(var(--color-glow-rgb), 0.85);
+  --btn-transform-hover: translateY(-2px);
+  --btn-transform-active: translateY(1px);
+  --eyebrow-border: 1px solid rgba(255, 255, 255, 0.14);
+  --eyebrow-bg: rgba(255, 255, 255, 0.05);
+  --eyebrow-shadow: none;
+  --table-border: 1px solid rgba(255, 255, 255, 0.08);
+  --table-border-cell: 1px solid rgba(255, 255, 255, 0.04);
+  --table-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --table-th-bg: rgba(255, 255, 255, 0.02);
+  --nav-border: 1px solid rgba(255, 255, 255, 0.1);
+  --nav-bg: rgba(8, 8, 12, 0.55);
+  --nav-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --nav-arrow-bg: rgba(255, 255, 255, 0.06);
+  --nav-arrow-border: 1px solid rgba(255, 255, 255, 0.1);
+  --nav-arrow-color: #fff;
+  --grid-dots: radial-gradient(rgba(255, 255, 255, 0.04) 1.5px, transparent 1.5px);
+  --bg-radial-gradient: radial-gradient(circle at 20% 20%, rgba(var(--color-glow-rgb), 0.15), transparent 70%);
+}
+
+/* Light Modes: Chunky borders, solid flat offsets, cartoon borders */
+.theme-lavender-light, .theme-sunburst-light, .theme-rose-light, .theme-botanical-light {
+  --theme-mode: light;
+  --shadow-card: 6px 6px 0 var(--color-line);
+  --shadow-card-hover: 9px 9px 0 var(--color-line);
+  --border-card: 3px solid var(--color-line);
+  --border-thick: 3px solid var(--color-line);
+  --bg-polaroid: #faf7f2;
+  --color-polaroid-border: var(--color-line);
+  --shadow-polaroid: 6px 6px 0 var(--color-accent);
+  --btn-border: 3px solid var(--color-line);
+  --btn-shadow: 4px 4px 0 var(--color-fg);
+  --btn-shadow-hover: 7px 7px 0 var(--color-fg);
+  --btn-transform-hover: translateY(-3px);
+  --btn-transform-active: translateY(1px);
+  --eyebrow-border: 2px solid var(--color-line);
+  --eyebrow-bg: var(--color-bg-soft);
+  --eyebrow-shadow: 2px 2px 0 var(--color-line);
+  --table-border: 3px solid var(--color-line);
+  --table-border-cell: 2px solid var(--color-line-soft);
+  --table-shadow: 6px 6px 0 var(--color-line-soft);
+  --table-th-bg: var(--color-bg-soft);
+  --nav-border: 3px solid var(--color-fg);
+  --nav-bg: var(--color-surface);
+  --nav-shadow: 5px 5px 0 var(--color-fg);
+  --nav-arrow-bg: #fff;
+  --nav-arrow-border: 2px solid var(--color-fg);
+  --nav-arrow-color: var(--color-fg);
+  --grid-dots: radial-gradient(var(--color-line-soft) 1.5px, transparent 1.5px);
+  --bg-radial-gradient: radial-gradient(circle at 20% 20%, var(--color-bg-soft), transparent 70%);
+}
+
+/* Custom Scrollbar override based on current mode */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border: 3px solid var(--color-bg);
+  border-radius: 10px;
+}
+
+/* ------ Ultimate Theme Dashboard ------ */
+.theme-controller-toggle {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: var(--z-overlay);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--nav-arrow-bg);
+  border: var(--nav-arrow-border);
+  color: var(--nav-arrow-color);
+  cursor: pointer;
+  box-shadow: var(--nav-shadow);
+  font-size: 18px;
+  transition: transform 0.15s var(--ease-glide), box-shadow 0.15s var(--ease-glide);
+}
+.theme-controller-toggle:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--nav-shadow);
+}
+.theme-controller-toggle:active {
+  transform: translateY(1px) scale(0.95);
+}
+
+.theme-controller {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 100;
+  background: var(--color-surface);
+  border: var(--border-thick);
+  border-radius: var(--r-2);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
+  transition: all var(--transition-speed) var(--ease-card);
+}
+.theme-controller:hover {
+  transform: translateY(-4px);
+}
+.theme-controller-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-fg-faint);
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 2px dashed var(--color-line-soft);
+  padding-bottom: 8px;
+}
+.theme-group-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 4px 0;
+}
+.theme-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.btn-theme-select {
+  padding: 8px;
+  border-radius: var(--r-1);
+  border: 1px solid var(--color-fg-faint);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+  background: var(--color-bg-soft);
+  color: var(--color-fg);
+  transition: all 0.2s ease;
+}
+.btn-theme-select.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-fg);
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.15);
+}
+.btn-theme-select:hover:not(.active) {
+  transform: translateY(-2px);
+  border-color: var(--color-fg);
+}
+
+@media (max-width: 480px) {
+  .theme-controller-toggle {
+    left: 16px;
+    bottom: 16px;
+  }
+  .theme-controller {
+    left: 16px;
+    bottom: 16px;
+    width: calc(100vw - 32px);
+    max-width: 340px;
+  }
+}
+
+

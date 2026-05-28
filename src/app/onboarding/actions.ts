@@ -4,9 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
+import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 
 export interface OnboardingInput {
   slug: string
+  template: string
   brideName: string
   groomName: string
   weddingDate: string // ISO datetime e.g. "2026-11-15T16:00:00"
@@ -48,6 +50,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : 'Slug tidak valid' }
     }
+    const template = isValidTemplate(input.template) ? input.template : DEFAULT_TEMPLATE_ID
     const brideName = input.brideName.trim()
     const groomName = input.groomName.trim()
     const venue = input.venue.trim()
@@ -62,15 +65,19 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     // 3. One user owns at most one invitation.
     const { data: alreadyOwned } = (await admin
       .from('invitations')
-      .select('slug')
+      .select('slug, template_id')
       .eq('owner_user_id', user.id)
-      .maybeSingle()) as { data: { slug: string } | null }
+      .maybeSingle()) as { data: { slug: string; template_id: string | null } | null }
     if (alreadyOwned?.slug) {
+      const ownedTemplate =
+        alreadyOwned.template_id && isValidTemplate(alreadyOwned.template_id)
+          ? alreadyOwned.template_id
+          : DEFAULT_TEMPLATE_ID
       return {
         ok: true,
         slug: alreadyOwned.slug,
-        publicUrl: `/${alreadyOwned.slug}`,
-        dashboardUrl: `/${alreadyOwned.slug}/dashboard`,
+        publicUrl: `/${ownedTemplate}/${alreadyOwned.slug}`,
+        dashboardUrl: `/${ownedTemplate}/${alreadyOwned.slug}/dashboard`,
       }
     }
 
@@ -82,13 +89,18 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
       .maybeSingle()) as { data: { id: string } | null }
     if (taken) return { ok: false, error: 'Slug sudah dipakai. Pilih yang lain.' }
 
-    // 5. Build the full seeded config.
-    const config = buildSeedConfig({
-      brideName,
-      groomName,
-      weddingDate: input.weddingDate,
-      venue,
-    })
+    // 5. Build the seeded config. Lovebirds substitutes the couple's data
+    //    into its 14-section cinematic config; other templates seed from
+    //    their bundled defaultConfig (couple edits content in the dashboard).
+    const config =
+      template === 'lovebirds'
+        ? buildSeedConfig({
+            brideName,
+            groomName,
+            weddingDate: input.weddingDate,
+            venue,
+          })
+        : getDefaultConfig(template)
 
     // 6. Insert. Legacy NOT NULL columns (from the bcrypt-era schema) are
     //    set the same way scripts/create-invitation.mjs does it.
@@ -98,7 +110,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
       email: user.email,
       password_hash: 'supabase-auth-migrated',
       plan: 'premium',
-      template_id: 'classic',
+      template_id: template,
       is_published: true,
       config,
     })
@@ -107,14 +119,14 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
       return { ok: false, error: `DB error: ${error.message}` }
     }
 
-    revalidatePath(`/${slug}`)
-    revalidatePath(`/${slug}/dashboard`)
+    revalidatePath('/[template]/[slug]', 'page')
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
 
     return {
       ok: true,
       slug,
-      publicUrl: `/${slug}`,
-      dashboardUrl: `/${slug}/dashboard`,
+      publicUrl: `/${template}/${slug}`,
+      dashboardUrl: `/${template}/${slug}/dashboard`,
     }
   } catch (e) {
     console.error('Onboarding unexpected error:', e)

@@ -92,20 +92,22 @@ function ResetPasswordInner() {
     // 3. Look up the user's invitation slug so we can deep-link them
     const { data: { user } } = await supabase.auth.getUser()
     let slug = ''
+    let template = 'lovebirds'
     if (user) {
       const { data: invitation } = await supabase
         .from('invitations')
-        .select('slug')
+        .select('slug, template_id')
         .eq('owner_user_id', user.id)
         .maybeSingle()
       slug = (invitation as any)?.slug || ''
+      template = (invitation as any)?.template_id || 'lovebirds'
     }
 
     setDone(true)
     setSubmitting(false)
 
     if (slug) {
-      setTimeout(() => router.replace(`/${slug}/dashboard`), 1200)
+      setTimeout(() => router.replace(`/${template}/${slug}/dashboard`), 1200)
     }
   }
 

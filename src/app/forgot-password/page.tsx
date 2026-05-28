@@ -18,6 +18,7 @@ import { createBrowserClient } from '@supabase/ssr'
 function ForgotPasswordInner() {
   const searchParams = useSearchParams()
   const slug = searchParams.get('slug') || ''
+  const template = searchParams.get('template') || 'lovebirds'
 
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -72,14 +73,14 @@ function ForgotPasswordInner() {
               Cek folder spam kalau tidak muncul.
             </p>
             <Link
-              href={`/reset-password?email=${encodeURIComponent(email)}`}
+              href={`/reset-password?email=${encodeURIComponent(email)}${slug ? `&slug=${encodeURIComponent(slug)}&template=${encodeURIComponent(template)}` : ''}`}
               style={{ ...primaryBtn, textAlign: 'center', textDecoration: 'none', display: 'block' }}
             >
               Lanjut: masukkan token →
             </Link>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
               {slug && (
-                <Link href={`/${slug}/dashboard`} style={ghostBtn}>
+                <Link href={`/${template}/${slug}/dashboard`} style={ghostBtn}>
                   ← Kembali ke login
                 </Link>
               )}
@@ -116,7 +117,7 @@ function ForgotPasswordInner() {
 
             <p style={{ textAlign: 'center', margin: 0 }}>
               {slug ? (
-                <Link href={`/${slug}/dashboard`} style={linkStyle}>← Kembali ke login</Link>
+                <Link href={`/${template}/${slug}/dashboard`} style={linkStyle}>← Kembali ke login</Link>
               ) : (
                 <Link href="/" style={linkStyle}>← Kembali ke beranda</Link>
               )}

@@ -1,0 +1,61 @@
+/* ============================================================
+   tokens.css — non-color primitives.
+   Color tokens are written into :root at runtime by themeBus.
+   ============================================================
+   2026-05-27: Adopted style-guide-add.html aesthetics:
+   - Fraunces (heavier weights up to 900) for display
+   - Pinyon Script for calligraphic accents
+   - Plus Jakarta Sans for body
+   - Space Mono for mono / labels
+   - Radii bumped, spring easing added
+   ============================================================ */
+:root {
+  /* Type */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-script:  "Pinyon Script", "Cormorant Garamond", cursive;
+  --font-body:    "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono:    "Space Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  --fs-display:   clamp(2.4rem, 7vw, 6rem);
+  --fs-h1:        clamp(1.9rem, 4.6vw, 3.6rem);
+  --fs-h2:        clamp(1.5rem, 3.4vw, 2.6rem);
+  --fs-h3:        clamp(1.1rem, 2.2vw, 1.6rem);
+  --fs-lede:      clamp(1rem, 1.5vw, 1.2rem);
+  --fs-body:      clamp(0.95rem, 1vw + 0.3rem, 1.05rem);
+
+  --leading-display: 1.05;
+  --leading-tight:   1.15;
+  --leading-body:    1.6;
+  --tracking-tight:  -0.02em;
+
+  --measure: 60ch;
+
+  /* Radii — bumped for chunkier playful feel */
+  --r-1: 12px;
+  --r-2: 20px;
+  --r-3: 32px;
+  --r-4: 48px;
+  --r-pill: 999px;
+
+  /* Motion */
+  --ease-glide:  cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-card:   cubic-bezier(0.34, 1.56, 0.64, 1);  /* springy bounce */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-speed: 0.4s;
+
+  /* Layout */
+  --navbar-h: 56px;
+  --section-padding-y: clamp(4.5rem, 10vh, 8rem);
+  --container-max: 1240px;
+  --container-pad: clamp(1rem, 4vw, 2.5rem);
+  --safe-pad: clamp(1rem, 5vw, 2rem);
+
+  /* Z layers */
+  --z-bg: 0;
+  --z-content: 2;
+  --z-overlay: 30;
+  --z-nav: 50;
+  --z-modal: 80;
+
+  --grain-opacity: 0.05;
+}

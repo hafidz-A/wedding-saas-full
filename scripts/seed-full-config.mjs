@@ -93,9 +93,9 @@ const supabase = createClient(url, key, { auth: { persistSession: false } })
 /* ── Load full template config ── */
 let config
 try {
-  const configPath = resolve(__dirname, '../src/config/pageConfig.js')
+  const configPath = resolve(__dirname, '../src/all-templates/lovebirds/defaultConfig.js')
   const configUrl = pathToFileURL(configPath).href
-  const { pageConfig } = await import(configUrl)
+  const { defaultConfig: pageConfig } = await import(configUrl)
   // Deep-clone so the imported module cache is never mutated.
   config = JSON.parse(JSON.stringify(pageConfig))
 } catch (e) {
@@ -110,7 +110,7 @@ enableAll(config)
 /* ── Update Supabase ── */
 const result = await supabase
   .from('invitations')
-  .update({ config })
+  .update({ config, template_id: 'lovebirds' })
   .eq('slug', slug)
   .select('slug, is_published, plan')
   .single()
@@ -139,8 +139,8 @@ console.log('  venue:    ', venue || '(not set)')
 console.log('  sections: ', `${sectionCount} (all enabled)`)
 console.log('  plan:     ', data.plan)
 console.log()
-console.log('  public URL: ', `/${data.slug}`)
-console.log('  dashboard:  ', `/${data.slug}/dashboard`)
+console.log('  public URL: ', `/lovebirds/${data.slug}`)
+console.log('  dashboard:  ', `/lovebirds/${data.slug}/dashboard`)
 console.log()
 
 process.exit(0)

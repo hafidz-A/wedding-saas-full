@@ -1,0 +1,21 @@
+/* ============================================================================
+   Lovebirds template theme — the cream ambient background + warm colour washes.
+   Scoped to `body.lovebirds-route` (added by Lovebirds Shell on mount) so it
+   applies ONLY on Lovebirds routes and never leaks onto other templates.
+
+   Tokens (--color-cream, --color-coral, etc.) come from the app baseline
+   (src/styles/tokens.css, loaded globally), so they resolve here too.
+   ============================================================================ */
+body.lovebirds-route {
+  background-color: var(--color-cream) !important;
+  background-image:
+    radial-gradient(50% 38% at 50% 82%, rgba(232, 85, 62, 0.18), transparent 70%),
+    radial-gradient(40% 32% at 12% 18%, rgba(245, 200, 66, 0.18), transparent 70%),
+    radial-gradient(40% 32% at 88% 16%, rgba(45, 140, 78, 0.11), transparent 70%),
+    radial-gradient(38% 28% at 8%  84%, rgba(107, 53, 168, 0.11), transparent 70%),
+    radial-gradient(38% 28% at 92% 82%, rgba(61, 155, 193, 0.11), transparent 70%),
+    linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%) !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+}

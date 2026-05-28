@@ -5,6 +5,7 @@ import { useEditor } from './EditorProvider'
 
 interface Props {
   slug: string
+  template: string
 }
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile'
@@ -15,7 +16,7 @@ const DEVICE_CONFIG: Record<DeviceMode, { label: string; icon: string; width: nu
   mobile:  { label: 'Mobile',  icon: '📱', width: 390,    height: 760 },
 }
 
-export default function PreviewPane({ slug }: Props) {
+export default function PreviewPane({ slug, template }: Props) {
   const { lastSavedAt, isDirty } = useEditor()
   // Single tick that bumps on ANY interaction (device switch OR refresh).
   // Used as the iframe React `key`, so the iframe fully unmounts +
@@ -81,7 +82,7 @@ export default function PreviewPane({ slug }: Props) {
           )}
           <iframe
             key={v}
-            src={`/${slug}?preview=1&v=${encodeURIComponent(v)}`}
+            src={`/${template}/${slug}?preview=1&v=${encodeURIComponent(v)}`}
             style={{ ...frame, height: cfg.width !== '100%' ? cfg.height - 28 : cfg.height }}
             title={`Invitation preview — ${cfg.label}`}
           />

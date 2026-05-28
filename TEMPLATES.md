@@ -62,24 +62,24 @@ export const defaultConfig = {
 
 ```sql
 -- Kolom sudah ada di tabel invitations:
-template_id TEXT NOT NULL DEFAULT 'classic'
--- Contoh value: 'burung-wedding', 'solar-wedding', 'garden-wedding'
+template_id TEXT NOT NULL DEFAULT 'lovebirds'
+-- Contoh value: 'lovebirds', 'solary', 'garden-wedding'
 ```
 
 ### Rendering: `src/renderers/SectionRenderer.jsx`
 
 ```jsx
 // Load registry berdasarkan template_id:
-import { sectionRegistry as burungRegistry } from '@/templates/burung-wedding/registry'
-import { sectionRegistry as solarRegistry } from '@/templates/solar-wedding/registry'
+import { sectionRegistry as lovebirdsRegistry } from '@/templates/lovebirds/registry'
+import { sectionRegistry as solaryRegistry } from '@/templates/solary/registry'
 
 const registries = {
-  'burung-wedding': burungRegistry,
-  'solar-wedding': solarRegistry,
+  'lovebirds': lovebirdsRegistry,
+  'solary': solaryRegistry,
 }
 
 function getRegistry(templateId) {
-  return registries[templateId] || burungRegistry // fallback
+  return registries[templateId] || lovebirdsRegistry // fallback
 }
 ```
 
@@ -90,9 +90,9 @@ Di onboarding form, tambahin step awal "Pilih template" yang set `template_id` s
 ### URL routing
 
 ```
-/burung-wedding/rizky-amara           ← couple pakai Burung
-/solar-wedding/budi-sari              ← couple pakai Solar
-/burung-wedding/rizky-amara/dashboard ← dashboard (shared UI)
+/lovebirds/rizky-amara           ← couple pakai Lovebirds
+/solary/budi-sari              ← couple pakai Solary
+/lovebirds/rizky-amara/dashboard ← dashboard (shared UI)
 ```
 
 Next.js routes:
@@ -127,7 +127,7 @@ import { defaultConfig as namaConfig } from '@/templates/<nama-template>/default
 
 export const templates = {
   // existing
-  'burung-wedding': { registry: burungRegistry, config: burungConfig, label: 'Burung Wedding' },
+  'lovebirds': { registry: lovebirdsRegistry, config: lovebirdsConfig, label: 'Lovebirds' },
   // tambah ini:
   '<nama-template>': { registry: namaRegistry, config: namaConfig, label: 'Nama Template' },
 }
@@ -168,13 +168,13 @@ Baca CLAUDE.md dan TEMPLATES.md untuk context arsitektur.
 Saya mau menambahkan template baru ke project ini.
 
 Template yang mau ditambahkan ada di folder:
-  [GANTI: path ke folder template, mis. c:\Users\arifi\Downloads\solar-wedding\]
+  [GANTI: path ke folder template, mis. c:\Users\arifi\Downloads\solary\]
 
 Nama template untuk URL dan database:
-  [GANTI: mis. solar-wedding]
+  [GANTI: mis. solary]
 
 Label display (untuk UI):
-  [GANTI: mis. Solar Wedding]
+  [GANTI: mis. Solary]
 
 Tolong:
 1. Copy/move section components dari folder template ke src/templates/[nama]/sections/
@@ -188,11 +188,11 @@ Tolong:
 8. Commit + push
 
 Constraints:
-- JANGAN ubah template yang sudah ada (burung-wedding dll)
+- JANGAN ubah template yang sudah ada (lovebirds dll)
 - JANGAN ubah database schema — cuma tambah row template_id baru
 - JANGAN ubah auth/dashboard/routing — cuma tambah entry di templateIndex
 - Setiap section harus 'use client' dan pakai CSS Modules
-- Ikuti pattern dari template existing (lihat src/templates/burung-wedding/ sebagai contoh)
+- Ikuti pattern dari template existing (lihat src/templates/lovebirds/ sebagai contoh)
 ```
 
 **PROMPT END**
@@ -216,13 +216,14 @@ config di src/config/pageConfig.js, dan registry di src/config/sectionRegistry.j
 
 Tolong restructure project agar support multi-template:
 
-1. Buat folder src/templates/burung-wedding/
-2. MOVE (bukan copy) semua section dari src/sections/ ke src/templates/burung-wedding/sections/
-3. MOVE src/config/sectionRegistry.js → src/templates/burung-wedding/registry.js
+1. Buat folder src/templates/lovebirds/
+2. COPY semua section dari src/sections/ ke src/templates/lovebirds/sections/
+   (src/sections/ tetap ada sebagai referensi)
+3. COPY src/config/sectionRegistry.js → src/templates/lovebirds/registry.js
    (update semua relative import paths di dalamnya)
-4. MOVE src/config/pageConfig.js → src/templates/burung-wedding/defaultConfig.js
+4. COPY src/config/pageConfig.js → src/templates/lovebirds/defaultConfig.js
    (rename export dari pageConfig ke defaultConfig)
-5. Buat src/config/templateIndex.js yang import dari templates/burung-wedding/
+5. Buat src/config/templateIndex.js yang import dari templates/lovebirds/
 6. Update src/renderers/SectionRenderer.jsx agar baca registry dari templateIndex
    berdasarkan templateId prop
 7. Update routing dari src/app/[slug]/ ke src/app/[template]/[slug]/
@@ -230,7 +231,7 @@ Tolong restructure project agar support multi-template:
 8. Update onboarding action: tambahin template selection
 9. Update semua import yang reference src/sections/ atau src/config/pageConfig
    ke lokasi baru
-10. Test: npm run dev → buka /burung-wedding/rizky-amara → harus sama persis
+10. Test: npm run dev → buka /lovebirds/rizky-amara → harus sama persis
     seperti sebelum restructure
 11. Build: npm run build → harus clean
 12. Commit dengan pesan: "refactor: restructure to multi-template architecture"
@@ -249,7 +250,7 @@ CRITICAL:
 ## FAQ
 
 **Q: Kalau template baru punya section type yang gak ada di template lain?**
-A: Gak masalah. Setiap template punya registry sendiri. Section "videoHero" bisa ada di Solar tapi gak ada di Burung. Dashboard editor cukup baca registry template yang aktif.
+A: Gak masalah. Setiap template punya registry sendiri. Section "videoHero" bisa ada di Solary tapi gak ada di Lovebirds. Dashboard editor cukup baca registry template yang aktif.
 
 **Q: Kalau 2 template punya section dengan nama sama (mis. Hero) tapi desain beda?**
 A: Masing-masing punya file Hero.jsx sendiri di folder template masing-masing. Gak conflict karena import path-nya beda.

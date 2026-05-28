@@ -34,26 +34,16 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--color-charcoal);
-  /* Global ambient background — cream base + 5 corner colour washes,
-     pinned to the viewport (background-attachment: fixed) so the warmth
-     follows the user as they scroll. Each section becomes transparent
-     so this shows through. */
-  background-color: var(--color-cream);
-  background-image:
-    radial-gradient(50% 38% at 50% 82%, rgba(232, 85, 62, 0.18), transparent 70%),
-    radial-gradient(40% 32% at 12% 18%, rgba(245, 200, 66, 0.18), transparent 70%),
-    radial-gradient(40% 32% at 88% 16%, rgba(45, 140, 78, 0.11), transparent 70%),
-    radial-gradient(38% 28% at 8%  84%, rgba(107, 53, 168, 0.11), transparent 70%),
-    radial-gradient(38% 28% at 92% 82%, rgba(61, 155, 193, 0.11), transparent 70%),
-    linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+/* NOTE: the cream ambient background that used to live here is template-specific
+   (Lovebirds). It now lives in src/all-templates/lovebirds/styles/theme.css,
+   scoped to `body.lovebirds-route`, so it no longer leaks onto other templates
+   (e.g. Solary's dark cosmic theme). This file keeps only the shared app
+   baseline: resets, tokens, neutral typography, a11y. */
 
 img, picture, svg, video { display: block; max-width: 100%; height: auto; }
 

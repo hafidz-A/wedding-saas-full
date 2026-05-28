@@ -8,9 +8,9 @@
  * onboarding flow. Both produce identical configs for a given input.
  */
 
-// Import the bundled default config used by the marketing demo.
-// pageConfig.js is plain ESM and works as-is from TS at runtime.
-import { pageConfig } from '@/config/pageConfig'
+// Import the Lovebirds template's default config as the base to customize.
+// defaultConfig.js is plain ESM and works as-is from TS at runtime.
+import { defaultConfig as pageConfig } from '@/all-templates/lovebirds/defaultConfig'
 
 export interface CoupleSeedInput {
   brideName: string

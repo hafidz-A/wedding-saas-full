@@ -86,6 +86,8 @@ const weddingDate = flags.date
 const venue = flags.venue || ''
 const email = flags.email
 const plan = flags.plan || 'free'
+const VALID_TEMPLATES = ['lovebirds', 'solary']
+const template = VALID_TEMPLATES.includes(flags.template) ? flags.template : 'lovebirds'
 // --full       → seed the full 14-section cinematic template
 // --starter    → use the minimal 6-section starter (default)
 // --no-full    → same as --starter
@@ -105,7 +107,8 @@ if (missing.length) {
   console.error('    --venue="Venue name & address" \\')
   console.error('    --email=couple@gmail.com \\')
   console.error('    [--plan=free|basic|premium] \\')
-  console.error('    [--full]              # seed full 14-section template (default = 6-section starter)')
+  console.error('    [--template=lovebirds|solary]  # default = lovebirds')
+  console.error('    [--full]              # (lovebirds) seed full 14-section template (default = 6-section starter)')
   process.exit(1)
 }
 
@@ -177,14 +180,28 @@ const monogram = `${brideName.trim()[0]} & ${groomName.trim()[0]}`
 
 let config
 
-if (seedFull) {
+if (template === 'solary') {
+  console.log('→ Loading Solary (galactic) template config…')
+  try {
+    const cfgPath = resolve(__dirname, '../src/all-templates/solary/config/pageConfig.js')
+    const mod = await import(pathToFileURL(cfgPath).href)
+    config = JSON.parse(JSON.stringify(mod.pageConfig || mod.default))
+    config.meta = { ...(config.meta || {}), title: `${coupleName} — Our Wedding`, slug }
+    console.log(`  loaded ${config.sections.length} planet sections`)
+  } catch (e) {
+    console.error('Failed to load Solary config:', e.message)
+    process.exit(1)
+  }
+}
+
+if (!config && seedFull) {
   console.log('→ Loading full 14-section template…')
   try {
     const { replaceSections, enableAll } = await import(
       pathToFileURL(resolve(__dirname, 'lib/config-transform.mjs')).href
     )
-    const configPath = resolve(__dirname, '../src/config/pageConfig.js')
-    const { pageConfig } = await import(pathToFileURL(configPath).href)
+    const configPath = resolve(__dirname, '../src/all-templates/lovebirds/defaultConfig.js')
+    const { defaultConfig: pageConfig } = await import(pathToFileURL(configPath).href)
     config = JSON.parse(JSON.stringify(pageConfig))
     replaceSections(config, { brideName, groomName, weddingDate, venue })
     enableAll(config)
@@ -358,7 +375,7 @@ const { data, error } = await supabase
       owner_user_id: userId,
       email,
       plan,
-      template_id: 'classic',
+      template_id: template,
       is_published: true,
       config,
     },
@@ -382,11 +399,12 @@ console.log('  date:       ', weddingDate)
 console.log('  venue:      ', venue || '(not set)')
 console.log('  email:      ', email)
 console.log('  plan:       ', data.plan)
+console.log('  template:   ', template)
 console.log('  published:  ', data.is_published)
 console.log('  sections:   ', `${config.sections.length}${seedFull ? ' (full template)' : ' (starter — add more via editor or run seed-full-config.mjs)'}`)
 console.log('  user id:    ', userId)
-console.log('  public URL: ', `/${data.slug}`)
-console.log('  dashboard:  ', `/${data.slug}/dashboard`)
+console.log('  public URL: ', `/${template}/${data.slug}`)
+console.log('  dashboard:  ', `/${template}/${data.slug}/dashboard`)
 console.log('  login with: ', `${email} / ${password}`)
 console.log('')
 

@@ -43,13 +43,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
-      <body
-        style={{
-          margin: 0,
-          background: '#FDF6EC',
-          minHeight: '100%',
-        }}
-      >
+      {/* No hardcoded background here: each template owns its own (Lovebirds
+          cream via body.lovebirds-route, Solary dark via body.solary-route),
+          and the dapur pages (login/onboarding/marketing/dashboard) each set
+          their own full-viewport background. Keeping the shell neutral avoids
+          one template's theme leaking onto another. */}
+      <body style={{ margin: 0, minHeight: '100%' }}>
         {children}
       </body>
     </html>
