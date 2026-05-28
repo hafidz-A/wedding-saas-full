@@ -2,21 +2,21 @@ import type { SectionSchema } from './types'
 
 export const ourStorySchema: SectionSchema = {
   type: 'ourStory',
-  label: 'Our Story',
+  label: { id: 'Kisah Kami', en: 'Our Story' },
   fields: [
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'title', label: { id: 'Judul', en: 'Title' }, type: 'text' },
     {
       key: 'stories',
-      label: 'Story cards',
+      label: { id: 'Kartu kisah', en: 'Story cards' },
       type: 'objectArray',
       itemLabelKey: 'title',
       newItem: { id: '', year: '', date: '', title: '', description: '', image: '' },
       itemFields: [
-        { key: 'year',        label: 'Year',        type: 'text' },
-        { key: 'date',        label: 'Date',        type: 'text' },
-        { key: 'title',       label: 'Title',       type: 'text' },
-        { key: 'description', label: 'Description', type: 'textarea', rows: 3 },
-        { key: 'image',       label: 'Image',       type: 'image' },
+        { key: 'year',        label: { id: 'Tahun', en: 'Year' },          type: 'text' },
+        { key: 'date',        label: { id: 'Tanggal', en: 'Date' },        type: 'text' },
+        { key: 'title',       label: { id: 'Judul', en: 'Title' },         type: 'text' },
+        { key: 'description', label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 3 },
+        { key: 'image',       label: { id: 'Gambar', en: 'Image' },        type: 'image' },
       ],
     },
   ],

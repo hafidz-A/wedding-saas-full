@@ -2,22 +2,22 @@ import type { SectionSchema } from './types'
 
 export const countdownSchema: SectionSchema = {
   type: 'countdown',
-  label: 'Countdown',
+  label: { id: 'Hitung Mundur', en: 'Countdown' },
   fields: [
-    { key: 'weddingDate',   label: 'Wedding date',   type: 'datetime' },
-    { key: 'eyebrow',       label: 'Eyebrow',        type: 'text' },
-    { key: 'title',         label: 'Title',          type: 'text' },
-    { key: 'subtitle',      label: 'Subtitle',       type: 'text' },
-    { key: 'messageDuring', label: 'Message (on the day)',    type: 'textarea', rows: 2 },
-    { key: 'messageAfter',  label: 'Message (after the day)', type: 'textarea', rows: 2 },
+    { key: 'weddingDate',   label: { id: 'Tanggal pernikahan', en: 'Wedding date' },   type: 'datetime' },
+    { key: 'eyebrow',       label: { id: 'Teks kecil atas', en: 'Eyebrow' },           type: 'text' },
+    { key: 'title',         label: { id: 'Judul', en: 'Title' },                        type: 'text' },
+    { key: 'subtitle',      label: { id: 'Subjudul', en: 'Subtitle' },                  type: 'text' },
+    { key: 'messageDuring', label: { id: 'Pesan (hari-H)', en: 'Message (on the day)' },    type: 'textarea', rows: 2 },
+    { key: 'messageAfter',  label: { id: 'Pesan (setelah hari-H)', en: 'Message (after the day)' }, type: 'textarea', rows: 2 },
     {
       key: 'style',
-      label: 'Style',
+      label: { id: 'Gaya', en: 'Style' },
       type: 'select',
       options: [
-        { value: 'card',   label: 'Card per unit (default)' },
-        { value: 'mono',   label: 'Monospace inline' },
-        { value: 'italic', label: 'Italic serif' },
+        { value: 'card',   label: { id: 'Kartu per unit (default)', en: 'Card per unit (default)' } },
+        { value: 'mono',   label: { id: 'Monospace sebaris', en: 'Monospace inline' } },
+        { value: 'italic', label: { id: 'Serif miring', en: 'Italic serif' } },
       ],
     },
     // Note: `labels` (Hari/Jam/Menit/Detik) is a nested object — current schema

@@ -2,25 +2,25 @@ import type { SectionSchema } from './types'
 
 export const brideGroomSchema: SectionSchema = {
   type: 'brideGroom',
-  label: 'Bride & Groom',
+  label: { id: 'Mempelai', en: 'Bride & Groom' },
   fields: [
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'title', label: { id: 'Judul', en: 'Title' }, type: 'text' },
     {
       key: 'people',
-      label: 'People',
+      label: { id: 'Profil mempelai', en: 'People' },
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { role: '', name: '', photo: '', parents: '', bio: '', instagram: '', direction: 'right' },
       itemFields: [
-        { key: 'role',      label: 'Role',      type: 'text' },
-        { key: 'name',      label: 'Name',      type: 'text' },
-        { key: 'photo',     label: 'Photo',     type: 'image' },
-        { key: 'parents',   label: 'Parents',   type: 'text' },
-        { key: 'bio',       label: 'Bio',       type: 'textarea', rows: 3 },
-        { key: 'instagram', label: 'Instagram', type: 'text' },
-        { key: 'direction', label: 'Image side', type: 'select', options: [
-          { value: 'left',  label: 'Left' },
-          { value: 'right', label: 'Right' },
+        { key: 'role',      label: { id: 'Peran', en: 'Role' },        type: 'text' },
+        { key: 'name',      label: { id: 'Nama', en: 'Name' },         type: 'text' },
+        { key: 'photo',     label: { id: 'Foto', en: 'Photo' },        type: 'image' },
+        { key: 'parents',   label: { id: 'Orang tua', en: 'Parents' }, type: 'text' },
+        { key: 'bio',       label: { id: 'Bio', en: 'Bio' },           type: 'textarea', rows: 3 },
+        { key: 'instagram', label: { id: 'Instagram', en: 'Instagram' }, type: 'text' },
+        { key: 'direction', label: { id: 'Posisi gambar', en: 'Image side' }, type: 'select', options: [
+          { value: 'left',  label: { id: 'Kiri', en: 'Left' } },
+          { value: 'right', label: { id: 'Kanan', en: 'Right' } },
         ] },
       ],
     },
