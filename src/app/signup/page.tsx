@@ -1,3 +1,6 @@
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict } from '@/lib/i18n'
+import { SiteNav } from '@/components/site/SiteNav'
 import SignupForm from './SignupForm'
 
 /**
@@ -12,5 +15,12 @@ import SignupForm from './SignupForm'
  *      row and redirects to /<slug>/dashboard.
  */
 export default function SignupPage() {
-  return <SignupForm />
+  const lang = getLang()
+  const t = getDict(lang)
+  return (
+    <>
+      <SiteNav lang={lang} t={t.common} />
+      <SignupForm />
+    </>
+  )
 }

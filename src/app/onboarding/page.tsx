@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict } from '@/lib/i18n'
+import { SiteNav } from '@/components/site/SiteNav'
 import OnboardingForm from './OnboardingForm'
 
 /**
@@ -16,12 +19,16 @@ import OnboardingForm from './OnboardingForm'
  *   3. Render the 5-field form.
  */
 export default async function OnboardingPage() {
+  const lang = getLang()
+  const t = getDict(lang)
   const supabase = createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     return (
-      <main style={panel}>
+      <>
+        <SiteNav lang={lang} t={t.common} />
+        <main style={panel}>
         <div style={card}>
           <p style={kicker}>Sesi tidak ditemukan</p>
           <h1 style={h1}>Silakan login dulu</h1>
@@ -47,7 +54,8 @@ export default async function OnboardingPage() {
             Kembali ke pendaftaran
           </Link>
         </div>
-      </main>
+        </main>
+      </>
     )
   }
 
@@ -67,7 +75,12 @@ export default async function OnboardingPage() {
     redirect(`/${t}/${existing.slug}/dashboard`)
   }
 
-  return <OnboardingForm email={user.email ?? ''} />
+  return (
+    <>
+      <SiteNav lang={lang} t={t.common} />
+      <OnboardingForm email={user.email ?? ''} />
+    </>
+  )
 }
 
 const panel: React.CSSProperties = {

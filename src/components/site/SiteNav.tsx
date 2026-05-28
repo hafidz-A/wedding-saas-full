@@ -19,7 +19,7 @@ export function SiteNav({ lang, t }: { lang: Lang; t: Dict['common'] }) {
 
   const links = (
     <>
-      <Link href="#features" className={styles.link} onClick={() => setOpen(false)}>{t.nav.experience}</Link>
+      <Link href="/#features" className={styles.link} onClick={() => setOpen(false)}>{t.nav.experience}</Link>
       <Link href="/templates" className={styles.link} onClick={() => setOpen(false)}>{t.nav.templates}</Link>
       <Link href="/login" className={styles.link} onClick={() => setOpen(false)}>{t.nav.login}</Link>
     </>

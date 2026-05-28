@@ -1,5 +1,8 @@
 import Link from 'next/link'
 import { templateCatalog } from '@/config/templateCatalog'
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict } from '@/lib/i18n'
+import { SiteNav } from '@/components/site/SiteNav'
 
 /**
  * Template gallery — browse every available invitation template before
@@ -9,13 +12,17 @@ import { templateCatalog } from '@/config/templateCatalog'
  * Server component, no auth.
  */
 export const metadata = {
-  title: 'Pilih Template — Wedding Invitation',
+  title: 'Pilih Template — finWedding',
   description: 'Browse and preview our cinematic wedding invitation templates.',
 }
 
 export default function TemplatesPage() {
+  const lang = getLang()
+  const t = getDict(lang)
   return (
-    <main style={page}>
+    <>
+      <SiteNav lang={lang} t={t.common} />
+      <main style={page}>
       <div style={{ maxWidth: 1080, margin: '0 auto', width: '100%' }}>
         <header style={{ textAlign: 'center', marginBottom: 'clamp(32px, 6vw, 56px)' }}>
           <p style={kicker}>Template Gallery</p>
@@ -69,7 +76,8 @@ export default function TemplatesPage() {
           </Link>
         </p>
       </div>
-    </main>
+      </main>
+    </>
   )
 }
 
@@ -81,6 +89,7 @@ const page: React.CSSProperties = {
   minHeight: '100vh',
   background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
   padding: 'clamp(32px, 6vw, 72px) clamp(20px, 5vw, 48px)',
+  paddingTop: 'clamp(96px, 12vw, 128px)',
   fontFamily: 'var(--font-body, system-ui)',
   color: '#2A2118',
 }
