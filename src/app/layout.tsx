@@ -18,8 +18,9 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Wedding Invitation',
-  description: 'Cinematic wedding invitation experience',
+  title: 'finWedding — Undangan Pernikahan Digital',
+  description:
+    'finWedding — undangan pernikahan digital yang sinematik. Pilih template, isi cerita kalian, bagikan link.',
 }
 
 /**
@@ -42,7 +43,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
+    <html lang="id" className={`${cormorant.variable} ${dmSans.variable}`}>
       {/* No hardcoded background here: each template owns its own (Lovebirds
           cream via body.lovebirds-route, Solary dark via body.solary-route),
           and the dapur pages (login/onboarding/marketing/dashboard) each set
