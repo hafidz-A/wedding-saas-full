@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useDashboardDict } from './DashboardI18nProvider'
 
 interface MusicSettings {
   url?: string
@@ -28,6 +29,7 @@ const DEFAULTS: Required<Omit<MusicSettings, 'url'>> & { url: string } = {
 }
 
 export default function MusicTab({ slug, initial }: Props) {
+  const t = useDashboardDict().tabs.music
   const [music, setMusic] = useState<typeof DEFAULTS>({
     ...DEFAULTS,
     ...(initial || {}),
@@ -54,13 +56,13 @@ export default function MusicTab({ slug, initial }: Props) {
       const res = await fetch('/api/upload', { method: 'POST', body: form })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        setSaveMsg({ kind: 'err', text: err.error || `Upload failed (${res.status})` })
+        setSaveMsg({ kind: 'err', text: err.error || `${t.uploadFailed} (${res.status})` })
         return
       }
       const data = await res.json()
       update('url', data.url)
     } catch (err: any) {
-      setSaveMsg({ kind: 'err', text: err?.message || 'Upload failed' })
+      setSaveMsg({ kind: 'err', text: err?.message || t.uploadFailed })
     } finally {
       setUploading(false)
       e.target.value = ''
@@ -81,19 +83,19 @@ export default function MusicTab({ slug, initial }: Props) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        setSaveMsg({ kind: 'err', text: err.error || `Save failed (${res.status})` })
+        setSaveMsg({ kind: 'err', text: err.error || `${t.saveFailed} (${res.status})` })
         return
       }
-      setSaveMsg({ kind: 'ok', text: 'Saved ✓ — popup akan muncul di halaman undangan' })
+      setSaveMsg({ kind: 'ok', text: t.savedMsg })
     } catch (err: any) {
-      setSaveMsg({ kind: 'err', text: err?.message || 'Network error' })
+      setSaveMsg({ kind: 'err', text: err?.message || t.networkError })
     } finally {
       setSaving(false)
     }
   }
 
   async function clearMusic() {
-    if (!confirm('Hapus musik latar?')) return
+    if (!confirm(t.clearConfirm)) return
     setMusic({ ...DEFAULTS })
     setSaving(true)
     setSaveMsg(null)
@@ -103,10 +105,10 @@ export default function MusicTab({ slug, initial }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ music: null }),
       })
-      if (res.ok) setSaveMsg({ kind: 'ok', text: 'Musik dihapus' })
-      else setSaveMsg({ kind: 'err', text: `Hapus gagal (${res.status})` })
+      if (res.ok) setSaveMsg({ kind: 'ok', text: t.cleared })
+      else setSaveMsg({ kind: 'err', text: `${t.clearFailed} (${res.status})` })
     } catch (err: any) {
-      setSaveMsg({ kind: 'err', text: err?.message || 'Network error' })
+      setSaveMsg({ kind: 'err', text: err?.message || t.networkError })
     } finally {
       setSaving(false)
     }
@@ -118,22 +120,19 @@ export default function MusicTab({ slug, initial }: Props) {
     <div style={card}>
       <header style={headerRow}>
         <div>
-          <h2 style={h2}>Background Music</h2>
-          <p style={sub}>
-            Upload satu lagu (MP3) untuk diputar di latar undangan. Sebuah popup
-            akan muncul di section pertama menanyakan tamu apakah ingin memutarnya.
-          </p>
+          <h2 style={h2}>{t.title}</h2>
+          <p style={sub}>{t.subtitle}</p>
         </div>
         {music.url && (
           <span style={music.enabled ? badgeOn : badgeOff}>
-            {music.enabled ? '● ON' : '○ OFF'}
+            {music.enabled ? t.on : t.off}
           </span>
         )}
       </header>
 
       {/* ── Upload ── */}
       <section style={section}>
-        <h3 style={h3}>1. Audio file (MP3)</h3>
+        <h3 style={h3}>{t.s1}</h3>
         {music.url ? (
           <div style={audioRow}>
             <div style={{ display: 'grid', gap: 6, flex: 1, minWidth: 0 }}>
@@ -142,10 +141,10 @@ export default function MusicTab({ slug, initial }: Props) {
             </div>
             <div style={btnsCol}>
               <button type="button" style={btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
-                {uploading ? 'Uploading…' : 'Replace'}
+                {uploading ? t.uploading : t.replace}
               </button>
               <button type="button" style={btnGhostDanger} onClick={() => update('url', '')}>
-                Remove
+                {t.remove}
               </button>
             </div>
           </div>
@@ -156,7 +155,7 @@ export default function MusicTab({ slug, initial }: Props) {
             onClick={() => fileInput.current?.click()}
             disabled={uploading}
           >
-            {uploading ? 'Uploading…' : '⬆ Upload MP3'}
+            {uploading ? t.uploading : t.upload}
           </button>
         )}
         <input
@@ -166,31 +165,31 @@ export default function MusicTab({ slug, initial }: Props) {
           hidden
           onChange={onPickFile}
         />
-        <p style={help}>Maks 12 MB. Format: mp3, wav, ogg, aac, m4a.</p>
+        <p style={help}>{t.help}</p>
       </section>
 
       {/* ── Popup wording ── */}
       <section style={section}>
-        <h3 style={h3}>2. Popup wording</h3>
+        <h3 style={h3}>{t.s2}</h3>
         <div style={grid2}>
-          <Field label="Title" value={music.title} onChange={(v) => update('title', v)} maxLength={60} />
-          <Field label="Subtitle" value={music.subtitle} onChange={(v) => update('subtitle', v)} maxLength={120} />
-          <Field label='Button "Accept"' value={music.acceptLabel} onChange={(v) => update('acceptLabel', v)} maxLength={20} />
-          <Field label='Button "Dismiss"' value={music.dismissLabel} onChange={(v) => update('dismissLabel', v)} maxLength={20} />
+          <Field label={t.fTitle} value={music.title} onChange={(v) => update('title', v)} maxLength={60} />
+          <Field label={t.fSubtitle} value={music.subtitle} onChange={(v) => update('subtitle', v)} maxLength={120} />
+          <Field label={t.fAccept} value={music.acceptLabel} onChange={(v) => update('acceptLabel', v)} maxLength={20} />
+          <Field label={t.fDismiss} value={music.dismissLabel} onChange={(v) => update('dismissLabel', v)} maxLength={20} />
         </div>
       </section>
 
       {/* ── Behaviour ── */}
       <section style={section}>
-        <h3 style={h3}>3. Behaviour</h3>
+        <h3 style={h3}>{t.s3}</h3>
         <div style={{ display: 'grid', gap: 12 }}>
           <Toggle
-            label="Enabled — popup akan muncul di halaman undangan"
+            label={t.enabledLabel}
             checked={music.enabled !== false}
             onChange={(v) => update('enabled', v)}
           />
           <Toggle
-            label="Loop — musik mengulang otomatis"
+            label={t.loopLabel}
             checked={music.loop !== false}
             onChange={(v) => update('loop', v)}
           />
@@ -205,11 +204,11 @@ export default function MusicTab({ slug, initial }: Props) {
         <div style={{ display: 'flex', gap: 8 }}>
           {music.url && (
             <button type="button" style={btnGhostDanger} onClick={clearMusic} disabled={saving}>
-              Clear all
+              {t.clearAll}
             </button>
           )}
           <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? t.saving : t.save}
           </button>
         </div>
       </footer>

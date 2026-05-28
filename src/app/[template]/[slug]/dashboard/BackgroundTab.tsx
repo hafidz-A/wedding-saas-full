@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useDashboardDict } from './DashboardI18nProvider'
 
 interface Props {
   slug: string
@@ -15,6 +16,7 @@ interface Props {
 const DEFAULT_GIF = '/images/wedding-animation.gif'
 
 export default function BackgroundTab({ slug, initial }: Props) {
+  const t = useDashboardDict().tabs.background
   const [gif, setGif] = useState<string | null>(initial === undefined ? null : initial)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -35,7 +37,7 @@ export default function BackgroundTab({ slug, initial }: Props) {
 
     // Client-side guard: GIF only
     if (file.type !== 'image/gif' && !file.name.toLowerCase().endsWith('.gif')) {
-      setMsg({ kind: 'err', text: 'Hanya file .gif yang diterima' })
+      setMsg({ kind: 'err', text: t.onlyGif })
       e.target.value = ''
       return
     }
@@ -49,13 +51,13 @@ export default function BackgroundTab({ slug, initial }: Props) {
       const res = await fetch('/api/upload', { method: 'POST', body: form })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        setMsg({ kind: 'err', text: err.error || `Upload failed (${res.status})` })
+        setMsg({ kind: 'err', text: err.error || `${t.uploadFailed} (${res.status})` })
         return
       }
       const data = await res.json()
       setGif(data.url)
     } catch (err: any) {
-      setMsg({ kind: 'err', text: err?.message || 'Upload failed' })
+      setMsg({ kind: 'err', text: err?.message || t.uploadFailed })
     } finally {
       setUploading(false)
       e.target.value = ''
@@ -73,13 +75,13 @@ export default function BackgroundTab({ slug, initial }: Props) {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        setMsg({ kind: 'err', text: err.error || `Save failed (${res.status})` })
+        setMsg({ kind: 'err', text: err.error || `${t.saveFailed} (${res.status})` })
         return false
       }
-      setMsg({ kind: 'ok', text: 'Saved ✓' })
+      setMsg({ kind: 'ok', text: t.savedOk })
       return true
     } catch (err: any) {
-      setMsg({ kind: 'err', text: err?.message || 'Network error' })
+      setMsg({ kind: 'err', text: err?.message || t.networkError })
       return false
     } finally {
       setSaving(false)
@@ -92,26 +94,23 @@ export default function BackgroundTab({ slug, initial }: Props) {
     <div style={card}>
       <header style={headerRow}>
         <div>
-          <h2 style={h2}>Background GIF</h2>
-          <p style={sub}>
-            Ganti animasi latar undangan (default: burung terbang). Hanya
-            file <strong>.gif</strong> yang diterima. Maks 5 MB.
-          </p>
+          <h2 style={h2}>{t.title}</h2>
+          <p style={sub}>{t.subtitle}</p>
         </div>
         <span style={isUsingDefault ? badgeDefault : isHidden ? badgeOff : badgeOn}>
-          {isUsingDefault ? 'DEFAULT' : isHidden ? '○ HIDDEN' : '● CUSTOM'}
+          {isUsingDefault ? t.badgeDefault : isHidden ? t.badgeHidden : t.badgeCustom}
         </span>
       </header>
 
       <section style={section}>
-        <h3 style={h3}>Preview</h3>
+        <h3 style={h3}>{t.preview}</h3>
         <div style={previewBox}>
           {previewSrc ? (
             <img src={previewSrc} alt="" style={previewImg} />
           ) : (
             <div style={hiddenBox}>
               <p style={{ margin: 0, fontSize: 13, color: 'rgba(42,33,24,0.55)' }}>
-                Tidak ada GIF — section akan kosong di posisi ini.
+                {t.hiddenText}
               </p>
             </div>
           )}
@@ -122,7 +121,7 @@ export default function BackgroundTab({ slug, initial }: Props) {
       </section>
 
       <section style={section}>
-        <h3 style={h3}>Upload custom GIF</h3>
+        <h3 style={h3}>{t.uploadSection}</h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           <button
             type="button"
@@ -130,7 +129,7 @@ export default function BackgroundTab({ slug, initial }: Props) {
             onClick={() => fileInput.current?.click()}
             disabled={uploading}
           >
-            {uploading ? 'Uploading…' : gif ? '⬆ Replace GIF' : '⬆ Upload GIF'}
+            {uploading ? t.uploading : gif ? t.replaceGif : t.uploadGif}
           </button>
           {gif && (
             <button
@@ -138,9 +137,9 @@ export default function BackgroundTab({ slug, initial }: Props) {
               style={btnGhost}
               onClick={() => save('')}
               disabled={saving}
-              title="Sembunyikan GIF di halaman undangan"
+              title={t.hideTitle}
             >
-              Hide GIF
+              {t.hideGif}
             </button>
           )}
           {!isUsingDefault && (
@@ -148,14 +147,14 @@ export default function BackgroundTab({ slug, initial }: Props) {
               type="button"
               style={btnGhostDanger}
               onClick={() => {
-                if (confirm('Reset ke GIF default (burung terbang)?')) {
+                if (confirm(t.resetConfirm)) {
                   setGif(null)
                   save(null)
                 }
               }}
               disabled={saving}
             >
-              Reset ke default
+              {t.resetDefault}
             </button>
           )}
         </div>
@@ -166,9 +165,7 @@ export default function BackgroundTab({ slug, initial }: Props) {
           hidden
           onChange={onPickFile}
         />
-        <p style={help}>
-          Setelah upload, klik <strong>Save</strong> di bawah untuk menerapkan.
-        </p>
+        <p style={help}>{t.help}</p>
       </section>
 
       <footer style={footer}>
@@ -182,7 +179,7 @@ export default function BackgroundTab({ slug, initial }: Props) {
             onClick={() => save(gif)}
             disabled={saving || uploading}
           >
-            {saving ? 'Saving…' : 'Save'}
+            {saving ? t.saving : t.save}
           </button>
         </div>
       </footer>
