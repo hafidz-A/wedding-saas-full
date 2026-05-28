@@ -1,0 +1,7 @@
+.section { padding: var(--spacing-section) var(--container-pad); background: var(--color-cream); }
+.panel { position: relative; overflow: hidden; max-width: 960px; margin: 0 auto; background: var(--color-charcoal); border-radius: 28px; padding: clamp(40px, 6vw, 72px); text-align: center; opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease-out), transform .7s var(--ease-out); }
+.revealed { opacity: 1; transform: none; }
+.title { font-family: var(--font-display); font-style: italic; font-size: clamp(30px, 5vw, 52px); color: var(--color-cream); }
+.subtitle { font-family: var(--font-body); font-size: 17px; line-height: 1.7; color: rgba(253, 246, 236, 0.78); max-width: 44ch; margin: 16px auto 32px; }
+.cta { display: inline-block; font-family: var(--font-body); font-size: 15px; font-weight: 600; background: var(--color-coral); color: var(--color-paper); padding: 16px 36px; border-radius: var(--border-radius-pill); transition: var(--transition-default); }
+.cta:hover { transform: translateY(-2px); }
