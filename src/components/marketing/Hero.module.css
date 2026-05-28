@@ -1,0 +1,20 @@
+.hero { padding: calc(96px + var(--spacing-section)) var(--container-pad) var(--spacing-section); background: radial-gradient(ellipse at 70% 0%, rgba(231, 185, 216, 0.22), transparent 60%); }
+.inner { max-width: var(--container-max); margin: 0 auto; display: grid; gap: 40px; opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease-out), transform .7s var(--ease-out); }
+.revealed { opacity: 1; transform: none; }
+.kicker { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.3em; color: var(--color-coral); margin-bottom: 14px; }
+.title { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: clamp(40px, 7vw, 80px); line-height: 1.04; color: var(--color-charcoal); }
+.subtitle { font-family: var(--font-body); font-size: clamp(16px, 2vw, 18px); line-height: 1.7; color: var(--color-charcoal-light); max-width: 46ch; margin-top: 20px; }
+.actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
+.primary { font-family: var(--font-body); font-size: 14px; font-weight: 600; background: var(--color-coral); color: var(--color-paper); padding: 14px 28px; border-radius: var(--border-radius-pill); box-shadow: 0 8px 24px rgba(232, 85, 62, 0.25); transition: var(--transition-default); }
+.primary:hover { transform: translateY(-2px); }
+.secondary { font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--color-charcoal); padding: 14px 28px; border-radius: var(--border-radius-pill); border: 1px solid rgba(42, 33, 24, 0.2); transition: var(--transition-default); }
+.secondary:hover { background: rgba(42, 33, 24, 0.05); }
+.visual { display: flex; justify-content: center; }
+.phone { width: clamp(220px, 60vw, 280px); aspect-ratio: 9 / 19; border-radius: 36px; background: var(--color-charcoal); padding: 12px; box-shadow: var(--shadow-card-hover); }
+.phoneCard { height: 100%; border-radius: 26px; background: linear-gradient(160deg, var(--color-cream) 0%, var(--color-cream-deep) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 24px; }
+.phoneScript { font-family: var(--font-display); font-style: italic; font-size: 18px; color: var(--color-charcoal-light); }
+.phoneNames { font-family: var(--font-display); font-size: 30px; color: var(--color-charcoal); }
+.phoneDate { font-family: var(--font-body); font-size: 13px; letter-spacing: 0.2em; color: var(--color-coral); }
+@media (min-width: 1024px) {
+  .inner { grid-template-columns: 1.1fr 0.9fr; align-items: center; gap: 56px; }
+}
