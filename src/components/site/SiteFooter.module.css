@@ -1,0 +1,18 @@
+.footer { background: var(--color-cream-deep); padding: var(--spacing-section) var(--container-pad) 40px; }
+.inner {
+  max-width: var(--container-max); margin: 0 auto;
+  display: flex; flex-direction: column; gap: 24px; align-items: flex-start;
+}
+.brand { display: flex; flex-direction: column; gap: 10px; }
+.tagline { font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light); max-width: 30ch; }
+.links { display: flex; flex-wrap: wrap; gap: 18px; }
+.link { font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light); transition: var(--transition-default); }
+.link:hover { color: var(--color-coral); }
+.rights {
+  max-width: var(--container-max); margin: 28px auto 0;
+  padding-top: 20px; border-top: 1px solid rgba(42, 33, 24, 0.1);
+  font-family: var(--font-body); font-size: 13px; color: rgba(42, 33, 24, 0.55);
+}
+@media (min-width: 768px) {
+  .inner { flex-direction: row; justify-content: space-between; align-items: center; }
+}
