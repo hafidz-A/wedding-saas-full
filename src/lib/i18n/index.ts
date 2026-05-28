@@ -3,6 +3,7 @@ import { landing } from './dictionaries/landing'
 import { auth } from './dictionaries/auth'
 import { onboarding } from './dictionaries/onboarding'
 import { templates } from './dictionaries/templates'
+import { dashboard } from './dictionaries/dashboard'
 import type { Lang } from './config'
 
 const dict = {
@@ -12,6 +13,7 @@ const dict = {
     auth: auth.id,
     onboarding: onboarding.id,
     templates: templates.id,
+    dashboard: dashboard.id,
   },
   en: {
     common: common.en,
@@ -19,6 +21,7 @@ const dict = {
     auth: auth.en,
     onboarding: onboarding.en,
     templates: templates.en,
+    dashboard: dashboard.en,
   },
 } as const
 

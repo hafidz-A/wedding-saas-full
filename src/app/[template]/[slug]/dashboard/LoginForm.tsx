@@ -4,19 +4,27 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import type { Dict } from '@/lib/i18n'
 import styles from './dashboard.module.css'
 
-const ERRORS: Record<string, string> = {
-  wrongpass: 'Email atau password salah.',
-  notfound: 'Akun tidak ditemukan.',
-  missing: 'Mohon isi email & password.',
-  notowner: 'Akun ini bukan pemilik undangan ini.',
-}
-
-export default function LoginForm({ slug, template }: { slug: string; template: string }) {
+export default function LoginForm({
+  slug,
+  template,
+  dict,
+}: {
+  slug: string
+  template: string
+  dict: Dict['dashboard']['login']
+}) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialError = searchParams.get('error') || ''
+  const ERRORS: Record<string, string> = {
+    wrongpass: dict.errWrongpass,
+    notfound: dict.errNotfound,
+    missing: dict.errMissing,
+    notowner: dict.errNotowner,
+  }
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -74,7 +82,7 @@ export default function LoginForm({ slug, template }: { slug: string; template: 
               margin: '0 0 8px',
             }}
           >
-            Dashboard
+            {dict.eyebrow}
           </p>
           <h1
             style={{
@@ -85,12 +93,12 @@ export default function LoginForm({ slug, template }: { slug: string; template: 
               color: '#2A2118',
             }}
           >
-            Masuk untuk <span style={{ fontStyle: 'normal', fontWeight: 600 }}>{slug}</span>
+            {dict.titlePrefix} <span style={{ fontStyle: 'normal', fontWeight: 600 }}>{slug}</span>
           </h1>
         </header>
 
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={lbl}>Email</span>
+          <span style={lbl}>{dict.email}</span>
           <input
             type="email"
             name="email"
@@ -104,7 +112,7 @@ export default function LoginForm({ slug, template }: { slug: string; template: 
         </label>
 
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={lbl}>Password</span>
+          <span style={lbl}>{dict.password}</span>
           <input
             type="password"
             name="password"
@@ -119,7 +127,7 @@ export default function LoginForm({ slug, template }: { slug: string; template: 
         {error && <p style={errorStyle}>{error}</p>}
 
         <button type="submit" disabled={submitting} style={submitBtn}>
-          {submitting ? 'Loading…' : 'Masuk'}
+          {submitting ? dict.loading : dict.submit}
         </button>
 
         <p style={{ textAlign: 'center', margin: 0 }}>
@@ -127,7 +135,7 @@ export default function LoginForm({ slug, template }: { slug: string; template: 
             href={`/forgot-password?slug=${encodeURIComponent(slug)}&template=${encodeURIComponent(template)}`}
             style={{ color: '#E8553E', fontSize: 13, textDecoration: 'none' }}
           >
-            Lupa password?
+            {dict.forgot}
           </Link>
         </p>
       </form>

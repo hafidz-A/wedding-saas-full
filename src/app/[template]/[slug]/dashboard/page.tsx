@@ -1,5 +1,7 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict, type Dict } from '@/lib/i18n'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import { fromDbRow } from './guests/types'
@@ -23,6 +25,7 @@ interface PageProps {
  */
 export default async function DashboardPage({ params }: PageProps) {
   const { template, slug } = params
+  const t = getDict(getLang())
 
   const hasSupabase =
     !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -39,7 +42,7 @@ export default async function DashboardPage({ params }: PageProps) {
     .eq('slug', slug)
     .maybeSingle()) as { data: any | null }
 
-  if (!invitation) return <NoSuchInvitation slug={slug} />
+  if (!invitation) return <NoSuchInvitation slug={slug} dict={t.dashboard.page} />
 
   // 2. Who is the current user?
   const serverClient = createSupabaseServerClient()
@@ -47,7 +50,7 @@ export default async function DashboardPage({ params }: PageProps) {
 
   // 3. Owner check.
   if (!user) {
-    return <LoginForm slug={slug} template={template} />
+    return <LoginForm slug={slug} template={template} dict={t.dashboard.login} />
   }
   if (invitation.owner_user_id !== user.id) {
     // Authenticated user is the wrong owner. Sign them out via the form
@@ -56,13 +59,12 @@ export default async function DashboardPage({ params }: PageProps) {
       <main style={panelStyle}>
         <div style={cardStyle}>
           <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: '0 0 12px' }}>
-            Akun salah
+            {t.dashboard.page.wrongAccountTitle}
           </h1>
           <p style={{ color: '#5C4A3A', lineHeight: 1.6, margin: '0 0 16px' }}>
-            Akun <strong>{user.email}</strong> bukan pemilik undangan <code>{slug}</code>.
-            Logout dulu lalu login pakai akun yang benar.
+            {t.dashboard.page.wrongAccountPrefix} <strong>{user.email}</strong> {t.dashboard.page.wrongAccountMid} <code>{slug}</code>{t.dashboard.page.wrongAccountSuffix}
           </p>
-          <SignOutButton />
+          <SignOutButton label={t.dashboard.page.signOut} />
         </div>
       </main>
     )
@@ -108,6 +110,7 @@ export default async function DashboardPage({ params }: PageProps) {
       gifts={(gifts as any) || []}
       notes={(notes as any) || []}
       guests={guests}
+      dict={t.dashboard}
     />
   )
 }
@@ -131,22 +134,20 @@ function SetupPrompt() {
   )
 }
 
-function NoSuchInvitation({ slug }: { slug: string }) {
+function NoSuchInvitation({ slug, dict }: { slug: string; dict: Dict['dashboard']['page'] }) {
   return (
     <main style={panelStyle}>
       <div style={cardStyle}>
         <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
-          Invitation <code>{slug}</code> tidak ditemukan
+          {dict.noInvitationPrefix} <code>{slug}</code> {dict.noInvitationSuffix}
         </h1>
-        <p style={{ color: '#5C4A3A', lineHeight: 1.6 }}>
-          Cek nama slug, atau buat row baru lewat <code>scripts/create-invitation.mjs</code>.
-        </p>
+        <p style={{ color: '#5C4A3A', lineHeight: 1.6 }}>{dict.noInvitationBody}</p>
       </div>
     </main>
   )
 }
 
-function SignOutButton() {
+function SignOutButton({ label }: { label: string }) {
   // Client component would be cleaner but for a one-off sign-out link a
   // form posting to /api/auth/logout works fine and keeps this file SSR.
   return (
@@ -165,7 +166,7 @@ function SignOutButton() {
           cursor: 'pointer',
         }}
       >
-        Logout & sign in dengan akun lain
+        {label}
       </button>
     </form>
   )

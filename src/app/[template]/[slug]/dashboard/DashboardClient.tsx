@@ -10,6 +10,8 @@ import BackgroundTab from './BackgroundTab'
 import NotesTab, { type NoteRow } from './NotesTab'
 import GuestsTab from './GuestsTab'
 import { type GuestRow } from './guests/types'
+import { DashboardI18nProvider } from './DashboardI18nProvider'
+import type { Dict } from '@/lib/i18n'
 import styles from './dashboard.module.css'
 
 /**
@@ -53,6 +55,7 @@ export default function DashboardClient({
   gifts,
   notes = [],
   guests = [],
+  dict,
 }: {
   slug: string
   template: string
@@ -61,6 +64,7 @@ export default function DashboardClient({
   gifts: GiftRow[]
   notes?: NoteRow[]
   guests?: GuestRow[]
+  dict: Dict['dashboard']
 }) {
   useRefreshLogoutGuard(template, slug)
   const [tab, setTab] = useState<
@@ -68,6 +72,7 @@ export default function DashboardClient({
   >('rsvps')
 
   return (
+    <DashboardI18nProvider dict={dict}>
     <main
       style={{
         minHeight: '100vh',
@@ -78,7 +83,7 @@ export default function DashboardClient({
     >
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <p>Dashboard</p>
+          <p>{dict.chrome.eyebrow}</p>
           <h1>{slug}</h1>
         </div>
         <div className={styles.headerActions}>
@@ -93,7 +98,7 @@ export default function DashboardClient({
               color: invitation.is_published ? '#fff' : '#2A2118',
             }}
           >
-            {invitation.is_published ? 'Published' : 'Draft'}
+            {invitation.is_published ? dict.chrome.published : dict.chrome.draft}
           </span>
           <Link
             href={`/${template}/${slug}`}
@@ -109,7 +114,7 @@ export default function DashboardClient({
               textDecoration: 'none',
             }}
           >
-            View live →
+            {dict.chrome.viewLive}
           </Link>
           <form action="/api/auth/logout" method="post" style={{ display: 'inline' }}>
             <button
@@ -125,9 +130,9 @@ export default function DashboardClient({
                 textTransform: 'uppercase',
                 cursor: 'pointer',
               }}
-              title="Logout"
+              title={dict.chrome.logout}
             >
-              Logout
+              {dict.chrome.logout}
             </button>
           </form>
         </div>
@@ -153,7 +158,7 @@ export default function DashboardClient({
               whiteSpace: 'nowrap',
             }}
           >
-            {t === 'rsvps' ? 'RSVP' : t === 'guests' ? 'Tamu' : t}
+            {dict.chrome.tabs[t]}
           </button>
         ))}
       </nav>
@@ -196,6 +201,7 @@ export default function DashboardClient({
         {tab === 'notes' && <NotesTab slug={slug} notes={notes} />}
       </section>
     </main>
+    </DashboardI18nProvider>
   )
 }
 
