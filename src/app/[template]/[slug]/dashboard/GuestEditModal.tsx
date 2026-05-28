@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { updateGuest } from './guests/actions'
 import { type GuestRow } from './guests/types'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
+import { useDashboardDict } from './DashboardI18nProvider'
 
 /**
  * Per-guest edit modal — opened from the GuestsTab "✎" button on each row.
@@ -25,6 +26,7 @@ export default function GuestEditModal({
   guest: GuestRow
   onClose: () => void
 }) {
+  const t = useDashboardDict().modals.edit
   const [name, setName] = useState(guest.name)
   const [phone, setPhone] = useState(formatPhoneDisplay(guest.phone_e164))
   const [group, setGroup] = useState(guest.group_label || '')
@@ -44,7 +46,7 @@ export default function GuestEditModal({
         })
         onClose()
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Gagal menyimpan')
+        setError(e instanceof Error ? e.message : t.saveError)
       }
     })
   }
@@ -53,37 +55,37 @@ export default function GuestEditModal({
     <div style={overlay} onClick={onClose}>
       <div style={dialog} onClick={(e) => e.stopPropagation()}>
         <header style={header}>
-          <h3 style={{ margin: 0 }}>Edit Tamu</h3>
-          <button type="button" onClick={onClose} style={closeBtn} aria-label="Tutup">×</button>
+          <h3 style={{ margin: 0 }}>{t.title}</h3>
+          <button type="button" onClick={onClose} style={closeBtn} aria-label={t.close}>×</button>
         </header>
 
         <label style={field}>
-          <span style={lbl}>Nama</span>
+          <span style={lbl}>{t.name}</span>
           <input value={name} onChange={(e) => setName(e.target.value)} style={input} />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Nomor (kosong = pakai contact picker WA)</span>
+          <span style={lbl}>{t.phone}</span>
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="08123456789"
+            placeholder={t.phonePlaceholder}
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Grup (opsional)</span>
+          <span style={lbl}>{t.group}</span>
           <input
             value={group}
             onChange={(e) => setGroup(e.target.value)}
-            placeholder="Keluarga, Kantor, dll"
+            placeholder={t.groupPlaceholder}
             style={input}
           />
         </label>
 
         <label style={field}>
-          <span style={lbl}>Pesan custom (kosong = pakai pesan default)</span>
+          <span style={lbl}>{t.notes}</span>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -98,19 +100,15 @@ export default function GuestEditModal({
             "
             style={{ ...input, fontFamily: 'inherit', resize: 'vertical', minHeight: 100 }}
           />
-          <span style={hint}>
-            Kalau diisi, pesan ini menggantikan pesan default untuk tamu ini saja.
-            Tersedia placeholder: <code>{'{{nama}}'}</code> atau <code>{'{{name}}'}</code> (nama tamu) dan{' '}
-            <code>{'{{link}}'}</code> atau <code>{'{{url}}'}</code> (link undangan).
-          </span>
+          <span style={hint}>{t.hint}</span>
         </label>
 
         {error && <p style={errorStyle}>{error}</p>}
 
         <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
-          <button type="button" onClick={onClose} style={ghostBtn}>Batal</button>
+          <button type="button" onClick={onClose} style={ghostBtn}>{t.cancel}</button>
           <button type="button" onClick={onSave} disabled={pending} style={primaryBtn}>
-            {pending ? 'Menyimpan…' : 'Simpan'}
+            {pending ? t.saving : t.save}
           </button>
         </footer>
       </div>

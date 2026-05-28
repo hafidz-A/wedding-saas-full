@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { parseGuestImport } from '@/lib/guests/parse-import'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { importGuests } from './guests/actions'
+import { useDashboardDict } from './DashboardI18nProvider'
 
 export default function GuestImportModal({
   slug,
@@ -12,6 +13,7 @@ export default function GuestImportModal({
   slug: string
   onClose: () => void
 }) {
+  const t = useDashboardDict().modals.import
   const [text, setText] = useState('')
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +28,7 @@ export default function GuestImportModal({
         await importGuests(slug, text)
         onClose()
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Import gagal')
+        setError(e instanceof Error ? e.message : t.importError)
       }
     })
   }
@@ -35,16 +37,13 @@ export default function GuestImportModal({
     <div style={overlay} onClick={onClose}>
       <div style={dialog} onClick={(e) => e.stopPropagation()}>
         <header style={header}>
-          <h3 style={{ margin: 0 }}>Import Daftar Tamu</h3>
-          <button type="button" onClick={onClose} style={closeBtn} aria-label="Tutup">
+          <h3 style={{ margin: 0 }}>{t.title}</h3>
+          <button type="button" onClick={onClose} style={closeBtn} aria-label={t.close}>
             ×
           </button>
         </header>
 
-        <p style={hint}>
-          <b>Format:</b> satu tamu per baris. Pisahkan nama dan nomor dengan{' '}
-          <b>TAB</b> (copy dari Excel/Google Sheets langsung jadi). Nomor opsional.
-        </p>
+        <p style={hint}>{t.formatHint}</p>
 
         <textarea
           value={text}
@@ -55,7 +54,7 @@ export default function GuestImportModal({
         />
 
         <div style={{ marginTop: 14, fontSize: 13 }}>
-          <b>{preview.length}</b> tamu siap di-import.
+          <b>{preview.length}</b> {t.ready}
           {preview.length > 0 && (
             <div style={previewBox}>
               {preview.slice(0, 5).map((r) => (
@@ -65,13 +64,13 @@ export default function GuestImportModal({
                 >
                   <span>{r.name}</span>
                   <span style={{ color: r.phoneE164 ? '#2D8C4E' : '#aaa' }}>
-                    {r.phoneE164 ? formatPhoneDisplay(r.phoneE164) : '(tanpa nomor)'}
+                    {r.phoneE164 ? formatPhoneDisplay(r.phoneE164) : t.noPhone}
                   </span>
                 </div>
               ))}
               {preview.length > 5 && (
                 <div style={{ color: '#5C4A3A', marginTop: 4 }}>
-                  …dan {preview.length - 5} lagi
+                  {t.andMorePrefix} {preview.length - 5} {t.andMoreSuffix}
                 </div>
               )}
             </div>
@@ -82,7 +81,7 @@ export default function GuestImportModal({
 
         <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
           <button type="button" onClick={onClose} style={ghostBtn}>
-            Batal
+            {t.cancel}
           </button>
           <button
             type="button"
@@ -90,7 +89,7 @@ export default function GuestImportModal({
             disabled={pending || preview.length === 0}
             style={primaryBtn}
           >
-            {pending ? 'Mengimpor…' : `Import ${preview.length} tamu`}
+            {pending ? t.importing : `${t.importPrefix} ${preview.length} ${t.importSuffix}`}
           </button>
         </footer>
       </div>

@@ -14,6 +14,7 @@ import {
 import { type GuestRow } from './guests/types'
 import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
+import { useDashboardDict } from './DashboardI18nProvider'
 import styles from './GuestsTab.module.css'
 
 const DEFAULT_TEMPLATE =
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: Props) {
+  const t = useDashboardDict().tabs.guests
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'sent' | 'pending'>('all')
@@ -57,7 +59,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     const result = await updateInviteMessageTemplate(slug, template)
     setTemplateSaving(false)
     if (!result.ok) {
-      setTemplateError(result.error || 'Gagal menyimpan')
+      setTemplateError(result.error || t.saveError)
       return
     }
     setTemplateSaved(true)
@@ -140,9 +142,9 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     <div className={styles.shell}>
       <header className={styles.header}>
         <div className={styles.headerTitle}>
-          <h2>Tamu Undangan</h2>
+          <h2>{t.title}</h2>
           <p>
-            {localGuests.length} tamu · {sentCount} sudah dikirim · {pendingCount} pending
+            {localGuests.length} {t.countGuests} · {sentCount} {t.countSent} · {pendingCount} {t.countPending}
           </p>
         </div>
         <div className={styles.headerActions}>
@@ -155,21 +157,17 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
               color: templateOpen ? '#fff' : '#2A2118',
             }}
           >
-            ✎ Pesan Default
+            {t.defaultMsgBtn}
           </button>
           <button type="button" onClick={() => setShowImport(true)} style={ghostBtn}>
-            + Import
+            {t.importBtn}
           </button>
         </div>
       </header>
 
       {templateOpen && (
         <div className={styles.templatePanel}>
-          <p className={styles.templateHint}>
-            Pesan default ini dipakai untuk <b>semua tamu</b> kecuali tamu yang punya pesan custom sendiri (di-edit per baris).
-            Tersedia placeholder: <code>{'{{nama}}'}</code> atau <code>{'{{name}}'}</code> (nama tamu) dan{' '}
-            <code>{'{{link}}'}</code> atau <code>{'{{url}}'}</code> (link undangan).
-          </p>
+          <p className={styles.templateHint}>{t.templateHint}</p>
           <textarea
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
@@ -188,7 +186,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
               <span style={{ fontSize: 13, color: '#E8553E', marginRight: 'auto' }}>{templateError}</span>
             )}
             {templateSaved && !templateError && (
-              <span style={{ fontSize: 13, color: '#2D8C4E', marginRight: 'auto' }}>✓ Tersimpan</span>
+              <span style={{ fontSize: 13, color: '#2D8C4E', marginRight: 'auto' }}>{t.savedMsg}</span>
             )}
             <button
               type="button"
@@ -196,20 +194,20 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
               style={ghostBtn}
               disabled={templateSaving}
             >
-              Reset
+              {t.reset}
             </button>
             <button type="button" onClick={saveTemplate} disabled={templateSaving} style={primaryBtn}>
-              {templateSaving ? 'Menyimpan…' : 'Simpan'}
+              {templateSaving ? t.saving : t.save}
             </button>
           </div>
         </div>
       )}
 
       <form action={handleAdd} className={styles.addForm}>
-        <input name="name" placeholder="Nama tamu" required style={input} />
-        <input name="phone" placeholder="08123456789 (opsional)" style={input} />
+        <input name="name" placeholder={t.namePlaceholder} required style={input} />
+        <input name="phone" placeholder={t.phonePlaceholder} style={input} />
         <button type="submit" disabled={pending} style={primaryBtn}>
-          Tambah
+          {t.addBtn}
         </button>
       </form>
 
@@ -217,7 +215,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari nama, nomor, grup…"
+          placeholder={t.searchPlaceholder}
           style={input}
         />
         {(['all', 'pending', 'sent'] as const).map((f) => (
@@ -231,7 +229,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
               color: filter === f ? '#fff' : '#2A2118',
             }}
           >
-            {f === 'all' ? 'Semua' : f === 'pending' ? 'Belum kirim' : 'Sudah'}
+            {f === 'all' ? t.filterAll : f === 'pending' ? t.filterPending : t.filterSent}
           </button>
         ))}
       </div>
@@ -240,32 +238,32 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Nama</th>
-              <th>Nomor</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'right' }}>Aksi</th>
+              <th>{t.colName}</th>
+              <th>{t.colPhone}</th>
+              <th>{t.colStatus}</th>
+              <th style={{ textAlign: 'right' }}>{t.colActions}</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={4} style={{ padding: 24, textAlign: 'center', color: '#5C4A3A' }}>
-                  Belum ada tamu. Klik <b>+ Import</b> untuk paste dari spreadsheet, atau tambah satu-satu di atas.
+                  {t.emptyText}
                 </td>
               </tr>
             )}
             {filtered.map((g) => (
               <tr key={g.id}>
-                <td data-label="Nama">
+                <td data-label={t.colName}>
                   {g.name}
                   {g.group_label && <span style={badge}>{g.group_label}</span>}
                 </td>
-                <td data-label="Nomor">
+                <td data-label={t.colPhone}>
                   {formatPhoneDisplay(g.phone_e164) || (
                     <span style={{ color: '#aaa' }}>—</span>
                   )}
                 </td>
-                <td data-label="Status">
+                <td data-label={t.colStatus}>
                   {g.sent_at ? (
                     <span
                       style={{
@@ -282,7 +280,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         minute: '2-digit',
                       })}
                     >
-                      Terkirim{' '}
+                      {t.sentLabel}{' '}
                       {new Date(g.sent_at).toLocaleString('id-ID', {
                         day: 'numeric',
                         month: 'numeric',
@@ -299,7 +297,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         color: '#E8553E',
                       }}
                     >
-                      Pending
+                      {t.pendingLabel}
                     </span>
                   )}
                   {g.notes && g.notes.trim() && (
@@ -310,9 +308,9 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         color: '#E8553E',
                         marginLeft: 6,
                       }}
-                      title={`Pesan custom: ${g.notes}`}
+                      title={`${t.customTitlePrefix} ${g.notes}`}
                     >
-                      ✎ custom
+                      {t.customBadge}
                     </span>
                   )}
                 </td>
@@ -323,13 +321,13 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     disabled={pending}
                     style={primaryBtn}
                   >
-                    {g.phone_e164 ? 'Kirim WA' : 'Pilih kontak'}
+                    {g.phone_e164 ? t.sendWa : t.pickContact}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingGuest(g)}
                     style={{ ...ghostBtn, marginLeft: 6 }}
-                    title="Edit tamu (nama, nomor, pesan custom)"
+                    title={t.editTitle}
                   >
                     ✎
                   </button>
@@ -352,7 +350,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         })
                       }}
                       style={{ ...ghostBtn, marginLeft: 6 }}
-                      title="Batalkan status terkirim"
+                      title={t.unmarkTitle}
                     >
                       ↶
                     </button>
@@ -360,7 +358,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                   <button
                     type="button"
                     onClick={() => {
-                      if (!confirm(`Hapus ${g.name}?`)) return
+                      if (!confirm(`${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`)) return
                       // Optimistic remove
                       setLocalGuests((prev) => prev.filter((x) => x.id !== g.id))
                       startTransition(async () => {
@@ -373,7 +371,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                       })
                     }}
                     style={{ ...ghostBtn, marginLeft: 6, color: '#E8553E' }}
-                    title="Hapus"
+                    title={t.deleteTitle}
                   >
                     ×
                   </button>
