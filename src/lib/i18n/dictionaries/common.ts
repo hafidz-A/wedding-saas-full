@@ -21,4 +21,4 @@ export const common = {
     },
     langToggle: { label: 'Language' },
   },
-} as const
+}

@@ -113,4 +113,4 @@ export const landing = {
       cta: 'Create Invitation',
     },
   },
-} as const
+}
