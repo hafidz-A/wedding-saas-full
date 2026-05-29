@@ -32,6 +32,15 @@ export const common = {
       viewPublic: 'Lihat undangan',
       openDashboard: 'Buka dashboard',
     },
+    activePeriod: {
+      draft: 'Draf — belum dibayar',
+      lifetime: 'Aktif seumur hidup',
+      expired: 'Kadaluarsa',
+      activeUntilPrefix: 'Aktif sampai',
+      payNow: 'Bayar sekarang',
+      unpaidBanner: 'Undangan ini belum dibayar — bayar untuk menerbitkannya.',
+      processing: 'Memproses…',
+    },
   },
   en: {
     nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template' },
@@ -65,6 +74,15 @@ export const common = {
       browseTemplates: 'Browse templates',
       viewPublic: 'View invitation',
       openDashboard: 'Open dashboard',
+    },
+    activePeriod: {
+      draft: 'Draft — not paid',
+      lifetime: 'Active for life',
+      expired: 'Expired',
+      activeUntilPrefix: 'Active until',
+      payNow: 'Pay now',
+      unpaidBanner: 'This invitation is not paid yet — pay to publish it.',
+      processing: 'Processing…',
     },
   },
 }
