@@ -4,7 +4,8 @@ import { useEffect, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { completeOnboarding, checkSlugAvailable } from './actions'
 import { templateCatalog } from '@/config/templateCatalog'
-import type { Dict } from '@/lib/i18n'
+import type { Dict, Lang } from '@/lib/i18n'
+import { LangToggle } from '@/components/site/LangToggle'
 
 function firstWord(s: string): string {
   return s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
@@ -12,7 +13,7 @@ function firstWord(s: string): string {
 
 const TEMPLATE_IDS = templateCatalog.map((t) => t.id)
 
-export default function OnboardingForm({ email, dict }: { email: string; dict: Dict['onboarding'] }) {
+export default function OnboardingForm({ email, dict, lang }: { email: string; dict: Dict['onboarding']; lang: Lang }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryTemplate = searchParams.get('template') || ''
@@ -153,6 +154,12 @@ export default function OnboardingForm({ email, dict }: { email: string; dict: D
               )
             })}
           </div>
+        </div>
+
+        <div style={field}>
+          <span style={lbl}>{dict.form.language}</span>
+          <LangToggle lang={lang} label={dict.form.language} />
+          <span style={{ fontSize: 12, color: '#5C4A3A', lineHeight: 1.4 }}>{dict.form.languageHint}</span>
         </div>
 
         <label style={field}>

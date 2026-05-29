@@ -75,7 +75,7 @@ export default async function OnboardingPage() {
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} />
+      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} lang={lang} />
     </>
   )
 }

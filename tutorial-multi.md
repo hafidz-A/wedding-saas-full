@@ -22,6 +22,7 @@
 13. [Scripts & seeding](#13-scripts--seeding)
 14. [Checklist tambah template](#14-checklist-tambah-template)
 15. [FAQ](#15-faq)
+16. [i18n — Bilingual ID/EN](#16-i18n--bilingual-iden)
 
 ---
 
@@ -422,6 +423,7 @@ Saat menambah template, update `create-invitation.mjs` agar `--template=<id>` me
 - [ ] `npm run build` clean
 - [ ] Uji visual `/<id>/demo-<id>` di browser (320px / 768px / 1024px)
 - [ ] (Opsional) seed demo row + thumbnail di `public/images/templates/`
+- [ ] i18n: label schema section baru ditulis `{ id, en }` (bukan string polos); `npm test` → `dict-parity` hijau (lihat bagian 16)
 
 ---
 
@@ -447,7 +449,72 @@ Tidak. Auth, dashboard, API, DB semuanya SHARED. Yang per-template cuma lapisan 
 
 ---
 
-## 16. Prompt siap-pakai: integrasi template DARI LUAR project
+## 16. i18n — Bilingual ID/EN
+
+Aplikasi ini bilingual (Bahasa Indonesia / English). Kunci memahaminya: **pisahkan dua "bahasa" yang berbeda.**
+
+| | Apa | Diatur oleh | Berubah saat toggle? |
+|---|---|---|---|
+| **UI / keterangan** | Teks chrome: marketing, auth, onboarding, dashboard, **label di editor** | cookie `fin_lang` + toggle ID/EN | ✅ YA |
+| **ISI undangan** | Konten couple (nama, cerita, foto, dll) di `config` | data couple | ❌ TIDAK |
+
+> **Prinsip:** toggle **hanya** mengubah keterangan UI. Ia **tidak pernah** menyentuh isi kartu undangan. Karena itu komponen template (`src/all-templates/*/sections/*`) **tidak diterjemahkan** — isi tetap apa yang couple tulis.
+
+### Cara kerja
+
+```
+cookie fin_lang ('id' | 'en', default 'id')
+      │
+      ▼
+src/lib/i18n/getLang.ts (server-only)  ── baca cookie
+      │
+      ▼
+getDict(lang)  ── ambil kamus dari src/lib/i18n/dictionaries/*
+      │  (server page kirim slice teks sbg PROPS ke komponen)
+      ▼
+<LangToggle> klik → set cookie + router.refresh() → server render ulang (tanpa flash)
+```
+
+- **Dictionary** ada di `src/lib/i18n/dictionaries/` (`common`, `landing`, `auth`, `onboarding`, `templates`, `dashboard`). Shape `{ id, en }` **wajib identik** — dijaga test `src/lib/i18n/__tests__/dict-parity.test.ts` (`npm test`).
+- **Server page** (mis. `page.tsx`, `dashboard/page.tsx`) memanggil `getLang()` → `getDict(lang)`, lalu mengoper slice yang relevan sebagai props.
+- **Halaman client murni** (forgot/reset/verify-password — pakai `useSearchParams`, tak punya server wrapper) memakai `useClientLang()` (`src/lib/i18n/useClientLang.ts`) yang baca cookie di sisi client.
+
+### Cakupan (sudah bilingual)
+
+landing · templates · login · signup · onboarding · forgot/reset/verify-password · **seluruh dashboard** (chrome + 6 tab + 2 modal tamu) · **seluruh editor** (chrome + label semua schema).
+
+### Editor: label schema `{id,en}`
+
+Label field & section di editor memakai tipe `LabelText = string | { id, en }` (di `src/editor/schemas/types.ts`):
+
+```ts
+export type Localized = { id: string; en: string }
+export type LabelText = string | Localized
+export function localizeLabel(label: LabelText, lang): string { /* string → as-is; objek → label[lang] */ }
+```
+
+- Schema menulis `label: { id: 'Nama pasangan', en: 'Couple name' }`. String polos masih valid → fallback English (boleh dikonversi bertahap, build tetap hijau).
+- Editor di dalam dashboard → konteks `DashboardI18nProvider` menyediakan `useDashboardDict()` (teks chrome) + `useDashboardLang()` (nilai `lang`). `FieldEditor`/`SectionList`/`AddSectionMenu`/`ObjectArrayField` me-resolve label via `localizeLabel(f.label, lang)`.
+- **`defaults` di schema TIDAK perlu diterjemahkan** — itu konten contoh (isi), bukan keterangan.
+
+### Setelan awal bahasa (onboarding)
+
+Di langkah onboarding ada picker **"Bahasa dashboard"** (ID/EN). Memilihnya langsung men-set cookie, jadi dashboard + editor terbuka dalam bahasa itu sejak awal. Tetap bisa di-switch kapan saja lewat toggle di navbar. (Toggle = `src/components/site/LangToggle.tsx`.)
+
+### Terjemahan elegan, bukan harfiah
+
+Kualitas terjemahan dijaga **natural & elegan**, bukan terjemahan mesin. Contoh: "Our Story" → **"Kisah Kami"** (bukan "Cerita Kami"), "Venue" → "Lokasi acara", "Wedding Party" → "Pendamping Mempelai".
+
+### Saat menambah template / section baru
+
+1. **Nama & deskripsi template** → tambah ke `templateCatalog.js` dan (bila ditampilkan di marketing) ke dict terkait.
+2. **Label schema** section baru → tulis langsung `{ id, en }` (lihat `src/editor/schemas/hero.ts` sebagai contoh).
+3. **Jaga parity** — setiap key di `id` harus ada di `en`. `npm test` akan gagal (`dict-parity`) bila ada yang lupa.
+4. Konten template/section (teks yang dilihat tamu) **bukan** urusan dict — itu isi undangan, biarkan apa adanya.
+
+---
+
+## 17. Prompt siap-pakai: integrasi template DARI LUAR project
 
 Pakai ini saat kamu sudah punya web/template jadi di folder LAIN (mis. project Vite/HTML
 terpisah) dan mau memasukkannya sebagai template baru ke project ini. Copy-paste ke
