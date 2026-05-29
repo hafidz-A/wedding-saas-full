@@ -6,6 +6,7 @@ export const dashboard = {
       draft: 'Draf',
       viewLive: 'Lihat live →',
       logout: 'Keluar',
+      language: 'Bahasa',
       tabs: {
         rsvps: 'RSVP',
         gifts: 'Hadiah',
@@ -257,6 +258,7 @@ export const dashboard = {
       draft: 'Draft',
       viewLive: 'View live →',
       logout: 'Logout',
+      language: 'Language',
       tabs: {
         rsvps: 'RSVP',
         gifts: 'Gifts',

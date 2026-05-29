@@ -11,6 +11,7 @@ import NotesTab, { type NoteRow } from './NotesTab'
 import GuestsTab from './GuestsTab'
 import { type GuestRow } from './guests/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
+import { LangToggle } from '@/components/site/LangToggle'
 import type { Dict, Lang } from '@/lib/i18n'
 import styles from './dashboard.module.css'
 
@@ -89,6 +90,7 @@ export default function DashboardClient({
           <h1>{slug}</h1>
         </div>
         <div className={styles.headerActions}>
+          <LangToggle lang={lang} label={dict.chrome.language} />
           <span
             style={{
               padding: '6px 12px',
