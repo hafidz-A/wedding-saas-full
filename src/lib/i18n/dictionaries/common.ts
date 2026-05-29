@@ -1,6 +1,6 @@
 export const common = {
   id: {
-    nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan' },
+    nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan', myTemplate: 'My Template' },
     footer: {
       tagline: 'Undangan pernikahan digital yang sinematik.',
       templates: 'Template',
@@ -15,9 +15,26 @@ export const common = {
       body: 'Sepertinya tautan yang kamu buka salah atau halamannya sudah dipindahkan.',
       backHome: 'Kembali ke beranda',
     },
+    profileMenu: {
+      trigger: 'Profil',
+      profile: 'Profil',
+      myTemplate: 'My Template',
+      resetPassword: 'Reset password',
+      logout: 'Keluar',
+    },
+    profile: {
+      title: 'Profil',
+      emailLabel: 'Email',
+      resetPassword: 'Reset password',
+      myTemplatesTitle: 'Undangan saya',
+      empty: 'Belum ada undangan.',
+      browseTemplates: 'Lihat template',
+      viewPublic: 'Lihat undangan',
+      openDashboard: 'Buka dashboard',
+    },
   },
   en: {
-    nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation' },
+    nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template' },
     footer: {
       tagline: 'Cinematic digital wedding invitations.',
       templates: 'Templates',
@@ -31,6 +48,23 @@ export const common = {
       title: 'Page not found',
       body: 'The link you opened looks wrong, or the page has moved.',
       backHome: 'Back to home',
+    },
+    profileMenu: {
+      trigger: 'Profile',
+      profile: 'Profile',
+      myTemplate: 'My Template',
+      resetPassword: 'Reset password',
+      logout: 'Logout',
+    },
+    profile: {
+      title: 'Profile',
+      emailLabel: 'Email',
+      resetPassword: 'Reset password',
+      myTemplatesTitle: 'My invitations',
+      empty: 'No invitations yet.',
+      browseTemplates: 'Browse templates',
+      viewPublic: 'View invitation',
+      openDashboard: 'Open dashboard',
     },
   },
 }
