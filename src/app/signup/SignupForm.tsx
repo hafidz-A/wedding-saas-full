@@ -74,11 +74,13 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
       return
     }
 
-    // Anti email-enumeration: for an already-registered email Supabase returns
-    // no error but an obfuscated user whose identities[] is empty. Detect that
-    // and tell the user to log in instead of sending them to /verify-signup
-    // (where no token would ever arrive).
-    if (data.user && data.user.identities && data.user.identities.length === 0) {
+    // Only a genuinely new signup gets a user with a non-empty identities[].
+    // Anything else — no user, or an obfuscated user with empty identities[]
+    // (Supabase's anti email-enumeration response for an already-registered
+    // email) — means the email is taken. Send them to login and NEVER continue
+    // to /verify-signup, where no token would ever arrive.
+    const isNewSignup = !!data.user && (data.user.identities?.length ?? 0) > 0
+    if (!isNewSignup) {
       setError(dict.errAlready)
       setSubmitting(false)
       return
