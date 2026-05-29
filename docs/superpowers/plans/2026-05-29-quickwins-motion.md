@@ -19,7 +19,10 @@
 - Modify: `src/app/onboarding/OnboardingForm.tsx` — make the language field a compact inline row (W1).
 - Create: `src/app/not-found.tsx` — styled global 404 (W2).
 - Modify: `src/lib/i18n/dictionaries/common.ts` — add `notFound` block (W2).
-- Modify: `src/app/[template]/[slug]/dashboard/DashboardClient.tsx` — add Homepage link, remove reload-logout guard (W3).
+- Create: `src/lib/auth/idle-timeout.ts` — pure `isIdleExpired` helper + constant (W3).
+- Test: `src/lib/auth/__tests__/idle-timeout.test.ts` — unit tests for the helper (W3).
+- Create: `src/middleware.ts` — Supabase session refresh + sliding 4-hour idle timeout on protected routes (W3).
+- Modify: `src/app/[template]/[slug]/dashboard/DashboardClient.tsx` — add Homepage link, remove F5 reload-logout guard (W3).
 - Modify: `src/lib/i18n/dictionaries/dashboard.ts` — add `chrome.homepage` (W3).
 - Create: `src/app/template.tsx` — route transition wrapper (W8).
 - Create: `src/lib/nav/is-cinematic-route.ts` — pure helper to detect the invitation route (W8).
@@ -197,19 +200,158 @@ git commit -m "feat(404): styled global not-found page (id/en)"
 
 ---
 
-## Task 3 (W3): Dashboard "← Homepage" link + persistent session
+## Task 3 (W3): Homepage link + sliding 4-hour idle session timeout
+
+**Decision (confirmed 2026-05-29):** Replace the F5-logout behavior with a
+**sliding idle timeout of 4 hours**. While the user is active (any request to a
+protected route within 4 hours), the session stays alive. After 4 hours of
+inactivity, the next protected request logs them out and redirects to `/login`.
 
 **Files:**
-- Modify: `src/lib/i18n/dictionaries/dashboard.ts` (chrome block, both id ~line 7 and en ~line 259)
-- Modify: `src/app/[template]/[slug]/dashboard/DashboardClient.tsx` (remove guard ~line 26-42 + call ~line 72; add link in header ~line 107)
+- Create: `src/lib/auth/idle-timeout.ts`
+- Test: `src/lib/auth/__tests__/idle-timeout.test.ts`
+- Create: `src/middleware.ts`
+- Modify: `src/lib/i18n/dictionaries/dashboard.ts` (chrome block, id ~line 7 + en ~line 259)
+- Modify: `src/app/[template]/[slug]/dashboard/DashboardClient.tsx` (remove guard lines 26-42 + call line 72; add header link ~line 107)
 
-> **Decision baked in:** this removes `useRefreshLogoutGuard`, which currently logs
-> the user out on every F5/reload. That guard contradicts the "stay logged in"
-> goal. Tradeoff: on a shared browser, a reopened tab stays logged in until
-> explicit logout (standard SaaS behavior). Confirm before running this task if
-> the shared-device logout was intentional for your launch.
+- [ ] **Step 1: Write the failing test for the idle helper**
 
-- [ ] **Step 1: Add the `homepage` chrome label**
+Create `src/lib/auth/__tests__/idle-timeout.test.ts`:
+
+```ts
+import { describe, it, expect } from 'vitest'
+import { isIdleExpired, IDLE_TIMEOUT_MS } from '../idle-timeout'
+
+describe('isIdleExpired', () => {
+  const now = 1_000_000_000_000
+
+  it('is false when activity is within the window', () => {
+    expect(isIdleExpired(now - (IDLE_TIMEOUT_MS - 1000), now)).toBe(false)
+  })
+
+  it('is true when idle longer than the window', () => {
+    expect(isIdleExpired(now - (IDLE_TIMEOUT_MS + 1000), now)).toBe(true)
+  })
+
+  it('is false when there is no recorded activity (0)', () => {
+    expect(isIdleExpired(0, now)).toBe(false)
+  })
+
+  it('uses the 4-hour default', () => {
+    expect(IDLE_TIMEOUT_MS).toBe(4 * 60 * 60 * 1000)
+  })
+
+  it('honors a custom window', () => {
+    expect(isIdleExpired(now - 5000, now, 4000)).toBe(true)
+    expect(isIdleExpired(now - 3000, now, 4000)).toBe(false)
+  })
+})
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/auth/__tests__/idle-timeout.test.ts`
+Expected: FAIL — cannot find module `../idle-timeout`.
+
+- [ ] **Step 3: Implement the helper**
+
+Create `src/lib/auth/idle-timeout.ts`:
+
+```ts
+export const IDLE_TIMEOUT_MS = 4 * 60 * 60 * 1000 // 4 hours
+export const ACTIVITY_COOKIE = 'last_activity'
+
+/**
+ * True when the last recorded activity is older than the idle window.
+ * A lastActivityMs of 0 (no record yet) is treated as not-expired so a fresh
+ * session is initialized rather than immediately logged out.
+ */
+export function isIdleExpired(
+  lastActivityMs: number,
+  nowMs: number,
+  idleMs: number = IDLE_TIMEOUT_MS,
+): boolean {
+  return lastActivityMs > 0 && nowMs - lastActivityMs > idleMs
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/auth/__tests__/idle-timeout.test.ts`
+Expected: PASS (5 tests).
+
+- [ ] **Step 5: Create the middleware (session refresh + idle timeout)**
+
+Create `src/middleware.ts`:
+
+```ts
+import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { isIdleExpired, ACTIVITY_COOKIE } from '@/lib/auth/idle-timeout'
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          response = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          )
+        },
+      },
+    },
+  )
+
+  // Refreshes the session (also keeps Supabase tokens fresh — there was no
+  // middleware before, so this is the canonical place for it).
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const now = Date.now()
+    const last = Number(request.cookies.get(ACTIVITY_COOKIE)?.value ?? '0')
+
+    if (isIdleExpired(last, now)) {
+      await supabase.auth.signOut() // clears auth cookies onto `response` via setAll
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      const redirect = NextResponse.redirect(url)
+      response.cookies.getAll().forEach((c) => redirect.cookies.set(c)) // carry the cleared auth cookies
+      redirect.cookies.set(ACTIVITY_COOKIE, '', { maxAge: 0, path: '/' })
+      return redirect
+    }
+
+    // Slide the window forward.
+    response.cookies.set(ACTIVITY_COOKIE, String(now), {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    })
+  }
+
+  return response
+}
+
+export const config = {
+  matcher: [
+    '/profile',
+    '/onboarding',
+    '/my-templates',
+    '/:template/:slug/dashboard/:path*',
+  ],
+}
+```
+
+- [ ] **Step 6: Add the `homepage` chrome label**
 
 In `src/lib/i18n/dictionaries/dashboard.ts`, in the Indonesian `chrome` block, after `viewLive: 'Lihat live →',` add:
 
@@ -223,13 +365,13 @@ In the English `chrome` block, after `viewLive: 'View live →',` add:
       homepage: '← Home',
 ```
 
-- [ ] **Step 2: Remove the reload-logout guard**
+- [ ] **Step 7: Remove the F5 reload-logout guard**
 
-In `src/app/[template]/[slug]/dashboard/DashboardClient.tsx`, delete the entire `useRefreshLogoutGuard` function (currently lines 26-42, the block starting `function useRefreshLogoutGuard(` through its closing `}`) AND delete its call `useRefreshLogoutGuard(template, slug)` (currently line 72). Also remove the now-unused doc comment above it (lines 16-25) if it only describes the guard.
+In `src/app/[template]/[slug]/dashboard/DashboardClient.tsx`, delete the entire `useRefreshLogoutGuard` function (lines 26-42, from `function useRefreshLogoutGuard(` through its closing `}`) AND delete its call `useRefreshLogoutGuard(template, slug)` (line 72). Also remove the doc comment above it (lines ~16-25) since it only describes the removed guard. (The idle timeout now governs session length, so F5 must NOT log out.)
 
-- [ ] **Step 3: Add the Homepage link to the header**
+- [ ] **Step 8: Add the Homepage link to the dashboard header**
 
-In the same file, inside `<div className={styles.headerActions}>`, immediately before the existing `<Link href={`/${template}/${slug}`} target="_blank" ...>` (currently ~line 107), insert:
+In the same file, inside `<div className={styles.headerActions}>`, immediately before the existing `<Link href={`/${template}/${slug}`} target="_blank" ...>` (~line 107), insert:
 
 ```tsx
           <Link
@@ -252,25 +394,26 @@ In the same file, inside `<div className={styles.headerActions}>`, immediately b
 
 (`Link` is already imported in this file.)
 
-- [ ] **Step 4: Verify parity + typecheck**
+- [ ] **Step 9: Verify tests + parity + typecheck**
 
-Run: `npx vitest run src/lib/i18n/__tests__/dict-parity.test.ts`
+Run: `npx vitest run src/lib/auth/__tests__/idle-timeout.test.ts src/lib/i18n/__tests__/dict-parity.test.ts`
 Expected: PASS.
 
 Run: `npx tsc --noEmit -p tsconfig.json`
-Expected: no errors (and no "useRefreshLogoutGuard is defined but never used").
+Expected: no errors (no "useRefreshLogoutGuard is defined but never used").
 
-- [ ] **Step 5: Manual browser verification**
+- [ ] **Step 10: Manual browser verification**
 
 Run `npm run dev`, log in, open the dashboard. Expected:
-- A "← Beranda" button appears in the header; clicking it goes to `/` and you remain logged in.
-- Pressing F5 on the dashboard **no longer logs you out** — the dashboard reloads still authenticated.
+- A "← Beranda" button in the header → goes to `/`, still logged in.
+- Press F5 on the dashboard → **stays logged in** (no auto-logout).
+- Idle-timeout smoke test: temporarily set `IDLE_TIMEOUT_MS` to `60 * 1000` (1 min) in `idle-timeout.ts`, rebuild, leave the dashboard untouched > 1 min, then navigate within it → redirected to `/login`. Restore `IDLE_TIMEOUT_MS` to 4 hours afterward.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 11: Commit**
 
 ```bash
-git add src/lib/i18n/dictionaries/dashboard.ts "src/app/[template]/[slug]/dashboard/DashboardClient.tsx"
-git commit -m "feat(dashboard): add homepage link and keep session on reload"
+git add src/lib/auth/idle-timeout.ts src/lib/auth/__tests__/idle-timeout.test.ts src/middleware.ts src/lib/i18n/dictionaries/dashboard.ts "src/app/[template]/[slug]/dashboard/DashboardClient.tsx"
+git commit -m "feat(auth): 4h sliding idle timeout via middleware; dashboard homepage link"
 ```
 
 ---
@@ -522,4 +665,8 @@ git commit -m "feat(i18n): sliding pill micro-animation on language toggle"
 - **Unique layoutId per toggle** (Task 5) via `useId()` — prevents cross-instance pill animation.
 - **i18n parity:** `notFound` (Task 2) and `chrome.homepage` (Task 3) added to both id and en; the existing `dict-parity` test enforces this.
 - **Type consistency:** `isCinematicRoute(pathname, templateIds)` signature matches between helper, test, and `template.tsx` call site.
-- **Security note flagged:** Task 3 removes the reload-logout guard — confirm intent before executing.
+- **Session model (Task 3):** F5 reload-logout guard removed; replaced by a sliding
+  4-hour idle timeout enforced in new `src/middleware.ts` (pure `isIdleExpired`
+  helper is unit-tested). Middleware also becomes the canonical Supabase token-refresh
+  point (none existed before). Matcher scopes it to `/profile`, `/onboarding`,
+  `/my-templates`, and the dashboard sub-route — public invitation pages are untouched.
