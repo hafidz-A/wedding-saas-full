@@ -75,15 +75,31 @@ export default function OurStory({
     // Defensive: bail safely if anything's missing — but still render content
     if (!sectionEl || total === 0) return undefined
 
+    const ROTATIONS = [-3.5, 2.2, -1.8, 3.5, -2.2, 1.8]
+
     // ── INITIAL STATE — set BEFORE any ScrollTrigger so cards are visible
     cardEls.forEach((card, i) => {
-      gsap.set(card, {
-        y: i === 0 ? 0 : 80,
-        opacity: i === 0 ? 1 : 0,
-        scale: 1,
-        zIndex: total - i,
-        willChange: 'transform',
-      })
+      if (i === 0) {
+        gsap.set(card, {
+          y: 0,
+          x: 0,
+          rotate: ROTATIONS[0],
+          opacity: 1,
+          scale: 1,
+          zIndex: 10,
+          willChange: 'transform, opacity',
+        })
+      } else {
+        gsap.set(card, {
+          y: '125%',
+          x: 40,
+          rotate: ROTATIONS[i % ROTATIONS.length] * 2.5,
+          opacity: 0,
+          scale: 1,
+          zIndex: 10 + i,
+          willChange: 'transform, opacity',
+        })
+      }
     })
     activeIndexRef.current = 0
 
@@ -143,32 +159,14 @@ export default function OurStory({
           cardEls[i],
           {
             y: 0,
+            x: 0,
+            rotate: ROTATIONS[i % ROTATIONS.length],
             opacity: 1,
-            scale: 1,
-            zIndex: total + i,
             duration: STEP_DURATION,
             ease: STEP_EASE,
           },
           stepStart,
         )
-
-        for (let j = 0; j < i; j++) {
-          const depthAfter = i - j
-          const scale = Math.max(MIN_SCALE, 1 - depthAfter * DEPTH_SCALE_STEP)
-          const yOffset = depthAfter * DEPTH_Y_STEP
-          tl.to(
-            cardEls[j],
-            {
-              y: yOffset,
-              scale,
-              opacity: 1,
-              zIndex: total + i - depthAfter,
-              duration: STEP_DURATION,
-              ease: STEP_EASE,
-            },
-            stepStart,
-          )
-        }
       }
     }, sectionEl)
 

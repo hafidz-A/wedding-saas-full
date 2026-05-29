@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { motion, AnimatePresence } from 'motion/react'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
+import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import styles from './WeddingGift.module.css'
 
 /* ============================================================================
@@ -83,7 +84,7 @@ function AccountCard({ account, index, onUseForConfirmation }) {
 
   return (
     <motion.article
-      className={`${styles.card} ${styles[`accent-${account.accent || 'coral'}`]}`}
+      className={styles.cardWrapper}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
@@ -93,44 +94,60 @@ function AccountCard({ account, index, onUseForConfirmation }) {
         delay: Math.min(index * 0.08, 0.4),
       }}
     >
-      <header className={styles.cardHeader}>
-        <span className={styles.cardIcon}><BankIcon type={account.type} /></span>
-        <div className={styles.cardHeaderText}>
-          <span className={styles.cardKind}>
-            {account.type === 'ewallet' ? 'E-Wallet' : 'Bank Transfer'}
-          </span>
-          <h3 className={styles.cardName}>{account.name}</h3>
-        </div>
-      </header>
+      <ThreeDTilt
+        className={`${styles.cardInner} ${styles[`accent-${account.accent || 'coral'}`]}`}
+        max={14}
+        scale={1.045}
+        perspective={1000}
+      >
+        <div className={styles.cardGlowOverlay} aria-hidden="true" />
+        
+        <header className={styles.cardHeader}>
+          <span className={styles.cardIcon}><BankIcon type={account.type} /></span>
+          <div className={styles.cardHeaderText}>
+            <span className={styles.cardKind}>
+              {account.type === 'ewallet' ? 'E-Wallet Card' : 'Debit / Credit Card'}
+            </span>
+            <h3 className={styles.cardName}>{account.name}</h3>
+          </div>
+        </header>
 
-      <div className={styles.cardBody}>
-        <span className={styles.cardLabel}>Nomor Rekening</span>
-        <div className={styles.cardNumberRow}>
-          <span className={styles.cardNumber}>{account.accountNumber}</span>
+        {/* Realistic Golden ATM Chip */}
+        <div className={styles.cardChip} aria-hidden="true">
+          <span className={styles.chipLine} />
+          <span className={styles.chipLine} />
+          <span className={styles.chipLine} />
+        </div>
+
+        <div className={styles.cardBody}>
+          <span className={styles.cardLabel}>Account Number</span>
+          <div className={styles.cardNumberRow}>
+            <span className={styles.cardNumber}>{account.accountNumber}</span>
+            <button
+              type="button"
+              className={`${styles.copyBtn} ${copied ? styles.copyBtnDone : ''}`}
+              onClick={handleCopy}
+              aria-label={`Copy ${account.name} account number`}
+            >
+              <CopyIcon copied={copied} />
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+          </div>
+
+          <span className={styles.cardLabel}>Cardholder Name</span>
+          <span className={styles.cardHolder}>{account.accountHolder}</span>
+        </div>
+
+        {onUseForConfirmation && (
           <button
             type="button"
-            className={`${styles.copyBtn} ${copied ? styles.copyBtnDone : ''}`}
-            onClick={handleCopy}
-            aria-label={`Copy ${account.name} account number`}
+            className={styles.useBtn}
+            onClick={() => onUseForConfirmation(account)}
           >
-            <CopyIcon copied={copied} />
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            Confirm Gift Transfer →
           </button>
-        </div>
-
-        <span className={styles.cardLabel}>Atas Nama</span>
-        <span className={styles.cardHolder}>{account.accountHolder}</span>
-      </div>
-
-      {onUseForConfirmation && (
-        <button
-          type="button"
-          className={styles.useBtn}
-          onClick={() => onUseForConfirmation(account)}
-        >
-          Konfirmasi transfer ke {account.name} →
-        </button>
-      )}
+        )}
+      </ThreeDTilt>
     </motion.article>
   )
 }

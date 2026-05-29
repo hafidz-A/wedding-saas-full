@@ -27,6 +27,19 @@
      }
    ============================================================================ */
 
+// Calculate a dynamic future date for the demo so the countdown is always active and counting down
+const now = new Date()
+// Target next year if we are already past November 15th of the current year
+const targetYear = (now.getMonth() > 10 || (now.getMonth() === 10 && now.getDate() >= 15))
+  ? now.getFullYear() + 1
+  : now.getFullYear()
+
+const demoWeddingDate = `${targetYear}-11-15T16:00:00`
+const demoWeddingDateWithOffset = `${targetYear}-11-15T16:00:00+07:00`
+const demoWeddingDateText = `15 November ${targetYear}`
+const demoWeddingDateFullText = `Saturday, 15 November ${targetYear}`
+const demoRsvpDateText = `Kindly respond by 1 November ${targetYear}`
+
 export const defaultConfig = {
   meta: {
     title: 'Rizky & Amara — Our Wedding',
@@ -50,7 +63,7 @@ export const defaultConfig = {
         coupleName: 'Rizky & Amara',
         brideName: 'Amara',
         groomName: 'Rizky',
-        weddingDate: '2025-11-15T16:00:00',
+        weddingDate: demoWeddingDate,
         venue: 'The Grand Ballroom, Jakarta',
         welcomeText: 'Welcome, our dear guest',
         scrollHint: 'Scroll to enter',
@@ -78,7 +91,7 @@ export const defaultConfig = {
       theme: 'warmCream',
       navLabel: 'Countdown',
       props: {
-        weddingDate: '2025-11-15T16:00:00+07:00',
+        weddingDate: demoWeddingDateWithOffset,
         eyebrow: 'Save the date',
         title: 'Menuju Hari Bahagia',
         subtitle: 'Hitung mundur sampai janji suci diucapkan',
@@ -147,8 +160,8 @@ export const defaultConfig = {
           },
           {
             id: 'card-5',
-            year: '2025',
-            date: '15 November 2025',
+            year: String(targetYear),
+            date: demoWeddingDateText,
             title: 'The Wedding Day',
             description:
               'And here we are — surrounded by the people we love, ready to begin the next chapter of our story together.',
@@ -172,7 +185,7 @@ export const defaultConfig = {
             id: 'ceremony',
             label: 'Ceremony',
             icon: 'rings',
-            date: 'Saturday, 15 November 2025',
+            date: demoWeddingDateFullText,
             time: '16:00 — 17:30',
             location: 'St. Mary Chapel, Jakarta',
             accent: 'coral',
@@ -181,7 +194,7 @@ export const defaultConfig = {
             id: 'reception',
             label: 'Reception',
             icon: 'champagne',
-            date: 'Saturday, 15 November 2025',
+            date: demoWeddingDateFullText,
             time: '19:00 — 23:00',
             location: 'The Grand Ballroom, Jakarta',
             accent: 'emerald',
@@ -335,7 +348,7 @@ export const defaultConfig = {
       theme: 'warmCream',
       props: {
         title: 'Will You Join Us?',
-        subtitle: 'Kindly respond by 1 November 2025',
+        subtitle: demoRsvpDateText,
         mealOptions: [
           { value: 'beef',       label: 'Beef Tenderloin'     },
           { value: 'fish',       label: 'Pan-Seared Fish'     },

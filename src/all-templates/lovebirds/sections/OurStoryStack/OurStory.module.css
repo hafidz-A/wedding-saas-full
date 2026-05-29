@@ -5,7 +5,7 @@
 .section {
   position: relative;
   min-height: 100vh;
-  background: transparent;
+  background: var(--bg, transparent);
   /* Tighter padding so section header + card + description fit in 100vh
      during the GSAP pin */
   padding: clamp(20px, 3vw, 48px) clamp(20px, 4vw, 48px);
@@ -22,23 +22,24 @@
 }
 
 .sectionEyebrow {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.36em;
-  font-size: clamp(10px, 1vw, 12px);
-  color: var(--color-coral, #E8553E);
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
   margin: 0 0 8px;
 }
 
 .sectionTitle {
   font-family: var(--font-display, 'Cormorant Garamond', serif);
   font-style: italic;
-  font-weight: 500;
+  font-weight: 400;
   /* Slightly smaller cap so the header doesn't dominate vertical space */
   font-size: clamp(38px, 5.5vw, 72px);
   line-height: 1;
   letter-spacing: -0.01em;
-  color: var(--color-charcoal, #2A2118);
+  color: var(--fg, var(--color-charcoal));
   margin: 0;
 }
 
@@ -46,7 +47,7 @@
   font-family: var(--font-body, 'DM Sans', sans-serif);
   font-size: clamp(13px, 1.3vw, 15px);
   line-height: 1.55;
-  color: var(--color-charcoal-light, rgba(42, 33, 24, 0.66));
+  color: var(--fg-muted, var(--color-charcoal-light));
   margin: 8px auto 0;
   max-width: 56ch;
 }
@@ -77,23 +78,22 @@
 .card {
   position: absolute;
   inset: 0;
-  border-radius: clamp(18px, 2vw, 28px);
-  background: linear-gradient(135deg, #E8553E 0%, #F5C842 100%);
-  box-shadow:
-    0 24px 60px rgba(42, 33, 24, 0.20),
-    0 8px 18px rgba(42, 33, 24, 0.10),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  background-clip: padding-box !important;
+  border: clamp(10px, 1.4vw, 14px) solid #fff;
+  border-bottom: clamp(48px, 6vw, 64px) solid #fff;
+  box-shadow: var(--shadow-polaroid, 5px 5px 18px rgba(0,0,0,0.25));
   overflow: hidden;
   display: flex;
   align-items: flex-end;
   justify-content: flex-start;
-  padding: clamp(28px, 3.5vw, 48px);
+  padding: 12px clamp(16px, 2.5vw, 24px);
   transform-origin: center top;
   will-change: transform;
   /* CSS fallback: card 0 visible, others hidden. GSAP overrides these
      once mounted. Prevents a blank section if GSAP fails to initialize. */
   opacity: 0;
-  transform: translateY(80px);
+  transform: translateY(120px) rotate(4deg);
 }
 
 /* First card is always visible by default — GSAP keeps it visible too */
@@ -182,7 +182,7 @@
   font-size: 12px;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: var(--color-charcoal-light, #5C4A3A);
+  color: var(--fg-muted, var(--color-charcoal-light));
   opacity: 0.7;
 }
 
@@ -190,7 +190,7 @@
   font-family: var(--font-body, 'DM Sans', sans-serif);
   font-size: 12.5px;
   letter-spacing: 0.08em;
-  color: var(--color-charcoal-light, #5C4A3A);
+  color: var(--fg-muted, var(--color-charcoal-light));
   opacity: 0.85;
   margin-bottom: 14px;
 }
@@ -198,11 +198,11 @@
 .descTitle {
   font-family: var(--font-display, 'Cormorant Garamond', serif);
   font-style: italic;
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(32px, 4.4vw, 60px);
   line-height: 1.05;
   letter-spacing: -0.01em;
-  color: var(--color-charcoal, #2A2118);
+  color: var(--fg, var(--color-charcoal));
   margin: 0;
 }
 
@@ -210,7 +210,7 @@
   font-family: var(--font-body, 'DM Sans', sans-serif);
   font-size: clamp(15px, 1.4vw, 17px);
   line-height: 1.7;
-  color: var(--color-charcoal-light, #5C4A3A);
+  color: var(--fg-muted, var(--color-charcoal-light));
   margin: 18px 0 0;
   max-width: 56ch;
 }

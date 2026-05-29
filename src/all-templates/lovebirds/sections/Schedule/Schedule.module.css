@@ -14,7 +14,7 @@
 
 .section {
   position: relative;
-  background: transparent;
+  background: var(--bg, transparent);
   overflow: visible;
 }
 
@@ -58,31 +58,33 @@
 .pinnedMode .header  { margin-bottom: 0; }
 
 .eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.32em;
-  font-size: 12px;
-  color: var(--color-emerald);
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-emerald));
   margin-bottom: 14px;
 }
 
 .title {
   font-family: var(--font-display);
   font-style: italic;
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(40px, 6vw, 72px);
+  color: var(--fg, var(--color-charcoal));
   margin-bottom: 12px;
 }
 
 /* Aggressively tighter header in pinned mode so 7 events fit within 100vh */
 .pinnedMode .title { font-size: clamp(26px, 3.6vw, 40px); margin-bottom: 4px; }
-.pinnedMode .eyebrow { margin-bottom: 6px; font-size: 11px; }
+.pinnedMode .eyebrow { margin-bottom: 6px; }
 .pinnedMode .subtitle { font-size: clamp(12px, 1.2vw, 14px); }
 
 .subtitle {
   font-family: var(--font-body);
   font-size: clamp(14px, 1.4vw, 16px);
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
 }
 
 /* ---------- Timeline ---------- */
@@ -124,8 +126,8 @@
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(18px, 2vw, 22px);
-  color: var(--color-charcoal);
-  font-weight: 500;
+  color: var(--fg, var(--color-charcoal));
+  font-weight: 400;
   text-align: right;
   font-variant-numeric: tabular-nums;
   /* Push digits inward from the right edge of the 80px column so they
@@ -144,16 +146,17 @@
    scroll. Only animate box-shadow (for hover lift). */
 .card {
   position: relative;
-  background: #fff;
+  background: var(--glass-bg, #ffffff);
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.08));
   border-radius: var(--border-radius-card);
   padding: clamp(14px, 2vh, 20px) clamp(18px, 2.4vw, 24px);
-  box-shadow: var(--shadow-soft);
-  border-left: 4px solid var(--accent, var(--color-coral));
+  box-shadow: var(--shadow-glass);
+  border-left: 4px solid var(--accent, var(--color-coral)) !important;
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 18px;
-  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 /* Compact cards in pinned mode (fits 7 events in 100vh) */
@@ -172,11 +175,15 @@
   height: 12px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 4px #fff;
+  box-shadow: 0 0 0 4px var(--bg, var(--color-cream, #fff));
 }
 
 .card:hover,
-.card:active { box-shadow: var(--shadow-card); }
+.card:active {
+  box-shadow: var(--shadow-glass-hover);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
 
 .iconWrap {
   width: 44px;
@@ -196,15 +203,16 @@
 .eventTitle {
   font-family: var(--font-display);
   font-style: italic;
+  font-weight: 400;
   font-size: clamp(18px, 2vw, 22px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   margin-bottom: 4px;
 }
 
 .eventDescription {
   font-family: var(--font-body);
   font-size: clamp(13px, 1.3vw, 14px);
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   line-height: 1.55;
 }
 

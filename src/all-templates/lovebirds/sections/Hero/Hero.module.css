@@ -137,15 +137,27 @@
   transform: translate(-50%, -50%);
   width:  calc(100vw - var(--gate) * (100vw - min(440px, 86vw)));
   height: calc(100vh - var(--gate) * (100vh - min(580px, 66vh)));
-  border-radius: calc(var(--gate) * 26px);
+  border-radius: calc(var(--gate) * 28px);
   overflow: hidden;
-  background: #2a2118;
+  background: #1e1711;
   box-shadow:
-    0 calc(var(--gate) * 30px) calc(var(--gate) * 80px)
-      rgba(42, 33, 24, calc(var(--gate) * 0.35)),
-    0 0 0 1px rgba(42, 33, 24, calc(var(--gate) * 0.08));
+    0 calc(var(--gate) * 35px) calc(var(--gate) * 90px)
+      rgba(42, 33, 24, calc(var(--gate) * 0.40)),
+    0 0 0 1px rgba(42, 33, 24, calc(var(--gate) * 0.1)),
+    0 0 calc((1 - var(--gate)) * 60px) rgba(245, 200, 66, calc((1 - var(--gate)) * 0.25));
   z-index: 4;
   will-change: width, height, border-radius;
+}
+
+/* Inner vignette for the gate photo */
+.gateCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 calc(100px + (1 - var(--gate)) * 100px) rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 2;
+  will-change: box-shadow;
 }
 
 .gateImg {
@@ -153,14 +165,31 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: blur(calc((1 - var(--gate)) * 5px));
+  will-change: transform, filter;
+}
+
+.gateGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(820px, 110vw);
+  height: min(820px, 110vh);
+  background: radial-gradient(circle at 50% 50%, rgba(245, 200, 66, 0.22) 0%, rgba(232, 85, 62, 0.08) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 3;
+  opacity: calc(1 - var(--gate) * 1.5);
+  will-change: opacity;
 }
 
 .gateOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.78) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.75) 100%);
   opacity: var(--overlay);
   pointer-events: none;
+  z-index: 1;
 }
 
 /* ---------- Gate content (always visible, colour blends) ---------- */
@@ -177,49 +206,60 @@
   gap: clamp(12px, 1.8vw, 18px);
 }
 
-/* color-mix interpolates from initial (gate=0) → final (gate=1) */
+/* Glassmorphism welcome card wrapper */
+.glassCard {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.45));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
+  border-radius: 28px;
+  padding: clamp(24px, 4.5vw, 48px) clamp(16px, 3.5vw, 32px);
+  box-shadow: 
+    0 24px 60px rgba(42, 33, 24, 0.12),
+    0 8px 18px rgba(42, 33, 24, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.8vw, 18px);
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  pointer-events: auto;
+}
+
 .welcomeText {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.36em;
-  font-size: clamp(11px, 1.2vw, 14px);
-  color: color-mix(in srgb,
-    var(--color-coral) calc(var(--gate) * 100%),
-    var(--color-gold));
-  text-shadow:
-    0 2px 14px rgba(0, 0, 0, calc(0.55 * (1 - var(--gate)))),
-    0 0 10px rgba(253, 246, 236, calc(0.75 * var(--gate)));
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
   margin: 0;
 }
 
 .coupleName {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(40px, 8.5vw, 108px);
+  font-family: var(--font-script, var(--font-display));
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(48px, 10vw, 88px);
   line-height: 1;
-  letter-spacing: -0.01em;
-  color: color-mix(in srgb,
-    var(--color-charcoal) calc(var(--gate) * 100%),
-    var(--color-cream));
+  letter-spacing: normal;
+  color: var(--glass-text, var(--color-charcoal));
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  gap: clamp(8px, 2vw, 28px);
+  gap: clamp(8px, 1.8vw, 20px);
   flex-wrap: wrap;
   margin: 0;
-  text-shadow:
-    0 4px 24px rgba(0, 0, 0, calc(0.45 * (1 - var(--gate)))),
-    0 0 22px rgba(253, 246, 236, calc(0.85 * var(--gate))),
-    0 0 10px rgba(253, 246, 236, calc(0.6 * var(--gate)));
 }
 
-.namePart { font-style: italic; }
+.namePart { font-style: normal; }
 
 .amp {
   color: var(--color-gold);
   font-size: 0.85em;
   transform: translateY(-0.05em);
+  font-weight: 400;
 }
 
 .date {
@@ -227,16 +267,12 @@
   align-items: center;
   justify-content: center;
   gap: clamp(8px, 1.4vw, 14px);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
-  font-size: clamp(11px, 1.2vw, 13px);
-  color: color-mix(in srgb,
-    var(--color-charcoal) calc(var(--gate) * 100%),
-    var(--color-cream));
-  text-shadow:
-    0 2px 12px rgba(0, 0, 0, calc(0.55 * (1 - var(--gate)))),
-    0 0 10px rgba(253, 246, 236, calc(0.7 * var(--gate)));
+  letter-spacing: 0.2em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--glass-text, var(--color-charcoal));
   margin: 0;
   flex-wrap: wrap;
 }
@@ -252,34 +288,26 @@
 
 .venue {
   font-family: var(--font-body);
-  font-size: clamp(13px, 1.4vw, 16px);
-  color: color-mix(in srgb,
-    var(--color-charcoal-light) calc(var(--gate) * 100%),
-    rgba(253, 246, 236, 0.92));
-  text-shadow:
-    0 2px 12px rgba(0, 0, 0, calc(0.5 * (1 - var(--gate)))),
-    0 0 8px rgba(253, 246, 236, calc(0.6 * var(--gate)));
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--glass-text-muted, var(--color-charcoal-light));
   margin: 0;
 }
 
-/* Countdown — also colour-blends */
+/* Countdown container */
 .countdown {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: clamp(6px, 1.4vw, 14px);
+  gap: clamp(6px, 1.4vw, 12px);
   max-width: 540px;
   margin: 6px auto 0;
   padding: 0;
   list-style: none;
+  width: 100%;
 }
 
 .countCell {
-  background: color-mix(in srgb,
-    rgba(42, 33, 24, 0.06) calc(var(--gate) * 100%),
-    rgba(253, 246, 236, 0.10));
-  border: 1px solid color-mix(in srgb,
-    rgba(42, 33, 24, 0.18) calc(var(--gate) * 100%),
-    rgba(253, 246, 236, 0.26));
+  background: var(--glass-bg, rgba(255, 255, 255, 0.45));
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.1));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: clamp(10px, 1.2vw, 14px);
@@ -294,13 +322,8 @@
   font-style: italic;
   font-size: clamp(20px, 4vw, 40px);
   line-height: 1;
-  color: color-mix(in srgb,
-    var(--color-charcoal) calc(var(--gate) * 100%),
-    var(--color-cream));
+  color: var(--glass-text, var(--color-charcoal));
   font-variant-numeric: tabular-nums;
-  text-shadow:
-    0 2px 10px rgba(0, 0, 0, calc(0.35 * (1 - var(--gate)))),
-    0 0 8px rgba(253, 246, 236, calc(0.55 * var(--gate)));
 }
 
 .countLabel {
@@ -308,9 +331,7 @@
   font-size: clamp(8px, 0.95vw, 10px);
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: color-mix(in srgb,
-    var(--color-charcoal-light) calc(var(--gate) * 100%),
-    rgba(253, 246, 236, 0.86));
+  color: var(--glass-text-muted, var(--color-charcoal-light));
 }
 
 .ended {
@@ -319,6 +340,61 @@
   font-size: clamp(20px, 3vw, 32px);
   color: var(--color-coral);
   margin: 0;
+}
+
+.decorBottomLeftLineArt {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: clamp(90px, 14vw, 160px);
+  height: auto;
+  pointer-events: none;
+  z-index: 6;
+  opacity: calc(1 - var(--gate));
+}
+
+.flowerClusteredTopLeft {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  pointer-events: none;
+  z-index: 6;
+  opacity: calc(1 - var(--gate));
+}
+
+.flowerBottomRight {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  pointer-events: none;
+  z-index: 6;
+  opacity: calc(1 - var(--gate));
+}
+
+.monogram {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(14px, 1.8vw, 20px);
+  color: var(--color-charcoal-light);
+  letter-spacing: 0.1em;
+  margin-top: 6px;
+  z-index: 2;
+}
+
+@media (max-width: 480px) {
+  .decorBottomLeftLineArt {
+    left: 12px;
+    bottom: 12px;
+  }
+  .flowerClusteredTopLeft {
+    left: 12px;
+    top: 12px;
+  }
+  .flowerBottomRight {
+    right: 12px;
+    bottom: 12px;
+  }
 }
 
 /* ---------- Scroll hint ---------- */
@@ -332,10 +408,10 @@
   align-items: center;
   gap: 10px;
   color: var(--color-cream);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: 0.36em;
-  font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: 0.28em;
+  font-size: clamp(10px, 1.1vw, 13px);
   opacity: var(--hint);
   z-index: 6;
   pointer-events: none;

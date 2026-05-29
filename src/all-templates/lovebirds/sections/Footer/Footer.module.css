@@ -77,9 +77,9 @@
 }
 
 .signoff {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(17px, 3vw, 22px);
+  font-family: var(--font-script, var(--font-display));
+  font-style: normal;
+  font-size: clamp(26px, 4.5vw, 38px);
   margin-top: 16px;
 }
 

@@ -20,14 +20,26 @@ export const themes = {
     '--fg-muted': 'var(--color-charcoal-light)',
     '--accent': 'var(--color-coral)',
     '--accent-soft': 'var(--color-coral-soft)',
+    '--glass-bg': 'rgba(255, 255, 255, 0.45)',
+    '--glass-border': 'rgba(255, 255, 255, 0.45)',
+    '--glass-text': 'var(--color-charcoal)',
+    '--glass-text-muted': 'var(--color-charcoal-light)',
+    '--button-bg': 'var(--color-charcoal)',
+    '--button-fg': 'var(--color-cream)',
   },
 
   darkLuxury: {
-    '--bg': 'transparent',
+    '--bg': 'var(--color-charcoal)',
     '--fg': 'var(--color-cream)',
     '--fg-muted': 'rgba(253, 246, 236, 0.78)',
     '--accent': 'var(--color-gold)',
     '--accent-soft': 'var(--color-gold-soft)',
+    '--glass-bg': 'rgba(30, 23, 17, 0.55)',
+    '--glass-border': 'rgba(255, 255, 255, 0.15)',
+    '--glass-text': 'var(--color-cream)',
+    '--glass-text-muted': 'rgba(253, 246, 236, 0.78)',
+    '--button-bg': 'var(--color-cream)',
+    '--button-fg': 'var(--color-charcoal)',
   },
 
   emeraldGarden: {
@@ -36,6 +48,12 @@ export const themes = {
     '--fg-muted': 'var(--color-charcoal-light)',
     '--accent': 'var(--color-emerald)',
     '--accent-soft': 'var(--color-emerald-soft)',
+    '--glass-bg': 'rgba(255, 255, 255, 0.45)',
+    '--glass-border': 'rgba(255, 255, 255, 0.45)',
+    '--glass-text': 'var(--color-charcoal)',
+    '--glass-text-muted': 'var(--color-charcoal-light)',
+    '--button-bg': 'var(--color-charcoal)',
+    '--button-fg': 'var(--color-cream)',
   },
 
   skyEditorial: {
@@ -44,6 +62,12 @@ export const themes = {
     '--fg-muted': 'var(--color-charcoal-light)',
     '--accent': 'var(--color-sky)',
     '--accent-soft': 'var(--color-sky-soft)',
+    '--glass-bg': 'rgba(255, 255, 255, 0.45)',
+    '--glass-border': 'rgba(255, 255, 255, 0.45)',
+    '--glass-text': 'var(--color-charcoal)',
+    '--glass-text-muted': 'var(--color-charcoal-light)',
+    '--button-bg': 'var(--color-charcoal)',
+    '--button-fg': 'var(--color-cream)',
   },
 }
 

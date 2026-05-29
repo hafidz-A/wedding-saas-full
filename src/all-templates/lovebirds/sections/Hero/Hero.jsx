@@ -49,6 +49,41 @@ function formatDate(iso) {
   }
 }
 
+function CuteFlower({ size = 48, color = '#E8553E', centerColor = '#F5C842', className, style }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className={className} style={{ display: 'inline-block', ...style }} aria-hidden="true">
+      <g transform="translate(50, 50)">
+        {[0, 72, 144, 216, 288].map((rot) => (
+          <ellipse
+            key={rot}
+            cx="0"
+            cy="-20"
+            rx="15"
+            ry="24"
+            fill={color}
+            transform={`rotate(${rot})`}
+          />
+        ))}
+        <circle r="12" fill={centerColor} />
+      </g>
+    </svg>
+  )
+}
+
+function BotanicalLineArt({ className, style }) {
+  return (
+    <svg className={className} style={style} viewBox="0 0 120 180" fill="none" stroke="currentColor" aria-hidden="true">
+      <path d="M10,170 Q30,130 50,70 T80,10" stroke="#4A3B32" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M32,126 C20,122 15,110 22,102 C28,96 34,106 32,126" stroke="#4A3B32" strokeWidth="1" fill="none" />
+      <path d="M40,110 C52,106 58,95 50,88 C44,82 38,92 40,110" stroke="#4A3B32" strokeWidth="1" fill="none" />
+      <path d="M46,88 C36,82 32,70 40,64 C47,58 52,68 46,88" stroke="#4A3B32" strokeWidth="1" fill="none" />
+      <path d="M58,74 C70,70 76,58 68,52 C62,46 56,56 58,74" stroke="#4A3B32" strokeWidth="1" fill="none" />
+      <path d="M64,54 C54,48 50,36 58,30 C65,24 70,34 64,54" stroke="#4A3B32" strokeWidth="1" fill="none" />
+      <path d="M72,40 C84,36 90,24 82,18 C76,12 70,22 72,40" stroke="#4A3B32" strokeWidth="1" fill="none" />
+    </svg>
+  )
+}
+
 // Eight edge slots that intentionally avoid the centre band (30–70%)
 // where the gate card sits.
 const PETAL_SLOTS = [
@@ -211,18 +246,18 @@ function DecorCorners() {
 
 export default function Hero(props) {
   const cfg = { ...DEFAULTS, ...props }
-  const containerRef = useRef(null)
+    const containerRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
   const [parts, setParts] = useState(() => diffParts(cfg.weddingDate))
   const viewportScale = useViewportScale()
-
+ 
   const blastLayout = useMemo(() => {
     const photos = cfg.blastPhotos || []
     // Base distance adapts to viewport: full on desktop, compressed on mobile
     // so photos stay visible and don't fly off-screen
-    const baseDistance = 320 * viewportScale
-    const extraDistance = 220 * viewportScale
+    const baseDistance = 330 * viewportScale
+    const extraDistance = 160 * viewportScale
     return photos.map((src, i) => {
       const seed = (i + 1) * 137.508
       const angle = (i / Math.max(1, photos.length)) * Math.PI * 2 + Math.sin(seed) * 0.7
@@ -230,14 +265,14 @@ export default function Hero(props) {
       return {
         src,
         x: Math.cos(angle) * distance,
-        y: Math.sin(angle) * distance * 0.78,
+        y: Math.sin(angle) * distance * 0.92,
         rotate: -28 + ((seed * 17) % 56),
         scale: 0.55 + Math.abs(Math.sin(seed * 0.7)) * 0.45,
         delay: (i % 6) * 0.04,
       }
     })
   }, [cfg.blastPhotos, viewportScale])
-
+ 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return undefined
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -306,6 +341,21 @@ export default function Hero(props) {
 
         <DecorCorners />
 
+        {/* Cute colorful flowers in the top-left corner */}
+        <div className={styles.flowerClusteredTopLeft}>
+          <CuteFlower size={44} color="#D97455" centerColor="#FFE9A8" style={{ transform: 'rotate(-10deg)' }} />
+          <CuteFlower size={36} color="#E8553E" centerColor="#FFE9A8" style={{ transform: 'rotate(15deg) translateY(-6px)' }} />
+          <CuteFlower size={34} color="#F5C842" centerColor="#E8553E" style={{ transform: 'rotate(35deg) translate(-22px, 8px)' }} />
+        </div>
+
+        {/* Botanical line-art in the bottom-left corner */}
+        <BotanicalLineArt className={styles.decorBottomLeftLineArt} />
+
+        {/* Purple flower in the bottom-right corner */}
+        <div className={styles.flowerBottomRight}>
+          <CuteFlower size={40} color="#A5A6E8" centerColor="#FFE9A8" style={{ transform: 'rotate(-20deg)' }} />
+        </div>
+
         {/* Edge petals — scale in then rotate with scroll */}
         <div className={styles.petalLayer} aria-hidden="true">
           {(cfg.petals || []).map((name, i) => {
@@ -365,47 +415,71 @@ export default function Hero(props) {
         {/* Main image — never disappears, only shrinks into a rounded card */}
         <div className={styles.gateCard}>
           {cfg.gateImage && (
-            <img src={cfg.gateImage} alt="" className={styles.gateImg} />
+            <img
+              src={cfg.gateImage}
+              alt=""
+              className={styles.gateImg}
+              style={{
+                transform: `scale(${1.16 - gatePhase * 0.16}) translateY(${-25 + gatePhase * 25}px)`,
+                transition: 'transform 0.1s ease-out',
+              }}
+            />
           )}
           <div className={styles.gateOverlay} aria-hidden="true" />
         </div>
 
+        {/* Glow vignette behind/around the card */}
+        <div className={styles.gateGlow} aria-hidden="true" />
+
         {/* All gate text overlaid on the main image — fades out on scroll */}
-        <div className={styles.gateContent}>
-          <p className={styles.welcomeText}>{cfg.welcomeText}</p>
-          <h1 className={styles.coupleName}>
-            <span className={styles.namePart}>{cfg.brideName}</span>
-            <span className={styles.amp}>&amp;</span>
-            <span className={styles.namePart}>{cfg.groomName}</span>
-          </h1>
-          {cfg.weddingDate && (
-            <p className={styles.date}>
-              <span className={styles.dot} aria-hidden="true" />
-              {formatDate(cfg.weddingDate)}
-              <span className={styles.dot} aria-hidden="true" />
-            </p>
-          )}
-          {cfg.venue && <p className={styles.venue}>{cfg.venue}</p>}
-          {cfg.countdownEnabled && parts && !parts.ended && (
-            <ul className={styles.countdown} aria-label="Countdown to the wedding day">
-              {[
-                { label: 'Days', value: parts.days },
-                { label: 'Hours', value: parts.hours },
-                { label: 'Min', value: parts.minutes },
-                { label: 'Sec', value: parts.seconds },
-              ].map((c) => (
-                <li key={c.label} className={styles.countCell}>
-                  <span className={styles.countValue}>
-                    {String(c.value).padStart(2, '0')}
-                  </span>
-                  <span className={styles.countLabel}>{c.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {cfg.countdownEnabled && parts && parts.ended && (
-            <p className={styles.ended}>Today is the day — welcome.</p>
-          )}
+        <div
+          className={styles.gateContent}
+          style={{
+            transform: `translate(-50%, calc(-50% + ${(1 - gatePhase) * -16}px))`,
+            transition: 'transform 0.1s ease-out',
+          }}
+        >
+          <div className={styles.glassCard}>
+            <p className={styles.welcomeText}>{cfg.welcomeText}</p>
+            <h1 className={styles.coupleName}>
+              <span className={styles.namePart}>{cfg.brideName}</span>
+              <span className={styles.amp}>&amp;</span>
+              <span className={styles.namePart}>{cfg.groomName}</span>
+            </h1>
+            {cfg.weddingDate && (
+              <p className={styles.date}>
+                <span className={styles.dot} aria-hidden="true" />
+                {formatDate(cfg.weddingDate)}
+                <span className={styles.dot} aria-hidden="true" />
+              </p>
+            )}
+            {cfg.venue && <p className={styles.venue}>{cfg.venue}</p>}
+            {cfg.countdownEnabled && parts && !parts.ended && (
+              <ul className={styles.countdown} aria-label="Countdown to the wedding day">
+                {[
+                  { label: 'Days', value: parts.days },
+                  { label: 'Hours', value: parts.hours },
+                  { label: 'Min', value: parts.minutes },
+                  { label: 'Sec', value: parts.seconds },
+                ].map((c) => (
+                  <li key={c.label} className={styles.countCell}>
+                    <span className={styles.countValue}>
+                      {String(c.value).padStart(2, '0')}
+                    </span>
+                    <span className={styles.countLabel}>{c.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {cfg.countdownEnabled && parts && parts.ended && (
+              <p className={styles.ended}>Today is the day — welcome.</p>
+            )}
+            
+            {/* Subtle initials monogram */}
+            <div className={styles.monogram}>
+              {(cfg.groomName?.[0] || 'R')} &amp; {(cfg.brideName?.[0] || 'A')}
+            </div>
+          </div>
         </div>
 
         {/* Scroll hint */}
@@ -436,10 +510,10 @@ function useViewportScale() {
   const calc = useCallback(() => {
     if (typeof window === 'undefined') return 1
     const w = window.innerWidth
-    // Smoothly interpolate: 375→0.35, 768→0.65, 1440→1.0
+    // Smoothly interpolate: 375→0.5, 768→0.75, 1440→1.0
     const minW = 375
     const maxW = 1440
-    const minScale = 0.35
+    const minScale = 0.5
     const maxScale = 1.0
     const t = Math.max(0, Math.min(1, (w - minW) / (maxW - minW)))
     // Use easeOutQuad for a nicer curve — scales faster on tablets

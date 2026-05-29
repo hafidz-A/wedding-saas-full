@@ -14,17 +14,17 @@ const buildConfig = (N) => {
   return {
     scrollPerPhoto: 130,
     rotationPerPhoto: 360 / safeN,
-    pitchY: Math.max(44, Math.min(72, 560 / safeN)),
-    radius: Math.max(170, Math.min(230, 135 + safeN * 4)),
-    coilTiltX: 9,
+    pitchY: Math.max(52, Math.min(85, 640 / safeN)),
+    radius: Math.max(220, Math.min(300, 175 + safeN * 5)),
+    coilTiltX: 11,
     cardWidth: 160,
     cardHeight: 206,
-    frontScale: 1.12,
-    neighborGap: 65,
-    depthOpacityMin: 0.2,
-    depthBlurMax: 2.75,
-    depthScaleMin: 0.4,
-    sideOpacityMax: 0.36,
+    frontScale: 1.18,
+    neighborGap: 75,
+    depthOpacityMin: 0.15,
+    depthBlurMax: 4.0,
+    depthScaleMin: 0.35,
+    sideOpacityMax: 0.32,
   }
 }
 
@@ -36,8 +36,8 @@ const COMPONENT_STYLES = `
      left/right: -14% on mobile) and 3D-rotated coil cards so the page
      never gets a horizontal scrollbar from this section. */
   overflow: hidden;
-  background: var(--color-bg, var(--color-cream, #f5f0eb));
-  color: var(--color-text, var(--color-charcoal, #2a2118));
+  background: var(--bg, var(--color-cream, #f5f0eb));
+  color: var(--fg, var(--color-charcoal, #2a2118));
 }
 
 .gsc-scene {
@@ -51,7 +51,7 @@ const COMPONENT_STYLES = `
   position: absolute;
   inset: 0;
   z-index: 10;
-  perspective: 820px;
+  perspective: 550px;
   perspective-origin: 50% 48%;
 }
 
@@ -145,24 +145,25 @@ const COMPONENT_STYLES = `
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 1px solid var(--color-border, rgba(255,255,255,0.34));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.34));
   border-radius: 12px;
-  background: var(--color-card, rgba(255,255,255,0.16));
+  background: var(--glass-bg, rgba(255,255,255,0.16));
   transition: border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 .gsc-coilCard[data-front="true"] .gsc-coilFrame {
-  border-color: rgba(255,255,255,0.78);
+  border-color: rgba(255,255,255,0.95);
   box-shadow:
-    0 0 0 1.5px rgba(255,255,255,0.72),
-    0 18px 70px rgba(0,0,0,0.22),
-    0 0 90px var(--color-accent, rgba(200,180,150,0.3));
+    0 0 0 2px var(--color-gold, #F5C842),
+    0 0 0 4px rgba(255,255,255,0.9),
+    0 24px 75px rgba(42,33,24,0.38),
+    0 0 100px rgba(245,200,66,0.35);
 }
 
 .gsc-coilButton:focus-visible .gsc-coilFrame {
   box-shadow:
-    0 0 0 2px var(--color-bg, #f5f0eb),
-    0 0 0 5px var(--color-accent, rgba(200,180,150,0.5)),
+    0 0 0 2px var(--bg, #f5f0eb),
+    0 0 0 5px var(--accent, rgba(200,180,150,0.5)),
     0 18px 70px rgba(0,0,0,0.22);
 }
 
@@ -186,9 +187,9 @@ const COMPONENT_STYLES = `
   display: grid;
   place-items: center;
   background:
-    linear-gradient(135deg, var(--color-card, rgba(255,255,255,0.22)), transparent),
-    var(--color-bg, #f5f0eb);
-  color: var(--color-text-muted, rgba(42,33,24,0.42));
+    linear-gradient(135deg, var(--glass-bg, rgba(255,255,255,0.22)), transparent),
+    var(--bg, #f5f0eb);
+  color: var(--fg-muted, rgba(42,33,24,0.42));
   font-family: var(--font-display, serif);
   font-size: 22px;
   font-style: italic;
@@ -200,7 +201,7 @@ const COMPONENT_STYLES = `
   left: 50%;
   width: min(100%, 20rem);
   margin: 0;
-  color: var(--color-text, rgba(42,33,24,0.52));
+  color: var(--fg-muted, rgba(42,33,24,0.52));
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-style: italic;
@@ -229,8 +230,8 @@ const COMPONENT_STYLES = `
   background: radial-gradient(
     ellipse 68% 68% at 50% 48%,
     transparent 26%,
-    color-mix(in srgb, var(--color-bg, #f5f0eb) 58%, transparent) 58%,
-    var(--color-bg, var(--color-cream, #f5f0eb)) 100%
+    color-mix(in srgb, var(--bg, #f5f0eb) 58%, transparent) 58%,
+    var(--bg, var(--color-cream, #f5f0eb)) 100%
   );
 }
 
@@ -238,10 +239,10 @@ const COMPONENT_STYLES = `
   z-index: 31;
   background: linear-gradient(
     to bottom,
-    var(--color-bg, var(--color-cream, #f5f0eb)) 0%,
+    var(--bg, var(--color-cream, #f5f0eb)) 0%,
     transparent 16%,
     transparent 82%,
-    var(--color-bg, var(--color-cream, #f5f0eb)) 100%
+    var(--bg, var(--color-cream, #f5f0eb)) 100%
   );
 }
 
@@ -257,18 +258,18 @@ const COMPONENT_STYLES = `
 
 .gsc-title {
   margin: 0 0 10px;
-  color: var(--color-text, var(--color-charcoal, #2a2118));
+  color: var(--fg, var(--color-charcoal, #2a2118));
   font-family: var(--font-display, serif);
   font-size: clamp(42px, 6vw, 76px);
   font-style: italic;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 0.95;
 }
 
 .gsc-subtitle {
   margin: 0;
   max-width: 620px;
-  color: var(--color-text-muted, var(--color-charcoal-light, rgba(42,33,24,0.62)));
+  color: var(--fg-muted, var(--color-charcoal-light, rgba(42,33,24,0.62)));
   font-family: var(--font-body, sans-serif);
   font-size: clamp(15px, 2vw, 22px);
   letter-spacing: 0.08em;
@@ -284,7 +285,7 @@ const COMPONENT_STYLES = `
   display: grid;
   justify-items: center;
   gap: 8px;
-  color: var(--color-text-muted, rgba(42,33,24,0.62));
+  color: var(--fg-muted, rgba(42,33,24,0.62));
   font-family: var(--font-body, sans-serif);
   text-align: center;
   text-transform: uppercase;
@@ -307,14 +308,14 @@ const COMPONENT_STYLES = `
   width: 4px;
   height: 4px;
   border-radius: 2px;
-  background: var(--color-text, rgba(0,0,0,0.15));
+  background: var(--fg, rgba(0,0,0,0.15));
   opacity: 0.28;
   transition: width 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
 }
 
 .gsc-dotActive {
   width: 18px;
-  background: var(--color-text, rgba(0,0,0,0.5));
+  background: var(--fg, rgba(0,0,0,0.5));
   opacity: 0.7;
 }
 

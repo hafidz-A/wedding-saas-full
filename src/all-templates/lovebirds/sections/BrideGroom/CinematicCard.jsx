@@ -115,7 +115,6 @@ export default function CinematicCard({
       style={{
         transformStyle: 'preserve-3d',
         willChange: 'transform, opacity, filter',
-        backfaceVisibility: 'hidden',
       }}
     >
       {children}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform } from 'motion/react'
 import SectionBackground from '../../components/SectionBackground.jsx'
+import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import styles from './EventDetails.module.css'
 
 const DEFAULTS = {
@@ -213,10 +214,16 @@ function EventCardPinned({ event, index, total, progress }) {
 
   return (
     <motion.article
-      className={`${styles.eventCard} ${styles[`accent-${event.accent || 'coral'}`]}`}
+      className={styles.eventCardWrapper}
       style={{ x, opacity }}
     >
-      <EventCardContent event={event} />
+      <ThreeDTilt
+        className={`${styles.eventCardInner} ${styles[`accent-${event.accent || 'coral'}`]}`}
+        max={8}
+        scale={1.02}
+      >
+        <EventCardContent event={event} />
+      </ThreeDTilt>
     </motion.article>
   )
 }
@@ -258,10 +265,12 @@ function MapCardPinned({ mapEmbed, progress }) {
 
   return (
     <motion.aside
-      className={styles.mapCard}
+      className={styles.mapCardWrapper}
       style={{ clipPath, y, opacity, scale }}
     >
-      <MapContent mapEmbed={mapEmbed} />
+      <ThreeDTilt className={styles.mapCardInner} max={6} scale={1.015}>
+        <MapContent mapEmbed={mapEmbed} />
+      </ThreeDTilt>
     </motion.aside>
   )
 }
@@ -271,13 +280,19 @@ function MapCardPinned({ mapEmbed, progress }) {
 function EventCardStacked({ event }) {
   return (
     <motion.article
-      className={`${styles.eventCard} ${styles[`accent-${event.accent || 'coral'}`]}`}
+      className={styles.eventCardWrapper}
       initial={{ x: -80, opacity: 0 }}
       whileInView={{ x: 0, opacity: 1 }}
       viewport={{ once: false, amount: 0.25 }}
       transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
     >
-      <EventCardContent event={event} />
+      <ThreeDTilt
+        className={`${styles.eventCardInner} ${styles[`accent-${event.accent || 'coral'}`]}`}
+        max={8}
+        scale={1.02}
+      >
+        <EventCardContent event={event} />
+      </ThreeDTilt>
     </motion.article>
   )
 }
@@ -289,13 +304,15 @@ function MapCardStacked({ mapEmbed }) {
   // invisible. Opacity + scale + slide is GPU-accelerated and reliable.
   return (
     <motion.aside
-      className={styles.mapCard}
+      className={styles.mapCardWrapper}
       initial={{ opacity: 0, y: -24, scale: 0.96 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
     >
-      <MapContent mapEmbed={mapEmbed} />
+      <ThreeDTilt className={styles.mapCardInner} max={6} scale={1.015}>
+        <MapContent mapEmbed={mapEmbed} />
+      </ThreeDTilt>
     </motion.aside>
   )
 }

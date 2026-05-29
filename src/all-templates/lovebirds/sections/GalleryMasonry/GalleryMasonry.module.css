@@ -1,7 +1,7 @@
 /* GalleryMasonry — vertical conveyor belt gallery */
 
 .section {
-  background: #d6d1be;
+  background: var(--bg, #d6d1be);
   padding: 80px 0 0;
   overflow: hidden;
 }
@@ -13,26 +13,30 @@
 }
 
 .eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.3em;
+  font-family: var(--font-display);
+  font-style: normal;
   text-transform: uppercase;
-  color: #8a7f6e;
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
   margin-bottom: 12px;
 }
 
 .title {
   font-family: var(--font-display, 'Cormorant Garamond', serif);
   font-style: italic;
+  font-weight: 400;
   font-size: clamp(40px, 6vw, 72px);
-  color: #1a1a1a;
+  color: var(--fg, var(--color-charcoal));
   margin-bottom: 10px;
   line-height: 1.1;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #6b6254;
-  letter-spacing: 0.04em;
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.4vw, 16px);
+  color: var(--fg-muted, var(--color-charcoal-light));
+  margin: 0;
 }
 
 /* ── Scroll stage ──

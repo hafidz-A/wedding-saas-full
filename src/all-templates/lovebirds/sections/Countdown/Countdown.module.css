@@ -14,7 +14,7 @@
 .section {
   position: relative;
   padding: var(--spacing-section, clamp(72px, 10vw, 120px)) var(--container-pad, clamp(20px, 4vw, 48px));
-  background: linear-gradient(180deg, var(--color-cream, #f5efe3), #ffffff);
+  background: var(--bg, linear-gradient(180deg, var(--color-cream, #f5efe3), #ffffff));
   overflow: hidden;
 }
 
@@ -32,20 +32,21 @@
 }
 
 .eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.32em;
-  font-size: 12px;
-  color: var(--color-coral);
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
   margin: 0 0 14px;
 }
 
 .title {
   font-family: var(--font-display);
   font-style: italic;
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(36px, 5.5vw, 64px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   margin: 0 0 12px;
   line-height: 1.1;
 }
@@ -53,7 +54,7 @@
 .subtitle {
   font-family: var(--font-body);
   font-size: clamp(14px, 1.4vw, 16px);
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   margin: 0;
 }
 
@@ -88,7 +89,7 @@
   font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
 }
 
 /* ---------- Variant: card (default) ---------- */
@@ -102,10 +103,12 @@
   align-items: center;
   gap: 12px;
   padding: clamp(18px, 2.4vw, 28px) clamp(10px, 2vw, 20px);
-  background: #ffffff;
+  background: var(--glass-bg, #ffffff);
   border-radius: var(--border-radius-card, 16px);
-  box-shadow: var(--shadow-soft, 0 8px 24px rgba(42, 33, 24, 0.08));
-  border: 1px solid rgba(42, 33, 24, 0.06);
+  box-shadow: var(--shadow-glass);
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.06));
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
 }
 
 .styleCard .numberWrap {
@@ -113,7 +116,7 @@
   font-style: italic;
   font-size: clamp(40px, 6vw, 64px);
   font-weight: 500;
-  color: var(--color-charcoal);
+  color: var(--glass-text, var(--color-charcoal));
   min-width: 2ch;
 }
 
@@ -130,7 +133,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: clamp(40px, 7vw, 84px);
   font-weight: 600;
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   letter-spacing: 0.04em;
   min-width: 2ch;
 }
@@ -141,7 +144,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: clamp(40px, 7vw, 84px);
   font-weight: 600;
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   align-self: center;
   line-height: 1;
 }
@@ -163,7 +166,7 @@
   font-style: italic;
   font-weight: 400;
   font-size: clamp(56px, 9vw, 96px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   min-width: 1.8ch;
 }
 
@@ -191,9 +194,9 @@
   font-size: 12px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   background: transparent;
-  border: 1px solid var(--color-charcoal);
+  border: 1px solid var(--fg, var(--color-charcoal));
   border-radius: 999px;
   cursor: pointer;
   transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
@@ -201,8 +204,8 @@
 
 .calendarButton:hover,
 .calendarButton:focus-visible {
-  background: var(--color-charcoal);
-  color: #ffffff;
+  background: var(--fg, var(--color-charcoal));
+  color: var(--bg, #ffffff);
   outline: none;
   transform: translateY(-1px);
 }
@@ -258,7 +261,7 @@
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(24px, 3.5vw, 36px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   text-align: center;
   margin: 0;
   line-height: 1.4;

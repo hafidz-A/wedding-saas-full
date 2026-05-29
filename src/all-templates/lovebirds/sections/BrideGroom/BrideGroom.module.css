@@ -4,7 +4,7 @@
 
 .section {
   position: relative;
-  background: transparent;
+  background: var(--bg, transparent);
   min-height: 160vh;
   padding: 0 var(--container-pad);
   overflow-x: clip;
@@ -63,20 +63,21 @@
 .header { text-align: center; margin-bottom: clamp(48px, 7vw, 88px); }
 
 .eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.32em;
-  font-size: 12px;
-  color: var(--color-coral);
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
   margin-bottom: 16px;
 }
 
 .title {
   font-family: var(--font-display);
   font-style: italic;
-  font-weight: 500;
+  font-weight: 400;
   font-size: clamp(40px, 6vw, 72px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   margin: 0;
 }
 
@@ -147,21 +148,110 @@
 /* ---------- Card ---------- */
 .card {
   position: relative;
-  background: #fff;
+  transform-style: preserve-3d;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.cardFront {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   border-radius: clamp(16px, 1.6vw, 22px);
   padding: clamp(28px, 3.5vw, 48px) clamp(24px, 3vw, 40px) clamp(32px, 4vw, 48px);
   text-align: center;
-  border: 1px solid rgba(42, 33, 24, 0.06);
-  box-shadow: 0 20px 50px rgba(42,33,24,0.10), 0 6px 16px rgba(42,33,24,0.06), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(255,255,255,0.5);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--shadow-glass);
   transform-style: preserve-3d;
-  transition: box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-.card-bride { background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--color-coral-soft) 24%, #fff) 100%); }
-.card-groom { background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--color-sky-soft) 32%, #fff) 100%); }
+.card-bride .cardFront {
+  background: linear-gradient(180deg, var(--glass-bg) 0%, color-mix(in srgb, var(--color-coral-soft) 12%, var(--glass-bg)) 100%);
+}
 
-.card:hover {
-  box-shadow: 0 36px 80px rgba(42,33,24,0.18), 0 16px 32px rgba(42,33,24,0.08), inset 0 1px 0 rgba(255,255,255,1), inset 0 0 0 1px rgba(255,255,255,0.7);
+.card-groom .cardFront {
+  background: linear-gradient(180deg, var(--glass-bg) 0%, color-mix(in srgb, var(--color-sky-soft) 15%, var(--glass-bg)) 100%);
+}
+
+.card:hover .cardFront {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+.cardBack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg);
+  border-radius: clamp(16px, 1.6vw, 22px);
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, var(--color-cream-deep) 0%, var(--color-cream) 100%);
+  box-shadow: var(--shadow-glass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.cardBackInner {
+  width: 100%;
+  height: 100%;
+  border: 2px double var(--gold-metallic);
+  border-radius: clamp(12px, 1.2vw, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 30px rgba(196, 144, 16, 0.12);
+}
+
+.monogramBorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.monogramText {
+  font-family: var(--font-script, var(--font-display));
+  font-size: clamp(48px, 5.5vw, 68px);
+  font-style: normal;
+  font-weight: 400;
+  color: var(--accent, var(--color-coral));
+  line-height: 1;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8), 2px 2px 0px var(--color-gold);
+}
+
+.monogramDivider {
+  width: 48px;
+  height: 1px;
+  background: var(--gold-metallic);
+  margin: 6px 0;
+  opacity: 0.6;
+}
+
+.monogramDate {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  font-weight: 500;
 }
 
 /* ---------- Photo ---------- */
@@ -214,19 +304,19 @@
 
 /* ---------- Text ---------- */
 .name {
-  font-family: var(--font-display); font-style: italic; font-weight: 500;
-  font-size: clamp(30px, 3.6vw, 44px); color: var(--color-charcoal);
+  font-family: var(--font-script, var(--font-display)); font-style: normal; font-weight: 400;
+  font-size: clamp(38px, 4.5vw, 54px); color: var(--fg, var(--color-charcoal));
   margin: 0 0 10px; line-height: 1.1;
 }
 
 .parents {
   font-family: var(--font-body); font-size: 12px; letter-spacing: 0.10em;
-  text-transform: uppercase; color: var(--color-charcoal-light); margin: 0 0 18px;
+  text-transform: uppercase; color: var(--fg-muted, var(--color-charcoal-light)); margin: 0 0 18px;
 }
 
 .bio {
   font-family: var(--font-body); font-size: clamp(14px, 1.4vw, 15px);
-  line-height: 1.7; color: var(--color-charcoal-light);
+  line-height: 1.7; color: var(--fg-muted, var(--color-charcoal-light));
   max-width: 42ch; margin: 0 auto 22px;
 }
 

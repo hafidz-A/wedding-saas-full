@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
+import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import styles from './Rsvp.module.css'
 
 const DEFAULTS = {
@@ -92,134 +93,138 @@ export default function Rsvp(props) {
         </header>
 
         {!submitted ? (
-          <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div className={styles.row}>
-              <label className={styles.field}>
-                <span className={styles.label}>Your name</span>
-                <input
-                  type="text"
-                  className={styles.input}
-                  placeholder="e.g. Maya Larasati"
-                  aria-invalid={errors.name ? 'true' : 'false'}
-                  {...register('name', { required: 'Please enter your name' })}
-                />
-                {errors.name && <span className={styles.error}>{errors.name.message}</span>}
-              </label>
-            </div>
+          <ThreeDTilt className={styles.formCard} max={6} scale={1.012}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <div className={styles.row}>
+                <label className={styles.field}>
+                  <span className={styles.label}>Your name</span>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    placeholder="e.g. Maya Larasati"
+                    aria-invalid={errors.name ? 'true' : 'false'}
+                    {...register('name', { required: 'Please enter your name' })}
+                  />
+                  {errors.name && <span className={styles.error}>{errors.name.message}</span>}
+                </label>
+              </div>
 
-            <div className={styles.row}>
-              <fieldset className={styles.field}>
-                <legend className={styles.label}>Will you attend?</legend>
-                <Controller
-                  name="attending"
-                  control={control}
-                  render={({ field }) => (
-                    <div className={styles.toggle} role="radiogroup" aria-label="Attendance">
-                      {[
-                        { value: 'yes', label: 'Joyfully, yes' },
-                        { value: 'no', label: 'Regretfully, no' },
-                      ].map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          role="radio"
-                          aria-checked={field.value === opt.value}
-                          className={`${styles.toggleBtn} ${
-                            field.value === opt.value ? styles.toggleActive : ''
-                          }`}
-                          onClick={() => field.onChange(opt.value)}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                />
-              </fieldset>
-            </div>
-
-            {attending === 'yes' && (
-              <>
-                <div className={styles.row}>
-                  <fieldset className={styles.field}>
-                    <legend className={styles.label}>How many of you?</legend>
-                    <Controller
-                      name="guestCount"
-                      control={control}
-                      rules={{ min: 1, max: maxGuests }}
-                      render={({ field }) => (
-                        <div className={styles.stepper}>
+              <div className={styles.row}>
+                <fieldset className={styles.field}>
+                  <legend className={styles.label}>Will you attend?</legend>
+                  <Controller
+                    name="attending"
+                    control={control}
+                    render={({ field }) => (
+                      <div className={styles.toggle} role="radiogroup" aria-label="Attendance">
+                        {[
+                          { value: 'yes', label: 'Joyfully, yes' },
+                          { value: 'no', label: 'Regretfully, no' },
+                        ].map((opt) => (
                           <button
+                            key={opt.value}
                             type="button"
-                            className={styles.stepBtn}
-                            onClick={() => field.onChange(Math.max(1, (field.value || 1) - 1))}
-                            aria-label="Decrease guest count"
-                          >−</button>
-                          <span className={styles.stepValue} aria-live="polite">
-                            {field.value}
-                          </span>
-                          <button
-                            type="button"
-                            className={styles.stepBtn}
-                            onClick={() =>
-                              field.onChange(Math.min(maxGuests, (field.value || 1) + 1))
-                            }
-                            aria-label="Increase guest count"
-                          >+</button>
-                          <span className={styles.stepHint}>Max {maxGuests}</span>
-                        </div>
-                      )}
-                    />
-                  </fieldset>
-                </div>
-
-                <div className={styles.row}>
-                  <label className={styles.field}>
-                    <span className={styles.label}>Meal preference</span>
-                    <div className={styles.selectWrap}>
-                      <select className={styles.select} {...register('meal')}>
-                        {mealOptions.map((m) => (
-                          <option key={m.value} value={m.value}>{m.label}</option>
+                            role="radio"
+                            aria-checked={field.value === opt.value}
+                            className={`${styles.toggleBtn} ${
+                              field.value === opt.value ? styles.toggleActive : ''
+                            }`}
+                            onClick={() => field.onChange(opt.value)}
+                          >
+                            {opt.label}
+                          </button>
                         ))}
-                      </select>
-                      <span className={styles.selectChevron} aria-hidden="true">▾</span>
-                    </div>
-                  </label>
-                </div>
-              </>
-            )}
+                      </div>
+                    )}
+                  />
+                </fieldset>
+              </div>
 
-            <div className={styles.row}>
-              <label className={styles.field}>
-                <span className={styles.label}>A note for us (optional)</span>
-                <textarea
-                  className={styles.textarea}
-                  rows={4}
-                  placeholder="Wishes, songs, dietary notes…"
-                  {...register('message', { maxLength: 500 })}
-                />
-              </label>
-            </div>
+              {attending === 'yes' && (
+                <>
+                  <div className={styles.row}>
+                    <fieldset className={styles.field}>
+                      <legend className={styles.label}>How many of you?</legend>
+                      <Controller
+                        name="guestCount"
+                        control={control}
+                        rules={{ min: 1, max: maxGuests }}
+                        render={({ field }) => (
+                          <div className={styles.stepper}>
+                            <button
+                              type="button"
+                              className={styles.stepBtn}
+                              onClick={() => field.onChange(Math.max(1, (field.value || 1) - 1))}
+                              aria-label="Decrease guest count"
+                            >−</button>
+                            <span className={styles.stepValue} aria-live="polite">
+                              {field.value}
+                            </span>
+                            <button
+                              type="button"
+                              className={styles.stepBtn}
+                              onClick={() =>
+                                field.onChange(Math.min(maxGuests, (field.value || 1) + 1))
+                              }
+                              aria-label="Increase guest count"
+                            >+</button>
+                            <span className={styles.stepHint}>Max {maxGuests}</span>
+                          </div>
+                        )}
+                      />
+                    </fieldset>
+                  </div>
 
-            {submitError && (
-              <p className={styles.error} role="alert" style={{ marginTop: 4 }}>{submitError}</p>
-            )}
+                  <div className={styles.row}>
+                    <label className={styles.field}>
+                      <span className={styles.label}>Meal preference</span>
+                      <div className={styles.selectWrap}>
+                        <select className={styles.select} {...register('meal')}>
+                          {mealOptions.map((m) => (
+                            <option key={m.value} value={m.value}>{m.label}</option>
+                          ))}
+                        </select>
+                        <span className={styles.selectChevron} aria-hidden="true">▾</span>
+                      </div>
+                    </label>
+                  </div>
+                </>
+              )}
 
-            <button type="submit" className={styles.submit} disabled={isSubmitting}>
-              {isSubmitting ? 'Sending…' : 'Send my RSVP'}
-            </button>
-          </form>
+              <div className={styles.row}>
+                <label className={styles.field}>
+                  <span className={styles.label}>A note for us (optional)</span>
+                  <textarea
+                    className={styles.textarea}
+                    rows={4}
+                    placeholder="Wishes, songs, dietary notes…"
+                    {...register('message', { maxLength: 500 })}
+                  />
+                </label>
+              </div>
+
+              {submitError && (
+                <p className={styles.error} role="alert" style={{ marginTop: 4 }}>{submitError}</p>
+              )}
+
+              <button type="submit" className={styles.submit} disabled={isSubmitting}>
+                {isSubmitting ? 'Sending…' : 'Send my RSVP'}
+              </button>
+            </form>
+          </ThreeDTilt>
         ) : (
-          <div className={styles.success} role="status" aria-live="polite">
-            <span className={styles.successIcon} aria-hidden="true">♥</span>
-            <h3 className={styles.successTitle}>Thank you</h3>
-            <p className={styles.successText}>
-              Your RSVP has been recorded. We cannot wait to celebrate with you.
-            </p>
-            <button type="button" className={styles.resetBtn} onClick={handleReset}>
-              Submit another response
-            </button>
-          </div>
+          <ThreeDTilt className={styles.successCard} max={6} scale={1.012}>
+            <div className={styles.successInner} role="status" aria-live="polite">
+              <span className={styles.successIcon} aria-hidden="true">♥</span>
+              <h3 className={styles.successTitle}>Thank you</h3>
+              <p className={styles.successText}>
+                Your RSVP has been recorded. We cannot wait to celebrate with you.
+              </p>
+              <button type="button" className={styles.resetBtn} onClick={handleReset}>
+                Submit another response
+              </button>
+            </div>
+          </ThreeDTilt>
         )}
       </div>
     </section>

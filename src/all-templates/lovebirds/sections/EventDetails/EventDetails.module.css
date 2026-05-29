@@ -61,7 +61,7 @@
   text-transform: uppercase;
   letter-spacing: 0.32em;
   font-size: 12px;
-  color: var(--color-coral);
+  color: var(--accent, var(--color-coral));
   margin-bottom: 14px;
 }
 
@@ -70,7 +70,7 @@
   font-style: italic;
   font-weight: 500;
   font-size: clamp(40px, 6vw, 72px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   margin-bottom: 10px;
 }
 
@@ -81,7 +81,7 @@
 .subtitle {
   font-family: var(--font-body);
   font-size: clamp(14px, 1.4vw, 16px);
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   max-width: 540px;
   margin: 0 auto;
 }
@@ -100,19 +100,29 @@
    IMPORTANT: motion controls `transform` per frame for the scroll-driven
    slide-in/out. We must NOT put a CSS transition on transform — it'd lag.
    Hover only animates box-shadow. */
-.eventCard {
-  background: #fff;
-  border-radius: var(--border-radius-card);
-  padding: clamp(18px, 2.2vw, 26px);
-  box-shadow: var(--shadow-card);
-  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  border-left: 4px solid var(--accent, var(--color-coral));
+.eventCardWrapper {
   will-change: transform, opacity;
+  transform-style: preserve-3d;
 }
 
-.eventCard:hover,
-.eventCard:active {
-  box-shadow: var(--shadow-card-hover);
+.eventCardInner {
+  border-radius: var(--border-radius-card);
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--shadow-glass);
+  border-left: 4px solid var(--accent, var(--color-coral)) !important;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.eventCardInner:hover,
+.eventCardInner:active {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
 }
 
 .eventHead {
@@ -140,7 +150,7 @@
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(20px, 2vw, 24px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   line-height: 1.1;
 }
 
@@ -149,14 +159,14 @@
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   font-weight: 500;
 }
 
 .eventTime {
   font-family: var(--font-body);
   font-size: 13px;
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   margin-bottom: 6px;
   display: grid;
   grid-template-columns: 56px 1fr;
@@ -169,14 +179,14 @@
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   font-weight: 500;
 }
 
 .eventLocation {
   font-family: var(--font-body);
   font-size: 13px;
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   line-height: 1.5;
   padding-top: 8px;
   border-top: 1px dashed rgba(42, 33, 24, 0.14);
@@ -193,19 +203,34 @@
    IMPORTANT: motion controls `clip-path` + `transform` + `opacity` here,
    so the CSS transition is removed for those props. The card still has
    the gradient + shadow look. */
-.mapCard {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--color-gold-soft) 55%, #fff) 0%, #fff 100%);
+.mapCardWrapper {
+  will-change: clip-path, transform, opacity;
+  transform-style: preserve-3d;
+}
+
+.mapCardInner {
   border-radius: var(--border-radius-card);
   padding: clamp(18px, 2.2vw, 26px);
-  box-shadow: var(--shadow-card);
-  will-change: clip-path, transform, opacity;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-gold-soft) 24%, rgba(255,255,255,0.75)) 0%, rgba(255,255,255,0.6) 100%);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--shadow-glass);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.mapCardInner:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-gold-soft) 30%, rgba(255,255,255,0.85)) 0%, rgba(255,255,255,0.7) 100%);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
 }
 
 .mapTitle {
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(20px, 2vw, 24px);
-  color: var(--color-charcoal);
+  color: var(--fg, var(--color-charcoal));
   margin-bottom: 14px;
 }
 
@@ -228,7 +253,7 @@
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-charcoal-light);
+  color: var(--fg-muted, var(--color-charcoal-light));
   text-align: center;
 }
 
