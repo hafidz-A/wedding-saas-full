@@ -1,0 +1,119 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict } from '@/lib/i18n'
+import { SiteNav } from '@/components/site/SiteNav'
+
+/**
+ * Deliberately simple profile page. Shows the account email, a reset-password
+ * link, and the list of invitations this account owns (interim "My Template").
+ * Auth-gated: bounces to /login when there is no session.
+ */
+export default async function ProfilePage() {
+  const lang = getLang()
+  const t = getDict(lang)
+  const p = t.common.profile
+
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const admin = createSupabaseAdminClient()
+  const { data: rows } = (await admin
+    .from('invitations')
+    .select('slug, template_id')
+    .eq('owner_user_id', user.id)
+    .order('created_at', { ascending: false })) as {
+    data: { slug: string; template_id: string | null }[] | null
+  }
+  const invitations = rows ?? []
+
+  const tmpl = (id: string | null) =>
+    id && isValidTemplate(id) ? id : DEFAULT_TEMPLATE_ID
+
+  return (
+    <>
+      <SiteNav lang={lang} t={t.common} />
+      <main style={page}>
+        <div style={wrap}>
+          <h1 style={h1}>{p.title}</h1>
+
+          <section style={cardBox}>
+            <p style={rowLabel}>{p.emailLabel}</p>
+            <p style={rowValue}>{user.email}</p>
+            <Link href="/forgot-password" style={resetLink}>{p.resetPassword}</Link>
+          </section>
+
+          <h2 style={h2}>{p.myTemplatesTitle}</h2>
+          {invitations.length === 0 ? (
+            <p style={emptyBox}>
+              {p.empty}{' '}
+              <Link href="/templates" style={resetLink}>{p.browseTemplates}</Link>
+            </p>
+          ) : (
+            <ul style={list}>
+              {invitations.map((inv) => {
+                const tt = tmpl(inv.template_id)
+                return (
+                  <li key={inv.slug} style={item}>
+                    <span style={itemSlug}>{inv.slug}</span>
+                    <span style={itemActions}>
+                      <Link href={`/${tt}/${inv.slug}`} target="_blank" style={ghostLink}>{p.viewPublic}</Link>
+                      <Link href={`/${tt}/${inv.slug}/dashboard`} style={solidLink}>{p.openDashboard}</Link>
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      </main>
+    </>
+  )
+}
+
+const page: React.CSSProperties = {
+  minHeight: '100vh',
+  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  padding: 'clamp(96px, 12vw, 128px) clamp(20px, 5vw, 48px) 64px',
+  fontFamily: 'var(--font-body, system-ui)',
+  color: '#2A2118',
+}
+const wrap: React.CSSProperties = { maxWidth: 720, margin: '0 auto', width: '100%' }
+const h1: React.CSSProperties = {
+  fontFamily: 'var(--font-display, serif)', fontStyle: 'italic',
+  fontSize: 'clamp(32px, 6vw, 52px)', margin: '0 0 24px',
+}
+const h2: React.CSSProperties = { fontSize: 18, fontWeight: 600, margin: '32px 0 12px' }
+const cardBox: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.94)', borderRadius: 16, padding: 24,
+  boxShadow: '0 20px 60px rgba(42,33,24,0.10)',
+}
+const rowLabel: React.CSSProperties = {
+  fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em',
+  color: 'rgba(42,33,24,0.6)', margin: 0,
+}
+const rowValue: React.CSSProperties = { fontSize: 16, margin: '4px 0 16px' }
+const resetLink: React.CSSProperties = {
+  color: '#E8553E', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 4, fontSize: 14,
+}
+const emptyBox: React.CSSProperties = { fontSize: 15, color: '#5C4A3A' }
+const list: React.CSSProperties = { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }
+const item: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
+  background: 'rgba(255,255,255,0.94)', borderRadius: 14, padding: '16px 20px',
+  boxShadow: '0 10px 30px rgba(42,33,24,0.08)',
+}
+const itemSlug: React.CSSProperties = { fontWeight: 600, fontSize: 16 }
+const itemActions: React.CSSProperties = { display: 'flex', gap: 10, flexWrap: 'wrap' }
+const ghostLink: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.2)',
+  color: '#2A2118', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
+}
+const solidLink: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3',
+  fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
+}
