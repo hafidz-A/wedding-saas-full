@@ -85,6 +85,36 @@
 - **Files:** Create `src/app/profile/page.tsx` (server, auth-gated) + small client form if needed.
 - **Effort:** S–M. **Deps:** W4 (entry point). **Ready to build.**
 
+### Phase 1.5 — Motion polish (UI only, uses existing `motion` dep)
+
+#### W8. Page-transition animation
+- **What:** Smooth enter transition between pages so navigation doesn't feel
+  abrupt ("ga patah") — a subtle fade + slight slide-up on each route.
+- **Approach:** Add a root `src/app/template.tsx` (Client Component) that wraps
+  `children` in a `motion.div` keyed by `usePathname()`, with an enter
+  animation. Enter-only is recommended (App Router unmounts the old page before
+  the new one, so exit animations need the FrozenRouter/`AnimatePresence` trick —
+  extra complexity, skip for now per YAGNI).
+- **Caveat:** Do NOT wrap the public invitation route `[template]/[slug]` — it
+  has its own cinematic "gate" intro + GSAP scroll pinning; a wrapper transition
+  would fight it. Scope the transition to the marketing/auth/dashboard shell, or
+  exclude that path inside `template.tsx`.
+- **Files:** Create `src/app/template.tsx`. Possibly exclude invitation paths via
+  a pathname check. Uses `motion` (already installed).
+- **Effort:** M. **Deps:** none. **Ready to build** (short design pass on the
+  exact curve/duration).
+
+#### W9. Language-toggle micro-animation
+- **What:** A small, cute, elegant animation when switching ID↔EN — e.g. a
+  sliding active "pill" that glides between ID and EN, plus a gentle crossfade of
+  the swapped content (the `router.refresh()` already re-renders in place).
+- **Approach:** In `LangToggle`, use `motion` `layoutId` on the active-state
+  indicator so it animates between the two buttons; keep the existing
+  cookie + `router.refresh()` logic untouched.
+- **Files:** `src/components/site/LangToggle.tsx` + `LangToggle.module.css`. Uses
+  `motion` (already installed).
+- **Effort:** S. **Deps:** none. **Ready to build.**
+
 ### Phase 3 — Multi-invitation foundation (architectural — needs brainstorm + spec)
 
 #### W6. Allow many invitations per account + "My Template" list
@@ -124,6 +154,8 @@
 W1 ─┐
 W2 ─┼─ (independent quick wins)
 W3 ─┘
+W8 ─┐  (motion polish, independent)
+W9 ─┘
 W4 ── W5
    └── W6 (My Template list) ── W7 (payment)
 ```
@@ -131,9 +163,10 @@ W4 ── W5
 ## Suggested build order
 
 1. **W1, W2, W3** — quick wins, ship same day, no backend risk.
-2. **W4 + W5** — auth-aware navbar + simple profile (biggest visible upgrade).
-3. **W6** — brainstorm → spec → plan → build (unlocks My Template + reversing 1:1).
-4. **W7** — brainstorm → spec → plan → build (payment; largest, most decisions).
+2. **W8, W9** — motion polish (page transitions + lang toggle), uses existing `motion` dep.
+3. **W4 + W5** — auth-aware navbar + simple profile (biggest visible upgrade).
+4. **W6** — brainstorm → spec → plan → build (unlocks My Template + reversing 1:1).
+5. **W7** — brainstorm → spec → plan → build (payment; largest, most decisions).
 
-Items W1–W5 are ready for detailed TDD plans now. W6 and W7 each need a brainstorm
-+ spec pass first (they carry data-model and third-party decisions).
+Items W1–W5, W8, W9 are ready for detailed TDD plans now. W6 and W7 each need a
+brainstorm + spec pass first (they carry data-model and third-party decisions).
