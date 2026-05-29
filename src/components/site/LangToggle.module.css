@@ -5,10 +5,18 @@
   padding: 2px; gap: 2px; background: rgba(255, 255, 255, 0.5);
 }
 .btn {
+  position: relative;
   font-family: var(--font-body); font-size: 12px; font-weight: 600;
   letter-spacing: 0.04em; color: var(--color-charcoal-light);
   padding: 5px 10px; border-radius: var(--border-radius-pill);
-  transition: var(--transition-default); min-height: 0;
+  transition: color var(--transition-default); min-height: 0;
 }
-.active { background: var(--color-coral); color: var(--color-paper); }
+.pill {
+  position: absolute; inset: 0;
+  background: var(--color-coral);
+  border-radius: var(--border-radius-pill);
+  z-index: 0;
+}
+.btnLabel { position: relative; z-index: 1; }
+.active { color: var(--color-paper); }
 .btn:not(.active):hover { color: var(--color-charcoal); }
