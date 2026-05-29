@@ -13,3 +13,13 @@ describe('getSchemaRegistry', () => {
     expect(getSchemaRegistry('solary')).toBe(solarySchemaRegistry)
   })
 })
+
+describe('solarySchemaRegistry', () => {
+  it('has all 10 existing solary section types', () => {
+    const r = getSchemaRegistry('solary')
+    for (const t of ['openingGate','welcomePlanet','storyPlanet','saturnRing','countdownPlanet','detailsPlanet','rsvpPlanet','teamPlanet','giftPlanet','footerPlanet']) {
+      expect(r[t]).toBeTruthy()
+      expect(r[t].fields.length).toBeGreaterThan(0)
+    }
+  })
+})
