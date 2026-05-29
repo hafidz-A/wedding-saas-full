@@ -56,7 +56,7 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
     })
@@ -70,6 +70,16 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
       } else {
         setError(signUpError.message)
       }
+      setSubmitting(false)
+      return
+    }
+
+    // Anti email-enumeration: for an already-registered email Supabase returns
+    // no error but an obfuscated user whose identities[] is empty. Detect that
+    // and tell the user to log in instead of sending them to /verify-signup
+    // (where no token would ever arrive).
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setError(dict.errAlready)
       setSubmitting(false)
       return
     }
