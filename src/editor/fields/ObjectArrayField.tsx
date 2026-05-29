@@ -8,6 +8,8 @@ import DatetimeField from './DatetimeField'
 import BooleanField from './BooleanField'
 import SelectField from './SelectField'
 import ImageField from './ImageField'
+import ImageArrayField from './ImageArrayField'
+import StringArrayField from './StringArrayField'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import type { Lang } from '@/lib/i18n'
 
@@ -95,6 +97,9 @@ export default function ObjectArrayField({
                       case 'boolean':  return <BooleanField  key={f.key} label={fLabel} value={v} onChange={onChange} help={fHelp} />
                       case 'select':   return <SelectField   key={f.key} label={fLabel} value={v} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={onChange} help={fHelp} />
                       case 'image':    return <ImageField    key={f.key} label={fLabel} value={v} slug={slug} onChange={onChange} help={fHelp} />
+                      case 'imageArray':  return <ImageArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} slug={slug} onChange={onChange} help={fHelp} />
+                      case 'stringArray': return <StringArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemPlaceholder={f.itemPlaceholder} onChange={onChange} help={fHelp} />
+                      case 'objectArray': return <ObjectArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemFields={f.itemFields} newItem={f.newItem} itemLabelKey={f.itemLabelKey} slug={slug} lang={lang} onChange={onChange} />
                       default:
                         return <div key={f.key} style={{ fontSize: 12, color: '#E8553E' }}>{t.unsupportedField} {f.type}</div>
                     }

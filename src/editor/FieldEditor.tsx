@@ -12,6 +12,7 @@ import BooleanField from './fields/BooleanField'
 import SelectField from './fields/SelectField'
 import ImageField from './fields/ImageField'
 import ImageArrayField from './fields/ImageArrayField'
+import StringArrayField from './fields/StringArrayField'
 import ObjectArrayField from './fields/ObjectArrayField'
 import AudioField from './fields/AudioField'
 
@@ -93,6 +94,7 @@ function renderField(
     case 'image':      return <ImageField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
     case 'audio':      return <AudioField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
     case 'imageArray': return <ImageArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} slug={slug} onChange={(v) => onChange(v)} help={help} />
+    case 'stringArray': return <StringArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} itemPlaceholder={f.itemPlaceholder} onChange={(v) => onChange(v)} help={help} />
     case 'objectArray':return <ObjectArrayField
                                 key={f.key}
                                 label={label}
