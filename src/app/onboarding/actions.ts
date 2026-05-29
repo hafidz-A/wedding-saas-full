@@ -5,10 +5,13 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
 import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { resolvePlan } from '@/lib/payments/plans'
+import { createXenditInvoice } from '@/lib/payments/xendit'
 
 export interface OnboardingInput {
   slug: string
   template: string
+  plan: string
   brideName: string
   groomName: string
   weddingDate: string // ISO datetime e.g. "2026-11-15T16:00:00"
@@ -18,6 +21,7 @@ export interface OnboardingInput {
 export interface OnboardingResult {
   ok: boolean
   slug?: string
+  invitationId?: string
   publicUrl?: string
   dashboardUrl?: string
   error?: string
@@ -60,28 +64,14 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     const dateMs = Date.parse(input.weddingDate)
     if (isNaN(dateMs)) return { ok: false, error: 'Tanggal acara tidak valid' }
 
+    // 3. Validate the chosen plan against the template's catalog plans
+    //    (defaults to 'basic' when missing/invalid).
+    const plan = resolvePlan(template, input.plan) ? input.plan : 'basic'
+
     const admin = createSupabaseAdminClient()
 
-    // 3. One user owns at most one invitation.
-    const { data: alreadyOwned } = (await admin
-      .from('invitations')
-      .select('slug, template_id')
-      .eq('owner_user_id', user.id)
-      .maybeSingle()) as { data: { slug: string; template_id: string | null } | null }
-    if (alreadyOwned?.slug) {
-      const ownedTemplate =
-        alreadyOwned.template_id && isValidTemplate(alreadyOwned.template_id)
-          ? alreadyOwned.template_id
-          : DEFAULT_TEMPLATE_ID
-      return {
-        ok: true,
-        slug: alreadyOwned.slug,
-        publicUrl: `/${ownedTemplate}/${alreadyOwned.slug}`,
-        dashboardUrl: `/${ownedTemplate}/${alreadyOwned.slug}/dashboard`,
-      }
-    }
-
-    // 4. Slug availability check.
+    // 4. Slug availability check. (One account may own many invitations, so
+    //    there is no per-user uniqueness check — only slug uniqueness.)
     const { data: taken } = (await admin
       .from('invitations')
       .select('id')
@@ -102,18 +92,23 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
           })
         : getDefaultConfig(template)
 
-    // 6. Insert. Legacy NOT NULL columns (from the bcrypt-era schema) are
-    //    set the same way scripts/create-invitation.mjs does it.
-    const { error } = await (admin.from('invitations') as any).insert({
-      slug,
-      owner_user_id: user.id,
-      email: user.email,
-      password_hash: 'supabase-auth-migrated',
-      plan: 'premium',
-      template_id: template,
-      is_published: true,
-      config,
-    })
+    // 6. Insert as an UNPAID DRAFT (is_paid=false, is_published=false). Payment
+    //    publishes it via the Xendit webhook. Legacy NOT NULL columns (from the
+    //    bcrypt-era schema) are set the same way scripts/create-invitation.mjs does.
+    const { data: inserted, error } = await (admin.from('invitations') as any)
+      .insert({
+        slug,
+        owner_user_id: user.id,
+        email: user.email,
+        password_hash: 'supabase-auth-migrated',
+        plan,
+        template_id: template,
+        is_paid: false,
+        is_published: false,
+        config,
+      })
+      .select('id')
+      .single()
     if (error) {
       console.error('Onboarding insert error:', error)
       return { ok: false, error: `DB error: ${error.message}` }
@@ -125,6 +120,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     return {
       ok: true,
       slug,
+      invitationId: (inserted as { id: string }).id,
       publicUrl: `/${template}/${slug}`,
       dashboardUrl: `/${template}/${slug}/dashboard`,
     }
@@ -150,5 +146,59 @@ export async function checkSlugAvailable(slug: string): Promise<{ available: boo
     return data ? { available: false, reason: 'Sudah dipakai' } : { available: true }
   } catch (e) {
     return { available: false, reason: e instanceof Error ? e.message : 'Format slug tidak valid' }
+  }
+}
+
+export interface CheckoutResult {
+  ok: boolean
+  invoiceUrl?: string
+  error?: string
+}
+
+/**
+ * Create a Xendit invoice for an invitation the caller owns, and persist the
+ * Xendit ids on the row so the webhook can correlate the PAID callback.
+ * Returns the hosted invoice URL for the client to redirect to.
+ */
+export async function startCheckout(invitationId: string): Promise<CheckoutResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, slug, plan, template_id, owner_user_id, email')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+
+    const resolved = resolvePlan(inv.template_id, inv.plan)
+    if (!resolved) return { ok: false, error: 'Plan tidak valid' }
+
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const externalId = `inv_${inv.id}_${Date.now()}`
+    const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
+
+    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
+      externalId,
+      amountIDR: resolved.amountIDR,
+      payerEmail: inv.email ?? user.email ?? undefined,
+      description: `Undangan ${inv.slug} — plan ${inv.plan}`,
+      successUrl: `${dash}?paid=1`,
+      failureUrl: `${dash}?payment=failed`,
+    })
+
+    await (admin.from('invitations') as any)
+      .update({ xendit_invoice_id: invoiceId, xendit_external_id: externalId })
+      .eq('id', inv.id)
+
+    return { ok: true, invoiceUrl }
+  } catch (e) {
+    console.error('startCheckout error:', e)
+    return { ok: false, error: e instanceof Error ? e.message : 'Gagal memulai pembayaran' }
   }
 }

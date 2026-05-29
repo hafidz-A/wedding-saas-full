@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { completeOnboarding, checkSlugAvailable } from './actions'
+import { completeOnboarding, checkSlugAvailable, startCheckout } from './actions'
 import { templateCatalog } from '@/config/templateCatalog'
 import type { Dict, Lang } from '@/lib/i18n'
 import { LangToggle } from '@/components/site/LangToggle'
@@ -18,6 +18,7 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
   const searchParams = useSearchParams()
   const queryTemplate = searchParams.get('template') || ''
   const initialTemplate = TEMPLATE_IDS.includes(queryTemplate) ? queryTemplate : templateCatalog[0].id
+  const plan = searchParams.get('plan') || 'basic'
 
   const [pending, startTransition] = useTransition()
   const [template, setTemplate] = useState(initialTemplate)
@@ -64,6 +65,7 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
       const result = await completeOnboarding({
         slug,
         template,
+        plan,
         brideName: bride,
         groomName: groom,
         weddingDate: date,
@@ -73,6 +75,16 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
         setError(result.error || dict.form.errFail)
         return
       }
+      // Draft created — kick off payment and redirect to the Xendit invoice.
+      if (result.invitationId) {
+        const checkout = await startCheckout(result.invitationId)
+        if (checkout.ok && checkout.invoiceUrl) {
+          window.location.href = checkout.invoiceUrl
+          return
+        }
+      }
+      // Checkout couldn't start — fall back to the done panel so the couple can
+      // reach the dashboard and pay later from the unpaid banner there.
       setDone({
         slug: result.slug!,
         publicUrl: result.publicUrl!,

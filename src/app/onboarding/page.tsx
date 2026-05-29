@@ -1,8 +1,5 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
@@ -56,21 +53,8 @@ export default async function OnboardingPage() {
     )
   }
 
-  // Idempotency: if this user already has an invitation, jump straight there.
-  const admin = createSupabaseAdminClient()
-  const { data: existing } = (await admin
-    .from('invitations')
-    .select('slug, template_id')
-    .eq('owner_user_id', user.id)
-    .maybeSingle()) as { data: { slug: string; template_id: string | null } | null }
-
-  if (existing?.slug) {
-    const t =
-      existing.template_id && isValidTemplate(existing.template_id)
-        ? existing.template_id
-        : DEFAULT_TEMPLATE_ID
-    redirect(`/${t}/${existing.slug}/dashboard`)
-  }
+  // One account may own many invitations, so onboarding always lets the user
+  // create a new one (no redirect to an existing invitation).
 
   return (
     <>
