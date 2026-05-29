@@ -29,6 +29,32 @@
   background: rgba(253, 246, 236, 0.98); border-bottom: 1px solid rgba(42, 33, 24, 0.08);
 }
 
+.profileWrap { position: relative; display: inline-block; }
+.profileTrigger {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  color: var(--color-charcoal); cursor: pointer;
+  padding: 8px 12px; border-radius: var(--border-radius-pill);
+  border: 1px solid rgba(42, 33, 24, 0.18); background: rgba(255, 255, 255, 0.5);
+  transition: var(--transition-default);
+}
+.profileTrigger:hover { border-color: var(--color-coral); color: var(--color-coral); }
+.caret { font-size: 10px; }
+.menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  min-width: 180px; display: flex; flex-direction: column;
+  background: rgba(253, 246, 236, 0.98);
+  border: 1px solid rgba(42, 33, 24, 0.1); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 6px; gap: 2px;
+}
+.menuItem, .menuItemButton {
+  display: block; width: 100%; text-align: left;
+  font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light);
+  padding: 9px 12px; border-radius: 9px; transition: var(--transition-default);
+  cursor: pointer; background: transparent; border: 0;
+}
+.menuItem:hover, .menuItemButton:hover { background: rgba(42, 33, 24, 0.06); color: var(--color-charcoal); }
+
 @media (min-width: 768px) {
   .desktop { display: flex; align-items: center; gap: 22px; }
   .burger, .mobilePanel { display: none; }
