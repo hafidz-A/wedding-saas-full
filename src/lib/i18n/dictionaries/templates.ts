@@ -6,6 +6,10 @@ export const templates = {
     thumbHint: 'Klik untuk preview →',
     previewBtn: 'Lihat preview ↗',
     useBtn: 'Gunakan template ini →',
+    flip: 'Lihat plan ↻',
+    back: '← Kembali',
+    plansTitle: 'Plan tersedia',
+    choosePlan: 'Pilih plan',
     haveAccount: 'Sudah punya akun?',
     loginLink: 'Login di sini →',
     byTemplate: {
@@ -20,6 +24,10 @@ export const templates = {
     thumbHint: 'Click to preview →',
     previewBtn: 'View preview ↗',
     useBtn: 'Use this template →',
+    flip: 'See plans ↻',
+    back: '← Back',
+    plansTitle: 'Available plans',
+    choosePlan: 'Choose plan',
     haveAccount: 'Already have an account?',
     loginLink: 'Log in here →',
     byTemplate: {

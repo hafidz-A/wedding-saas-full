@@ -3,13 +3,15 @@ import { templateCatalog } from '@/config/templateCatalog'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
+import { TemplateCard } from './TemplateCard'
 
 /**
  * Template gallery — browse every available invitation template before
- * signing up. Each card links to a full demo preview (with a real slug)
- * and to onboarding pre-seeded with that template.
+ * signing up. Each card flips to reveal the template's description + the
+ * plans available for it.
  *
- * Server component, no auth.
+ * Server component, no auth. The card flip + plan selection is handled by the
+ * client component TemplateCard.
  */
 export const metadata = {
   title: 'Pilih Template — finWedding',
@@ -33,37 +35,7 @@ export default function TemplatesPage() {
 
         <div style={grid}>
           {templateCatalog.map((t) => (
-            <article key={t.id} style={card}>
-              <Link
-                href={`/${t.id}/${t.demoSlug}`}
-                style={{ ...thumb, background: thumbGradient(t.accent) }}
-                aria-label={`Preview ${t.label}`}
-              >
-                <span style={thumbLabel}>{t.label}</span>
-                <span style={thumbHint}>{tt.thumbHint}</span>
-              </Link>
-
-              <div style={cardBody}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <h2 style={cardTitle}>{t.label}</h2>
-                  <span style={{ ...dot, background: t.accent }} />
-                  <span style={tagRow}>{t.tags.join(' · ')}</span>
-                </div>
-                <p style={desc}>{tt.byTemplate[t.id as keyof typeof tt.byTemplate] ?? t.description}</p>
-
-                <div style={actions}>
-                  <Link href={`/${t.id}/${t.demoSlug}`} target="_blank" style={previewBtn}>
-                    {tt.previewBtn}
-                  </Link>
-                  <Link
-                    href={`/onboarding?template=${t.id}`}
-                    style={{ ...useBtn, background: t.accent }}
-                  >
-                    {tt.useBtn}
-                  </Link>
-                </div>
-              </div>
-            </article>
+            <TemplateCard key={t.id} t={t} tt={tt} />
           ))}
         </div>
 
@@ -77,10 +49,6 @@ export default function TemplatesPage() {
       </main>
     </>
   )
-}
-
-function thumbGradient(accent: string) {
-  return `linear-gradient(135deg, ${accent} 0%, #2A2118 100%)`
 }
 
 const page: React.CSSProperties = {
@@ -117,62 +85,4 @@ const grid: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
   gap: 'clamp(20px, 3vw, 32px)',
-}
-const card: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.94)',
-  borderRadius: 20,
-  overflow: 'hidden',
-  boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
-  display: 'flex',
-  flexDirection: 'column',
-}
-const thumb: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'flex-end',
-  gap: 6,
-  aspectRatio: '16 / 10',
-  padding: 24,
-  textDecoration: 'none',
-  color: '#FFF8EE',
-}
-const thumbLabel: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
-  fontStyle: 'italic',
-  fontSize: 32,
-  lineHeight: 1,
-}
-const thumbHint: React.CSSProperties = {
-  fontSize: 12,
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase',
-  opacity: 0.85,
-}
-const cardBody: React.CSSProperties = { padding: 24, display: 'flex', flexDirection: 'column', flex: 1 }
-const cardTitle: React.CSSProperties = { fontSize: 20, fontWeight: 600, margin: 0 }
-const dot: React.CSSProperties = { width: 8, height: 8, borderRadius: 999, display: 'inline-block' }
-const tagRow: React.CSSProperties = { fontSize: 12, color: 'rgba(42,33,24,0.55)', letterSpacing: '0.04em' }
-const desc: React.CSSProperties = { fontSize: 14, lineHeight: 1.6, color: '#5C4A3A', margin: '0 0 20px', flex: 1 }
-const actions: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 10 }
-const previewBtn: React.CSSProperties = {
-  padding: '11px 18px',
-  borderRadius: 999,
-  border: '1px solid rgba(42,33,24,0.2)',
-  background: 'transparent',
-  color: '#2A2118',
-  fontSize: 12,
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase',
-  textDecoration: 'none',
-}
-const useBtn: React.CSSProperties = {
-  padding: '11px 18px',
-  borderRadius: 999,
-  color: '#FFF8EE',
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase',
-  textDecoration: 'none',
-  border: 'none',
 }

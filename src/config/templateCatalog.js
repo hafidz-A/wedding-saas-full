@@ -13,6 +13,12 @@ export const templateCatalog = [
     thumbnail: '/images/templates/lovebirds-thumb.jpg',
     accent: '#E8553E',
     tags: ['cinematic', 'elegant', 'botanical'],
+    // PLACEHOLDER plans — edit name/price/features freely. Each template can
+    // have its own plans. Payment/DB wiring is intentionally not connected yet.
+    plans: [
+      { id: 'basic', name: 'Basic', price: 'Rp —', features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
+      { id: 'premium', name: 'Premium', price: 'Rp —', features: ['Galeri unlimited', 'Tanpa watermark', 'Musik'] },
+    ],
   },
   {
     id: 'solary',
@@ -23,6 +29,11 @@ export const templateCatalog = [
     thumbnail: '/images/templates/solary-thumb.jpg',
     accent: '#6B35A8',
     tags: ['futuristic', 'space', '3D'],
+    // PLACEHOLDER plans — edit freely.
+    plans: [
+      { id: 'basic', name: 'Basic', price: 'Rp —', features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
+      { id: 'premium', name: 'Premium', price: 'Rp —', features: ['Galeri unlimited', 'Palette switcher', 'Musik'] },
+    ],
   },
 ]
 
