@@ -1,4 +1,5 @@
 import type { SectionSchema } from './types'
+import { solarySchemaRegistry } from './solary'
 import { heroSchema } from './hero'
 import { countdownSchema } from './countdown'
 import { ourStorySchema } from './ourStory'
@@ -38,3 +39,12 @@ export const schemaRegistry: Record<string, SectionSchema> = {
 }
 
 export type { SectionSchema, FieldDef } from './types'
+
+const registriesByTemplate: Record<string, Record<string, SectionSchema>> = {
+  lovebirds: schemaRegistry,
+  solary: solarySchemaRegistry,
+}
+
+export function getSchemaRegistry(template: string): Record<string, SectionSchema> {
+  return registriesByTemplate[template] ?? schemaRegistry
+}
