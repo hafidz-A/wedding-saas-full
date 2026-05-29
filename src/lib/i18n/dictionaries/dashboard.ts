@@ -5,6 +5,7 @@ export const dashboard = {
       published: 'Terbit',
       draft: 'Draf',
       viewLive: 'Lihat live →',
+      homepage: '← Beranda',
       logout: 'Keluar',
       language: 'Bahasa',
       tabs: {
@@ -257,6 +258,7 @@ export const dashboard = {
       published: 'Published',
       draft: 'Draft',
       viewLive: 'View live →',
+      homepage: '← Home',
       logout: 'Logout',
       language: 'Language',
       tabs: {
