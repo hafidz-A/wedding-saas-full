@@ -14,6 +14,7 @@ export type FieldType =
   | 'imageArray'
   | 'objectArray'
   | 'audio'
+  | 'stringArray'
 
 /** Bilingual label/help. The id/en toggle picks one at render time — this is
  *  editor "keterangan" only; it never touches the couple's invitation content.
@@ -65,6 +66,11 @@ export interface ImageArrayField extends BaseField {
   /** Property name of the URL when itemIsObject is true (default: 'src'). */
   urlKey?: string
 }
+export interface StringArrayField extends BaseField {
+  type: 'stringArray'
+  /** Placeholder for each new string row (default ''). */
+  itemPlaceholder?: string
+}
 export interface ObjectArrayField extends BaseField {
   type: 'objectArray'
   /** Sub-schema for each row in the array. */
@@ -85,6 +91,7 @@ export type FieldDef =
   | ImageArrayField
   | ObjectArrayField
   | AudioField
+  | StringArrayField
 
 export interface SectionSchema {
   type: string
