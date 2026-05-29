@@ -16,8 +16,8 @@ export const templateCatalog = [
     // PLACEHOLDER plans — edit name/price/features freely. Each template can
     // have its own plans. Payment/DB wiring is intentionally not connected yet.
     plans: [
-      { id: 'basic', name: 'Basic', price: 'Rp —', features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
-      { id: 'premium', name: 'Premium', price: 'Rp —', features: ['Galeri unlimited', 'Tanpa watermark', 'Musik'] },
+      { id: 'basic', name: 'Basic', price: 'Rp 149.000', amountIDR: 149000, features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
+      { id: 'premium', name: 'Premium', price: 'Rp 299.000', amountIDR: 299000, features: ['Galeri unlimited', 'Tanpa watermark', 'Musik'] },
     ],
   },
   {
@@ -31,8 +31,8 @@ export const templateCatalog = [
     tags: ['futuristic', 'space', '3D'],
     // PLACEHOLDER plans — edit freely.
     plans: [
-      { id: 'basic', name: 'Basic', price: 'Rp —', features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
-      { id: 'premium', name: 'Premium', price: 'Rp —', features: ['Galeri unlimited', 'Palette switcher', 'Musik'] },
+      { id: 'basic', name: 'Basic', price: 'Rp 149.000', amountIDR: 149000, features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
+      { id: 'premium', name: 'Premium', price: 'Rp 299.000', amountIDR: 299000, features: ['Galeri unlimited', 'Palette switcher', 'Musik'] },
     ],
   },
 ]
