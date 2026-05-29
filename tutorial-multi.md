@@ -72,6 +72,7 @@ Setiap template = 1 folder mandiri di `src/all-templates/<id>/`:
 ```
 src/all-templates/<id>/
 ├── sections/          ← komponen tiap bagian undangan (Hero, Countdown, dll)
+├── renderers/         ← SectionRenderer milik template ini (config → komponen)
 ├── components/        ← komponen khusus template ini (opsional)
 ├── contexts/          ← React context khusus template (opsional)
 ├── styles/            ← CSS khusus template (opsional)
@@ -133,7 +134,7 @@ Skema 1 section: `{ id, type, enabled, theme?, props, ... }`.
 Pola minimal:
 ```jsx
 'use client'
-import SectionRenderer from '@/renderers/SectionRenderer.jsx'
+import SectionRenderer from './renderers/SectionRenderer.jsx'   // per-template, RELATIF
 import { sectionRegistry } from './registry.js'
 
 export default function Shell({ config, slug }) {
@@ -161,8 +162,8 @@ Dua file "registry pusat" yang menyatukan semua template:
 Dipakai server component (page.tsx) & onboarding. **Hanya boleh import data** (defaultConfig), JANGAN import Shell/registry/Three.js (nanti kode client kebawa ke server).
 
 ```js
-import { defaultConfig as lovebirdsConfig } from '../templates/lovebirds/defaultConfig.js'
-import { defaultConfig as solaryConfig }    from '../templates/solary/defaultConfig.js'
+import { defaultConfig as lovebirdsConfig } from '../all-templates/lovebirds/defaultConfig.js'
+import { defaultConfig as solaryConfig }    from '../all-templates/solary/defaultConfig.js'
 
 export const templates = {
   lovebirds: { label: 'Lovebirds', config: lovebirdsConfig },
@@ -318,7 +319,7 @@ src/all-templates/garden/
 
 ### Langkah 2 — Daftarkan di `templateIndex.js`
 ```js
-import { defaultConfig as gardenConfig } from '../templates/garden/defaultConfig.js'
+import { defaultConfig as gardenConfig } from '../all-templates/garden/defaultConfig.js'
 export const templates = {
   /* existing... */
   garden: { label: 'Garden', config: gardenConfig },   // ← tambah
