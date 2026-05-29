@@ -137,8 +137,8 @@
   redirected to My Template → use the purchased template. Logged out: pick
   template → forced to login/register → pick plan → pay → My Template. Each
   successful payment creates a new invitation row (ties into W6).
-- **Open decisions (brainstorm):** payment provider (Midtrans / Xendit are the
-  Indonesian options), plan tiers + prices, webhook → server creates invitation,
+- **Payment provider: Xendit** (decided 2026-05-29).
+- **Open decisions (brainstorm):** plan tiers + prices, webhook → server creates invitation,
   expiry (`expires_at`: 1-year vs lifetime → unpublish not delete), what gates
   on "paid" vs "draft".
 - **Files (rough):** new `src/app/api/payment/*` (create + webhook), plan picker
