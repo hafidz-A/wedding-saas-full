@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import EditorRoot from '@/editor/EditorRoot'
 import RsvpsTab, { type RsvpRow } from './RsvpsTab'
 import GiftsTab, { type GiftRow } from './GiftsTab'
@@ -12,6 +12,8 @@ import GuestsTab from './GuestsTab'
 import { type GuestRow } from './guests/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
 import { LangToggle } from '@/components/site/LangToggle'
+import { startCheckout } from '@/app/onboarding/actions'
+import { activePeriodStatus } from '@/lib/payments/active-period'
 import type { Dict, Lang } from '@/lib/i18n'
 import styles from './dashboard.module.css'
 
@@ -31,6 +33,7 @@ export default function DashboardClient({
   notes = [],
   guests = [],
   dict,
+  activePeriod,
   lang,
 }: {
   slug: string
@@ -41,8 +44,27 @@ export default function DashboardClient({
   notes?: NoteRow[]
   guests?: GuestRow[]
   dict: Dict['dashboard']
+  activePeriod: Dict['common']['activePeriod']
   lang: Lang
 }) {
+  const [payPending, startPay] = useTransition()
+  const period = activePeriodStatus(invitation, Date.now())
+  const periodLabel =
+    period.status === 'lifetime'
+      ? activePeriod.lifetime
+      : period.status === 'expired'
+      ? activePeriod.expired
+      : period.status === 'active' && period.expiresAt
+      ? `${activePeriod.activeUntilPrefix} ${new Date(period.expiresAt).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
+      : activePeriod.draft
+
+  function onPay() {
+    startPay(async () => {
+      const res = await startCheckout(invitation.id)
+      if (res.ok && res.invoiceUrl) window.location.href = res.invoiceUrl
+    })
+  }
+
   const [tab, setTab] = useState<
     'rsvps' | 'gifts' | 'guests' | 'editor' | 'music' | 'background' | 'notes'
   >('rsvps')
@@ -76,6 +98,18 @@ export default function DashboardClient({
             }}
           >
             {invitation.is_published ? dict.chrome.published : dict.chrome.draft}
+          </span>
+          <span
+            style={{
+              padding: '6px 12px',
+              borderRadius: 999,
+              fontSize: 11,
+              letterSpacing: '0.08em',
+              background: 'rgba(42,33,24,0.06)',
+              color: '#5C4A3A',
+            }}
+          >
+            {periodLabel}
           </span>
           <Link
             href="/"
@@ -130,6 +164,45 @@ export default function DashboardClient({
           </form>
         </div>
       </header>
+
+      {!invitation.is_paid && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            margin: '0 clamp(16px, 4vw, 40px) 16px',
+            padding: '14px 18px',
+            borderRadius: 14,
+            background: 'rgba(232,85,62,0.1)',
+            border: '1px solid rgba(232,85,62,0.3)',
+          }}
+        >
+          <span style={{ color: '#B23A28', fontSize: 14 }}>{activePeriod.unpaidBanner}</span>
+          <button
+            type="button"
+            onClick={onPay}
+            disabled={payPending}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 999,
+              background: '#E8553E',
+              color: '#fff',
+              border: 0,
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            {payPending ? activePeriod.processing : activePeriod.payNow}
+          </button>
+        </div>
+      )}
 
       <nav className={styles.nav}>
         {(['rsvps', 'gifts', 'guests', 'notes', 'editor', 'music', 'background'] as const).map((t) => (

@@ -40,7 +40,7 @@ export default async function Page({ params }: PageProps) {
     const supabase = createSupabaseServerClient()
     const { data, error } = await supabase
       .from('invitations')
-      .select('id, config, is_published, template_id')
+      .select('id, config, is_published, template_id, expires_at')
       .eq('slug', slug)
       .maybeSingle()
 
@@ -48,7 +48,11 @@ export default async function Page({ params }: PageProps) {
       console.error('[invitation fetch]', error)
     }
 
-    if (!data || !data.is_published) {
+    const isExpired =
+      !!(data as { expires_at?: string | null } | null)?.expires_at &&
+      Date.parse((data as { expires_at: string }).expires_at) < Date.now()
+
+    if (!data || !data.is_published || isExpired) {
       if (isDemoSlug) {
         config = getDefaultConfig(template)
       } else {

@@ -112,6 +112,7 @@ export default async function DashboardPage({ params }: PageProps) {
       notes={(notes as any) || []}
       guests={guests}
       dict={t.dashboard}
+      activePeriod={t.common.activePeriod}
       lang={lang}
     />
   )

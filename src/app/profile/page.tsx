@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { activePeriodStatus } from '@/lib/payments/active-period'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
@@ -24,15 +25,26 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('slug, template_id')
+    .select('slug, template_id, is_paid, expires_at')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
-    data: { slug: string; template_id: string | null }[] | null
+    data: { slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null }[] | null
   }
   const invitations = rows ?? []
+  const ap = t.common.activePeriod
+  const now = Date.now()
 
   const tmpl = (id: string | null) =>
     id && isValidTemplate(id) ? id : DEFAULT_TEMPLATE_ID
+
+  const periodLabel = (inv: { is_paid: boolean; expires_at: string | null }) => {
+    const r = activePeriodStatus(inv, now)
+    if (r.status === 'lifetime') return ap.lifetime
+    if (r.status === 'expired') return ap.expired
+    if (r.status === 'active' && r.expiresAt)
+      return `${ap.activeUntilPrefix} ${new Date(r.expiresAt).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
+    return ap.draft
+  }
 
   return (
     <>
@@ -59,7 +71,10 @@ export default async function ProfilePage() {
                 const tt = tmpl(inv.template_id)
                 return (
                   <li key={inv.slug} style={item}>
-                    <span style={itemSlug}>{inv.slug}</span>
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <span style={itemSlug}>{inv.slug}</span>
+                      <span style={periodChip}>{periodLabel(inv)}</span>
+                    </span>
                     <span style={itemActions}>
                       <Link href={`/${tt}/${inv.slug}`} target="_blank" style={ghostLink}>{p.viewPublic}</Link>
                       <Link href={`/${tt}/${inv.slug}/dashboard`} style={solidLink}>{p.openDashboard}</Link>
@@ -108,6 +123,14 @@ const item: React.CSSProperties = {
   boxShadow: '0 10px 30px rgba(42,33,24,0.08)',
 }
 const itemSlug: React.CSSProperties = { fontWeight: 600, fontSize: 16 }
+const periodChip: React.CSSProperties = {
+  fontSize: 12,
+  color: '#5C4A3A',
+  background: 'rgba(42,33,24,0.06)',
+  padding: '3px 10px',
+  borderRadius: 999,
+  alignSelf: 'flex-start',
+}
 const itemActions: React.CSSProperties = { display: 'flex', gap: 10, flexWrap: 'wrap' }
 const ghostLink: React.CSSProperties = {
   padding: '8px 16px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.2)',
