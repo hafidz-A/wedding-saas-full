@@ -156,10 +156,9 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
           </div>
         </div>
 
-        <div style={field}>
+        <div style={{ ...field, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <span style={lbl}>{dict.form.language}</span>
           <LangToggle lang={lang} label={dict.form.language} />
-          <span style={{ fontSize: 12, color: '#5C4A3A', lineHeight: 1.4 }}>{dict.form.languageHint}</span>
         </div>
 
         <label style={field}>
