@@ -45,7 +45,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
             <SectionList slug={slug} template={template} />
           </div>
           <main className={styles.fieldPane}>
-            <FieldEditor slug={slug} />
+            <FieldEditor slug={slug} template={template} />
           </main>
         </div>
 

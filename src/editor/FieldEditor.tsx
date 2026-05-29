@@ -1,7 +1,7 @@
 'use client'
 
 import { useEditor } from './EditorProvider'
-import { schemaRegistry } from './schemas'
+import { getSchemaRegistry } from './schemas'
 import { localizeLabel, type FieldDef } from './schemas/types'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import type { Lang } from '@/lib/i18n'
@@ -18,9 +18,10 @@ import AudioField from './fields/AudioField'
 
 interface Props {
   slug: string
+  template: string
 }
 
-export default function FieldEditor({ slug }: Props) {
+export default function FieldEditor({ slug, template }: Props) {
   const { selectedSection, updateField, removeSection } = useEditor()
   const t = useDashboardDict().editor
   const lang = useDashboardLang()
@@ -29,7 +30,7 @@ export default function FieldEditor({ slug }: Props) {
     return <div style={empty}>{t.selectPrompt}</div>
   }
 
-  const schema = schemaRegistry[selectedSection.type]
+  const schema = getSchemaRegistry(template)[selectedSection.type]
   const props = (selectedSection.props || {}) as Record<string, any>
 
   if (!schema) {
