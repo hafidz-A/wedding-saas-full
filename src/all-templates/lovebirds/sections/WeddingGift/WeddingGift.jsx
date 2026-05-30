@@ -8,7 +8,12 @@ import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import styles from './WeddingGift.module.css'
 
 /* ============================================================================
-   WEDDING GIFT — bank accounts + e-wallets + gift confirmation form
+   WEDDING GIFT — bank accounts + e-wallets + gift registry + confirmation form
+
+   NOTE: this file INTENTIONALLY diverges from the upstream Vite source — it
+   renders the folded Gift Registry block (the standalone `registry` section was
+   merged into Wedding Gift). See docs/superpowers/specs/2026-05-30-lovebirds-
+   editor-dialogs-design.md §B.
 
    Pattern mirrors Rsvp.jsx so once Supabase is wired in, both sections post
    to their respective tables (rsvps / gift_confirmations) with identical
@@ -23,6 +28,10 @@ const DEFAULTS = {
   accounts: [],
   giftAddress: null,
   confirmationEnabled: true,
+  registryEnabled: false,
+  registryTitle: 'Wishlist Kami',
+  registryMessage: '',
+  platforms: [],
 }
 
 function BankIcon({ type }) {
@@ -154,7 +163,10 @@ function AccountCard({ account, index, onUseForConfirmation }) {
 
 export default function WeddingGift(props) {
   const config = { ...DEFAULTS, ...props }
-  const { title, subtitle, intro, accounts, giftAddress, confirmationEnabled, slug } = config
+  const {
+    title, subtitle, intro, accounts, giftAddress, confirmationEnabled, slug,
+    registryEnabled, registryTitle, registryMessage, platforms,
+  } = config
   const { ref, isVisible } = useScrollReveal()
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState(null)
@@ -254,6 +266,28 @@ export default function WeddingGift(props) {
                 onUseForConfirmation={confirmationEnabled ? handleUseAccount : null}
               />
             ))}
+          </div>
+        )}
+
+        {registryEnabled && Array.isArray(platforms) && platforms.length > 0 && (
+          <div className={styles.registry}>
+            {registryTitle && <h3 className={styles.registryTitle}>{registryTitle}</h3>}
+            {registryMessage && <p className={styles.registryMessage}>{registryMessage}</p>}
+            <div className={styles.registryGrid}>
+              {platforms.map((p, idx) => (
+                <a
+                  key={p.id || p.name || idx}
+                  className={styles.registryCard}
+                  href={p.url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className={styles.registryName}>{p.name}</span>
+                  {p.description && <span className={styles.registryDesc}>{p.description}</span>}
+                  <span className={styles.registryArrow} aria-hidden="true">→</span>
+                </a>
+              ))}
+            </div>
           </div>
         )}
 

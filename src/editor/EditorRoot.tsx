@@ -7,6 +7,7 @@ import FieldEditor from './FieldEditor'
 import SaveBar from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 import styles from './EditorRoot.module.css'
 
 interface Props {
@@ -17,9 +18,12 @@ interface Props {
 }
 
 export default function EditorRoot({ slug, template, initialConfig, initialIsPublished }: Props) {
+  // Lovebirds: fold registry→weddingGift + strip guestbook/countdown on load.
+  const migrated =
+    template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig
   const safeConfig: PageConfig = {
-    meta: initialConfig?.meta ?? {},
-    sections: Array.isArray(initialConfig?.sections) ? initialConfig.sections : [],
+    meta: migrated?.meta ?? {},
+    sections: Array.isArray(migrated?.sections) ? migrated.sections : [],
   }
 
   const [previewOpen, setPreviewOpen] = useState(true)

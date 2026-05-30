@@ -5,6 +5,7 @@ import { isValidTemplate, getDefaultConfig } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { decryptConfig } from '@/lib/crypto/config'
+import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -111,6 +112,10 @@ export default async function Page({ params }: PageProps) {
   // phone) server-side before they reach the client renderer. No-op on a
   // plaintext config (demo/default, or rows not yet encrypted).
   config = decryptConfig(config)
+
+  // Lovebirds: fold registry→weddingGift + strip guestbook/countdown so old/
+  // unsaved configs don't render dropped sections. No-op for other templates.
+  if (templateId === 'lovebirds') config = migrateLovebirdsConfig(config)
 
   return <InvitationView config={config} slug={slug} templateId={templateId} isDemo={isDemoSlug} />
 }

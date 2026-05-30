@@ -120,6 +120,7 @@ The dashboard editor tab is currently a JSON preview stub. Build the real editor
 ## Conventions to preserve
 
 - **Section components stay byte-identical with the Vite project** — when in doubt, diff against `../Wedding Website Design new/src/sections/<Name>/<Name>.jsx`. Animation knobs (`SECTION_HEIGHT_VH`, ease curves, stagger windows) are the result of many iterations — do not "improve" them.
+  - **Known intentional divergence:** `sections/WeddingGift/WeddingGift.jsx` renders the folded Gift Registry block (the standalone `registry` section was merged into Wedding Gift). Approved deviation — see `docs/superpowers/specs/2026-05-30-lovebirds-editor-dialogs-design.md` §B.
 - **CSS Modules + CSS variables** for all section styling. No Tailwind, no styled-components.
 - **No `import.meta.env`** — that's Vite. Use `process.env.NODE_ENV` in Next.
 - **`'use client'`** lives on all section/component/hook files. Server components are: `src/app/**/page.tsx` and `src/app/api/**/route.ts`. Don't sprinkle 'use server' inside section components.
