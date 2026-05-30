@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function Lightbox({ src, caption, onClose }) {
   useEffect(() => {
