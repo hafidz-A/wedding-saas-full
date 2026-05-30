@@ -62,7 +62,10 @@ export default async function Page({ params }: PageProps) {
       return <ExpiredInvitationView slug={slug} />
     }
 
-    if (!data || (!data.is_published && !isOwner)) {
+    // Guests can only see an invitation that is both published AND paid.
+    // The owner can always preview their own (unpublished or unpaid).
+    const guestCanView = !!data?.is_published && !!data?.is_paid
+    if (!data || (!guestCanView && !isOwner)) {
       if (isDemoSlug) {
         config = getDefaultConfig(template)
       } else {
