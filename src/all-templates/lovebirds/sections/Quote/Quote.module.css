@@ -1,0 +1,10 @@
+.quote {
+  background: var(--color-cream, #FDF6EC);
+  padding: clamp(64px, 12vw, 140px) var(--container-pad, 24px);
+}
+
+.inner {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}

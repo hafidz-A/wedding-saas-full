@@ -17,9 +17,11 @@ import { faqSchema } from './faq'
 import { guestbookSchema } from './guestbook'
 import { playlistSchema } from './playlist'
 import { footerSchema } from './footer'
+import { quoteSchema } from './quote'
 
 export const schemaRegistry: Record<string, SectionSchema> = {
   hero:              heroSchema,
+  quote:             quoteSchema,
   countdown:         countdownSchema,
   ourStory:          ourStorySchema,
   eventDetails:      eventDetailsSchema,
@@ -40,8 +42,16 @@ export const schemaRegistry: Record<string, SectionSchema> = {
 
 export type { SectionSchema, FieldDef } from './types'
 
+// Lovebirds: `registry` is folded into weddingGift (B); `guestbook` + `countdown`
+// are removed (C). Exclude them from the lovebirds editor registry so the
+// pickers never offer them.
+const LOVEBIRDS_EXCLUDED = new Set(['registry', 'guestbook', 'countdown'])
+const lovebirdsSchemaRegistry: Record<string, SectionSchema> = Object.fromEntries(
+  Object.entries(schemaRegistry).filter(([type]) => !LOVEBIRDS_EXCLUDED.has(type)),
+)
+
 const registriesByTemplate: Record<string, Record<string, SectionSchema>> = {
-  lovebirds: schemaRegistry,
+  lovebirds: lovebirdsSchemaRegistry,
   solary: solarySchemaRegistry,
 }
 
