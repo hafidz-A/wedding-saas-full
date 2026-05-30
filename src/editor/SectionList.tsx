@@ -10,7 +10,8 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from './EditorProvider'
-import { schemaRegistry } from './schemas'
+import { getSchemaRegistry } from './schemas'
+import { getTemplatePolicy, computeSafeOrder } from './templatePolicy'
 import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
@@ -24,8 +25,10 @@ interface Props {
 export default function SectionList({ slug, template }: Props) {
   const {
     config, selectedSectionId,
-    reorderSections, toggleSectionEnabled, selectSection, addSection, removeSection,
+    reorderSections, reorderSectionsById,
+    toggleSectionEnabled, selectSection, addSection, removeSection,
   } = useEditor()
+  const policy = getTemplatePolicy(template)
   const t = useDashboardDict().editor
   const lang = useDashboardLang()
 
@@ -34,6 +37,12 @@ export default function SectionList({ slug, template }: Props) {
   function onDragEnd(e: DragEndEvent) {
     const { active, over } = e
     if (!over || active.id === over.id) return
+    if (policy) {
+      const order = config.sections.map((s) => s.id)
+      const next = computeSafeOrder(order, String(active.id), String(over.id), policy)
+      if (next) reorderSectionsById(next)
+      return
+    }
     const from = config.sections.findIndex((s) => s.id === active.id)
     const to = config.sections.findIndex((s) => s.id === over.id)
     if (from < 0 || to < 0) return
@@ -49,24 +58,34 @@ export default function SectionList({ slug, template }: Props) {
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={config.sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
           <div style={list}>
-            {config.sections.map((s) => (
-              <SectionRow
-                key={s.id}
-                section={s}
-                label={localizeLabel(schemaRegistry[s.type]?.label ?? s.type, lang)}
-                isSelected={s.id === selectedSectionId}
-                onSelect={() => selectSection(s.id)}
-                onToggleEnabled={() => toggleSectionEnabled(s.id)}
-                onRemove={() => removeSection(s.id)}
-              />
-            ))}
+            {config.sections.map((s) => {
+              const lock = policy?.locks[s.id]
+              const posLocked = !!lock?.lockPosition
+              const disableLocked = !!lock?.lockDisable
+              return (
+                <SectionRow
+                  key={s.id}
+                  section={s}
+                  label={localizeLabel(getSchemaRegistry(template)[s.type]?.label ?? s.type, lang)}
+                  isSelected={s.id === selectedSectionId}
+                  onSelect={() => selectSection(s.id)}
+                  onToggleEnabled={() => toggleSectionEnabled(s.id)}
+                  onRemove={() => removeSection(s.id)}
+                  draggable={!posLocked}
+                  canRemove={!policy?.fixedSections}
+                  canDisable={!disableLocked}
+                />
+              )
+            })}
           </div>
         </SortableContext>
       </DndContext>
 
-      <div style={{ padding: 12 }}>
-        <AddSectionMenu onAdd={(type, label) => addSection(type, label)} />
-      </div>
+      {!policy?.fixedSections && (
+        <div style={{ padding: 12 }}>
+          <AddSectionMenu onAdd={(type, label) => addSection(type, label)} />
+        </div>
+      )}
 
       <footer style={ftr}>
         <a

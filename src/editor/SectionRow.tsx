@@ -14,9 +14,12 @@ interface Props {
   onSelect: () => void
   onToggleEnabled: () => void
   onRemove: () => void
+  draggable?: boolean
+  canRemove?: boolean
+  canDisable?: boolean
 }
 
-export default function SectionRow({ section, label, isSelected, onSelect, onToggleEnabled, onRemove }: Props) {
+export default function SectionRow({ section, label, isSelected, onSelect, onToggleEnabled, onRemove, draggable = true, canRemove = true, canDisable = true }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
   const { renameSectionNav } = useEditor()
   const t = useDashboardDict().editor
@@ -66,13 +69,14 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
   return (
     <div ref={setNodeRef} style={style} onClick={onSelect}>
       <span
-        {...attributes}
-        {...listeners}
+        {...(draggable ? attributes : {})}
+        {...(draggable ? listeners : {})}
         onClick={(e) => e.stopPropagation()}
-        style={{ cursor: 'grab', color: 'rgba(42,33,24,0.4)', fontSize: 14, padding: '0 4px' }}
-        aria-label={t.dragReorder}
+        style={{ cursor: draggable ? 'grab' : 'not-allowed', color: 'rgba(42,33,24,0.4)', fontSize: 14, padding: '0 4px', opacity: draggable ? 1 : 0.5 }}
+        aria-label={draggable ? t.dragReorder : 'Terkunci'}
+        title={draggable ? t.dragReorder : 'Terkunci'}
       >
-        ⠿
+        {draggable ? '⠿' : '🔒'}
       </span>
 
       <div style={{ flex: 1, minWidth: 0, display: 'grid', gap: 2 }}>
@@ -114,25 +118,29 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
           ✏️
         </button>
       )}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onToggleEnabled() }}
-        title={section.enabled === false ? t.enableTitle : t.disableTitle}
-        style={{
-          width: 12, height: 12, borderRadius: 999,
-          border: 'none', cursor: 'pointer',
-          background: section.enabled === false ? 'rgba(42,33,24,0.18)' : '#2D8C4E',
-          flexShrink: 0,
-        }}
-      />
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); if (confirm(`${t.removeConfirmPrefix}"${displayLabel}"${t.removeConfirmSuffix}`)) onRemove() }}
-        style={{ border: 'none', background: 'transparent', color: 'rgba(42,33,24,0.4)', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
-        aria-label={t.removeAria}
-      >
-        ×
-      </button>
+      {canDisable && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onToggleEnabled() }}
+          title={section.enabled === false ? t.enableTitle : t.disableTitle}
+          style={{
+            width: 12, height: 12, borderRadius: 999,
+            border: 'none', cursor: 'pointer',
+            background: section.enabled === false ? 'rgba(42,33,24,0.18)' : '#2D8C4E',
+            flexShrink: 0,
+          }}
+        />
+      )}
+      {canRemove && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); if (confirm(`${t.removeConfirmPrefix}"${displayLabel}"${t.removeConfirmSuffix}`)) onRemove() }}
+          style={{ border: 'none', background: 'transparent', color: 'rgba(42,33,24,0.4)', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
+          aria-label={t.removeAria}
+        >
+          ×
+        </button>
+      )}
     </div>
   )
 }
