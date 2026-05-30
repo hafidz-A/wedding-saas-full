@@ -9,9 +9,10 @@ import type { Dict } from '@/lib/i18n'
 /**
  * /login — slug-agnostic password login.
  *
- * After signInWithPassword succeeds, /onboarding takes over: it's
- * idempotent — returning users get auto-redirected to /<slug>/dashboard,
- * brand-new accounts get the 5-field wizard.
+ * After signInWithPassword succeeds, send the user to the homepage. They
+ * can browse, open their existing invitation's dashboard, or start a new
+ * one from there — login no longer force-drops them into the create-
+ * invitation wizard.
  */
 export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
   const router = useRouter()
@@ -53,9 +54,7 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
       return
     }
 
-    // /onboarding is idempotent: routes returning users to their dashboard,
-    // new users to the 5-field wizard.
-    router.push('/onboarding')
+    router.push('/')
     router.refresh()
   }
 
