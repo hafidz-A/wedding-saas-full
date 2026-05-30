@@ -8,17 +8,25 @@ import RSVPPlanet           from "../sections/RSVPPlanet.jsx";
 import TeamPlanet           from "../sections/TeamPlanet.jsx";
 import GiftPlanet           from "../sections/GiftPlanet.jsx";
 import FooterPlanet         from "../sections/FooterPlanet.jsx";
+import QuotePlanet          from "../sections/QuotePlanet.jsx";
+import SchedulePlanet       from "../sections/SchedulePlanet.jsx";
+import LiveStreamPlanet     from "../sections/LiveStreamPlanet.jsx";
+import FaqPlanet            from "../sections/FaqPlanet.jsx";
 
 /* Registry: { type → component }. Add new section types here. */
 export const sectionRegistry = {
-  openingGate:    OpeningGatePlaceholder,
-  welcomePlanet:  WelcomePlanet,
-  storyPlanet:    StoryPlanet,
-  saturnRing:     SaturnRingPlanet,
+  openingGate:     OpeningGatePlaceholder,
+  welcomePlanet:   WelcomePlanet,
+  storyPlanet:     StoryPlanet,
+  saturnRing:      SaturnRingPlanet,
   countdownPlanet: CountdownPlanet,
-  detailsPlanet:  DetailsPlanet,
-  rsvpPlanet:     RSVPPlanet,
-  teamPlanet:     TeamPlanet,
-  giftPlanet:     GiftPlanet,
-  footerPlanet:   FooterPlanet,
+  detailsPlanet:   DetailsPlanet,
+  rsvpPlanet:      RSVPPlanet,
+  teamPlanet:      TeamPlanet,
+  giftPlanet:      GiftPlanet,
+  footerPlanet:    FooterPlanet,
+  quotePlanet:     QuotePlanet,
+  schedulePlanet:  SchedulePlanet,
+  liveStreamPlanet: LiveStreamPlanet,
+  faqPlanet:       FaqPlanet,
 };
