@@ -40,7 +40,7 @@ export default async function Page({ params }: PageProps) {
     const supabase = createSupabaseServerClient()
     const { data, error } = await supabase
       .from('invitations')
-      .select('id, config, is_published, template_id, expires_at')
+      .select('id, config, is_published, template_id, expires_at, owner_user_id')
       .eq('slug', slug)
       .maybeSingle()
 
@@ -52,7 +52,17 @@ export default async function Page({ params }: PageProps) {
       !!(data as { expires_at?: string | null } | null)?.expires_at &&
       Date.parse((data as { expires_at: string }).expires_at) < Date.now()
 
-    if (!data || !data.is_published || isExpired) {
+    // Owner-preview bypass: a signed-in owner can view their own unpublished
+    // invitation while they're still unpaid. Expired invitations stay closed
+    // for everyone — the dashboard PaymentGate offers the renew CTA.
+    const { data: { user: viewer } } = await supabase.auth.getUser()
+    const isOwner = !!viewer && !!data?.owner_user_id && data.owner_user_id === viewer.id
+
+    if (isExpired && !isDemoSlug) {
+      return <ExpiredInvitationView slug={slug} />
+    }
+
+    if (!data || (!data.is_published && !isOwner)) {
       if (isDemoSlug) {
         config = getDefaultConfig(template)
       } else {
@@ -114,6 +124,59 @@ function injectGuestbookNotes(config: any, dbNotes: any[]) {
         : s,
     ),
   }
+}
+
+function ExpiredInvitationView({ slug }: { slug: string }) {
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 24,
+        background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+        fontFamily: 'var(--font-body, system-ui)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 480,
+          padding: 40,
+          background: 'rgba(255,255,255,0.95)',
+          borderRadius: 22,
+          boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+          textAlign: 'center',
+        }}
+      >
+        <p
+          style={{
+            textTransform: 'uppercase',
+            letterSpacing: '0.32em',
+            fontSize: 11,
+            color: '#E8553E',
+            margin: '0 0 10px',
+          }}
+        >
+          Expired
+        </p>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display, serif)',
+            fontStyle: 'italic',
+            fontSize: 32,
+            margin: 0,
+            color: '#2A2118',
+            lineHeight: 1.2,
+          }}
+        >
+          Masa aktif undangan ini sudah berakhir
+        </h1>
+        <p style={{ color: '#5C4A3A', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
+          Halaman undangan <code style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code> tidak bisa dibuka untuk sementara. Silakan hubungi pasangan untuk informasi lebih lanjut.
+        </p>
+      </div>
+    </main>
+  )
 }
 
 export async function generateMetadata({ params }: PageProps) {

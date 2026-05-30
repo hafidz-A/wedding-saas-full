@@ -2,8 +2,10 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict, type Dict } from '@/lib/i18n'
+import { activePeriodStatus } from '@/lib/payments/active-period'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
+import PaymentGate from './PaymentGate'
 import { fromDbRow } from './guests/types'
 
 interface PageProps {
@@ -68,6 +70,22 @@ export default async function DashboardPage({ params }: PageProps) {
           <SignOutButton label={t.dashboard.page.signOut} />
         </div>
       </main>
+    )
+  }
+
+  // 3b. Payment gate: dashboard is locked while the invitation is unpaid or
+  //     its active period has run out. Owner sees a "bayar / perpanjang"
+  //     screen instead of the editor; preview link is offered only in the
+  //     unpaid case (expired view is closed for everyone).
+  const period = activePeriodStatus(invitation, Date.now())
+  if (period.status === 'draft' || period.status === 'expired') {
+    return (
+      <PaymentGate
+        invitationId={invitation.id}
+        slug={slug}
+        template={template}
+        status={period.status}
+      />
     )
   }
 
