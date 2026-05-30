@@ -5,6 +5,17 @@ import { isIdleExpired, ACTIVITY_COOKIE } from '@/lib/auth/idle-timeout'
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
 
+  // Fast path: if there's no Supabase auth cookie, there is no session to
+  // refresh, no idle window to slide, and no owner-preview to enable — so skip
+  // the supabase.auth.getUser() network round-trip entirely. This is the
+  // common case for anonymous guests viewing a public invitation, and the
+  // matcher now covers /<template>/<slug>. Page-level guards still redirect
+  // unauthenticated users away from /profile, /dashboard, etc.
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('auth-token'))
+  if (!hasAuthCookie) return response
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

@@ -1,4 +1,5 @@
 import 'server-only'
+import { unstable_cache } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export interface TemplatePlanRow {
@@ -12,29 +13,16 @@ export interface TemplatePlanRow {
 }
 
 /**
- * Source of truth for plan pricing + features. Reads template_plans from
- * Supabase so the operator can edit prices in Supabase Studio without
- * touching source code.
- *
- * Cached per request via Next's fetch-like dedupe (we use Supabase Admin
- * directly, so caching here is just a module-scoped in-memory map keyed
- * by template_id — fine because Server Components are short-lived).
+ * Cache tag for plan pricing. Prices are edited in Supabase Studio (no in-app
+ * editor yet), so staleness is bounded by the `revalidate` TTL below rather
+ * than tag invalidation — but the tag is wired so a future in-app price editor
+ * can `revalidateTag(TEMPLATE_PLANS_TAG)` for instant refresh.
  */
-const memo = new Map<string, TemplatePlanRow[]>()
+export const TEMPLATE_PLANS_TAG = 'template-plans'
+const REVALIDATE_SECONDS = 60
 
-export async function getTemplatePlans(templateId: string): Promise<TemplatePlanRow[]> {
-  const cached = memo.get(templateId)
-  if (cached) return cached
-  const supabase = createSupabaseAdminClient()
-  const { data, error } = await (supabase.from('template_plans') as any)
-    .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order')
-    .eq('template_id', templateId)
-    .order('sort_order', { ascending: true })
-  if (error) {
-    console.error('[getTemplatePlans]', error)
-    return []
-  }
-  const rows = (data ?? []).map((r: any) => ({
+function mapRow(r: any): TemplatePlanRow {
+  return {
     template_id: r.template_id,
     plan_code: r.plan_code,
     display_name: r.display_name,
@@ -42,38 +30,56 @@ export async function getTemplatePlans(templateId: string): Promise<TemplatePlan
     duration_days: r.duration_days == null ? null : Number(r.duration_days),
     features: Array.isArray(r.features) ? (r.features as string[]) : [],
     sort_order: Number(r.sort_order),
-  })) as TemplatePlanRow[]
-  memo.set(templateId, rows)
-  return rows
+  }
 }
 
+/**
+ * Source of truth for plan pricing + features. Reads template_plans from
+ * Supabase so the operator can edit prices in Supabase Studio without touching
+ * source code. Wrapped in unstable_cache: shared across requests, refreshed at
+ * most every 60s. Replaces the old never-expiring module-scoped memo (which
+ * never reflected a Studio price edit until the process recycled).
+ */
+export const getTemplatePlans = unstable_cache(
+  async (templateId: string): Promise<TemplatePlanRow[]> => {
+    const supabase = createSupabaseAdminClient()
+    const { data, error } = await (supabase.from('template_plans') as any)
+      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order')
+      .eq('template_id', templateId)
+      .order('sort_order', { ascending: true })
+    if (error) {
+      console.error('[getTemplatePlans]', error)
+      return []
+    }
+    return (data ?? []).map(mapRow)
+  },
+  ['template-plans-by-id'],
+  { revalidate: REVALIDATE_SECONDS, tags: [TEMPLATE_PLANS_TAG] },
+)
+
 /** Fetch plans for every known template. Used by the public /templates page. */
-export async function getAllTemplatePlans(): Promise<Record<string, TemplatePlanRow[]>> {
-  const supabase = createSupabaseAdminClient()
-  const { data, error } = await (supabase.from('template_plans') as any)
-    .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order')
-    .order('template_id', { ascending: true })
-    .order('sort_order', { ascending: true })
-  if (error) {
-    console.error('[getAllTemplatePlans]', error)
-    return {}
-  }
-  const out: Record<string, TemplatePlanRow[]> = {}
-  for (const r of data ?? []) {
-    const tid = r.template_id as string
-    if (!out[tid]) out[tid] = []
-    out[tid].push({
-      template_id: tid,
-      plan_code: r.plan_code,
-      display_name: r.display_name,
-      price_idr: Number(r.price_idr),
-      duration_days: r.duration_days == null ? null : Number(r.duration_days),
-      features: Array.isArray(r.features) ? (r.features as string[]) : [],
-      sort_order: Number(r.sort_order),
-    })
-  }
-  return out
-}
+export const getAllTemplatePlans = unstable_cache(
+  async (): Promise<Record<string, TemplatePlanRow[]>> => {
+    const supabase = createSupabaseAdminClient()
+    const { data, error } = await (supabase.from('template_plans') as any)
+      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order')
+      .order('template_id', { ascending: true })
+      .order('sort_order', { ascending: true })
+    if (error) {
+      console.error('[getAllTemplatePlans]', error)
+      return {}
+    }
+    const out: Record<string, TemplatePlanRow[]> = {}
+    for (const r of data ?? []) {
+      const tid = r.template_id as string
+      if (!out[tid]) out[tid] = []
+      out[tid].push(mapRow(r))
+    }
+    return out
+  },
+  ['template-plans-all'],
+  { revalidate: REVALIDATE_SECONDS, tags: [TEMPLATE_PLANS_TAG] },
+)
 
 /** Format an IDR amount as "Rp 149.000". */
 export function formatIDR(amount: number): string {

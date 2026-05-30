@@ -5,6 +5,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'picsum.photos' },
     ],
   },
   // GSAP ships ESM that older bundlers complain about — Next 14 is fine,
