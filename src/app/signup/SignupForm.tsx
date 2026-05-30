@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Dict } from '@/lib/i18n'
+import { safeNext } from '@/lib/auth/safeNext'
 
 /**
  * /signup — email + password + repeat. Supabase Auth signUp() sends an
@@ -26,6 +27,7 @@ import type { Dict } from '@/lib/i18n'
  */
 export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
   const router = useRouter()
+  const next = safeNext(useSearchParams().get('next'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeat, setRepeat] = useState('')
@@ -86,7 +88,8 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
       return
     }
 
-    router.push(`/verify-signup?email=${encodeURIComponent(email.trim())}`)
+    const verifyUrl = `/verify-signup?email=${encodeURIComponent(email.trim())}${next ? `&next=${encodeURIComponent(next)}` : ''}`
+    router.push(verifyUrl)
   }
 
   return (
@@ -144,7 +147,7 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
 
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 14 }}>
           {dict.haveAccount}{' '}
-          <Link href="/login" style={{ color: '#E8553E', textDecoration: 'underline' }}>
+          <Link href={next ? `/login?next=${encodeURIComponent(next)}` : '/login'} style={{ color: '#E8553E', textDecoration: 'underline' }}>
             {dict.loginLink}
           </Link>
         </p>

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
+import { safeNext } from '@/lib/auth/safeNext'
 
 /**
  * /verify-signup — 6-digit token entry after signUp.
@@ -31,6 +32,7 @@ function VerifySignupInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const presetEmail = searchParams.get('email') || ''
+  const next = safeNext(searchParams.get('next'))
   const t = getDict(useClientLang()).auth.verify
 
   const [email, setEmail] = useState(presetEmail)
@@ -71,7 +73,7 @@ function VerifySignupInner() {
       return
     }
 
-    router.push('/onboarding')
+    router.push(next || '/')
     router.refresh()
   }
 

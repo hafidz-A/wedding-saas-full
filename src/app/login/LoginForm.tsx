@@ -1,21 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Dict } from '@/lib/i18n'
+import { safeNext } from '@/lib/auth/safeNext'
 
 /**
  * /login — slug-agnostic password login.
  *
- * After signInWithPassword succeeds, send the user to the homepage. They
- * can browse, open their existing invitation's dashboard, or start a new
- * one from there — login no longer force-drops them into the create-
- * invitation wizard.
+ * After signInWithPassword succeeds, honor `?next=<internal-path>` when
+ * present (e.g. coming from "Pakai template ini" → /onboarding?template=…).
+ * Plain logins (no intent) land on the homepage.
  */
 export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
   const router = useRouter()
+  const next = safeNext(useSearchParams().get('next'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -54,7 +55,7 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
       return
     }
 
-    router.push('/')
+    router.push(next || '/')
     router.refresh()
   }
 
@@ -106,7 +107,7 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
         </p>
         <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
           {dict.noAccount}{' '}
-          <Link href="/signup" style={{ color: '#E8553E', textDecoration: 'underline' }}>
+          <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'} style={{ color: '#E8553E', textDecoration: 'underline' }}>
             {dict.signupLink}
           </Link>
         </p>
