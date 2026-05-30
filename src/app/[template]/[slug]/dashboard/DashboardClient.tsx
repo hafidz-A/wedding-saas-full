@@ -10,7 +10,9 @@ import BackgroundTab from './BackgroundTab'
 import PaletteTab from './PaletteTab'
 import NotesTab, { type NoteRow } from './NotesTab'
 import GuestsTab from './GuestsTab'
+import GuestbookTab from './GuestbookTab'
 import { type GuestRow } from './guests/types'
+import { type AttendanceRow } from './guestbook/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
 import { LangToggle } from '@/components/site/LangToggle'
 import { startCheckout } from '@/app/onboarding/actions'
@@ -33,6 +35,7 @@ export default function DashboardClient({
   gifts,
   notes = [],
   guests = [],
+  attendances = [],
   dict,
   activePeriod,
   lang,
@@ -44,6 +47,7 @@ export default function DashboardClient({
   gifts: GiftRow[]
   notes?: NoteRow[]
   guests?: GuestRow[]
+  attendances?: AttendanceRow[]
   dict: Dict['dashboard']
   activePeriod: Dict['common']['activePeriod']
   lang: Lang
@@ -66,15 +70,24 @@ export default function DashboardClient({
     })
   }
 
-  const [tab, setTab] = useState<
-    'rsvps' | 'gifts' | 'guests' | 'editor' | 'music' | 'background' | 'notes' | 'palette'
-  >('rsvps')
+  type TabKey =
+    | 'rsvps' | 'gifts' | 'guests' | 'guestbook'
+    | 'editor' | 'music' | 'background' | 'notes' | 'palette'
 
-  const tabKeys = (
-    template === 'solary'
-      ? (['rsvps', 'gifts', 'guests', 'notes', 'editor', 'palette', 'music', 'background'] as const)
-      : (['rsvps', 'gifts', 'guests', 'notes', 'editor', 'music', 'background'] as const)
-  )
+  const [tab, setTab] = useState<TabKey>('rsvps')
+
+  // Buku Tamu (attendance ledger) is a premium-only feature. Unknown plan
+  // values fall back to no-tab (defensive — treat non-'premium' as basic).
+  const hasGuestbook = invitation.plan === 'premium'
+
+  const tabKeys: TabKey[] = (() => {
+    const keys: TabKey[] = ['rsvps', 'gifts', 'guests']
+    if (hasGuestbook) keys.push('guestbook')
+    keys.push('notes', 'editor')
+    if (template === 'solary') keys.push('palette')
+    keys.push('music', 'background')
+    return keys
+  })()
 
   return (
     <DashboardI18nProvider dict={dict} lang={lang}>
@@ -261,6 +274,10 @@ export default function DashboardClient({
             }
             messageTemplate={invitation?.config?.inviteMessageTemplate}
           />
+        )}
+
+        {tab === 'guestbook' && hasGuestbook && (
+          <GuestbookTab slug={slug} attendances={attendances} />
         )}
 
         {tab === 'music' && (

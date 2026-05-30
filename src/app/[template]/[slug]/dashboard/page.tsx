@@ -7,6 +7,7 @@ import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
 import { fromDbRow } from './guests/types'
+import { fromDbRow as attendanceFromDbRow } from './guestbook/types'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -89,36 +90,50 @@ export default async function DashboardPage({ params }: PageProps) {
     )
   }
 
-  // 4. Fetch RSVPs + gifts + notes + guests in parallel.
-  const [{ data: rsvps }, { data: gifts }, { data: notes }, { data: guestsRaw }] =
-    await Promise.all([
-      admin
-        .from('rsvps')
-        .select('*')
-        .eq('invitation_id', invitation.id)
-        .order('created_at', { ascending: false }),
-      admin
-        .from('gift_confirmations')
-        .select('*')
-        .eq('invitation_id', invitation.id)
-        .order('created_at', { ascending: false }),
-      admin
-        .from('guestbook_notes')
-        .select('id, guest_name, message, color, created_at')
-        .eq('invitation_id', invitation.id)
-        .order('created_at', { ascending: false }),
-      admin
-        .from('guests')
-        .select('*')
-        .eq('invitation_id', invitation.id)
-        .order('created_at', { ascending: true }),
-    ])
+  // 4. Fetch RSVPs + gifts + notes + guests + attendances in parallel.
+  //    The attendances query degrades gracefully: if the table doesn't exist
+  //    yet (migration not applied), Supabase resolves with error + null data
+  //    rather than throwing, so the Buku Tamu tab just shows an empty list.
+  const [
+    { data: rsvps },
+    { data: gifts },
+    { data: notes },
+    { data: guestsRaw },
+    { data: attendancesRaw },
+  ] = await Promise.all([
+    admin
+      .from('rsvps')
+      .select('*')
+      .eq('invitation_id', invitation.id)
+      .order('created_at', { ascending: false }),
+    admin
+      .from('gift_confirmations')
+      .select('*')
+      .eq('invitation_id', invitation.id)
+      .order('created_at', { ascending: false }),
+    admin
+      .from('guestbook_notes')
+      .select('id, guest_name, message, color, created_at')
+      .eq('invitation_id', invitation.id)
+      .order('created_at', { ascending: false }),
+    admin
+      .from('guests')
+      .select('*')
+      .eq('invitation_id', invitation.id)
+      .order('created_at', { ascending: true }),
+    admin
+      .from('attendances')
+      .select('*')
+      .eq('invitation_id', invitation.id)
+      .order('created_at', { ascending: false }),
+  ])
 
   // Decrypt guests rows server-side — the client never sees ciphertext.
   // If the guests table doesn't exist yet (migration not applied), guestsRaw
   // will be null and we just render an empty list — Tab shows the empty
   // state with the "+ Import" CTA.
   const guests = (guestsRaw as any[] | null)?.map(fromDbRow) ?? []
+  const attendances = (attendancesRaw as any[] | null)?.map(attendanceFromDbRow) ?? []
 
   return (
     <DashboardClient
@@ -129,6 +144,7 @@ export default async function DashboardPage({ params }: PageProps) {
       gifts={(gifts as any) || []}
       notes={(notes as any) || []}
       guests={guests}
+      attendances={attendances}
       dict={t.dashboard}
       activePeriod={t.common.activePeriod}
       lang={lang}

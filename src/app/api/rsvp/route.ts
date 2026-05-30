@@ -43,18 +43,45 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invitation not published' }, { status: 403 })
   }
 
-  const { error } = await (supabase.from('rsvps') as any).insert({
-    invitation_id: invitation.id,
-    guest_name: String(guest_name).slice(0, 120),
-    attending,
-    guest_count: Math.min(20, Math.max(1, Number(guest_count) || 1)),
-    meal_choice: meal_choice ? String(meal_choice).slice(0, 80) : null,
-    message: message ? String(message).slice(0, 500) : null,
-  })
+  const cleanName = String(guest_name).slice(0, 120)
+  const cleanCount = Math.min(20, Math.max(1, Number(guest_count) || 1))
+  const cleanMessage = message ? String(message).slice(0, 500) : null
 
-  if (error) {
+  const { data: rsvp, error } = (await (supabase.from('rsvps') as any)
+    .insert({
+      invitation_id: invitation.id,
+      guest_name: cleanName,
+      attending,
+      guest_count: cleanCount,
+      meal_choice: meal_choice ? String(meal_choice).slice(0, 80) : null,
+      message: cleanMessage,
+    })
+    .select('id')
+    .single()) as { data: { id: string } | null; error: any }
+
+  if (error || !rsvp) {
     console.error('[rsvp insert]', error)
     return NextResponse.json({ error: 'Failed to record RSVP' }, { status: 500 })
+  }
+
+  // Auto-populate the Buku Tamu (attendance ledger) for guests who are
+  // coming. The unique index on attendances(rsvp_id) keeps this dup-free
+  // across retries; a missing table (migration not yet applied) or a
+  // duplicate must NOT fail the guest-facing RSVP submission.
+  if (attending) {
+    const { error: attErr } = await (supabase.from('attendances') as any).insert({
+      invitation_id: invitation.id,
+      rsvp_id: rsvp.id,
+      guest_id: null,
+      name_enc: cleanName, // plaintext for now — Phase 3 encrypts on write
+      guest_count: cleanCount,
+      source: 'rsvp',
+      note_enc: cleanMessage,
+      arrived_at: null,
+    })
+    if (attErr) {
+      console.warn('[rsvp→attendance]', attErr.message ?? attErr)
+    }
   }
 
   return NextResponse.json({ ok: true })
