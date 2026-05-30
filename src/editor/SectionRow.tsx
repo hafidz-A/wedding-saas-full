@@ -73,8 +73,8 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         {...(draggable ? listeners : {})}
         onClick={(e) => e.stopPropagation()}
         style={{ cursor: draggable ? 'grab' : 'not-allowed', color: 'rgba(42,33,24,0.4)', fontSize: 14, padding: '0 4px', opacity: draggable ? 1 : 0.5 }}
-        aria-label={draggable ? t.dragReorder : 'Terkunci'}
-        title={draggable ? t.dragReorder : 'Terkunci'}
+        aria-label={draggable ? t.dragReorder : t.lockedHint}
+        title={draggable ? t.dragReorder : t.lockedHint}
       >
         {draggable ? '⠿' : '🔒'}
       </span>

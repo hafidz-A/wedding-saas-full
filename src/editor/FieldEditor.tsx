@@ -2,6 +2,7 @@
 
 import { useEditor } from './EditorProvider'
 import { getSchemaRegistry } from './schemas'
+import { getTemplatePolicy, isTypeLocked } from './templatePolicy'
 import { localizeLabel, type FieldDef } from './schemas/types'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import type { Lang } from '@/lib/i18n'
@@ -22,7 +23,7 @@ interface Props {
 }
 
 export default function FieldEditor({ slug, template }: Props) {
-  const { selectedSection, updateField, removeSection } = useEditor()
+  const { selectedSection, updateField, removeSection, changeSectionType } = useEditor()
   const t = useDashboardDict().editor
   const lang = useDashboardLang()
 
@@ -64,11 +65,39 @@ export default function FieldEditor({ slug, template }: Props) {
     )
   }
 
+  const policy = getTemplatePolicy(template)
+  const registry = getSchemaRegistry(template)
+  const typeLocked = policy ? isTypeLocked(selectedSection.id, policy) : false
+  const swapOptions = policy && !typeLocked
+    ? policy.swappablePool.filter((tp) => registry[tp])
+    : []
+
+  function onChangeType(newType: string) {
+    if (newType === selectedSection!.type) return
+    if (!confirm(t.changeTypeConfirm)) return
+    changeSectionType(selectedSection!.id, newType, registry[newType]?.defaults)
+  }
+
   return (
     <div style={wrap}>
       <header style={hdr}>
         <p style={kicker}>{t.sectionKicker}</p>
         <h3 style={h3}>{localizeLabel(schema.label, lang)}</h3>
+        {swapOptions.length > 0 && (
+          <label style={{ display: 'block', marginTop: 10 }}>
+            <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(42,33,24,0.55)' }}>{t.changeType}</span>
+            <select
+              value={selectedSection.type}
+              onChange={(e) => onChangeType(e.target.value)}
+              style={{ display: 'block', marginTop: 6, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(42,33,24,0.2)', fontSize: 13, background: '#fff', color: '#2A2118' }}
+            >
+              {swapOptions.map((tp) => (
+                <option key={tp} value={tp}>{localizeLabel(registry[tp].label, lang)}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        {typeLocked && policy && <p style={{ marginTop: 8, fontSize: 11, color: 'rgba(42,33,24,0.45)' }}>🔒 {t.lockedHint}</p>}
       </header>
       <div style={form}>
         {schema.fields.map((f) => renderField(f, props[f.key], (v) => updateField(selectedSection.id, f.key, v), slug, lang))}

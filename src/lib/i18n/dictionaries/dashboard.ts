@@ -250,6 +250,9 @@ export const dashboard = {
       itemFallback: 'Item',
       noItems: 'Belum ada item — klik + Tambah untuk menambah.',
       unsupportedField: 'Field bersarang tidak didukung:',
+      changeType: 'Ganti tipe section',
+      changeTypeConfirm: 'Mengganti tipe akan mengganti isi section ini dengan konten contoh. Lanjutkan?',
+      lockedHint: 'Posisi & tipe section ini dikunci. Isinya tetap bisa diedit.',
     },
   },
   en: {
@@ -503,6 +506,9 @@ export const dashboard = {
       itemFallback: 'Item',
       noItems: 'No items yet — click + Add to create one.',
       unsupportedField: 'Unsupported nested field:',
+      changeType: 'Change section type',
+      changeTypeConfirm: 'Changing the type will replace this section content with sample content. Continue?',
+      lockedHint: 'This section position & type are locked. Its content stays editable.',
     },
   },
 }
