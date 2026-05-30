@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { encryptField } from '@/lib/crypto/app'
 
 /**
  * POST /api/rsvp
@@ -50,11 +51,11 @@ export async function POST(req: Request) {
   const { data: rsvp, error } = (await (supabase.from('rsvps') as any)
     .insert({
       invitation_id: invitation.id,
-      guest_name: cleanName,
+      guest_name_enc: encryptField(cleanName),
       attending,
       guest_count: cleanCount,
       meal_choice: meal_choice ? String(meal_choice).slice(0, 80) : null,
-      message: cleanMessage,
+      message_enc: encryptField(cleanMessage),
     })
     .select('id')
     .single()) as { data: { id: string } | null; error: any }
@@ -73,10 +74,10 @@ export async function POST(req: Request) {
       invitation_id: invitation.id,
       rsvp_id: rsvp.id,
       guest_id: null,
-      name_enc: cleanName, // plaintext for now — Phase 3 encrypts on write
+      name_enc: encryptField(cleanName),
       guest_count: cleanCount,
       source: 'rsvp',
-      note_enc: cleanMessage,
+      note_enc: encryptField(cleanMessage),
       arrived_at: null,
     })
     if (attErr) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { encryptField } from '@/lib/crypto/app'
 
 /**
  * POST /api/gift
@@ -52,11 +53,11 @@ export async function POST(req: Request) {
 
   const { error } = await (supabase.from('gift_confirmations') as any).insert({
     invitation_id: invitation.id,
-    guest_name: String(guest_name).slice(0, 120),
-    account_used: String(account_used).slice(0, 120),
-    amount: normalizedAmount,
+    guest_name_enc: encryptField(String(guest_name).slice(0, 120)),
+    account_used: String(account_used).slice(0, 120), // plaintext — couple's own account label
+    amount_enc: encryptField(normalizedAmount != null ? String(normalizedAmount) : null),
     currency: (currency ? String(currency) : 'IDR').slice(0, 8),
-    message: message ? String(message).slice(0, 500) : null,
+    message_enc: encryptField(message ? String(message).slice(0, 500) : null),
   })
 
   if (error) {

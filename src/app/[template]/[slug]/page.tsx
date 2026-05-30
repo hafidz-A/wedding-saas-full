@@ -4,6 +4,7 @@ import InvitationView from './InvitationView'
 import { isValidTemplate, getDefaultConfig } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
+import { decryptConfig } from '@/lib/crypto/config'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -105,6 +106,11 @@ export default async function Page({ params }: PageProps) {
     // No Supabase configured — local dev fallback to the template demo.
     config = getDefaultConfig(template)
   }
+
+  // Decrypt sensitive config leaves (account numbers/names, whatsapp, email,
+  // phone) server-side before they reach the client renderer. No-op on a
+  // plaintext config (demo/default, or rows not yet encrypted).
+  config = decryptConfig(config)
 
   return <InvitationView config={config} slug={slug} templateId={templateId} isDemo={isDemoSlug} />
 }

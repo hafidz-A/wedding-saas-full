@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
+import { encryptConfig } from '@/lib/crypto/config'
 
 interface Ctx {
   params: { slug: string }
@@ -46,10 +47,15 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (existing?.config?.music !== undefined) mergedConfig.music = existing.config.music
   if (existing?.config?.bgGif !== undefined) mergedConfig.bgGif = existing.config.bgGif
 
+  // Encrypt sensitive leaves (account numbers/names, whatsapp, email, phone)
+  // before persisting. The editor loaded a decrypted config, so these arrive
+  // as plaintext; encryptConfig wraps them as { enc } (idempotent).
+  const encryptedConfig = encryptConfig(mergedConfig)
+
   const savedAt = new Date().toISOString()
   // Cast to any at from() to avoid Supabase 'never' inference on untyped schema
   const { error } = await (supabase.from('invitations') as any)
-    .update({ config: mergedConfig as any, updated_at: savedAt })
+    .update({ config: encryptedConfig as any, updated_at: savedAt })
     .eq('id', owner.id)
 
   if (error) {

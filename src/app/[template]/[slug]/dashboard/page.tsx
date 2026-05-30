@@ -8,6 +8,8 @@ import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
 import { fromDbRow } from './guests/types'
 import { fromDbRow as attendanceFromDbRow } from './guestbook/types'
+import { decryptField as appDecrypt } from '@/lib/crypto/app'
+import { decryptConfig } from '@/lib/crypto/config'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -134,14 +136,20 @@ export default async function DashboardPage({ params }: PageProps) {
   // state with the "+ Import" CTA.
   const guests = (guestsRaw as any[] | null)?.map(fromDbRow) ?? []
   const attendances = (attendancesRaw as any[] | null)?.map(attendanceFromDbRow) ?? []
+  const rsvpsDec = (rsvps as any[] | null)?.map(decryptRsvpRow) ?? []
+  const giftsDec = (gifts as any[] | null)?.map(decryptGiftRow) ?? []
+
+  // Decrypt the config once, server-side, before it reaches the editor/tabs
+  // (account numbers, whatsapp, email, phone). No-op on a plaintext config.
+  const invitationDecrypted = { ...invitation, config: decryptConfig(invitation.config) }
 
   return (
     <DashboardClient
       slug={slug}
       template={template}
-      invitation={invitation}
-      rsvps={(rsvps as any) || []}
-      gifts={(gifts as any) || []}
+      invitation={invitationDecrypted}
+      rsvps={rsvpsDec}
+      gifts={giftsDec}
       notes={(notes as any) || []}
       guests={guests}
       attendances={attendances}
@@ -150,6 +158,38 @@ export default async function DashboardPage({ params }: PageProps) {
       lang={lang}
     />
   )
+}
+
+/* ──────────── row decryptors (server-side) ────────────
+ * rsvps / gift_confirmations keep their plaintext columns alongside the new
+ * _enc columns during the encryption migration. Prefer the _enc value; fall
+ * back to the plaintext column for rows not yet backfilled. After the
+ * drop-plaintext migration the plaintext columns are gone (undefined) and the
+ * _enc branch is the only one used. */
+
+function decryptRsvpRow(r: any) {
+  return {
+    id: r.id,
+    guest_name: r.guest_name_enc != null ? appDecrypt(r.guest_name_enc) ?? '' : r.guest_name ?? '',
+    attending: r.attending,
+    guest_count: r.guest_count,
+    meal_choice: r.meal_choice,
+    message: r.message_enc != null ? appDecrypt(r.message_enc) : r.message ?? null,
+    created_at: r.created_at,
+  }
+}
+
+function decryptGiftRow(g: any) {
+  const amt = g.amount_enc != null ? appDecrypt(g.amount_enc) : null
+  return {
+    id: g.id,
+    guest_name: g.guest_name_enc != null ? appDecrypt(g.guest_name_enc) ?? '' : g.guest_name ?? '',
+    account_used: g.account_used,
+    amount: amt != null ? Number(amt) : g.amount ?? null,
+    currency: g.currency,
+    message: g.message_enc != null ? appDecrypt(g.message_enc) : g.message ?? null,
+    created_at: g.created_at,
+  }
 }
 
 /* ──────────── small server-rendered placeholders ──────────── */

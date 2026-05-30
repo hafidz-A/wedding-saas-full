@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { decryptField } from '@/lib/guests/crypto'
+import { encryptField } from '@/lib/crypto/app'
 import { fromDbRow, type AttendanceRow, type AttendanceRowDb } from './types'
 
 /**
@@ -133,10 +134,12 @@ export async function addWalkInAttendance(input: {
         invitation_id,
         guest_id: guest.id,
         rsvp_id: null,
-        name_enc: name, // plaintext for now — Phase 3 encrypts on write
+        // `name` is decrypted from guests (GUESTS_ENCRYPTION_KEY) above, then
+        // re-encrypted here under the app key for the attendances domain.
+        name_enc: encryptField(name),
         guest_count: count,
         source: 'walkin',
-        note_enc: note,
+        note_enc: encryptField(note),
         arrived_at: new Date().toISOString(),
       } as any)
       .select()
