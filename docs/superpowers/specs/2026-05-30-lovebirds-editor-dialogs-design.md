@@ -29,7 +29,7 @@ attendance tab and the Ucapan tab (untouched), invitation-template perf.
 | # | type | notes |
 |---|------|-------|
 | 1 | `hero` | 🔒 anchored first, type-locked, non-removable |
-| 2 | `countdown` | |
+| 2 | `quote` | **new section** (§A.1) — replaces `countdown`, which is redundant with the hero's built-in countdown |
 | 3 | `ourStory` | |
 | 4 | `eventDetails` | |
 | 5 | `brideGroom` | |
@@ -42,6 +42,24 @@ attendance tab and the Ucapan tab (untouched), invitation-template perf.
 Dropped from the default (still addable/swappable from the pool):
 `weddingParty`, `gallerySpringCoil`, `accommodations`, `faq`, `playlist`.
 
+`countdown` is removed from lovebirds entirely (the hero has a built-in
+countdown) — see §C.
+
+### A.1 New `quote` section (verse / ayat)
+
+Lovebirds has no quote section, only a `QuoteBlock` primitive. Add a thin,
+dedicated section that reuses it:
+- Component `src/all-templates/lovebirds/sections/Quote/Quote.jsx` — a section
+  wrapper rendering the existing `QuoteBlock` (text + attribution) in a centered
+  section container with the lovebirds look. New file (no Vite-divergence
+  concern).
+- Editor schema `src/editor/schemas/quote.ts` — fields `text` (textarea) and
+  `attribution` (text, e.g. "QS Ar-Rum: 21"); registered in the lovebirds
+  editor schema registry.
+- Register `quote` in the lovebirds renderer (type → component) so it renders on
+  the public page.
+- Added to the section pool (addable/swappable).
+
 ### Behavior
 
 - **Max 10 sections.** The "Add section" control is hidden/disabled at 10.
@@ -51,7 +69,7 @@ Dropped from the default (still addable/swappable from the pool):
   solary), **remove** (→ < 10).
 - When < 10, "Add section" returns; adding caps back at 10.
 - **Section pool** = all lovebirds types except `hero`, `footer`, `registry`,
-  `guestbook` → 13 types: `countdown`, `ourStory`, `eventDetails`,
+  `guestbook`, `countdown` → 13 types: `quote`, `ourStory`, `eventDetails`,
   `brideGroom`, `weddingParty`, `galleryMasonry`, `gallerySpringCoil`,
   `schedule`, `rsvp`, `weddingGift`, `accommodations`, `faq`, `playlist`.
 
@@ -100,15 +118,18 @@ from the lovebirds renderer registry.
 
 ---
 
-## C. Remove Guestbook section from lovebirds
+## C. Remove Guestbook + Countdown sections from lovebirds
 
-- Remove `guestbook` from the lovebirds **editor schema registry**, the
-  **renderer** registry, and the **pool**.
-- Strip any `guestbook` section from lovebirds configs on load (same mechanism
-  as the existing `DEPRECATED_SECTION_TYPES` set, made template-aware).
+- Remove `guestbook` and `countdown` from the lovebirds **editor schema
+  registry**, the **renderer** registry, and the **pool**.
+  - `guestbook`: not wanted.
+  - `countdown`: redundant — the hero already has a built-in countdown.
+- Strip any `guestbook` / `countdown` section from lovebirds configs on load
+  (same mechanism as the existing `DEPRECATED_SECTION_TYPES` set, made
+  template-aware).
 - The dashboard **Ucapan** tab and the Phase-2 **Buku Tamu** attendance tab are
   untouched (different features).
-- Solary is unaffected (its registry never had a generic guestbook section).
+- Solary is unaffected.
 
 ---
 
@@ -167,9 +188,12 @@ themed alert.
 
 ## Acceptance criteria
 
-- New lovebirds invitation seeds exactly the 10 default sections; hero first &
-  footer last are locked; middle slots swap/change-type/remove; add is blocked
-  at 10 and dedupes types.
+- New lovebirds invitation seeds exactly the 10 default sections (incl. the new
+  `quote` section at slot 2, not `countdown`); hero first & footer last are
+  locked; middle slots swap/change-type/remove; add is blocked at 10 and dedupes
+  types.
+- The `quote` section renders the verse text + attribution on the public page
+  and is editable (text + attribution) in the editor.
 - A lovebirds config with a standalone `registry` section opens with that data
   folded into Wedding Gift and the standalone section gone; the public page
   renders the registry block inside Wedding Gift.
