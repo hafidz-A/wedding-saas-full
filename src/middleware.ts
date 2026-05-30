@@ -60,5 +60,9 @@ export const config = {
     '/onboarding',
     '/my-templates',
     '/:template/:slug/dashboard/:path*',
+    // Public invitation pages — needed so the supabase server client can
+    // refresh the auth session and the owner-preview bypass works.
+    // Negative lookahead excludes the API, Next internals, and static assets.
+    '/((?!api|_next|images|audio|fonts|favicon).+)/:slug',
   ],
 }
