@@ -1,19 +1,29 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { schemaRegistry } from './schemas'
+import { getSchemaRegistry } from './schemas'
+import { getTemplatePolicy, availableAddTypes } from './templatePolicy'
+import { useEditor } from './EditorProvider'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { localizeLabel } from './schemas/types'
 
 interface Props {
+  template: string
   onAdd: (sectionType: string, label: string, defaults?: Record<string, unknown>) => void
 }
 
-export default function AddSectionMenu({ onAdd }: Props) {
+export default function AddSectionMenu({ template, onAdd }: Props) {
   const t = useDashboardDict().editor
   const lang = useDashboardLang()
+  const { config } = useEditor()
   const [open, setOpen] = useState(false)
-  const entries = Object.entries(schemaRegistry)
+
+  const policy = getTemplatePolicy(template)
+  const registry = getSchemaRegistry(template)
+  const atMax = !!policy?.maxSections && config.sections.length >= policy.maxSections
+  // Dedup: only offer types not already used (and within the template pool).
+  const types = availableAddTypes(registry, config.sections, policy)
+  const entries = types.map((type) => [type, registry[type]] as const)
 
   const wrapRef = useRef<HTMLDivElement>(null)
 
@@ -25,6 +35,9 @@ export default function AddSectionMenu({ onAdd }: Props) {
     document.addEventListener('mousedown', onDocClick)
     return () => document.removeEventListener('mousedown', onDocClick)
   }, [open])
+
+  // Hidden once the section cap is reached or every type is already used.
+  if (atMax || entries.length === 0) return null
 
   return (
     <div ref={wrapRef} style={{ position: 'relative' }}>

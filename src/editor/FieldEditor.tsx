@@ -2,7 +2,13 @@
 
 import { useEditor } from './EditorProvider'
 import { getSchemaRegistry } from './schemas'
-import { getTemplatePolicy, isTypeLocked } from './templatePolicy'
+import {
+  getTemplatePolicy,
+  isTypeLocked,
+  isTypeAnchored,
+  isTypeLockedFor,
+  availableSwapTypes,
+} from './templatePolicy'
 import { localizeLabel, type FieldDef } from './schemas/types'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import type { Lang } from '@/lib/i18n'
@@ -23,7 +29,7 @@ interface Props {
 }
 
 export default function FieldEditor({ slug, template }: Props) {
-  const { selectedSection, updateField, removeSection, changeSectionType } = useEditor()
+  const { selectedSection, updateField, removeSection, changeSectionType, config } = useEditor()
   const t = useDashboardDict().editor
   const lang = useDashboardLang()
 
@@ -67,10 +73,15 @@ export default function FieldEditor({ slug, template }: Props) {
 
   const policy = getTemplatePolicy(template)
   const registry = getSchemaRegistry(template)
-  const typeLocked = policy ? isTypeLocked(selectedSection.id, policy) : false
-  const swapOptions = policy && !typeLocked
-    ? policy.swappablePool.filter((tp) => registry[tp])
-    : []
+  const anchored = policy ? isTypeAnchored(selectedSection.type, policy) : false
+  const typeLocked = policy
+    ? isTypeLockedFor(selectedSection.type, policy) || isTypeLocked(selectedSection.id, policy)
+    : false
+  // Dedup: only offer pool types not used by other slots (current type stays first).
+  const swapOptions =
+    policy && !typeLocked && !anchored
+      ? availableSwapTypes(registry, config.sections, policy, selectedSection.id, selectedSection.type)
+      : []
 
   function onChangeType(newType: string) {
     if (newType === selectedSection!.type) return
