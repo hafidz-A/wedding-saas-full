@@ -74,10 +74,12 @@
 .cardWrapper {
   perspective: 1000px;
   transform-style: preserve-3d;
+  display: flex; /* stretch the inner card to the (equal) grid-row height */
 }
 
 .cardInner {
   position: relative;
+  flex: 1; /* fill cardWrapper so all cards are the same height */
   border-radius: 20px;
   padding: clamp(20px, 2.5vw, 28px);
   display: flex;
@@ -274,7 +276,7 @@
 }
 
 .useBtn {
-  margin-top: 14px;
+  margin-top: auto; /* pin to the bottom so equal-height cards line up */
   padding: 11px 16px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.12);
@@ -373,22 +375,30 @@
   gap: clamp(12px, 1.6vw, 18px);
 }
 .registryCard {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
   text-align: left;
   text-decoration: none;
-  padding: clamp(16px, 2vw, 22px) clamp(40px, 4vw, 48px) clamp(16px, 2vw, 22px) clamp(16px, 2vw, 22px);
+  padding: clamp(14px, 1.6vw, 18px);
   border-radius: clamp(14px, 1.4vw, 18px);
   background: var(--glass-bg, rgba(255, 255, 255, 0.7));
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.1));
   border-left: 3px solid var(--accent, var(--color-coral));
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-.registryCard:hover {
+/* Only the linkable cards lift on hover. */
+a.registryCard:hover {
   transform: translateY(-3px);
   box-shadow: 0 14px 34px rgba(42, 33, 24, 0.12);
+}
+.registryImg {
+  width: 100%;
+  height: clamp(120px, 16vw, 160px);
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  display: block;
 }
 .registryName {
   font-family: var(--font-display, 'Cormorant Garamond', serif);
@@ -402,11 +412,9 @@
   color: var(--fg-muted, rgba(42, 33, 24, 0.65));
 }
 .registryArrow {
-  position: absolute;
-  top: clamp(16px, 2vw, 22px);
-  right: clamp(16px, 2vw, 22px);
   color: var(--accent, var(--color-coral));
-  font-size: 18px;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 /* ---------- Confirmation form ---------- */

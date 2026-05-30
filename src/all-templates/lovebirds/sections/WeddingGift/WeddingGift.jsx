@@ -274,19 +274,27 @@ export default function WeddingGift(props) {
             {registryTitle && <h3 className={styles.registryTitle}>{registryTitle}</h3>}
             {registryMessage && <p className={styles.registryMessage}>{registryMessage}</p>}
             <div className={styles.registryGrid}>
-              {platforms.map((p, idx) => (
-                <a
-                  key={p.id || p.name || idx}
-                  className={styles.registryCard}
-                  href={p.url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className={styles.registryName}>{p.name}</span>
-                  {p.description && <span className={styles.registryDesc}>{p.description}</span>}
-                  <span className={styles.registryArrow} aria-hidden="true">→</span>
-                </a>
-              ))}
+              {platforms.map((p, idx) => {
+                const link = p.url && String(p.url).trim() && String(p.url).trim() !== '#' ? String(p.url).trim() : null
+                const body = (
+                  <>
+                    {p.image && <img className={styles.registryImg} src={p.image} alt={p.name || ''} loading="lazy" />}
+                    <span className={styles.registryName}>
+                      {p.name}
+                      {link && <span className={styles.registryArrow} aria-hidden="true"> →</span>}
+                    </span>
+                    {p.description && <span className={styles.registryDesc}>{p.description}</span>}
+                  </>
+                )
+                const key = p.id || p.name || idx
+                return link ? (
+                  <a key={key} className={styles.registryCard} href={link} target="_blank" rel="noopener noreferrer">
+                    {body}
+                  </a>
+                ) : (
+                  <div key={key} className={styles.registryCard}>{body}</div>
+                )
+              })}
             </div>
           </div>
         )}

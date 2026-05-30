@@ -130,6 +130,6 @@ export default function SectionList({ slug, template }: Props) {
 const wrap: React.CSSProperties = { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'transparent' }
 const hdr:  React.CSSProperties = { padding: '18px 16px 8px' }
 const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: '#E8553E' }
-const list: React.CSSProperties = { display: 'grid', gap: 4, padding: '4px 8px', flex: 1, overflow: 'auto' }
+const list: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, padding: '4px 8px', flex: 1, overflow: 'auto' }
 const ftr:  React.CSSProperties = { padding: 12, borderTop: '1px solid rgba(42,33,24,0.08)' }
 const previewLink: React.CSSProperties = { display: 'block', textAlign: 'center', padding: '10px 14px', borderRadius: 10, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', textDecoration: 'none' }
