@@ -5,6 +5,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // No-op so files that import 'server-only' for the runtime guard
+      // can still be loaded by the node test environment.
+      'server-only': fileURLToPath(new URL('./src/__test-stubs__/empty.ts', import.meta.url)),
     },
   },
   test: {

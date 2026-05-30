@@ -1,4 +1,5 @@
-import { templateCatalog } from '@/config/templateCatalog'
+import 'server-only'
+import { getTemplatePlans, type TemplatePlanRow } from './template-plans'
 
 export interface ResolvedPlan {
   planId: string
@@ -6,24 +7,45 @@ export interface ResolvedPlan {
   expiresAt: (paidAtMs: number) => string | null
 }
 
-const YEAR_MS = 365 * 24 * 60 * 60 * 1000
-
 /**
- * Resolve a (template, plan) pair to its price + expiry rule.
- * - basic → expires 1 year after payment
- * - premium → lifetime (null)
- * Returns null for an unknown template/plan or a plan without a numeric amount.
+ * Pure helper: resolve a plan row by code. Exported separately so tests
+ * can run against synthetic data without touching the database.
  */
-export function resolvePlan(templateId: string, planId: string): ResolvedPlan | null {
-  const entry = (templateCatalog as Array<{ id: string; plans?: Array<{ id: string; amountIDR?: number }> }>).find(
-    (t) => t.id === templateId,
-  )
-  const plan = entry?.plans?.find((p) => p.id === planId)
-  if (!plan || typeof plan.amountIDR !== 'number') return null
+export function resolvePlanFrom(
+  plans: TemplatePlanRow[],
+  planId: string,
+): ResolvedPlan | null {
+  const plan = plans.find((p) => p.plan_code === planId)
+  if (!plan) return null
+  const durationDays = plan.duration_days
   return {
     planId,
-    amountIDR: plan.amountIDR,
-    expiresAt: (paidAtMs: number) =>
-      planId === 'premium' ? null : new Date(paidAtMs + YEAR_MS).toISOString(),
+    amountIDR: plan.price_idr,
+    expiresAt: (paidAtMs: number) => {
+      if (durationDays == null) return null
+      return new Date(paidAtMs + durationDays * 86_400_000).toISOString()
+    },
   }
+}
+
+/**
+ * Resolve a (template, plan) pair to its price + expiry rule, reading
+ * from the `template_plans` Supabase table (DB-driven pricing).
+ *
+ *   duration_days = NULL → lifetime (expiresAt returns null)
+ *   duration_days = N    → expires N days after payment
+ *
+ * Returns null for an unknown template/plan.
+ */
+export async function resolvePlan(
+  templateId: string,
+  planId: string,
+): Promise<ResolvedPlan | null> {
+  const plans = await getTemplatePlans(templateId)
+  return resolvePlanFrom(plans, planId)
+}
+
+/** Whether the plan unlocks the guestbook ("buku tamu") attendance ledger. */
+export function planHasGuestbook(planCode: string): boolean {
+  return planCode === 'premium'
 }

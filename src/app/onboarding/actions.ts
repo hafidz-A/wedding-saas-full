@@ -64,9 +64,9 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     const dateMs = Date.parse(input.weddingDate)
     if (isNaN(dateMs)) return { ok: false, error: 'Tanggal acara tidak valid' }
 
-    // 3. Validate the chosen plan against the template's catalog plans
+    // 3. Validate the chosen plan against the template's DB-backed plans
     //    (defaults to 'basic' when missing/invalid).
-    const plan = resolvePlan(template, input.plan) ? input.plan : 'basic'
+    const plan = (await resolvePlan(template, input.plan)) ? input.plan : 'basic'
 
     const admin = createSupabaseAdminClient()
 
@@ -176,7 +176,7 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
 
-    const resolved = resolvePlan(inv.template_id, inv.plan)
+    const resolved = await resolvePlan(inv.template_id, inv.plan)
     if (!resolved) return { ok: false, error: 'Plan tidak valid' }
 
     const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')

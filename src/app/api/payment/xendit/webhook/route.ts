@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   if (!inv || inv.is_paid) return NextResponse.json({ ok: true }) // unknown or already processed
 
   const now = Date.now()
-  const resolved = resolvePlan(inv.template_id, inv.plan)
+  const resolved = await resolvePlan(inv.template_id, inv.plan)
   await (admin.from('invitations') as any)
     .update({
       is_paid: true,

@@ -4,6 +4,7 @@ import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
 import { TemplateCard } from './TemplateCard'
+import { getAllTemplatePlans, formatIDR } from '@/lib/payments/template-plans'
 
 /**
  * Template gallery — browse every available invitation template before
@@ -18,10 +19,11 @@ export const metadata = {
   description: 'Browse and preview our cinematic wedding invitation templates.',
 }
 
-export default function TemplatesPage() {
+export default async function TemplatesPage() {
   const lang = getLang()
   const dict = getDict(lang)
   const tt = dict.templates
+  const plansByTemplate = await getAllTemplatePlans()
   return (
     <>
       <SiteNav lang={lang} t={dict.common} />
@@ -34,9 +36,19 @@ export default function TemplatesPage() {
         </header>
 
         <div style={grid}>
-          {templateCatalog.map((t) => (
-            <TemplateCard key={t.id} t={t} tt={tt} />
-          ))}
+          {templateCatalog.map((t) => {
+            const dbPlans = plansByTemplate[t.id] ?? []
+            const merged = {
+              ...t,
+              plans: dbPlans.map((p) => ({
+                id: p.plan_code,
+                name: p.display_name,
+                price: formatIDR(p.price_idr),
+                features: p.features,
+              })),
+            }
+            return <TemplateCard key={t.id} t={merged} tt={tt} />
+          })}
         </div>
 
         <p style={{ textAlign: 'center', marginTop: 40, fontSize: 13, color: 'rgba(42,33,24,0.6)' }}>
