@@ -7,6 +7,7 @@ import RsvpsTab, { type RsvpRow } from './RsvpsTab'
 import GiftsTab, { type GiftRow } from './GiftsTab'
 import MusicTab from './MusicTab'
 import BackgroundTab from './BackgroundTab'
+import PaletteTab from './PaletteTab'
 import NotesTab, { type NoteRow } from './NotesTab'
 import GuestsTab from './GuestsTab'
 import { type GuestRow } from './guests/types'
@@ -66,8 +67,14 @@ export default function DashboardClient({
   }
 
   const [tab, setTab] = useState<
-    'rsvps' | 'gifts' | 'guests' | 'editor' | 'music' | 'background' | 'notes'
+    'rsvps' | 'gifts' | 'guests' | 'editor' | 'music' | 'background' | 'notes' | 'palette'
   >('rsvps')
+
+  const tabKeys = (
+    template === 'solary'
+      ? (['rsvps', 'gifts', 'guests', 'notes', 'editor', 'palette', 'music', 'background'] as const)
+      : (['rsvps', 'gifts', 'guests', 'notes', 'editor', 'music', 'background'] as const)
+  )
 
   return (
     <DashboardI18nProvider dict={dict} lang={lang}>
@@ -205,7 +212,7 @@ export default function DashboardClient({
       )}
 
       <nav className={styles.nav}>
-        {(['rsvps', 'gifts', 'guests', 'notes', 'editor', 'music', 'background'] as const).map((t) => (
+        {tabKeys.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -262,6 +269,10 @@ export default function DashboardClient({
 
         {tab === 'background' && (
           <BackgroundTab slug={slug} initial={invitation.config?.bgGif} />
+        )}
+
+        {tab === 'palette' && (
+          <PaletteTab slug={slug} initial={invitation.config?.theme?.defaultPalette} />
         )}
 
         {tab === 'notes' && <NotesTab slug={slug} notes={notes} />}

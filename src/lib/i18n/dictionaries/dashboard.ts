@@ -16,6 +16,7 @@ export const dashboard = {
         editor: 'Editor',
         music: 'Musik',
         background: 'Latar',
+        palette: 'Palette',
       },
     },
     login: {
@@ -134,6 +135,17 @@ export const dashboard = {
         saveFailed: 'Simpan gagal',
         networkError: 'Network error',
         savedOk: 'Tersimpan ✓',
+      },
+      palette: {
+        title: 'Palette Warna',
+        subtitle: 'Pilih satu palette untuk undangan kamu. Tamu akan melihat palette ini.',
+        groupDark: 'Gelap Kosmik',
+        groupLight: 'Terang Pastel',
+        save: 'Simpan',
+        saving: 'Menyimpan…',
+        savedOk: 'Tersimpan ✓',
+        saveFailed: 'Gagal menyimpan',
+        networkError: 'Gangguan jaringan',
       },
       guests: {
         title: 'Tamu Undangan',
@@ -272,6 +284,7 @@ export const dashboard = {
         editor: 'Editor',
         music: 'Music',
         background: 'Background',
+        palette: 'Palette',
       },
     },
     login: {
@@ -390,6 +403,17 @@ export const dashboard = {
         saveFailed: 'Save failed',
         networkError: 'Network error',
         savedOk: 'Saved ✓',
+      },
+      palette: {
+        title: 'Color Palette',
+        subtitle: 'Pick one palette for your invitation. Guests will see this palette.',
+        groupDark: 'Cosmic Dark',
+        groupLight: 'Pastel Light',
+        save: 'Save',
+        saving: 'Saving…',
+        savedOk: 'Saved ✓',
+        saveFailed: 'Save failed',
+        networkError: 'Network error',
       },
       guests: {
         title: 'Invitation Guests',
