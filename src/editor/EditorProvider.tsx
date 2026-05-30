@@ -43,7 +43,7 @@ export interface PageConfig {
   sections: SectionEntry[]
 }
 
-interface State {
+export interface State {
   config: PageConfig
   initialConfig: PageConfig
   selectedSectionId: string | null
@@ -52,7 +52,7 @@ interface State {
   lastSavedAt: string | null
 }
 
-type Action =
+export type Action =
   | { type: 'UPDATE_FIELD';        sectionId: string; key: string; value: unknown }
   | { type: 'UPDATE_ARRAY_ITEM';   sectionId: string; key: string; index: number; subKey: string; value: unknown }
   | { type: 'ADD_ARRAY_ITEM';      sectionId: string; key: string; item: unknown }
@@ -67,6 +67,8 @@ type Action =
   | { type: 'SAVE_START' }
   | { type: 'SAVE_SUCCESS';           savedAt: string }
   | { type: 'SAVE_ERROR';             message: string }
+  | { type: 'CHANGE_SECTION_TYPE'; sectionId: string; newType: string; defaults?: Record<string, unknown> }
+  | { type: 'REORDER_SECTIONS_BY_ID'; order: string[] }
 
 function moveItem<T>(arr: T[], from: number, to: number): T[] {
   const next = arr.slice()
@@ -86,7 +88,7 @@ function patchSection(
   }
 }
 
-function reducer(state: State, action: Action): State {
+export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'UPDATE_FIELD':
       return {
@@ -146,6 +148,33 @@ function reducer(state: State, action: Action): State {
         ...state,
         config: { ...state.config, sections: moveItem(state.config.sections, action.from, action.to) },
       }
+
+    case 'CHANGE_SECTION_TYPE':
+      return {
+        ...state,
+        config: patchSection(state.config, action.sectionId, (s) => {
+          const prev = (s.props || {}) as Record<string, unknown>
+          const preserved: Record<string, unknown> = {}
+          if (prev.planetKey !== undefined) preserved.planetKey = prev.planetKey
+          if (prev.planetName !== undefined) preserved.planetName = prev.planetName
+          if (prev.sectionLabel !== undefined) preserved.sectionLabel = prev.sectionLabel
+          return {
+            ...s,
+            type: action.newType,
+            props: { ...(action.defaults || {}), ...preserved },
+          }
+        }),
+      }
+
+    case 'REORDER_SECTIONS_BY_ID': {
+      const byId = new Map(state.config.sections.map((s) => [s.id, s]))
+      const next = action.order
+        .map((id) => byId.get(id))
+        .filter((s): s is SectionEntry => !!s)
+      // Guard: only apply if it's a pure permutation (same length).
+      if (next.length !== state.config.sections.length) return state
+      return { ...state, config: { ...state.config, sections: next } }
+    }
 
     case 'TOGGLE_SECTION_ENABLED':
       return {
@@ -236,6 +265,8 @@ interface EditorContextValue extends State {
   removeSection: (sectionId: string) => void
   selectSection: (sectionId: string) => void
   save: () => Promise<void>
+  changeSectionType: (sectionId: string, newType: string, defaults?: Record<string, unknown>) => void
+  reorderSectionsById: (order: string[]) => void
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null)
@@ -339,6 +370,9 @@ export function EditorProvider({ slug, initialConfig, children }: ProviderProps)
     removeSection: (sectionId) => dispatch({ type: 'REMOVE_SECTION', sectionId }),
     selectSection: (sectionId) => dispatch({ type: 'SELECT_SECTION', sectionId }),
     save,
+    changeSectionType: (sectionId, newType, defaults) =>
+      dispatch({ type: 'CHANGE_SECTION_TYPE', sectionId, newType, defaults }),
+    reorderSectionsById: (order) => dispatch({ type: 'REORDER_SECTIONS_BY_ID', order }),
   }
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
