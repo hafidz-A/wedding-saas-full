@@ -85,26 +85,13 @@ export const defaultConfig = {
     },
 
     {
-      id: 'countdown',
-      type: 'countdown',
+      id: 'quote',
+      type: 'quote',
       enabled: true,
       theme: 'warmCream',
-      navLabel: 'Countdown',
       props: {
-        weddingDate: demoWeddingDateWithOffset,
-        eyebrow: 'Save the date',
-        title: 'Menuju Hari Bahagia',
-        subtitle: 'Hitung mundur sampai janji suci diucapkan',
-        messageDuring: 'Hari ini, kami menikah! 💍',
-        messageAfter: 'Terima kasih telah menjadi bagian dari kisah kami.',
-        labels: { days: 'Hari', hours: 'Jam', minutes: 'Menit', seconds: 'Detik' },
-        style: 'card',
-        calendarEnabled: true,
-        calendarLabel: 'Tambah ke Kalender',
-        calendarTitle: 'Pernikahan Rizky & Amara',
-        calendarLocation: 'The Grand Ballroom, Jakarta',
-        calendarDescription: 'Akad nikah & resepsi. Mohon kehadirannya.',
-        calendarDurationHours: 4,
+        text: 'Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya.',
+        attribution: 'QS Ar-Rum: 21',
       },
     },
 
@@ -245,23 +232,6 @@ export const defaultConfig = {
     },
 
     {
-      id: 'weddingParty',
-      type: 'weddingParty',
-      enabled: false,
-      theme: 'warmCream',
-      props: {
-        title: 'Wedding Party',
-        subtitle: 'The people who make our story brighter',
-        people: [
-          { id: 'p1', name: 'Maya Larasati', role: 'Maid of Honor', photo: '' },
-          { id: 'p2', name: 'Dimas Aji', role: 'Best Man', photo: '' },
-          { id: 'p3', name: 'Sari Wulandari', role: 'Bridesmaid', photo: '' },
-          { id: 'p4', name: 'Bagas Permana', role: 'Groomsman', photo: '' },
-        ],
-      },
-    },
-
-    {
       id: 'galleryMasonry',
       type: 'galleryMasonry',
       enabled: true,
@@ -288,35 +258,6 @@ export const defaultConfig = {
           { src: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=600&q=80', alt: 'Cooking together' },
           { src: 'https://images.unsplash.com/photo-1542042161784-26ab9e041e2e?auto=format&fit=crop&w=600&q=80', alt: 'Family dinner' },
           { src: 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=600&q=80', alt: 'First dance' },
-        ],
-      },
-    },
-
-    {
-      // Spring Coil gallery with GSAP ScrollTrigger `pin: true`.
-      // Toggle `enabled: true/false` to enable or disable scroll hijacking.
-      // Keep the other gallery variants above disabled to avoid duplicates.
-      id: 'gallerySpringCoil',
-      type: 'gallerySpringCoil',
-      enabled: true,
-      theme: 'warmCream',
-      navLabel: 'Coil',
-      props: {
-        sectionTitle: 'Moments',
-        sectionSubtitle: 'Memori kami menjalin dalam spiral kenangan',
-        photos: [
-          { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', caption: 'The proposal'      },
-          { src: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80', caption: 'A road trip'        },
-          { src: 'https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?auto=format&fit=crop&w=900&q=80', caption: 'First holiday'      },
-          { src: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=900&q=80', caption: 'Lazy Sunday'        },
-          { src: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=900&q=80', caption: 'Cooking together'  },
-          { src: 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&fit=crop&w=900&q=80', caption: 'Coffee mornings'   },
-          { src: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?auto=format&fit=crop&w=900&q=80', caption: 'Birthday surprise' },
-          { src: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&w=900&q=80', caption: 'City lights'       },
-          { src: 'https://images.unsplash.com/photo-1521336575822-6da63fb45455?auto=format&fit=crop&w=900&q=80', caption: 'Sunset walk'       },
-          { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', caption: 'Family dinner'     },
-          { src: 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=900&q=80', caption: 'First dance'       },
-          { src: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=900&q=80', caption: 'Just us'           },
         ],
       },
     },
@@ -400,119 +341,6 @@ export const defaultConfig = {
         ],
         giftAddress:
           'Untuk kado fisik, mohon kirimkan ke alamat: Jl. Senopati No. 45, Kebayoran Baru, Jakarta Selatan 12190 — atas nama Rizky Pratama (+62 812 0000 0000).',
-      },
-    },
-
-    {
-      id: 'registry',
-      type: 'registry',
-      enabled: false,
-      theme: 'warmCream',
-      props: {
-        title: 'Wedding Registry',
-        message:
-          'Your presence is the greatest gift of all — but if you wish to contribute, here are a few places we have curated together.',
-        platforms: [
-          { id: 'r1', name: 'Tokopedia Wishlist', description: 'Home essentials for our new apartment.', url: '#', accent: 'coral'   },
-          { id: 'r2', name: 'Honeymoon Fund',     description: 'Help us explore Kyoto in spring.',       url: '#', accent: 'purple'  },
-          { id: 'r3', name: 'Charity in Lieu',    description: 'Donate to the Indonesia Mengajar foundation.', url: '#', accent: 'emerald' },
-        ],
-      },
-    },
-
-    {
-      id: 'accommodations',
-      type: 'accommodations',
-      enabled: true,
-      theme: 'warmCream',
-      props: {
-        title: 'Where to Stay',
-        subtitle: 'A few favorites for our out-of-town guests',
-        hotels: [
-          {
-            id: 'h1',
-            name: 'Hotel Indonesia Kempinski',
-            distance: '0.4 km',
-            description: 'Five-star luxury directly across from the venue.',
-            price: 'From IDR 3.500.000 / night',
-            phone: '+62 21 2358 3838',
-            tag: 'Luxury',
-          },
-          {
-            id: 'h2',
-            name: 'Pullman Jakarta Indonesia',
-            distance: '1.1 km',
-            description: 'Modern comfort with a beautiful rooftop pool.',
-            price: 'From IDR 2.100.000 / night',
-            phone: '+62 21 3192 1111',
-            tag: 'Mid-range',
-          },
-          {
-            id: 'h3',
-            name: 'Artotel Thamrin',
-            distance: '1.6 km',
-            description: 'Boutique art-themed rooms, a fun and walkable option.',
-            price: 'From IDR 1.200.000 / night',
-            phone: '+62 21 3193 5555',
-            tag: 'Boutique',
-          },
-        ],
-        tips: [
-          { id: 't1', icon: 'plane', text: 'Soekarno-Hatta Intl. Airport (CGK) is about 45 minutes from the venue.' },
-          { id: 't2', icon: 'car',   text: 'Grab and Gojek are reliable and inexpensive — keep the app installed.' },
-          { id: 't3', icon: 'sun',   text: 'November is mild and humid; bring a light umbrella just in case.'      },
-        ],
-      },
-    },
-
-    {
-      id: 'faq',
-      type: 'faq',
-      enabled: true,
-      theme: 'warmCream',
-      props: {
-        title: 'Questions, Answered',
-        subtitle: 'A few things our friends keep asking',
-        items: [
-          { id: 'f1', q: 'Can I bring a plus one?',                a: 'We are keeping the guest list intimate. If your invitation includes a plus one, it will be listed on the RSVP page.' },
-          { id: 'f2', q: 'Is parking available at the venue?',     a: 'Yes — complimentary valet parking is provided for all guests on the evening of the wedding.' },
-          { id: 'f3', q: 'Will there be a kids menu?',             a: 'Absolutely. Please indicate a kids plate on the RSVP form so we can prepare a special meal.' },
-          { id: 'f4', q: 'What time should I arrive?',             a: 'We recommend arriving at 15:30 for welcome drinks. The ceremony begins at 16:00 sharp.' },
-          { id: 'f5', q: 'Is the venue accessible?',               a: 'Yes. The venue is fully wheelchair accessible with step-free access from the lobby to the ballroom.' },
-          { id: 'f6', q: 'Can I take photos during the ceremony?', a: 'We kindly ask that phones be put away during the ceremony — our photographer will share images afterwards.' },
-        ],
-      },
-    },
-
-    {
-      id: 'guestbook',
-      type: 'guestbook',
-      enabled: false,
-      theme: 'warmCream',
-      props: {
-        title: 'Leave a Note',
-        subtitle: 'A digital guestbook of wishes from the people we love',
-        initialNotes: [
-          { id: 'n1', name: 'Maya',  message: 'So happy for you both — cannot wait for the big day!', color: 'gold'  },
-          { id: 'n2', name: 'Dimas', message: 'Brother, you found a gem. Cheers to forever.',         color: 'sky'   },
-          { id: 'n3', name: 'Sari',  message: 'My heart is so full. Sending all the love.',           color: 'coral' },
-        ],
-      },
-    },
-
-    {
-      id: 'playlist',
-      type: 'playlist',
-      enabled: true,
-      theme: 'warmCream',
-      props: {
-        title: 'Build the Playlist',
-        subtitle: 'What song would get you on the dance floor?',
-        initialSongs: [
-          { id: 'pl1', song: 'Perfect',              artist: 'Ed Sheeran'           },
-          { id: 'pl2', song: 'September',            artist: 'Earth, Wind & Fire'   },
-          { id: 'pl3', song: 'Mendung Tanpo Udan',   artist: 'Ndarboy Genk'         },
-        ],
       },
     },
 
