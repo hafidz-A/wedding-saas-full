@@ -37,7 +37,7 @@ import { defaultConfig } from './defaultConfig.js'
  * is dynamic-imported with `ssr: false`, so Three.js / window access
  * never runs on the server.
  */
-export default function Shell({ config: incoming, slug }) {
+export default function Shell({ config: incoming, slug, isDemo = false }) {
   const config = incoming && incoming.sections ? incoming : defaultConfig
 
   const visible = useMemo(
@@ -90,6 +90,7 @@ export default function Shell({ config: incoming, slug }) {
     <ThemeProvider
       defaultPalette={config.theme?.defaultPalette}
       options={config.theme?.paletteOptions}
+      allowGuestSwitch={isDemo}
     >
       <AudioProvider src={config.audio?.src} defaultVolume={config.audio?.volume ?? 0.5}>
         <GuestProvider>
@@ -104,7 +105,7 @@ export default function Shell({ config: incoming, slug }) {
               ))}
             </main>
             <TravellingOverlay />
-            <PaletteSwitcher />
+            {isDemo && <PaletteSwitcher />}
             <MuteButton />
             <SectionArrows sectionIds={sectionIds} />
           </JourneyProvider>

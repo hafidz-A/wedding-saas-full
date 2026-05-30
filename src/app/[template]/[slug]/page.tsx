@@ -91,7 +91,7 @@ export default async function Page({ params }: PageProps) {
     config = getDefaultConfig(template)
   }
 
-  return <InvitationView config={config} slug={slug} templateId={templateId} />
+  return <InvitationView config={config} slug={slug} templateId={templateId} isDemo={isDemoSlug} />
 }
 
 /**
