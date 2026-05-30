@@ -1,0 +1,72 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: rgba(42, 33, 24, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: fade 0.16s ease-out;
+}
+.card {
+  width: min(420px, 100%);
+  background: var(--color-cream, #FDF6EC);
+  border-radius: 20px;
+  padding: 28px 26px 22px;
+  box-shadow: 0 30px 80px rgba(42, 33, 24, 0.32);
+  animation: pop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.title {
+  margin: 0 0 10px;
+  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-style: italic;
+  font-size: 26px;
+  color: var(--color-charcoal, #2A2118);
+}
+.message {
+  margin: 0 0 22px;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(42, 33, 24, 0.75);
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.actions button {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.actions button:hover {
+  transform: translateY(-1px);
+}
+.cancel {
+  background: transparent;
+  border: 1px solid rgba(42, 33, 24, 0.2);
+  color: var(--color-charcoal, #2A2118);
+}
+.primary {
+  background: var(--color-coral, #E8553E);
+  color: #fff;
+}
+.danger {
+  background: #C43F2A;
+  color: #fff;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}

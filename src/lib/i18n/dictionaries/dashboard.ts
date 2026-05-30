@@ -19,6 +19,7 @@ export const dashboard = {
         background: 'Latar',
         palette: 'Palette',
       },
+      dialog: { confirm: 'Ya', cancel: 'Batal', ok: 'OK' },
     },
     login: {
       eyebrow: 'Dashboard',
@@ -34,7 +35,7 @@ export const dashboard = {
       errNotowner: 'Akun ini bukan pemilik undangan ini.',
     },
     tabs: {
-      common: { refresh: '↻ Segarkan', downloadCsv: 'Unduh CSV' },
+      common: { refresh: '↻ Segarkan', downloadCsv: 'Unduh CSV', nothingToExport: 'Belum ada data untuk diekspor.' },
       rsvps: {
         title: 'RSVP',
         statResponses: 'Respons',
@@ -343,6 +344,7 @@ export const dashboard = {
         background: 'Background',
         palette: 'Palette',
       },
+      dialog: { confirm: 'Yes', cancel: 'Cancel', ok: 'OK' },
     },
     login: {
       eyebrow: 'Dashboard',
@@ -358,7 +360,7 @@ export const dashboard = {
       errNotowner: 'This account does not own this invitation.',
     },
     tabs: {
-      common: { refresh: '↻ Refresh', downloadCsv: 'Download CSV' },
+      common: { refresh: '↻ Refresh', downloadCsv: 'Download CSV', nothingToExport: 'Nothing to export yet.' },
       rsvps: {
         title: 'RSVPs',
         statResponses: 'Responses',

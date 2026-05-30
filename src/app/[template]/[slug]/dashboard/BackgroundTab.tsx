@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 
 interface Props {
   slug: string
@@ -17,6 +18,7 @@ const DEFAULT_GIF = '/images/wedding-animation.gif'
 
 export default function BackgroundTab({ slug, initial }: Props) {
   const t = useDashboardDict().tabs.background
+  const confirmDialog = useConfirm()
   const [gif, setGif] = useState<string | null>(initial === undefined ? null : initial)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -146,8 +148,8 @@ export default function BackgroundTab({ slug, initial }: Props) {
             <button
               type="button"
               style={btnGhostDanger}
-              onClick={() => {
-                if (confirm(t.resetConfirm)) {
+              onClick={async () => {
+                if (await confirmDialog({ message: t.resetConfirm, tone: 'danger' })) {
                   setGif(null)
                   save(null)
                 }

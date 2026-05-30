@@ -6,6 +6,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { SectionEntry } from './EditorProvider'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 
 interface Props {
   section: SectionEntry
@@ -23,6 +24,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
   const { renameSectionNav } = useEditor()
   const t = useDashboardDict().editor
+  const confirmDialog = useConfirm()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(section.navLabel || '')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -134,7 +136,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
       {canRemove && (
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); if (confirm(`${t.removeConfirmPrefix}"${displayLabel}"${t.removeConfirmSuffix}`)) onRemove() }}
+          onClick={async (e) => { e.stopPropagation(); if (await confirmDialog({ message: `${t.removeConfirmPrefix}"${displayLabel}"${t.removeConfirmSuffix}`, tone: 'danger' })) onRemove() }}
           style={{ border: 'none', background: 'transparent', color: 'rgba(42,33,24,0.4)', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
           aria-label={t.removeAria}
         >

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 
 interface MusicSettings {
   url?: string
@@ -30,6 +31,7 @@ const DEFAULTS: Required<Omit<MusicSettings, 'url'>> & { url: string } = {
 
 export default function MusicTab({ slug, initial }: Props) {
   const t = useDashboardDict().tabs.music
+  const confirmDialog = useConfirm()
   const [music, setMusic] = useState<typeof DEFAULTS>({
     ...DEFAULTS,
     ...(initial || {}),
@@ -95,7 +97,7 @@ export default function MusicTab({ slug, initial }: Props) {
   }
 
   async function clearMusic() {
-    if (!confirm(t.clearConfirm)) return
+    if (!(await confirmDialog({ message: t.clearConfirm, tone: 'danger' }))) return
     setMusic({ ...DEFAULTS })
     setSaving(true)
     setSaveMsg(null)

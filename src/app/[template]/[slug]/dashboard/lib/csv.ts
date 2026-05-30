@@ -1,11 +1,12 @@
 /**
  * Client-side CSV download. Quotes any cell containing ',', '"', or '\n'.
  * Stringifies non-null primitives via String(); null/undefined become ''.
+ * Returns false when there's nothing to export (caller shows a themed alert),
+ * true once the download is triggered.
  */
-export function downloadCsv(filename: string, rows: Record<string, unknown>[]) {
+export function downloadCsv(filename: string, rows: Record<string, unknown>[]): boolean {
   if (!rows || rows.length === 0) {
-    alert('Nothing to export yet.')
-    return
+    return false
   }
   const headers = Object.keys(rows[0])
   const escape = (v: unknown): string => {
@@ -28,4 +29,5 @@ export function downloadCsv(filename: string, rows: Record<string, unknown>[]) {
   a.click()
   document.body.removeChild(a)
   setTimeout(() => URL.revokeObjectURL(url), 100)
+  return true
 }

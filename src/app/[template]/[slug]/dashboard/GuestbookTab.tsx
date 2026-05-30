@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
 import {
   addWalkInAttendance,
   deleteAttendance,
@@ -30,6 +31,8 @@ function sortLedger(rows: AttendanceRow[]): AttendanceRow[] {
 export default function GuestbookTab({ slug, attendances }: Props) {
   const t = useDashboardDict().tabs.guestbook
   const tc = useDashboardDict().tabs.common
+  const confirmDialog = useConfirm()
+  const showAlert = useAlert()
   const router = useRouter()
 
   // Local mirror so add/delete reflect immediately without re-decrypting the
@@ -59,17 +62,17 @@ export default function GuestbookTab({ slug, attendances }: Props) {
   const walkinCount = rows.filter((r) => r.source === 'walkin').length
 
   async function onDelete(id: string) {
-    if (!confirm(t.deleteConfirm)) return
+    if (!(await confirmDialog({ message: t.deleteConfirm, tone: 'danger' }))) return
     setDeletingId(id)
     try {
       const res = await deleteAttendance(slug, id)
       if (!res.ok) {
-        alert(res.error || t.deleteFailed)
+        await showAlert({ message: res.error || t.deleteFailed })
         return
       }
       setRows((prev) => prev.filter((r) => r.id !== id))
     } catch (e: any) {
-      alert(e?.message || t.networkError)
+      await showAlert({ message: e?.message || t.networkError })
     } finally {
       setDeletingId(null)
     }

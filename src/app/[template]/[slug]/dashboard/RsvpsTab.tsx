@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { downloadCsv } from './lib/csv'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useAlert } from '@/components/dashboard/DialogProvider'
 import tabs from './dashboardTabs.module.css'
 
 export interface RsvpRow {
@@ -20,6 +21,7 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
   const dd = useDashboardDict()
   const t = dd.tabs.rsvps
   const tc = dd.tabs.common
+  const showAlert = useAlert()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'yes' | 'no'>('all')
   const router = useRouter()
@@ -61,7 +63,7 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
           </button>
           <button
             type="button"
-            onClick={() => downloadCsv(`rsvps-${new Date().toISOString().slice(0, 10)}.csv`, rsvps as unknown as Record<string, unknown>[])}
+            onClick={async () => { if (!downloadCsv(`rsvps-${new Date().toISOString().slice(0, 10)}.csv`, rsvps as unknown as Record<string, unknown>[])) await showAlert({ message: tc.nothingToExport }) }}
             style={primaryBtn}
           >
             {tc.downloadCsv}

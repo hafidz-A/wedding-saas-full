@@ -15,6 +15,7 @@ import { type GuestRow } from './guests/types'
 import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 import styles from './GuestsTab.module.css'
 
 const DEFAULT_TEMPLATE =
@@ -30,6 +31,7 @@ interface Props {
 
 export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: Props) {
   const t = useDashboardDict().tabs.guests
+  const confirmDialog = useConfirm()
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'sent' | 'pending'>('all')
@@ -357,8 +359,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                   )}
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!confirm(`${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`)) return
+                    onClick={async () => {
+                      if (!(await confirmDialog({ message: `${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`, tone: 'danger' }))) return
                       // Optimistic remove
                       setLocalGuests((prev) => prev.filter((x) => x.id !== g.id))
                       startTransition(async () => {

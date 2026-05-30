@@ -11,6 +11,7 @@ import ImageField from './ImageField'
 import ImageArrayField from './ImageArrayField'
 import StringArrayField from './StringArrayField'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 import type { Lang } from '@/lib/i18n'
 
 interface Props {
@@ -28,6 +29,7 @@ export default function ObjectArrayField({
   label, value, itemFields, newItem, itemLabelKey, slug, lang, onChange,
 }: Props) {
   const t = useDashboardDict().editor
+  const confirmDialog = useConfirm()
   const items = Array.isArray(value) ? value : []
   const [openIdx, setOpenIdx] = useState<number | null>(items.length === 1 ? 0 : null)
 
@@ -37,8 +39,8 @@ export default function ObjectArrayField({
     setOpenIdx(next.length - 1)
   }
 
-  function remove(idx: number) {
-    if (!confirm(t.removeItemConfirm)) return
+  async function remove(idx: number) {
+    if (!(await confirmDialog({ message: t.removeItemConfirm, tone: 'danger' }))) return
     const next = items.slice()
     next.splice(idx, 1)
     onChange(next)

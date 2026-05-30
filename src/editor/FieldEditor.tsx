@@ -11,6 +11,7 @@ import {
 } from './templatePolicy'
 import { localizeLabel, type FieldDef } from './schemas/types'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 import type { Lang } from '@/lib/i18n'
 import TextField from './fields/TextField'
 import TextareaField from './fields/TextareaField'
@@ -32,6 +33,7 @@ export default function FieldEditor({ slug, template }: Props) {
   const { selectedSection, updateField, removeSection, changeSectionType, config } = useEditor()
   const t = useDashboardDict().editor
   const lang = useDashboardLang()
+  const confirmDialog = useConfirm()
 
   if (!selectedSection) {
     return <div style={empty}>{t.selectPrompt}</div>
@@ -55,8 +57,8 @@ export default function FieldEditor({ slug, template }: Props) {
               <p style={legacyDesc}>{t.legacyDesc}</p>
               <button
                 type="button"
-                onClick={() => {
-                  if (confirm(`${t.removeConfirmPrefix}"${selectedSection.type}"${t.removeConfirmSuffix}`)) {
+                onClick={async () => {
+                  if (await confirmDialog({ message: `${t.removeConfirmPrefix}"${selectedSection.type}"${t.removeConfirmSuffix}`, tone: 'danger' })) {
                     removeSection(selectedSection.id)
                   }
                 }}
@@ -83,9 +85,9 @@ export default function FieldEditor({ slug, template }: Props) {
       ? availableSwapTypes(registry, config.sections, policy, selectedSection.id, selectedSection.type)
       : []
 
-  function onChangeType(newType: string) {
+  async function onChangeType(newType: string) {
     if (newType === selectedSection!.type) return
-    if (!confirm(t.changeTypeConfirm)) return
+    if (!(await confirmDialog({ message: t.changeTypeConfirm }))) return
     changeSectionType(selectedSection!.id, newType, registry[newType]?.defaults)
   }
 

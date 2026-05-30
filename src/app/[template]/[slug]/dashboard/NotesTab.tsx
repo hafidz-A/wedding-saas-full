@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
 import tabs from './dashboardTabs.module.css'
 
 export interface NoteRow {
@@ -30,6 +31,8 @@ export default function NotesTab({ slug, notes }: Props) {
   const dd = useDashboardDict()
   const t = dd.tabs.notes
   const tc = dd.tabs.common
+  const confirmDialog = useConfirm()
+  const showAlert = useAlert()
   const [query, setQuery] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const router = useRouter()
@@ -46,7 +49,7 @@ export default function NotesTab({ slug, notes }: Props) {
   }, [notes, query])
 
   async function deleteNote(id: string) {
-    if (!confirm(t.deleteConfirm)) return
+    if (!(await confirmDialog({ message: t.deleteConfirm, tone: 'danger' }))) return
     setDeletingId(id)
     try {
       const res = await fetch(`/api/guestbook/${id}?slug=${encodeURIComponent(slug)}`, {
@@ -54,13 +57,13 @@ export default function NotesTab({ slug, notes }: Props) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        alert(data.error || `${t.deleteFailed} (${res.status})`)
+        await showAlert({ message: data.error || `${t.deleteFailed} (${res.status})` })
         return
       }
       // Refresh server data so the list updates without manual reload
       startTransition(() => router.refresh())
     } catch (err: any) {
-      alert(err?.message || t.networkError)
+      await showAlert({ message: err?.message || t.networkError })
     } finally {
       setDeletingId(null)
     }

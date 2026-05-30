@@ -14,6 +14,7 @@ import GuestbookTab from './GuestbookTab'
 import { type GuestRow } from './guests/types'
 import { type AttendanceRow } from './guestbook/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
+import { DialogProvider } from '@/components/dashboard/DialogProvider'
 import { LangToggle } from '@/components/site/LangToggle'
 import { startCheckout } from '@/app/onboarding/actions'
 import { activePeriodStatus } from '@/lib/payments/active-period'
@@ -85,12 +86,17 @@ export default function DashboardClient({
     if (hasGuestbook) keys.push('guestbook')
     keys.push('notes', 'editor')
     if (template === 'solary') keys.push('palette')
-    keys.push('music', 'background')
+    keys.push('music')
+    // The Background (Latar) tab swaps the invitation's background GIF — only
+    // meaningful for lovebirds. Solary renders its own Three.js galactic scene,
+    // so the tab is hidden there.
+    if (template !== 'solary') keys.push('background')
     return keys
   })()
 
   return (
     <DashboardI18nProvider dict={dict} lang={lang}>
+    <DialogProvider labels={dict.chrome.dialog}>
     <main
       style={{
         minHeight: '100vh',
@@ -295,6 +301,7 @@ export default function DashboardClient({
         {tab === 'notes' && <NotesTab slug={slug} notes={notes} />}
       </section>
     </main>
+    </DialogProvider>
     </DashboardI18nProvider>
   )
 }

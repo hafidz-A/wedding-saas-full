@@ -4,10 +4,16 @@ import { solarySchemaRegistry } from '../schemas/solary'
 import { getTemplatePolicy } from '../templatePolicy'
 
 describe('getSchemaRegistry', () => {
-  it('returns the lovebirds registry by default', () => {
-    expect(getSchemaRegistry('lovebirds')).toBe(schemaRegistry)
+  it('returns a curated lovebirds registry (drops registry/guestbook/countdown, adds quote)', () => {
+    const r = getSchemaRegistry('lovebirds')
+    expect(r.quote).toBeTruthy()
+    expect(r.hero).toBeTruthy()
+    expect(r.weddingGift).toBeTruthy()
+    for (const t of ['registry', 'guestbook', 'countdown']) {
+      expect(r[t]).toBeUndefined()
+    }
   })
-  it('returns the lovebirds registry for unknown templates', () => {
+  it('falls back to the full shared registry for unknown templates', () => {
     expect(getSchemaRegistry('does-not-exist')).toBe(schemaRegistry)
   })
   it('returns the solary registry for solary', () => {
