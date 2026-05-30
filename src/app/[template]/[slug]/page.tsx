@@ -2,6 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import InvitationView from './InvitationView'
 import { isValidTemplate, getDefaultConfig } from '@/config/templateIndex'
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict } from '@/lib/i18n'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -40,7 +42,7 @@ export default async function Page({ params }: PageProps) {
     const supabase = createSupabaseServerClient()
     const { data, error } = await supabase
       .from('invitations')
-      .select('id, config, is_published, template_id, expires_at, owner_user_id')
+      .select('id, config, is_published, is_paid, template_id, expires_at, owner_user_id')
       .eq('slug', slug)
       .maybeSingle()
 
@@ -130,6 +132,7 @@ function injectGuestbookNotes(config: any, dbNotes: any[]) {
 }
 
 function ExpiredInvitationView({ slug }: { slug: string }) {
+  const t = getDict(getLang()).common.invitationExpired
   return (
     <main
       style={{
@@ -160,7 +163,7 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
             margin: '0 0 10px',
           }}
         >
-          Expired
+          {t.kicker}
         </p>
         <h1
           style={{
@@ -172,10 +175,10 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
             lineHeight: 1.2,
           }}
         >
-          Masa aktif undangan ini sudah berakhir
+          {t.title}
         </h1>
         <p style={{ color: '#5C4A3A', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
-          Halaman undangan <code style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code> tidak bisa dibuka untuk sementara. Silakan hubungi pasangan untuk informasi lebih lanjut.
+          {t.bodyPrefix} <code style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code> {t.bodySuffix}
         </p>
       </div>
     </main>

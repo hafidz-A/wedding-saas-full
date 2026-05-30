@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { startCheckout } from '@/app/onboarding/actions'
+import { useDashboardDict } from './DashboardI18nProvider'
 
 /**
  * Full-screen gate shown in place of the dashboard when payment is required:
@@ -29,6 +30,7 @@ export default function PaymentGate({
   status: 'draft' | 'expired'
 }) {
   const [pending, start] = useTransition()
+  const t = useDashboardDict().paymentGate
   const isExpired = status === 'expired'
 
   function onPay() {
@@ -41,35 +43,29 @@ export default function PaymentGate({
   return (
     <main style={shell}>
       <div style={card}>
-        <p style={kicker}>{isExpired ? 'Masa Aktif Berakhir' : 'Belum Aktif'}</p>
-        <h1 style={h1}>
-          {isExpired ? 'Perpanjang undanganmu' : 'Bayar dulu untuk membuka dashboard'}
-        </h1>
-        <p style={body}>
-          {isExpired
-            ? 'Masa aktif undangan ini sudah berakhir, jadi tamu tidak bisa lagi membukanya. Perpanjang untuk mengaktifkan kembali halaman undangan dan dashboard.'
-            : 'Editor, publish toggle, dan kelola RSVP/hadiah akan terbuka setelah pembayaran. Sementara itu kamu masih bisa lihat preview undangan kamu sendiri.'}
-        </p>
+        <p style={kicker}>{isExpired ? t.expiredKicker : t.draftKicker}</p>
+        <h1 style={h1}>{isExpired ? t.expiredTitle : t.draftTitle}</h1>
+        <p style={body}>{isExpired ? t.expiredBody : t.draftBody}</p>
 
         <div style={btnRow}>
           <button type="button" onClick={onPay} disabled={pending} style={primaryBtn}>
-            {pending ? 'Memproses…' : isExpired ? 'Perpanjang Sekarang' : 'Bayar Sekarang'}
+            {pending ? t.processing : isExpired ? t.expiredPayBtn : t.draftPayBtn}
           </button>
           {!isExpired && (
             <Link href={`/${template}/${slug}`} style={ghostBtn}>
-              Lihat preview undangan
+              {t.previewLink}
             </Link>
           )}
         </div>
 
         <p style={muted}>
-          Slug: <code style={code}>{slug}</code>
+          {t.slugLabel}: <code style={code}>{slug}</code>
         </p>
 
         <footer style={ftr}>
-          <Link href="/" style={ftrLink}>← Beranda</Link>
+          <Link href="/" style={ftrLink}>{t.backHome}</Link>
           <form action="/api/auth/logout" method="post" style={{ display: 'inline' }}>
-            <button type="submit" style={ftrLogout}>Keluar</button>
+            <button type="submit" style={ftrLogout}>{t.logout}</button>
           </form>
         </footer>
       </div>

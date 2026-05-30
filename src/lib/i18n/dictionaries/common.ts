@@ -38,8 +38,21 @@ export const common = {
       expired: 'Kadaluarsa',
       activeUntilPrefix: 'Aktif sampai',
       payNow: 'Bayar sekarang',
+      renewNow: 'Perpanjang sekarang',
       unpaidBanner: 'Undangan ini belum dibayar — bayar untuk menerbitkannya.',
       processing: 'Memproses…',
+    },
+    invitationNotFound: {
+      kicker: 'Undangan tidak ditemukan',
+      title: 'Hmm — link ini belum aktif.',
+      body: 'Undangan mungkin belum dipublikasikan oleh pemiliknya, atau alamatnya keliru.',
+      backHome: 'Kembali ke beranda',
+    },
+    invitationExpired: {
+      kicker: 'Expired',
+      title: 'Masa aktif undangan ini sudah berakhir',
+      bodyPrefix: 'Halaman undangan',
+      bodySuffix: 'tidak bisa dibuka untuk sementara. Silakan hubungi pasangan untuk informasi lebih lanjut.',
     },
   },
   en: {
@@ -81,8 +94,21 @@ export const common = {
       expired: 'Expired',
       activeUntilPrefix: 'Active until',
       payNow: 'Pay now',
+      renewNow: 'Renew now',
       unpaidBanner: 'This invitation is not paid yet — pay to publish it.',
       processing: 'Processing…',
+    },
+    invitationNotFound: {
+      kicker: 'Invitation not found',
+      title: 'Hmm — this link isn’t active yet.',
+      body: 'The invitation might not be published yet, or the URL is wrong.',
+      backHome: 'Back to home',
+    },
+    invitationExpired: {
+      kicker: 'Expired',
+      title: 'This invitation has expired',
+      bodyPrefix: 'The invitation page',
+      bodySuffix: 'is closed for now. Please contact the couple for more information.',
     },
   },
 }

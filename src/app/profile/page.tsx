@@ -7,6 +7,7 @@ import { activePeriodStatus } from '@/lib/payments/active-period'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
+import RenewButton from './RenewButton'
 
 /**
  * Deliberately simple profile page. Shows the account email, a reset-password
@@ -25,10 +26,10 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('slug, template_id, is_paid, expires_at')
+    .select('id, slug, template_id, is_paid, expires_at')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
-    data: { slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null }[] | null
+    data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null }[] | null
   }
   const invitations = rows ?? []
   const ap = t.common.activePeriod
@@ -69,6 +70,8 @@ export default async function ProfilePage() {
             <ul style={list}>
               {invitations.map((inv) => {
                 const tt = tmpl(inv.template_id)
+                const periodStatus = activePeriodStatus(inv, now).status
+                const needsAction = periodStatus === 'draft' || periodStatus === 'expired'
                 return (
                   <li key={inv.slug} style={item}>
                     <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -78,6 +81,15 @@ export default async function ProfilePage() {
                     <span style={itemActions}>
                       <Link href={`/${tt}/${inv.slug}`} target="_blank" style={ghostLink}>{p.viewPublic}</Link>
                       <Link href={`/${tt}/${inv.slug}/dashboard`} style={solidLink}>{p.openDashboard}</Link>
+                      {needsAction && (
+                        <RenewButton
+                          invitationId={inv.id}
+                          status={periodStatus}
+                          payNowLabel={ap.payNow}
+                          renewNowLabel={ap.renewNow}
+                          processingLabel={ap.processing}
+                        />
+                      )}
                     </span>
                   </li>
                 )

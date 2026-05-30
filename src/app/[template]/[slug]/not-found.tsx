@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import { getLang } from '@/lib/i18n/getLang'
+import { getDict } from '@/lib/i18n'
 
 export default function NotFound() {
+  const t = getDict(getLang()).common.invitationNotFound
   return (
     <main
       style={{
@@ -15,7 +18,7 @@ export default function NotFound() {
     >
       <div style={{ maxWidth: 480 }}>
         <p style={{ textTransform: 'uppercase', letterSpacing: '0.36em', fontSize: 12, color: '#E8553E', marginBottom: 12 }}>
-          Undangan tidak ditemukan
+          {t.kicker}
         </p>
         <h1
           style={{
@@ -26,10 +29,10 @@ export default function NotFound() {
             margin: '0 0 16px',
           }}
         >
-          Hmm — link ini belum aktif.
+          {t.title}
         </h1>
         <p style={{ fontSize: 15, color: '#5C4A3A', lineHeight: 1.6, marginBottom: 28 }}>
-          Undangan mungkin belum dipublikasikan oleh pemiliknya, atau alamatnya keliru.
+          {t.body}
         </p>
         <Link
           href="/"
@@ -44,7 +47,7 @@ export default function NotFound() {
             textDecoration: 'none',
           }}
         >
-          Kembali ke beranda
+          {t.backHome}
         </Link>
       </div>
     </main>
