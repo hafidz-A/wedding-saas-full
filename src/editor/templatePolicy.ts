@@ -10,6 +10,10 @@ export interface TemplatePolicy {
   swappablePool: string[]
   pinnedFirstId?: string
   pinnedLastId?: string
+  maxSections?: number          // cap on section count (lovebirds: 10)
+  anchorFirstType?: string      // section TYPE pinned to index 0 (lovebirds: 'hero')
+  anchorLastType?: string       // section TYPE pinned to the last index (lovebirds: 'footer')
+  lockedTypes?: string[]        // types that can't be removed or type-changed
 }
 
 const SOLARY_SWAPPABLE_POOL = [
@@ -38,10 +42,73 @@ const solaryPolicy: TemplatePolicy = {
   swappablePool: SOLARY_SWAPPABLE_POOL,
 }
 
-const policies: Record<string, TemplatePolicy> = { solary: solaryPolicy }
+// Lovebirds: solary-style constrained model but lighter — add/remove allowed,
+// capped at 10, hero pinned first + footer pinned last (locked by TYPE since
+// add/remove generates fresh ids). registry/guestbook/countdown are excluded
+// (folded/removed elsewhere).
+const LOVEBIRDS_POOL = [
+  'quote', 'ourStory', 'eventDetails', 'brideGroom', 'weddingParty',
+  'galleryMasonry', 'gallerySpringCoil', 'schedule', 'rsvp', 'weddingGift',
+  'accommodations', 'faq', 'playlist',
+]
+
+const lovebirdsPolicy: TemplatePolicy = {
+  fixedSections: false,
+  locks: {},
+  swappablePool: LOVEBIRDS_POOL,
+  maxSections: 10,
+  anchorFirstType: 'hero',
+  anchorLastType: 'footer',
+  lockedTypes: ['hero', 'footer'],
+}
+
+const policies: Record<string, TemplatePolicy> = {
+  solary: solaryPolicy,
+  lovebirds: lovebirdsPolicy,
+}
 
 export function getTemplatePolicy(template: string): TemplatePolicy | null {
   return policies[template] ?? null
+}
+
+/** True for a type pinned to an end (lovebirds hero/footer). */
+export function isTypeAnchored(type: string, policy: TemplatePolicy): boolean {
+  return policy.anchorFirstType === type || policy.anchorLastType === type
+}
+
+/** True for a type that cannot be removed or type-changed (lovebirds hero/footer). */
+export function isTypeLockedFor(type: string, policy: TemplatePolicy): boolean {
+  return !!policy.lockedTypes?.includes(type)
+}
+
+/** Types offerable in the "add section" menu: in-pool, registered, not already used. */
+export function availableAddTypes(
+  registry: Record<string, unknown>,
+  sections: { type: string }[],
+  policy: TemplatePolicy | null,
+): string[] {
+  const used = new Set(sections.map((s) => s.type))
+  const pool = policy?.swappablePool ?? Object.keys(registry)
+  return pool.filter((t) => !!registry[t] && !used.has(t))
+}
+
+/**
+ * Types offerable in the "change type" dropdown: the current type first (so it
+ * stays selected), then in-pool/registered types not used by any OTHER section.
+ */
+export function availableSwapTypes(
+  registry: Record<string, unknown>,
+  sections: { id: string; type: string }[],
+  policy: TemplatePolicy | null,
+  currentId: string,
+  currentType: string,
+): string[] {
+  const usedElsewhere = new Set(
+    sections.filter((s) => s.id !== currentId).map((s) => s.type),
+  )
+  const pool = policy?.swappablePool ?? Object.keys(registry)
+  const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t))
+  return [currentType, ...rest]
 }
 
 export function isPositionLocked(id: string, policy: TemplatePolicy): boolean {
