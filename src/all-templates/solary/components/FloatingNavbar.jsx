@@ -16,10 +16,15 @@ const EASE_IN_OUT_CUBIC = (t) =>
 function lenisScrollTo(target, duration, onComplete) {
   const lenis = window.__lenis;
   const el = typeof target === "string" ? document.getElementById(target) : target;
-  if (lenis?.scrollTo && el) {
-    lenis.scrollTo(el, { duration, easing: EASE_IN_OUT_CUBIC, onComplete });
-  } else if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!el) return;
+  // Center the section in the viewport instead of pinning its top there.
+  // Sections taller than 100vh (Saturn at 130vh, content-heavy stages) would
+  // otherwise land with the GlassCard below the 3D camera's framed planet.
+  const offset = Math.max(0, (el.offsetHeight - window.innerHeight) / 2);
+  if (lenis?.scrollTo) {
+    lenis.scrollTo(el, { duration, easing: EASE_IN_OUT_CUBIC, offset, onComplete });
+  } else {
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
     if (onComplete) setTimeout(onComplete, duration * 1000);
   }
 }
