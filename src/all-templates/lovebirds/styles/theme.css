@@ -186,7 +186,99 @@ body.lovebirds-route {
   transform: translate(-1px, -1px);
 }
 
-/* 5. Magnetic Morphing Button */
+/* 5. Slide-in Text Button (magnetic slide) */
+.btn-magnetic-slide {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px;
+  border-radius: var(--border-radius-pill);
+  background: var(--button-bg, var(--color-coral));
+  color: var(--button-fg, #fff) !important;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(42, 33, 24, 0.12);
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.btn-magnetic-slide span {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.btn-magnetic-slide::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  transform: translateY(200%);
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.btn-magnetic-slide:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(42, 33, 24, 0.18);
+}
+.btn-magnetic-slide:hover span {
+  transform: translateY(-200%);
+}
+.btn-magnetic-slide:hover::after {
+  transform: translateY(0);
+}
+
+/* 6. Iridescent Glass Button */
+.btn-iridescent-glass {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--border-radius-pill);
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: var(--fg) !important;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.4);
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.btn-iridescent-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.btn-iridescent-glass:hover {
+  border-color: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(244, 163, 143, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.btn-iridescent-glass:hover::before {
+  transform: translateX(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-magnetic-slide span,
+  .btn-magnetic-slide::after { transition: none; }
+}
+
+/* 7. Magnetic Morphing Button */
 .btn-morphing {
   display: inline-flex;
   align-items: center;
