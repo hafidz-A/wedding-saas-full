@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
+import { isPaletteAllowedForTemplate } from '@/lib/config/palette-allowlist'
 
 interface Ctx { params: { slug: string } }
-
-const ALLOWED_PALETTES = new Set([
-  'cosmicDark', 'nebulaDark', 'roseDark', 'emeraldDark',
-  'lavenderLight', 'sunburstLight', 'roseLight', 'botanicalLight',
-])
 
 /**
  * PUT /api/invitation/[slug]/theme
@@ -23,14 +19,18 @@ export async function PUT(req: Request, { params }: Ctx) {
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
   const palette = body?.defaultPalette
-  if (typeof palette !== 'string' || !ALLOWED_PALETTES.has(palette)) {
+  if (typeof palette !== 'string') {
     return NextResponse.json({ error: 'Invalid palette' }, { status: 400 })
   }
 
   const supabase = createSupabaseAdminClient()
   const { data: row, error: fetchErr } = await (supabase.from('invitations') as any)
-    .select('config').eq('id', owner.id).single()
+    .select('config, template_id').eq('id', owner.id).single()
   if (fetchErr || !row) return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
+
+  if (!isPaletteAllowedForTemplate(row.template_id, palette)) {
+    return NextResponse.json({ error: 'Invalid palette' }, { status: 400 })
+  }
 
   const cfg = { ...(row.config || {}) }
   cfg.theme = { ...(cfg.theme || {}), defaultPalette: palette }

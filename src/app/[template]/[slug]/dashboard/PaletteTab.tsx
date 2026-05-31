@@ -3,22 +3,41 @@
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 
-const DARK = [
+type Swatch = { key: string; label: string; swatch: string }
+
+const SOLARY_DARK: Swatch[] = [
   { key: 'cosmicDark', label: 'Purple', swatch: '#7D53DE' },
   { key: 'nebulaDark', label: 'Nebula', swatch: '#c19bff' },
   { key: 'roseDark', label: 'Rose', swatch: '#e64980' },
   { key: 'emeraldDark', label: 'Emerald', swatch: '#0f9f8e' },
 ]
-const LIGHT = [
+const SOLARY_LIGHT: Swatch[] = [
   { key: 'lavenderLight', label: 'Lavender', swatch: '#b794f6' },
   { key: 'sunburstLight', label: 'Sunburst', swatch: '#f5c518' },
   { key: 'roseLight', label: 'Rose', swatch: '#f43f5e' },
   { key: 'botanicalLight', label: 'Botanical', swatch: '#3f9142' },
 ]
+const LOVEBIRDS_LIGHT: Swatch[] = [
+  { key: 'warmCream', label: 'Warm Cream', swatch: '#E8553E' },
+  { key: 'emeraldGarden', label: 'Emerald Garden', swatch: '#2D8C4E' },
+  { key: 'skyEditorial', label: 'Sky Editorial', swatch: '#3D9BC1' },
+  { key: 'blossomVelvet', label: 'Blossom Velvet', swatch: '#E06B7B' },
+  { key: 'sunsetClay', label: 'Sunset Clay', swatch: '#C85A32' },
+]
+const LOVEBIRDS_DARK: Swatch[] = [
+  { key: 'darkLuxury', label: 'Dark Luxury', swatch: '#F5C842' },
+  { key: 'midnightStardust', label: 'Midnight Stardust', swatch: '#E3C08D' },
+]
 
-export default function PaletteTab({ slug, initial }: { slug: string; initial?: string }) {
+const TEMPLATE_PALETTES: Record<string, { dark: Swatch[]; light: Swatch[]; fallback: string }> = {
+  solary: { dark: SOLARY_DARK, light: SOLARY_LIGHT, fallback: 'cosmicDark' },
+  lovebirds: { dark: LOVEBIRDS_DARK, light: LOVEBIRDS_LIGHT, fallback: 'warmCream' },
+}
+
+export default function PaletteTab({ slug, template, initial }: { slug: string; template?: string; initial?: string }) {
   const t = useDashboardDict().tabs.palette
-  const [palette, setPalette] = useState(initial || 'cosmicDark')
+  const groups = (template && TEMPLATE_PALETTES[template]) || TEMPLATE_PALETTES.lovebirds
+  const [palette, setPalette] = useState(initial || groups.fallback)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
 
@@ -44,7 +63,7 @@ export default function PaletteTab({ slug, initial }: { slug: string; initial?: 
     }
   }
 
-  const Group = ({ title, items }: { title: string; items: typeof DARK }) => (
+  const Group = ({ title, items }: { title: string; items: Swatch[] }) => (
     <section style={section}>
       <h3 style={h3}>{title}</h3>
       <div style={grid}>
@@ -66,8 +85,8 @@ export default function PaletteTab({ slug, initial }: { slug: string; initial?: 
   return (
     <div style={card}>
       <header><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></header>
-      <Group title={t.groupDark} items={DARK} />
-      <Group title={t.groupLight} items={LIGHT} />
+      <Group title={t.groupDark} items={groups.dark} />
+      <Group title={t.groupLight} items={groups.light} />
       <footer style={footer}>
         {msg && <span style={msg.kind === 'ok' ? msgOk : msgErr}>{msg.text}</span>}
         <button type="button" style={btnPrimary} onClick={save} disabled={saving}>
