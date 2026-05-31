@@ -98,6 +98,48 @@ export const themes = {
     '--button-bg': 'var(--color-champagne)',
     '--button-fg': 'var(--color-midnight)',
   },
+
+  royalPlum: {
+    '--bg': '#4A0E1D',
+    '--fg': '#FAF0EC',
+    '--fg-muted': '#F2B6C1',
+    '--accent': '#F5C842',
+    '--accent-soft': '#E06B7B',
+    '--glass-bg': 'rgba(74, 14, 29, 0.55)',
+    '--glass-border': 'rgba(255, 255, 255, 0.2)',
+    '--glass-text': '#FAF0EC',
+    '--glass-text-muted': '#F2B6C1',
+    '--button-bg': '#F5C842',
+    '--button-fg': '#4A0E1D',
+  },
+
+  forestMist: {
+    '--bg': '#12291B',
+    '--fg': '#EAF0E9',
+    '--fg-muted': '#A4B29E',
+    '--accent': '#9EE0B1',
+    '--accent-soft': '#2D8C4E',
+    '--glass-bg': 'rgba(18, 41, 27, 0.55)',
+    '--glass-border': 'rgba(255, 255, 255, 0.2)',
+    '--glass-text': '#EAF0E9',
+    '--glass-text-muted': '#A4B29E',
+    '--button-bg': '#9EE0B1',
+    '--button-fg': '#12291B',
+  },
+
+  terracottaOasis: {
+    '--bg': '#8E3A21',
+    '--fg': '#FAF2EA',
+    '--fg-muted': '#EAD0A8',
+    '--accent': '#FBE3A6',
+    '--accent-soft': '#FAF2EA',
+    '--glass-bg': 'rgba(142, 58, 33, 0.55)',
+    '--glass-border': 'rgba(255, 255, 255, 0.2)',
+    '--glass-text': '#FAF2EA',
+    '--glass-text-muted': '#EAD0A8',
+    '--button-bg': '#FBE3A6',
+    '--button-fg': '#8E3A21',
+  },
 }
 
 /**

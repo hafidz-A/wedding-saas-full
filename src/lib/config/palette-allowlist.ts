@@ -9,6 +9,7 @@ export const TEMPLATE_PALETTES: Record<string, readonly string[]> = {
   lovebirds: [
     'warmCream', 'emeraldGarden', 'skyEditorial', 'blossomVelvet',
     'sunsetClay', 'darkLuxury', 'midnightStardust',
+    'royalPlum', 'forestMist', 'terracottaOasis',
   ],
 }
 

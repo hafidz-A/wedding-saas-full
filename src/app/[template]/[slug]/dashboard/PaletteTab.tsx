@@ -23,10 +23,13 @@ const LOVEBIRDS_LIGHT: Swatch[] = [
   { key: 'skyEditorial', label: 'Sky Editorial', swatch: '#3D9BC1' },
   { key: 'blossomVelvet', label: 'Blossom Velvet', swatch: '#E06B7B' },
   { key: 'sunsetClay', label: 'Sunset Clay', swatch: '#C85A32' },
+  { key: 'terracottaOasis', label: 'Terracotta Oasis', swatch: '#FBE3A6' },
 ]
 const LOVEBIRDS_DARK: Swatch[] = [
   { key: 'darkLuxury', label: 'Dark Luxury', swatch: '#F5C842' },
   { key: 'midnightStardust', label: 'Midnight Stardust', swatch: '#E3C08D' },
+  { key: 'royalPlum', label: 'Royal Plum', swatch: '#F5C842' },
+  { key: 'forestMist', label: 'Forest Mist', swatch: '#9EE0B1' },
 ]
 
 const TEMPLATE_PALETTES: Record<string, { dark: Swatch[]; light: Swatch[]; fallback: string }> = {

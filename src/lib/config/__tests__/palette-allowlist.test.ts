@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { isPaletteAllowedForTemplate } from '../palette-allowlist'
 
+describe('lovebirds palette allowlist', () => {
+  it('accepts the three new bold palettes', () => {
+    for (const p of ['royalPlum', 'forestMist', 'terracottaOasis']) {
+      expect(isPaletteAllowedForTemplate('lovebirds', p)).toBe(true)
+    }
+  })
+  it('still rejects unknown palettes', () => {
+    expect(isPaletteAllowedForTemplate('lovebirds', 'notAColor')).toBe(false)
+  })
+})
+
 describe('isPaletteAllowedForTemplate', () => {
   it('accepts lovebirds palettes for lovebirds', () => {
     expect(isPaletteAllowedForTemplate('lovebirds', 'blossomVelvet')).toBe(true)

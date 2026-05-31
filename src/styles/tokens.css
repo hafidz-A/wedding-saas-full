@@ -32,6 +32,18 @@
   --color-champagne: #E3C08D;
   --color-champagne-soft: #F5E5C9;
 
+  /* Royal Plum */
+  --color-royal-plum: #4A0E1D;
+  --color-royal-plum-deep: #22030B;
+
+  /* Forest Mist */
+  --color-forest-mist: #12291B;
+  --color-forest-mist-soft: #9EE0B1;
+
+  /* Terracotta Oasis */
+  --color-terracotta-deep: #8E3A21;
+  --color-terracotta-darker: #4D1A0D;
+
   /* ---------- Surface / neutral ---------- */
   --color-cream: #FDF6EC;
   --color-cream-deep: #F7EBD7;
