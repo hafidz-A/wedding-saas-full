@@ -16,6 +16,7 @@ import FloatingNavbar from './components/FloatingNavbar.jsx'
 import TravellingOverlay from './components/TravellingOverlay.jsx'
 import PaletteSwitcher from './components/PaletteSwitcher.jsx'
 import MuteButton from './components/MuteButton.jsx'
+import MusicPopup from './components/MusicPopup.jsx'
 import SectionArrows from './components/SectionArrows.jsx'
 
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
@@ -60,6 +61,9 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
       })),
     [visible],
   )
+  const music = config.music || {}
+  const audioSrc = (music.enabled !== false && music.url) ? music.url : config.audio?.src
+
   const effSlug = slug || config.meta?.slug || 'demo'
   const sectionIds = visible.map((s) => s.id)
 
@@ -97,7 +101,7 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
       options={config.theme?.paletteOptions}
       allowGuestSwitch={isDemo}
     >
-      <AudioProvider src={config.audio?.src} defaultVolume={config.audio?.volume ?? 0.5}>
+      <AudioProvider src={audioSrc} defaultVolume={config.audio?.volume ?? 0.5}>
         <GuestProvider>
           <JourneyProvider>
             <FloatingNavbar
@@ -112,6 +116,12 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
             <TravellingOverlay />
             {isDemo && <PaletteSwitcher />}
             <MuteButton />
+            <MusicPopup
+              title={music.title}
+              subtitle={music.subtitle}
+              acceptLabel={music.acceptLabel}
+              dismissLabel={music.dismissLabel}
+            />
             <SectionArrows sectionIds={sectionIds} />
           </JourneyProvider>
         </GuestProvider>
