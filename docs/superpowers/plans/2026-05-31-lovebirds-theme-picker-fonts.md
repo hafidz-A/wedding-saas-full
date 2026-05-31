@@ -23,6 +23,30 @@ generalized per-template.
 
 ---
 
+## ⚠️ Implementation note (2026-05-31) — built PER-SECTION, not the global `palettes.js`
+
+During execution we found the user had substantial **uncommitted parallel WIP** already
+implementing this feature in the **existing per-section `themes.js`** model (added
+`blossomVelvet`/`sunsetClay`/`midnightStardust` presets, new colour tokens in
+`tokens.css`, component variations + Classy fonts in `theme.css`/`fonts.css`). Per the
+user's decision ("pakai WIP saya"), we reconciled to that architecture instead of building
+the standalone `palettes.js` global system this plan originally specified:
+
+- **No `palettes.js`** — the new `config/applyTheme.js` reuses `themes.js` (`resolveTheme`)
+  as the theme source and applies the chosen theme globally to `body.lovebirds-route`.
+- **Hero follows the picked theme** (user changed their mind from "Hero stays inverted" to
+  uniform), so there is no `inverted` layer — `SectionRenderer` just drops per-section
+  theming and lets every section inherit the global theme.
+- `ThemeProvider`, `PaletteSwitcher`, `Shell`/`InvitationView` wiring, the per-template
+  `PaletteTab`, and the `palette-allowlist` theme API match this plan's intent.
+- Executed **inline** (not subagents) because the working tree was full of overlapping user
+  WIP; staged only clean files. `DashboardClient.tsx` (user WIP) was edited to enable the
+  Palette tab but left **unstaged** for the user to commit with their dashboard work.
+
+Shipped commits: `9fb0b89` (fonts), `96c95b7` (runtime + switcher), `d48f2ef` (owner lock).
+
+---
+
 ## File Structure
 
 | Action | Path | Responsibility |
