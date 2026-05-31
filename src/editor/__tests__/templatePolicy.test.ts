@@ -1,6 +1,23 @@
 import { describe, it, expect } from 'vitest'
 import { getTemplatePolicy, computeSafeOrder, isMandatoryType, availableSwapTypes } from '../templatePolicy'
 
+describe('lovebirds gallery swap group', () => {
+  const lb = getTemplatePolicy('lovebirds')!
+  const reg: Record<string, unknown> = {
+    galleryMasonry: {}, gallerySpringCoil: {}, quote: {}, rsvp: {}, weddingGift: {}, faq: {},
+  }
+  it('a masonry gallery only offers the two galleries', () => {
+    const sections = [{ id: 'g1', type: 'galleryMasonry' }, { id: 'q', type: 'quote' }]
+    const opts = availableSwapTypes(reg, sections, lb, 'g1', 'galleryMasonry')
+    expect(new Set(opts)).toEqual(new Set(['galleryMasonry', 'gallerySpringCoil']))
+  })
+  it('omits the other gallery if already used by another slot', () => {
+    const sections = [{ id: 'g1', type: 'galleryMasonry' }, { id: 'g2', type: 'gallerySpringCoil' }]
+    const opts = availableSwapTypes(reg, sections, lb, 'g1', 'galleryMasonry')
+    expect(opts).toEqual(['galleryMasonry'])
+  })
+})
+
 describe('mandatory RSVP/Gift locks', () => {
   const solary = getTemplatePolicy('solary')!
   const sections = [

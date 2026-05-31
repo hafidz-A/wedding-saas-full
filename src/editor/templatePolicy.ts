@@ -15,6 +15,7 @@ export interface TemplatePolicy {
   anchorLastType?: string       // section TYPE pinned to the last index (lovebirds: 'footer')
   lockedTypes?: string[]        // types that can't be removed or type-changed
   mandatoryTypes?: string[]     // types that must always exist: no remove/disable/type-change, position-locked
+  swapGroups?: Record<string, string[]> // type -> the only types it may swap with (incl. itself)
 }
 
 const SOLARY_SWAPPABLE_POOL = [
@@ -63,6 +64,10 @@ const lovebirdsPolicy: TemplatePolicy = {
   anchorLastType: 'footer',
   lockedTypes: ['hero', 'footer'],
   mandatoryTypes: ['rsvp', 'weddingGift'],
+  swapGroups: {
+    galleryMasonry: ['galleryMasonry', 'gallerySpringCoil'],
+    gallerySpringCoil: ['galleryMasonry', 'gallerySpringCoil'],
+  },
 }
 
 const policies: Record<string, TemplatePolicy> = {
@@ -114,7 +119,8 @@ export function availableSwapTypes(
   const usedElsewhere = new Set(
     sections.filter((s) => s.id !== currentId).map((s) => s.type),
   )
-  const pool = policy?.swappablePool ?? Object.keys(registry)
+  const group = policy?.swapGroups?.[currentType]
+  const pool = group ?? policy?.swappablePool ?? Object.keys(registry)
   const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t) && !policy?.mandatoryTypes?.includes(t))
   return [currentType, ...rest]
 }

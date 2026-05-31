@@ -40,6 +40,22 @@ describe('CHANGE_SECTION_TYPE', () => {
   })
 })
 
+describe('CHANGE_SECTION_TYPE — gallery photo preservation', () => {
+  const galBase = {
+    config: { sections: [
+      { id: 'g1', type: 'galleryMasonry', props: { photos: [{ src: 'a.jpg', alt: 'Hi' }] } },
+    ] },
+    initialConfig: { sections: [] }, selectedSectionId: 'g1',
+    isSaving: false, saveError: null, lastSavedAt: null,
+  } as any
+  it('carries photos across masonry -> spring coil, mapping alt to caption', () => {
+    const next = reducer(galBase, { type: 'CHANGE_SECTION_TYPE', sectionId: 'g1', newType: 'gallerySpringCoil', defaults: { photos: [{ src: 'default.jpg', caption: 'def' }], sectionTitle: 'X' } })
+    const s = next.config.sections[0]
+    expect(s.type).toBe('gallerySpringCoil')
+    expect(s.props.photos).toEqual([{ src: 'a.jpg', alt: 'Hi', caption: 'Hi' }])
+  })
+})
+
 describe('REORDER_SECTIONS_BY_ID', () => {
   it('reorders to match the id order', () => {
     const next = reducer(base, { type: 'REORDER_SECTIONS_BY_ID', order: ['mars', 'venus'] })

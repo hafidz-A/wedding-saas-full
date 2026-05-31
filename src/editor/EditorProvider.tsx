@@ -163,6 +163,15 @@ export function reducer(state: State, action: Action): State {
           const preserved: Record<string, unknown> = {}
           if (prev.planetKey !== undefined) preserved.planetKey = prev.planetKey
           if (prev.planetName !== undefined) preserved.planetName = prev.planetName
+          const GALLERY_TYPES = new Set(['galleryMasonry', 'gallerySpringCoil'])
+          if (GALLERY_TYPES.has(s.type) && GALLERY_TYPES.has(action.newType) && Array.isArray(prev.photos)) {
+            // masonry uses {src, alt}; spring-coil uses {src, caption}. Map both so
+            // the caption text survives in either direction.
+            preserved.photos = (prev.photos as Array<Record<string, unknown>>).map((p) => {
+              const text = (p.alt ?? p.caption ?? '') as string
+              return { src: p.src ?? '', alt: text, caption: text }
+            })
+          }
           // navLabel: clear so lovebirds re-derives from its per-type default
           // label map; solary has no such map, so seed it from the new type's
           // sectionLabel default so the floating nav updates too.
