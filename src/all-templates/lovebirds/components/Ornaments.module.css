@@ -1,0 +1,212 @@
+/* =========================================================
+   Ornaments.module.css
+   Local (hashed) classes: .root, .flyZoneBg, .flyZoneFg, .canvas
+   All ported style-guide rules live inside :global{} so CSS
+   Modules does NOT hash them (they are applied via className
+   strings in JSX, not via styles.xxx).
+   ========================================================= */
+
+/* ----- Local module classes ----- */
+
+.root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.flyZoneBg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1; /* Behind content (.page is 2) */
+}
+
+.flyZoneFg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3; /* In front of content (.page is 2) */
+}
+
+.canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  display: none;
+}
+
+/* ----- Global ported rules from style-guide-lovebirds.html lines 206–391 ----- */
+
+:global {
+  .lovebird-parallax-wrap {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .lovebird {
+    position: absolute;
+    fill: var(--accent, #E8553E);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.05));
+    transition: fill 0.4s ease-out;
+    opacity: 0;
+  }
+
+  .lovebird .wing-back,
+  .lovebird-asset-icon .wing-back {
+    fill: var(--accent-soft, #F4A38F);
+    transform-origin: 28px 33px;
+    animation: flap-back 0.7s ease-in-out infinite alternate;
+  }
+
+  .lovebird .wing-front,
+  .lovebird-asset-icon .wing-front {
+    fill: var(--accent, #E8553E);
+    transform-origin: 30px 33px;
+    animation: flap-front 0.7s ease-in-out infinite alternate;
+    transition: fill 0.4s ease-out;
+  }
+
+  /* Staggered flapping speeds for realism */
+  .lovebird-1 .wing-back,  .lovebird-1 .wing-front  { animation-duration: 0.82s; }
+  .lovebird-2 .wing-back,  .lovebird-2 .wing-front  { animation-duration: 0.78s; }
+  .lovebird-3 .wing-back,  .lovebird-3 .wing-front  { animation-duration: 0.74s; }
+  .lovebird-4 .wing-back,  .lovebird-4 .wing-front  { animation-duration: 0.70s; }
+  .lovebird-5 .wing-back,  .lovebird-5 .wing-front  { animation-duration: 0.66s; }
+  .lovebird-6 .wing-back,  .lovebird-6 .wing-front  { animation-duration: 0.62s; }
+  .lovebird-7 .wing-back,  .lovebird-7 .wing-front  { animation-duration: 0.58s; }
+  .lovebird-8 .wing-back,  .lovebird-8 .wing-front  { animation-duration: 0.54s; }
+  .lovebird-9 .wing-back,  .lovebird-9 .wing-front  { animation-duration: 0.50s; }
+  .lovebird-10 .wing-back, .lovebird-10 .wing-front { animation-duration: 0.46s; }
+  .lovebird-11 .wing-back, .lovebird-11 .wing-front { animation-duration: 0.42s; }
+  .lovebird-12 .wing-back, .lovebird-12 .wing-front { animation-duration: 0.38s; }
+  .lovebird-13 .wing-back, .lovebird-13 .wing-front { animation-duration: 0.34s; }
+  .lovebird-14 .wing-back, .lovebird-14 .wing-front { animation-duration: 0.72s; }
+  .lovebird-15 .wing-back, .lovebird-15 .wing-front { animation-duration: 0.60s; }
+
+  /* 3D Depth & Staggered positions */
+  /* Foreground Layer */
+  .lovebird-1  { width: 115px; height: 115px; animation: fly-ltr      22s linear infinite; animation-delay:   0s; }
+  .lovebird-2  { width: 100px; height: 100px; animation: fly-rtl      25s linear infinite; animation-delay:  -3s; }
+  .lovebird-3  { width:  85px; height:  85px; animation: fly-diag-up  24s linear infinite; animation-delay:  -6s; }
+  .lovebird-4  { width:  75px; height:  75px; animation: fly-diag-down 27s linear infinite; animation-delay: -9s; }
+  .lovebird-14 { width:  80px; height:  80px; animation: fly-rtl      23s linear infinite; animation-delay: -12s; }
+
+  /* Background Layer */
+  .lovebird-5  { width: 75px; height: 75px; animation: fly-ltr       29s linear infinite; animation-delay:  -2s; }
+  .lovebird-6  { width: 65px; height: 65px; animation: fly-rtl       32s linear infinite; animation-delay:  -5s; }
+  .lovebird-7  { width: 58px; height: 58px; animation: fly-diag-up   30s linear infinite; animation-delay:  -8s; }
+  .lovebird-8  { width: 52px; height: 52px; animation: fly-diag-down 34s linear infinite; animation-delay: -11s; }
+  .lovebird-9  { width: 46px; height: 46px; animation: fly-ltr       31s linear infinite; animation-delay: -14s; }
+  .lovebird-10 { width: 40px; height: 40px; animation: fly-rtl       28s linear infinite; animation-delay: -17s; }
+  .lovebird-11 { width: 36px; height: 36px; animation: fly-diag-up   35s linear infinite; animation-delay: -20s; }
+  .lovebird-12 { width: 30px; height: 30px; animation: fly-diag-down 33s linear infinite; animation-delay: -23s; }
+  .lovebird-13 { width: 26px; height: 26px; animation: fly-ltr       36s linear infinite; animation-delay: -26s; }
+  .lovebird-15 { width: 60px; height: 60px; animation: fly-diag-up   26s linear infinite; animation-delay: -15s; }
+
+  /* ----- Keyframes ----- */
+
+  @keyframes flap-front {
+    0%   { transform: scaleY(-0.7) rotate(-15deg); }
+    100% { transform: scaleY(1.1)  rotate(20deg);  }
+  }
+
+  @keyframes flap-back {
+    0%   { transform: scaleY(-0.6) rotate(-5deg);  }
+    100% { transform: scaleY(1.0)  rotate(25deg);  }
+  }
+
+  /* Path 1: Left to Right (Classic swoop) */
+  @keyframes fly-ltr {
+    0%   { transform: translate3d(-20vw,  15vh, 0) rotate( 15deg) scaleX( 1); opacity: 0;    }
+    3%   { opacity: 0.85; }
+    50%  { transform: translate3d( 50vw, -10vh, 0) rotate( -2deg) scaleX( 1); }
+    97%  { opacity: 0.85; }
+    100% { transform: translate3d(120vw,  20vh, 0) rotate( 12deg) scaleX( 1); opacity: 0;    }
+  }
+
+  /* Path 2: Right to Left (Flipped horizontally, swoop) */
+  @keyframes fly-rtl {
+    0%   { transform: translate3d(120vw, 25vh, 0) rotate(-15deg) scaleX(-1); opacity: 0;    }
+    3%   { opacity: 0.85; }
+    50%  { transform: translate3d( 50vw,  0vh, 0) rotate(  2deg) scaleX(-1); }
+    97%  { opacity: 0.85; }
+    100% { transform: translate3d(-20vw, 30vh, 0) rotate(-12deg) scaleX(-1); opacity: 0;    }
+  }
+
+  /* Path 3: Diagonal Up (Left-to-Right climbing) */
+  @keyframes fly-diag-up {
+    0%   { transform: translate3d(-20vw, 60vh, 0) rotate(-25deg) scaleX(1); opacity: 0;    }
+    3%   { opacity: 0.85; }
+    50%  { transform: translate3d( 50vw, 30vh, 0) rotate(-20deg) scaleX(1); }
+    97%  { opacity: 0.85; }
+    100% { transform: translate3d(120vw,  0vh, 0) rotate(-15deg) scaleX(1); opacity: 0;    }
+  }
+
+  /* Path 4: Diagonal Down (Right-to-Left diving) */
+  @keyframes fly-diag-down {
+    0%   { transform: translate3d(120vw,  5vh, 0) rotate( 25deg) scaleX(-1); opacity: 0;    }
+    3%   { opacity: 0.85; }
+    50%  { transform: translate3d( 50vw, 35vh, 0) rotate( 20deg) scaleX(-1); }
+    97%  { opacity: 0.85; }
+    100% { transform: translate3d(-20vw, 65vh, 0) rotate( 15deg) scaleX(-1); opacity: 0;    }
+  }
+
+  /* Responsive — keep flight natural on small screens */
+  @media (max-width: 768px) {
+    .lovebird-1  { width: 64px; height: 64px; }
+    .lovebird-2  { width: 56px; height: 56px; }
+    .lovebird-3  { width: 48px; height: 48px; }
+    .lovebird-4  { width: 42px; height: 42px; }
+    .lovebird-5  { width: 44px; height: 44px; }
+    .lovebird-6  { width: 38px; height: 38px; }
+    .lovebird-7  { width: 34px; height: 34px; }
+    .lovebird-8  { width: 30px; height: 30px; }
+    .lovebird-9  { width: 26px; height: 26px; }
+    .lovebird-10 { width: 22px; height: 22px; }
+    .lovebird-11 { width: 20px; height: 20px; }
+    .lovebird-12 { width: 18px; height: 18px; }
+    .lovebird-13 { width: 16px; height: 16px; }
+    .lovebird-14 { width: 45px; height: 45px; }
+    .lovebird-15 { width: 35px; height: 35px; }
+
+    @keyframes fly-ltr {
+      0%   { transform: translate3d(-25vw, 15vh, 0) rotate( 15deg) scaleX( 1); opacity: 0;    }
+      5%   { opacity: 0.85; }
+      100% { transform: translate3d(125vw, 20vh, 0) rotate( 10deg) scaleX( 1); opacity: 0;    }
+    }
+    @keyframes fly-rtl {
+      0%   { transform: translate3d(125vw, 25vh, 0) rotate(-15deg) scaleX(-1); opacity: 0;    }
+      5%   { opacity: 0.85; }
+      100% { transform: translate3d(-25vw, 30vh, 0) rotate(-10deg) scaleX(-1); opacity: 0;    }
+    }
+    @keyframes fly-diag-up {
+      0%   { transform: translate3d(-25vw, 45vh, 0) rotate(-20deg) scaleX(1); opacity: 0;    }
+      5%   { opacity: 0.85; }
+      100% { transform: translate3d(125vw, 10vh, 0) rotate(-15deg) scaleX(1); opacity: 0;    }
+    }
+    @keyframes fly-diag-down {
+      0%   { transform: translate3d(125vw, 10vh, 0) rotate( 20deg) scaleX(-1); opacity: 0;    }
+      5%   { opacity: 0.85; }
+      100% { transform: translate3d(-25vw, 45vh, 0) rotate( 15deg) scaleX(-1); opacity: 0;    }
+    }
+  }
+}
