@@ -45,7 +45,9 @@
   --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
   --font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-script: 'Great Vibes', 'Alex Brush', cursive;
-  --font-serif-soft: 'Kameron', 'Cormorant Garamond', serif;
+  --font-serif-soft: var(--font-kameron), 'Kameron', 'Cormorant Garamond', serif;
+  --font-display-classy: var(--font-sacramento), 'Sacramento', cursive;
+  --font-body-fun: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
 
   /* ---------- Spacing ----------
      `--spacing-section` is now FLUID — single value that grows from 64px on

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, DM_Sans, Pinyon_Script, Great_Vibes, Plus_Jakarta_Sans } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans, Pinyon_Script, Great_Vibes, Plus_Jakarta_Sans, Sacramento, Kameron } from 'next/font/google'
 import '../styles/global.css'
 
 const cormorant = Cormorant_Garamond({
@@ -41,6 +41,20 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
+const sacramento = Sacramento({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-sacramento',
+  display: 'swap',
+})
+
+const kameron = Kameron({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-kameron',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
   title: 'finWedding — Undangan Pernikahan Digital',
   description:
@@ -67,7 +81,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${cormorant.variable} ${dmSans.variable} ${pinyon.variable} ${greatVibes.variable} ${jakarta.variable}`}>
+    <html lang="id" className={`${cormorant.variable} ${dmSans.variable} ${pinyon.variable} ${greatVibes.variable} ${jakarta.variable} ${sacramento.variable} ${kameron.variable}`}>
       {/* No hardcoded background here: each template owns its own (Lovebirds
           cream via body.lovebirds-route, Solary dark via body.solary-route),
           and the dapur pages (login/onboarding/marketing/dashboard) each set
