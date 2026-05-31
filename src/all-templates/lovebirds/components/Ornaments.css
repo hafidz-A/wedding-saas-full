@@ -33,7 +33,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 4; /* above opaque section backgrounds; decorative + pointer-events:none */
+  z-index: 1; /* subtle ambient backdrop — sits behind page content (z-index 2), shows through transparent sections */
   pointer-events: none;
   display: none;
 }
