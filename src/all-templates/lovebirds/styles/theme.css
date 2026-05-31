@@ -38,10 +38,14 @@ body.lovebirds-route {
   --shadow-button-3d-hover: 0 6px 0 var(--color-charcoal-light), 0 12px 24px rgba(42, 33, 24, 0.18);
   --shadow-button-3d-active: 0 1px 0 var(--color-charcoal-light), 0 2px 8px rgba(42, 33, 24, 0.1);
 
-  /* ---------- Global font swap — scoped to the invitation card only ---------- */
-  --font-display: 'Playfair Display', 'Cormorant Garamond', 'Times New Roman', serif;
+  /* ---------- Fonts — scoped to the invitation card only ----------
+     Headings use the Great Vibes script (the romantic look the couple wants);
+     body stays Plus Jakarta Sans for readability. If a functional heading
+     (e.g. "Schedule of the Day") reads poorly in script, override that section
+     to var(--font-serif-soft) / Cormorant locally. */
+  --font-display: 'Great Vibes', 'Cormorant Garamond', cursive;
   --font-body: 'Plus Jakarta Sans', 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-  --font-script: 'Sacramento', 'Great Vibes', cursive;
+  --font-script: 'Great Vibes', 'Sacramento', cursive;
   /* --font-serif-soft (Kameron) intentionally left unchanged */
 }
 
