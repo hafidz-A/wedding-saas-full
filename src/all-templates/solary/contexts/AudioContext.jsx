@@ -20,9 +20,9 @@ export function AudioProvider({ src, defaultVolume = 0.45, children }) {
   const play = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    el.muted = muted;
+    el.muted = false;
     el.play().catch(() => { /* autoplay blocked — must come from a user gesture */ });
-  }, [muted]);
+  }, []);
 
   const stop = useCallback(() => {
     const el = ref.current;
@@ -44,11 +44,16 @@ export function AudioProvider({ src, defaultVolume = 0.45, children }) {
     setMuted((m) => {
       const next = !m;
       const el = ref.current;
-      if (el) el.muted = next;
-      if (!next && enabled) play();
+      if (el) {
+        // "Mute" pauses so currentTime freezes; "unmute" resumes from that exact
+        // point (the browser keeps currentTime across pause). Fixes the old bug
+        // where play() re-applied a stale muted flag and the track went silent.
+        if (next) el.pause();
+        else { el.muted = false; el.play().catch(() => {}); }
+      }
       return next;
     });
-  }, [enabled, play]);
+  }, []);
 
   const value = { enabled, muted, acceptMusic, declineMusic, toggleMute, hasAudio: !!src };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
