@@ -1,0 +1,82 @@
+.wrap { max-width: 920px; margin: 0 auto; }
+
+.subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(42, 33, 24, 0.12);
+}
+
+.subtab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 33, 24, 0.16);
+  background: transparent;
+  color: rgba(42, 33, 24, 0.7);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.subtab:hover { border-color: rgba(42, 33, 24, 0.4); }
+.subtabActive,
+.subtabActive:hover {
+  background: #2a2118;
+  color: #f5efe3;
+  border-color: #2a2118;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: #2a2118;
+}
+.summary {
+  color: #5c4a3a;
+  margin: 0 0 20px;
+  line-height: 1.55;
+}
+
+.h {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a7866;
+  margin: 24px 0 10px;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.7;
+  color: #2a2118;
+}
+
+.bullets { list-style: none; margin: 0; padding: 0; }
+.bullets li {
+  padding: 6px 0 6px 26px;
+  position: relative;
+  line-height: 1.55;
+  color: #2a2118;
+}
+.always li::before { content: '✅'; position: absolute; left: 0; }
+.never li::before { content: '⛔'; position: absolute; left: 0; }
+.tips li::before { content: '💡'; position: absolute; left: 0; }
+
+.shot { margin: 14px 0; }
+.shot img {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  box-shadow: 0 6px 20px rgba(42, 33, 24, 0.1);
+  display: block;
+}
+.shotCap {
+  font-size: 12px;
+  color: #8a7866;
+  margin-top: 6px;
+  text-align: center;
+}
