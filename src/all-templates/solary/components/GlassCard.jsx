@@ -54,6 +54,28 @@ export default function GlassCard({ title, planetName, children, className = "" 
     };
   }, []);
 
+  // The card mounts only while its section is the active planet, so an inactive
+  // section collapses to min-height:100vh and rhythm.js measures that short
+  // height. When the card mounts (or its content grows — e.g. Gift with wishlist
+  // + an always-open confirmation form taller than one screen), the section
+  // grows but rhythm's scroll boundaries are stale, so it would transition to
+  // the next planet before the content can be read. Rebuild boundaries whenever
+  // this card's box size changes so a tall section gets its full scroll runway.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        window.galacticRhythm?.rebuildBoundaries?.();
+        window.galacticRhythm?.applyScroll?.();
+      });
+    });
+    ro.observe(el);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, []);
+
   const titleText = title && planetName
     ? <>{title} Planet <span style={{ opacity: 0.55, padding: "0 8px" }}>·</span> <strong>{planetName}</strong></>
     : title;
