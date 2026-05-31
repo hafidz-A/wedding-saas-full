@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import styles from './Ornaments.module.css'
+import './Ornaments.css'
 import { resolveOrnamentTheme } from '../config/ornamentThemes.js'
 
 // SVG path sets — copied verbatim from style-guide-lovebirds.html lines 2310-2331.
@@ -30,10 +30,10 @@ export default function Ornaments({ ornamentType = 'birds', paletteKey } = {}) {
   const inner = SHAPES[ornamentType] || SHAPES.birds
 
   return (
-    <div className={styles.root} aria-hidden="true">
+    <div className="lovebirds-ornament-root" aria-hidden="true">
       {!isPerched && (
         <>
-          <div className={`${styles.flyZoneBg} fly-zone-bg`}>
+          <div className="lovebirds-fly-zone-bg">
             {BG_BIRDS.map((n) => (
               <div key={n} className={`lovebird-parallax-wrap p-wrap-${n}`}>
                 <svg className={`lovebird lovebird-${n}`} viewBox="0 0 64 64"
@@ -41,7 +41,7 @@ export default function Ornaments({ ornamentType = 'birds', paletteKey } = {}) {
               </div>
             ))}
           </div>
-          <div className={`${styles.flyZoneFg} fly-zone-fg`}>
+          <div className="lovebirds-fly-zone-fg">
             {FG_BIRDS.map((n) => (
               <div key={n} className={`lovebird-parallax-wrap p-wrap-${n}`}>
                 <svg className={`lovebird lovebird-${n}`} viewBox="0 0 64 64"
@@ -648,7 +648,7 @@ function PerchedCanvas({ active, paletteKey }) {
   return (
     <canvas
       ref={canvasRef}
-      className={styles.canvas}
+      className="lovebirds-bird-canvas"
       style={{ display: active ? 'block' : 'none' }}
     />
   )
