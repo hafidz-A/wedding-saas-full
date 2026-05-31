@@ -7,7 +7,7 @@ import { useGuest } from "../contexts/GuestContext.jsx";
    Content mirrors the lovebirds Wedding Gift flow (accounts with copy +
    a confirmation form that records to gift_confirmations via /api/gift),
    rendered in Solary's cosmic glass-card style. */
-export default function GiftPlanet({ sectionLabel, planetName, heading, accounts = [], confirmationEnabled = true, slug = "demo" }) {
+export default function GiftPlanet({ sectionLabel, planetName, heading, accounts = [], confirmationEnabled = true, slug = "demo", registryEnabled = false, registryTitle, registryMessage, wishlist = [] }) {
   const { name } = useGuest();
   const [copied, setCopied] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -146,6 +146,39 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
                 </div>
               </form>
             )}
+          </CardChild>
+        )}
+
+        {registryEnabled && Array.isArray(wishlist) && wishlist.length > 0 && (
+          <CardChild>
+            <div style={{ marginTop: "2rem", borderTop: "1px solid var(--color-line)", paddingTop: "1.75rem" }}>
+              <h3 className="h-3 center-text" style={{ marginBottom: 6 }}>{registryTitle || "Wishlist"}</h3>
+              {registryMessage && (
+                <p className="p-body center-text" style={{ color: "var(--color-fg-mute)", fontSize: 14, marginBottom: "1.5rem", maxWidth: 520, marginInline: "auto" }}>
+                  {registryMessage}
+                </p>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "clamp(0.8rem, 2vw, 1.2rem)" }}>
+                {wishlist.map((w, i) => (
+                  <div key={i} style={{ border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                    {w.image && (
+                      <div style={{ aspectRatio: "4 / 3", overflow: "hidden", background: "var(--color-bg-soft)" }}>
+                        <img src={w.image} alt={w.name || ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    )}
+                    <div style={{ padding: "0.9rem 1rem", display: "flex", flexDirection: "column", gap: 6, flex: 1, textAlign: "left" }}>
+                      {w.name && <div style={{ fontWeight: 600, fontSize: 15 }}>{w.name}</div>}
+                      {w.description && <p className="p-body" style={{ fontSize: 13, color: "var(--color-fg-mute)", margin: 0 }}>{w.description}</p>}
+                      {w.url && (
+                        <a href={w.url} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ marginTop: "auto", alignSelf: "flex-start" }}>
+                          Lihat hadiah →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardChild>
         )}
       </GlassCard>
