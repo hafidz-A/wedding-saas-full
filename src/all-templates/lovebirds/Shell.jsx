@@ -3,6 +3,7 @@
 import { Suspense, lazy, useEffect } from 'react'
 import ThemeProvider from './components/ThemeProvider.jsx'
 import GlobalBackground from './components/GlobalBackground.jsx'
+import Ornaments from './components/Ornaments.jsx'
 import { BotanicalBorder } from './components/BotanicalBorder.tsx'
 import SectionRenderer from './renderers/SectionRenderer.jsx'
 import FloatingNavbar from './components/FloatingNavbar.jsx'
@@ -22,7 +23,8 @@ export default function Shell({ config, slug, isDemo = false }) {
   const sections = config?.sections || []
   const music = config?.music
   const musicActive = music?.url && music.enabled !== false
-  const bgGif = config?.bgGif
+  const ornamentType = config?.theme?.ornamentType || 'birds'
+  const paletteKey = config?.theme?.defaultPalette
 
   // Tag <body> so Lovebirds' cream theme applies for this route only
   // (the shared app global.css carries just resets/tokens now).
@@ -37,7 +39,8 @@ export default function Shell({ config, slug, isDemo = false }) {
       allowGuestSwitch={isDemo}
     >
       <SmoothScroll />
-      <GlobalBackground gifUrl={bgGif} />
+      <GlobalBackground />
+      <Ornaments ornamentType={ornamentType} paletteKey={paletteKey} />
       <BotanicalBorder />
       <SectionRenderer config={config} slug={slug} registry={sectionRegistry} />
       <FloatingNavbar sections={sections} />

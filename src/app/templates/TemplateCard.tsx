@@ -49,27 +49,11 @@ export function TemplateCard({ t, tt }: { t: TemplateEntry; tt: Dict['templates'
             }}
             aria-label={`Preview ${t.label}`}
           >
-            {/* If lovebirds, show mini botanical borders and birds gif */}
+            {/* If lovebirds, show mini botanical borders */}
             {t.id === 'lovebirds' && (
               <>
                 <div style={botanicalLeft} />
                 <div style={botanicalRight} />
-                <img
-                  src="/images/wedding-animation.gif"
-                  alt=""
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: 76,
-                    height: 'auto',
-                    opacity: 0.5,
-                    mixBlendMode: 'multiply',
-                    pointerEvents: 'none',
-                    zIndex: 1,
-                  }}
-                />
               </>
             )}
             {/* If solary, show orbits */}

@@ -8,20 +8,6 @@
   overflow: hidden;
 }
 
-.gifLayer {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(84vw, 760px);
-  max-width: 100%;
-  height: auto;
-  transform: translate(-50%, -50%);
-  opacity: 0.18;
-  mix-blend-mode: multiply;
-  user-select: none;
-  pointer-events: none;
-}
-
 /* ---------- Radial colour washes (accent soft glows) ---------- */
 .washes {
   position: absolute;
@@ -158,9 +144,6 @@
     opacity: 0.45;
   }
 
-  /* GIF: scale down — but keep ornaments unchanged. */
-  .gifLayer { width: min(62vw, 520px); }
-
   .petalAnchor { width: clamp(34px, 7vw, 70px); }
   .lineDecor   { width: clamp(120px, 24vw, 300px); opacity: 0.18; }
   .wash        { filter: blur(70px); }
@@ -168,8 +151,6 @@
 
 /* ── Tablet portrait (600–767px) ── */
 @media (max-width: 767px) {
-  .gifLayer { width: min(70vw, 380px); opacity: 0.16; }
-
   .ornamentTR,
   .ornamentBL { opacity: 0.25; }
 
@@ -199,8 +180,6 @@
 
 /* ── Large phone landscape / phablet (480–599px) ── */
 @media (max-width: 599px) {
-  .gifLayer { width: min(78vw, 320px); opacity: 0.14; }
-
   .ornamentTR,
   .ornamentBL { display: none; }
 
@@ -231,8 +210,6 @@
 
 /* ── Small phone portrait (<= 479px) ── */
 @media (max-width: 479px) {
-  .gifLayer { width: min(82vw, 260px); opacity: 0.13; }
-
   .ornamentTR,
   .ornamentBL { display: none; }
 

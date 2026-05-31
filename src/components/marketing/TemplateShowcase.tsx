@@ -173,9 +173,6 @@ export function TemplateShowcase({ t }: { t: Dict['landing']['showcase'] }) {
                         {/* Botanical side borders */}
                         <div className={`${styles.miniBotanical} ${styles.miniBotanicalL}`} />
                         <div className={`${styles.miniBotanical} ${styles.miniBotanicalR}`} />
-                        
-                        {/* Birds branch GIF */}
-                        <img src="/images/wedding-animation.gif" className={styles.miniBirds} alt="" />
                       </div>
                     ) : (
                       <div className={styles.miniSolaryBg}>
