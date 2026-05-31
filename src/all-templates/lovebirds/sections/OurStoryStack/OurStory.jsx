@@ -7,9 +7,7 @@ import styles from './OurStory.module.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/* ============================================================================
-   OUR STORY — scroll-stacking deck (GSAP ScrollTrigger, scrub timeline)
-   ============================================================================ */
+/* Our Story — scroll-stacking card deck driven by GSAP ScrollTrigger. */
 
 const DEFAULT_STORIES = [
   { id: 1, year: '2019', date: 'Januari 2019',  title: 'The First Meeting', description: 'Sebuah pertemuan pertama yang tidak terduga di tepi pantai.', image: '' },

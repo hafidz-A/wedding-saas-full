@@ -437,9 +437,7 @@
   50%      { transform: translateY(6px); opacity: 1; }
 }
 
-/* ============================================================================
-   RESPONSIVE
-   ============================================================================ */
+/* Responsive */
 
 /* Desktop boundary — pulls decoration inward so it doesn't crowd the gate
    card on iPad Pro landscape and below. */

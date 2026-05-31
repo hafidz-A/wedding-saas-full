@@ -1,6 +1,4 @@
-/* ============================================================================
-   BRIDE & GROOM — Cinematic GSAP ScrollTrigger 3D editorial section
-   ============================================================================ */
+/* Bride & Groom — cinematic GSAP ScrollTrigger 3D editorial section. */
 
 .section {
   position: relative;
@@ -334,9 +332,7 @@
 
 .decor { position: absolute; pointer-events: none; z-index: 1; }
 
-/* ============================================================================
-   RESPONSIVE
-   ============================================================================ */
+/* Responsive */
 
 @media (min-width: 1440px) {
   .stage { perspective: 2500px; gap: clamp(60px, 5vw, 120px); }

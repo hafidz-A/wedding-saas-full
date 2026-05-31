@@ -243,10 +243,7 @@ function PetalShape({ name }) {
   }
 }
 
-/* ── Layout for 10 floating petals — pinned to edges, avoiding centre ──
-   Uses percentage positions so they scale naturally with viewport.
-   On mobile (via useBreakpoint), only every 3rd petal is shown.
-   On tablet, every 2nd petal is shown. */
+/* 10 floating petals pinned to viewport edges; mobile shows every 3rd, tablet every 2nd. */
 const PETAL_LAYOUT = [
   { shape: 'coral',   position: { top: '6%',   left: '2%'  }, rotate: -18,  delay: 0,    opacity: 0.65 },
   { shape: 'gold',    position: { top: '4%',   right: '4%' }, rotate: 22,   delay: 1.2,  opacity: 0.5  },

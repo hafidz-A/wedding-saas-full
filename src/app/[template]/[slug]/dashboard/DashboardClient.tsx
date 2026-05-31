@@ -21,13 +21,7 @@ import { activePeriodStatus } from '@/lib/payments/active-period'
 import type { Dict, Lang } from '@/lib/i18n'
 import styles from './dashboard.module.css'
 
-/**
- * Stub dashboard — shows the invitation status + counts and links to the
- * public view. The full block-based editor will replace this in the next
- * sprint (drag-reorder sections, image/GIF upload, live preview).
- *
- * For now it proves that auth works and the data flows from Supabase.
- */
+/** Client-side dashboard: tab switcher for editor, RSVPs, gifts, guests, music, background. */
 export default function DashboardClient({
   slug,
   template,

@@ -1,15 +1,4 @@
-/* ============================================================================
-   COUNTDOWN — gentle hero-adjacent countdown.
-
-   - Section uses a soft vertical gradient from cream → white.
-   - Decorative botanical SVGs sit on the left/right edges at low opacity
-     (multiply blend mode so they tint the background, not overlay it).
-   - Three numeric display variants are switched via a single root class
-     (.styleCard / .styleMono / .styleItalic).
-   - Each unit's number sits inside .numberWrap with overflow:hidden so the
-     motion enter/exit (translateY ±8px) plays inside the cell without
-     pushing layout.
-   ============================================================================ */
+/* Countdown — three variants (.styleCard/.styleMono/.styleItalic); .numberWrap overflow:hidden keeps number flip in-cell. */
 
 .section {
   position: relative;

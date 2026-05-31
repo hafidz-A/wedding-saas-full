@@ -1,16 +1,6 @@
 import { lazy } from 'react'
 
-/* ============================================================================
-   BLOCK REGISTRY
-
-   Primitive content blocks that compose section content. Used by
-   BlockRenderer for any section that has a `blocks: [...]` array.
-
-   Adding a new block:
-     1. Create src/blocks/<Name>Block.jsx
-     2. Register here as `<type>: lazy(() => import('...'))`
-     3. Reference from pageConfig.js: `{ type: '<type>', ... }`
-   ============================================================================ */
+/* Primitive block registry — type → lazy component. Add new blocks here + reference from config. */
 
 export const blockRegistry = {
   text:             lazy(() => import('../blocks/TextBlock.jsx')),

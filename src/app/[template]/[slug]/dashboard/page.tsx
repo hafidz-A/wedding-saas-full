@@ -153,12 +153,7 @@ export default async function DashboardPage({ params }: PageProps) {
   )
 }
 
-/* ──────────── row decryptors (server-side) ────────────
- * rsvps / gift_confirmations keep their plaintext columns alongside the new
- * _enc columns during the encryption migration. Prefer the _enc value; fall
- * back to the plaintext column for rows not yet backfilled. After the
- * drop-plaintext migration the plaintext columns are gone (undefined) and the
- * _enc branch is the only one used. */
+/* Row decryptors — prefer _enc column, fall back to plaintext for un-migrated rows. */
 
 function decryptRsvpRow(r: any) {
   return {

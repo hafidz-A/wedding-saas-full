@@ -1,14 +1,4 @@
-/* ============================================================================
-   LOVEBIRDS — global theme application.
-
-   Builds on the existing per-section presets in `themes.js`. Instead of theming
-   each section individually, the chosen theme is applied to the whole invitation
-   by writing its CSS vars onto `body.lovebirds-route`; every section inherits.
-
-   `applyTheme(name)` also derives the page (body) background: a dark preset
-   (its `--bg` is a solid colour, not `transparent`) paints the whole page dark;
-   light presets keep the warm cream ambient.
-   ============================================================================ */
+/* Global theme applicator — writes CSS vars onto <body>; dark presets also set page bg. */
 import { resolveTheme } from './themes.js'
 
 export const DEFAULT_THEME_NAME = 'warmCream'

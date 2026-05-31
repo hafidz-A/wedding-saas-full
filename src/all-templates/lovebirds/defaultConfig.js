@@ -1,31 +1,4 @@
-/* ============================================================================
-   PAGE CONFIG — single source of truth for the homepage
-
-   The whole site is rendered dynamically from `sections` below. To customize:
-
-     ▸ Remove a section    → delete its entry from the array
-     ▸ Hide a section      → set `enabled: false`
-     ▸ Reorder sections    → move the entry up/down in the array
-     ▸ Change theme        → set `theme: 'darkLuxury' | 'warmCream' | …`
-     ▸ Change background   → set `background: { type, value }`
-     ▸ Edit content        → modify the `props` object
-     ▸ Add blocks          → push to `blocks: []` (for block-composed sections)
-     ▸ Add new section     → register its component in sectionRegistry.js first,
-                              then push a new entry here with the matching `type`
-
-   Schema:
-     {
-       id:          unique stable key
-       type:        matches a key in sectionRegistry
-       enabled:     boolean (false = skipped)
-       theme:       optional theme preset name (themes.js)
-       background:  optional { type: 'gradient' | 'solid' | 'image', value }
-       layout:      optional layout hint ('centered' | 'split' | …)
-       decorativeLayers: optional array of decorative blocks
-       props:       data passed to the section component (specialized sections)
-       blocks:      optional array of blocks (for block-composed sections)
-     }
-   ============================================================================ */
+/* Default page config — bundled demo data, rendered when no Supabase row exists. */
 
 // Calculate a dynamic future date for the demo so the countdown is always active and counting down
 const now = new Date()

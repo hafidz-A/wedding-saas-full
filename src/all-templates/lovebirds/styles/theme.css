@@ -1,11 +1,4 @@
-/* ============================================================================
-   Lovebirds template theme — the cream ambient background + warm colour washes.
-   Scoped to `body.lovebirds-route` (added by Lovebirds Shell on mount) so it
-   applies ONLY on Lovebirds routes and never leaks onto other templates.
-
-   Tokens (--color-cream, --color-coral, etc.) come from the app baseline
-   (src/styles/tokens.css, loaded globally), so they resolve here too.
-   ============================================================================ */
+/* Lovebirds theme — scoped to body.lovebirds-route (set by Shell) so it never leaks to other templates. */
 body.lovebirds-route {
   /* Default (warmCream) ambient. applyTheme() overrides --page-bg at runtime
      when another theme is selected (dark presets paint a solid colour). */
@@ -50,9 +43,7 @@ body.lovebirds-route {
   --font-body: var(--font-jakarta), 'DM Sans', sans-serif;
 }
 
-/* ============================================================================
-   Elegant, Fun & Classy Component Variations
-   ============================================================================ */
+/* Component variations */
 
 /* 1. Iridescent Champagne Glass Card */
 .glass-iridescent {

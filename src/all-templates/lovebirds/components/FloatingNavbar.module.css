@@ -1,19 +1,4 @@
-/* ============================================================================
-   FLOATING NAVBAR — responsive in-page nav.
-
-   Two surfaces share the same items array but render at different breakpoints:
-
-     ≥768px  →  Horizontal pill list with ‹ › scroll buttons (`.nav`).
-                Hamburger trigger + sheet are hidden.
-     <768px  →  Hamburger button anchored top-right (`.hamburger`).
-                Tap opens a drop-down sheet (`.sheet`) with one tall list item
-                per section, each meeting the 44px tap-target floor.
-                Horizontal pill list is hidden.
-
-   The shell itself is fixed-positioned and `pointer-events: none` so it never
-   blocks page interactions; the trigger/sheet/nav opt back in via
-   `pointer-events: auto`.
-============================================================================ */
+/* Responsive nav: pill list (≥768px) or hamburger+sheet (<768px). Shell is pointer-events:none. */
 
 .shell {
   position: fixed;
@@ -224,11 +209,7 @@
   color: var(--button-fg, var(--color-cream));
 }
 
-/* ============================================================================
-   Breakpoint switch — mobile-first.
-   Base styles above target <768px (mobile): nav hidden, hamburger visible.
-   At ≥768px we flip: show the pill nav, hide the hamburger + sheet entirely.
-============================================================================ */
+/* ≥768px: show pill nav, hide hamburger + sheet. */
 @media (min-width: 768px) {
   .nav { display: flex; }
   .hamburger,

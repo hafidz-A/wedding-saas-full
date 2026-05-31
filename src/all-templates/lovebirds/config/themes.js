@@ -1,17 +1,4 @@
-/* ============================================================================
-   THEMES — named presets that map to CSS custom-property overrides.
-
-   Each theme is a flat object whose keys become CSS variables on the
-   section wrapper. So setting `theme: 'darkLuxury'` in pageConfig.js
-   applies these variables only to that section.
-
-   Variables consumed by sections (defined in tokens.css):
-     --bg            section base background
-     --fg            primary text color
-     --fg-muted      secondary text color
-     --accent        accent color (eyebrows, dots, etc.)
-     --accent-soft   softer accent shade
-   ============================================================================ */
+/* Named theme presets — flat CSS-variable objects applied to <body> by ThemeProvider. */
 
 export const themes = {
   warmCream: {

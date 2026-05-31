@@ -1,16 +1,4 @@
-/* ==========================================================================
-   GLOBAL BACKGROUND — fixed ornaments & floating petals behind ALL sections.
-   Mirrors the Hero's DecorCorners + petal aesthetic so every section
-   feels part of the same visual story.
-
-   Breakpoints:
-     >= 1440px  — Large desktop (2K+)
-     960–1439px — Standard desktop / laptop
-     768–959px  — Tablet landscape / small laptop
-     600–767px  — Tablet portrait
-     480–599px  — Large phone (landscape & phablets)
-     <= 479px   — Small phone (portrait)
-   ========================================================================== */
+/* Fixed ornamental backdrop — petals + corner SVGs + colour washes behind all sections. */
 
 .canvas {
   position: fixed;
@@ -145,10 +133,6 @@
 .lineDecor1 { top: 18%;  left: 2%;  }
 .lineDecor2 { top: 45%;  right: 0%; transform: scaleX(-1); }
 .lineDecor3 { top: 72%;  left: 3%;  }
-
-/* ==========================================================================
-   RESPONSIVE BREAKPOINTS
-   ========================================================================== */
 
 /* ── Large desktop (>= 1440px) — show everything bigger ── */
 @media (min-width: 1440px) {
