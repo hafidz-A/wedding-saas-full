@@ -40,7 +40,7 @@ export const giftPlanetSchema: SectionSchema = {
     heading: 'Your presence is the gift. But if you insist…',
     accounts: [{ bank: 'BCA', number: '1234567890', name: 'Aruna K.' }],
     confirmationEnabled: true,
-    registryEnabled: false,
+    registryEnabled: true,
     registryTitle: 'Wishlist Kami',
     registryMessage: 'Bila Anda berkenan memberi hadiah, berikut beberapa hal yang kami impikan.',
     wishlist: [

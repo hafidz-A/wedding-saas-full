@@ -149,7 +149,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
           </CardChild>
         )}
 
-        {registryEnabled && Array.isArray(wishlist) && wishlist.length > 0 && (
+        {registryEnabled !== false && Array.isArray(wishlist) && wishlist.length > 0 && (
           <CardChild>
             <div style={{ marginTop: "2rem", borderTop: "1px solid var(--color-line)", paddingTop: "1.75rem" }}>
               <h3 className="h-3 center-text" style={{ marginBottom: 6 }}>{registryTitle || "Wishlist"}</h3>
@@ -159,24 +159,32 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
                 </p>
               )}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "clamp(0.8rem, 2vw, 1.2rem)" }}>
-                {wishlist.map((w, i) => (
-                  <div key={i} style={{ border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                    {w.image && (
-                      <div style={{ aspectRatio: "4 / 3", overflow: "hidden", background: "var(--color-bg-soft)" }}>
-                        <img src={w.image} alt={w.name || ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      </div>
-                    )}
-                    <div style={{ padding: "0.9rem 1rem", display: "flex", flexDirection: "column", gap: 6, flex: 1, textAlign: "left" }}>
-                      {w.name && <div style={{ fontWeight: 600, fontSize: 15 }}>{w.name}</div>}
-                      {w.description && <p className="p-body" style={{ fontSize: 13, color: "var(--color-fg-mute)", margin: 0 }}>{w.description}</p>}
-                      {w.url && (
-                        <a href={w.url} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ marginTop: "auto", alignSelf: "flex-start" }}>
-                          Lihat hadiah →
-                        </a>
+                {wishlist.map((w, i) => {
+                  const link = w.url && String(w.url).trim() && String(w.url).trim() !== "#" ? String(w.url).trim() : null;
+                  const inner = (
+                    <>
+                      {w.image && (
+                        <div style={{ aspectRatio: "4 / 3", overflow: "hidden", background: "var(--color-bg-soft)" }}>
+                          <img src={w.image} alt={w.name || ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </div>
                       )}
-                    </div>
-                  </div>
-                ))}
+                      <div style={{ padding: "0.9rem 1rem", display: "flex", flexDirection: "column", gap: 6, flex: 1, textAlign: "left" }}>
+                        {w.name && (
+                          <div style={{ fontWeight: 600, fontSize: 15 }}>
+                            {w.name}{link && <span style={{ color: "var(--color-accent)" }} aria-hidden="true"> →</span>}
+                          </div>
+                        )}
+                        {w.description && <p className="p-body" style={{ fontSize: 13, color: "var(--color-fg-mute)", margin: 0 }}>{w.description}</p>}
+                      </div>
+                    </>
+                  );
+                  const cardStyle = { border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)", overflow: "hidden", display: "flex", flexDirection: "column", textDecoration: "none", color: "inherit" };
+                  return link ? (
+                    <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={cardStyle}>{inner}</a>
+                  ) : (
+                    <div key={i} style={cardStyle}>{inner}</div>
+                  );
+                })}
               </div>
             </div>
           </CardChild>
