@@ -10,6 +10,7 @@ export const welcomePlanetSchema: SectionSchema = {
     { key: 'portraitCaption', label: { id: 'Caption foto', en: 'Portrait caption' }, type: 'text' },
   ],
   defaults: {
+    sectionLabel: 'Welcome',
     heading: 'We found each other in the deep blue.',
     body: 'A short prelude before the journey: who we are, where we met, and the gravity that pulled us together.',
     portrait: 'https://picsum.photos/seed/welcome-portrait/800/1000',

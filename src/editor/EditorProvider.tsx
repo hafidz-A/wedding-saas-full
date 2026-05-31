@@ -154,14 +154,25 @@ export function reducer(state: State, action: Action): State {
         ...state,
         config: patchSection(state.config, action.sectionId, (s) => {
           const prev = (s.props || {}) as Record<string, unknown>
+          const defaults = (action.defaults || {}) as Record<string, unknown>
+          // Solary planets are POSITIONAL — planetKey/planetName are the physical
+          // celestial body framed by the 3D camera at this slot, so they stay.
+          // Everything else (sectionLabel, navLabel, content) adopts the new
+          // type, otherwise a swap "Bridal Party"→"Quote" keeps showing the old
+          // name on the card and in the nav.
           const preserved: Record<string, unknown> = {}
           if (prev.planetKey !== undefined) preserved.planetKey = prev.planetKey
           if (prev.planetName !== undefined) preserved.planetName = prev.planetName
-          if (prev.sectionLabel !== undefined) preserved.sectionLabel = prev.sectionLabel
+          // navLabel: clear so lovebirds re-derives from its per-type default
+          // label map; solary has no such map, so seed it from the new type's
+          // sectionLabel default so the floating nav updates too.
+          const navLabel =
+            typeof defaults.sectionLabel === 'string' ? (defaults.sectionLabel as string) : undefined
           return {
             ...s,
             type: action.newType,
-            props: { ...(action.defaults || {}), ...preserved },
+            navLabel,
+            props: { ...defaults, ...preserved },
           }
         }),
       }

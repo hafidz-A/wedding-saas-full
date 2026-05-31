@@ -318,22 +318,22 @@ export const pageConfig = {
       type: "giftPlanet",
       enabled: true,
       theme: "nebulaDark",
-      navLabel: "Gifts & Wishes",
+      navLabel: "Gifts",
       props: {
         planetKey: "mercury",
         planetName: "Mercury",
-        sectionLabel: "Gifts & Wishes",
+        sectionLabel: "Gifts",
         heading: "Your presence is the gift. But if you insist…", // [CONTOH]
         accounts: [                                          // [CONTOH]
           { bank: "BCA",     number: "1234567890", name: "Aruna K." },
           { bank: "Mandiri", number: "9876543210", name: "Daksa P." },
         ],
-        wishesEnabled: true,
+        confirmationEnabled: true,
       },
       schema: {
         heading:  { kind: "text" },
         accounts: { kind: "objectArray", fields: { bank:"text", number:"text", name:"text" } },
-        wishesEnabled: { kind: "boolean" },
+        confirmationEnabled: { kind: "boolean" },
       },
     },
 

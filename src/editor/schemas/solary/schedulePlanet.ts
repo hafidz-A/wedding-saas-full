@@ -19,6 +19,7 @@ export const schedulePlanetSchema: SectionSchema = {
     },
   ],
   defaults: {
+    sectionLabel: 'Schedule',
     heading: 'Rundown Acara',
     events: [
       { time: '08:00', title: 'Akad Nikah', desc: 'Pemberkatan di ballroom utama.' },

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans, Pinyon_Script, Great_Vibes, Plus_Jakarta_Sans } from 'next/font/google'
 import '../styles/global.css'
 
 const cormorant = Cormorant_Garamond({
@@ -14,6 +14,30 @@ const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600'],
   variable: '--font-body',
+  display: 'swap',
+})
+
+const pinyon = Pinyon_Script({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-script',
+  display: 'swap',
+})
+
+// Lovebirds heading script (Great Vibes) + body sans (Plus Jakarta Sans).
+// Loaded globally so they're available; applied only on the lovebirds route
+// (src/all-templates/lovebirds/styles/theme.css) via these CSS variables.
+const greatVibes = Great_Vibes({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-greatvibes',
+  display: 'swap',
+})
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-jakarta',
   display: 'swap',
 })
 
@@ -43,7 +67,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${cormorant.variable} ${dmSans.variable}`}>
+    <html lang="id" className={`${cormorant.variable} ${dmSans.variable} ${pinyon.variable} ${greatVibes.variable} ${jakarta.variable}`}>
       {/* No hardcoded background here: each template owns its own (Lovebirds
           cream via body.lovebirds-route, Solary dark via body.solary-route),
           and the dapur pages (login/onboarding/marketing/dashboard) each set

@@ -69,6 +69,48 @@ export const themes = {
     '--button-bg': 'var(--color-charcoal)',
     '--button-fg': 'var(--color-cream)',
   },
+
+  blossomVelvet: {
+    '--bg': 'transparent',
+    '--fg': 'var(--color-plum)',
+    '--fg-muted': 'var(--color-charcoal-light)',
+    '--accent': 'var(--color-rose)',
+    '--accent-soft': 'var(--color-rose-soft)',
+    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
+    '--glass-border': 'rgba(255, 255, 255, 0.45)',
+    '--glass-text': 'var(--color-plum)',
+    '--glass-text-muted': 'var(--color-charcoal-light)',
+    '--button-bg': 'var(--color-plum)',
+    '--button-fg': 'var(--color-mauve-cream)',
+  },
+
+  sunsetClay: {
+    '--bg': 'transparent',
+    '--fg': 'var(--color-terracotta)',
+    '--fg-muted': 'var(--color-sage)',
+    '--accent': 'var(--color-terracotta)',
+    '--accent-soft': 'var(--color-gold-sand)',
+    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
+    '--glass-border': 'rgba(255, 255, 255, 0.45)',
+    '--glass-text': 'var(--color-terracotta)',
+    '--glass-text-muted': 'var(--color-sage)',
+    '--button-bg': 'var(--color-terracotta)',
+    '--button-fg': 'var(--color-peach-sand)',
+  },
+
+  midnightStardust: {
+    '--bg': 'var(--color-midnight)',
+    '--fg': 'var(--color-champagne-soft)',
+    '--fg-muted': 'rgba(245, 229, 201, 0.75)',
+    '--accent': 'var(--color-champagne)',
+    '--accent-soft': 'var(--color-celestial)',
+    '--glass-bg': 'rgba(21, 37, 68, 0.65)',
+    '--glass-border': 'rgba(255, 255, 255, 0.15)',
+    '--glass-text': 'var(--color-champagne-soft)',
+    '--glass-text-muted': 'rgba(245, 229, 201, 0.75)',
+    '--button-bg': 'var(--color-champagne)',
+    '--button-fg': 'var(--color-midnight)',
+  },
 }
 
 /**

@@ -1,4 +1,4 @@
-# Design — Lovebirds Editor Cleanup + Themed Dialogs
+1# Design — Lovebirds Editor Cleanup + Themed Dialogs
 
 > Status: approved in brainstorming 2026-05-30. Next: implementation plan.
 > Scope is the **dashboard editor** and **dashboard dialogs**. Invitation

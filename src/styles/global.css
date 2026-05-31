@@ -144,3 +144,85 @@ h1, h2, h3, h4 {
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* ---------- Premium Scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(253, 246, 236, 0.5); /* soft cream */
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(42, 33, 24, 0.15); /* warm charcoal tint */
+  border-radius: 99px;
+  border: 2px solid #FDF6EC;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(42, 33, 24, 0.3);
+}
+
+/* ---------- UI Glassmorphism & Shadows ---------- */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 16px 40px rgba(42, 33, 24, 0.05),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.luxury-card {
+  background: var(--color-paper);
+  border: 1px solid rgba(42, 33, 24, 0.06);
+  box-shadow: 0 12px 36px rgba(42, 33, 24, 0.04);
+  transition: transform 0.6s var(--ease-out), box-shadow 0.6s var(--ease-out);
+}
+.luxury-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(42, 33, 24, 0.08);
+}
+
+/* ---------- Text Scroll Reveal ---------- */
+.reveal-word {
+  display: inline-block;
+  opacity: 0.15;
+  transform: translateY(6px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.revealed .reveal-word {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Floating animations (reused in landing) ---------- */
+@keyframes float-petal {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(15px, -15px) rotate(180deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+.petal-floating {
+  animation: float-petal 18s ease-in-out infinite alternate;
+}
+
+/* ---------- Tactile linen grain overlay ---------- */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+

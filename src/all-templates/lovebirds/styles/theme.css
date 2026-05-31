@@ -39,14 +39,15 @@ body.lovebirds-route {
   --shadow-button-3d-active: 0 1px 0 var(--color-charcoal-light), 0 2px 8px rgba(42, 33, 24, 0.1);
 
   /* ---------- Fonts — scoped to the invitation card only ----------
-     Headings use the Great Vibes script (the romantic look the couple wants);
-     body stays Plus Jakarta Sans for readability. If a functional heading
-     (e.g. "Schedule of the Day") reads poorly in script, override that section
-     to var(--font-serif-soft) / Cormorant locally. */
-  --font-display: 'Great Vibes', 'Cormorant Garamond', cursive;
-  --font-body: 'Plus Jakarta Sans', 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-  --font-script: 'Great Vibes', 'Sacramento', cursive;
-  /* --font-serif-soft (Kameron) intentionally left unchanged */
+     These reference next/font loaders defined in src/app/layout.tsx (literal
+     family names do NOT work — next/font exposes fonts only via these vars):
+       --font-greatvibes → Great Vibes (headings, the romantic script)
+       --font-jakarta    → Plus Jakarta Sans (body)
+     Names/monogram keep --font-script (Pinyon Script) from layout — not
+     overridden here. If a functional heading reads poorly in script, override
+     that section's title to var(--font-serif-soft) / serif locally. */
+  --font-display: var(--font-greatvibes), 'Cormorant Garamond', serif;
+  --font-body: var(--font-jakarta), 'DM Sans', sans-serif;
 }
 
 /* ============================================================================

@@ -124,6 +124,10 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
     const totalMs = Math.max(PAGE_SCROLL_DURATION, cameraDuration) * 1000 + 200;
     setTimeout(() => {
       window.__rhythmSuspended = false;
+      /* Rhythm was suspended during the arc, so announce the destination
+         section ourselves — this reveals the destination card on arrival. */
+      window.__activeSolarySectionId = targetSection.id;
+      window.dispatchEvent(new CustomEvent("solary:section", { detail: { id: targetSection.id, key: destKey } }));
       window.dispatchEvent(new CustomEvent("galactic:travel:end"));
     }, totalMs);
   };

@@ -92,14 +92,13 @@ export default async function DashboardPage({ params }: PageProps) {
     )
   }
 
-  // 4. Fetch RSVPs + gifts + notes + guests + attendances in parallel.
+  // 4. Fetch RSVPs + gifts + guests + attendances in parallel.
   //    The attendances query degrades gracefully: if the table doesn't exist
   //    yet (migration not applied), Supabase resolves with error + null data
   //    rather than throwing, so the Buku Tamu tab just shows an empty list.
   const [
     { data: rsvps },
     { data: gifts },
-    { data: notes },
     { data: guestsRaw },
     { data: attendancesRaw },
   ] = await Promise.all([
@@ -111,11 +110,6 @@ export default async function DashboardPage({ params }: PageProps) {
     admin
       .from('gift_confirmations')
       .select('*')
-      .eq('invitation_id', invitation.id)
-      .order('created_at', { ascending: false }),
-    admin
-      .from('guestbook_notes')
-      .select('id, guest_name, message, color, created_at')
       .eq('invitation_id', invitation.id)
       .order('created_at', { ascending: false }),
     admin
@@ -150,7 +144,6 @@ export default async function DashboardPage({ params }: PageProps) {
       invitation={invitationDecrypted}
       rsvps={rsvpsDec}
       gifts={giftsDec}
-      notes={(notes as any) || []}
       guests={guests}
       attendances={attendances}
       dict={t.dashboard}

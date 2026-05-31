@@ -135,6 +135,13 @@ export function installRhythm(cfg) {
         lastTransitionId = null;
       }
       scene.setActive(cur.key);
+      /* Broadcast the active section so each GlassCard can reveal itself
+         exactly when the camera frames its planet (and hide during transit),
+         keeping card and camera in sync for ANY section arrangement. */
+      if (window.__activeSolarySectionId !== cur.id) {
+        window.__activeSolarySectionId = cur.id;
+        fire("solary:section", { id: cur.id, key: cur.key });
+      }
     }
   }
   function onScroll() {

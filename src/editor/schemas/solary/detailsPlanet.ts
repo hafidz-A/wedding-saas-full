@@ -31,6 +31,7 @@ export const detailsPlanetSchema: SectionSchema = {
     { key: 'quoteAttribution', label: { id: 'Sumber kutipan', en: 'Quote attribution' }, type: 'text' },
   ],
   defaults: {
+    sectionLabel: 'The Details',
     heading: 'Where, when, and what to wear.',
     cards: [
       { icon: 'pin', label: 'Venue', primary: 'Plataran Menteng', secondary: 'Jakarta', actionLabel: 'Open Map', actionHref: '#' },

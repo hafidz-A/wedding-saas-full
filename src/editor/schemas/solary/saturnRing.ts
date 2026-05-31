@@ -17,4 +17,7 @@ export const saturnRingSchema: SectionSchema = {
       ],
     },
   ],
+  defaults: {
+    sectionLabel: 'Gallery',
+  },
 }

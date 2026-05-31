@@ -18,6 +18,7 @@ export const faqPlanetSchema: SectionSchema = {
     },
   ],
   defaults: {
+    sectionLabel: 'FAQ',
     heading: 'Pertanyaan Umum',
     items: [
       { q: 'Apakah boleh membawa anak?', a: 'Tentu, kami menyambut keluarga Anda.' },

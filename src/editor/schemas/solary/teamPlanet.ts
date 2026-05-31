@@ -29,6 +29,7 @@ export const teamPlanetSchema: SectionSchema = {
     },
   ],
   defaults: {
+    sectionLabel: 'Bridal Party',
     heading: 'The constellation by our side.',
     groups: [
       { label: 'Bridesmaids', members: [{ name: 'Maya', role: 'Maid of Honor', avatar: '' }] },

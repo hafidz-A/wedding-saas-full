@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const giftPlanetSchema: SectionSchema = {
   type: 'giftPlanet',
-  label: { id: 'Hadiah & Ucapan (Mercury)', en: 'Gifts & Wishes (Mercury)' },
+  label: { id: 'Hadiah (Mercury)', en: 'Gifts (Mercury)' },
   fields: [
     { key: 'heading', label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     {
@@ -17,11 +17,12 @@ export const giftPlanetSchema: SectionSchema = {
         { key: 'name',   label: { id: 'Atas nama', en: 'Account name' }, type: 'text' },
       ],
     },
-    { key: 'wishesEnabled', label: { id: 'Aktifkan ucapan', en: 'Enable wishes' }, type: 'boolean' },
+    { key: 'confirmationEnabled', label: { id: 'Aktifkan form konfirmasi', en: 'Enable confirmation form' }, type: 'boolean' },
   ],
   defaults: {
+    sectionLabel: 'Gifts',
     heading: 'Your presence is the gift. But if you insist…',
     accounts: [{ bank: 'BCA', number: '1234567890', name: 'Aruna K.' }],
-    wishesEnabled: true,
+    confirmationEnabled: true,
   },
 }

@@ -8,4 +8,7 @@ export const footerPlanetSchema: SectionSchema = {
     { key: 'body',             label: { id: 'Isi', en: 'Body' }, type: 'textarea', rows: 3 },
     { key: 'easterEggMessage', label: { id: 'Pesan rahasia (klik matahari)', en: 'Easter egg message' }, type: 'textarea', rows: 2 },
   ],
+  defaults: {
+    sectionLabel: 'End of Transmission',
+  },
 }

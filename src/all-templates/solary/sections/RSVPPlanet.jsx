@@ -23,16 +23,23 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
   useEffect(() => { if (name) setValue("guest_name", name); }, [name, setValue]);
   const attending = watch("attending");
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState(null);
 
   const onSubmit = async (data) => {
-    await submitRSVP({
-      slug,
-      guest_name: data.guest_name,
-      attending: data.attending === "yes",
-      guest_count: data.guest_count,
-      meal_choice: data.meal_choice,
-      message: data.message,
-    });
+    setSendError(null);
+    try {
+      await submitRSVP({
+        slug,
+        guest_name: data.guest_name,
+        attending: data.attending === "yes",
+        guest_count: data.guest_count,
+        meal_choice: data.meal_choice,
+        message: data.message,
+      });
+    } catch (err) {
+      setSendError(err?.message || "Gagal mengirim. Coba lagi.");
+      return;
+    }
     setSent(true);
     if (whatsappNumber) {
       const text = `RSVP — ${data.attending === "yes" ? "Attending ✦" : "Cannot attend"}\nName: ${data.guest_name}\nGuests: ${data.guest_count}\nMenu: ${data.meal_choice || "-"}\n${data.message ? "Note: " + data.message : ""}`;
@@ -96,6 +103,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
               <label className="form-label" htmlFor="rsvp-note">A note for the couple (optional)</label>
               <textarea id="rsvp-note" rows={3} className="form-input" style={{ resize: "vertical", minHeight: 80 }} placeholder="Wishes, allergies, song requests…" {...register("message")} />
             </div>
+            {sendError && <span className="form-error" role="alert">{sendError}</span>}
             <button type="submit" className="form-button" disabled={isSubmitting}>
               {sent ? "Sent ✓ — Send Again" : isSubmitting ? "Sending…" : "Send →"}
             </button>

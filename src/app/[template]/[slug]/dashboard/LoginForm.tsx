@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { motion } from 'motion/react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Dict } from '@/lib/i18n'
 import styles from './dashboard.module.css'
@@ -71,7 +72,26 @@ export default function LoginForm({
         fontFamily: 'var(--font-body, system-ui)',
       }}
     >
-      <form onSubmit={onSubmit} className={styles.loginForm}>
+      <motion.form
+        onSubmit={onSubmit}
+        className={styles.loginForm}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          boxShadow: '0 24px 64px rgba(42, 33, 24, 0.08), inset 0 0 0 1px rgba(255,255,255,0.7)',
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.4)',
+          borderRadius: 22,
+          padding: 40,
+          display: 'grid',
+          gap: 18,
+          maxWidth: 420,
+          width: '100%',
+        }}
+      >
         <header style={{ textAlign: 'center', marginBottom: 8 }}>
           <p
             style={{
@@ -138,7 +158,7 @@ export default function LoginForm({
             {dict.forgot}
           </Link>
         </p>
-      </form>
+      </motion.form>
     </main>
   )
 }

@@ -2,13 +2,13 @@
 
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import EditorRoot from '@/editor/EditorRoot'
 import RsvpsTab, { type RsvpRow } from './RsvpsTab'
 import GiftsTab, { type GiftRow } from './GiftsTab'
 import MusicTab from './MusicTab'
 import BackgroundTab from './BackgroundTab'
 import PaletteTab from './PaletteTab'
-import NotesTab, { type NoteRow } from './NotesTab'
 import GuestsTab from './GuestsTab'
 import GuestbookTab from './GuestbookTab'
 import { type GuestRow } from './guests/types'
@@ -34,7 +34,6 @@ export default function DashboardClient({
   invitation,
   rsvps,
   gifts,
-  notes = [],
   guests = [],
   attendances = [],
   dict,
@@ -46,7 +45,6 @@ export default function DashboardClient({
   invitation: any
   rsvps: RsvpRow[]
   gifts: GiftRow[]
-  notes?: NoteRow[]
   guests?: GuestRow[]
   attendances?: AttendanceRow[]
   dict: Dict['dashboard']
@@ -73,7 +71,7 @@ export default function DashboardClient({
 
   type TabKey =
     | 'rsvps' | 'gifts' | 'guests' | 'guestbook'
-    | 'editor' | 'music' | 'background' | 'notes' | 'palette'
+    | 'editor' | 'music' | 'background' | 'palette'
 
   const [tab, setTab] = useState<TabKey>('rsvps')
 
@@ -84,8 +82,8 @@ export default function DashboardClient({
   const tabKeys: TabKey[] = (() => {
     const keys: TabKey[] = ['rsvps', 'gifts', 'guests']
     if (hasGuestbook) keys.push('guestbook')
-    keys.push('notes', 'editor')
-    if (template === 'solary') keys.push('palette')
+    keys.push('editor')
+    keys.push('palette')
     keys.push('music')
     // The Background (Latar) tab swaps the invitation's background GIF — only
     // meaningful for lovebirds. Solary renders its own Three.js galactic scene,
@@ -256,49 +254,57 @@ export default function DashboardClient({
       </nav>
 
       <section className={styles.content}>
-        {tab === 'editor' && (
-          <EditorRoot
-            slug={slug}
-            template={template}
-            initialConfig={invitation.config ?? { sections: [] }}
-            initialIsPublished={!!invitation.is_published}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {tab === 'editor' && (
+              <EditorRoot
+                slug={slug}
+                template={template}
+                initialConfig={invitation.config ?? { sections: [] }}
+                initialIsPublished={!!invitation.is_published}
+              />
+            )}
 
-        {tab === 'rsvps' && <RsvpsTab rsvps={rsvps} />}
+            {tab === 'rsvps' && <RsvpsTab rsvps={rsvps} />}
 
-        {tab === 'gifts' && <GiftsTab gifts={gifts} />}
+            {tab === 'gifts' && <GiftsTab gifts={gifts} />}
 
-        {tab === 'guests' && (
-          <GuestsTab
-            slug={slug}
-            guests={guests}
-            publicUrl={
-              typeof window !== 'undefined'
-                ? `${window.location.origin}/${template}/${slug}`
-                : `/${template}/${slug}`
-            }
-            messageTemplate={invitation?.config?.inviteMessageTemplate}
-          />
-        )}
+            {tab === 'guests' && (
+              <GuestsTab
+                slug={slug}
+                guests={guests}
+                publicUrl={
+                  typeof window !== 'undefined'
+                    ? `${window.location.origin}/${template}/${slug}`
+                    : `/${template}/${slug}`
+                }
+                messageTemplate={invitation?.config?.inviteMessageTemplate}
+              />
+            )}
 
-        {tab === 'guestbook' && hasGuestbook && (
-          <GuestbookTab slug={slug} attendances={attendances} />
-        )}
+            {tab === 'guestbook' && hasGuestbook && (
+              <GuestbookTab slug={slug} attendances={attendances} />
+            )}
 
-        {tab === 'music' && (
-          <MusicTab slug={slug} initial={invitation.config?.music ?? null} />
-        )}
+            {tab === 'music' && (
+              <MusicTab slug={slug} initial={invitation.config?.music ?? null} />
+            )}
 
-        {tab === 'background' && (
-          <BackgroundTab slug={slug} initial={invitation.config?.bgGif} />
-        )}
+            {tab === 'background' && (
+              <BackgroundTab slug={slug} initial={invitation.config?.bgGif} />
+            )}
 
-        {tab === 'palette' && (
-          <PaletteTab slug={slug} initial={invitation.config?.theme?.defaultPalette} />
-        )}
-
-        {tab === 'notes' && <NotesTab slug={slug} notes={notes} />}
+            {tab === 'palette' && (
+              <PaletteTab slug={slug} template={template} initial={invitation.config?.theme?.defaultPalette} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </section>
     </main>
     </DialogProvider>

@@ -27,6 +27,7 @@ import { startSmoothScroll } from './utils/smoothScroll.js'
 import { mountGalacticScene } from './three/galacticScene.js'
 import { installRhythm } from './utils/rhythm.js'
 import { defaultConfig } from './defaultConfig.js'
+import { normalizeSolaryConfig } from './config/normalizeConfig.js'
 
 /**
  * Solary render shell — port of the standalone galactic-wedding
@@ -38,7 +39,11 @@ import { defaultConfig } from './defaultConfig.js'
  * never runs on the server.
  */
 export default function Shell({ config: incoming, slug, isDemo = false }) {
-  const config = incoming && incoming.sections ? incoming : defaultConfig
+  const raw = incoming && incoming.sections ? incoming : defaultConfig
+  // Normalize so the scene is adaptive to ANY arrangement: self-heal stale
+  // sectionLabels left over from type swaps and guarantee every section has a
+  // planet for the camera to frame (added sections otherwise have none).
+  const config = useMemo(() => normalizeSolaryConfig(raw), [raw])
 
   const visible = useMemo(
     () => (config.sections || []).filter((s) => s.enabled !== false),

@@ -18,6 +18,7 @@ export const liveStreamPlanetSchema: SectionSchema = {
     { key: 'note',        label: { id: 'Catatan (opsional)', en: 'Note (optional)' }, type: 'textarea', rows: 2 },
   ],
   defaults: {
+    sectionLabel: 'Live Stream',
     heading: 'Saksikan Langsung',
     platform: 'youtube',
     url: 'https://youtube.com/live/your-stream',

@@ -8,6 +8,14 @@ export const landing = {
       ctaPrimary: 'Buat Undangan',
       ctaSecondary: 'Lihat Template',
     },
+    emotionalHook: {
+      title: 'Lebih dari sekadar undangan digital.',
+      body: 'Kami merajut cerita cinta Anda menjadi sebuah pengalaman sinematik yang emosional dan memukau — sebuah gerbang indah menuju awal yang baru.',
+    },
+    vibeExploration: {
+      heading: 'Temukan Vibe Pernikahan Kalian',
+      subheading: 'Sentuh dan jelajahi estetika visual yang melukiskan karakter cinta kalian.',
+    },
     features: {
       heading: 'Semua yang kalian butuhkan',
       subheading: 'Fitur lengkap untuk undangan yang terasa hangat dan personal.',
@@ -50,6 +58,27 @@ export const landing = {
         { title: 'Bagikan link', body: 'Sebar ke tamu lewat WhatsApp — pantau RSVP real-time.' },
       ],
     },
+    testimonials: {
+      heading: 'Kata Mereka Yang Berbahagia',
+      subheading: 'Kisah dari pasangan yang telah mengukir awal perjalanan indahnya bersama kami.',
+      items: [
+        {
+          quote: 'Tamu-tamu kami sangat kagum dengan template Solary yang kami gunakan. Animasi 3D tata suryanya benar-benar unik dan belum pernah mereka lihat sebelumnya.',
+          author: 'Aria & Kirana',
+          plan: 'Solary Template',
+        },
+        {
+          quote: 'Lovebirds sangat sesuai dengan estetika rustic dan vintage pernikahan kami. Polaroid slider dan sentuhan musik latar membuat banyak kerabat terharu saat membukanya.',
+          author: 'Dito & Rania',
+          plan: 'Lovebirds Template',
+        },
+        {
+          quote: 'Dashboard datanya mempermudah pendaftaran tamu secara instan. Konfirmasi kehadiran dan ucapan tamu terangkum rapi tanpa repot.',
+          author: 'Rian & Siska',
+          plan: 'Premium Tier',
+        },
+      ],
+    },
     finalCta: {
       title: 'Siap bikin undangan kalian?',
       subtitle: 'Bangun dan lihat hasilnya sebelum dipublish.',
@@ -64,6 +93,14 @@ export const landing = {
         'Craft a premium digital invitation that captivates from the first scroll to the RSVP. Pick a template, add your story, share the link.',
       ctaPrimary: 'Create Invitation',
       ctaSecondary: 'Browse Templates',
+    },
+    emotionalHook: {
+      title: 'More than a digital invitation.',
+      body: 'We weave your love story into a cinematic, emotional, and captivating experience — a beautiful entrance to your new beginning.',
+    },
+    vibeExploration: {
+      heading: 'Discover Your Wedding Vibe',
+      subheading: 'Interact and explore the visual aesthetics that paint the story of your love.',
     },
     features: {
       heading: 'Everything you need',
@@ -105,6 +142,27 @@ export const landing = {
         { title: 'Pick a template', body: 'Start from the style that fits your story best.' },
         { title: 'Add your story & details', body: 'Photos, dates, venue, and event details via the dashboard.' },
         { title: 'Share the link', body: 'Send it to guests over WhatsApp — track RSVPs in real time.' },
+      ],
+    },
+    testimonials: {
+      heading: 'Stories of Happily Ever After',
+      subheading: 'Hear from couples who crafted their unforgettable first impressions with us.',
+      items: [
+        {
+          quote: 'Our guests were completely amazed by the Solary template. The 3D solar system animation was incredibly unique and unlike anything they had seen before.',
+          author: 'Aria & Kirana',
+          plan: 'Solary Template',
+        },
+        {
+          quote: 'Lovebirds matched our rustic, vintage theme perfectly. The polaroid layouts and romantic background music moved many of our friends to tears.',
+          author: 'Dito & Rania',
+          plan: 'Lovebirds Template',
+        },
+        {
+          quote: 'The RSVP dashboard simplified guest list tracking immensely. Attendance details and wishing notes were automatically sorted without any stress.',
+          author: 'Rian & Siska',
+          plan: 'Premium Tier',
+        },
       ],
     },
     finalCta: {

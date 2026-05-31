@@ -12,6 +12,7 @@ export const countdownPlanetSchema: SectionSchema = {
     { key: 'venueAddress', label: { id: 'Alamat tempat', en: 'Venue address' }, type: 'text' },
   ],
   defaults: {
+    sectionLabel: 'Save the Date',
     heading: '02 · 14 · 2027',
     subheading: 'Sunday · 16:00 WIB · Garden Pavilion',
     targetDate: '2027-02-14T16:00:00+07:00',

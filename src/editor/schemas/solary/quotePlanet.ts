@@ -10,6 +10,7 @@ export const quotePlanetSchema: SectionSchema = {
     { key: 'source',      label: { id: 'Sumber', en: 'Source' }, type: 'text', help: { id: 'mis. QS Ar-Rum: 21', en: 'e.g. QS Ar-Rum: 21' } },
   ],
   defaults: {
+    sectionLabel: 'Quote',
     heading: '',
     verse: 'And among His signs is that He created for you mates from among yourselves, that you may dwell in tranquility with them.',
     translation: 'Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya.',

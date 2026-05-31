@@ -11,6 +11,27 @@
   --color-sky: #3D9BC1;
   --color-sky-soft: #A8D5E3;
 
+  /* ---------- Elegant, Fun & Classy Variations Palette ---------- */
+  /* Blossom Velvet */
+  --color-plum: #802B43;
+  --color-rose: #E06B7B;
+  --color-rose-soft: #F2B6C1;
+  --color-mauve-cream: #FAF0EC;
+
+  /* Sunset Clay */
+  --color-terracotta: #C85A32;
+  --color-sage: #6E8268;
+  --color-sage-soft: #A4B29E;
+  --color-peach-sand: #FAF2EA;
+  --color-gold-sand: #EAD0A8;
+
+  /* Midnight Stardust */
+  --color-midnight: #1E222D;
+  --color-sapphire: #152544;
+  --color-celestial: #5D9CEC;
+  --color-champagne: #E3C08D;
+  --color-champagne-soft: #F5E5C9;
+
   /* ---------- Surface / neutral ---------- */
   --color-cream: #FDF6EC;
   --color-cream-deep: #F7EBD7;

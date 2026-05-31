@@ -20,6 +20,7 @@ export const storyPlanetSchema: SectionSchema = {
     },
   ],
   defaults: {
+    sectionLabel: 'Our Story',
     heading: 'A timeline written in starlight.',
     timeline: [
       { year: '2019', label: 'First Orbit', desc: "We crossed paths at a friend's birthday.", photos: [] },

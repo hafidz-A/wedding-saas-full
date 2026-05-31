@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Great+Vibes&family=Kameron:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Great+Vibes&family=Kameron:wght@400;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Sacramento&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================================
@@ -29,6 +29,14 @@
     --color-purple: #6B35A8;  --color-purple-soft: #BFA5DC;
     --color-sky: #3D9BC1;     --color-sky-soft: #A8D5E3;
 
+    /* Classy & Fun Palette */
+    --color-plum: #802B43;    --color-rose: #E06B7B;    --color-rose-soft: #F2B6C1;
+    --color-mauve-cream: #FAF0EC;
+    --color-terracotta: #C85A32; --color-sage: #6E8268; --color-sage-soft: #A4B29E;
+    --color-peach-sand: #FAF2EA; --color-gold-sand: #EAD0A8;
+    --color-midnight: #1E222D; --color-sapphire: #152544; --color-celestial: #5D9CEC;
+    --color-champagne: #E3C08D; --color-champagne-soft: #F5E5C9;
+
     /* Surface / neutral */
     --color-cream: #FDF6EC;   --color-cream-deep: #F7EBD7;
     --color-greige: #d6d1be;
@@ -41,6 +49,11 @@
     --font-script: 'Great Vibes', 'Alex Brush', cursive;
     --font-serif-soft: 'Kameron', 'Cormorant Garamond', serif;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; /* style-guide chrome only — not a lovebirds token */
+
+    /* Classy, Elegant & Fun font pairing */
+    --font-display-classy: 'Playfair Display', serif;
+    --font-body-fun: 'Plus Jakarta Sans', sans-serif;
+    --font-script-fun: 'Sacramento', cursive;
 
     /* Spacing / layout */
     --spacing-section: clamp(64px, 9vw, 120px);
@@ -492,10 +505,311 @@
     .ease-fill { animation: none; width: 60%; }
     .person-demo .photo-ring { display: none; }
   }
+
+  /* ============================================================================
+     Elegant, Fun & Classy Component Variations
+     ============================================================================ */
+  .glass-iridescent {
+    border-radius: var(--border-radius-card);
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, rgba(255, 245, 230, 0.6) 0%, rgba(250, 220, 235, 0.5) 100%);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    box-shadow: 
+      0 16px 36px rgba(42, 33, 24, 0.08), 
+      0 0 20px rgba(244, 163, 143, 0.15), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: var(--transition-default);
+  }
+  .glass-iridescent:hover {
+    border-color: rgba(255, 255, 255, 0.85);
+    background: linear-gradient(135deg, rgba(255, 245, 230, 0.75) 0%, rgba(250, 220, 235, 0.65) 100%);
+    box-shadow: 
+      0 24px 48px rgba(42, 33, 24, 0.14), 
+      0 0 30px rgba(244, 163, 143, 0.25), 
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+  }
+
+  .polaroid-arch {
+    border-radius: 120px 120px 16px 16px;
+    border: 2.5px solid var(--accent, #E8553E);
+    padding: 12px;
+    background: var(--color-paper, #ffffff);
+    box-shadow: var(--shadow-polaroid);
+    transition: var(--transition-default);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    max-width: 190px;
+    margin: 0 auto;
+  }
+  .polaroid-arch::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 116px 116px 12px 12px;
+    border: 1px solid rgba(42, 33, 24, 0.12);
+    pointer-events: none;
+  }
+  .polaroid-arch .photo-inner {
+    border-radius: 110px 110px 8px 8px;
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: linear-gradient(135deg, var(--accent-soft, var(--color-coral-soft)), var(--color-gold-soft));
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display-classy, var(--font-display));
+    font-style: italic;
+    font-size: 40px;
+    color: var(--color-charcoal);
+  }
+
+  .polaroid-stamp {
+    border-radius: 4px;
+    background: #fff;
+    padding: 12px;
+    padding-bottom: 32px;
+    box-shadow: var(--shadow-polaroid);
+    position: relative;
+    outline: 1px solid rgba(42,33,24,0.06);
+    max-width: 190px;
+    transform: rotate(3deg);
+    transition: var(--transition-default);
+    margin: 0 auto;
+  }
+  .polaroid-stamp:hover {
+    transform: rotate(0deg) scale(1.03);
+  }
+  .polaroid-stamp::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 4px dotted #fff;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  .polaroid-stamp .photo-inner {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: linear-gradient(135deg, var(--color-rose-soft, var(--color-coral-soft)), var(--color-gold-soft));
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 36px;
+    color: var(--color-charcoal);
+  }
+
+  .btn-offset-border {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border-radius: var(--border-radius-pill);
+    background: var(--accent, var(--color-coral));
+    color: #fff !important;
+    font-family: var(--font-body-fun, var(--font-body));
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.25s var(--ease-out), background 0.25s var(--ease-out);
+  }
+  .btn-offset-border::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: var(--border-radius-pill);
+    border: 1.5px solid var(--accent, var(--color-coral));
+    opacity: 0.8;
+    transition: transform 0.25s var(--ease-out), opacity 0.25s var(--ease-out);
+    transform: translate(4px, 4px);
+    pointer-events: none;
+  }
+  .btn-offset-border:hover {
+    transform: translate(-1px, -1px);
+    background: var(--color-plum, var(--color-coral));
+  }
+  .btn-offset-border:hover::after {
+    transform: translate(0px, 0px);
+    opacity: 1;
+  }
+  .btn-offset-border:active {
+    transform: translate(2px, 2px);
+  }
+  .btn-offset-border:active::after {
+    transform: translate(-1px, -1px);
+  }
+
+  .btn-morphing {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    background: var(--color-charcoal, #2A2118);
+    color: var(--color-cream, #FDF6EC) !important;
+    font-family: var(--font-body-fun, var(--font-body));
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-radius 0.4s var(--ease-out), transform 0.25s var(--ease-out), background 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+    box-shadow: 0 6px 16px rgba(42,33,24,0.15);
+  }
+  .btn-morphing:hover {
+    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    transform: scale(1.05) rotate(1deg);
+    background: var(--accent, var(--color-coral));
+    box-shadow: 0 10px 24px rgba(42,33,24,0.22);
+  }
+  .btn-morphing:active {
+    transform: scale(0.98);
+  }
+
+  .person-arch-portal {
+    text-align: center;
+    position: relative;
+  }
+  .person-arch-portal .photo-outer {
+    position: relative;
+    width: 140px;
+    height: 180px;
+    margin: 0 auto 22px;
+  }
+  .person-arch-portal .photo-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 70px 70px 16px 16px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--color-rose-soft, var(--color-coral-soft)), var(--color-gold-soft));
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 46px;
+    box-shadow: 0 16px 40px rgba(42, 33, 24, 0.18), inset 0 0 0 3px #fff;
+    transition: transform 0.5s var(--ease-out);
+  }
+  .person-arch-portal:hover .photo-frame {
+    transform: scale(1.03);
+  }
+  .person-arch-portal .photo-outline {
+    position: absolute;
+    inset: -8px;
+    border-radius: 78px 78px 24px 24px;
+    border: 1px solid var(--accent, var(--color-coral));
+    opacity: 0.6;
+    animation: archPulse 3s infinite ease-in-out;
+    pointer-events: none;
+  }
+  @keyframes archPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.04); opacity: 0.8; }
+  }
+  .person-arch-portal .role {
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 16px;
+    border-radius: var(--border-radius-pill);
+    background: #fff;
+    font-family: var(--font-body-fun, var(--font-body));
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    box-shadow: 0 6px 16px rgba(42, 33, 24, 0.12);
+    border: 1px solid rgba(42,33,24,0.08);
+  }
+  .person-arch-portal .pname {
+    font-family: var(--font-script-fun, var(--font-script));
+    font-size: 38px;
+    color: var(--color-charcoal);
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  /* Custom helper utilities for Classy, Elegant & Fun variations */
+  body.variant-classy-fun {
+    font-family: var(--font-body-fun, var(--font-body)) !important;
+  }
+  body.variant-classy-fun h1, 
+  body.variant-classy-fun h2, 
+  body.variant-classy-fun h3, 
+  body.variant-classy-fun .section-title,
+  body.variant-classy-fun .block-title {
+    font-family: var(--font-display-classy, var(--font-display)) !important;
+  }
+  body.variant-classy-fun .script,
+  body.variant-classy-fun .pname {
+    font-family: var(--font-script-fun, var(--font-script)) !important;
+  }
+  body.variant-classy-fun .eyebrow,
+  body.variant-classy-fun .eyebrow-demo {
+    font-family: var(--font-body-fun, var(--font-body)) !important;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+  }
+
+  /* Interactive Toggle Styles */
+  .variant-switcher {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(253, 246, 236, 0.85);
+    border: 1px solid rgba(42, 33, 24, 0.15);
+    padding: 6px;
+    border-radius: 30px;
+    box-shadow: 0 8px 32px rgba(42, 33, 24, 0.15);
+    backdrop-filter: blur(12px);
+    display: inline-flex;
+    gap: 4px;
+  }
+  .variant-switcher button {
+    border: 0;
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-charcoal-light);
+    transition: all 0.25s ease;
+  }
+  .variant-switcher button.active {
+    background: var(--color-coral);
+    color: #fff;
+  }
+  body.variant-classy-fun .variant-switcher button.active {
+    background: var(--color-plum);
+  }
 </style>
 </head>
 
 <body>
+<div class="variant-switcher">
+  <button id="mode-classic" class="active" onclick="toggleDesignVariant(false)">Classic</button>
+  <button id="mode-classy-fun" onclick="toggleDesignVariant(true)">Classy &amp; Fun ✨</button>
+</div>
+
 <div class="page">
 
   <!-- =============== HERO =============== -->
@@ -603,6 +917,69 @@
           </div>
         </div>
       </div>
+
+      <!-- blossomVelvet -->
+      <div class="theme-card">
+        <div class="theme-preview" style="--bg: transparent; --fg: #802B43; --fg-muted: #5C4A3A; --accent: #E06B7B; --button-bg: #802B43; --button-fg: #FAF0EC; background: linear-gradient(180deg, #FAF0EC, #F2B6C1);">
+          <p class="tp-eyebrow">An Invitation</p>
+          <p class="tp-h">A beautiful blossom romance.</p>
+          <p class="tp-body">Mauve cream surface with plum text and rose details.</p>
+          <span class="tp-cta" style="background: var(--button-bg); color: var(--button-fg);">RSVP Now</span>
+        </div>
+        <div class="theme-meta">
+          <h4>Blossom Velvet</h4>
+          <span class="key">key · blossomVelvet</span>
+          <div class="theme-swatches">
+            <span style="background:#FAF0EC" title="bg/mauve-cream"></span>
+            <span style="background:#802B43" title="fg/plum"></span>
+            <span style="background:#E06B7B" title="accent/rose"></span>
+            <span style="background:#F2B6C1" title="accent-soft"></span>
+            <span style="background:rgba(255,255,255,0.55)" title="glass-bg"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- sunsetClay -->
+      <div class="theme-card">
+        <div class="theme-preview" style="--bg: transparent; --fg: #C85A32; --fg-muted: #6E8268; --accent: #C85A32; --button-bg: #C85A32; --button-fg: #FAF2EA; background: linear-gradient(180deg, #FAF2EA, #EAD0A8);">
+          <p class="tp-eyebrow">An Invitation</p>
+          <p class="tp-h">A cozy, terracotta twilight.</p>
+          <p class="tp-body">Peach sand surface with earthy clay text and sage details.</p>
+          <span class="tp-cta" style="background: var(--button-bg); color: var(--button-fg);">View Details</span>
+        </div>
+        <div class="theme-meta">
+          <h4>Sunset Clay</h4>
+          <span class="key">key · sunsetClay</span>
+          <div class="theme-swatches">
+            <span style="background:#FAF2EA" title="bg/peach-sand"></span>
+            <span style="background:#C85A32" title="fg/terracotta"></span>
+            <span style="background:#6E8268" title="fg-muted/sage"></span>
+            <span style="background:#EAD0A8" title="accent-soft"></span>
+            <span style="background:rgba(255,255,255,0.55)" title="glass-bg"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- midnightStardust -->
+      <div class="theme-card">
+        <div class="theme-preview" style="--bg: #1E222D; --fg: #F5E5C9; --fg-muted: rgba(245, 229, 201, 0.75); --accent: #E3C08D; --button-bg: #E3C08D; --button-fg: #1E222D; background: #1E222D;">
+          <p class="tp-eyebrow">An Invitation</p>
+          <p class="tp-h">Written in the stardust.</p>
+          <p class="tp-body">Midnight navy background with glowing champagne accents.</p>
+          <span class="tp-cta" style="background: var(--button-bg); color: var(--button-fg);">Enter Event</span>
+        </div>
+        <div class="theme-meta">
+          <h4>Midnight Stardust</h4>
+          <span class="key">key · midnightStardust</span>
+          <div class="theme-swatches">
+            <span style="background:#1E222D" title="bg/midnight"></span>
+            <span style="background:#F5E5C9" title="fg/champagne-soft"></span>
+            <span style="background:#E3C08D" title="accent/champagne"></span>
+            <span style="background:#5D9CEC" title="accent-soft/celestial"></span>
+            <span style="background:rgba(21,37,68,0.65)" title="glass-bg"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <h3 class="block-title">Brand palette</h3>
@@ -617,6 +994,17 @@
       <div class="sw"><div class="chip" style="background:#BFA5DC"></div><div class="lab"><b>Purple soft</b><span>#BFA5DC</span></div></div>
       <div class="sw"><div class="chip" style="background:#3D9BC1"></div><div class="lab"><b>Sky</b><span>#3D9BC1</span></div></div>
       <div class="sw"><div class="chip" style="background:#A8D5E3"></div><div class="lab"><b>Sky soft</b><span>#A8D5E3</span></div></div>
+      
+      <!-- New Classy/Fun Colors -->
+      <div class="sw"><div class="chip" style="background:#802B43"></div><div class="lab"><b>Plum</b><span>#802B43</span></div></div>
+      <div class="sw"><div class="chip" style="background:#E06B7B"></div><div class="lab"><b>Rose</b><span>#E06B7B</span></div></div>
+      <div class="sw"><div class="chip" style="background:#F2B6C1"></div><div class="lab"><b>Rose soft</b><span>#F2B6C1</span></div></div>
+      <div class="sw"><div class="chip" style="background:#FAF0EC"></div><div class="lab"><b>Mauve cream</b><span>#FAF0EC</span></div></div>
+      <div class="sw"><div class="chip" style="background:#C85A32"></div><div class="lab"><b>Terracotta</b><span>#C85A32</span></div></div>
+      <div class="sw"><div class="chip" style="background:#6E8268"></div><div class="lab"><b>Sage</b><span>#6E8268</span></div></div>
+      <div class="sw"><div class="chip" style="background:#FAF2EA"></div><div class="lab"><b>Peach sand</b><span>#FAF2EA</span></div></div>
+      <div class="sw"><div class="chip" style="background:#1E222D"></div><div class="lab"><b>Midnight</b><span>#1E222D</span></div></div>
+      <div class="sw"><div class="chip" style="background:#E3C08D"></div><div class="lab"><b>Champagne</b><span>#E3C08D</span></div></div>
     </div>
 
     <h3 class="block-title">Surface &amp; neutral</h3>
@@ -681,6 +1069,26 @@
         <div class="aa" style="font-family: var(--font-serif-soft);">Aa</div>
         <div class="fname" style="font-family: var(--font-serif-soft);">Kameron</div>
         <div class="fmeta">Slab-ish serif lembut. Alternatif tenang untuk badan teks panjang. Fallback: Cormorant Garamond, serif.</div>
+      </div>
+      
+      <!-- Classy & Fun Font Cards -->
+      <div class="font-card" style="border: 1px dashed var(--color-rose);">
+        <div class="ftag">--font-display-classy</div>
+        <div class="aa" style="font-family: var(--font-display-classy); font-style: italic;">Aa</div>
+        <div class="fname" style="font-family: var(--font-display-classy);">Playfair Display</div>
+        <div class="fmeta">Classy high-contrast display serif. Keanggunan modern dengan lekukan dramatis.</div>
+      </div>
+      <div class="font-card" style="border: 1px dashed var(--color-rose);">
+        <div class="ftag">--font-body-fun</div>
+        <div class="aa" style="font-family: var(--font-body-fun); font-weight: 500;">Aa</div>
+        <div class="fname" style="font-family: var(--font-body-fun);">Plus Jakarta Sans</div>
+        <div class="fmeta">Playful geometric sans-serif. Sangat bersih, dinamis, dan modern untuk UI.</div>
+      </div>
+      <div class="font-card" style="border: 1px dashed var(--color-rose);">
+        <div class="ftag">--font-script-fun</div>
+        <div class="aa" style="font-family: var(--font-script-fun); font-size: 52px;">Aa</div>
+        <div class="fname" style="font-family: var(--font-script-fun); font-size: 24px;">Sacramento</div>
+        <div class="fmeta">Elegant script with thin lines. Sangat fun, santai namun tetap mewah.</div>
       </div>
     </div>
 
@@ -784,7 +1192,6 @@
       <span class="mono" style="color: var(--color-charcoal-light);">Card enter</span>
     </div>
   </section>
-
   <!-- =============== 04 · COMPONENTS =============== -->
   <section>
     <p class="eyebrow">04 · Component Library</p>
@@ -795,105 +1202,151 @@
 
       <!-- Glass card -->
       <div class="component-card">
-        <p class="component-label">.cardFront · glass</p>
+        <p class="component-label">.cardFront · glass | .glass-iridescent</p>
         <h3 class="component-title">Glass card</h3>
-        <div class="component-stage">
+        <div class="component-stage" style="gap: 16px; flex-wrap: wrap;">
           <div class="glass-card-demo">
-            <p class="gc-title">The Bride</p>
+            <p class="gc-title">Classic Glass</p>
             <p class="gc-h">Amara Sastrawijaya</p>
           </div>
+          <div class="glass-card-demo glass-iridescent" style="border: 0; max-width: 240px;">
+            <p class="gc-title" style="color: var(--color-rose); font-family: var(--font-body-fun);">Classy &amp; Fun ✨</p>
+            <p class="gc-h" style="font-family: var(--font-display-classy);">Amara S.</p>
+          </div>
         </div>
-        <pre class="code"><span class="c-com">/* EventDetails / BrideGroom .cardFront */</span>
-border: 1px solid <span class="c-key">var(--glass-border)</span>;
-background: <span class="c-key">var(--glass-bg)</span>;
-backdrop-filter: <span class="c-key">var(--glass-backdrop-filter)</span>;
-box-shadow: <span class="c-key">var(--shadow-glass)</span>;</pre>
-        <p class="component-note">Glassmorphism: blur 16px + saturate 120%, border &amp; isi putih semi-transparan, multi-layer soft shadow. Hover naik ke <code>--glass-bg-hover</code>.</p>
+        <pre class="code"><span class="c-com">/* Iridescent Champagne Glass Variation */</span>
+border: 1.5px solid rgba(255, 255, 255, 0.6);
+background: linear-gradient(135deg, rgba(255, 245, 230, 0.6) 0%, rgba(250, 220, 235, 0.5) 100%);
+box-shadow: 
+  0 16px 36px rgba(42, 33, 24, 0.08), 
+  0 0 20px rgba(244, 163, 143, 0.15), 
+  inset 0 1px 0 rgba(255, 255, 255, 0.8);</pre>
+        <p class="component-note">Glassmorphism klasik bergeser menjadi gradasi *iridescent champagne* halus dengan bayangan berpijar lembut.</p>
       </div>
 
       <!-- Polaroid -->
       <div class="component-card">
-        <p class="component-label">.card · OurStoryStack</p>
+        <p class="component-label">.card | .polaroid-arch | .polaroid-stamp</p>
         <h3 class="component-title">Polaroid story card</h3>
-        <div class="component-stage">
-          <div class="polaroid-demo"><span class="pd-num">01</span></div>
+        <div class="component-stage" style="gap: 16px; flex-wrap: wrap; justify-content: center; align-items: flex-end;">
+          <!-- Classic -->
+          <div>
+            <span class="mono" style="font-size: 10px; display: block; text-align: center; margin-bottom: 4px;">Classic</span>
+            <div class="polaroid-demo" style="margin: 0;"><span class="pd-num">01</span></div>
+          </div>
+          <!-- Fine Art Arch -->
+          <div>
+            <span class="mono" style="font-size: 10px; display: block; text-align: center; margin-bottom: 4px; color: var(--color-rose);">Arch Frame</span>
+            <div class="polaroid-arch">
+              <div class="photo-inner">01</div>
+            </div>
+          </div>
+          <!-- Ticket Stamp -->
+          <div>
+            <span class="mono" style="font-size: 10px; display: block; text-align: center; margin-bottom: 4px; color: var(--color-rose);">Stamp Frame</span>
+            <div class="polaroid-stamp">
+              <div class="photo-inner">01</div>
+            </div>
+          </div>
         </div>
-        <pre class="code"><span class="c-com">/* OurStoryStack .card */</span>
-border-radius: 16px;
-border: clamp(10px,1.4vw,14px) solid #fff;
-border-bottom: clamp(48px,6vw,64px) solid #fff;
+        <pre class="code"><span class="c-com">/* Fine Art Arch Frame */</span>
+border-radius: 120px 120px 16px 16px;
+border: 2.5px solid <span class="c-key">var(--accent)</span>;
 box-shadow: <span class="c-key">var(--shadow-polaroid)</span>;
-transform: rotate(4deg) <span class="c-com">/* deck tilt */</span>;</pre>
-        <p class="component-note">Bingkai cetakan: border putih tebal, sisi bawah ekstra lebar (ruang caption), bayangan bias ke bawah-kanan. Disusun bertumpuk + rotasi oleh GSAP.</p>
+
+<span class="c-com">/* Stamp Frame */</span>
+border-radius: 4px; border: 4px dotted #fff;</pre>
+        <p class="component-note">Alternatif tumpukan polaroid klasik: bingkai portal melengkung (arch) yang aristokratis, atau bentuk perangko (stamp) yang lucu dan retro.</p>
       </div>
 
       <!-- Buttons -->
       <div class="component-card">
-        <p class="component-label">.cta · .cta-ghost · 3D</p>
+        <p class="component-label">.btn-* | .btn-offset-border | .btn-morphing</p>
         <h3 class="component-title">Buttons</h3>
-        <div class="component-stage" style="flex-direction: column; gap: 14px;">
-          <a href="#" class="btn-cta">RSVP Now</a>
-          <a href="#" class="btn-ghost">Open Map</a>
-          <a href="#" class="btn-3d">Confirm</a>
+        <div class="component-stage" style="flex-wrap: wrap; gap: 24px; align-items: flex-start; justify-content: center;">
+          <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; border-right: 1px solid rgba(42,33,24,0.1); padding-right: 24px;">
+            <span class="mono" style="font-size: 10px; color: var(--color-charcoal-light);">Classic</span>
+            <a href="#" class="btn-cta" onclick="return false;">RSVP Now</a>
+            <a href="#" class="btn-ghost" onclick="return false;">Open Map</a>
+            <a href="#" class="btn-3d" onclick="return false;">Confirm</a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px; align-items: center; padding-left: 10px; min-height: 140px; justify-content: center;">
+            <span class="mono" style="font-size: 10px; color: var(--color-rose);">Classy &amp; Fun ✨</span>
+            <a href="#" class="btn-offset-border" onclick="return false;">RSVP Now</a>
+            <a href="#" class="btn-morphing" onclick="return false;">Confirm</a>
+          </div>
         </div>
-        <pre class="code"><span class="c-com">/* blocks .cta — primary pill */</span>
-padding: 14px 28px; border-radius: <span class="c-key">var(--border-radius-pill)</span>;
-background: <span class="c-key">var(--accent)</span>; color: #fff;
-letter-spacing: 0.16em; text-transform: uppercase;
-
-<span class="c-com">/* 3D variant — theme.css */</span>
-box-shadow: <span class="c-key">var(--shadow-button-3d)</span>;
-<span class="c-com">/* :active → translateY + --shadow-button-3d-active */</span></pre>
-        <p class="component-note">Primary pakai <code>--accent</code> (coral di warmCream). Ghost transparan + border <code>currentColor</code>. Varian 3D punya layer shadow padat yang &ldquo;tertekan&rdquo; saat aktif.</p>
+        <pre class="code"><span class="c-com">/* Floating Offset Border Button */</span>
+.btn-offset-border::after {
+  content: ''; transform: translate(4px, 4px);
+  border: 1.5px solid <span class="c-key">var(--accent)</span>;
+}
+<span class="c-com">/* Magnetic Morphing Button */</span>
+.btn-morphing:hover {
+  border-radius: 50%; transform: scale(1.05);
+}</pre>
+        <p class="component-note">Floating Offset memiliki border melayang yang menyatu saat hover. Morphing Button mengubah bentuk sudut organiknya menjadi bulat sempurna.</p>
       </div>
 
       <!-- Eyebrow -->
       <div class="component-card">
-        <p class="component-label">.textEyebrow</p>
+        <p class="component-label">.textEyebrow | Classy &amp; Fun variant</p>
         <h3 class="component-title">Eyebrow tag</h3>
-        <div class="component-stage">
+        <div class="component-stage" style="gap: 24px; flex-wrap: wrap; justify-content: center;">
           <div style="text-align: center;">
+            <span class="mono" style="font-size: 10px; display: block; margin-bottom: 8px;">Classic</span>
             <span class="eyebrow-demo">An Interstellar Invitation</span>
             <p style="font-family: var(--font-display); font-style: italic; font-size: 26px; margin: 14px 0 0; color: var(--color-charcoal);">Our Story</p>
           </div>
+          <div style="text-align: center; border-left: 1px solid rgba(42,33,24,0.1); padding-left: 24px;">
+            <span class="mono" style="font-size: 10px; display: block; margin-bottom: 8px; color: var(--color-rose);">Classy &amp; Fun ✨</span>
+            <span class="eyebrow-demo" style="font-family: var(--font-body-fun); font-weight: 600; color: var(--color-plum);">An Interstellar Invitation</span>
+            <p style="font-family: var(--font-display-classy); font-style: italic; font-size: 26px; margin: 14px 0 0; color: var(--color-plum);">Our Story</p>
+          </div>
         </div>
-        <pre class="code"><span class="c-com">/* blocks .textEyebrow */</span>
-font-family: <span class="c-key">var(--font-body)</span>;
-text-transform: uppercase;
-letter-spacing: 0.32em;
-font-size: 12px;
-color: <span class="c-key">var(--accent, var(--color-coral))</span>;</pre>
-        <p class="component-note">Selalu mendahului judul section. DM Sans uppercase, tracking 0.28–0.32em, warna aksen.</p>
+        <pre class="code"><span class="c-com">/* Classy &amp; Fun Eyebrow Variant */</span>
+font-family: <span class="c-key">var(--font-body-fun)</span>;
+font-weight: 600;
+letter-spacing: 0.24em;
+color: <span class="c-key">var(--accent)</span>;</pre>
+        <p class="component-note">Lebih tebal dan proporsional menggunakan *Plus Jakarta Sans*, dipadukan dengan display font *Playfair Display*.</p>
       </div>
 
       <!-- Floating navbar -->
       <div class="component-card">
-        <p class="component-label">FloatingNavbar</p>
+        <p class="component-label">FloatingNavbar | Classy &amp; Fun variant</p>
         <h3 class="component-title">Floating glass nav</h3>
-        <div class="component-stage">
-          <nav class="navbar-demo">
-            <a href="#" class="active">Story</a>
-            <a href="#">Details</a>
-            <a href="#">Gallery</a>
-            <a href="#">RSVP</a>
-          </nav>
+        <div class="component-stage" style="gap: 16px; flex-direction: column; align-items: center;">
+          <div style="text-align: center;">
+            <span class="mono" style="font-size: 10px; display: block; margin-bottom: 6px;">Classic</span>
+            <nav class="navbar-demo">
+              <a href="#" class="active" onclick="return false;">Story</a>
+              <a href="#" onclick="return false;">Details</a>
+              <a href="#" onclick="return false;">Gallery</a>
+            </nav>
+          </div>
+          <div style="border-top: 1px dashed rgba(42,33,24,0.1); padding-top: 12px; width: 100%; text-align: center;">
+            <span class="mono" style="font-size: 10px; display: block; margin-bottom: 6px; color: var(--color-rose);">Classy &amp; Fun ✨</span>
+            <nav class="navbar-demo" style="font-family: var(--font-body-fun);">
+              <a href="#" class="active" style="background: var(--color-plum);" onclick="return false;">Story</a>
+              <a href="#" onclick="return false;">Details</a>
+              <a href="#" onclick="return false;">Gallery</a>
+            </nav>
+          </div>
         </div>
-        <pre class="code"><span class="c-com">/* FloatingNavbar .nav */</span>
-background: rgba(253, 246, 236, 0.82);
-border-radius: 26px;
-backdrop-filter: blur(16px) saturate(1.4);
-box-shadow: 0 12px 32px rgba(42,33,24,.10),
-            inset 0 1px 0 rgba(255,255,255,.7);
-<span class="c-com">/* .linkActive */</span> background: <span class="c-key">var(--color-coral)</span>;</pre>
-        <p class="component-note">Pill glass cream, fixed di atas (<code>top: clamp(10px,2vw,24px)</code>). Link aktif jadi pill coral + glow. &lt;768px berubah jadi hamburger + sheet.</p>
+        <pre class="code"><span class="c-com">/* Floating glass nav using clean geometric font */</span>
+font-family: <span class="c-key">var(--font-body-fun)</span>;
+/* Active state background: plum for blossomVelvet */</pre>
+        <p class="component-note">Mengadaptasi font UI menjadi lebih modern dan dinamis, menyesuaikan skema warna aktif tema (seperti Plum pada Blossom Velvet).</p>
       </div>
 
       <!-- Person card -->
       <div class="component-card">
-        <p class="component-label">BrideGroom · person</p>
+        <p class="component-label">BrideGroom · person | .person-arch-portal</p>
         <h3 class="component-title">Person card</h3>
-        <div class="component-stage">
+        <div class="component-stage" style="gap: 32px; flex-wrap: wrap; justify-content: center; align-items: flex-end;">
           <div class="person-demo">
+            <span class="mono" style="font-size: 10px; display: block; margin-bottom: 8px;">Classic</span>
             <div class="photo-outer">
               <div class="photo-ring"></div>
               <div class="photo-frame">A</div>
@@ -901,13 +1354,26 @@ box-shadow: 0 12px 32px rgba(42,33,24,.10),
             </div>
             <p class="pname">Amara</p>
           </div>
+          
+          <div class="person-arch-portal" style="border-left: 1px solid rgba(42,33,24,0.1); padding-left: 32px;">
+            <span class="mono" style="font-size: 10px; display: block; margin-bottom: 8px; color: var(--color-rose);">Classy &amp; Fun ✨</span>
+            <div class="photo-outer">
+              <div class="photo-outline"></div>
+              <div class="photo-frame">A</div>
+              <span class="role">Bride</span>
+            </div>
+            <p class="pname">Amara</p>
+          </div>
         </div>
-        <pre class="code"><span class="c-com">/* BrideGroom .photoFrame */</span>
-border-radius: 50%;
-box-shadow: 0 16px 40px rgba(42,33,24,.20),
-            inset 0 0 0 4px #fff;
-<span class="c-com">/* .photoRing → dashed, spins 22s; .role → pill */</span></pre>
-        <p class="component-note">Foto bulat dengan inner ring putih, cincin dashed berputar pelan, dan label peran sebagai pill putih melayang di bawah. Nama dalam Great Vibes.</p>
+        <pre class="code"><span class="c-com">/* Arched Portal Variation */</span>
+.person-arch-portal .photo-frame {
+  border-radius: 70px 70px 16px 16px;
+}
+.person-arch-portal .photo-outline {
+  border: 1px solid <span class="c-key">var(--accent)</span>;
+  animation: archPulse 3s infinite ease-in-out;
+}</pre>
+        <p class="component-note">Cincin putus-putus berputar digantikan oleh garis siluet kubah melengkung (*arch portal*) dengan animasi berpendar lembut (*pulsing outline*).</p>
       </div>
 
     </div>
@@ -990,5 +1456,34 @@ const vars = resolveTheme(<span class="c-val">'darkLuxury'</span>);
   </footer>
 
 </div>
+<script>
+  function toggleDesignVariant(useVariant) {
+    if (useVariant) {
+      document.body.classList.add('variant-classy-fun');
+      document.getElementById('mode-classic').classList.remove('active');
+      document.getElementById('mode-classy-fun').classList.add('active');
+      
+      // Update accent color variables to show blossomVelvet style on body
+      document.body.style.setProperty('--accent', 'var(--color-rose)');
+      document.body.style.setProperty('--color-coral', 'var(--color-rose)');
+      document.body.style.setProperty('--color-coral-soft', 'var(--color-rose-soft)');
+      document.body.style.setProperty('--font-body', 'var(--font-body-fun)');
+      document.body.style.setProperty('--font-display', 'var(--font-display-classy)');
+      document.body.style.setProperty('--font-script', 'var(--font-script-fun)');
+    } else {
+      document.body.classList.remove('variant-classy-fun');
+      document.getElementById('mode-classic').classList.add('active');
+      document.getElementById('mode-classy-fun').classList.remove('active');
+      
+      // Remove variables to fall back to tokens.css defaults
+      document.body.style.removeProperty('--accent');
+      document.body.style.removeProperty('--color-coral');
+      document.body.style.removeProperty('--color-coral-soft');
+      document.body.style.removeProperty('--font-body');
+      document.body.style.removeProperty('--font-display');
+      document.body.style.removeProperty('--font-script');
+    }
+  }
+</script>
 </body>
 </html>

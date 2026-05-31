@@ -14,15 +14,44 @@ export default function GlassCard({ title, planetName, children, className = "" 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Each card belongs to a <section id>. We reveal it exactly when the
+    // rhythm reports that section as the active planet (and hide it during
+    // transit), so the card and the 3D camera stay in sync no matter how the
+    // sections are ordered, swapped, or replaced. The IntersectionObserver is
+    // only a fallback for when the scene/rhythm isn't running.
+    const myId = el.closest("section[id]")?.id || null;
+    let gotSignal = false;
+
+    const onSection = (e) => {
+      gotSignal = true;
+      setVisible(e.detail?.id === myId);
+    };
+    const onTravelStart = () => {
+      gotSignal = true;
+      setVisible(false);
+    };
+    window.addEventListener("solary:section", onSection);
+    window.addEventListener("galactic:travel:start", onTravelStart);
+
+    // Initial sync if the rhythm already knows the active section.
+    if (typeof window !== "undefined" && window.__activeSolarySectionId != null) {
+      gotSignal = true;
+      setVisible(window.__activeSolarySectionId === myId);
+    }
+
     const io = new IntersectionObserver(
-      ([entry]) => {
-        setVisible(entry.isIntersecting);
-      },
+      ([entry]) => { if (!gotSignal) setVisible(entry.isIntersecting); },
       { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }
     );
     io.observe(el);
-    const fallback = setTimeout(() => setVisible(true), 1600);
-    return () => { io.disconnect(); clearTimeout(fallback); };
+    const fallback = setTimeout(() => { if (!gotSignal) setVisible(true); }, 1800);
+
+    return () => {
+      io.disconnect();
+      clearTimeout(fallback);
+      window.removeEventListener("solary:section", onSection);
+      window.removeEventListener("galactic:travel:start", onTravelStart);
+    };
   }, []);
 
   const titleText = title && planetName

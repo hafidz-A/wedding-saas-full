@@ -70,6 +70,12 @@
   gap: clamp(16px, 2vw, 24px);
   margin-bottom: clamp(40px, 5vw, 56px);
 }
+/* A lone account card would otherwise stretch across the full container and
+   look like a giant banner. Cap it at a natural card width and center it. */
+.accountGrid:has(> :only-child) {
+  grid-template-columns: minmax(0, 420px);
+  justify-content: center;
+}
 
 .cardWrapper {
   perspective: 1000px;
@@ -373,6 +379,11 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: clamp(12px, 1.6vw, 18px);
+}
+/* Same guard for a single wishlist item — center it at a tidy width. */
+.registryGrid:has(> :only-child) {
+  grid-template-columns: minmax(0, 320px);
+  justify-content: center;
 }
 .registryCard {
   display: flex;

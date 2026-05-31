@@ -10,6 +10,7 @@ export const rsvpPlanetSchema: SectionSchema = {
     { key: 'menuOptions',    label: { id: 'Pilihan menu', en: 'Menu options' }, type: 'stringArray', itemPlaceholder: 'e.g. Nusantara' },
   ],
   defaults: {
+    sectionLabel: 'RSVP',
     heading: 'Please confirm your orbit by 31 January.',
     deadline: '2027-01-31',
     whatsappNumber: '+62 812-1234-5678',

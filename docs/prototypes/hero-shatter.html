@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Hero · Photo Shatter Prototype</title>
+<!--
+  PROTOTYPE — lovebirds Hero, scroll-driven "one parallax photo shatters into many".
+  Assumptions (to validate with Hafidz):
+   - ONE parallax photo (gateImage) is shown full-bleed, internally a grid of tiles.
+   - On scroll (1:1 scrubbed), each tile detaches, flies out, and cross-fades into a
+     distinct wedding photo wearing a white polaroid frame → the "photo blast".
+   - The gate glass card (welcome/names/date) fades out as the shatter begins.
+   - Countdown materialises in the photo-blast area (NOT in the fading card).
+   - Real Unsplash photos reused from the project's defaultConfig.
+  Tweak knobs (top-right ⚙) let you feel: grid density, spread, end arrangement
+  (scatter vs grid), and cross-fade-to-different-photos on/off.
+  This is throwaway — once the motion is approved it ports to Hero.jsx.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #FDF6EC;
+    --cream-deep: #F3E7D3;
+    --coral: #E8553E;
+    --charcoal: #2A2118;
+    --charcoal-soft: rgba(42, 33, 24, 0.62);
+    --display: 'Cormorant Garamond', Georgia, serif;
+    --body: 'DM Sans', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: auto; }
+  body { background: var(--cream); font-family: var(--body); color: var(--charcoal); -webkit-font-smoothing: antialiased; }
+
+  /* Tall wrapper gives the scroll its travel; the stage is sticky inside it. */
+  .hero-wrap { position: relative; height: 360vh; }
+  .stage {
+    position: sticky; top: 0; height: 100vh; width: 100%;
+    overflow: hidden; background: var(--cream);
+    display: grid; place-items: center;
+  }
+  /* Soft cream vignette revealed as the photo breaks apart. */
+  .backdrop {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(120% 90% at 50% 30%, rgba(232,85,62,0.06), transparent 60%),
+      linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
+    z-index: 0;
+  }
+
+  /* ─── tiles (the shattering photo) ─── */
+  .tiles { position: absolute; inset: 0; z-index: 2; }
+  .tile {
+    position: absolute; will-change: transform, opacity;
+    transform-origin: center center; overflow: visible;
+  }
+  .tile-slice {
+    position: absolute; inset: 0;
+    background-repeat: no-repeat; will-change: opacity;
+    box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.04);
+  }
+  /* The polaroid that fades in as the tile separates. */
+  .tile-photo {
+    position: absolute; inset: 0; will-change: opacity; opacity: 0;
+    background: #fff; padding: 6% 6% 16%;
+    box-shadow: 0 14px 30px rgba(42,33,24,0.22);
+    border-radius: 3px;
+  }
+  .tile-photo img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 1px; }
+
+  /* ─── gate glass card ─── */
+  .gate {
+    position: absolute; left: 50%; top: 50%; z-index: 6;
+    transform: translate(-50%, -50%); will-change: transform, opacity;
+    width: min(86vw, 360px);
+  }
+  .glass {
+    backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1);
+    background: rgba(253, 246, 236, 0.62);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 22px; padding: 30px 26px 26px; text-align: center;
+    box-shadow: 0 24px 60px rgba(42,33,24,0.18);
+  }
+  .welcome { font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--coral); }
+  .names { font-family: var(--display); font-style: italic; font-weight: 600; font-size: clamp(40px, 12vw, 56px); line-height: 1.0; margin: 12px 0 14px; color: var(--charcoal); }
+  .amp { color: var(--coral); font-weight: 500; margin: 0 6px; }
+  .date { display: inline-flex; align-items: center; gap: 9px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--charcoal-soft); }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--coral); display: inline-block; }
+  .venue { font-family: var(--display); font-style: italic; font-size: 17px; color: var(--charcoal-soft); margin-top: 12px; }
+  .mono { margin-top: 16px; font-family: var(--display); font-size: 13px; letter-spacing: 0.3em; color: rgba(42,33,24,0.4); }
+
+  /* ─── countdown (in the blast area) ─── */
+  /* Countdown floats as a solid cream card ABOVE the photo pile — always
+     clean & readable no matter what photo sits behind it. */
+  .countdown {
+    position: absolute; left: 50%; top: 50%; z-index: 30;
+    transform: translate(-50%, -50%); will-change: transform, opacity; opacity: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 11px;
+    pointer-events: none;
+    background: rgba(253, 246, 236, 0.97);
+    padding: 16px 18px 18px; border-radius: 22px;
+    box-shadow: 0 22px 56px rgba(42,33,24,0.22), 0 0 0 1px rgba(255,255,255,0.65);
+  }
+  .cd-title { font-family: var(--display); font-style: italic; font-size: 18px; color: var(--charcoal-soft); }
+  .cd-row { display: flex; gap: 9px; }
+  .cd-cell {
+    background: rgba(42,33,24,0.035); border: 1px solid rgba(42,33,24,0.06);
+    border-radius: 14px; padding: 12px 13px; min-width: 56px; text-align: center;
+  }
+  .cd-val { font-family: var(--display); font-style: italic; font-weight: 600; font-size: 30px; line-height: 1; color: var(--charcoal); }
+  .cd-lab { margin-top: 5px; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--coral); }
+
+  /* ─── scroll hint ─── */
+  .hint { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 8; text-align: center; will-change: opacity; }
+  .hint span { display: block; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--charcoal-soft); margin-bottom: 8px; }
+  .hint .line { width: 1px; height: 26px; margin: 0 auto; background: linear-gradient(var(--charcoal-soft), transparent); animation: hintpulse 1.8s ease-in-out infinite; }
+  @keyframes hintpulse { 0%,100% { opacity: 0.4; transform: scaleY(0.7); } 50% { opacity: 1; transform: scaleY(1); } }
+
+  /* corner florals — light brand identity, not slop */
+  .floral { position: absolute; z-index: 5; opacity: 0.9; pointer-events: none; }
+  .floral.tl { top: 14px; left: 12px; }
+  .floral.br { bottom: 14px; right: 14px; }
+
+  /* next-section peek so it's clear the gate "enters" somewhere */
+  .after { height: 60vh; display: grid; place-items: center; background: linear-gradient(180deg, var(--cream-deep), #EAD9BE); }
+  .after p { font-family: var(--display); font-style: italic; font-size: 22px; color: var(--charcoal-soft); }
+
+  /* ─── Tweak panel ─── */
+  .tweaks { position: fixed; top: 12px; right: 12px; z-index: 50; font-size: 12px; }
+  .tweaks summary { list-style: none; cursor: pointer; background: var(--charcoal); color: var(--cream); padding: 8px 12px; border-radius: 999px; letter-spacing: 0.1em; user-select: none; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+  .tweaks summary::-webkit-details-marker { display: none; }
+  .tweaks[open] summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .tweak-body { background: #fff; border: 1px solid rgba(42,33,24,0.12); border-top: none; border-radius: 0 0 12px 12px; padding: 14px; width: 230px; box-shadow: 0 16px 40px rgba(42,33,24,0.18); }
+  .tweak-row { display: grid; gap: 5px; margin-bottom: 14px; }
+  .tweak-row:last-child { margin-bottom: 0; }
+  .tweak-row label { font-weight: 600; letter-spacing: 0.04em; color: var(--charcoal); display: flex; justify-content: space-between; }
+  .tweak-row .val { color: var(--coral); font-variant-numeric: tabular-nums; }
+  .tweak-row input[type=range] { width: 100%; accent-color: var(--coral); }
+  .seg { display: flex; gap: 6px; }
+  .seg button { flex: 1; padding: 6px 4px; border: 1px solid rgba(42,33,24,0.2); background: #fff; border-radius: 8px; cursor: pointer; font-family: var(--body); font-size: 11px; }
+  .seg button.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+  .scrolltip { position: fixed; left: 12px; bottom: 12px; z-index: 50; background: rgba(42,33,24,0.82); color: var(--cream); font-size: 11px; padding: 7px 12px; border-radius: 999px; letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+
+<details class="tweaks" open>
+  <summary>⚙ Tweaks</summary>
+  <div class="tweak-body">
+    <div class="tweak-row">
+      <label>Grid pecahan <span class="val" id="vGrid">3 × 3</span></label>
+      <input type="range" id="tGrid" min="2" max="4" step="1" value="3" />
+    </div>
+    <div class="tweak-row">
+      <label>Sebaran <span class="val" id="vSpread">1.00</span></label>
+      <input type="range" id="tSpread" min="0.5" max="1.6" step="0.05" value="1" />
+    </div>
+    <div class="tweak-row">
+      <label>Susunan akhir</label>
+      <div class="seg" id="tArr">
+        <button data-v="scatter" class="on">Scatter</button>
+        <button data-v="grid">Grid rapi</button>
+      </div>
+    </div>
+    <div class="tweak-row">
+      <label>Pecah jadi foto beda</label>
+      <div class="seg" id="tCross">
+        <button data-v="on" class="on">Ya</button>
+        <button data-v="off">Foto sama</button>
+      </div>
+    </div>
+  </div>
+</details>
+<div class="scrolltip">↕ Scroll pelan buat lihat motion</div>
+
+<div class="hero-wrap" id="wrap">
+  <div class="stage" id="stage">
+    <div class="backdrop"></div>
+
+    <svg class="floral tl" width="64" height="64" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)">
+      <g transform="rotate(-12)"><g>
+        <ellipse cx="0" cy="-16" rx="11" ry="18" fill="#D97455"/><ellipse cx="0" cy="-16" rx="11" ry="18" fill="#E8553E" transform="rotate(72)"/><ellipse cx="0" cy="-16" rx="11" ry="18" fill="#D97455" transform="rotate(144)"/><ellipse cx="0" cy="-16" rx="11" ry="18" fill="#E8553E" transform="rotate(216)"/><ellipse cx="0" cy="-16" rx="11" ry="18" fill="#D97455" transform="rotate(288)"/><circle r="8" fill="#F5C842"/>
+      </g></g></g></svg>
+    <svg class="floral br" width="48" height="48" viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(50,50)">
+      <ellipse cx="0" cy="-16" rx="10" ry="17" fill="#A5A6E8"/><ellipse cx="0" cy="-16" rx="10" ry="17" fill="#A5A6E8" transform="rotate(72)"/><ellipse cx="0" cy="-16" rx="10" ry="17" fill="#A5A6E8" transform="rotate(144)"/><ellipse cx="0" cy="-16" rx="10" ry="17" fill="#A5A6E8" transform="rotate(216)"/><ellipse cx="0" cy="-16" rx="10" ry="17" fill="#A5A6E8" transform="rotate(288)"/><circle r="7" fill="#FFE9A8"/></g></svg>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="countdown" id="countdown">
+      <div class="cd-title">Menuju hari bahagia</div>
+      <div class="cd-row">
+        <div class="cd-cell"><div class="cd-val" id="cdD">00</div><div class="cd-lab">Days</div></div>
+        <div class="cd-cell"><div class="cd-val" id="cdH">00</div><div class="cd-lab">Hours</div></div>
+        <div class="cd-cell"><div class="cd-val" id="cdM">00</div><div class="cd-lab">Min</div></div>
+        <div class="cd-cell"><div class="cd-val" id="cdS">00</div><div class="cd-lab">Sec</div></div>
+      </div>
+    </div>
+
+    <div class="gate" id="gate">
+      <div class="glass">
+        <p class="welcome">Welcome, our dear guest</p>
+        <h1 class="names">Rizky<span class="amp">&amp;</span>Amara</h1>
+        <p class="date"><span class="dot"></span>Saturday, 25 July 2026<span class="dot"></span></p>
+        <p class="venue">The Grand Ballroom, Jakarta</p>
+        <div class="mono">R &amp; A</div>
+      </div>
+    </div>
+
+    <div class="hint" id="hint"><span>Scroll to enter</span><div class="line"></div></div>
+  </div>
+</div>
+
+<div class="after"><p>… the story continues below …</p></div>
+
+<script>
+  const GATE_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80';
+  // Only the verified wedding photos used by the project's defaultConfig.
+  const BLAST = [
+    'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1542042161784-26ab9e041e2e?auto=format&fit=crop&w=600&q=80',
+  ];
+
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+  const frac = (x) => x - Math.floor(x);
+  // stable per-piece pseudo-random in [0,1) — varies by piece index i and seed s
+  const rnd = (i, s) => frac(Math.sin(i * 12.9898 + s * 78.233) * 43758.5453);
+
+  const opts = { grid: 3, spread: 1, arrangement: 'scatter', cross: 'on' };
+  const tilesEl = document.getElementById('tiles');
+  const gate = document.getElementById('gate');
+  const hint = document.getElementById('hint');
+  const countdown = document.getElementById('countdown');
+  const wrap = document.getElementById('wrap');
+
+  let tiles = [];
+
+  function build() {
+    const N = opts.grid * opts.grid;
+    tilesEl.innerHTML = '';
+    tiles = [];
+    for (let i = 0; i < N; i++) {
+      const el = document.createElement('div');
+      el.className = 'tile';
+      const slice = document.createElement('div');
+      slice.className = 'tile-slice';
+      const photo = document.createElement('div');
+      photo.className = 'tile-photo';
+      const img = document.createElement('img');
+      img.src = BLAST[i % BLAST.length];
+      img.loading = 'eager';
+      photo.appendChild(img);
+      el.appendChild(slice);
+      el.appendChild(photo);
+      tilesEl.appendChild(el);
+      tiles.push({ el, slice, photo });
+    }
+    layout();
+  }
+
+  function layout() {
+    const G = opts.grid;
+    const W = window.innerWidth, H = window.innerHeight;
+    const tw = W / G, th = H / G;
+    const cx = W * 0.5, cy = H * 0.52;
+    const minWH = Math.min(W, H);
+
+    tiles.forEach((t, i) => {
+      const c = i % G, r = Math.floor(i / G);
+      // assembled slice of the single gate image
+      const bgX = G > 1 ? (c / (G - 1)) * 100 : 50;
+      const bgY = G > 1 ? (r / (G - 1)) * 100 : 50;
+      t.slice.style.backgroundImage = `url("${GATE_IMAGE}")`;
+      t.slice.style.backgroundSize = `${G * 100}% ${G * 100}%`;
+      t.slice.style.backgroundPosition = `${bgX}% ${bgY}%`;
+
+      t.el.style.width = tw + 'px';
+      t.el.style.height = th + 'px';
+      t.ax = (c + 0.5) * tw;
+      t.ay = (r + 0.5) * th;
+      t.el.style.left = (t.ax - tw / 2) + 'px';
+      t.el.style.top = (t.ay - th / 2) + 'px';
+
+      // End size = a real PORTRAIT polaroid (matches the template's blast
+      // photo), NOT the tall grid-cell shape. Independent X/Y scale reshapes
+      // the cell into a portrait card; the distinct photo uses object-fit cover
+      // so it never distorts.
+      const endW = minWH * (0.255 + rnd(i, 3) * 0.07);   // ~100-127px @390w
+      const endH = endW * 1.3;                            // portrait
+      t.sx = endW / tw;
+      t.sy = endH / th;
+
+      if (opts.arrangement === 'grid') {
+        const perRow = Math.ceil(Math.sqrt(tiles.length * 1.4));
+        const gc = i % perRow, gr = Math.floor(i / perRow);
+        const cw = endW * 1.12, ch = endH * 1.12;
+        const rows = Math.ceil(tiles.length / perRow);
+        t.tx = cx + (gc - (perRow - 1) / 2) * cw;
+        t.ty = cy + (gr - (rows - 1) / 2) * ch;
+        t.rot = (rnd(i, 5) * 2 - 1) * 6;
+      } else {
+        // organic scatter — evenly spread angle + per-piece jitter, jittered
+        // radius, and STRONGLY varied rotation (both directions) so the pile
+        // never looks lined up / facing one way.
+        const ang = ((i + 0.5) / tiles.length) * Math.PI * 2 + (rnd(i, 1) - 0.5) * 1.1;
+        const rad = (0.30 + rnd(i, 2) * 0.16) * opts.spread;
+        t.tx = cx + Math.cos(ang) * rad * W;
+        t.ty = cy + Math.sin(ang) * rad * H * 0.94;
+        t.rot = (rnd(i, 4) * 2 - 1) * 34;
+      }
+
+      // Clamp the target centre so the whole rotated card stays on-screen —
+      // hero photos must NEVER look cropped at the viewport edge.
+      const bb = Math.hypot(endW, endH) / 2 + 6;
+      t.tx = Math.max(bb, Math.min(W - bb, t.tx));
+      t.ty = Math.max(bb, Math.min(H - bb, t.ty));
+      t.delay = (i % 9) * 0.018;
+    });
+  }
+
+  function render(p) {
+    // gate card recedes over the first ~42%
+    const g = easeOutCubic(clamp01(p / 0.42));
+    gate.style.opacity = (1 - g).toFixed(3);
+    gate.style.transform = `translate(-50%, -50%) translateY(${g * -10}px) scale(${1 - g * 0.05})`;
+    gate.style.pointerEvents = g > 0.6 ? 'none' : 'auto';
+
+    hint.style.opacity = clamp01(1 - p / 0.06).toFixed(3);
+
+    // countdown rises into the blast area
+    const cd = easeOutCubic(clamp01((p - 0.5) / 0.4));
+    countdown.style.opacity = cd.toFixed(3);
+    countdown.style.transform = `translate(-50%, -50%) translateY(${(1 - cd) * 26}px) scale(${0.92 + cd * 0.08})`;
+
+    const crossOn = opts.cross === 'on';
+    tiles.forEach((t, i) => {
+      const lt = clamp01((p - 0.12 - t.delay) / 0.62);
+      const e = easeOutCubic(lt);
+      const dx = (t.tx - t.ax) * e;
+      const dy = (t.ty - t.ay) * e;
+      const sx = 1 + (t.sx - 1) * e;
+      const sy = 1 + (t.sy - 1) * e;
+      const rot = t.rot * e;
+      t.el.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
+      t.el.style.zIndex = 2 + Math.round(e * 12);
+      if (crossOn) {
+        t.slice.style.opacity = (1 - clamp01(e * 1.4)).toFixed(3);
+        t.photo.style.opacity = clamp01((e - 0.12) * 1.5).toFixed(3);
+      } else {
+        // same photo: keep the slice, just give it a polaroid frame feel
+        t.slice.style.opacity = 1;
+        t.photo.style.opacity = 0;
+      }
+    });
+  }
+
+  let raf = 0;
+  function onScroll() { if (!raf) raf = requestAnimationFrame(update); }
+  function update() {
+    raf = 0;
+    const rect = wrap.getBoundingClientRect();
+    const total = wrap.offsetHeight - window.innerHeight;
+    const scrolled = Math.max(0, -rect.top);
+    render(total > 0 ? clamp01(scrolled / total) : 0);
+  }
+
+  // countdown ticking (fixed target ~78 days out)
+  const target = Date.now() + 78 * 86400000 + 9 * 3600000 + 41 * 60000;
+  function tick() {
+    const ms = Math.max(0, target - Date.now());
+    const s = Math.floor(ms / 1000);
+    document.getElementById('cdD').textContent = String(Math.floor(s / 86400)).padStart(2, '0');
+    document.getElementById('cdH').textContent = String(Math.floor((s % 86400) / 3600)).padStart(2, '0');
+    document.getElementById('cdM').textContent = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    document.getElementById('cdS').textContent = String(s % 60).padStart(2, '0');
+  }
+
+  // tweak wiring
+  document.getElementById('tGrid').addEventListener('input', (e) => {
+    opts.grid = +e.target.value;
+    document.getElementById('vGrid').textContent = `${opts.grid} × ${opts.grid}`;
+    build(); update();
+  });
+  document.getElementById('tSpread').addEventListener('input', (e) => {
+    opts.spread = +e.target.value;
+    document.getElementById('vSpread').textContent = opts.spread.toFixed(2);
+    layout(); update();
+  });
+  document.querySelectorAll('#tArr button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('#tArr button').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on'); opts.arrangement = b.dataset.v; layout(); update();
+  }));
+  document.querySelectorAll('#tCross button').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('#tCross button').forEach((x) => x.classList.remove('on'));
+    b.classList.add('on'); opts.cross = b.dataset.v; update();
+  }));
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => { layout(); update(); });
+  build();
+  tick(); setInterval(tick, 1000);
+  update();
+</script>
+</body>
+</html>
