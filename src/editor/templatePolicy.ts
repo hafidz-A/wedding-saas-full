@@ -14,6 +14,7 @@ export interface TemplatePolicy {
   anchorFirstType?: string      // section TYPE pinned to index 0 (lovebirds: 'hero')
   anchorLastType?: string       // section TYPE pinned to the last index (lovebirds: 'footer')
   lockedTypes?: string[]        // types that can't be removed or type-changed
+  mandatoryTypes?: string[]     // types that must always exist: no remove/disable/type-change, position-locked
 }
 
 const SOLARY_SWAPPABLE_POOL = [
@@ -40,6 +41,7 @@ const solaryPolicy: TemplatePolicy = {
     sun:    { lockType: true, lockPosition: true, lockDisable: true },
   },
   swappablePool: SOLARY_SWAPPABLE_POOL,
+  mandatoryTypes: ['rsvpPlanet', 'giftPlanet'],
 }
 
 // Lovebirds: solary-style constrained model but lighter — add/remove allowed,
@@ -60,6 +62,7 @@ const lovebirdsPolicy: TemplatePolicy = {
   anchorFirstType: 'hero',
   anchorLastType: 'footer',
   lockedTypes: ['hero', 'footer'],
+  mandatoryTypes: ['rsvp', 'weddingGift'],
 }
 
 const policies: Record<string, TemplatePolicy> = {
@@ -79,6 +82,11 @@ export function isTypeAnchored(type: string, policy: TemplatePolicy): boolean {
 /** True for a type that cannot be removed or type-changed (lovebirds hero/footer). */
 export function isTypeLockedFor(type: string, policy: TemplatePolicy): boolean {
   return !!policy.lockedTypes?.includes(type)
+}
+
+/** True for a type that must always be present and stays put (RSVP / Gift). */
+export function isMandatoryType(type: string, policy: TemplatePolicy): boolean {
+  return !!policy.mandatoryTypes?.includes(type)
 }
 
 /** Types offerable in the "add section" menu: in-pool, registered, not already used. */
@@ -107,7 +115,7 @@ export function availableSwapTypes(
     sections.filter((s) => s.id !== currentId).map((s) => s.type),
   )
   const pool = policy?.swappablePool ?? Object.keys(registry)
-  const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t))
+  const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t) && !policy?.mandatoryTypes?.includes(t))
   return [currentType, ...rest]
 }
 
@@ -128,9 +136,14 @@ export function computeSafeOrder(
   activeId: string,
   overId: string,
   policy: TemplatePolicy,
+  sections?: { id: string; type: string }[],
 ): string[] | null {
   if (activeId === overId) return null
   if (isPositionLocked(activeId, policy)) return null
+
+  const typeOf = (id: string) => sections?.find((s) => s.id === id)?.type
+  const activeType = typeOf(activeId)
+  if (activeType && isMandatoryType(activeType, policy)) return null
 
   const from = order.indexOf(activeId)
   const to = order.indexOf(overId)
@@ -144,6 +157,12 @@ export function computeSafeOrder(
   for (const [id, lock] of Object.entries(policy.locks)) {
     if (!lock.lockPosition) continue
     if (order.indexOf(id) !== next.indexOf(id)) return null
+  }
+  if (sections) {
+    for (const s of sections) {
+      if (!isMandatoryType(s.type, policy)) continue
+      if (order.indexOf(s.id) !== next.indexOf(s.id)) return null
+    }
   }
   return next
 }

@@ -11,7 +11,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from './EditorProvider'
 import { getSchemaRegistry } from './schemas'
-import { getTemplatePolicy, computeSafeOrder, isTypeAnchored, isTypeLockedFor } from './templatePolicy'
+import { getTemplatePolicy, computeSafeOrder, isTypeAnchored, isTypeLockedFor, isMandatoryType } from './templatePolicy'
 import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
@@ -46,18 +46,27 @@ export default function SectionList({ slug, template }: Props) {
       let to = order.findIndex((s) => s.id === over.id)
       if (from < 0 || to < 0) return
       if (isTypeAnchored(order[from].type, policy)) return
+      if (isMandatoryType(order[from].type, policy)) return
       const firstFree = order.findIndex((s) => !isTypeAnchored(s.type, policy))
       const lastFree =
         order.length - 1 - [...order].reverse().findIndex((s) => !isTypeAnchored(s.type, policy))
       to = Math.max(firstFree, Math.min(lastFree, to))
-      if (from !== to) reorderSections(from, to)
+      if (from === to) return
+      const tentative = order.slice()
+      const [moved] = tentative.splice(from, 1)
+      tentative.splice(to, 0, moved)
+      const shiftsMandatory = order.some(
+        (s, i) => isMandatoryType(s.type, policy) && tentative.findIndex((t) => t.id === s.id) !== i,
+      )
+      if (shiftsMandatory) return
+      reorderSections(from, to)
       return
     }
 
     // Solary: id-based locks.
     if (policy) {
       const order = config.sections.map((s) => s.id)
-      const next = computeSafeOrder(order, String(active.id), String(over.id), policy)
+      const next = computeSafeOrder(order, String(active.id), String(over.id), policy, config.sections)
       if (next) reorderSectionsById(next)
       return
     }
@@ -83,6 +92,7 @@ export default function SectionList({ slug, template }: Props) {
               const disableLocked = !!lock?.lockDisable
               const typeAnchored = policy ? isTypeAnchored(s.type, policy) : false
               const typeLocked = policy ? isTypeLockedFor(s.type, policy) : false
+              const mandatory = policy ? isMandatoryType(s.type, policy) : false
               return (
                 <SectionRow
                   key={s.id}
@@ -92,9 +102,9 @@ export default function SectionList({ slug, template }: Props) {
                   onSelect={() => selectSection(s.id)}
                   onToggleEnabled={() => toggleSectionEnabled(s.id)}
                   onRemove={() => removeSection(s.id)}
-                  draggable={!posLocked && !typeAnchored}
-                  canRemove={!policy?.fixedSections && !typeLocked}
-                  canDisable={!disableLocked && !typeLocked}
+                  draggable={!posLocked && !typeAnchored && !mandatory}
+                  canRemove={!policy?.fixedSections && !typeLocked && !mandatory}
+                  canDisable={!disableLocked && !typeLocked && !mandatory}
                 />
               )
             })}

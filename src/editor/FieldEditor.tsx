@@ -7,6 +7,7 @@ import {
   isTypeLocked,
   isTypeAnchored,
   isTypeLockedFor,
+  isMandatoryType,
   availableSwapTypes,
 } from './templatePolicy'
 import { localizeLabel, type FieldDef } from './schemas/types'
@@ -77,7 +78,7 @@ export default function FieldEditor({ slug, template }: Props) {
   const registry = getSchemaRegistry(template)
   const anchored = policy ? isTypeAnchored(selectedSection.type, policy) : false
   const typeLocked = policy
-    ? isTypeLockedFor(selectedSection.type, policy) || isTypeLocked(selectedSection.id, policy)
+    ? isTypeLockedFor(selectedSection.type, policy) || isTypeLocked(selectedSection.id, policy) || isMandatoryType(selectedSection.type, policy)
     : false
   // Dedup: only offer pool types not used by other slots (current type stays first).
   const swapOptions =
