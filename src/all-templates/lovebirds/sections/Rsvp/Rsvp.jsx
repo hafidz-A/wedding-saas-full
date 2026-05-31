@@ -207,8 +207,13 @@ export default function Rsvp(props) {
                 <p className={styles.error} role="alert" style={{ marginTop: 4 }}>{submitError}</p>
               )}
 
-              <button type="submit" className={styles.submit} disabled={isSubmitting}>
-                {isSubmitting ? 'Sending…' : 'Send my RSVP'}
+              <button
+                type="submit"
+                className={`${styles.submit} btn-magnetic-slide`}
+                data-text={isSubmitting ? 'Sending…' : 'Send my RSVP'}
+                disabled={isSubmitting}
+              >
+                <span>{isSubmitting ? 'Sending…' : 'Send my RSVP'}</span>
               </button>
             </form>
           </ThreeDTilt>
