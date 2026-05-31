@@ -6,6 +6,7 @@ import GlobalBackground from './components/GlobalBackground.jsx'
 import { BotanicalBorder } from './components/BotanicalBorder.tsx'
 import SectionRenderer from './renderers/SectionRenderer.jsx'
 import FloatingNavbar from './components/FloatingNavbar.jsx'
+import PaletteSwitcher from './components/PaletteSwitcher.jsx'
 import SmoothScroll from './components/SmoothScroll'
 import { sectionRegistry } from './registry.js'
 import './styles/theme.css'
@@ -17,7 +18,7 @@ const MusicPopup = lazy(() => import('./sections/MusicPopup/index.js'))
  * fetched from Supabase (or the bundled demo). Mirrors the original
  * src/App.jsx + src/pages/Home.jsx composition.
  */
-export default function Shell({ config, slug }) {
+export default function Shell({ config, slug, isDemo = false }) {
   const sections = config?.sections || []
   const music = config?.music
   const musicActive = music?.url && music.enabled !== false
@@ -31,7 +32,10 @@ export default function Shell({ config, slug }) {
   }, [])
 
   return (
-    <ThemeProvider theme={undefined}>
+    <ThemeProvider
+      defaultPalette={config?.theme?.defaultPalette}
+      allowGuestSwitch={isDemo}
+    >
       <SmoothScroll />
       <GlobalBackground gifUrl={bgGif} />
       <BotanicalBorder />
@@ -49,6 +53,7 @@ export default function Shell({ config, slug }) {
           />
         </Suspense>
       )}
+      {isDemo && <PaletteSwitcher />}
     </ThemeProvider>
   )
 }

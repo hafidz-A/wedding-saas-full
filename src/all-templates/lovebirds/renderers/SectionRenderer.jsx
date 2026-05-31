@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo } from 'react'
 import { sectionRegistry as lovebirdsRegistry } from '../registry.js'
-import { resolveTheme, resolveBackground } from '../config/themes.js'
+import { resolveBackground } from '../config/themes.js'
 import SectionSkeleton from '../components/SectionSkeleton.jsx'
 
 /**
@@ -12,8 +12,9 @@ import SectionSkeleton from '../components/SectionSkeleton.jsx'
  * For every entry it:
  *   1. Skips if `enabled` is false
  *   2. Skips if `type` isn't in the registry (logs warning in dev)
- *   3. Wraps in a div carrying the resolved theme variables + optional
- *      background override (so each section can theme itself)
+ *   3. Wraps in a div with an optional per-section background override. The
+ *      colour theme is GLOBAL now — applied to <body> by ThemeProvider, so
+ *      every section inherits it (legacy per-section `theme:` fields are inert).
  *   4. Suspends until the lazy section component is loaded
  */
 export default function SectionRenderer({ config, slug, registry = lovebirdsRegistry }) {
@@ -32,12 +33,8 @@ export default function SectionRenderer({ config, slug, registry = lovebirdsRegi
           return null
         }
 
-        const themeVars = resolveTheme(section.theme)
         const backgroundCss = resolveBackground(section.background)
-        const wrapStyle = {
-          ...themeVars,
-          ...(backgroundCss ? { background: backgroundCss } : null),
-        }
+        const wrapStyle = backgroundCss ? { background: backgroundCss } : undefined
 
         return (
           <div

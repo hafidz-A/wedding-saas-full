@@ -28,5 +28,5 @@ export default function InvitationView({
   if (templateId === 'solary') {
     return <SolaryShell config={config} slug={slug} isDemo={isDemo} />
   }
-  return <LovebirdsShell config={config} slug={slug} />
+  return <LovebirdsShell config={config} slug={slug} isDemo={isDemo} />
 }
