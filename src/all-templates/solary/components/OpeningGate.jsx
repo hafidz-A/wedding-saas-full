@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useGuest } from "../contexts/GuestContext.jsx";
+import GatePhotoStars from "./GatePhotoStars.jsx";
 
-export default function OpeningGate({ eyebrow, coupleName, tagline, ctaLabel = "Get Started" }) {
+export default function OpeningGate({ eyebrow, coupleName, tagline, ctaLabel = "Get Started", gatePhotos = [] }) {
   const { name } = useGuest();
   const rootRef = useRef(null);
   const [faded, setFaded] = useState(false);
+
+  const reducedMotion = typeof window !== "undefined" && window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -46,6 +51,7 @@ export default function OpeningGate({ eyebrow, coupleName, tagline, ctaLabel = "
 
   return (
     <div ref={rootRef} className="gate-root" data-faded={faded ? "true" : "false"}>
+      <GatePhotoStars photos={gatePhotos} reducedMotion={reducedMotion} />
       <div className="gate-card">
         <p className="gate-eyebrow">{eyebrow}</p>
         {name && <p className="gate-greet">Dear {name},</p>}

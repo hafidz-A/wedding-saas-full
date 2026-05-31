@@ -85,6 +85,7 @@
 }
 .gate-card {
   position: relative;
+  z-index: 2;
   text-align: center;
   max-width: min(640px, 92vw);
   color: var(--color-fg);

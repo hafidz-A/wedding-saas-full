@@ -73,6 +73,11 @@ export const pageConfig = {
         coupleName: "Aruna  &  Daksa",                       // [CONTOH]
         tagline: "Two stars, one orbit. You are invited to witness a once-in-a-lifetime alignment.", // [CONTOH]
         ctaLabel: "Get Started",
+        gatePhotos: [
+          "https://picsum.photos/seed/gate-1/300/400",
+          "https://picsum.photos/seed/gate-2/300/400",
+          "https://picsum.photos/seed/gate-3/300/400",
+        ],
       },
       schema: {
         eyebrow:    { kind: "text" },
