@@ -663,6 +663,32 @@
   will-change: transform, opacity;
 }
 
+/* Tap-to-advance deck affordances */
+.polaroid-cluster[data-interactive="true"] { cursor: pointer; }
+.polaroid-cluster[data-interactive="true"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 8px;
+  border-radius: 6px;
+}
+.polaroid__img--front { animation: storyPhotoIn 280ms ease; }
+@keyframes storyPhotoIn { from { opacity: 0; } to { opacity: 1; } }
+
+.story-photo-dots { display: flex; gap: 6px; justify-content: center; }
+.story-photo-dots span {
+  width: 6px; height: 6px; border-radius: 999px;
+  background: var(--color-line);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.story-photo-dots span[data-active="true"] {
+  background: var(--color-accent);
+  transform: scale(1.25);
+}
+
+/* Responsive: shrink the deck on short landscape viewports so it never clips */
+@media (orientation: landscape) and (max-height: 560px) {
+  .polaroid-cluster { transform: scale(0.8); }
+}
+
 /* Connector pipe — SVG overlay */
 .connector-pipe {
   position: absolute;
@@ -720,6 +746,7 @@
   .polaroid {
     will-change: auto;
   }
+  .polaroid__img--front { animation: none; }
 }
 
 /* Detail cards grid — neo-brutalist */
