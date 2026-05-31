@@ -1136,7 +1136,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
       const isFocused =
         (mode === "planet" && activeKey === p.key) ||
         (cameraTravel && cameraTravel.dest === p.key);
-      const targetOrbit = isFocused ? NEPTUNE_ORBIT_SPEED : p.angleSpeed;
+      // Freeze the orbital revolution while a planet is focused so its centre
+      // stays put and the camera (which tracks it exactly) doesn't sway left and
+      // right. The planet still spins on its own axis (targetSpin) so it stays
+      // alive. Non-focused planets keep orbiting.
+      const targetOrbit = isFocused ? 0 : p.angleSpeed;
       const targetSpin = isFocused ? NEPTUNE_SPIN_SPEED : p.spinSpeed;
 
       /* Frame-rate independent exponential approach.
