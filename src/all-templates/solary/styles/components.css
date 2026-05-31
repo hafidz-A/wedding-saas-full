@@ -707,58 +707,65 @@
   z-index: 2; /* above connector glow but below dot rail visually */
 }
 
-/* ---- Story Mobile v2 — Lovebirds-style deck (Uranus) -----------
-   Replaces the old per-chapter snap carousel. A stacked card deck:
-   active chapter on top, next two peeking behind; description below;
-   Next/Prev controls advance chapters. No scroll pinning. */
-.story-deck {
+/* ---- Story Mobile v3 — scroll-driven pinned glass-card deck (Uranus) ----
+   Mirrors the DESKTOP experience: the outer wrapper is items.length × 100vh
+   and the sticky inner keeps the glass card pinned, so the galaxy camera HOLDS
+   on the planet while page scroll advances chapters one at a time (driven by
+   the ScrollTrigger in StoryMobileExperience.jsx). NO next/prev/pager buttons.
+   A stacked polaroid deck (active chapter on top, next 1-2 peeking behind)
+   re-stacks via CSS transition as activeIndex changes; description swaps below.
+   `.story-mobile`/`.story-mobile__sticky` sizing is set inline in the JSX
+   (height, sticky/relative) — these rules only style the contents. */
+
+.story-mobile__shell {
+  /* extends .glass-card — vertical content stack, sized for phones */
+  gap: clamp(0.75rem, 2.5vh, 1.25rem);
+  position: relative;
+  overflow: hidden;
+  align-items: stretch;
+  /* clamp inner padding so the deck + text fit short landscape viewports */
+  padding: clamp(1.1rem, 4vw, 2rem);
+}
+
+.story-mobile__head {
+  flex: 0 0 auto;
+  text-align: center;
+}
+.story-mobile__chapter {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-fg-mute);
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+/* ---- Stage (the card deck) ---- */
+.story-mobile__stage {
   position: relative;
   width: 100%;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* generous top pad so the deck clears the floating navbar */
-  padding: clamp(5rem, 14vh, 7rem) 1.25rem clamp(2rem, 5vh, 3rem);
-  gap: clamp(1rem, 3vh, 1.75rem);
-}
-
-.story-deck__head {
-  text-align: center;
-  max-width: 34ch;
-}
-.story-deck__kicker {
-  font-size: 11px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: 0.6rem;
-}
-.story-deck__kicker span { opacity: 0.55; padding: 0 6px; }
-
-/* ---- Stage (the card deck + next control) ---- */
-.story-deck__stage {
-  position: relative;
-  width: min(82vw, 320px);
   /* sized with viewport units so it never overflows portrait or landscape */
-  height: min(58svh, 420px);
-  flex: 0 0 auto;
+  height: min(46svh, 360px);
+  flex: 1 1 auto;
+  min-height: 0;
 }
-.story-deck__cards {
+.story-mobile__cards {
   position: absolute;
   inset: 0;
 }
 
 /* Each card — Solary polaroid/glass frame */
-.story-deck__card {
+.story-mobile__card {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100%;
+  width: min(74%, 280px);
+  height: 100%;
   /* transform set inline (per-depth offset/rotate/scale) */
   transform-origin: center center;
-  transition: transform 0.45s var(--ease-card, cubic-bezier(0.34,1.56,0.64,1)),
-    opacity 0.4s ease, filter 0.4s ease;
+  transition: transform 0.5s var(--ease-card, cubic-bezier(0.34,1.56,0.64,1)),
+    opacity 0.45s ease, filter 0.45s ease;
   will-change: transform, opacity;
   background: var(--bg-polaroid);
   border: 3px solid var(--color-polaroid-border);
@@ -766,13 +773,13 @@
   border-radius: var(--r-1, 12px);
   padding: 10px 10px 28px;
 }
-.story-deck__card[data-interactive="true"] { cursor: pointer; }
-.story-deck__card[data-interactive="true"]:focus-visible {
+.story-mobile__card[data-interactive="true"] { cursor: pointer; }
+.story-mobile__card[data-interactive="true"]:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 6px;
 }
 
-.story-deck__photo {
+.story-mobile__photo {
   position: relative;
   width: 100%;
   height: 100%;
@@ -780,16 +787,16 @@
   overflow: hidden;
   background: var(--color-bg-soft);
 }
-.story-deck__img {
+.story-mobile__img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.story-deck__img--front { animation: storyPhotoIn 280ms ease; }
+.story-mobile__img--front { animation: storyPhotoIn 280ms ease; }
 
 /* Cosmic placeholder for chapters without a photo */
-.story-deck__placeholder {
+.story-mobile__placeholder {
   position: absolute;
   inset: 0;
   display: flex;
@@ -799,15 +806,15 @@
     radial-gradient(120% 90% at 30% 20%, rgba(var(--color-glow-rgb, 193,155,255), 0.18), transparent 60%),
     var(--color-surface);
 }
-.story-deck__placeholder-star {
+.story-mobile__placeholder-star {
   font-size: clamp(2rem, 9vw, 3rem);
   color: var(--color-accent);
   opacity: 0.7;
   text-shadow: 0 0 24px rgba(var(--color-glow-rgb, 193,155,255), 0.5);
 }
 
-/* Big chapter number overlay (corner) */
-.story-deck__num {
+/* Big italic chapter number overlay (corner) */
+.story-mobile__num {
   position: absolute;
   bottom: 4px;
   right: 10px;
@@ -822,44 +829,15 @@
   z-index: 2;
 }
 
-/* Next control — circular, accent themed, pinned to the deck corner */
-.story-deck__next {
-  position: absolute;
-  right: -6px;
-  bottom: -6px;
-  z-index: 10;
-  width: clamp(48px, 13vw, 58px);
-  height: clamp(48px, 13vw, 58px);
-  border-radius: 999px;
-  border: 2px solid var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-bg-soft);
-  font-family: var(--font-mono);
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 8px 24px -6px rgba(var(--color-glow-rgb, 193,155,255), 0.6);
-  transition: transform 0.2s var(--ease-card, ease), box-shadow 0.2s ease;
-}
-.story-deck__next:hover { transform: scale(1.08); }
-.story-deck__next:active { transform: scale(0.94); }
-.story-deck__next:focus-visible {
-  outline: 2px solid var(--color-fg);
-  outline-offset: 3px;
-}
-
 /* ---- Description panel ---- */
-.story-deck__desc {
+.story-mobile__desc {
+  flex: 0 0 auto;
   text-align: center;
   max-width: 42ch;
-  min-height: 8rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  margin: 0 auto;
+  min-height: 6.5rem;
 }
-.story-deck__year {
+.story-mobile__year {
   font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -867,52 +845,14 @@
   margin-bottom: 0.5rem;
 }
 
-/* ---- Chapter pager ---- */
-.story-deck__pager {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: auto;
-}
-.story-deck__pagerbtn {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1.5px solid var(--color-line);
-  background: var(--color-surface);
-  color: var(--color-fg);
-  font-family: var(--font-mono);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-.story-deck__pagerbtn:hover {
-  border-color: var(--color-accent);
-  transform: scale(1.06);
-}
-.story-deck__pagerbtn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.story-deck__count {
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: var(--color-fg-mute);
-}
-
 /* Short / landscape viewports: shrink the stage so deck + text fit */
 @media (orientation: landscape) and (max-height: 560px) {
-  .story-deck {
-    padding-top: clamp(4rem, 12vh, 5.5rem);
-    gap: 0.85rem;
-  }
-  .story-deck__stage { height: min(54svh, 260px); width: min(46vw, 280px); }
-  .story-deck__desc { min-height: 6rem; }
+  .story-mobile__stage { height: min(44svh, 220px); }
+  .story-mobile__card { width: min(40%, 240px); }
+  .story-mobile__desc { min-height: 4.5rem; }
 }
 @media (max-height: 680px) and (orientation: portrait) {
-  .story-deck__stage { height: min(50svh, 360px); }
+  .story-mobile__stage { height: min(42svh, 320px); }
 }
 
 /* ---- Reduced-motion fallback ----------------------------------- */
@@ -926,6 +866,19 @@
   }
   .story-desktop__shell {
     max-height: none !important;
+  }
+  .story-mobile {
+    height: auto !important;
+  }
+  .story-mobile__sticky {
+    position: relative !important;
+    height: auto !important;
+  }
+  .story-mobile__shell {
+    max-height: none !important;
+  }
+  .story-mobile__card {
+    transition: none !important;
   }
   .timeline-dot,
   .timeline-dot--active {
