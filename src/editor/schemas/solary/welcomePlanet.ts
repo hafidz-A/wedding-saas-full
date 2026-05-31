@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const welcomePlanetSchema: SectionSchema = {
   type: 'welcomePlanet',
-  label: { id: 'Sambutan (Neptune)', en: 'Welcome (Neptune)' },
+  label: { id: 'Sambutan', en: 'Welcome' },
   fields: [
     { key: 'heading',         label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     { key: 'body',            label: { id: 'Isi', en: 'Body' }, type: 'textarea', rows: 4 },

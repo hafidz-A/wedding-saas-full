@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const giftPlanetSchema: SectionSchema = {
   type: 'giftPlanet',
-  label: { id: 'Hadiah (Mercury)', en: 'Gifts (Mercury)' },
+  label: { id: 'Hadiah', en: 'Gifts' },
   fields: [
     { key: 'heading', label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     {

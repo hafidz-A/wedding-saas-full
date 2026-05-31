@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const countdownPlanetSchema: SectionSchema = {
   type: 'countdownPlanet',
-  label: { id: 'Hitung Mundur (Jupiter)', en: 'Countdown (Jupiter)' },
+  label: { id: 'Hitung Mundur', en: 'Countdown' },
   fields: [
     { key: 'heading',      label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     { key: 'subheading',   label: { id: 'Subjudul', en: 'Subheading' }, type: 'text' },

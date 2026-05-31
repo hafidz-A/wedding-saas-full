@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const rsvpPlanetSchema: SectionSchema = {
   type: 'rsvpPlanet',
-  label: { id: 'RSVP (Earth)', en: 'RSVP (Earth)' },
+  label: { id: 'RSVP', en: 'RSVP' },
   fields: [
     { key: 'heading',        label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     { key: 'deadline',       label: { id: 'Batas waktu', en: 'Deadline' }, type: 'text' },

@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const teamPlanetSchema: SectionSchema = {
   type: 'teamPlanet',
-  label: { id: 'Tim Pengiring (Venus)', en: 'Bridal Party (Venus)' },
+  label: { id: 'Tim Pengiring', en: 'Bridal Party' },
   fields: [
     { key: 'heading', label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     {

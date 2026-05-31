@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const saturnRingSchema: SectionSchema = {
   type: 'saturnRing',
-  label: { id: 'Galeri (Saturn)', en: 'Gallery (Saturn)' },
+  label: { id: 'Galeri', en: 'Gallery' },
   fields: [
     { key: 'heading', label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     {

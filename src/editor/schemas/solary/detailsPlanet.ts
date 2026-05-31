@@ -9,7 +9,7 @@ const ICONS = [
 
 export const detailsPlanetSchema: SectionSchema = {
   type: 'detailsPlanet',
-  label: { id: 'Detail Acara (Mars)', en: 'Details (Mars)' },
+  label: { id: 'Detail Acara', en: 'Details' },
   fields: [
     { key: 'heading', label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     {

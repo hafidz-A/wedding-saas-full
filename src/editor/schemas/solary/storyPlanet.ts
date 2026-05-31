@@ -2,7 +2,7 @@ import type { SectionSchema } from '../types'
 
 export const storyPlanetSchema: SectionSchema = {
   type: 'storyPlanet',
-  label: { id: 'Kisah Kami (Uranus)', en: 'Our Story (Uranus)' },
+  label: { id: 'Kisah Kami', en: 'Our Story' },
   fields: [
     { key: 'heading', label: { id: 'Judul', en: 'Heading' }, type: 'text' },
     {
