@@ -542,6 +542,12 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   }
   scene.add(sunGroup);
 
+  // Roll (radians) applied to Saturn's ring + photo orbit so the orbit reads as
+  // a diagonal across the screen (top-left ↔ bottom-right) instead of sweeping
+  // off the left/right edges. Applied in world space via euler order 'ZYX'.
+  // Tunable: flip the sign to mirror the diagonal; ~0.5–0.8 looks good.
+  const SATURN_RING_ROLL = -0.6;
+
   /* ============================================================
      PLANETS + ORBIT LINES
      ============================================================ */
@@ -614,7 +620,8 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
       const baseOpacity = (p.rings.opacity ?? 0.65) * 0.92;
       fadingObjects.push({ material: ringMat, baseOpacity });
       const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.x = Math.PI / 2 + 0.08;
+      ring.rotation.order = 'ZYX';
+      ring.rotation.set(Math.PI / 2 + 0.08, 0, p.key === 'saturn' ? SATURN_RING_ROLL : 0);
       g.add(ring);
     }
 
@@ -693,8 +700,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   const photoRingGroup = new THREE.Group();
   /* Match ring orientation: ring mesh has rotation.x = π/2 + 0.08
      inside the saturn group. We mirror that so photo sprites orbit
-     on the same plane. */
-  photoRingGroup.rotation.x = Math.PI / 2 + 0.08;
+     on the same plane. Both share rotation.order='ZYX' so that
+     SATURN_RING_ROLL (rotation.z) is applied in world space after
+     the x-tilt, tilting the ellipse diagonally on screen. */
+  photoRingGroup.rotation.order = 'ZYX';
+  photoRingGroup.rotation.set(Math.PI / 2 + 0.08, 0, SATURN_RING_ROLL);
   planetGroups.saturn.add(photoRingGroup);
 
   function loadPhotoTexture(photoObj, tokens) {
