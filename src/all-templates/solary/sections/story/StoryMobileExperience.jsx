@@ -1,10 +1,21 @@
-import React from "react";
-import PolaroidCluster from "./PolaroidCluster.jsx";
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
-/* Mobile Experience — snap carousel.
-   Setiap item timeline = satu slide setinggi 100dvh.
-   Item dengan foto: cluster di atas, teks di bawah.
-   Item tanpa foto: typographic hero (year sangat besar). */
+/* Mobile Experience — Lovebirds-style stacked card deck (themed to Solary).
+   No GSAP / no scroll pinning (Solary runs Lenis + a custom rhythm scroll;
+   a pinned ScrollTrigger here would conflict). The active chapter sits on top
+   of the deck, the next two chapters peek behind it. A Next/Prev control
+   advances chapters (wraps). The active chapter's description shows below.
+
+   Multi-photo chapters: tapping the FRONT card cycles that chapter's photos
+   (dots indicator). No-photo chapters render a cosmic placeholder card. */
+
+// Peeking offsets/rotations for the cards behind the active one.
+const PEEK = [
+  { rotate: 0, x: 0, y: 0, scale: 1, opacity: 1, blur: 0 },
+  { rotate: 4, x: 18, y: 14, scale: 0.95, opacity: 0.7, blur: 1.2 },
+  { rotate: -5, x: -18, y: 26, scale: 0.9, opacity: 0.45, blur: 2 },
+];
 
 export default function StoryMobileExperience({
   sectionLabel,
@@ -12,164 +23,176 @@ export default function StoryMobileExperience({
   heading,
   items = [],
 }) {
+  const total = items.length;
+  const [active, setActive] = useState(0);
+  const [photoIdx, setPhotoIdx] = useState(0);
+
+  if (total === 0) return null;
+
+  const goto = (next) => {
+    const idx = ((next % total) + total) % total;
+    setActive(idx);
+    setPhotoIdx(0); // reset photo index when chapter changes
+  };
+  const nextChapter = () => goto(active + 1);
+  const prevChapter = () => goto(active - 1);
+
+  const current = items[active] || items[0];
+  const curPhotos = Array.isArray(current.photos) ? current.photos : [];
+  const curMultiPhoto = curPhotos.length > 1;
+  const advancePhoto = () => {
+    if (curMultiPhoto) setPhotoIdx((i) => (i + 1) % curPhotos.length);
+  };
+
   return (
-    <div
-      className="story-mobile"
-      style={{
-        position: "relative",
-        width: "100%",
-        scrollSnapType: "y mandatory",
-        scrollBehavior: "smooth",
-      }}
-    >
-      {/* Header lead slide */}
-      <div
-        className="story-mobile__slide story-mobile__slide--header"
-        style={{
-          height: "100dvh",
-          scrollSnapAlign: "start",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "clamp(4.5rem, 13vh, 6.5rem) 1.25rem 2rem",
-        }}
-      >
-        <div className="glass-card" style={{ textAlign: "center" }}>
-          <div className="glass-card__title">
-            {sectionLabel} Planet{" "}
-            <span style={{ opacity: 0.55, padding: "0 8px" }}>·</span>{" "}
-            <strong>{planetName}</strong>
-          </div>
-          <h2 className="h-2" style={{ margin: 0 }}>{heading}</h2>
-          <p
-            className="mono"
-            style={{
-              marginTop: "1rem",
-              fontSize: 10,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "var(--color-fg-mute)",
-              opacity: 0.6,
-            }}
-            aria-hidden="true"
-          >
-            Scroll · {items.length} chapters ahead
-          </p>
+    <div className="story-deck">
+      {/* Header */}
+      <header className="story-deck__head">
+        <div className="story-deck__kicker mono">
+          {sectionLabel} Planet <span aria-hidden="true">·</span>{" "}
+          <strong>{planetName}</strong>
         </div>
+        <h2 className="h-2" style={{ margin: 0 }}>
+          {heading}
+        </h2>
+      </header>
+
+      {/* Card deck */}
+      <div className="story-deck__stage">
+        <div className="story-deck__cards">
+          {PEEK.map((preset, depth) => {
+            const idx = (active + depth) % total;
+            const it = items[idx];
+            const photos = Array.isArray(it.photos) ? it.photos : [];
+            const isFront = depth === 0;
+            // Front card honours its own photoIdx; peeking cards show photo 0.
+            const src = isFront ? photos[photoIdx] : photos[0];
+            const number = String(idx + 1).padStart(2, "0");
+            // Render order: deepest first so the front card paints last (top).
+            return (
+              <div
+                key={`${idx}-${depth}`}
+                className="story-deck__card"
+                aria-hidden={isFront ? undefined : "true"}
+                role={isFront && curMultiPhoto ? "button" : undefined}
+                tabIndex={isFront && curMultiPhoto ? 0 : undefined}
+                aria-label={
+                  isFront && curMultiPhoto ? "Lihat foto berikutnya" : undefined
+                }
+                data-interactive={isFront && curMultiPhoto ? "true" : "false"}
+                onClick={isFront ? advancePhoto : undefined}
+                onKeyDown={
+                  isFront && curMultiPhoto
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          advancePhoto();
+                        }
+                      }
+                    : undefined
+                }
+                style={{
+                  zIndex: PEEK.length - depth,
+                  transform: `translate(-50%, -50%) translate3d(${preset.x}px, ${preset.y}px, 0) rotate(${preset.rotate}deg) scale(${preset.scale})`,
+                  opacity: preset.opacity,
+                  filter: preset.blur ? `blur(${preset.blur}px)` : "none",
+                  pointerEvents: isFront ? "auto" : "none",
+                }}
+              >
+                <div className="story-deck__photo">
+                  {src ? (
+                    <img
+                      key={isFront ? `f-${photoIdx}` : `b-${depth}`}
+                      className={
+                        isFront ? "story-deck__img story-deck__img--front" : "story-deck__img"
+                      }
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    /* Cosmic placeholder for chapters with no photo */
+                    <div className="story-deck__placeholder" aria-hidden="true">
+                      <span className="story-deck__placeholder-star">✦</span>
+                    </div>
+                  )}
+                  <span className="story-deck__num">{number}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Next control near the deck (bottom-right) */}
+        <button
+          type="button"
+          className="story-deck__next"
+          onClick={nextChapter}
+          aria-label="Bab berikutnya"
+        >
+          <span aria-hidden="true">→</span>
+        </button>
       </div>
 
-      {items.map((it, i) => {
-        const hasPhotos = Array.isArray(it.photos) && it.photos.length > 0;
-        const number = String(i + 1).padStart(2, "0");
-        const total = String(items.length).padStart(2, "0");
-        return (
-          <article
-            key={`${it.year}-${i}`}
-            className="story-mobile__slide"
-            style={{
-              position: "relative",
-              height: "100dvh",
-              scrollSnapAlign: "start",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "clamp(4.5rem, 13vh, 6.5rem) 1.25rem clamp(2rem, 5vh, 3rem)",
-              gap: "clamp(1rem, 3vh, 1.75rem)",
-            }}
-            data-has-photo={hasPhotos ? "true" : "false"}
-          >
-            {/* Chapter indicator */}
-            <div
-              className="mono"
-              style={{
-                position: "absolute",
-                top: "1.25rem",
-                left: "1.25rem",
-                fontSize: 10,
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-                color: "var(--color-fg-mute)",
-                opacity: 0.55,
-              }}
-              aria-hidden="true"
-            >
-              {number} / {total}
-            </div>
+      {/* Photo dots (active chapter, multi-photo only) */}
+      {curMultiPhoto && (
+        <div className="story-photo-dots" aria-hidden="true">
+          {curPhotos.map((_, i) => (
+            <span key={i} data-active={i === photoIdx ? "true" : "false"} />
+          ))}
+        </div>
+      )}
 
-            {hasPhotos ? (
-              <>
-                <div
-                  style={{
-                    flex: "0 1 auto",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    minHeight: 0,
-                  }}
-                >
-                  <PolaroidCluster photos={it.photos} size="sm" />
-                </div>
-                <div
-                  style={{
-                    flex: "0 0 auto",
-                    textAlign: "center",
-                    maxWidth: 480,
-                    paddingTop: "0.5rem",
-                  }}
-                >
-                  <div
-                    className="mono"
-                    style={{
-                      fontSize: 11,
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                      color: "var(--color-accent)",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    {it.year}
-                  </div>
-                  <h3 className="h-3" style={{ margin: 0, marginBottom: "0.5rem" }}>
-                    {it.label}
-                  </h3>
-                  <p className="p-body" style={{ margin: 0 }}>{it.desc}</p>
-                </div>
-              </>
-            ) : (
-              /* Typographic hero — year sangat besar, label & desc di bawah */
-              <div style={{ textAlign: "center", maxWidth: 480 }}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "clamp(5rem, 26vw, 9rem)",
-                    lineHeight: 1,
-                    letterSpacing: "-0.04em",
-                    color: "var(--color-fg)",
-                    opacity: 0.94,
-                    textShadow: "0 4px 40px rgba(var(--color-glow)/0.25)",
-                    marginBottom: "1.25rem",
-                  }}
-                >
-                  {it.year}
-                </div>
-                <h3
-                  className="h-3"
-                  style={{
-                    margin: 0,
-                    marginBottom: "0.75rem",
-                    color: "var(--color-accent)",
-                  }}
-                >
-                  {it.label}
-                </h3>
-                <p className="p-body" style={{ margin: 0, opacity: 0.85 }}>{it.desc}</p>
-              </div>
+      {/* Description panel */}
+      <div className="story-deck__desc">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.32, ease: [0.25, 0.8, 0.25, 1] }}
+          >
+            {current.year && (
+              <div className="story-deck__year mono">{current.year}</div>
             )}
-          </article>
-        );
-      })}
+            {current.label && (
+              <h3 className="h-3" style={{ margin: "0 0 0.5rem" }}>
+                {current.label}
+              </h3>
+            )}
+            {current.desc && (
+              <p className="p-body" style={{ margin: "0 auto" }}>
+                {current.desc}
+              </p>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Chapter pager */}
+      <div className="story-deck__pager">
+        <button
+          type="button"
+          className="story-deck__pagerbtn"
+          onClick={prevChapter}
+          aria-label="Bab sebelumnya"
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+        <span className="story-deck__count mono" aria-live="polite">
+          {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        </span>
+        <button
+          type="button"
+          className="story-deck__pagerbtn"
+          onClick={nextChapter}
+          aria-label="Bab berikutnya"
+        >
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
     </div>
   );
 }
