@@ -41,11 +41,12 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
       return;
     }
     setSent(true);
-    if (whatsappNumber) {
-      const text = `RSVP — ${data.attending === "yes" ? "Attending ✦" : "Cannot attend"}\nName: ${data.guest_name}\nGuests: ${data.guest_count}\nMenu: ${data.meal_choice || "-"}\n${data.message ? "Note: " + data.message : ""}`;
-      const num = whatsappNumber.replace(/\D/g, "");
-      window.open(`https://wa.me/${num}?text=${encodeURIComponent(text)}`, "_blank");
-    }
+  };
+
+  const resetForm = () => {
+    setSent(false);
+    setSendError(null);
+    reset({ guest_name: name || "", attending: "yes", guest_count: 1, meal_choice: menuOptions[0] || "", message: "" });
   };
 
   return (
@@ -61,53 +62,64 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
           </div>
         </CardChild>
         <CardChild>
-          <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
-            <div className="form-row">
-              <label className="form-label" htmlFor="rsvp-name">Your name</label>
-              <input id="rsvp-name" className="form-input" placeholder="Full name as on invitation" {...register("guest_name")} />
-              {errors.guest_name && <span className="form-error">{errors.guest_name.message}</span>}
+          {sent ? (
+            <div className="center-text" style={{ marginTop: "0.5rem", padding: "1.75rem 1.5rem", border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)" }}>
+              <div style={{ fontSize: 30, color: "var(--color-accent)", marginBottom: 10 }}>✦</div>
+              <h3 className="h-3" style={{ marginBottom: 6 }}>Terima kasih</h3>
+              <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14, marginBottom: 16 }}>
+                RSVP Anda telah kami catat. Sampai jumpa di hari bahagia kami.
+              </p>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Kirim RSVP lain</button>
             </div>
-            <div className="form-row-2">
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
               <div className="form-row">
-                <label className="form-label">Attending</label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  {["yes", "no"].map((v) => (
-                    <button key={v} type="button" onClick={() => setValue("attending", v, { shouldValidate: true })}
-                      style={{
-                        flex: 1, padding: "10px 12px",
-                        fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase",
-                        borderRadius: "var(--r-2)", border: "1px solid",
-                        borderColor: attending === v ? "var(--color-accent)" : "var(--color-line)",
-                        background: attending === v ? "var(--color-accent-soft)" : "transparent",
-                        color: attending === v ? "var(--color-accent)" : "var(--color-fg)",
-                      }}>
-                      {v === "yes" ? "Joining ✦" : "Regret"}
-                    </button>
-                  ))}
+                <label className="form-label" htmlFor="rsvp-name">Your name</label>
+                <input id="rsvp-name" className="form-input" placeholder="Full name as on invitation" {...register("guest_name")} />
+                {errors.guest_name && <span className="form-error">{errors.guest_name.message}</span>}
+              </div>
+              <div className="form-row-2">
+                <div className="form-row">
+                  <label className="form-label">Attending</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {["yes", "no"].map((v) => (
+                      <button key={v} type="button" onClick={() => setValue("attending", v, { shouldValidate: true })}
+                        style={{
+                          flex: 1, padding: "10px 12px",
+                          fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase",
+                          borderRadius: "var(--r-2)", border: "1px solid",
+                          borderColor: attending === v ? "var(--color-accent)" : "var(--color-line)",
+                          background: attending === v ? "var(--color-accent-soft)" : "transparent",
+                          color: attending === v ? "var(--color-accent)" : "var(--color-fg)",
+                        }}>
+                        {v === "yes" ? "Joining ✦" : "Regret"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label className="form-label" htmlFor="rsvp-guests">Total guests</label>
+                  <input id="rsvp-guests" type="number" min="1" max="20" className="form-input" {...register("guest_count")} />
                 </div>
               </div>
+              {menuOptions.length > 0 && (
+                <div className="form-row">
+                  <label className="form-label" htmlFor="rsvp-menu">Menu preference</label>
+                  <select id="rsvp-menu" className="form-input" {...register("meal_choice")}>
+                    {menuOptions.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+              )}
               <div className="form-row">
-                <label className="form-label" htmlFor="rsvp-guests">Total guests</label>
-                <input id="rsvp-guests" type="number" min="1" max="20" className="form-input" {...register("guest_count")} />
+                <label className="form-label" htmlFor="rsvp-note">A note for the couple (optional)</label>
+                <textarea id="rsvp-note" rows={3} className="form-input" style={{ resize: "vertical", minHeight: 80 }} placeholder="Wishes, allergies, song requests…" {...register("message")} />
               </div>
-            </div>
-            {menuOptions.length > 0 && (
-              <div className="form-row">
-                <label className="form-label" htmlFor="rsvp-menu">Menu preference</label>
-                <select id="rsvp-menu" className="form-input" {...register("meal_choice")}>
-                  {menuOptions.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
-            )}
-            <div className="form-row">
-              <label className="form-label" htmlFor="rsvp-note">A note for the couple (optional)</label>
-              <textarea id="rsvp-note" rows={3} className="form-input" style={{ resize: "vertical", minHeight: 80 }} placeholder="Wishes, allergies, song requests…" {...register("message")} />
-            </div>
-            {sendError && <span className="form-error" role="alert">{sendError}</span>}
-            <button type="submit" className="form-button" disabled={isSubmitting}>
-              {sent ? "Sent ✓ — Send Again" : isSubmitting ? "Sending…" : "Send →"}
-            </button>
-          </form>
+              {sendError && <span className="form-error" role="alert">{sendError}</span>}
+              <button type="submit" className="form-button" disabled={isSubmitting}>
+                {isSubmitting ? "Mengirim…" : "Kirim RSVP →"}
+              </button>
+            </form>
+          )}
         </CardChild>
       </GlassCard>
     </div>
