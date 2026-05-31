@@ -2,8 +2,9 @@ import React from "react";
 import GlassCard, { CardChild } from "../components/GlassCard.jsx";
 import { useGuest } from "../contexts/GuestContext.jsx";
 
-export default function WelcomePlanet({ sectionLabel, planetName, heading, body, portrait, portraitCaption }) {
+export default function WelcomePlanet({ sectionLabel, planetName, heading, body, portrait, portraitCaption, layout = "single", portrait2, portraitCaption2 }) {
   const { name } = useGuest();
+  const duo = layout === "duo" && (portrait || portrait2);
   return (
     <div className="section-stage">
       <GlassCard title={sectionLabel} planetName={planetName}>
@@ -17,13 +18,20 @@ export default function WelcomePlanet({ sectionLabel, planetName, heading, body,
         <CardChild>
           <h2 className="h-1 center-text" style={{ marginBottom: "0.9rem" }}>{heading}</h2>
         </CardChild>
-        {portrait && (
+        {duo ? (
+          <CardChild>
+            <div className="welcome-duo" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "clamp(0.8rem, 3vw, 1.6rem)", margin: "0.5rem 0 1rem", justifyItems: "center" }}>
+              <SafeImage src={portrait} caption={portraitCaption} alt="Portrait one" />
+              <SafeImage src={portrait2} caption={portraitCaption2} alt="Portrait two" />
+            </div>
+          </CardChild>
+        ) : portrait ? (
           <CardChild>
             <div style={{ display: "grid", placeItems: "center", margin: "0.5rem 0 1rem" }}>
               <SafeImage src={portrait} caption={portraitCaption} alt="Couple portrait" />
             </div>
           </CardChild>
-        )}
+        ) : null}
         <CardChild>
           <p className="p-body" style={{ marginInline: "auto", textAlign: "center" }}>{body}</p>
         </CardChild>

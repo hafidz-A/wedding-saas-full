@@ -96,6 +96,9 @@ export const pageConfig = {
         body: "A short prelude before the journey: who we are, where we met, and the gravity that pulled us together.", // [CONTOH]
         portrait: "https://picsum.photos/seed/aruna-daksa-portrait/800/1000", // [CONTOH] demo via picsum.photos
         portraitCaption: "Bali, 2023",                       // [CONTOH]
+        layout: "single",                                    // [CONTOH] "single" | "duo"
+        portrait2: "https://picsum.photos/seed/aruna-daksa-portrait-2/800/1000", // [CONTOH] used when layout="duo"
+        portraitCaption2: "Jakarta, 2024",                   // [CONTOH]
       },
       schema: {
         heading:         { kind: "text" },
