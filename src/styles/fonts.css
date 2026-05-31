@@ -1,9 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Sacramento&display=swap');
 
 :root {
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'DM Sans', sans-serif;
   --font-cursive: 'Great Vibes', cursive;
+  --font-serif-soft: 'Kameron', serif;
+
+  /* Classy, Elegant & Fun font pairing */
+  --font-display-classy: 'Playfair Display', serif;
+  --font-body-fun: 'Plus Jakarta Sans', sans-serif;
+  --font-script-fun: 'Sacramento', cursive;
 }
 
 body {
