@@ -6,7 +6,7 @@ import StoryMobileExperience from "./story/StoryMobileExperience.jsx";
    Router antara desktop pinned dual-panel vs mobile snap carousel.
    Breakpoint: 768px (matches CSS conventions in project). */
 
-const DESKTOP_MQ = "(min-width: 768px)";
+const DESKTOP_MQ = "(min-width: 768px) and (min-height: 600px)";
 
 export default function StoryPlanet({
   sectionLabel,

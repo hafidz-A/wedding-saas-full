@@ -723,9 +723,12 @@
 
 /* Reduce polaroid stack offset slightly on small phones to avoid clipping */
 @media (max-width: 480px) {
-  .story-mobile .polaroid-cluster {
-    transform: scale(0.92);
-  }
+  .story-mobile .polaroid-cluster { transform: scale(0.86); }
+}
+/* Short viewports (incl. landscape phones now routed to the mobile snap
+   experience): shrink the deck so the fanned cards + text fit one slide. */
+@media (max-height: 680px) {
+  .story-mobile .polaroid-cluster { transform: scale(0.78); }
 }
 
 /* ---- Reduced-motion fallback ----------------------------------- */

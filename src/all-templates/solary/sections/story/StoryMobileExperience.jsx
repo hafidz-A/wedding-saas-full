@@ -31,7 +31,7 @@ export default function StoryMobileExperience({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "2rem 1.25rem",
+          padding: "clamp(4.5rem, 13vh, 6.5rem) 1.25rem 2rem",
         }}
       >
         <div className="glass-card" style={{ textAlign: "center" }}>
@@ -72,9 +72,9 @@ export default function StoryMobileExperience({
               scrollSnapAlign: "start",
               display: "flex",
               flexDirection: "column",
-              justifyContent: hasPhotos ? "flex-start" : "center",
+              justifyContent: "center",
               alignItems: "center",
-              padding: "clamp(2rem, 5vh, 3rem) 1.25rem",
+              padding: "clamp(4.5rem, 13vh, 6.5rem) 1.25rem clamp(2rem, 5vh, 3rem)",
               gap: "clamp(1rem, 3vh, 1.75rem)",
             }}
             data-has-photo={hasPhotos ? "true" : "false"}
@@ -101,7 +101,7 @@ export default function StoryMobileExperience({
               <>
                 <div
                   style={{
-                    flex: "1 1 auto",
+                    flex: "0 1 auto",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
