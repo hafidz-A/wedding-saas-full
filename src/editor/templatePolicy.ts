@@ -100,9 +100,27 @@ export function availableAddTypes(
   sections: { type: string }[],
   policy: TemplatePolicy | null,
 ): string[] {
-  const used = new Set(sections.map((s) => s.type))
+  const used = expandUsedBySwapGroup(new Set(sections.map((s) => s.type)), policy)
   const pool = policy?.swappablePool ?? Object.keys(registry)
   return pool.filter((t) => !!registry[t] && !used.has(t))
+}
+
+/**
+ * Expand a set of used types so that if any member of a swap-group is used,
+ * ALL members of that group count as used. This makes an interchangeable group
+ * (e.g. galleryMasonry/gallerySpringCoil) occupy a single slot — you can switch
+ * between members but cannot create a second one elsewhere.
+ */
+export function expandUsedBySwapGroup(
+  used: Set<string>,
+  policy: TemplatePolicy | null,
+): Set<string> {
+  if (!policy?.swapGroups) return used
+  const out = new Set(used)
+  for (const t of used) {
+    for (const sib of policy.swapGroups[t] ?? []) out.add(sib)
+  }
+  return out
 }
 
 /**
@@ -116,10 +134,14 @@ export function availableSwapTypes(
   currentId: string,
   currentType: string,
 ): string[] {
-  const usedElsewhere = new Set(
-    sections.filter((s) => s.id !== currentId).map((s) => s.type),
+  const usedElsewhere = expandUsedBySwapGroup(
+    new Set(sections.filter((s) => s.id !== currentId).map((s) => s.type)),
+    policy,
   )
   const group = policy?.swapGroups?.[currentType]
+  // The current section's own group members are not "taken" by another section,
+  // so a gallery can still swap to its sibling.
+  if (group) for (const sib of group) usedElsewhere.delete(sib)
   const pool = group ?? policy?.swappablePool ?? Object.keys(registry)
   const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t) && !policy?.mandatoryTypes?.includes(t))
   return [currentType, ...rest]

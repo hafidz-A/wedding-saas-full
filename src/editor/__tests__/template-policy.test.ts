@@ -80,3 +80,43 @@ describe('dedup helpers', () => {
     expect(out).not.toContain('hero')
   })
 })
+
+describe('lovebirds gallery single-instance', () => {
+  const registry: Record<string, unknown> = {
+    hero: {}, footer: {}, quote: {}, ourStory: {}, eventDetails: {},
+    brideGroom: {}, weddingParty: {}, galleryMasonry: {}, gallerySpringCoil: {},
+    schedule: {}, rsvp: {}, weddingGift: {}, accommodations: {}, faq: {}, playlist: {},
+  }
+  const p = getTemplatePolicy('lovebirds')!
+
+  it('does not offer the other gallery to a non-gallery section when a gallery exists', () => {
+    const sections = [
+      { id: 's-quote', type: 'quote' },
+      { id: 's-gal', type: 'galleryMasonry' },
+    ]
+    const opts = availableSwapTypes(registry, sections, p, 's-quote', 'quote')
+    expect(opts).not.toContain('gallerySpringCoil')
+    expect(opts).not.toContain('galleryMasonry')
+  })
+
+  it('does not offer the other gallery in the add menu when a gallery exists', () => {
+    const sections = [{ type: 'galleryMasonry' }]
+    const opts = availableAddTypes(registry, sections, p)
+    expect(opts).not.toContain('gallerySpringCoil')
+    expect(opts).not.toContain('galleryMasonry')
+  })
+
+  it('still lets a gallery section swap to the other gallery type', () => {
+    const sections = [{ id: 's-gal', type: 'galleryMasonry' }]
+    const opts = availableSwapTypes(registry, sections, p, 's-gal', 'galleryMasonry')
+    expect(opts).toContain('galleryMasonry')      // current type stays selectable
+    expect(opts).toContain('gallerySpringCoil')   // swap target stays offered
+  })
+
+  it('offers both gallery types when no gallery exists yet', () => {
+    const sections = [{ type: 'quote' }]
+    const opts = availableAddTypes(registry, sections, p)
+    expect(opts).toContain('galleryMasonry')
+    expect(opts).toContain('gallerySpringCoil')
+  })
+})
