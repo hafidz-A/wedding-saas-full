@@ -24,12 +24,23 @@ import { AnimatePresence, motion } from "motion/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Peeking offsets/rotations for the up-to-two cards behind the active one.
-const PEEK = [
-  { rotate: 0, x: 0, y: 0, scale: 1, opacity: 1, blur: 0 },
-  { rotate: 4, x: 18, y: 16, scale: 0.94, opacity: 0.62, blur: 1.2 },
-  { rotate: -5, x: -18, y: 30, scale: 0.88, opacity: 0.38, blur: 2 },
+/* Slot presets — a card's look is driven by its SLOT relative to the active
+   card (slot 0 = front, 1 = first peek, 2 = second peek, ≥3 = hidden behind).
+   motion animates between these as activeIndex changes → cards shuffle. */
+const SLOT_FRONT = { x: 0, y: 0, rotate: 0, scale: 1, opacity: 1, blur: 0 };
+const SLOT_PEEK = [
+  { x: 18, y: 16, rotate: 4, scale: 0.94, opacity: 0.62, blur: 1.2 },
+  { x: -18, y: 30, rotate: -5, scale: 0.88, opacity: 0.38, blur: 2 },
 ];
+// Tucked invisibly behind the deck (slot ≥ 3).
+const SLOT_HIDDEN = { x: 0, y: 40, rotate: 0, scale: 0.82, opacity: 0, blur: 3 };
+
+function slotPreset(slot) {
+  if (slot === 0) return SLOT_FRONT;
+  if (slot === 1) return SLOT_PEEK[0];
+  if (slot === 2) return SLOT_PEEK[1];
+  return SLOT_HIDDEN;
+}
 
 export default function StoryMobileExperience({
   sectionLabel,
@@ -195,76 +206,133 @@ export default function StoryMobileExperience({
             </div>
           </div>
 
-          {/* Deck — front card = active chapter, next 1-2 peek behind */}
+          {/* Deck — persistent cards (stable key per chapter) shuffle between
+              slots as activeIndex changes: front card riffles to the back. */}
           <div className="story-mobile__stage">
             <div className="story-mobile__cards">
-              {PEEK.map((preset, depth) => {
-                const idx = (activeIndex + depth) % total;
-                const it = items[idx];
+              {items.map((it, idx) => {
+                // Slot relative to the active card: 0 = front, 1/2 = peeks,
+                // ≥3 = hidden behind. This is what each card animates toward.
+                const slot = (idx - activeIndex + total) % total;
+                const preset = slotPreset(slot);
+                const isFront = slot === 0;
                 const photos = Array.isArray(it.photos) ? it.photos : [];
-                const isFront = depth === 0;
                 // Front card honours its own photoIdx; peeking cards show photo 0.
                 const src = isFront ? photos[photoIdx] : photos[0];
                 const number = String(idx + 1).padStart(2, "0");
                 const interactive = isFront && curMultiPhoto;
-                return (
-                  <div
-                    key={`${idx}-${depth}`}
-                    className="story-mobile__card"
-                    aria-hidden={isFront ? undefined : "true"}
-                    role={interactive ? "button" : undefined}
-                    tabIndex={interactive ? 0 : undefined}
-                    aria-label={
-                      interactive ? "Lihat foto berikutnya" : undefined
+                // Stacking: front on top; never interpolated (snap is fine).
+                const zIndex = total - slot;
+
+                /* Wrap choreography: when this card is at the BACK (the just-
+                   dealt card, last slot), give it a brief lifted arc + raised
+                   z so it reads as riffled over the top then placed behind,
+                   rather than sliding straight down through the peeks. */
+                const isBack = total > 3 && slot === total - 1;
+                const animate = isBack
+                  ? {
+                      // Lift up + scale over the deck, then settle at the back.
+                      x: [6, preset.x],
+                      y: [-26, preset.y],
+                      rotate: [-2, preset.rotate],
+                      scale: [1.04, preset.scale],
+                      opacity: [1, preset.opacity],
+                      filter: [`blur(0px)`, `blur(${preset.blur}px)`],
+                      // zIndex steps (no interpolation): on top during the arc,
+                      // then drops to its true resting stack value behind.
+                      zIndex: [total + 1, total - slot],
                     }
-                    data-interactive={interactive ? "true" : "false"}
-                    onClick={isFront ? advancePhoto : undefined}
-                    onKeyDown={
-                      interactive
-                        ? (e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              advancePhoto();
-                            }
-                          }
-                        : undefined
-                    }
-                    style={{
-                      zIndex: PEEK.length - depth,
-                      transform: `translate(-50%, -50%) translate3d(${preset.x}px, ${preset.y}px, 0) rotate(${preset.rotate}deg) scale(${preset.scale})`,
+                  : {
+                      x: preset.x,
+                      y: preset.y,
+                      rotate: preset.rotate,
+                      scale: preset.scale,
                       opacity: preset.opacity,
-                      filter: preset.blur ? `blur(${preset.blur}px)` : "none",
+                      filter: `blur(${preset.blur}px)`,
+                      zIndex,
+                    };
+                const transition = isBack
+                  ? { duration: 0.55, ease: [0.4, 0, 0.2, 1], times: [0.45, 1] }
+                  : { type: "spring", stiffness: 260, damping: 30 };
+
+                const photoBlock = (
+                  <div className="story-mobile__photo">
+                    {src ? (
+                      <img
+                        key={isFront ? `f-${photoIdx}` : `b-${idx}`}
+                        className={
+                          isFront
+                            ? "story-mobile__img story-mobile__img--front"
+                            : "story-mobile__img"
+                        }
+                        src={src}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      /* Cosmic placeholder for chapters with no photo */
+                      <div
+                        className="story-mobile__placeholder"
+                        aria-hidden="true"
+                      >
+                        <span className="story-mobile__placeholder-star">✦</span>
+                      </div>
+                    )}
+                    <span className="story-mobile__num">{number}</span>
+                  </div>
+                );
+
+                const commonProps = {
+                  className: "story-mobile__card",
+                  "aria-hidden": isFront ? undefined : "true",
+                  role: interactive ? "button" : undefined,
+                  tabIndex: interactive ? 0 : undefined,
+                  "aria-label": interactive ? "Lihat foto berikutnya" : undefined,
+                  "data-interactive": interactive ? "true" : "false",
+                  onClick: isFront ? advancePhoto : undefined,
+                  onKeyDown: interactive
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          advancePhoto();
+                        }
+                      }
+                    : undefined,
+                };
+
+                /* Reduced motion: static slot preset, no animation. */
+                if (reducedMotion) {
+                  return (
+                    <div
+                      key={idx}
+                      {...commonProps}
+                      style={{
+                        zIndex,
+                        transform: `translate3d(${preset.x}px, ${preset.y}px, 0) rotate(${preset.rotate}deg) scale(${preset.scale})`,
+                        opacity: preset.opacity,
+                        filter: preset.blur ? `blur(${preset.blur}px)` : "none",
+                        pointerEvents: isFront ? "auto" : "none",
+                      }}
+                    >
+                      {photoBlock}
+                    </div>
+                  );
+                }
+
+                return (
+                  <motion.div
+                    key={idx}
+                    {...commonProps}
+                    initial={false}
+                    animate={animate}
+                    transition={transition}
+                    style={{
                       pointerEvents: isFront ? "auto" : "none",
                     }}
                   >
-                    <div className="story-mobile__photo">
-                      {src ? (
-                        <img
-                          key={isFront ? `f-${photoIdx}` : `b-${depth}`}
-                          className={
-                            isFront
-                              ? "story-mobile__img story-mobile__img--front"
-                              : "story-mobile__img"
-                          }
-                          src={src}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        /* Cosmic placeholder for chapters with no photo */
-                        <div
-                          className="story-mobile__placeholder"
-                          aria-hidden="true"
-                        >
-                          <span className="story-mobile__placeholder-star">
-                            ✦
-                          </span>
-                        </div>
-                      )}
-                      <span className="story-mobile__num">{number}</span>
-                    </div>
-                  </div>
+                    {photoBlock}
+                  </motion.div>
                 );
               })}
             </div>

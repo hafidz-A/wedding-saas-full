@@ -753,19 +753,21 @@
 .story-mobile__cards {
   position: absolute;
   inset: 0;
+  /* Overlap every card in a single centered grid cell so motion's x/y/rotate/
+     scale are pure offsets from center (no translate(-50%,-50%) conflict). */
+  display: grid;
+  place-items: center;
 }
 
 /* Each card — Solary polaroid/glass frame */
 .story-mobile__card {
-  position: absolute;
-  left: 50%;
-  top: 50%;
+  /* Stack all cards in the same grid cell; motion drives the transform. */
+  grid-area: 1 / 1;
   width: min(74%, 280px);
   height: 100%;
-  /* transform set inline (per-depth offset/rotate/scale) */
   transform-origin: center center;
-  transition: transform 0.5s var(--ease-card, cubic-bezier(0.34,1.56,0.64,1)),
-    opacity 0.45s ease, filter 0.45s ease;
+  /* No CSS transition: motion (motion/react) owns transform/opacity/filter.
+     In reduced-motion the slot presets are applied as static inline styles. */
   will-change: transform, opacity;
   background: var(--bg-polaroid);
   border: 3px solid var(--color-polaroid-border);
