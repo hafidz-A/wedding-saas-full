@@ -61,39 +61,40 @@ function fixLabel(type, stored) {
 export function normalizeSolaryConfig(config) {
   if (!config || !Array.isArray(config.sections)) return config;
 
-  // Planets already claimed by sections that carry an explicit planetKey.
-  const used = new Set();
-  for (const s of config.sections) {
-    const k = s?.props?.planetKey;
-    if (k) used.add(k);
-  }
+  // Planets are POSITIONAL. The first section (openingGate) frames Andromeda,
+  // the last (footerPlanet) frames the Sun; everything between maps to the
+  // canonical PLANET_POOL in journey order. We override any stored planetKey so
+  // a reordered/swapped section always adopts the planet of the slot it lands
+  // in — never carries its old planet with it.
+  const sections = config.sections;
+  const lastIdx = sections.length - 1;
   let poolIdx = 0;
-  const nextPlanet = () => {
-    while (poolIdx < PLANET_POOL.length && used.has(PLANET_POOL[poolIdx])) poolIdx++;
-    const k = PLANET_POOL[poolIdx] || 'andromeda';
-    used.add(k);
-    return k;
+
+  const planetFor = (s, idx) => {
+    if (s.type === 'openingGate' || idx === 0) return 'andromeda';
+    if (s.type === 'footerPlanet' || idx === lastIdx) return 'sun';
+    const key = PLANET_POOL[poolIdx] || 'andromeda';
+    poolIdx += 1;
+    return key;
   };
 
-  const sections = config.sections.map((s) => {
+  const out = sections.map((s, idx) => {
     const props = s.props || {};
     const next = { ...props };
 
-    // 1. self-healing sectionLabel
+    // 1. self-healing sectionLabel (label travels with the section)
     const label = fixLabel(s.type, props.sectionLabel);
     if (label !== props.sectionLabel) next.sectionLabel = label;
 
-    // 2. ensure a planet to frame
-    if (!props.planetKey) {
-      const key = nextPlanet();
-      next.planetKey = key;
-      next.planetName = props.planetName || cap(key);
-    }
+    // 2. positional planet — always derived, overriding stored values
+    const key = planetFor(s, idx);
+    next.planetKey = key;
+    next.planetName = cap(key);
 
-    return next === props ? s : { ...s, props: next };
+    return { ...s, props: next };
   });
 
-  return { ...config, sections };
+  return { ...config, sections: out };
 }
 
 export default normalizeSolaryConfig;
