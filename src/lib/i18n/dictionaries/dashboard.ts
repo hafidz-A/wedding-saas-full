@@ -238,10 +238,9 @@ export const dashboard = {
           steps: [
             'Daftar bagian ada di panel kiri — seret (drag) untuk mengubah urutan.',
             'Klik sebuah bagian untuk mengedit teks dan foto; unggah foto lewat tombol upload.',
-            'Tambah bagian baru lewat tombol "+ Tambah bagian".',
-            'Hero dan Footer terkunci di paling atas dan paling bawah — tidak bisa dipindah atau dihapus.',
-            'RSVP dan Hadiah wajib ada dan tidak bisa dihapus.',
-            'Galeri hanya boleh satu — Masonry atau SpringCoil. Setelah memilih satu, tipe galeri lainnya hilang dari menu. Klik Simpan saat selesai.',
+            'Hero dan Footer terkunci di paling atas dan paling bawah — tidak bisa dipindah.',
+            'Susunan section sudah tetap — kamu tidak bisa menambah atau menghapus bagian, hanya menata dan mengisinya.',
+            'Galeri hanya boleh satu — Masonry atau SpringCoil. Buka "Ganti tipe section" untuk berpindah di antara keduanya. Klik Simpan saat selesai.',
           ],
           always: [
             'Klik Simpan setiap selesai mengedit.',
@@ -251,7 +250,7 @@ export const dashboard = {
           never: [
             'Jangan reload halaman sebelum Simpan — perubahan akan hilang.',
             'Jangan berharap dua galeri sekaligus — template ini hanya satu galeri.',
-            'Jangan mencoba menghapus RSVP atau Hadiah (memang dikunci).',
+            'Jangan cari tombol Tambah/Hapus bagian — sengaja dimatikan agar layout tetap rapi & lengkap.',
             'Jangan mengunggah file non-gambar ke slot foto.',
           ],
           tips: [
@@ -259,9 +258,8 @@ export const dashboard = {
             'Label bagian terlalu panjang? Persingkat supaya navbar rapi.',
           ],
           shots: {
-            list: 'Daftar bagian — gunakan drag handle untuk mengatur urutan.',
-            add: 'Menu "Tambah bagian" — tipe yang sudah dipakai tidak muncul lagi.',
-            galleryRule: 'Setelah satu galeri dipilih, tipe galeri lainnya tidak ditawarkan.',
+            list: 'Daftar bagian — seret untuk urutkan, edit isinya. Tidak ada tombol tambah/hapus.',
+            galleryRule: 'Lewat "Ganti tipe section", galeri hanya menawarkan Masonry ↔ Spring Coil.',
             save: 'Tombol Simpan — selalu klik setelah mengedit.',
           },
         },
@@ -697,10 +695,9 @@ export const dashboard = {
           steps: [
             'The section list is in the left panel — drag to reorder.',
             'Click a section to edit its text and photos; upload photos via the upload button.',
-            'Add a new section with the "+ Add section" button.',
-            'Hero and Footer are locked to the very top and bottom — they can\'t be moved or removed.',
-            'RSVP and Gift are mandatory and can\'t be removed.',
-            'You may only have one gallery — Masonry or SpringCoil. Once you pick one, the other gallery type disappears from the menu. Click Save when done.',
+            'Hero and Footer are locked to the very top and bottom — they can\'t be moved.',
+            'The set of sections is fixed — you can\'t add or remove sections, only arrange and fill them in.',
+            'You may only have one gallery — Masonry or SpringCoil. Use "Change section type" to switch between the two. Click Save when done.',
           ],
           always: [
             'Click Save every time you finish editing.',
@@ -710,7 +707,7 @@ export const dashboard = {
           never: [
             'Don\'t reload the page before saving — your changes will be lost.',
             'Don\'t expect two galleries at once — this template has only one.',
-            'Don\'t try to delete RSVP or Gift (they\'re locked on purpose).',
+            'Don\'t look for an Add/Remove section button — they\'re disabled on purpose to keep the layout complete and tidy.',
             'Don\'t upload non-image files into a photo slot.',
           ],
           tips: [
@@ -718,9 +715,8 @@ export const dashboard = {
             'Section label too long? Shorten it so the navbar stays tidy.',
           ],
           shots: {
-            list: 'Section list — use the drag handle to set the order.',
-            add: 'The "Add section" menu — types already in use no longer appear.',
-            galleryRule: 'Once one gallery is chosen, the other gallery type is no longer offered.',
+            list: 'Section list — drag to reorder and edit content. No add/remove buttons.',
+            galleryRule: 'Via "Change section type", the gallery only offers Masonry ↔ Spring Coil.',
             save: 'The Save button — always click it after editing.',
           },
         },

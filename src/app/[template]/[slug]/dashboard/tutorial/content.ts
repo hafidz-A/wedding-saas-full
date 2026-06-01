@@ -31,10 +31,9 @@ export interface TutorialCategory {
 export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
   { id: 'start',     stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'start-header', captionKey: 'header' }] },
-  { id: 'editor',    stepCount: 6, alwaysCount: 3, neverCount: 4, tipCount: 2,
+  { id: 'editor',    stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 2,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
-      { key: 'editor-add',          captionKey: 'add' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
       { key: 'editor-save',         captionKey: 'save' },
     ] },
