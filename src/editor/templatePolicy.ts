@@ -16,6 +16,7 @@ export interface TemplatePolicy {
   lockedTypes?: string[]        // types that can't be removed or type-changed
   mandatoryTypes?: string[]     // types that must always exist: no remove/disable/type-change, position-locked
   swapGroups?: Record<string, string[]> // type -> the only types it may swap with (incl. itself)
+  lockSectionCount?: boolean    // fixed section count: no add + no remove (lovebirds). drag/edit/swap still allowed
 }
 
 const SOLARY_SWAPPABLE_POOL = [
@@ -68,6 +69,9 @@ const lovebirdsPolicy: TemplatePolicy = {
     galleryMasonry: ['galleryMasonry', 'gallerySpringCoil'],
     gallerySpringCoil: ['galleryMasonry', 'gallerySpringCoil'],
   },
+  // Fixed section set: couples may reorder, edit, swap the gallery, and
+  // enable/disable, but never add or remove sections.
+  lockSectionCount: true,
 }
 
 const policies: Record<string, TemplatePolicy> = {
@@ -92,6 +96,20 @@ export function isTypeLockedFor(type: string, policy: TemplatePolicy): boolean {
 /** True for a type that must always be present and stays put (RSVP / Gift). */
 export function isMandatoryType(type: string, policy: TemplatePolicy): boolean {
   return !!policy.mandatoryTypes?.includes(type)
+}
+
+/** Whether the "Add section" affordance should be offered at all. */
+export function canAddSections(policy: TemplatePolicy | null): boolean {
+  return !policy?.fixedSections && !policy?.lockSectionCount
+}
+
+/** Whether a given section TYPE may be removed (delete button). */
+export function canRemoveSectionType(type: string, policy: TemplatePolicy | null): boolean {
+  if (!policy) return true
+  if (policy.fixedSections || policy.lockSectionCount) return false
+  if (isTypeLockedFor(type, policy)) return false
+  if (isMandatoryType(type, policy)) return false
+  return true
 }
 
 /** Types offerable in the "add section" menu: in-pool, registered, not already used. */

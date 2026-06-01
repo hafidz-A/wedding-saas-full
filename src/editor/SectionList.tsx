@@ -11,7 +11,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from './EditorProvider'
 import { getSchemaRegistry } from './schemas'
-import { getTemplatePolicy, computeSafeOrder, isTypeAnchored, isTypeLockedFor, isMandatoryType } from './templatePolicy'
+import { getTemplatePolicy, computeSafeOrder, isTypeAnchored, isTypeLockedFor, isMandatoryType, canAddSections, canRemoveSectionType } from './templatePolicy'
 import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
@@ -103,7 +103,7 @@ export default function SectionList({ slug, template }: Props) {
                   onToggleEnabled={() => toggleSectionEnabled(s.id)}
                   onRemove={() => removeSection(s.id)}
                   draggable={!posLocked && !typeAnchored && !mandatory}
-                  canRemove={!policy?.fixedSections && !typeLocked && !mandatory}
+                  canRemove={canRemoveSectionType(s.type, policy)}
                   canDisable={!disableLocked && !typeLocked && !mandatory}
                 />
               )
@@ -112,7 +112,7 @@ export default function SectionList({ slug, template }: Props) {
         </SortableContext>
       </DndContext>
 
-      {!policy?.fixedSections && (
+      {canAddSections(policy) && (
         <div style={{ padding: 12 }}>
           <AddSectionMenu
             template={template}

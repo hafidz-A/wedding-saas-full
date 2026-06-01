@@ -4,6 +4,8 @@ import {
   computeSafeOrder,
   availableAddTypes,
   availableSwapTypes,
+  canAddSections,
+  canRemoveSectionType,
 } from '../templatePolicy'
 
 const ids = ['intro','neptune','uranus','saturn','jupiter','mars','earth','venus','mercury','sun']
@@ -118,5 +120,29 @@ describe('lovebirds gallery single-instance', () => {
     const opts = availableAddTypes(registry, sections, p)
     expect(opts).toContain('galleryMasonry')
     expect(opts).toContain('gallerySpringCoil')
+  })
+})
+
+describe('section count locking', () => {
+  const lb = getTemplatePolicy('lovebirds')!
+  const sol = getTemplatePolicy('solary')!
+
+  it('lovebirds: adding sections is disabled', () => {
+    expect(canAddSections(lb)).toBe(false)
+  })
+
+  it('lovebirds: removing any section is disabled (even normally-removable types)', () => {
+    expect(canRemoveSectionType('quote', lb)).toBe(false)
+    expect(canRemoveSectionType('galleryMasonry', lb)).toBe(false)
+    expect(canRemoveSectionType('hero', lb)).toBe(false)
+  })
+
+  it('solary: adding disabled via fixedSections', () => {
+    expect(canAddSections(sol)).toBe(false)
+  })
+
+  it('no policy: add + remove allowed', () => {
+    expect(canAddSections(null)).toBe(true)
+    expect(canRemoveSectionType('quote', null)).toBe(true)
   })
 })
