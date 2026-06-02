@@ -200,6 +200,15 @@ export const dashboard = {
         dialogSaving: 'Menyimpan…',
         dialogCancel: 'Batal',
       },
+      guestbookLocked: {
+        title: 'Buku Tamu terkunci',
+        body: 'Buku Tamu (catatan kehadiran tamu saat acara) tersedia di paket Premium. Upgrade untuk membukanya — undanganmu tetap online selama proses pembayaran.',
+        cta: 'Upgrade ke Premium',
+        processing: 'Memproses…',
+        recheck: 'Sudah bayar? Cek ulang',
+        recheckPending: 'Pembayaran belum terdeteksi. Coba lagi sebentar.',
+        error: 'Gagal memulai upgrade',
+      },
       tutorial: {
         navTitle: 'Panduan Dashboard',
         headings: {
@@ -313,7 +322,7 @@ export const dashboard = {
           ],
           always: ['Segarkan untuk melihat respons terbaru.'],
           never: ['Jangan anggap kosong = error — terisi saat tamu submit form.'],
-          tips: ['Unduh CSV untuk menghitung kebutuhan katering.'],
+          tips: ['Unduh CSV untuk rekap data RSVP kapan saja.'],
           shots: { table: 'Tabel RSVP beserta statistik di atasnya.' },
         },
         gifts: {
@@ -350,12 +359,12 @@ export const dashboard = {
           title: 'Buku Tamu',
           summary: 'Catatan kehadiran tamu saat acara berlangsung (fitur Premium).',
           steps: [
-            'Buka Buku Tamu (tersedia di paket Premium).',
-            'Tandai tamu yang hadir saat acara.',
+            'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya) untuk membukanya.',
+            'Setelah Premium, tandai tamu yang hadir saat acara.',
           ],
           always: ['Gunakan saat hari-H untuk mencatat kehadiran tamu.'],
-          never: ['Jangan bingung kalau tidak muncul — tab ini khusus paket Premium.'],
-          shots: { ledger: 'Ledger kehadiran tamu.' },
+          never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
+          shots: { ledger: 'Ledger kehadiran tamu (terbuka setelah Premium).' },
         },
       },
     },
@@ -657,6 +666,15 @@ export const dashboard = {
         dialogSaving: 'Saving…',
         dialogCancel: 'Cancel',
       },
+      guestbookLocked: {
+        title: 'Guestbook locked',
+        body: 'The Guestbook (recording guest attendance during the event) is a Premium feature. Upgrade to unlock it — your invitation stays online throughout the payment.',
+        cta: 'Upgrade to Premium',
+        processing: 'Processing…',
+        recheck: 'Already paid? Re-check',
+        recheckPending: 'Payment not detected yet. Try again in a moment.',
+        error: 'Failed to start upgrade',
+      },
       tutorial: {
         navTitle: 'Dashboard Guide',
         headings: {
@@ -770,7 +788,7 @@ export const dashboard = {
           ],
           always: ['Refresh to see the latest responses.'],
           never: ['Don\'t assume empty = error — it fills in as guests submit the form.'],
-          tips: ['Download the CSV to calculate catering needs.'],
+          tips: ['Download the CSV for an RSVP recap anytime.'],
           shots: { table: 'The RSVP table with stats above it.' },
         },
         gifts: {
@@ -807,12 +825,12 @@ export const dashboard = {
           title: 'Guestbook',
           summary: 'A record of guest attendance during the event (Premium feature).',
           steps: [
-            'Open the Guestbook (available on the Premium plan).',
-            'Mark the guests who attend during the event.',
+            'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference) to unlock it.',
+            'Once Premium, mark the guests who attend during the event.',
           ],
           always: ['Use it on the day to record guest attendance.'],
-          never: ['Don\'t be confused if it doesn\'t appear — this tab is Premium-only.'],
-          shots: { ledger: 'The guest attendance ledger.' },
+          never: ['Don\'t worry about upgrading — your invitation stays online the whole time, nothing is lost.'],
+          shots: { ledger: 'The guest attendance ledger (unlocked after Premium).' },
         },
       },
     },
