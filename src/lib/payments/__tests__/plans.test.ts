@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolvePlanFrom } from '../plans'
+import { resolvePlanFrom, computeUpgradeAmount } from '../plans'
 import type { TemplatePlanRow } from '../template-plans'
 
 const rows: TemplatePlanRow[] = [
@@ -28,5 +28,23 @@ describe('resolvePlanFrom', () => {
 
   it('returns null for an empty plan list', () => {
     expect(resolvePlanFrom([], 'basic')).toBeNull()
+  })
+})
+
+describe('computeUpgradeAmount', () => {
+  it('charges the price difference for basic -> premium', () => {
+    expect(computeUpgradeAmount(rows, 'basic', 'premium')).toBe(299000 - 149000)
+  })
+
+  it('charges the full target price when fromPlan is unknown (e.g. legacy free)', () => {
+    expect(computeUpgradeAmount(rows, 'free', 'premium')).toBe(299000)
+  })
+
+  it('returns 0 when already at (or above) the target', () => {
+    expect(computeUpgradeAmount(rows, 'premium', 'premium')).toBe(0)
+  })
+
+  it('returns null when the target plan is not sellable', () => {
+    expect(computeUpgradeAmount(rows, 'basic', 'nope')).toBeNull()
   })
 })

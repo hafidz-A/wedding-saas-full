@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict, type Dict } from '@/lib/i18n'
 import { activePeriodStatus } from '@/lib/payments/active-period'
+import { resolveUpgrade } from '@/lib/payments/plans'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
@@ -137,6 +138,14 @@ export default async function DashboardPage({ params }: PageProps) {
   // (account numbers, whatsapp, email, phone). No-op on a plaintext config.
   const invitationDecrypted = { ...invitation, config: decryptConfig(invitation.config) }
 
+  // Resolve the Premium-upgrade price (difference) for a paid, non-premium
+  // invitation, so the locked Buku Tamu card can show the amount.
+  let upgrade: { amountIDR: number } | null = null
+  if (invitation.is_paid && invitation.plan !== 'premium') {
+    const u = await resolveUpgrade(invitation.template_id ?? template, invitation.plan, 'premium')
+    if (u) upgrade = { amountIDR: u.amountIDR }
+  }
+
   return (
     <DashboardClient
       slug={slug}
@@ -149,6 +158,7 @@ export default async function DashboardPage({ params }: PageProps) {
       dict={t.dashboard}
       activePeriod={t.common.activePeriod}
       lang={lang}
+      upgrade={upgrade}
     />
   )
 }

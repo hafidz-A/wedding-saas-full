@@ -5,8 +5,9 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
 import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
-import { resolvePlan } from '@/lib/payments/plans'
-import { createXenditInvoice } from '@/lib/payments/xendit'
+import { resolvePlan, resolveUpgrade } from '@/lib/payments/plans'
+import { createXenditInvoice, getXenditInvoice, isPaidStatus } from '@/lib/payments/xendit'
+import { publishPaidInvitation, applyPaidUpgrade } from '@/lib/payments/publish'
 
 export interface OnboardingInput {
   slug: string
@@ -200,5 +201,179 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
   } catch (e) {
     console.error('startCheckout error:', e)
     return { ok: false, error: e instanceof Error ? e.message : 'Gagal memulai pembayaran' }
+  }
+}
+
+export interface RecheckResult {
+  ok: boolean
+  published?: boolean
+  status?: string
+  error?: string
+}
+
+/**
+ * Manual fallback for a missed / late Xendit webhook. The owner clicks
+ * "Saya sudah bayar — cek ulang"; we re-query the invoice from Xendit and, if
+ * it is genuinely paid for the correct amount, publish the invitation right
+ * away. Safe to call repeatedly — returns early if already paid, and verifies
+ * the amount the same way the webhook does.
+ */
+export async function recheckPayment(invitationId: string): Promise<RecheckResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, plan, template_id, owner_user_id, is_paid, xendit_invoice_id')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: {
+        id: string
+        plan: string
+        template_id: string
+        owner_user_id: string
+        is_paid: boolean
+        xendit_invoice_id: string | null
+      } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    if (inv.is_paid) return { ok: true, published: true, status: 'PAID' }
+    if (!inv.xendit_invoice_id)
+      return { ok: false, error: 'Belum ada transaksi pembayaran untuk undangan ini' }
+
+    const resolved = await resolvePlan(inv.template_id, inv.plan)
+    if (!resolved) return { ok: false, error: 'Plan tidak valid' }
+
+    const snap = await getXenditInvoice(inv.xendit_invoice_id)
+    if (!isPaidStatus(snap.status) || snap.amountIDR !== resolved.amountIDR) {
+      return { ok: true, published: false, status: snap.status }
+    }
+
+    await publishPaidInvitation(admin, inv)
+    revalidatePath('/[template]/[slug]', 'page')
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    revalidatePath('/profile', 'page')
+    return { ok: true, published: true, status: snap.status }
+  } catch (e) {
+    console.error('recheckPayment error:', e)
+    return { ok: false, error: e instanceof Error ? e.message : 'Gagal mengecek pembayaran' }
+  }
+}
+
+const UPGRADE_TARGET_PLAN = 'premium'
+
+/**
+ * Start a "pay the difference" upgrade to Premium for an already-paid invitation
+ * the caller owns. Creates a Xendit invoice for the price difference (keyed by
+ * an `upg_` external id), records a pending plan_upgrades row, and returns the
+ * hosted invoice URL. Does NOT change the live invitation — the webhook /
+ * recheckUpgrade applies the plan change only after the upgrade is paid.
+ */
+export async function startUpgradeCheckout(invitationId: string): Promise<CheckoutResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    if (!inv.is_paid) return { ok: false, error: 'Selesaikan pembayaran awal undangan dulu sebelum upgrade' }
+    if (inv.plan === UPGRADE_TARGET_PLAN) return { ok: false, error: 'Undangan ini sudah Premium' }
+
+    const resolved = await resolveUpgrade(inv.template_id, inv.plan, UPGRADE_TARGET_PLAN)
+    if (!resolved) return { ok: false, error: 'Upgrade tidak tersedia untuk plan ini' }
+
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const externalId = `upg_${inv.id}_${Date.now()}`
+    const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
+
+    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
+      externalId,
+      amountIDR: resolved.amountIDR,
+      payerEmail: inv.email ?? user.email ?? undefined,
+      description: `Upgrade ${inv.slug} ke Premium`,
+      successUrl: `${dash}?upgraded=1`,
+      failureUrl: `${dash}?upgrade=failed`,
+    })
+
+    await (admin.from('plan_upgrades') as any).insert({
+      invitation_id: inv.id,
+      from_plan: inv.plan,
+      to_plan: UPGRADE_TARGET_PLAN,
+      amount_idr: resolved.amountIDR,
+      xendit_invoice_id: invoiceId,
+      xendit_external_id: externalId,
+      status: 'pending',
+    })
+
+    return { ok: true, invoiceUrl }
+  } catch (e) {
+    console.error('startUpgradeCheckout error:', e)
+    return { ok: false, error: e instanceof Error ? e.message : 'Gagal memulai upgrade' }
+  }
+}
+
+/**
+ * Manual fallback for a missed upgrade webhook: re-fetch the latest pending
+ * upgrade's invoice from Xendit and, if genuinely paid for the right amount,
+ * apply the plan change. Safe to call repeatedly.
+ */
+export async function recheckUpgrade(invitationId: string): Promise<RecheckResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, plan, template_id, owner_user_id')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: { id: string; plan: string; template_id: string; owner_user_id: string } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    if (inv.plan === UPGRADE_TARGET_PLAN) return { ok: true, published: true, status: 'PAID' }
+
+    const { data: upg } = (await admin
+      .from('plan_upgrades')
+      .select('id, invitation_id, to_plan, amount_idr, xendit_invoice_id, status')
+      .eq('invitation_id', inv.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()) as {
+      data: { id: string; invitation_id: string; to_plan: string; amount_idr: number; xendit_invoice_id: string | null; status: string } | null
+    }
+    if (!upg || !upg.xendit_invoice_id)
+      return { ok: false, error: 'Tidak ada upgrade yang menunggu pembayaran' }
+
+    const snap = await getXenditInvoice(upg.xendit_invoice_id)
+    if (!isPaidStatus(snap.status) || snap.amountIDR !== Number(upg.amount_idr)) {
+      return { ok: true, published: false, status: snap.status }
+    }
+
+    await applyPaidUpgrade(admin, {
+      id: upg.id,
+      invitation_id: upg.invitation_id,
+      to_plan: upg.to_plan,
+      template_id: inv.template_id,
+    })
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    revalidatePath('/profile', 'page')
+    return { ok: true, published: true, status: snap.status }
+  } catch (e) {
+    console.error('recheckUpgrade error:', e)
+    return { ok: false, error: e instanceof Error ? e.message : 'Gagal mengecek upgrade' }
   }
 }

@@ -12,6 +12,7 @@ import PaletteTab from './PaletteTab'
 import TutorialTab from './TutorialTab'
 import GuestsTab from './GuestsTab'
 import GuestbookTab from './GuestbookTab'
+import GuestbookLocked from './GuestbookLocked'
 import { type GuestRow } from './guests/types'
 import { type AttendanceRow } from './guestbook/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
@@ -34,6 +35,7 @@ export default function DashboardClient({
   dict,
   activePeriod,
   lang,
+  upgrade = null,
 }: {
   slug: string
   template: string
@@ -45,6 +47,7 @@ export default function DashboardClient({
   dict: Dict['dashboard']
   activePeriod: Dict['common']['activePeriod']
   lang: Lang
+  upgrade?: { amountIDR: number } | null
 }) {
   const [payPending, startPay] = useTransition()
   const period = activePeriodStatus(invitation, Date.now())
@@ -70,13 +73,13 @@ export default function DashboardClient({
 
   const [tab, setTab] = useState<TabKey>('rsvps')
 
-  // Buku Tamu (attendance ledger) is a premium-only feature. Unknown plan
-  // values fall back to no-tab (defensive — treat non-'premium' as basic).
+  // Buku Tamu (attendance ledger) is a Premium feature. The tab is always shown;
+  // non-Premium plans see a locked card with a "pay the difference" upgrade CTA.
   const hasGuestbook = invitation.plan === 'premium'
 
   const tabKeys: TabKey[] = (() => {
     const keys: TabKey[] = ['rsvps', 'gifts', 'guests']
-    if (hasGuestbook) keys.push('guestbook')
+    keys.push('guestbook')
     keys.push('editor')
     keys.push('palette')
     keys.push('music')
@@ -285,9 +288,12 @@ export default function DashboardClient({
               />
             )}
 
-            {tab === 'guestbook' && hasGuestbook && (
-              <GuestbookTab slug={slug} attendances={attendances} />
-            )}
+            {tab === 'guestbook' &&
+              (hasGuestbook ? (
+                <GuestbookTab slug={slug} attendances={attendances} />
+              ) : (
+                <GuestbookLocked invitationId={invitation.id} amountIDR={upgrade?.amountIDR ?? null} />
+              ))}
 
             {tab === 'music' && (
               <MusicTab slug={slug} initial={invitation.config?.music ?? null} />

@@ -49,3 +49,49 @@ export async function resolvePlan(
 export function planHasGuestbook(planCode: string): boolean {
   return planCode === 'premium'
 }
+
+/**
+ * Pure helper: the rupiah amount to charge for upgrading from one plan to
+ * another within the same template — the price difference.
+ *
+ *   - Unknown `toPlan` (not sellable) → null (no upgrade possible).
+ *   - Unknown `fromPlan` (e.g. legacy 'free', not in template_plans) → treated
+ *     as price 0, so the full target price is charged.
+ *   - Same/cheaper target → 0 (caller should reject; nothing to pay).
+ */
+export function computeUpgradeAmount(
+  plans: TemplatePlanRow[],
+  fromPlan: string,
+  toPlan: string,
+): number | null {
+  const to = plans.find((p) => p.plan_code === toPlan)
+  if (!to) return null
+  const from = plans.find((p) => p.plan_code === fromPlan)
+  const fromPrice = from ? from.price_idr : 0
+  return Math.max(0, to.price_idr - fromPrice)
+}
+
+export interface ResolvedUpgrade {
+  amountIDR: number
+  toPlan: string
+  /** expiry stamp for the target plan, given the payment time */
+  expiresAt: (paidAtMs: number) => string | null
+}
+
+/**
+ * DB-backed: resolve an upgrade (price difference + the target plan's expiry
+ * rule). Returns null when the target plan is unknown or there is nothing to
+ * charge (already at/above the target).
+ */
+export async function resolveUpgrade(
+  templateId: string,
+  fromPlan: string,
+  toPlan: string,
+): Promise<ResolvedUpgrade | null> {
+  const plans = await getTemplatePlans(templateId)
+  const amountIDR = computeUpgradeAmount(plans, fromPlan, toPlan)
+  if (amountIDR == null || amountIDR <= 0) return null
+  const target = resolvePlanFrom(plans, toPlan)
+  if (!target) return null
+  return { amountIDR, toPlan, expiresAt: target.expiresAt }
+}
