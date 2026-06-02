@@ -22,7 +22,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
   const isLowEnd = isMobile || window.devicePixelRatio < 1.5;
   const PERF = {
-    pixelRatio: isMobile ? 1 : Math.min(window.devicePixelRatio, 2),
+    // Cap at 2 on every device (was hard-locked to 1 on mobile, which rendered
+    // the whole WebGL scene — Saturn + photo sprites — at 1/DPR resolution and
+    // let the browser upscale it, so on a DPR-3 phone everything looked blurry).
+    // 2 is the sharp-vs-fillrate sweet spot; drop to 1.5 if low-end FPS suffers.
+    pixelRatio: Math.min(window.devicePixelRatio, 2),
     starsNear: isMobile ? 250 : 700,
     starsMid: isMobile ? 700 : 1800,
     starsFar: isMobile ? 1800 : Math.min(5000, Math.floor(starfieldDensity * 0.6)),

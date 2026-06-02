@@ -101,7 +101,7 @@ export default function SaturnRingPlanet({ sectionLabel, planetName, heading, ph
 
   return (
     <div className="section-stage saturn-section-stage" ref={sectionAnchorRef}>
-      <div style={{ width: "100%", textAlign: "center" }}>
+      <div style={{ width: "100%", textAlign: "center", textShadow: "0 2px 14px rgba(0,0,0,0.55)" }}>
         <p className="eyebrow">
           {sectionLabel} Planet
           <span style={{ opacity: 0.5, padding: "0 6px" }}>·</span>
