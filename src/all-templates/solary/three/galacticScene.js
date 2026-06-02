@@ -191,7 +191,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
     // 5. Draw Caption Text at the bottom
     ctx.fillStyle = tokens.fg || (isLight ? "#1d0f3a" : "#ece5f6");
-    ctx.font = `bold ${Math.round(16 * scale)}px 'Space Mono', monospace`;
+    // Caption size knob: the `22` multiplier sets the on-card font size and
+    // (via scale = W/512) applies to both mobile and desktop. Raise/lower it
+    // to taste — bigger also reads sharper since larger glyphs survive the
+    // texture's mip filtering better.
+    ctx.font = `bold ${Math.round(22 * scale)}px 'Space Mono', monospace`;
     ctx.textAlign = "center";
     ctx.fillText((caption || "Memory").toUpperCase(), W / 2, H - 48 * scale);
   }
@@ -702,6 +706,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
      `scale = W/512` makes every proportion (incl. caption font) follow W. */
   const SATURN_CARD_TEX_W = isMobile ? 1280 : 1536;
   const SATURN_CARD_TEX_H = Math.round(SATURN_CARD_TEX_W * 1.25);
+  /* When the camera focuses Saturn, aim it this many world-units BELOW the
+     planet centre so Saturn — together with its ring + photo cards (both
+     children of the planet group) — rides higher in the frame instead of
+     sitting dead-centre. Bigger value = Saturn sits higher. */
+  const SATURN_FRAME_LIFT = 1.2;
   const SATURN_PHOTO_SPEED = 0.12;      // rad/sec — orbit AFTER assembly
   const STAGGER_TOTAL = 0.35;           // 0..1: portion of progress used for stagger
   const ASSEMBLE_THRESHOLD = 0.95;      // orbit kicks in only above this
@@ -918,9 +927,12 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
     const len = Math.hypot(p.x, p.z) || 1;
     const ux = p.x / len, uz = p.z / len;
+    // Saturn-only: aim below the planet centre so it (and its ring + cards)
+    // rides higher in the frame. Other planets stay centred (offset 0).
+    const lookY = key === "saturn" ? p.y - SATURN_FRAME_LIFT : p.y;
     return {
       pos: new THREE.Vector3(p.x + ux * dist, p.y + data.radius * CAMERA.heightOffset, p.z + uz * dist),
-      look: new THREE.Vector3(p.x, p.y, p.z),
+      look: new THREE.Vector3(p.x, lookY, p.z),
       fov: CAMERA.fovPlanet,
     };
   }
