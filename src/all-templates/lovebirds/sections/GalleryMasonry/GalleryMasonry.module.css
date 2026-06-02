@@ -1,7 +1,8 @@
 /* GalleryMasonry — vertical conveyor belt gallery */
 
 .section {
-  background: var(--bg, #d6d1be);
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
   padding: 80px 0 0;
   overflow: hidden;
 }
@@ -13,7 +14,7 @@
 }
 
 .eyebrow {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;

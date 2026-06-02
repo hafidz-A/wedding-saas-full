@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { enforceRateLimit } from '@/lib/security/rate-limit'
 
 const ALLOWED_COLORS = new Set(['gold', 'coral', 'sky', 'emerald', 'purple'])
 const RATE_LIMIT_MS = 30_000 // 30 seconds between submissions per slug
@@ -17,6 +18,11 @@ const lastSubmitBySlug = new Map<string, number>()
  * Rate-limited to 1 submission per 30 seconds per slug.
  */
 export async function POST(req: Request) {
+  // Cross-instance IP rate limit (the per-slug Map below is a best-effort
+  // in-memory extra that does not survive serverless cold starts).
+  const limited = await enforceRateLimit(req, 'guestbook', { windowMs: 60_000, max: 8 })
+  if (limited) return limited
+
   let body: any
   try {
     body = await req.json()

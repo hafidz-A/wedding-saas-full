@@ -23,8 +23,6 @@ export default function Shell({ config, slug, isDemo = false }) {
   const sections = config?.sections || []
   const music = config?.music
   const musicActive = music?.url && music.enabled !== false
-  const ornamentType = config?.theme?.ornamentType || 'birds'
-  const paletteKey = config?.theme?.defaultPalette
 
   // Tag <body> so Lovebirds' cream theme applies for this route only
   // (the shared app global.css carries just resets/tokens now).
@@ -36,11 +34,14 @@ export default function Shell({ config, slug, isDemo = false }) {
   return (
     <ThemeProvider
       defaultPalette={config?.theme?.defaultPalette}
+      defaultOrnament={config?.theme?.ornamentType}
       allowGuestSwitch={isDemo}
     >
       <SmoothScroll />
       <GlobalBackground />
-      <Ornaments ornamentType={ornamentType} paletteKey={paletteKey} />
+      {/* Ornaments reads the live palette + ornament type from ThemeProvider,
+          so demo switches re-colour the canvas birds and swap the shape. */}
+      <Ornaments />
       <BotanicalBorder />
       <SectionRenderer config={config} slug={slug} registry={sectionRegistry} />
       <FloatingNavbar sections={sections} />

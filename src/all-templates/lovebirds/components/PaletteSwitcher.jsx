@@ -10,8 +10,14 @@ import styles from './PaletteSwitcher.module.css'
  * Lists every lovebirds theme grouped Light / Dark; selecting one re-themes the
  * whole card live via ThemeProvider.setTheme.
  */
+const ORNAMENTS = [
+  { key: 'birds', label: 'Burung', emoji: '🐦' },
+  { key: 'butterflies', label: 'Kupu', emoji: '🦋' },
+  { key: 'perched', label: 'Bertengger', emoji: '🪵' },
+]
+
 export default function PaletteSwitcher() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, ornamentType, setOrnamentType } = useTheme()
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
   const toggleRef = useRef(null)
@@ -66,6 +72,23 @@ export default function PaletteSwitcher() {
           </div>
           <Group title="Terang" keys={THEME_GROUPS.light} />
           <Group title="Gelap" keys={THEME_GROUPS.dark} />
+
+          <div className={styles.divider} />
+          <div className={styles.groupTitle}>Ornamen</div>
+          <div className={styles.ornamentRow}>
+            {ORNAMENTS.map((o) => (
+              <button
+                key={o.key}
+                type="button"
+                className={`${styles.ornamentBtn} ${ornamentType === o.key ? styles.active : ''}`}
+                onClick={() => setOrnamentType(o.key)}
+                aria-pressed={ornamentType === o.key}
+              >
+                <span className={styles.emoji}>{o.emoji}</span>
+                {o.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </>

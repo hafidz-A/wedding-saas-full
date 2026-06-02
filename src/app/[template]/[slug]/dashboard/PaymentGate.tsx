@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTransition } from 'react'
 import { startCheckout } from '@/app/onboarding/actions'
+import RecheckPaymentButton from '@/app/profile/RecheckPaymentButton'
 import { useDashboardDict } from './DashboardI18nProvider'
 
 /**
@@ -57,6 +58,12 @@ export default function PaymentGate({
             </Link>
           )}
         </div>
+
+        {!isExpired && (
+          <div style={{ marginBottom: 22 }}>
+            <RecheckPaymentButton invitationId={invitationId} />
+          </div>
+        )}
 
         <p style={muted}>
           {t.slugLabel}: <code style={code}>{slug}</code>

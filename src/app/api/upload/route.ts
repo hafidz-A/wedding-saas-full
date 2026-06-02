@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
+import { enforceRateLimit } from '@/lib/security/rate-limit'
 
 const BUCKET = 'invitation-media'
 const ALLOWED_IMAGE_MIMES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
@@ -20,6 +21,9 @@ const MAX_AUDIO_BYTES = 12 * 1024 * 1024 // 12 MB
  * Returns the public URL.
  */
 export async function POST(req: Request) {
+  const limited = await enforceRateLimit(req, 'upload', { windowMs: 60_000, max: 20 })
+  if (limited) return limited
+
   const form = await req.formData().catch(() => null)
   if (!form) return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
 

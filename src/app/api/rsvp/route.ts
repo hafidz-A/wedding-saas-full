@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { encryptField } from '@/lib/crypto/app'
+import { enforceRateLimit } from '@/lib/security/rate-limit'
 
 /**
  * POST /api/rsvp
@@ -12,6 +13,9 @@ import { encryptField } from '@/lib/crypto/app'
  * the client.
  */
 export async function POST(req: Request) {
+  const limited = await enforceRateLimit(req, 'rsvp', { windowMs: 60_000, max: 10 })
+  if (limited) return limited
+
   let body: any
   try {
     body = await req.json()

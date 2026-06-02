@@ -68,8 +68,8 @@
   justify-self: end;
   padding: 12px 24px;
   border-radius: var(--border-radius-pill);
-  background: var(--color-coral);
-  color: #fff;
+  background: var(--accent, var(--color-coral));
+  color: var(--button-fg, #fff);
   font-family: var(--font-body);
   font-size: 13px;
   letter-spacing: 0.14em;
@@ -77,7 +77,7 @@
   font-weight: 500;
   transition: var(--transition-default);
 }
-.submit:hover { background: #d24632; transform: translateY(-2px); }
+.submit:hover { background: color-mix(in srgb, var(--accent, var(--color-coral)) 85%, #000); transform: translateY(-2px); }
 
 .grid {
   display: grid;

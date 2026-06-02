@@ -1,106 +1,156 @@
-/* Named theme presets — flat CSS-variable objects applied to <body> by ThemeProvider. */
+/* Named theme presets — flat CSS-variable objects applied to <body> by ThemeProvider.
+ *
+ * SINGLE SOURCE OF TRUTH for the Lovebirds palette. Every value below is copied
+ * verbatim from `style-guide-lovebirds.html` (the master reference, `themes`
+ * object at line ~2096) so the running app is pixel-identical to the guide.
+ *
+ *   --bg          section background override. `transparent` on light-background
+ *                 presets so the global ambient (--page-bg / --bg-image) and
+ *                 ornaments show through; a solid colour on dark presets.
+ *   --bg-image    the per-theme ambient gradient. applyTheme() paints this onto
+ *                 --page-bg so each palette gets its OWN glow (guide: `bgImage`).
+ *   --glass-text / --glass-text-muted — project-only vars (not in the guide);
+ *                 mirror --fg / --fg-muted so glass cards read correctly.
+ *
+ * Literal hex (not var(--color-*)) by design: this file IS the palette config,
+ * so the values must match the guide exactly with no token indirection drift.
+ */
 
 export const themes = {
   warmCream: {
     '--bg': 'transparent',
-    '--fg': 'var(--color-charcoal)',
-    '--fg-muted': 'var(--color-charcoal-light)',
-    '--accent': 'var(--color-coral)',
-    '--accent-soft': 'var(--color-coral-soft)',
-    '--glass-bg': 'rgba(255, 255, 255, 0.45)',
+    '--bg-image':
+      'radial-gradient(50% 38% at 50% 82%, rgba(232, 85, 62, 0.18), transparent 70%),' +
+      'radial-gradient(40% 32% at 12% 18%, rgba(245, 200, 66, 0.18), transparent 70%),' +
+      'radial-gradient(40% 32% at 88% 16%, rgba(45, 140, 78, 0.11), transparent 70%),' +
+      'radial-gradient(38% 28% at 8% 84%, rgba(107, 53, 168, 0.11), transparent 70%),' +
+      'radial-gradient(38% 28% at 92% 82%, rgba(61, 155, 193, 0.11), transparent 70%),' +
+      'linear-gradient(180deg, #FDF6EC 0%, #F7EBD7 100%)',
+    '--fg': '#2A2118',
+    '--fg-muted': '#5C4A3A',
+    '--accent': '#E8553E',
+    '--accent-soft': '#F4A38F',
+    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
     '--glass-border': 'rgba(255, 255, 255, 0.45)',
-    '--glass-text': 'var(--color-charcoal)',
-    '--glass-text-muted': 'var(--color-charcoal-light)',
-    '--button-bg': 'var(--color-charcoal)',
-    '--button-fg': 'var(--color-cream)',
+    '--glass-text': '#2A2118',
+    '--glass-text-muted': '#5C4A3A',
+    '--button-bg': '#E8553E',
+    '--button-fg': '#ffffff',
   },
 
   darkLuxury: {
-    '--bg': 'var(--color-charcoal)',
-    '--fg': 'var(--color-cream)',
+    '--bg': '#2A2118',
+    '--bg-image':
+      'radial-gradient(60% 50% at 50% 0%, rgba(245, 200, 66, 0.12), transparent 80%),' +
+      'linear-gradient(180deg, #2A2118 0%, #1e1711 100%)',
+    '--fg': '#FDF6EC',
     '--fg-muted': 'rgba(253, 246, 236, 0.78)',
-    '--accent': 'var(--color-gold)',
-    '--accent-soft': 'var(--color-gold-soft)',
+    '--accent': '#F5C842',
+    '--accent-soft': '#FBE3A6',
     '--glass-bg': 'rgba(30, 23, 17, 0.55)',
     '--glass-border': 'rgba(255, 255, 255, 0.15)',
-    '--glass-text': 'var(--color-cream)',
+    '--glass-text': '#FDF6EC',
     '--glass-text-muted': 'rgba(253, 246, 236, 0.78)',
-    '--button-bg': 'var(--color-cream)',
-    '--button-fg': 'var(--color-charcoal)',
+    '--button-bg': '#F5C842',
+    '--button-fg': '#2A2118',
   },
 
   emeraldGarden: {
     '--bg': 'transparent',
-    '--fg': 'var(--color-charcoal)',
-    '--fg-muted': 'var(--color-charcoal-light)',
-    '--accent': 'var(--color-emerald)',
-    '--accent-soft': 'var(--color-emerald-soft)',
-    '--glass-bg': 'rgba(255, 255, 255, 0.45)',
+    '--bg-image':
+      'radial-gradient(50% 38% at 50% 82%, rgba(45, 140, 78, 0.15), transparent 70%),' +
+      'radial-gradient(40% 32% at 12% 18%, rgba(245, 200, 66, 0.12), transparent 70%),' +
+      'linear-gradient(180deg, #FDF6EC 0%, #F7EBD7 100%)',
+    '--fg': '#2A2118',
+    '--fg-muted': '#5C4A3A',
+    '--accent': '#2D8C4E',
+    '--accent-soft': '#8FCBA1',
+    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
     '--glass-border': 'rgba(255, 255, 255, 0.45)',
-    '--glass-text': 'var(--color-charcoal)',
-    '--glass-text-muted': 'var(--color-charcoal-light)',
-    '--button-bg': 'var(--color-charcoal)',
-    '--button-fg': 'var(--color-cream)',
+    '--glass-text': '#2A2118',
+    '--glass-text-muted': '#5C4A3A',
+    '--button-bg': '#2D8C4E',
+    '--button-fg': '#ffffff',
   },
 
   skyEditorial: {
     '--bg': 'transparent',
-    '--fg': 'var(--color-charcoal)',
-    '--fg-muted': 'var(--color-charcoal-light)',
-    '--accent': 'var(--color-sky)',
-    '--accent-soft': 'var(--color-sky-soft)',
-    '--glass-bg': 'rgba(255, 255, 255, 0.45)',
+    '--bg-image':
+      'radial-gradient(50% 38% at 50% 82%, rgba(61, 155, 193, 0.15), transparent 70%),' +
+      'radial-gradient(40% 32% at 12% 18%, rgba(245, 200, 66, 0.12), transparent 70%),' +
+      'linear-gradient(180deg, #FDF6EC 0%, #F7EBD7 100%)',
+    '--fg': '#2A2118',
+    '--fg-muted': '#5C4A3A',
+    '--accent': '#3D9BC1',
+    '--accent-soft': '#A8D5E3',
+    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
     '--glass-border': 'rgba(255, 255, 255, 0.45)',
-    '--glass-text': 'var(--color-charcoal)',
-    '--glass-text-muted': 'var(--color-charcoal-light)',
-    '--button-bg': 'var(--color-charcoal)',
-    '--button-fg': 'var(--color-cream)',
+    '--glass-text': '#2A2118',
+    '--glass-text-muted': '#5C4A3A',
+    '--button-bg': '#3D9BC1',
+    '--button-fg': '#ffffff',
   },
 
   blossomVelvet: {
     '--bg': 'transparent',
-    '--fg': 'var(--color-plum)',
-    '--fg-muted': 'var(--color-charcoal-light)',
-    '--accent': 'var(--color-rose)',
-    '--accent-soft': 'var(--color-rose-soft)',
-    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
-    '--glass-border': 'rgba(255, 255, 255, 0.45)',
-    '--glass-text': 'var(--color-plum)',
-    '--glass-text-muted': 'var(--color-charcoal-light)',
-    '--button-bg': 'var(--color-plum)',
-    '--button-fg': 'var(--color-mauve-cream)',
+    '--bg-image':
+      'radial-gradient(50% 40% at 50% 80%, rgba(224, 107, 123, 0.22), transparent 70%),' +
+      'radial-gradient(40% 30% at 15% 20%, rgba(128, 43, 67, 0.15), transparent 70%),' +
+      'linear-gradient(180deg, #FAF0EC 0%, #F2B6C1 100%)',
+    '--fg': '#802B43',
+    '--fg-muted': '#6B5A5E',
+    '--accent': '#E06B7B',
+    '--accent-soft': '#F2B6C1',
+    '--glass-bg': 'rgba(255, 255, 255, 0.65)',
+    '--glass-border': 'rgba(255, 255, 255, 0.5)',
+    '--glass-text': '#802B43',
+    '--glass-text-muted': '#6B5A5E',
+    '--button-bg': '#802B43',
+    '--button-fg': '#FAF0EC',
   },
 
   sunsetClay: {
     '--bg': 'transparent',
-    '--fg': 'var(--color-terracotta)',
-    '--fg-muted': 'var(--color-sage)',
-    '--accent': 'var(--color-terracotta)',
-    '--accent-soft': 'var(--color-gold-sand)',
-    '--glass-bg': 'rgba(255, 255, 255, 0.55)',
-    '--glass-border': 'rgba(255, 255, 255, 0.45)',
-    '--glass-text': 'var(--color-terracotta)',
-    '--glass-text-muted': 'var(--color-sage)',
-    '--button-bg': 'var(--color-terracotta)',
-    '--button-fg': 'var(--color-peach-sand)',
+    '--bg-image':
+      'radial-gradient(50% 40% at 50% 80%, rgba(200, 90, 50, 0.18), transparent 70%),' +
+      'radial-gradient(40% 30% at 85% 15%, rgba(110, 130, 104, 0.18), transparent 70%),' +
+      'linear-gradient(180deg, #FAF2EA 0%, #EAD0A8 100%)',
+    '--fg': '#C85A32',
+    '--fg-muted': '#6E8268',
+    '--accent': '#C85A32',
+    '--accent-soft': '#EAD0A8',
+    '--glass-bg': 'rgba(255, 255, 255, 0.65)',
+    '--glass-border': 'rgba(255, 255, 255, 0.5)',
+    '--glass-text': '#C85A32',
+    '--glass-text-muted': '#6E8268',
+    '--button-bg': '#C85A32',
+    '--button-fg': '#FAF2EA',
   },
 
   midnightStardust: {
-    '--bg': 'var(--color-midnight)',
-    '--fg': 'var(--color-champagne-soft)',
+    '--bg': '#1E222D',
+    '--bg-image':
+      'radial-gradient(60% 50% at 50% 0%, rgba(227, 192, 141, 0.12), transparent 80%),' +
+      'radial-gradient(40% 40% at 10% 80%, rgba(93, 156, 236, 0.12), transparent 70%),' +
+      'linear-gradient(180deg, #1E222D 0%, #11141B 100%)',
+    '--fg': '#F5E5C9',
     '--fg-muted': 'rgba(245, 229, 201, 0.75)',
-    '--accent': 'var(--color-champagne)',
-    '--accent-soft': 'var(--color-celestial)',
+    '--accent': '#E3C08D',
+    '--accent-soft': '#5D9CEC',
     '--glass-bg': 'rgba(21, 37, 68, 0.65)',
-    '--glass-border': 'rgba(255, 255, 255, 0.15)',
-    '--glass-text': 'var(--color-champagne-soft)',
+    '--glass-border': 'rgba(255, 255, 255, 0.12)',
+    '--glass-text': '#F5E5C9',
     '--glass-text-muted': 'rgba(245, 229, 201, 0.75)',
-    '--button-bg': 'var(--color-champagne)',
-    '--button-fg': 'var(--color-midnight)',
+    '--button-bg': '#E3C08D',
+    '--button-fg': '#1E222D',
   },
 
   royalPlum: {
     '--bg': '#4A0E1D',
+    '--bg-image':
+      'radial-gradient(50% 40% at 50% 10%, rgba(245, 200, 66, 0.18), transparent 70%),' +
+      'radial-gradient(45% 45% at 85% 85%, rgba(224, 107, 123, 0.25), transparent 70%),' +
+      'linear-gradient(180deg, #4A0E1D 0%, #22030B 100%)',
     '--fg': '#FAF0EC',
     '--fg-muted': '#F2B6C1',
     '--accent': '#F5C842',
@@ -115,6 +165,10 @@ export const themes = {
 
   forestMist: {
     '--bg': '#12291B',
+    '--bg-image':
+      'radial-gradient(50% 45% at 15% 15%, rgba(158, 224, 177, 0.25), transparent 70%),' +
+      'radial-gradient(45% 40% at 85% 80%, rgba(245, 200, 66, 0.15), transparent 70%),' +
+      'linear-gradient(180deg, #12291B 0%, #06110A 100%)',
     '--fg': '#EAF0E9',
     '--fg-muted': '#A4B29E',
     '--accent': '#9EE0B1',
@@ -129,6 +183,10 @@ export const themes = {
 
   terracottaOasis: {
     '--bg': '#8E3A21',
+    '--bg-image':
+      'radial-gradient(50% 40% at 80% 20%, rgba(245, 200, 66, 0.22), transparent 70%),' +
+      'radial-gradient(45% 45% at 20% 80%, rgba(110, 130, 104, 0.22), transparent 70%),' +
+      'linear-gradient(180deg, #8E3A21 0%, #4D1A0D 100%)',
     '--fg': '#FAF2EA',
     '--fg-muted': '#EAD0A8',
     '--accent': '#FBE3A6',

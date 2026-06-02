@@ -3,7 +3,7 @@
 .section {
   position: relative;
   padding: var(--spacing-section, clamp(72px, 10vw, 120px)) var(--container-pad, clamp(20px, 4vw, 48px));
-  background: var(--bg, linear-gradient(180deg, var(--color-cream, #f5efe3), #ffffff));
+  background: transparent;
   overflow: hidden;
 }
 
@@ -21,7 +21,7 @@
 }
 
 .eyebrow {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;

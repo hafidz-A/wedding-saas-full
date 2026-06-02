@@ -3,7 +3,8 @@
 .section {
   position: relative;
   padding: clamp(64px, 9vw, 120px) clamp(20px, 4vw, 48px);
-  background: var(--bg, transparent);
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.9s ease, transform 0.9s ease;
@@ -22,7 +23,7 @@
 .header { text-align: center; margin-bottom: clamp(40px, 5vw, 64px); }
 
 .eyebrow {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -192,10 +193,11 @@
 }
 
 .cardName {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(22px, 2.2vw, 26px);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-size: clamp(19px, 2vw, 23px);
   line-height: 1.1;
   color: #fff;
   margin: 0;
@@ -358,9 +360,11 @@
   text-align: center;
 }
 .registryTitle {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
-  font-style: italic;
-  font-size: clamp(24px, 3vw, 34px);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-size: clamp(22px, 2.6vw, 30px);
   color: var(--fg, var(--color-charcoal));
   margin: 0 0 8px;
 }
@@ -409,8 +413,9 @@ a.registryCard:hover {
   display: block;
 }
 .registryName {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
-  font-size: clamp(18px, 2vw, 22px);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-weight: 600;
+  font-size: clamp(16px, 1.7vw, 19px);
   color: var(--fg, var(--color-charcoal));
 }
 .registryDesc {
@@ -492,8 +497,10 @@ a.registryCard:hover {
 }
 
 .input, .textarea, .select {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.95));
-  color: var(--fg, var(--color-charcoal));
+  /* Always a light field with dark text so it stays legible on every palette
+     (dark themes otherwise gave light text on a white focus bg = invisible). */
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-charcoal, #2A2118);
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.12));
   border-radius: 10px;
   padding: 13px 16px;
@@ -503,11 +510,15 @@ a.registryCard:hover {
   outline: 0;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
+.input::placeholder, .textarea::placeholder {
+  color: rgba(42, 33, 24, 0.5);
+}
 
 .input:focus, .textarea:focus, .select:focus {
   border-color: var(--accent, var(--color-coral));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--color-coral)) 18%, transparent);
   background: #fff;
+  color: var(--color-charcoal, #2A2118);
 }
 
 .textarea { resize: vertical; min-height: 110px; }

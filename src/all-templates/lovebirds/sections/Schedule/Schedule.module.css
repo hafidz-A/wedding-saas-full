@@ -14,7 +14,8 @@
 
 .section {
   position: relative;
-  background: var(--bg, transparent);
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
   overflow: visible;
 }
 
@@ -58,7 +59,7 @@
 .pinnedMode .header  { margin-bottom: 0; }
 
 .eyebrow {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -201,10 +202,11 @@
 .pinnedMode .iconWrap svg { width: 16px; height: 16px; }
 
 .eventTitle {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(18px, 2vw, 22px);
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  font-size: clamp(16px, 1.7vw, 19px);
   color: var(--fg, var(--color-charcoal));
   margin-bottom: 4px;
 }

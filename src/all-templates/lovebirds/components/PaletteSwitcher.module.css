@@ -24,6 +24,8 @@
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   box-shadow: 0 18px 48px rgba(42, 33, 24, 0.22);
   display: grid; gap: 10px;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
 }
 .header {
   display: flex; align-items: center; justify-content: space-between;
@@ -48,3 +50,16 @@
 }
 .swatchBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
 .dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(42, 33, 24, 0.15); }
+
+/* Ornament type chooser (Birds / Butterflies / Perched) */
+.divider { height: 1px; background: rgba(42, 33, 24, 0.10); margin: 4px 0 2px; }
+.ornamentRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ornamentBtn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; border-radius: 10px;
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  background: #fff; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; font-size: 10px; color: #2A2118;
+}
+.ornamentBtn .emoji { font-size: 18px; line-height: 1; }
+.ornamentBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }

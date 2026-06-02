@@ -3,7 +3,9 @@
 .section {
   position: relative;
   min-height: 100vh;
-  background: var(--bg, transparent);
+  /* Transparent so the global ornament backdrop (birds/petals) shows through
+     in every palette — only Hero/Quote/RSVP/Footer paint an opaque band. */
+  background: transparent;
   /* Tighter padding so section header + card + description fit in 100vh
      during the GSAP pin */
   padding: clamp(20px, 3vw, 48px) clamp(20px, 4vw, 48px);
@@ -20,7 +22,7 @@
 }
 
 .sectionEyebrow {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;

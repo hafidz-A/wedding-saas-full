@@ -3,6 +3,16 @@
   padding: clamp(64px, 12vw, 140px) var(--container-pad, 24px);
 }
 
+/* Dark palettes: the verse band must match the dark page so the theme's
+   light --fg text (used by QuoteBlock) stays readable — a cream band here
+   would render light text on cream = invisible. */
+:global(body.theme-dark-luxury) .quote {
+  background: #2A2118;
+}
+:global(body.theme-midnight-stardust) .quote {
+  background: #1E222D;
+}
+
 .inner {
   max-width: 760px;
   margin: 0 auto;

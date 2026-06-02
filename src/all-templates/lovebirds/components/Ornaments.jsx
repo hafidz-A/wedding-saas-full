@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import './Ornaments.css'
 import { resolveOrnamentTheme } from '../config/ornamentThemes.js'
+import { useTheme } from './ThemeProvider.jsx'
 
 // SVG path sets — copied verbatim from style-guide-lovebirds.html lines 2310-2331.
 const SHAPES = {
@@ -25,7 +26,12 @@ const SHAPES = {
 const BG_BIRDS = [5, 6, 7, 8, 9]
 const FG_BIRDS = [1, 2, 3]
 
-export default function Ornaments({ ornamentType = 'birds', paletteKey } = {}) {
+export default function Ornaments() {
+  // Live values from ThemeProvider — in demo these change as the guest switches
+  // palette/ornament; on a published invitation they stay locked to the
+  // couple's saved defaults. The flying SVG birds inherit colour via CSS
+  // (var(--accent)); the perched canvas resolves its palette below.
+  const { theme: paletteKey, ornamentType } = useTheme()
   const isPerched = ornamentType === 'perched'
   const inner = SHAPES[ornamentType] || SHAPES.birds
 

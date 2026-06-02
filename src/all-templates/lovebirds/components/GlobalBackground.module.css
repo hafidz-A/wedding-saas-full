@@ -25,27 +25,30 @@
   height: clamp(200px, 30vw, 500px);
 }
 
+/* Washes are tinted from the active palette (var --accent / --accent-soft via
+   color-mix) so the backdrop follows the theme instead of leaking a fixed
+   gold/coral/emerald/purple set onto dark palettes. */
 .wash1 {
   top: 5%;  left: 2%;
-  background: radial-gradient(circle, rgba(245, 200, 66, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-soft, #F4A38F) 30%, transparent) 0%, transparent 70%);
   animation-delay: 0s;
 }
 
 .wash2 {
   top: 30%; right: 0%;
-  background: radial-gradient(circle, rgba(232, 85, 62, 0.14) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent, #E8553E) 22%, transparent) 0%, transparent 70%);
   animation-delay: 3s;
 }
 
 .wash3 {
   bottom: 25%; left: 4%;
-  background: radial-gradient(circle, rgba(45, 140, 78, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent, #E8553E) 18%, transparent) 0%, transparent 70%);
   animation-delay: 6s;
 }
 
 .wash4 {
   bottom: 5%; right: 5%;
-  background: radial-gradient(circle, rgba(107, 53, 168, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-soft, #F4A38F) 20%, transparent) 0%, transparent 70%);
   animation-delay: 9s;
 }
 

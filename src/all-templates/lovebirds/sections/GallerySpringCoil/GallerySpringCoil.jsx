@@ -788,6 +788,29 @@ export default function GallerySpringCoil({
     scene.addEventListener('pointermove', onPointerMove)
     scene.addEventListener('pointerleave', onPointerLeave)
 
+    // iPad orientation flip (landscape⇄portrait) is the classic breaker here:
+    // iPadOS reports the new innerWidth/innerHeight a beat AFTER the
+    // orientationchange event, so GSAP's own resize-refresh recomputes the
+    // pinned spacer + start/end against the stale (pre-rotation) viewport.
+    // The pin range ends up wrong and the coil appears frozen. We refresh
+    // again once the dimensions have actually settled. A double-rAF + short
+    // timeout covers both the immediate resize and the late iPad report.
+    let refreshTimer = 0
+    const refreshNow = () => {
+      // Re-evaluate the active range and kick the loop if we're pinned, so
+      // the coil never sits frozen after the layout recalculates.
+      ScrollTrigger.refresh()
+    }
+    const handleViewportChange = () => {
+      window.clearTimeout(refreshTimer)
+      refreshTimer = window.setTimeout(refreshNow, 320)
+    }
+    window.addEventListener('orientationchange', handleViewportChange)
+    window.addEventListener('resize', handleViewportChange)
+    // visualViewport fires on the iPad URL-bar/keyboard resize too, which is
+    // exactly when the pin height drifts — listen if available.
+    window.visualViewport?.addEventListener('resize', handleViewportChange)
+
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: section,
@@ -822,8 +845,11 @@ export default function GallerySpringCoil({
           startLoop()
         },
         onRefresh: (self) => {
-          // After GSAP recalculates on viewport resize, restart the
-          // loop if the section is currently in its active range.
+          // After GSAP recalculates on viewport resize/orientation flip,
+          // re-sync progress to the corrected pin range and restart the loop
+          // if the section is currently in its active range — otherwise the
+          // coil would paint a stale frame (or none) and look frozen.
+          scrollProgress.current = self.progress
           if (self.isActive) {
             inView = true
             startLoop()
@@ -842,6 +868,10 @@ export default function GallerySpringCoil({
       observer.disconnect()
       scene.removeEventListener('pointermove', onPointerMove)
       scene.removeEventListener('pointerleave', onPointerLeave)
+      window.clearTimeout(refreshTimer)
+      window.removeEventListener('orientationchange', handleViewportChange)
+      window.removeEventListener('resize', handleViewportChange)
+      window.visualViewport?.removeEventListener('resize', handleViewportChange)
       if (raf) cancelAnimationFrame(raf)
       ctx.revert()
     }

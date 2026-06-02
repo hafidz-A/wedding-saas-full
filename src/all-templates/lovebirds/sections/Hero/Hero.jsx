@@ -463,7 +463,13 @@ export default function Hero(props) {
                   { label: 'Sec', value: parts.seconds },
                 ].map((c) => (
                   <li key={c.label} className={styles.countCell}>
-                    <span className={styles.countValue}>
+                    {/* The live value (esp. seconds) is computed from Date.now(),
+                        so the server-rendered number and the value at client
+                        hydration differ by ~1s. suppressHydrationWarning tells
+                        React this text mismatch is expected — without it the
+                        mismatch throws and forces the whole Suspense boundary to
+                        re-render on the client (the dev "2 errors" toast). */}
+                    <span className={styles.countValue} suppressHydrationWarning>
                       {String(c.value).padStart(2, '0')}
                     </span>
                     <span className={styles.countLabel}>{c.label}</span>

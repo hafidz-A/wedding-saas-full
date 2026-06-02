@@ -2,7 +2,8 @@
 
 .section {
   position: relative;
-  background: var(--bg, transparent);
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
   min-height: 160vh;
   padding: 0 var(--container-pad);
   overflow-x: clip;
@@ -61,7 +62,7 @@
 .header { text-align: center; margin-bottom: clamp(48px, 7vw, 88px); }
 
 .eyebrow {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -248,7 +249,9 @@
   font-size: 11px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--fg-muted, var(--color-charcoal-light));
+  /* Backface is always a cream paper card, so keep the date dark on every
+     palette (theme --fg-muted goes light in dark themes = invisible here). */
+  color: var(--color-charcoal-light, #6B5B4A);
   font-weight: 500;
 }
 

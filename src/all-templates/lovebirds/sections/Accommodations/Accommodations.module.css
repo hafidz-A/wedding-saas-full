@@ -1,6 +1,6 @@
 .section {
   position: relative;
-  background: var(--bg, transparent);
+  background: transparent;
   padding: var(--spacing-section) var(--container-pad);
   overflow: visible;
   opacity: 0;
@@ -14,7 +14,7 @@
 .header { text-align: center; margin-bottom: clamp(40px, 6vw, 64px); }
 
 .eyebrow {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;
