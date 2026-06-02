@@ -52,3 +52,35 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
   { id: 'guestbook', premiumOnly: true, stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
 ]
+
+// Solary shares the same dashboard tabs as lovebirds EXCEPT the Background/Ornament
+// tab — solary renders its own Three.js galactic scene, so that category is dropped.
+// Copy lives under dashboard.tabs.tutorial.solary.<categoryId>; screenshots live at
+// public/tutorial/solary/<key>.png.
+export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
+  { id: 'start',     stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
+    shots: [{ key: 'start-header', captionKey: 'header' }] },
+  { id: 'editor',    stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 2,
+    shots: [
+      { key: 'editor-list',         captionKey: 'list' },
+      { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
+      { key: 'editor-save',         captionKey: 'save' },
+    ] },
+  { id: 'palette',   stepCount: 3, alwaysCount: 1, neverCount: 1, tipCount: 1,
+    shots: [{ key: 'palette-grid', captionKey: 'grid' }] },
+  { id: 'music',     stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
+    shots: [{ key: 'music-upload', captionKey: 'upload' }] },
+  { id: 'rsvps',     stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 1,
+    shots: [{ key: 'rsvps-table', captionKey: 'table' }] },
+  { id: 'gifts',     stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+    shots: [{ key: 'gifts-table', captionKey: 'table' }] },
+  { id: 'guests',    stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
+    shots: [{ key: 'guests-share', captionKey: 'share' }] },
+  { id: 'guestbook', premiumOnly: true, stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+    shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
+]
+
+/** Category list for a template's tutorial. Solary drops the ornament category. */
+export function getTutorialCategories(template: string): TutorialCategory[] {
+  return template === 'solary' ? TUTORIAL_CATEGORIES_SOLARY : TUTORIAL_CATEGORIES
+}

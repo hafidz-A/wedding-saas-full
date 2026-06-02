@@ -87,8 +87,8 @@ export default function DashboardClient({
     // meaningful for lovebirds. Solary renders its own Three.js galactic scene,
     // so the tab is hidden there.
     if (template !== 'solary') keys.push('ornament')
-    // Tutorial is lovebirds-only for now (solary gets its own later).
-    if (template === 'lovebirds') keys.push('tutorial')
+    // Tutorial tab — both templates have their own categorized guide + screenshots.
+    keys.push('tutorial')
     return keys
   })()
 
@@ -308,7 +308,7 @@ export default function DashboardClient({
             )}
 
             {tab === 'tutorial' && (
-              <TutorialTab isPremium={invitation.plan === 'premium'} />
+              <TutorialTab isPremium={invitation.plan === 'premium'} template={template} />
             )}
           </motion.div>
         </AnimatePresence>

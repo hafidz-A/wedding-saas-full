@@ -366,6 +366,150 @@ export const dashboard = {
           never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
           shots: { ledger: 'Ledger kehadiran tamu (terbuka setelah Premium).' },
         },
+        // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
+        // merges this over the lovebirds copy when template === 'solary'.
+        solary: {
+          start: {
+            title: 'Mulai di sini',
+            summary: 'Kenalan dengan dashboard undangan Solary: status undangan, masa aktif, dan tombol penting di bar atas.',
+            steps: [
+              'Login pakai email & password undangan kamu.',
+              'Perhatikan status Terbit/Draf: Draf = tamu belum bisa membuka; Terbit = undangan sudah live.',
+              'Lihat masa aktif di kanan atas. Kalau banner "belum bayar" masih muncul, undangan bisa kedaluwarsa.',
+              'Tombol "Lihat live" membuka undangan tata-surya kamu di tab baru. Toggle Bahasa mengganti tampilan ID/EN dashboard.',
+            ],
+            always: [
+              'Pastikan status Terbit sebelum membagikan link ke tamu.',
+              'Cek masa aktif belum berakhir.',
+            ],
+            never: [
+              'Jangan bagikan link saat undangan masih Draf.',
+              'Jangan lupa bayar sebelum hari-H supaya undangan tidak kedaluwarsa.',
+            ],
+            tips: [
+              'Klik "Lihat live" tiap selesai mengedit — Solary penuh animasi, jadi enak dicek langsung.',
+            ],
+            shots: {
+              header: 'Bar atas: status Terbit/Draf, masa aktif, tombol Lihat live, dan toggle Bahasa.',
+            },
+          },
+          editor: {
+            title: 'Editor Section',
+            summary: 'Atur isi, foto, dan urutan tiap "planet" (bagian) undangan.',
+            steps: [
+              'Tiap bagian Solary adalah sebuah planet di panel kiri — seret (drag) untuk mengubah urutannya.',
+              'Klik sebuah planet untuk mengedit teks dan foto; unggah foto lewat tombol upload (maks 5 MB per gambar).',
+              'Gerbang Pembuka terkunci di paling depan dan Penutup di paling belakang; Galeri, RSVP, dan Hadiah juga terkunci (ikon 🔒) — tidak bisa dipindah atau diganti jenisnya.',
+              'Jumlah planet sudah tetap — kamu tidak bisa menambah atau menghapus bagian, hanya menata dan mengisinya.',
+              'Planet yang tidak terkunci bisa diganti jenisnya lewat "Ganti tipe section" (mis. Kutipan → Jadwal / FAQ). Klik Simpan saat selesai.',
+            ],
+            always: [
+              'Klik Simpan setiap selesai mengedit.',
+              'Cek hasil lewat "Lihat live" — pastikan planet & animasinya tampil benar.',
+              'Pakai foto dengan rasio wajar supaya tidak gepeng saat ditempel di planet.',
+            ],
+            never: [
+              'Jangan reload halaman sebelum Simpan — perubahan akan hilang.',
+              'Jangan harap memindah atau mengganti Galeri, RSVP, dan Hadiah — ketiganya terkunci.',
+              'Jangan cari tombol Tambah/Hapus planet — sengaja dimatikan agar tata surya tetap utuh & rapi.',
+              'Jangan mengunggah file non-gambar ke slot foto.',
+            ],
+            tips: [
+              'Susun urutan planet mengikuti alur cerita kalian — itu juga urutan tamu menjelajah.',
+              'Label bagian terlalu panjang? Persingkat supaya navigasi rapi.',
+            ],
+            shots: {
+              list: 'Daftar planet — seret ⠿ untuk urutkan, klik untuk edit. Tidak ada tombol tambah/hapus.',
+              galleryRule: 'Planet tak terkunci bisa berganti jenis lewat "Ganti tipe section". Galeri / RSVP / Hadiah terkunci 🔒.',
+              save: 'Tombol Simpan — selalu klik setelah mengedit.',
+            },
+          },
+          palette: {
+            title: 'Palette Warna',
+            summary: 'Pilih skema warna kosmik yang akan dilihat tamu. Latar galaksi ikut menyesuaikan otomatis.',
+            steps: [
+              'Pilih satu palette dari kelompok Gelap (Purple, Nebula, Rose, Emerald).',
+              'Atau pilih dari kelompok Terang (Lavender, Sunburst, Rose, Botanical).',
+              'Klik Simpan — warna planet dan latar galaksi langsung mengikuti pilihanmu.',
+            ],
+            always: ['Simpan setelah memilih palette.'],
+            never: ['Jangan lupa Simpan — kalau tidak, tamu masih melihat palette lama.'],
+            tips: ['Palette Gelap cocok untuk kesan malam berbintang; Terang untuk nuansa pastel lembut.'],
+            shots: { grid: 'Dua kelompok palette (Gelap & Terang) — satu sedang dipilih.' },
+          },
+          music: {
+            title: 'Musik Latar',
+            summary: 'Lagu yang diputar di latar undangan lewat popup saat tamu membuka halaman.',
+            steps: [
+              'Unggah satu file MP3 (maksimal 12 MB).',
+              'Atur teks popup: judul dan tombol Terima/Tutup.',
+              'Aktifkan toggle Aktif, atur Loop, lalu klik Simpan.',
+            ],
+            always: [
+              'Aktifkan toggle Aktif kalau ingin musik muncul.',
+              'Simpan setelah mengunggah.',
+            ],
+            never: [
+              'Jangan unggah file lebih dari 12 MB.',
+              'Jangan lupa Aktif — kalau off, popup musik tidak muncul.',
+            ],
+            tips: ['Pilih lagu lembut berdurasi panjang supaya tidak cepat mengulang.'],
+            shots: { upload: 'Panel unggah MP3, teks popup, dan toggle Aktif.' },
+          },
+          rsvps: {
+            title: 'RSVP',
+            summary: 'Respons kehadiran dari tamu undangan.',
+            steps: [
+              'Lihat ringkasan: Respons, Hadir, Tidak hadir, dan estimasi tamu.',
+              'Filter atau cari, lalu Unduh CSV untuk rekap.',
+            ],
+            always: ['Segarkan untuk melihat respons terbaru.'],
+            never: ['Jangan anggap kosong = error — terisi saat tamu submit form.'],
+            tips: ['Unduh CSV untuk rekap data RSVP kapan saja.'],
+            shots: { table: 'Tabel RSVP beserta statistik di atasnya.' },
+          },
+          gifts: {
+            title: 'Hadiah',
+            summary: 'Konfirmasi amplop/hadiah yang dikirim tamu.',
+            steps: [
+              'Lihat daftar konfirmasi dan total yang disebutkan.',
+              'Cari nama atau akun, lalu Unduh CSV.',
+            ],
+            always: ['Cocokkan konfirmasi dengan mutasi rekening kalian sendiri.'],
+            never: ['Jangan jadikan angka di sini sebagai bukti transfer — ini input dari tamu.'],
+            shots: { table: 'Tabel konfirmasi hadiah.' },
+          },
+          guests: {
+            title: 'Tamu',
+            summary: 'Buat undangan personal dan bagikan link khusus tiap tamu.',
+            steps: [
+              'Tambahkan nama tamu.',
+              'Salin link personal masing-masing tamu.',
+              'Pakai template pesan untuk mengirim lewat WhatsApp.',
+            ],
+            always: [
+              'Pakai link personal supaya nama tamu muncul di undangan.',
+              'Cek nama sebelum mengirim.',
+            ],
+            never: [
+              'Jangan kirim link generic kalau ingin sapaan personal.',
+              'Jangan lupa mengatur template pesan terlebih dahulu.',
+            ],
+            tips: ['Kirim bertahap, jangan sekaligus, supaya mudah dipantau.'],
+            shots: { share: 'Daftar tamu dengan tombol salin link dan pesan.' },
+          },
+          guestbook: {
+            title: 'Buku Tamu',
+            summary: 'Catatan kehadiran tamu saat acara berlangsung (fitur Premium).',
+            steps: [
+              'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya) untuk membukanya.',
+              'Setelah Premium: daftar terisi otomatis dari RSVP yang menyatakan hadir; tambahkan tamu yang datang langsung lewat "+ Tamu Datang".',
+            ],
+            always: ['Gunakan saat hari-H untuk mencatat kehadiran tamu (termasuk walk-in).'],
+            never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
+            shots: { ledger: 'Ledger kehadiran — otomatis dari RSVP + walk-in (terbuka setelah Premium).' },
+          },
+        },
       },
     },
     page: {
@@ -831,6 +975,150 @@ export const dashboard = {
           always: ['Use it on the day to record guest attendance.'],
           never: ['Don\'t worry about upgrading — your invitation stays online the whole time, nothing is lost.'],
           shots: { ledger: 'The guest attendance ledger (unlocked after Premium).' },
+        },
+        // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
+        // merges this over the lovebirds copy when template === 'solary'.
+        solary: {
+          start: {
+            title: 'Start here',
+            summary: 'Get oriented in your Solary dashboard: invitation status, active period, and the key buttons in the top bar.',
+            steps: [
+              'Sign in with your invitation email & password.',
+              'Watch the Published/Draft status: Draft = guests can\'t open it yet; Published = your invitation is live.',
+              'Check the active period at the top right. If an "unpaid" banner is still showing, your invitation can expire.',
+              'The "View live" button opens your solar-system invitation in a new tab. The Language toggle switches the dashboard\'s ID/EN.',
+            ],
+            always: [
+              'Make sure the status is Published before sharing the link with guests.',
+              'Check that the active period hasn\'t ended.',
+            ],
+            never: [
+              'Don\'t share the link while the invitation is still Draft.',
+              'Don\'t forget to pay before the big day so your invitation doesn\'t expire.',
+            ],
+            tips: [
+              'Click "View live" after each edit — Solary is animation-heavy, so it\'s best to check it directly.',
+            ],
+            shots: {
+              header: 'Top bar: Published/Draft status, active period, View live button, and the Language toggle.',
+            },
+          },
+          editor: {
+            title: 'Section Editor',
+            summary: 'Arrange the content, photos, and order of each "planet" (section) of your invitation.',
+            steps: [
+              'Each Solary section is a planet in the left panel — drag to reorder.',
+              'Click a planet to edit its text and photos; upload photos via the upload button (max 5 MB per image).',
+              'The Opening planet is locked to the very front and the Closing planet to the very back; Gallery, RSVP, and Gifts are locked too (🔒 icon) — they can\'t be moved or type-changed.',
+              'The number of planets is fixed — you can\'t add or remove sections, only arrange and fill them in.',
+              'Non-locked planets can be changed to another type via "Change section type" (e.g. Quote → Schedule / FAQ). Click Save when done.',
+            ],
+            always: [
+              'Click Save every time you finish editing.',
+              'Check the result via "View live" — confirm the planets and animations render correctly.',
+              'Use photos with a sensible aspect ratio so they don\'t stretch on the planets.',
+            ],
+            never: [
+              'Don\'t reload the page before saving — your changes will be lost.',
+              'Don\'t try to move or change the Gallery, RSVP, and Gifts — all three are locked.',
+              'Don\'t look for an Add/Remove planet button — they\'re disabled on purpose to keep the solar system complete and tidy.',
+              'Don\'t upload non-image files into a photo slot.',
+            ],
+            tips: [
+              'Order the planets to follow your story — that\'s also the order guests travel through.',
+              'Section label too long? Shorten it so navigation stays tidy.',
+            ],
+            shots: {
+              list: 'Planet list — drag ⠿ to reorder, click to edit. No add/remove buttons.',
+              galleryRule: 'Non-locked planets can change type via "Change section type". Gallery / RSVP / Gifts are locked 🔒.',
+              save: 'The Save button — always click it after editing.',
+            },
+          },
+          palette: {
+            title: 'Color Palette',
+            summary: 'Pick the cosmic color scheme your guests will see. The galactic background adapts automatically.',
+            steps: [
+              'Pick a palette from the Dark group (Purple, Nebula, Rose, Emerald).',
+              'Or pick from the Light group (Lavender, Sunburst, Rose, Botanical).',
+              'Click Save — the planet colors and galactic background follow your choice immediately.',
+            ],
+            always: ['Save after picking a palette.'],
+            never: ['Don\'t forget to Save — otherwise guests still see the old palette.'],
+            tips: ['Dark palettes suit a starry-night mood; Light ones give a soft pastel feel.'],
+            shots: { grid: 'The two palette groups (Dark & Light) — one is selected.' },
+          },
+          music: {
+            title: 'Background Music',
+            summary: 'A song played in the background of your invitation via a popup when guests open the page.',
+            steps: [
+              'Upload one MP3 file (max 12 MB).',
+              'Set the popup text: title and the Accept/Dismiss buttons.',
+              'Turn on the Enabled toggle, set Loop, then click Save.',
+            ],
+            always: [
+              'Turn on the Enabled toggle if you want the music to appear.',
+              'Save after uploading.',
+            ],
+            never: [
+              'Don\'t upload a file larger than 12 MB.',
+              'Don\'t forget Enabled — if it\'s off, the music popup won\'t show.',
+            ],
+            tips: ['Pick a soft, long song so it doesn\'t loop too soon.'],
+            shots: { upload: 'The MP3 upload panel, popup text, and the Enabled toggle.' },
+          },
+          rsvps: {
+            title: 'RSVP',
+            summary: 'Attendance responses from your guests.',
+            steps: [
+              'See the summary: Responses, Attending, Declined, and the guest estimate.',
+              'Filter or search, then Download CSV for a recap.',
+            ],
+            always: ['Refresh to see the latest responses.'],
+            never: ['Don\'t assume empty = error — it fills in as guests submit the form.'],
+            tips: ['Download the CSV for an RSVP recap anytime.'],
+            shots: { table: 'The RSVP table with stats above it.' },
+          },
+          gifts: {
+            title: 'Gifts',
+            summary: 'Confirmations of gifts/envelopes your guests send.',
+            steps: [
+              'See the list of confirmations and the total mentioned.',
+              'Search by name or account, then Download CSV.',
+            ],
+            always: ['Cross-check confirmations against your own bank statement.'],
+            never: ['Don\'t treat the numbers here as proof of transfer — they\'re guest input.'],
+            shots: { table: 'The gift confirmations table.' },
+          },
+          guests: {
+            title: 'Guests',
+            summary: 'Create personal invitations and share a unique link for each guest.',
+            steps: [
+              'Add a guest name.',
+              'Copy each guest\'s personal link.',
+              'Use the message template to send via WhatsApp.',
+            ],
+            always: [
+              'Use the personal link so the guest\'s name shows on the invitation.',
+              'Double-check the name before sending.',
+            ],
+            never: [
+              'Don\'t send a generic link if you want a personal greeting.',
+              'Don\'t forget to set up the message template first.',
+            ],
+            tips: ['Send in batches, not all at once, so it\'s easier to track.'],
+            shots: { share: 'The guest list with copy-link and message buttons.' },
+          },
+          guestbook: {
+            title: 'Guestbook',
+            summary: 'A record of guest attendance during the event (Premium feature).',
+            steps: [
+              'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference) to unlock it.',
+              'Once Premium: the list fills in automatically from RSVPs marked attending; add guests who show up in person via "+ Walk-in".',
+            ],
+            always: ['Use it on the day to record guest attendance (including walk-ins).'],
+            never: ['Don\'t worry about upgrading — your invitation stays online the whole time, nothing is lost.'],
+            shots: { ledger: 'The attendance ledger — auto-filled from RSVP + walk-ins (unlocked after Premium).' },
+          },
         },
       },
     },

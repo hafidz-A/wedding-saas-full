@@ -2,16 +2,24 @@
 
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
-import { TUTORIAL_CATEGORIES, type TutorialCategory } from './tutorial/content'
+import { getTutorialCategories, type TutorialCategory } from './tutorial/content'
 import styles from './TutorialTab.module.css'
 
-const SHOT_BASE = '/tutorial/lovebirds'
-
-export default function TutorialTab({ isPremium }: { isPremium: boolean }) {
+export default function TutorialTab({
+  isPremium,
+  template = 'lovebirds',
+}: {
+  isPremium: boolean
+  template?: string
+}) {
   const dict = useDashboardDict()
+  // Screenshots live at public/tutorial/<template>/<key>.png.
+  const SHOT_BASE = `/tutorial/${template}`
   // The tutorial copy tree is hand-authored; index it loosely by category id.
-  const t = (dict.tabs as any).tutorial
-  const cats = TUTORIAL_CATEGORIES.filter((c) => !c.premiumOnly || isPremium)
+  // Solary keeps its own copy under tutorial.solary.*, with headings/navTitle shared.
+  const root = (dict.tabs as any).tutorial
+  const t = template === 'solary' && root.solary ? { ...root, ...root.solary } : root
+  const cats = getTutorialCategories(template).filter((c) => !c.premiumOnly || isPremium)
   const [active, setActive] = useState<string>(cats[0]?.id ?? 'start')
   const cat = cats.find((c) => c.id === active) ?? cats[0]
   const c = t[cat.id]
@@ -36,7 +44,7 @@ export default function TutorialTab({ isPremium }: { isPremium: boolean }) {
       <h2 className={styles.title}>{c.title}</h2>
       <p className={styles.summary}>{c.summary}</p>
 
-      {cat.shots[0] && <Shot cat={cat} c={c} index={0} />}
+      {cat.shots[0] && <Shot cat={cat} c={c} index={0} base={SHOT_BASE} />}
 
       <p className={styles.h}>{t.headings.steps}</p>
       <ol className={styles.steps}>
@@ -46,7 +54,7 @@ export default function TutorialTab({ isPremium }: { isPremium: boolean }) {
       </ol>
 
       {cat.shots.slice(1).map((_, i) => (
-        <Shot key={i + 1} cat={cat} c={c} index={i + 1} />
+        <Shot key={i + 1} cat={cat} c={c} index={i + 1} base={SHOT_BASE} />
       ))}
 
       <Block title={t.headings.always} cls={styles.always} items={list(cat.alwaysCount, c.always)} />
@@ -72,14 +80,14 @@ function Block({ title, cls, items }: { title: string; cls: string; items: strin
   )
 }
 
-function Shot({ cat, c, index }: { cat: TutorialCategory; c: any; index: number }) {
+function Shot({ cat, c, index, base }: { cat: TutorialCategory; c: any; index: number; base: string }) {
   const shot = cat.shots[index]
   if (!shot) return null
   const caption: string | undefined = c.shots?.[shot.captionKey]
   return (
     <figure className={styles.shot}>
       <img
-        src={`${SHOT_BASE}/${shot.key}.png`}
+        src={`${base}/${shot.key}.png`}
         alt={caption ?? ''}
         loading="lazy"
         onError={(e) => {
