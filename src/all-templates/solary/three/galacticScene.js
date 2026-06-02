@@ -22,11 +22,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
   const isLowEnd = isMobile || window.devicePixelRatio < 1.5;
   const PERF = {
-    // Cap at 2 on every device (was hard-locked to 1 on mobile, which rendered
+    // Cap at 3 on every device (was hard-locked to 1 on mobile, which rendered
     // the whole WebGL scene — Saturn + photo sprites — at 1/DPR resolution and
     // let the browser upscale it, so on a DPR-3 phone everything looked blurry).
-    // 2 is the sharp-vs-fillrate sweet spot; drop to 1.5 if low-end FPS suffers.
-    pixelRatio: Math.min(window.devicePixelRatio, 2),
+    // 3 = native on most phones (sharpest); drop to 2 if low-end FPS suffers.
+    pixelRatio: Math.min(window.devicePixelRatio, 3),
     starsNear: isMobile ? 250 : 700,
     starsMid: isMobile ? 700 : 1800,
     starsFar: isMobile ? 1800 : Math.min(5000, Math.floor(starfieldDensity * 0.6)),
@@ -693,6 +693,15 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   const SATURN_PHOTO_CARD_H = 1.55;     // ~1.8× sebelumnya (0.85)
   const SATURN_BODY_R        = 1.7;     // saturn sphere radius (for occlusion test)
   const SATURN_PHOTO_MAX_ANISO = Math.min(16, renderer.capabilities?.getMaxAnisotropy?.() ?? 16);
+  /* Card texture resolution. The whole card — photo + baked caption — is one
+     canvas; the front/centre card renders large on screen, so 1024 left the
+     small caption text magnified (upscaled) → blurry. Bump it, but keep mobile
+     conservative because every card holds its own texture simultaneously
+     (~N cards live at once) and 2048² across 18+ cards would blow the GPU
+     memory budget on phones. Aspect MUST stay 0.8 (H = W × 1.25). The card's
+     `scale = W/512` makes every proportion (incl. caption font) follow W. */
+  const SATURN_CARD_TEX_W = isMobile ? 1280 : 1536;
+  const SATURN_CARD_TEX_H = Math.round(SATURN_CARD_TEX_W * 1.25);
   const SATURN_PHOTO_SPEED = 0.12;      // rad/sec — orbit AFTER assembly
   const STAGGER_TOTAL = 0.35;           // 0..1: portion of progress used for stagger
   const ASSEMBLE_THRESHOLD = 0.95;      // orbit kicks in only above this
@@ -713,8 +722,8 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
   function loadPhotoTexture(photoObj, tokens) {
     const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 1280;
+    canvas.width = SATURN_CARD_TEX_W;
+    canvas.height = SATURN_CARD_TEX_H;
 
     // Draw initial state (loading/placeholder)
     drawCardOnCanvas(canvas, null, photoObj.caption, tokens);
