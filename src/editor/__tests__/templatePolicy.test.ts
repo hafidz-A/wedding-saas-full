@@ -11,10 +11,12 @@ describe('lovebirds gallery swap group', () => {
     const opts = availableSwapTypes(reg, sections, lb, 'g1', 'galleryMasonry')
     expect(new Set(opts)).toEqual(new Set(['galleryMasonry', 'gallerySpringCoil']))
   })
-  it('omits the other gallery if already used by another slot', () => {
-    const sections = [{ id: 'g1', type: 'galleryMasonry' }, { id: 'g2', type: 'gallerySpringCoil' }]
+  it('lets the single gallery slot swap to the other gallery type (1 gallery per invitation)', () => {
+    // Single-instance model: an invitation has exactly one gallery slot, which
+    // may switch between the two gallery types. Current type comes first.
+    const sections = [{ id: 'g1', type: 'galleryMasonry' }]
     const opts = availableSwapTypes(reg, sections, lb, 'g1', 'galleryMasonry')
-    expect(opts).toEqual(['galleryMasonry'])
+    expect(opts).toEqual(['galleryMasonry', 'gallerySpringCoil'])
   })
 })
 
