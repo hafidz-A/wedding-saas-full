@@ -2,31 +2,19 @@
 
 import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { verifyOwnership } from '@/editor/lib/auth'
 import { decryptField } from '@/lib/guests/crypto'
 import { encryptField } from '@/lib/crypto/app'
 import { fromDbRow, type AttendanceRow, type AttendanceRowDb } from './types'
 
 /**
  * Verify the calling user owns the invitation for this slug, then return the
- * invitation_id. Mirrors authorizeOwnership() in ../guests/actions.ts.
+ * invitation_id. Single source of truth: editor/lib/auth.verifyOwnership.
  */
 async function authorizeOwnership(slug: string): Promise<string> {
-  const serverClient = createSupabaseServerClient()
-  const { data: { user } } = await serverClient.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
-  const admin = createSupabaseAdminClient()
-  const { data: invitation, error } = (await admin
-    .from('invitations')
-    .select('id, owner_user_id')
-    .eq('slug', slug)
-    .maybeSingle()) as { data: { id: string; owner_user_id: string } | null; error: unknown }
-  if (error || !invitation) throw new Error('Invitation not found')
-  if (invitation.owner_user_id !== user.id) {
-    throw new Error('Forbidden — not the owner of this invitation')
-  }
-  return invitation.id
+  const owner = await verifyOwnership(slug)
+  if (!owner) throw new Error('Forbidden — not the owner of this invitation')
+  return owner.id
 }
 
 export interface WalkInGuestHit {

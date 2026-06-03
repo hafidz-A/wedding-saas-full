@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { verifyOwnership } from '@/editor/lib/auth'
 import { parseGuestImport } from '@/lib/guests/parse-import'
 import { normalizePhone } from '@/lib/guests/phone'
 import { encryptField } from '@/lib/guests/crypto'
@@ -10,25 +11,13 @@ import { fromDbRow, type GuestRow, type GuestRowDb } from './types'
 
 /**
  * Verify the calling user owns the invitation for this slug, then return
- * the invitation_id. Mirrors the auth gate in page.tsx: the Supabase Auth
- * session's user.id must match invitations.owner_user_id for the slug.
+ * the invitation_id. Single source of truth: editor/lib/auth.verifyOwnership
+ * (the Supabase Auth session's user.id must match invitations.owner_user_id).
  */
 async function authorizeOwnership(slug: string): Promise<string> {
-  const serverClient = createSupabaseServerClient()
-  const { data: { user } } = await serverClient.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
-  const admin = createSupabaseAdminClient()
-  const { data: invitation, error } = (await admin
-    .from('invitations')
-    .select('id, owner_user_id')
-    .eq('slug', slug)
-    .maybeSingle()) as { data: { id: string; owner_user_id: string } | null; error: unknown }
-  if (error || !invitation) throw new Error('Invitation not found')
-  if (invitation.owner_user_id !== user.id) {
-    throw new Error('Forbidden — not the owner of this invitation')
-  }
-  return invitation.id
+  const owner = await verifyOwnership(slug)
+  if (!owner) throw new Error('Forbidden — not the owner of this invitation')
+  return owner.id
 }
 
 export async function addGuest(
@@ -65,7 +54,7 @@ export async function updateGuest(
     notes?: string | null
   },
 ): Promise<void> {
-  await authorizeOwnership(slug)
+  const invitation_id = await authorizeOwnership(slug)
   const admin = createSupabaseAdminClient()
   const update: Record<string, unknown> = {}
   if (patch.name !== undefined) update.name_enc = encryptField(patch.name.trim())
@@ -75,15 +64,24 @@ export async function updateGuest(
   }
   if (patch.groupLabel !== undefined) update.group_label = patch.groupLabel?.trim() || null
   if (patch.notes !== undefined) update.notes_enc = encryptField(patch.notes?.trim() || null)
-  const { error } = await (admin.from('guests') as any).update(update).eq('id', id)
+  // Scope by invitation_id so an owner can never touch another couple's guest (IDOR).
+  const { error } = await (admin.from('guests') as any)
+    .update(update)
+    .eq('id', id)
+    .eq('invitation_id', invitation_id)
   if (error) throw new Error(error.message)
   revalidatePath('/[template]/[slug]/dashboard', 'page')
 }
 
 export async function deleteGuest(slug: string, id: string): Promise<void> {
-  await authorizeOwnership(slug)
+  const invitation_id = await authorizeOwnership(slug)
   const admin = createSupabaseAdminClient()
-  const { error } = await admin.from('guests').delete().eq('id', id)
+  // Scope by invitation_id so an owner can never delete another couple's guest (IDOR).
+  const { error } = await admin
+    .from('guests')
+    .delete()
+    .eq('id', id)
+    .eq('invitation_id', invitation_id)
   if (error) throw new Error(error.message)
   revalidatePath('/[template]/[slug]/dashboard', 'page')
 }
@@ -112,19 +110,23 @@ export async function importGuests(
 }
 
 export async function markGuestSent(slug: string, id: string): Promise<void> {
-  await authorizeOwnership(slug)
+  const invitation_id = await authorizeOwnership(slug)
   const admin = createSupabaseAdminClient()
   const { error } = await (admin.from('guests') as any)
     .update({ sent_at: new Date().toISOString() })
     .eq('id', id)
+    .eq('invitation_id', invitation_id)
   if (error) throw new Error(error.message)
   revalidatePath('/[template]/[slug]/dashboard', 'page')
 }
 
 export async function unmarkGuestSent(slug: string, id: string): Promise<void> {
-  await authorizeOwnership(slug)
+  const invitation_id = await authorizeOwnership(slug)
   const admin = createSupabaseAdminClient()
-  const { error } = await (admin.from('guests') as any).update({ sent_at: null }).eq('id', id)
+  const { error } = await (admin.from('guests') as any)
+    .update({ sent_at: null })
+    .eq('id', id)
+    .eq('invitation_id', invitation_id)
   if (error) throw new Error(error.message)
   revalidatePath('/[template]/[slug]/dashboard', 'page')
 }

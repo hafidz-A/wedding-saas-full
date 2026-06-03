@@ -58,14 +58,14 @@ export async function POST(req: Request) {
 
   const supabase = createSupabaseAdminClient()
 
-  // Resolve slug → invitation_id (only for published invitations).
+  // Resolve slug → invitation_id (only for LIVE invitations: published AND paid).
   const { data: invitation } = (await supabase
     .from('invitations')
-    .select('id, is_published')
+    .select('id, is_published, is_paid')
     .eq('slug', slug)
-    .maybeSingle()) as { data: { id: string; is_published: boolean } | null }
+    .maybeSingle()) as { data: { id: string; is_published: boolean; is_paid: boolean } | null }
 
-  if (!invitation || !invitation.is_published) {
+  if (!invitation || !invitation.is_published || !invitation.is_paid) {
     return NextResponse.json({ error: 'Undangan tidak ditemukan' }, { status: 404 })
   }
 

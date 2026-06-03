@@ -8,6 +8,10 @@ import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config
 import { resolvePlan, resolveUpgrade } from '@/lib/payments/plans'
 import { createXenditInvoice, getXenditInvoice, isPaidStatus } from '@/lib/payments/xendit'
 import { publishPaidInvitation, applyPaidUpgrade } from '@/lib/payments/publish'
+import { rateLimit } from '@/lib/security/rate-limit'
+
+/** Max unpaid draft invitations a single account may stack up (anti-abuse). */
+const MAX_UNPAID_DRAFTS = 10
 
 export interface OnboardingInput {
   slug: string
@@ -33,9 +37,10 @@ export interface OnboardingResult {
  *
  *   - Validates the slug format (3–40 chars, lowercase + digits + hyphens).
  *   - Checks slug availability (rejects if taken by another invitation).
- *   - Refuses if this user already owns an invitation (1:1 enforcement).
+ *   - Caps how many UNPAID drafts one account may stack up (anti-abuse).
  *   - Builds the full 14-section config with the couple's data substituted.
- *   - Inserts the row with is_published=true so the public URL works immediately.
+ *   - Inserts the row as an unpaid draft (is_paid=false, is_published=false);
+ *     payment publishes it via the Xendit webhook.
  *
  * Returns a structured result object (not throws) so the client UI can
  * display the exact error message — Next.js sanitizes thrown errors in
@@ -79,6 +84,19 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
       .eq('slug', slug)
       .maybeSingle()) as { data: { id: string } | null }
     if (taken) return { ok: false, error: 'Slug sudah dipakai. Pilih yang lain.' }
+
+    // 4b. Anti-abuse: cap how many UNPAID drafts one account can stack up, so a
+    //     single user can't squat slugs / bloat the table with free draft rows.
+    const { count: draftCount } = await (admin.from('invitations') as any)
+      .select('id', { count: 'exact', head: true })
+      .eq('owner_user_id', user.id)
+      .eq('is_paid', false)
+    if ((draftCount ?? 0) >= MAX_UNPAID_DRAFTS) {
+      return {
+        ok: false,
+        error: `Kamu punya ${draftCount} undangan yang belum dibayar. Selesaikan pembayaran atau hapus salah satunya dulu sebelum membuat yang baru.`,
+      }
+    }
 
     // 5. Build the seeded config. Lovebirds substitutes the couple's data
     //    into its 14-section cinematic config; other templates seed from
@@ -167,6 +185,9 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     const { data: { user } } = await server.auth.getUser()
     if (!user) return { ok: false, error: 'Tidak ada sesi login' }
 
+    const { allowed } = await rateLimit(`checkout:${user.id}`, { windowMs: 60_000, max: 6 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak percobaan pembayaran. Coba lagi sebentar lagi.' }
+
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
@@ -224,6 +245,9 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
     const { data: { user } } = await server.auth.getUser()
     if (!user) return { ok: false, error: 'Tidak ada sesi login' }
 
+    const { allowed } = await rateLimit(`recheck:${user.id}`, { windowMs: 60_000, max: 12 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak permintaan cek pembayaran. Coba lagi sebentar lagi.' }
+
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
@@ -277,6 +301,9 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
     const server = createSupabaseServerClient()
     const { data: { user } } = await server.auth.getUser()
     if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`checkout:${user.id}`, { windowMs: 60_000, max: 6 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak percobaan upgrade. Coba lagi sebentar lagi.' }
 
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
@@ -333,6 +360,9 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
     const server = createSupabaseServerClient()
     const { data: { user } } = await server.auth.getUser()
     if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`recheck:${user.id}`, { windowMs: 60_000, max: 12 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak permintaan cek upgrade. Coba lagi sebentar lagi.' }
 
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin

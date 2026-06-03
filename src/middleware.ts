@@ -69,7 +69,6 @@ export const config = {
   matcher: [
     '/profile',
     '/onboarding',
-    '/my-templates',
     '/:template/:slug/dashboard/:path*',
     // Public invitation pages — needed so the supabase server client can
     // refresh the auth session and the owner-preview bypass works.

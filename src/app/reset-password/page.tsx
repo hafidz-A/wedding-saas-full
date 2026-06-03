@@ -55,8 +55,8 @@ function ResetPasswordInner() {
       setError(t.errToken)
       return
     }
-    if (password.length < 6) {
-      setError(t.errMin6)
+    if (password.length < 8) {
+      setError(t.errMin8)
       return
     }
     if (password !== confirm) {
@@ -170,7 +170,7 @@ function ResetPasswordInner() {
           <input
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={input}
@@ -183,7 +183,7 @@ function ResetPasswordInner() {
           <input
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             style={input}

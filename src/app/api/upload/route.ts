@@ -55,6 +55,13 @@ export async function POST(req: Request) {
   const path = `${invitation.id}/${Date.now()}-${safeName}`
   const bytes = new Uint8Array(await file.arrayBuffer())
 
+  // Defense-in-depth: the declared MIME is client-controlled, so for images
+  // confirm the actual file signature (magic bytes) matches. Blocks a polyglot
+  // / mislabeled file slipping in under an image content-type.
+  if (!isAudio && !imageSignatureMatches(file.type, bytes)) {
+    return NextResponse.json({ error: 'File content does not match its image type' }, { status: 400 })
+  }
+
   const { error: upErr } = await supabase.storage
     .from(BUCKET)
     .upload(path, bytes, { contentType: file.type, upsert: false })
@@ -65,4 +72,26 @@ export async function POST(req: Request) {
 
   const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path)
   return NextResponse.json({ ok: true, url: pub.publicUrl, path })
+}
+
+/** Verify a buffer's leading bytes match the declared image MIME type. */
+function imageSignatureMatches(mime: string, b: Uint8Array): boolean {
+  const at = (i: number) => b[i]
+  switch (mime) {
+    case 'image/jpeg':
+      return at(0) === 0xff && at(1) === 0xd8 && at(2) === 0xff
+    case 'image/png':
+      return at(0) === 0x89 && at(1) === 0x50 && at(2) === 0x4e && at(3) === 0x47
+    case 'image/gif':
+      // "GIF8"
+      return at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x38
+    case 'image/webp':
+      // "RIFF" .... "WEBP"
+      return (
+        at(0) === 0x52 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x46 &&
+        at(8) === 0x57 && at(9) === 0x45 && at(10) === 0x42 && at(11) === 0x50
+      )
+    default:
+      return false
+  }
 }

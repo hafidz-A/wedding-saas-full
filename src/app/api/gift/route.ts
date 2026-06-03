@@ -33,14 +33,16 @@ export async function POST(req: Request) {
 
   const { data: invitation, error: invErr } = (await supabase
     .from('invitations')
-    .select('id, is_published')
+    .select('id, is_published, is_paid')
     .eq('slug', slug)
-    .maybeSingle()) as { data: { id: string; is_published: boolean } | null; error: any }
+    .maybeSingle()) as { data: { id: string; is_published: boolean; is_paid: boolean } | null; error: any }
 
   if (invErr || !invitation) {
     return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
   }
-  if (!invitation.is_published) {
+  // Match the public page gate: only accept submissions for a LIVE invitation
+  // (published AND paid).
+  if (!invitation.is_published || !invitation.is_paid) {
     return NextResponse.json({ error: 'Invitation not published' }, { status: 403 })
   }
 

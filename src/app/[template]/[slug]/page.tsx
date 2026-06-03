@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import InvitationView from './InvitationView'
 import { isValidTemplate, getDefaultConfig } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
@@ -32,7 +33,9 @@ export default async function Page({ params }: PageProps) {
   }
 
   const hasSupabase =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
   const isDemoSlug = slug.startsWith('demo-') || slug === 'rizky-amara'
 
@@ -41,12 +44,28 @@ export default async function Page({ params }: PageProps) {
   let templateId = template
 
   if (hasSupabase) {
+    // `supabase` (anon + cookies) is used ONLY for auth.getUser() below.
+    // Row reads go through the admin client so the public page no longer
+    // depends on a broad anon SELECT policy on `invitations` (see the
+    // 2026-06-03 security-hardening migration, which restricts anon columns).
     const supabase = createSupabaseServerClient()
-    const { data, error } = await supabase
+    const admin = createSupabaseAdminClient()
+    const { data, error } = (await admin
       .from('invitations')
       .select('id, config, is_published, is_paid, template_id, expires_at, owner_user_id')
       .eq('slug', slug)
-      .maybeSingle()
+      .maybeSingle()) as {
+      data: {
+        id: string
+        config: any
+        is_published: boolean
+        is_paid: boolean
+        template_id: string | null
+        expires_at: string | null
+        owner_user_id: string | null
+      } | null
+      error: any
+    }
 
     if (error) {
       console.error('[invitation fetch]', error)
@@ -83,10 +102,15 @@ export default async function Page({ params }: PageProps) {
       templateId =
         data.template_id && isValidTemplate(data.template_id) ? data.template_id : template
 
-      // If the couple hasn't filled their config yet (empty {}), fall back
-      // to the template demo so they see SOMETHING rather than a blank page.
+      // Empty config handling. For DEMO slugs we fall back to the template
+      // demo so previews work without real data. For a REAL invitation an
+      // empty config means it isn't set up yet — show a "not ready" notice
+      // rather than leaking the demo couple's content onto a live page.
       const isEmpty =
         !data.config || (typeof data.config === 'object' && Object.keys(data.config).length === 0)
+      if (isEmpty && !isDemoSlug) {
+        return <NotReadyInvitationView slug={slug} />
+      }
       config = isEmpty ? getDefaultConfig(templateId) : data.config
       invitationId = (data as any).id
     }
@@ -94,7 +118,7 @@ export default async function Page({ params }: PageProps) {
     // Inject guestbook notes (newest first) into the guestbook section so
     // they're server-rendered — no client loading flash.
     if (invitationId) {
-      const { data: notes } = await supabase
+      const { data: notes } = await admin
         .from('guestbook_notes')
         .select('id, guest_name, message, color, created_at')
         .eq('invitation_id', invitationId)
@@ -140,6 +164,44 @@ function injectGuestbookNotes(config: any, dbNotes: any[]) {
         : s,
     ),
   }
+}
+
+function NotReadyInvitationView({ slug }: { slug: string }) {
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 24,
+        background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+        fontFamily: 'var(--font-body, system-ui)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 480,
+          padding: 40,
+          background: 'rgba(255,255,255,0.95)',
+          borderRadius: 22,
+          boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+          textAlign: 'center',
+        }}
+      >
+        <p style={{ textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: '#E8553E', margin: '0 0 10px' }}>
+          Undangan
+        </p>
+        <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: 0, color: '#2A2118', lineHeight: 1.2 }}>
+          Undangan belum siap
+        </h1>
+        <p style={{ color: '#5C4A3A', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
+          Undangan{' '}
+          <code style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code>{' '}
+          masih disiapkan oleh pemiliknya. Silakan cek kembali nanti.
+        </p>
+      </div>
+    </main>
+  )
 }
 
 function ExpiredInvitationView({ slug }: { slug: string }) {
