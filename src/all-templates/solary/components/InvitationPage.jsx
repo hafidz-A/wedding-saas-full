@@ -28,6 +28,13 @@ export default function InvitationPage({ config }) {
   );
   const slug = config.meta?.slug || "demo";
   const sectionIds = visible.map((s) => s.id);
+  // Gate photos double as the floating "photo-stars" scattered behind every
+  // non-photo section (see SectionRenderer's PHOTO_BACKED_TYPES).
+  const gatePhotos = useMemo(() => {
+    const gate = config.sections.find((s) => s.type === "openingGate");
+    const photos = gate?.props?.gatePhotos;
+    return Array.isArray(photos) ? photos.filter(Boolean) : [];
+  }, [config]);
 
   return (
     <ThemeProvider
@@ -43,7 +50,7 @@ export default function InvitationPage({ config }) {
             />
             <main>
               {visible.map((s) => (
-                <SectionRenderer key={s.id} section={s} slug={slug} />
+                <SectionRenderer key={s.id} section={s} slug={slug} gatePhotos={gatePhotos} />
               ))}
             </main>
             <TravellingOverlay />

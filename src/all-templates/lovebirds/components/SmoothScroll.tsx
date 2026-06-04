@@ -55,6 +55,14 @@ export default function SmoothScroll() {
     // sync with the interpolated scroll position.
     lenis.on('scroll', ScrollTrigger.update)
 
+    // syncTouch is false, so Lenis does NOT smooth (or emit 'scroll' for)
+    // native touch scrolling. Without this, scrub-driven entrances (e.g.
+    // BrideGroom's 3D card spin) freeze on phones/tablets because nothing
+    // calls ScrollTrigger.update while you swipe. The native 'scroll' event
+    // DOES fire on touch, so update from it too. On desktop this is a cheap
+    // duplicate of the Lenis-driven update (ScrollTrigger.update is idempotent).
+    window.addEventListener('scroll', ScrollTrigger.update, { passive: true })
+
     const rafCallback = (time: number) => {
       // gsap.ticker passes time in seconds; Lenis expects ms
       lenis.raf(time * 1000)
@@ -63,6 +71,7 @@ export default function SmoothScroll() {
     gsap.ticker.lagSmoothing(0)
 
     return () => {
+      window.removeEventListener('scroll', ScrollTrigger.update)
       gsap.ticker.remove(rafCallback)
       lenis.destroy()
     }

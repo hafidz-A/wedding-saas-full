@@ -1,0 +1,26 @@
+/* Cover order for the GSAP pin-scrub (see VibeExploration). The explorer pins,
+   the user scrolls through ALL its content, then the NEXT section rises up and
+   covers it. We give later panels a higher z-index so they paint over the
+   pinned one. Using `> *` (not `> section`) because GSAP wraps the pinned
+   section in a `.pin-spacer`, which then becomes the nth child.
+
+   Desktop + motion only; on mobile / reduced-motion sections are plain,
+   fully-scrollable blocks (content is never clipped). */
+.stack {
+  position: relative;
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .stack > * {
+    position: relative;
+  }
+  .stack > *:nth-child(1) {
+    z-index: 1;
+  }
+  .stack > *:nth-child(2) {
+    z-index: 2;
+  }
+  .stack > *:nth-child(3) {
+    z-index: 3;
+  }
+}

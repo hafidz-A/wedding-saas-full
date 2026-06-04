@@ -87,7 +87,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           and the dapur pages (login/onboarding/marketing/dashboard) each set
           their own full-viewport background. Keeping the shell neutral avoids
           one template's theme leaking onto another. */}
-      <body style={{ margin: 0, minHeight: '100%' }}>
+      {/* Base body reset (margin:0; min-height:100%) lives in global.css. We do
+          NOT set it inline here: an inline style on <body> hydration-mismatches
+          (the browser/Lenis normalises it to a different string than React's),
+          which surfaced as the dev "errors" overlay. CSS handles it cleanly. */}
+      <body>
         {children}
       </body>
     </html>

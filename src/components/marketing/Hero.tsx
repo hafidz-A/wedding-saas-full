@@ -82,11 +82,11 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
           <p className={styles.subtitle}>{t.subtitle}</p>
           
           <div className={styles.actions}>
-            <Link href="/signup" className={styles.primary}>
+            <Link href="/#vibe" className={styles.primary}>
               {t.ctaPrimary}
-              <span className={styles.btnArrow}>→</span>
+              <span className={styles.btnArrow}>↓</span>
             </Link>
-            <Link href="/#templates" className={styles.secondary}>
+            <Link href="/#vibe" className={styles.secondary}>
               {t.ctaSecondary}
             </Link>
           </div>

@@ -41,9 +41,12 @@ export default function DummyCardLayer({
           opacity: cfg.opacity,
           scale: cfg.scale,
           scrollTrigger: {
+            // Match the main card's compressed range (CinematicCard) so the
+            // backing stack fades in together with the photo card instead of
+            // trailing it to the bottom of the tall section.
             trigger,
-            start: 'top 70%',
-            end: 'bottom 30%',
+            start: 'top 80%',
+            end: 'top top',
             scrub: 1.8 + i * 0.3,
           },
           ease: 'none',

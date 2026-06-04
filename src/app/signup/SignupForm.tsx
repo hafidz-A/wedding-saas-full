@@ -76,15 +76,16 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
       return
     }
 
-    // Only a genuinely new signup gets a user with a non-empty identities[].
-    // Anything else — no user, or an obfuscated user with empty identities[]
-    // (Supabase's anti email-enumeration response for an already-registered
-    // email) — means the email is taken. Send them to login and NEVER continue
-    // to /verify-signup, where no token would ever arrive.
-    const isNewSignup = !!data.user && (data.user.identities?.length ?? 0) > 0
-    if (!isNewSignup) {
-      setError(dict.errAlready)
-      setSubmitting(false)
+    // Supabase "Email enumeration protection" (ON by default) makes signUp()
+    // return { user: null, session: null } even for a brand-new signup, so
+    // data.user.identities can't be used to tell "new" from "already used" —
+    // relying on it dead-ended every signup at "email sudah dipakai" and never
+    // routed here. On any non-error response a 6-digit token has been emailed,
+    // so proceed to the OTP screen. (If email confirmation is disabled, signUp
+    // returns a live session instead — skip straight to the destination.)
+    if (data.session) {
+      router.push(next || '/')
+      router.refresh()
       return
     }
 

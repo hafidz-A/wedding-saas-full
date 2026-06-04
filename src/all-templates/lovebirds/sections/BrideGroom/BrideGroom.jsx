@@ -2,11 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll } from 'motion/react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import CinematicCard from './CinematicCard.jsx'
 import DummyCardLayer from './DummyCardLayer.jsx'
 import FloatingDecoration from './FloatingDecoration.jsx'
 import PersonCard from './PersonCard.jsx'
 import styles from './BrideGroom.module.css'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const COMPACT_BP = '(max-width: 760px)'
 const SMALL_BP = '(max-width: 480px)'
@@ -36,10 +40,21 @@ function normalizePeople(props) {
 export default function BrideGroom(props) {
   const { title } = { ...DEFAULTS, ...props }
   const people = normalizePeople({ ...DEFAULTS, ...props })
+  // Couple monogram for the card back (e.g. "A & R"), derived from the actual
+  // names instead of a hardcoded "R & A" so every couple sees their own.
+  const coupleMonogram = people
+    .map((p) => (p?.name || '').trim().charAt(0).toUpperCase())
+    .filter(Boolean)
+    .join(' & ')
   const sectionRef = useRef(null)
 
   const isCompact = useMatchMedia(COMPACT_BP)
   const isSmall = useMatchMedia(SMALL_BP)
+  // Matches the CSS mobile breakpoint where we drop the sticky pin. On mobile
+  // each card becomes its own ScrollTrigger so it spins in as it scrolls into
+  // view (no long pinned "hold"); on desktop the section stays the trigger so
+  // the pair spins together while pinned.
+  const isMobile = useMatchMedia('(max-width: 767.98px)')
   const noMotion = useMatchMedia('(prefers-reduced-motion: reduce)')
 
   // Framer Motion scroll for floating decorations parallax
@@ -47,6 +62,31 @@ export default function BrideGroom(props) {
     target: sectionRef,
     offset: ['start end', 'end start'],
   })
+
+  // Re-measure every card's GSAP ScrollTrigger range when the viewport changes.
+  // Mobile address-bar collapse, iPad orientation flips, and late content
+  // reflow all shift the pin start/end — without a refresh the scrubbed
+  // entrance freezes mid-way and the cards can stay invisible ("blank"). The
+  // 320ms debounce waits for iPadOS to report the post-rotation size and avoids
+  // refreshing on every visualViewport tick during a scroll. Same proven
+  // pattern as GallerySpringCoil.
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    let timer = 0
+    const refresh = () => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => ScrollTrigger.refresh(), 320)
+    }
+    window.addEventListener('resize', refresh)
+    window.addEventListener('orientationchange', refresh)
+    window.visualViewport?.addEventListener('resize', refresh)
+    return () => {
+      window.clearTimeout(timer)
+      window.removeEventListener('resize', refresh)
+      window.removeEventListener('orientationchange', refresh)
+      window.visualViewport?.removeEventListener('resize', refresh)
+    }
+  }, [])
 
   const tiltStrength = isSmall ? 0.35 : isCompact ? 0.55 : 1
   const slideDistance = isSmall ? 100 : isCompact ? 180 : 400
@@ -107,13 +147,14 @@ export default function BrideGroom(props) {
               <CinematicCard
                 direction={cfg.direction}
                 triggerRef={sectionRef}
+                selfTrigger={isMobile}
                 startPct={cfg.startPct}
                 endPct={cfg.endPct}
                 tiltStrength={tiltStrength}
                 distance={slideDistance}
               >
                 <div className={styles.cardShadow} aria-hidden="true" />
-                <PersonCard person={cfg.person} variant={cfg.variant} />
+                <PersonCard person={cfg.person} variant={cfg.variant} monogram={coupleMonogram} />
               </CinematicCard>
             </div>
           ))}

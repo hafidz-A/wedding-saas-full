@@ -1,209 +1,418 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Dict } from '@/lib/i18n'
+import { getCatalogEntry } from '@/config/templateCatalog'
 import { useReveal } from '@/hooks/useReveal'
+import { TEMPLATE_VIBES, type PaletteVibe, type TemplateId } from './vibeData'
+import { VibeBackdrop } from './VibeBackdrop'
 import styles from './VibeExploration.module.css'
 
-interface VibeEntry {
-  id: string
-  label: Record<'id' | 'en', string>
-  description: Record<'id' | 'en', string>
-  watermark: string
-  color: string
-  bg: string
-  accent: string
-  image: string
+type VibeDict = Dict['landing']['vibeExploration']
+
+/* Pick a readable text colour to sit on top of a solid accent button. */
+function readableOn(hex: string): string {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex.trim())
+  if (!m) return '#ffffff'
+  const [r, g, b] = [m[1], m[2], m[3]].map((h) => parseInt(h, 16) / 255)
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+  const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+  return L > 0.45 ? '#1A1208' : '#FFFFFF'
 }
 
-const VIBES: VibeEntry[] = [
-  {
-    id: 'elegant',
-    label: { id: 'Elegant Luxury', en: 'Elegant Luxury' },
-    description: { id: 'Sentuhan kain sutra, anggrek putih, dan kaligrafi emas tulisan tangan.', en: 'Pure silk drapery, white orchids, and handmade gold calligraphy.' },
-    watermark: 'Luxury',
-    color: '#C89A1F',
-    bg: '#FDF8F2',
-    accent: 'rgba(200, 154, 31, 0.1)',
-    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'garden',
-    label: { id: 'Garden Romance', en: 'Garden Romance' },
-    description: { id: 'Mawar yang merekah, altar kayu, dan gemerlap lampu hias outdoor.', en: 'Blooming roses, wooden arches, and soft glowing string lights.' },
-    watermark: 'Romance',
-    color: '#2D8C4E',
-    bg: '#F2FDF5',
-    accent: 'rgba(45, 140, 78, 0.1)',
-    image: 'https://images.unsplash.com/photo-1546190255-451a91afc548?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'classic',
-    label: { id: 'Royal Classic', en: 'Royal Classic' },
-    description: { id: 'Kemegahan lampu kristal, dekorasi lilin, dan monogram klasik.', en: 'Grand crystal chandeliers, silver accents, and classic crest monograms.' },
-    watermark: 'Royal',
-    color: '#3D9BC1',
-    bg: '#F2F7FD',
-    accent: 'rgba(61, 155, 193, 0.1)',
-    image: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'blackgold',
-    label: { id: 'Modern Black Gold', en: 'Modern Black Gold' },
-    description: { id: 'Kertas hitam bertekstur, tinta emas foil, dan layout minimalis berani.', en: 'Textured matte black cardstock, foil stamps, and bold minimalist lines.' },
-    watermark: 'Modern',
-    color: '#F5C842',
-    bg: '#1A1A1A',
-    accent: 'rgba(245, 200, 66, 0.08)',
-    image: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'fairytale',
-    label: { id: 'Fairytale Dream', en: 'Fairytale Dream' },
-    description: { id: 'Bunga wisteria bergantungan, warna pastel magis, dan lentera berkabut.', en: 'Hanging wisteria vines, magic lilac lighting, and glowing forest lanterns.' },
-    watermark: 'Dream',
-    color: '#6B35A8',
-    bg: '#FAF5FD',
-    accent: 'rgba(107, 53, 168, 0.1)',
-    image: 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'vintage',
-    label: { id: 'Vintage Romance', en: 'Vintage Romance' },
-    description: { id: 'Kertas perkamen kuno, jepretan foto polaroid, dan nuansa hangat nostalgia.', en: 'Aged deckled parchment, vintage Polaroid photos, and warm nostalgia.' },
-    watermark: 'Vintage',
-    color: '#E8553E',
-    bg: '#FDF4F2',
-    accent: 'rgba(232, 85, 62, 0.1)',
-    image: 'https://images.unsplash.com/photo-1502139214982-d0ad755818d8?auto=format&fit=crop&w=800&q=80'
-  }
-]
-
-export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: Dict['landing']['vibeExploration'] }) {
-  const { ref, revealed } = useReveal<HTMLDivElement>()
-  const [activeVibe, setActiveVibe] = useState<VibeEntry>(VIBES[0])
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget
-    const box = card.getBoundingClientRect()
-    const x = e.clientX - box.left - box.width / 2
-    const y = e.clientY - box.top - box.height / 2
-    const factorX = 10 / (box.height / 2)
-    const factorY = 10 / (box.width / 2)
-    setTilt({
-      rotateX: -y * factorX,
-      rotateY: x * factorY,
-    })
-  }
-
-  const handleMouseLeave = () => {
-    setTilt({ rotateX: 0, rotateY: 0 })
-  }
-
-  const isDark = activeVibe.id === 'blackgold'
-
+/* ---------------- Themed invitation preview mockup ---------------- */
+function PreviewMock({
+  templateId,
+  palette,
+  t,
+}: {
+  templateId: TemplateId
+  palette: PaletteVibe
+  t: VibeDict
+}) {
+  const isSolary = templateId === 'solary'
   return (
-    <section 
-      className={styles.section} 
-      ref={ref}
-      style={{ 
-        backgroundColor: activeVibe.bg,
-        transition: 'background-color 0.8s ease'
+    <div
+      className={styles.mock}
+      style={{
+        background: palette.surface,
+        borderColor: palette.surfaceBorder,
+        color: palette.fg,
       }}
     >
-      <div className={styles.inner}>
-        <header className={`${styles.head} ${isDark ? styles.headDark : ''}`}>
-          <span className={styles.kicker} style={{ color: activeVibe.color }}>
+      {/* Template-specific ambient ornament */}
+      {isSolary ? (
+        <svg className={styles.mockOrbits} viewBox="0 0 240 240" aria-hidden="true">
+          <circle cx="120" cy="120" r="58" fill="none" stroke={palette.accent} strokeWidth="0.8" opacity="0.35" />
+          <circle cx="120" cy="120" r="92" fill="none" stroke={palette.accent} strokeWidth="0.6" opacity="0.22" />
+          <circle cx="120" cy="62" r="4" fill={palette.accent} />
+          <circle cx="212" cy="120" r="2.5" fill={palette.swatches[1]} />
+        </svg>
+      ) : (
+        <>
+          <span className={`${styles.mockLeaf} ${styles.mockLeafL}`} style={{ color: palette.fgMuted }} aria-hidden="true">
+            ❧
+          </span>
+          <span className={`${styles.mockLeaf} ${styles.mockLeafR}`} style={{ color: palette.fgMuted }} aria-hidden="true">
+            ❧
+          </span>
+        </>
+      )}
+
+      <div className={styles.mockGlow} style={{ background: `radial-gradient(circle, ${palette.accent}33 0%, transparent 65%)` }} />
+
+      <div className={styles.mockBody}>
+        <span className={styles.mockEyebrow} style={{ color: palette.fgMuted }}>
+          {t.previewEyebrow}
+        </span>
+        <span className={styles.mockNames} style={{ color: palette.fg }}>
+          {t.previewNames}
+        </span>
+        <span className={styles.mockRule} aria-hidden="true">
+          <span style={{ background: palette.surfaceBorder }} />
+          <span className={styles.mockRuleDot} style={{ background: palette.accent }} />
+          <span style={{ background: palette.surfaceBorder }} />
+        </span>
+        <span className={styles.mockDate} style={{ color: palette.fgMuted }}>
+          {t.previewDate}
+        </span>
+        <span
+          className={styles.mockPill}
+          style={{ background: palette.accent, color: readableOn(palette.accent) }}
+        >
+          RSVP
+        </span>
+      </div>
+    </div>
+  )
+}
+
+export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict }) {
+  const { ref } = useReveal<HTMLDivElement>()
+  const innerRef = useRef<HTMLDivElement>(null)
+  const [pinned, setPinned] = useState(false)
+  const [templateIndex, setTemplateIndex] = useState(0)
+  const [paletteIndex, setPaletteIndex] = useState(0)
+  const [plansOpen, setPlansOpen] = useState(false)
+
+  // Pin the section and scrub its content: the user scrolls through ALL of the
+  // content (however tall) while the cosmic/botanical backdrop stays put, and
+  // only then does the page continue to the next section. Desktop + motion only;
+  // on mobile / reduced-motion the section is a normal, fully-scrollable block
+  // (so nothing is ever clipped).
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const section = ref.current
+    const inner = innerRef.current
+    if (!section || !inner) return
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (!desktop.matches || reduce.matches) return
+
+    gsap.registerPlugin(ScrollTrigger)
+
+    const overflow = () => {
+      const cs = getComputedStyle(section)
+      const padV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+      return Math.max(0, inner.scrollHeight - (window.innerHeight - padV))
+    }
+
+    let st: ScrollTrigger | undefined
+    const build = () => {
+      st?.kill()
+      gsap.set(inner, { clearProps: 'transform' })
+      if (overflow() <= 4) {
+        setPinned(false)
+        return
+      }
+      setPinned(true)
+      // Pin the section and scrub its content: the user scrolls through ALL of
+      // the content while it stays pinned; the pin releases exactly when the
+      // content is finished, then the next section takes over.
+      const tween = gsap.to(inner, {
+        y: () => -overflow(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => '+=' + overflow(),
+          scrub: 0.6,
+          pin: true,
+          pinSpacing: true,
+          invalidateOnRefresh: true,
+        },
+      })
+      st = tween.scrollTrigger
+    }
+    build()
+
+    return () => {
+      st?.kill()
+      gsap.set(inner, { clearProps: 'transform' })
+      setPinned(false)
+    }
+  }, [])
+
+  // Content height changes (template/palette switch, plans toggle) → recompute.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const id = window.setTimeout(() => ScrollTrigger.refresh(), 60)
+    return () => window.clearTimeout(id)
+  }, [templateIndex, paletteIndex, plansOpen])
+
+  const template = TEMPLATE_VIBES[templateIndex]
+  const palette = template.palettes[paletteIndex]
+  const catalog = getCatalogEntry(template.id)
+  const copy = t.byTemplate[template.id]
+  const isDark = palette.mode === 'dark'
+
+  const switchTemplate = (next: number) => {
+    const len = TEMPLATE_VIBES.length
+    setTemplateIndex(((next % len) + len) % len)
+    setPaletteIndex(0)
+    setPlansOpen(false)
+  }
+
+  const previewHref = `/${template.id}/${template.demoSlug}`
+  const buyHref = `/onboarding?template=${template.id}`
+  const accentText = useMemo(() => readableOn(palette.accent), [palette.accent])
+
+  return (
+    <section
+      id="vibe"
+      ref={ref}
+      className={`${styles.section} ${isDark ? styles.dark : ''} ${pinned ? styles.pinned : ''}`}
+    >
+      {/* Background + backdrop, masked so the section fades in/out softly at its
+          top & bottom edges (no hard seam against the neighbouring sections). */}
+      <div className={styles.bgWrap} aria-hidden="true">
+        {/* Cross-fading palette background — CSS can't tween gradients, so we
+            fade a fresh full-bleed layer in over the previous one. */}
+        <AnimatePresence>
+          <motion.div
+            key={`${template.id}-${palette.key}-bg`}
+            className={styles.bgLayer}
+            style={{ background: palette.background }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: 'easeInOut' }}
+          />
+        </AnimatePresence>
+
+        {/* Real template backdrop (perched birds + flowers / Andromeda + stars),
+            recoloured by the active palette. */}
+        <VibeBackdrop template={template.id} palette={palette} />
+      </div>
+
+      <div ref={innerRef} className={styles.inner}>
+        <header className={styles.head}>
+          <span className={styles.kicker} style={{ color: palette.accent }}>
             {t.heading}
           </span>
-          <h2 className={styles.heading}>{t.subheading}</h2>
+          <h2 className={styles.heading} style={{ color: palette.fg }}>
+            {t.subheading}
+          </h2>
         </header>
 
-        <div className={styles.layout}>
-          {/* Vibe Selection Panel */}
-          <div className={styles.menu}>
-            {VIBES.map((vibe) => {
-              const isSelected = activeVibe.id === vibe.id
-              return (
-                <button
-                  key={vibe.id}
-                  type="button"
-                  className={`${styles.menuBtn} ${isSelected ? styles.menuBtnSelected : ''} ${isDark ? styles.menuBtnDark : ''}`}
-                  onClick={() => setActiveVibe(vibe)}
+        {/* Template carousel */}
+        <div className={styles.carousel}>
+          <button
+            type="button"
+            className={styles.arrow}
+            style={{ color: palette.fg, borderColor: palette.surfaceBorder }}
+            aria-label={t.prevTemplate}
+            onClick={() => switchTemplate(templateIndex - 1)}
+          >
+            ‹
+          </button>
+          <div className={styles.carouselCenter}>
+            <span className={styles.carouselEyebrow} style={{ color: palette.fgMuted }}>
+              {t.templateEyebrow}
+            </span>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={template.id}
+                className={styles.carouselName}
+                style={{ color: palette.fg }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {template.label}
+              </motion.span>
+            </AnimatePresence>
+            <span className={styles.dots} aria-hidden="true">
+              {TEMPLATE_VIBES.map((tpl, i) => (
+                <span
+                  key={tpl.id}
+                  className={styles.dot}
                   style={{
-                    color: isSelected ? vibe.color : '',
-                    backgroundColor: isSelected ? vibe.accent : 'transparent'
+                    background: i === templateIndex ? palette.accent : palette.surfaceBorder,
+                    width: i === templateIndex ? 22 : 7,
                   }}
-                >
-                  <span className={styles.bullet} style={{ backgroundColor: vibe.color }} />
-                  {vibe.label[lang]}
-                </button>
-              )
-            })}
+                />
+              ))}
+            </span>
+          </div>
+          <button
+            type="button"
+            className={styles.arrow}
+            style={{ color: palette.fg, borderColor: palette.surfaceBorder }}
+            aria-label={t.nextTemplate}
+            onClick={() => switchTemplate(templateIndex + 1)}
+          >
+            ›
+          </button>
+        </div>
+
+        <div className={styles.layout}>
+          {/* Palette menu */}
+          <div className={styles.menuWrap}>
+            <span className={styles.menuLabel} style={{ color: palette.fgMuted }}>
+              {t.paletteLabel}
+            </span>
+            <div className={styles.menu}>
+              {template.palettes.map((p, i) => {
+                const selected = i === paletteIndex
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    className={`${styles.menuBtn} ${selected ? styles.menuBtnSelected : ''}`}
+                    aria-pressed={selected}
+                    onClick={() => {
+                      setPaletteIndex(i)
+                      setPlansOpen(false)
+                    }}
+                    style={{
+                      color: selected ? p.accent : palette.fgMuted,
+                      borderColor: selected ? p.accent : palette.surfaceBorder,
+                      background: selected ? `${p.accent}1a` : 'transparent',
+                    }}
+                  >
+                    <span className={styles.bullet} style={{ background: p.accent }} />
+                    {p.label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
-          {/* Vibe Detail Display */}
+          {/* Display: preview mockup + details */}
           <div className={styles.display}>
-            {/* Calligraphic Watermark Text behind the photo card */}
             <AnimatePresence mode="wait">
               <motion.div
-                key={`watermark-${activeVibe.id}`}
-                className={styles.watermarkText}
-                style={{ color: activeVibe.color }}
-                initial={{ opacity: 0, scale: 0.85, y: -20 }}
-                animate={{ opacity: isDark ? 0.04 : 0.08, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 1.15, y: 20 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                key={`${template.id}-${palette.key}`}
+                className={styles.displayInner}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
-                {activeVibe.watermark}
-              </motion.div>
-            </AnimatePresence>
+                <PreviewMock templateId={template.id} palette={palette} t={t} />
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeVibe.id}
-                className={styles.displayContent}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.45, ease: 'easeOut' }}
-              >
-                {/* Asymmetrical Photo Card */}
-                <motion.div 
-                  className={styles.photoFrame}
-                  onMouseMove={handleMouseMove}
-                  onMouseLeave={handleMouseLeave}
-                  animate={{
-                    rotateX: tilt.rotateX,
-                    rotateY: tilt.rotateY,
-                  }}
-                  transition={{ type: 'spring', stiffness: 150, damping: 20 }}
-                  style={{ transformStyle: 'preserve-3d', perspective: 1000 }}
-                >
-                  <div className={styles.photoGlow} style={{ background: `radial-gradient(circle, ${activeVibe.color}25 0%, transparent 60%)` }} />
-                  <img 
-                    src={activeVibe.image} 
-                    alt={activeVibe.label[lang]} 
-                    className={styles.photo}
-                  />
-                  <div className={styles.badge} style={{ borderColor: activeVibe.color, color: activeVibe.color, transform: 'translateZ(20px)' }}>
-                    {activeVibe.label[lang].toUpperCase()}
-                  </div>
-                </motion.div>
+                <div className={styles.details}>
+                  <span className={styles.tagline} style={{ color: palette.accent }}>
+                    {copy.tagline}
+                  </span>
+                  <h3 className={styles.paletteName} style={{ color: palette.fg }}>
+                    {palette.label}
+                  </h3>
+                  <p className={styles.blurb} style={{ color: palette.fgMuted }}>
+                    {copy.blurb}
+                  </p>
 
-                {/* Vibe Copy */}
-                <div className={`${styles.details} ${isDark ? styles.detailsDark : ''}`}>
-                  <p className={styles.description}>{activeVibe.description[lang]}</p>
-                  <div className={styles.palette}>
-                    <span className={styles.paletteLabel}>Ambience Palette</span>
+                  <div className={styles.ambience}>
+                    <span className={styles.ambienceLabel} style={{ color: palette.fgMuted }}>
+                      {t.ambienceLabel}
+                    </span>
                     <div className={styles.swatches}>
-                      <span className={styles.swatch} style={{ backgroundColor: activeVibe.color }} />
-                      <span className={styles.swatch} style={{ backgroundColor: activeVibe.bg }} />
-                      <span className={styles.swatch} style={{ backgroundColor: '#2A2118' }} />
+                      {palette.swatches.map((c, i) => (
+                        <span
+                          key={i}
+                          className={styles.swatch}
+                          style={{ background: c, borderColor: palette.surfaceBorder }}
+                        />
+                      ))}
                     </div>
                   </div>
+
+                  <div className={styles.actions}>
+                    <Link
+                      href={previewHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={styles.btnGhost}
+                      style={{ color: palette.fg, borderColor: palette.accent }}
+                    >
+                      {t.liveReview}
+                      <span aria-hidden="true">↗</span>
+                    </Link>
+                    <button
+                      type="button"
+                      className={styles.btnPrimary}
+                      style={{ background: palette.accent, color: accentText }}
+                      aria-expanded={plansOpen}
+                      onClick={() => setPlansOpen((v) => !v)}
+                    >
+                      {t.buy}
+                      <span
+                        aria-hidden="true"
+                        className={`${styles.btnCaret} ${plansOpen ? styles.btnCaretOpen : ''}`}
+                      >
+                        ↓
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Inline plans */}
+                  <AnimatePresence initial={false}>
+                    {plansOpen && (
+                      <motion.div
+                        className={styles.plans}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                      >
+                        <span className={styles.plansTitle} style={{ color: palette.fgMuted }}>
+                          {t.plansTitle}
+                        </span>
+                        <div className={styles.planGrid}>
+                          {(catalog.plans ?? []).map((pl: { id: string; name: string; price: string; features: string[] }) => (
+                            <div
+                              key={pl.id}
+                              className={styles.planCard}
+                              style={{ borderColor: palette.surfaceBorder, background: palette.surface }}
+                            >
+                              <div className={styles.planTop}>
+                                <span className={styles.planName} style={{ color: palette.fg }}>{pl.name}</span>
+                                <span className={styles.planPrice} style={{ color: palette.accent }}>{pl.price}</span>
+                              </div>
+                              <ul className={styles.planFeatures} style={{ color: palette.fgMuted }}>
+                                {pl.features.map((f: string) => (
+                                  <li key={f}>{f}</li>
+                                ))}
+                              </ul>
+                              <Link
+                                href={`${buyHref}&plan=${pl.id}`}
+                                className={styles.planBtn}
+                                style={{ background: palette.accent, color: accentText }}
+                              >
+                                {t.choosePlan}
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             </AnimatePresence>

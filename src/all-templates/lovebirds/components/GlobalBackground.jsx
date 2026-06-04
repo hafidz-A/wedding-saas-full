@@ -71,10 +71,13 @@ export default function GlobalBackground() {
 
 /* ── Simple breakpoint hook ── */
 function useBreakpoint(maxWidth) {
-  const [matches, setMatches] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth <= maxWidth
-  })
+  // MUST start false on BOTH server and the client's first render. Reading
+  // window.innerWidth in the initializer made the client's first render differ
+  // from the server (desktop renders more wash/petal <div>s than mobile),
+  // causing a hydration mismatch that crashed this Suspense boundary into
+  // client-only rendering. We read the real value after mount instead — a
+  // decorative, aria-hidden layer can adjust its petal count a frame later.
+  const [matches, setMatches] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return

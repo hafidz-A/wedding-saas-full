@@ -1,0 +1,47 @@
+.browseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: #2a2118;
+  color: #f5efe3;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(42, 33, 24, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.browseBtn:hover {
+  transform: translateY(-2px);
+  background: #3a2e22;
+  box-shadow: 0 18px 38px rgba(42, 33, 24, 0.26);
+}
+
+.browseBtn:active {
+  transform: translateY(0);
+}
+
+.browseBtn svg {
+  transition: transform 0.2s ease;
+}
+
+.browseBtn:hover svg {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .browseBtn,
+  .browseBtn svg {
+    transition: none;
+  }
+  .browseBtn:hover {
+    transform: none;
+  }
+  .browseBtn:hover svg {
+    transform: none;
+  }
+}

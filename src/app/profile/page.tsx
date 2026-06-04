@@ -8,6 +8,7 @@ import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
 import RenewButton from './RenewButton'
+import styles from './profile.module.css'
 
 /**
  * Deliberately simple profile page. Shows the account email, a reset-password
@@ -62,10 +63,24 @@ export default async function ProfilePage() {
 
           <h2 style={h2}>{p.myTemplatesTitle}</h2>
           {invitations.length === 0 ? (
-            <p style={emptyBox}>
-              {p.empty}{' '}
-              <Link href="/templates" style={resetLink}>{p.browseTemplates}</Link>
-            </p>
+            <div style={emptyCard}>
+              <span style={emptyIconBadge} aria-hidden>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="3" />
+                  <path d="M3 9h18" />
+                  <path d="M9 9v12" />
+                </svg>
+              </span>
+              <h3 style={emptyTitleStyle}>{p.empty}</h3>
+              <p style={emptyBodyStyle}>{p.emptyBody}</p>
+              <Link href="/#vibe" className={styles.browseBtn}>
+                {p.browseTemplates}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 12h14" />
+                  <path d="M13 6l6 6-6 6" />
+                </svg>
+              </Link>
+            </div>
           ) : (
             <ul style={list}>
               {invitations.map((inv) => {
@@ -127,7 +142,24 @@ const rowValue: React.CSSProperties = { fontSize: 16, margin: '4px 0 16px' }
 const resetLink: React.CSSProperties = {
   color: '#E8553E', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 4, fontSize: 14,
 }
-const emptyBox: React.CSSProperties = { fontSize: 15, color: '#5C4A3A' }
+const emptyCard: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 14,
+  padding: 'clamp(32px, 6vw, 48px) 28px',
+  background: 'rgba(255,255,255,0.94)', borderRadius: 20,
+  border: '1px dashed rgba(232,85,62,0.4)',
+  boxShadow: '0 20px 60px rgba(42,33,24,0.08)',
+}
+const emptyIconBadge: React.CSSProperties = {
+  display: 'grid', placeItems: 'center', width: 64, height: 64, borderRadius: 18,
+  background: 'rgba(232,85,62,0.1)', color: '#E8553E', marginBottom: 2,
+}
+const emptyTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display, serif)', fontStyle: 'italic',
+  fontSize: 'clamp(22px, 4vw, 28px)', margin: 0, color: '#2A2118',
+}
+const emptyBodyStyle: React.CSSProperties = {
+  fontSize: 15, color: '#5C4A3A', lineHeight: 1.6, margin: '0 0 6px', maxWidth: 380,
+}
 const list: React.CSSProperties = { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }
 const item: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,

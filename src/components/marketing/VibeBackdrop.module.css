@@ -1,0 +1,65 @@
+/* Shared: a full-bleed, non-interactive backdrop layer inside the section. */
+.lovebirds,
+.solary {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ---------- Lovebirds ---------- */
+.birds {
+  position: absolute;
+  inset: 0;
+}
+/* The real perched-bird canvas is position:fixed/100vw — scope it to the
+   section instead so the birds stay inside the explorer. */
+.birds :global(.lovebirds-bird-canvas) {
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+/* ---------- Solary ---------- */
+.starCanvas,
+.galaxyCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.galaxyCanvas {
+  transform-origin: 50% 42%;
+}
+
+.twinkle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.4;
+  box-shadow: 0 0 6px currentColor;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .galaxyCanvas {
+    animation: vibe-galaxy-spin 240s linear infinite;
+  }
+  .twinkle {
+    animation: vibe-twinkle 3.4s ease-in-out infinite;
+  }
+}
+
+@keyframes vibe-galaxy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes vibe-twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.25);
+  }
+}

@@ -32,8 +32,41 @@ export function SmoothScroll() {
     // Store in global window for debugging or sharing
     ;(window as any).__lenis = lenis
 
+    // ---- In-page anchor smooth scrolling (e.g. "Template" / "Buat Undangan"
+    // CTAs that point to /#vibe). Lenis doesn't handle anchors itself. ----
+    const scrollToHash = (hash: string) => {
+      if (!hash) return
+      const el = document.querySelector(hash)
+      if (el) lenis.scrollTo(el as HTMLElement, { offset: -72, duration: 1.1 })
+    }
+    // Intercept same-page hash links so they glide instead of jumping.
+    const onClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement)?.closest('a')
+      if (!target) return
+      const href = target.getAttribute('href') || ''
+      const hashIndex = href.indexOf('#')
+      if (hashIndex < 0) return
+      const path = href.slice(0, hashIndex) || '/'
+      const hash = href.slice(hashIndex)
+      // Only handle links that resolve to the current (home) page.
+      if ((path === '/' || path === window.location.pathname) && document.querySelector(hash)) {
+        e.preventDefault()
+        window.history.pushState(null, '', hash)
+        scrollToHash(hash)
+      }
+    }
+    document.addEventListener('click', onClick)
+    // Honour an incoming hash (cross-page navigation to /#vibe).
+    const initialHash = window.location.hash
+    const hashTimer = window.setTimeout(() => scrollToHash(initialHash), 250)
+    const onHashChange = () => scrollToHash(window.location.hash)
+    window.addEventListener('hashchange', onHashChange)
+
     return () => {
       gsap.ticker.remove(rafCallback)
+      document.removeEventListener('click', onClick)
+      window.removeEventListener('hashchange', onHashChange)
+      window.clearTimeout(hashTimer)
       lenis.destroy()
       ;(window as any).__lenis = undefined
     }

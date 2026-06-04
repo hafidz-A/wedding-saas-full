@@ -13,12 +13,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
   // Public invitation pages own their intro + GSAP pinning — don't wrap them.
   if (isCinematicRoute(pathname, TEMPLATE_IDS)) return <>{children}</>
 
+  // IMPORTANT: keep this entrance to OPACITY only. A lingering `transform` or
+  // `filter` (even `scale(1)` / `blur(0px)`) makes this wrapper a containing
+  // block, which traps every `position: fixed` descendant — that's what stops
+  // the floating SiteNav (and any future fixed UI) from sticking to the
+  // viewport. Opacity creates a stacking context but NOT a containing block.
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0, scale: 0.995, filter: 'blur(4px)' }}
-      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </motion.div>

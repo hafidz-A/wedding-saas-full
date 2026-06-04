@@ -50,9 +50,9 @@ export function FinalCta({ t }: { t: Dict['landing']['finalCta'] }) {
             animate={revealed ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Link href="/signup" className={styles.cta}>
+            <Link href="/#vibe" className={styles.cta}>
               {t.cta}
-              <span className={styles.arrow}>→</span>
+              <span className={styles.arrow}>↓</span>
             </Link>
           </motion.div>
         </div>

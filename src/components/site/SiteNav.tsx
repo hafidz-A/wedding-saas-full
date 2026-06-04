@@ -46,14 +46,14 @@ export function SiteNav({ lang, t }: { lang: Lang; t: Dict['common'] }) {
   const baseLinks = (
     <>
       <Link href="/#features" className={styles.link} onClick={() => setOpen(false)}>{t.nav.experience}</Link>
-      <Link href="/templates" className={styles.link} onClick={() => setOpen(false)}>{t.nav.templates}</Link>
+      <Link href="/#vibe" className={styles.link} onClick={() => setOpen(false)}>{t.nav.templates}</Link>
     </>
   )
 
   const loggedOutRight = (
     <>
       <Link href="/login" className={styles.link} onClick={() => setOpen(false)}>{t.nav.login}</Link>
-      <Link href="/signup" className={styles.cta} onClick={() => setOpen(false)}>{t.nav.cta}</Link>
+      <Link href="/#vibe" className={styles.cta} onClick={() => setOpen(false)}>{t.nav.cta}</Link>
     </>
   )
 
@@ -100,7 +100,7 @@ export function SiteNav({ lang, t }: { lang: Lang; t: Dict['common'] }) {
         </div>
         <button
           type="button"
-          className={styles.burger}
+          className={`${styles.burger} ${open ? styles.open : ''}`}
           aria-label="Menu"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}

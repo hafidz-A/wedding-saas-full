@@ -13,9 +13,9 @@ export function SiteFooter({ lang, t }: { lang: Lang; t: Dict['common'] }) {
           <p className={styles.tagline}>{t.footer.tagline}</p>
         </div>
         <nav className={styles.links} aria-label="Footer">
-          <Link href="/templates" className={styles.link}>{t.footer.templates}</Link>
+          <Link href="/#vibe" className={styles.link}>{t.footer.templates}</Link>
           <Link href="/login" className={styles.link}>{t.footer.login}</Link>
-          <Link href="/signup" className={styles.link}>{t.footer.signup}</Link>
+          <Link href="/#vibe" className={styles.link}>{t.footer.signup}</Link>
           <Link href="/terms" className={styles.link}>Syarat &amp; Ketentuan</Link>
           <Link href="/privacy" className={styles.link}>Privasi</Link>
           <Link href="/refund" className={styles.link}>Refund</Link>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './Hero.module.css'
+import { deriveMonogram } from '../../config/monogram.js'
 
 const DEFAULTS = {
   coupleName: '',
@@ -481,9 +482,11 @@ export default function Hero(props) {
               <p className={styles.ended}>Today is the day — welcome.</p>
             )}
             
-            {/* Subtle initials monogram */}
+            {/* Subtle initials monogram — same source (deriveMonogram) as the
+                Couple cards and the Footer, so the order always matches the
+                couple name instead of being hardcoded groom-first. */}
             <div className={styles.monogram}>
-              {(cfg.groomName?.[0] || 'R')} &amp; {(cfg.brideName?.[0] || 'A')}
+              {deriveMonogram(cfg.coupleName, { brideName: cfg.brideName, groomName: cfg.groomName })}
             </div>
           </div>
         </div>

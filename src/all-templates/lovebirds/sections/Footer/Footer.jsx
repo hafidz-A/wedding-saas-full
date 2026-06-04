@@ -2,13 +2,15 @@
 
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import styles from './Footer.module.css'
+import { deriveMonogram } from '../../config/monogram.js'
 
 const DEFAULTS = {
-  monogram: 'R & A',
+  monogram: 'A & R',
   hashtag: '#OurWedding',
   message: 'Thank you for being part of our story.',
   coupleName: 'The Happy Couple',
   socials: [],
+  photos: [],
 }
 
 function MonogramSvg({ text }) {
@@ -61,8 +63,10 @@ function SocialIcon({ label }) {
 }
 
 export default function Footer(props) {
-  const { monogram, hashtag, message, coupleName, socials } = { ...DEFAULTS, ...props }
+  const { monogram, hashtag, message, coupleName, socials, photos } = { ...DEFAULTS, ...props }
   const { ref, isVisible } = useScrollReveal()
+  const monogramText = deriveMonogram(coupleName, undefined, monogram)
+  const couplePhotos = (Array.isArray(photos) ? photos : []).filter((p) => p && p.src).slice(0, 2)
 
   return (
     <footer
@@ -71,7 +75,25 @@ export default function Footer(props) {
       aria-label="Footer"
     >
       <div className={styles.inner}>
-        <MonogramSvg text={monogram} />
+        <MonogramSvg text={monogramText} />
+
+        {couplePhotos.length > 0 && (
+          <div className={styles.couplePhotos} aria-label="The couple">
+            {couplePhotos.map((p, i) => (
+              <div
+                key={i}
+                className={`${styles.photoCard} ${i === 0 ? styles.photoLeft : styles.photoRight}`}
+              >
+                <img
+                  src={p.src}
+                  alt={p.alt || ''}
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <h2 className={styles.hashtag}>{hashtag}</h2>
         <p className={styles.message}>{message}</p>

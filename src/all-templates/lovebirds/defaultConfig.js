@@ -15,7 +15,7 @@ const demoRsvpDateText = `Kindly respond by 1 November ${targetYear}`
 
 export const defaultConfig = {
   meta: {
-    title: 'Rizky & Amara — Our Wedding',
+    title: 'Amara & Rizky — Our Wedding',
     description: 'Cinematic wedding invitation experience',
   },
 
@@ -33,7 +33,7 @@ export const defaultConfig = {
       enabled: true,
       theme: 'darkLuxury',
       props: {
-        coupleName: 'Rizky & Amara',
+        coupleName: 'Amara & Rizky',
         brideName: 'Amara',
         groomName: 'Rizky',
         weddingDate: demoWeddingDate,
@@ -323,10 +323,15 @@ export const defaultConfig = {
       enabled: true,
       theme: 'warmCream',
       props: {
-        monogram: 'R & A',
-        hashtag: '#RizkyAndAmara',
+        monogram: 'A & R',
+        hashtag: '#AmaraAndRizky',
         message: 'Thank you for being part of our story.',
-        coupleName: 'Rizky & Amara',
+        coupleName: 'Amara & Rizky',
+        // Two photos shown as tilted polaroids below the monogram (bride, groom).
+        photos: [
+          { src: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=600&q=80', alt: 'Amara' },
+          { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80', alt: 'Rizky' },
+        ],
         socials: [
           { id: 's-ig',   label: 'Instagram', url: '#'                          },
           { id: 's-mail', label: 'Email',     url: 'mailto:hello@rizkyamara.id' },

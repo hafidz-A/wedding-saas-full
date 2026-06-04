@@ -66,7 +66,9 @@ export default function Ornaments() {
 // style-guide-lovebirds.html (lines ~2481–3082). All former module globals
 // are now effect-locals; all `currentTheme.*` reads become the resolved
 // `theme` for this paletteKey.
-function PerchedCanvas({ active, paletteKey }) {
+// Exported so the marketing "Vibe Explorer" can reuse the real perched birds
+// as a palette-driven backdrop (scoped to a section via absolute positioning).
+export function PerchedCanvas({ active, paletteKey }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {

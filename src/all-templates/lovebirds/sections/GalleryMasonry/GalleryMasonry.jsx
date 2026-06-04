@@ -67,10 +67,13 @@ export default function GalleryMasonry({
                   className={styles.cell}
                   style={{ aspectRatio: COL_RATIOS[colIdx][i % 4] }}
                 >
+                  {/* Broken URL → hide the broken-image icon/alt text so the
+                      cell's soft placeholder background shows instead. */}
                   <img
                     src={photo.src}
                     alt={photo.alt || ''}
                     loading="lazy"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
                   />
                 </div>
               ))}

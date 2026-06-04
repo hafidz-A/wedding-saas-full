@@ -113,6 +113,9 @@
   flex-shrink: 0;
   border-radius: 6px;
   overflow: hidden;
+  /* Soft placeholder shown when a photo URL is broken (img is hidden on error)
+     so the masonry rhythm holds instead of leaving a blank gap. */
+  background: linear-gradient(135deg, rgba(42, 33, 24, 0.06), rgba(42, 33, 24, 0.02));
 }
 
 .cell img {
@@ -129,11 +132,17 @@
    "unhides" the next belt and bumps the column count. Re-asserting
    `animation` keeps the CSS keyframes restarting cleanly when the
    viewport widens past the threshold (animation: none → unset on flip). */
+/* Hidden until their breakpoint unlocks them. Toggle ONLY `display` here — not
+   `animation`. display:none already stops the animation and its paint cost, and
+   leaving the base .beltUp/.beltDown rule intact matters: it carries the
+   CSS-Modules-SCOPED @keyframes name. (A previous version re-set
+   `animation: var(--belt-anim, beltUp)` in the unlock media queries below, but
+   CSS Modules can't rewrite a keyframe name inside var() — it stayed the raw,
+   non-existent `beltUp`, so columns 3 & 5 silently never moved.) */
 .belt:nth-child(3),
 .belt:nth-child(4),
 .belt:nth-child(5) {
   display: none;
-  animation: none;
 }
 
 /* Small phone → larger phone (≥480px): same 2-col layout, looser gutter. */
@@ -141,17 +150,15 @@
   .stage { gap: 10px; }
 }
 
-/* Tablet (≥768px): unlock 3rd column. */
+/* Tablet (≥768px): unlock 3rd column. Just reveal it — the base .beltUp/
+   .beltDown rule (scoped keyframe) animates it, restarting cleanly from
+   display:none → flex. */
 @media (min-width: 768px) {
   .stage {
     grid-template-columns: repeat(3, 1fr);
     height: clamp(840px, 100vw, 1080px);
   }
-  .belt:nth-child(3) {
-    display: flex;
-    animation: var(--belt-anim, beltUp) var(--spd, 20s) linear infinite;
-  }
-  .beltDown:nth-child(3) { animation-name: beltDown; }
+  .belt:nth-child(3) { display: flex; }
 }
 
 /* Desktop (≥1024px): unlock 4th column. */
@@ -160,19 +167,11 @@
     grid-template-columns: repeat(4, 1fr);
     height: 1080px;
   }
-  .belt:nth-child(4) {
-    display: flex;
-    animation: var(--belt-anim, beltUp) var(--spd, 20s) linear infinite;
-  }
-  .beltDown:nth-child(4) { animation-name: beltDown; }
+  .belt:nth-child(4) { display: flex; }
 }
 
 /* Wide desktop (≥1280px): full 5-column wall. */
 @media (min-width: 1280px) {
   .stage { grid-template-columns: repeat(5, 1fr); }
-  .belt:nth-child(5) {
-    display: flex;
-    animation: var(--belt-anim, beltUp) var(--spd, 20s) linear infinite;
-  }
-  .beltDown:nth-child(5) { animation-name: beltDown; }
+  .belt:nth-child(5) { display: flex; }
 }

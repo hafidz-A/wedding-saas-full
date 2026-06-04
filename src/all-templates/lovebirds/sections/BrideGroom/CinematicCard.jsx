@@ -18,6 +18,7 @@ export default function CinematicCard({
   children,
   direction = 'right',
   triggerRef,
+  selfTrigger = false,
   startPct = 0,
   endPct = 400,
   tiltStrength = 1,
@@ -35,12 +36,19 @@ export default function CinematicCard({
     const xStart = (isRight ? 1 : -1) * distance
     const restTiltY = (isRight ? -3 : 3) * tiltStrength
 
+    // selfTrigger (mobile): the card triggers off ITSELF and spins in as it
+    // scrolls into view, with a short scrub so it tracks the finger — no pinned
+    // "hold" where scrolling looks frozen. Desktop: the section is the trigger
+    // and the pair spins together while the section is pinned (sticky), ending
+    // by the time the section fills the screen.
+    const stTrigger = selfTrigger ? el : trigger
+
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger,
-        start: 'top 60%',
-        end: 'bottom 10%',
-        scrub: 2.5,
+        trigger: stTrigger,
+        start: selfTrigger ? 'top 92%' : 'top 75%',
+        end: selfTrigger ? 'top 45%' : 'top top',
+        scrub: selfTrigger ? 1 : 2.5,
         invalidateOnRefresh: true,
       },
     })
@@ -91,10 +99,12 @@ export default function CinematicCard({
       s + dur * 0.78,
     )
 
-    // When scroll completes, add the idle float class
+    // Start the idle float as soon as the section is fully on screen (which is
+    // also when the compressed entrance finishes) so the cards are never left
+    // sitting static and bare for the rest of the scroll.
     ScrollTrigger.create({
-      trigger,
-      start: 'bottom 30%',
+      trigger: stTrigger,
+      start: selfTrigger ? 'top 55%' : 'top top',
       onEnter: () => el.classList.add(styles.idleFloat),
       onLeaveBack: () => el.classList.remove(styles.idleFloat),
     })
@@ -103,10 +113,10 @@ export default function CinematicCard({
       tl.scrollTrigger?.kill()
       tl.kill()
       ScrollTrigger.getAll().forEach((st) => {
-        if (st.trigger === trigger) st.kill()
+        if (st.trigger === stTrigger) st.kill()
       })
     }
-  }, [direction, triggerRef, startPct, endPct, tiltStrength, distance, isRight])
+  }, [direction, triggerRef, selfTrigger, startPct, endPct, tiltStrength, distance, isRight])
 
   return (
     <div

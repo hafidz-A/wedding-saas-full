@@ -66,6 +66,13 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
 
   const effSlug = slug || config.meta?.slug || 'demo'
   const sectionIds = visible.map((s) => s.id)
+  // Gate photos double as the floating "photo-stars" scattered behind every
+  // non-photo section (see SectionRenderer's PHOTO_BACKED_TYPES).
+  const gatePhotos = useMemo(() => {
+    const gate = (config.sections || []).find((s) => s.type === 'openingGate')
+    const photos = gate?.props?.gatePhotos
+    return Array.isArray(photos) ? photos.filter(Boolean) : []
+  }, [config])
 
   // Tag <body> so Solary's dark cosmic background overrides the app's shared
   // cream body background (root layout + global.css) for this route only.
@@ -110,7 +117,7 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
             />
             <main>
               {visible.map((s) => (
-                <SectionRenderer key={s.id} section={s} slug={effSlug} />
+                <SectionRenderer key={s.id} section={s} slug={effSlug} gatePhotos={gatePhotos} />
               ))}
             </main>
             <TravellingOverlay />
