@@ -36,16 +36,21 @@ export async function PUT(req: Request, { params }: Ctx) {
 
   const supabase = createSupabaseAdminClient()
 
-  // Preserve config.music and config.bgGif — they're saved by dedicated
-  // dashboard tabs via separate endpoints and editor save MUST NOT clobber
-  // either of them.
+  // Top-level config keys owned by dedicated dashboard tabs (Music, Palette,
+  // Ornament, Meta, Guests) which save via their own endpoints. The section
+  // editor loaded a config snapshot when the page opened, so it must NOT write
+  // these back — that would revert a change made in another tab since load.
+  // Always take them from the freshly-read DB row instead of the editor payload.
+  const PRESERVE_KEYS = ['music', 'bgGif', 'theme', 'meta', 'inviteMessageTemplate']
   const { data: existing } = await (supabase.from('invitations') as any)
     .select('config')
     .eq('id', owner.id)
     .single()
   const mergedConfig: any = { ...config }
-  if (existing?.config?.music !== undefined) mergedConfig.music = existing.config.music
-  if (existing?.config?.bgGif !== undefined) mergedConfig.bgGif = existing.config.bgGif
+  for (const key of PRESERVE_KEYS) {
+    if (existing?.config && key in existing.config) mergedConfig[key] = existing.config[key]
+    else delete mergedConfig[key]
+  }
 
   // Encrypt sensitive leaves (account numbers/names, whatsapp, email, phone)
   // before persisting. The editor loaded a decrypted config, so these arrive

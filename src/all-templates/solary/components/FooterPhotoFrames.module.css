@@ -1,0 +1,100 @@
+/* Spans the whole glass-card. z-index:-1 keeps the frames above the card's
+   own (frosted) background fill but behind every text child, so the closing
+   words stay readable. pointer-events:none so the buttons remain clickable. */
+.frames {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* Slim "polaroid" matte built only from theme tokens so it recolors with the
+   active palette. */
+.frame {
+  position: absolute;
+  margin: 0;
+  width: clamp(118px, 14vw, 184px);
+  aspect-ratio: 3 / 4;
+  padding: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  opacity: 0.6;
+  overflow: hidden;
+  will-change: transform;
+}
+.frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 7px;
+}
+/* Theme-tinted veil so the photo settles into a calm backdrop on any palette. */
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 7px;
+  background: linear-gradient(180deg, transparent 35%, var(--color-surface));
+  opacity: 0.55;
+}
+
+/* upper-left */
+.a {
+  top: 5%;
+  left: 1%;
+  transform: rotate(-7deg);
+  animation: footerFrameInA 900ms ease both, footerFrameFloatA 9s ease-in-out 900ms infinite alternate;
+}
+/* lower-right */
+.b {
+  bottom: 5%;
+  right: 1%;
+  transform: rotate(7deg);
+  animation: footerFrameInB 1000ms ease both, footerFrameFloatB 10.5s ease-in-out 1000ms infinite alternate;
+}
+
+@keyframes footerFrameInA {
+  from { opacity: 0; transform: rotate(-7deg) translateY(14px) scale(0.94); }
+  to   { opacity: 0.6; transform: rotate(-7deg) translateY(0) scale(1); }
+}
+@keyframes footerFrameInB {
+  from { opacity: 0; transform: rotate(7deg) translateY(14px) scale(0.94); }
+  to   { opacity: 0.6; transform: rotate(7deg) translateY(0) scale(1); }
+}
+@keyframes footerFrameFloatA {
+  from { transform: rotate(-7deg) translateY(0); }
+  to   { transform: rotate(-8.6deg) translateY(-10px); }
+}
+@keyframes footerFrameFloatB {
+  from { transform: rotate(7deg) translateY(0); }
+  to   { transform: rotate(8.6deg) translateY(-12px); }
+}
+
+/* ---- Tablet ---- */
+@media (max-width: 768px) {
+  .frame { width: clamp(96px, 21vw, 142px); opacity: 0.5; }
+  .a { top: 3%; left: -1%; }
+  .b { bottom: 3%; right: -1%; }
+  @keyframes footerFrameInA { from { opacity: 0; } to { opacity: 0.5; } }
+  @keyframes footerFrameInB { from { opacity: 0; } to { opacity: 0.5; } }
+}
+
+/* ---- Phone ---- */
+@media (max-width: 480px) {
+  .frame { width: clamp(74px, 27vw, 108px); opacity: 0.42; border-radius: 10px; }
+  .a { top: 2%; left: -2%; }
+  .b { bottom: 2%; right: -2%; }
+  @keyframes footerFrameInA { from { opacity: 0; } to { opacity: 0.42; } }
+  @keyframes footerFrameInB { from { opacity: 0; } to { opacity: 0.42; } }
+}
+
+/* ---- Reduced motion: hold still, keep the resting tilt ---- */
+.still .frame { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .frame { animation: none; }
+}

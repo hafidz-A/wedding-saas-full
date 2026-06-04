@@ -360,11 +360,14 @@ export const pageConfig = {
         body: "We can't wait to share that day with you. Until then, walk well, dear traveller.", // [CONTOH]
         easterEggMessage: "We're so glad you came this far. We love you. ✦", // [CONTOH] — appears on sun click
         signature: "Made with light. Galactic Wedding Engine v3.0.",
+        photoFramesEnabled: true, // tilted photo frames behind the closing text
       },
       schema: {
         heading: { kind: "text" },
         body:    { kind: "textarea" },
         easterEggMessage: { kind: "textarea" },
+        signature: { kind: "text" },
+        photoFramesEnabled: { kind: "boolean" },
       },
     },
   ],

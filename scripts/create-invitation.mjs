@@ -44,6 +44,7 @@ import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createClient } from '@supabase/supabase-js'
+import { assertPasswordValid } from './lib/password-policy.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -119,10 +120,9 @@ if (missing.length) {
   process.exit(1)
 }
 
-if (password.length < 6) {
-  console.error('Password too short (Supabase Auth minimum is 6 chars).')
-  process.exit(1)
-}
+// Enforce the account password policy (uppercase + number + symbol, min 8).
+// admin.createUser bypasses Supabase's own policy, so this is the only guard.
+assertPasswordValid(password)
 
 /* ────────────────────────── supabase ────────────────────────── */
 

@@ -16,7 +16,6 @@ export const sectionRegistry = {
   weddingGift:       lazy(() => import('./sections/WeddingGift/WeddingGift.jsx')),
   accommodations:    lazy(() => import('./sections/Accommodations/Accommodations.jsx')),
   faq:               lazy(() => import('./sections/Faq/Faq.jsx')),
-  playlist:          lazy(() => import('./sections/Playlist/Playlist.jsx')),
   footer:            lazy(() => import('./sections/Footer/Footer.jsx')),
   blocks:            lazy(() => import('./sections/BlocksSection/BlocksSection.jsx')),
   // `countdown`, `registry`, `guestbook` removed from lovebirds — registry is

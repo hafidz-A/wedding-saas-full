@@ -6,6 +6,12 @@ import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Dict } from '@/lib/i18n'
 import { safeNext } from '@/lib/auth/safeNext'
+import LegalModal from '@/components/legal/LegalModal'
+import PrivacyContent from '@/components/legal/PrivacyContent'
+import RefundContent from '@/components/legal/RefundContent'
+import { CONSENT_VERSION } from '@/lib/legal/consent'
+import { isPasswordValid } from '@/lib/auth/passwordPolicy'
+import PasswordChecklist from '@/components/auth/PasswordChecklist'
 
 /**
  * /signup — email + password + repeat. Supabase Auth signUp() sends an
@@ -25,14 +31,25 @@ import { safeNext } from '@/lib/auth/safeNext'
  *      include {{ .Token }} (the 6-digit code). Default template uses
  *      only {{ .ConfirmationURL }} which is the link, not the code.
  */
-export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
+export default function SignupForm({
+  dict,
+  rules,
+}: {
+  dict: Dict['auth']['signup']
+  rules: Dict['auth']['passwordRules']
+}) {
   const router = useRouter()
   const next = safeNext(useSearchParams().get('next'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeat, setRepeat] = useState('')
+  const [agreePrivacy, setAgreePrivacy] = useState(false)
+  const [agreeRefund, setAgreeRefund] = useState(false)
+  const [openDoc, setOpenDoc] = useState<'privacy' | 'refund' | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  const consentMissing = !agreePrivacy || !agreeRefund
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -42,12 +59,16 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
       setError(dict.errFill)
       return
     }
-    if (password.length < 8) {
-      setError(dict.errMin8)
+    if (!isPasswordValid(password)) {
+      setError(rules.error)
       return
     }
     if (password !== repeat) {
       setError(dict.errMismatch)
+      return
+    }
+    if (consentMissing) {
+      setError(dict.errConsent)
       return
     }
 
@@ -61,6 +82,17 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      // Record the legal consent alongside the account. Lands in
+      // auth.users.raw_user_meta_data — no extra table/migration needed, and
+      // it still persists under Supabase's email-enumeration protection.
+      options: {
+        data: {
+          consent_privacy: true,
+          consent_refund: true,
+          consent_version: CONSENT_VERSION,
+          consent_at: new Date().toISOString(),
+        },
+      },
     })
 
     if (signUpError) {
@@ -126,6 +158,7 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
             placeholder={dict.passwordPlaceholder}
             style={input}
           />
+          <PasswordChecklist password={password} labels={rules} />
         </label>
 
         <label style={field}>
@@ -140,9 +173,46 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
           />
         </label>
 
+        <div style={consentGroup}>
+          <div style={consentRow}>
+            <input
+              id="agree-privacy"
+              type="checkbox"
+              checked={agreePrivacy}
+              onChange={(e) => setAgreePrivacy(e.target.checked)}
+              style={checkbox}
+            />
+            <span style={consentText}>
+              <label htmlFor="agree-privacy" style={consentLabel}>{dict.consentPrefix}</label>
+              <button type="button" onClick={() => setOpenDoc('privacy')} style={consentLink}>
+                {dict.consentPrivacy}
+              </button>
+            </span>
+          </div>
+          <div style={consentRow}>
+            <input
+              id="agree-refund"
+              type="checkbox"
+              checked={agreeRefund}
+              onChange={(e) => setAgreeRefund(e.target.checked)}
+              style={checkbox}
+            />
+            <span style={consentText}>
+              <label htmlFor="agree-refund" style={consentLabel}>{dict.consentPrefix}</label>
+              <button type="button" onClick={() => setOpenDoc('refund')} style={consentLink}>
+                {dict.consentRefund}
+              </button>
+            </span>
+          </div>
+        </div>
+
         {error && <p style={errorStyle}>{error}</p>}
 
-        <button type="submit" disabled={submitting} style={submitBtn}>
+        <button
+          type="submit"
+          disabled={submitting || consentMissing}
+          style={{ ...submitBtn, ...(submitting || consentMissing ? submitBtnDisabled : null) }}
+        >
           {submitting ? dict.submitting : dict.submit}
         </button>
 
@@ -158,6 +228,17 @@ export default function SignupForm({ dict }: { dict: Dict['auth']['signup'] }) {
           </Link>
         </p>
       </form>
+
+      {openDoc === 'privacy' && (
+        <LegalModal title={dict.consentPrivacy} closeLabel={dict.modalClose} onClose={() => setOpenDoc(null)}>
+          <PrivacyContent />
+        </LegalModal>
+      )}
+      {openDoc === 'refund' && (
+        <LegalModal title={dict.consentRefund} closeLabel={dict.modalClose} onClose={() => setOpenDoc(null)}>
+          <RefundContent />
+        </LegalModal>
+      )}
     </main>
   )
 }
@@ -222,6 +303,46 @@ const submitBtn: React.CSSProperties = {
   fontWeight: 600,
   letterSpacing: '0.16em',
   textTransform: 'uppercase',
+  cursor: 'pointer',
+}
+const submitBtnDisabled: React.CSSProperties = {
+  opacity: 0.45,
+  cursor: 'not-allowed',
+}
+const consentGroup: React.CSSProperties = {
+  display: 'grid',
+  gap: 10,
+  marginTop: 4,
+}
+const consentRow: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 10,
+}
+const checkbox: React.CSSProperties = {
+  width: 18,
+  height: 18,
+  marginTop: 2,
+  flexShrink: 0,
+  accentColor: '#E8553E',
+  cursor: 'pointer',
+}
+const consentText: React.CSSProperties = {
+  fontSize: 13.5,
+  lineHeight: 1.5,
+  color: '#5C4A3A',
+}
+const consentLabel: React.CSSProperties = {
+  cursor: 'pointer',
+}
+const consentLink: React.CSSProperties = {
+  background: 'none',
+  border: 0,
+  padding: 0,
+  font: 'inherit',
+  color: '#E8553E',
+  fontWeight: 600,
+  textDecoration: 'underline',
   cursor: 'pointer',
 }
 const errorStyle: React.CSSProperties = {

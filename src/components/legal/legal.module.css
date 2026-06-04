@@ -19,14 +19,39 @@
   margin: 0 0 12px;
 }
 
+/*
+ * Restore real list markers inside legal prose. The global reset
+ * (styles/global.css → `ul, ol { list-style: none }`) strips bullets
+ * site-wide; here we opt back in so policy lists read like a Word document:
+ * filled discs for the main level, hollow circles for nested sub-lists, and
+ * decimal numbers for ordered lists.
+ */
 .prose ul,
 .prose ol {
   margin: 0 0 14px;
-  padding-left: 22px;
+  padding-left: 26px;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose ul ul {
+  list-style: circle;
+  margin: 6px 0 8px;
 }
 
 .prose li {
   margin: 0 0 6px;
+  padding-left: 4px;
+}
+
+.prose li::marker {
+  color: #2a2118;
 }
 
 .prose a {

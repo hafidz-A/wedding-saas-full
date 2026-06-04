@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
+import { isPasswordValid } from '@/lib/auth/passwordPolicy'
+import PasswordChecklist from '@/components/auth/PasswordChecklist'
 
 /**
  * /reset-password — TOKEN-based password reset.
@@ -33,7 +35,9 @@ function ResetPasswordInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const presetEmail = searchParams.get('email') || ''
-  const t = getDict(useClientLang()).auth.reset
+  const dict = getDict(useClientLang())
+  const t = dict.auth.reset
+  const rules = dict.auth.passwordRules
 
   const [email, setEmail] = useState(presetEmail)
   const [token, setToken] = useState('')
@@ -55,8 +59,8 @@ function ResetPasswordInner() {
       setError(t.errToken)
       return
     }
-    if (password.length < 8) {
-      setError(t.errMin8)
+    if (!isPasswordValid(password)) {
+      setError(rules.error)
       return
     }
     if (password !== confirm) {
@@ -176,6 +180,7 @@ function ResetPasswordInner() {
             style={input}
             autoComplete="new-password"
           />
+          <PasswordChecklist password={password} labels={rules} />
         </label>
 
         <label style={{ display: 'grid', gap: 6 }}>

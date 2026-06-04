@@ -7,7 +7,7 @@ const EASE = [0.16, 1, 0.3, 1];
    enters the viewport, then reverses on exit. Children get a
    stagger via the `data-card-child` selector — wrap items in
    <CardChild>…</CardChild>. */
-export default function GlassCard({ title, planetName, children, className = "" }) {
+export default function GlassCard({ title, planetName, children, className = "", backdrop = null }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -92,6 +92,10 @@ export default function GlassCard({ title, planetName, children, className = "" 
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.8, ease: EASE }}
           >
+            {/* Optional decorative layer (e.g. footer photo frames). Sits above
+                the card's frosted fill but behind the text via its own
+                negative z-index, so it never covers the content. */}
+            {backdrop}
             {titleText && (
               <motion.div
                 className="glass-card__title"

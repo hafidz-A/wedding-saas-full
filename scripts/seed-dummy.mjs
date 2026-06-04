@@ -20,7 +20,7 @@
  * Usage:
  *   node scripts/seed-dummy.mjs
  *   node scripts/seed-dummy.mjs --template=lovebirds
- *   node scripts/seed-dummy.mjs my-test pass1234 --template=solary --lifetime
+ *   node scripts/seed-dummy.mjs my-test MyTest123! --template=solary --lifetime
  *   node scripts/seed-dummy.mjs --no-seed            # empty invitation only
  *   node scripts/seed-dummy.mjs --draft              # unpaid gate state
  *   node scripts/seed-dummy.mjs --days=-1            # expired state
@@ -42,6 +42,7 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createCipheriv, randomBytes } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
+import { assertPasswordValid } from './lib/password-policy.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -85,9 +86,14 @@ const VALID_TEMPLATES = ['lovebirds', 'solary']
 const template = VALID_TEMPLATES.includes(flags.template) ? flags.template : 'solary'
 const plan = flags.plan === 'basic' ? 'basic' : 'premium'
 const slug = positional[0] || flags.slug || `dummy-${template}`
-const password = positional[1] || flags.password || 'test1234'
+// Compliant by default (uppercase + number + symbol, min 8) — the password
+// policy applies to dummy accounts too, no exceptions.
+const password = positional[1] || flags.password || 'DemoTutorial123!'
 const email = flags.email || `dummy+${slug}@example.com`
 const seedData = flags.seed !== 'false' && flags['no-seed'] !== 'true'
+
+// Reject a custom --password that doesn't meet the policy.
+assertPasswordValid(password)
 
 /* payment state — mirrors mark-paid.mjs */
 let payState

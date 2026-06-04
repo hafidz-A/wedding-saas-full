@@ -53,7 +53,6 @@ const DEFAULT_LABELS = {
   accommodations: 'Stay',
   faq: 'FAQ',
   guestbook: 'Notes',
-  playlist: 'Playlist',
   footer: 'End',
 }
 

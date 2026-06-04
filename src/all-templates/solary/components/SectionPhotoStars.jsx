@@ -4,11 +4,12 @@ import styles from "./SectionPhotoStars.module.css";
 /* Subtle sibling of GatePhotoStars: scatters the couple's gate photos as
    faint, twinkling "star" cards behind a section's content. Tuned quieter
    than the gate (fewer concurrent, lower opacity, slower cadence) so the
-   GlassCard text stays readable, and only spawns while the section is on
-   screen. The gate component is intentionally left untouched. */
+   GlassCard text stays readable. The spawn loop runs continuously — even
+   while the section is scrolled off screen — so the twinkle never pauses.
+   The gate component is intentionally left untouched. */
 const MAX_CONCURRENT = 4;
-const LIFETIME_MS = 5200;
-const SPAWN_EVERY_MS = 1500;
+const LIFETIME_MS = 4800;
+const SPAWN_EVERY_MS = 1000;
 
 // Bias spawns toward the edges so photos avoid the center where the card sits.
 function randomSpot() {
@@ -20,24 +21,10 @@ function randomSpot() {
 export default function SectionPhotoStars({ photos = [], reducedMotion = false }) {
   const list = useMemo(() => (Array.isArray(photos) ? photos.filter(Boolean) : []), [photos]);
   const [sparks, setSparks] = useState([]);
-  const rootRef = useRef(null);
   const idRef = useRef(0);
-  const [inView, setInView] = useState(false);
-
-  // Only run the spawn loop while the section is visible.
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      setInView(true);
-      return undefined;
-    }
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
   useEffect(() => {
-    if (!list.length || reducedMotion || !inView) return undefined;
+    if (!list.length || reducedMotion) return undefined;
     const spawn = () => {
       const spot = randomSpot();
       const photo = list[Math.floor(Math.random() * list.length)];
@@ -48,12 +35,12 @@ export default function SectionPhotoStars({ photos = [], reducedMotion = false }
     const iv = window.setInterval(spawn, SPAWN_EVERY_MS);
     spawn();
     return () => window.clearInterval(iv);
-  }, [list, reducedMotion, inView]);
+  }, [list, reducedMotion]);
 
   if (!list.length) return null;
 
   return (
-    <div ref={rootRef} className={styles.layer} aria-hidden="true">
+    <div className={styles.layer} aria-hidden="true">
       {sparks.map((s) => (
         <figure
           key={s.key}

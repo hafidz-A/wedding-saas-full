@@ -87,7 +87,7 @@ describe('lovebirds gallery single-instance', () => {
   const registry: Record<string, unknown> = {
     hero: {}, footer: {}, quote: {}, ourStory: {}, eventDetails: {},
     brideGroom: {}, weddingParty: {}, galleryMasonry: {}, gallerySpringCoil: {},
-    schedule: {}, rsvp: {}, weddingGift: {}, accommodations: {}, faq: {}, playlist: {},
+    schedule: {}, rsvp: {}, weddingGift: {}, accommodations: {}, faq: {},
   }
   const p = getTemplatePolicy('lovebirds')!
 

@@ -9,6 +9,7 @@ import GiftsTab, { type GiftRow } from './GiftsTab'
 import MusicTab from './MusicTab'
 import OrnamentTab from './OrnamentTab'
 import PaletteTab from './PaletteTab'
+import MetaTab from './MetaTab'
 import TutorialTab from './TutorialTab'
 import GuestsTab from './GuestsTab'
 import GuestbookTab from './GuestbookTab'
@@ -69,7 +70,7 @@ export default function DashboardClient({
 
   type TabKey =
     | 'rsvps' | 'gifts' | 'guests' | 'guestbook'
-    | 'editor' | 'music' | 'ornament' | 'palette' | 'tutorial'
+    | 'editor' | 'music' | 'ornament' | 'palette' | 'meta' | 'tutorial'
 
   const [tab, setTab] = useState<TabKey>('rsvps')
 
@@ -83,6 +84,7 @@ export default function DashboardClient({
     keys.push('editor')
     keys.push('palette')
     keys.push('music')
+    keys.push('meta')
     // The Background (Latar) tab swaps the invitation's background GIF — only
     // meaningful for lovebirds. Solary renders its own Three.js galactic scene,
     // so the tab is hidden there.
@@ -305,6 +307,10 @@ export default function DashboardClient({
 
             {tab === 'palette' && (
               <PaletteTab slug={slug} template={template} initial={invitation.config?.theme?.defaultPalette} />
+            )}
+
+            {tab === 'meta' && (
+              <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} />
             )}
 
             {tab === 'tutorial' && (

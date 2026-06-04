@@ -53,7 +53,7 @@ const solaryPolicy: TemplatePolicy = {
 const LOVEBIRDS_POOL = [
   'quote', 'ourStory', 'eventDetails', 'brideGroom', 'weddingParty',
   'galleryMasonry', 'gallerySpringCoil', 'schedule', 'rsvp', 'weddingGift',
-  'accommodations', 'faq', 'playlist',
+  'accommodations', 'faq',
 ]
 
 const lovebirdsPolicy: TemplatePolicy = {

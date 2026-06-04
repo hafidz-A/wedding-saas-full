@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from "react";
 import GlassCard, { CardChild } from "../components/GlassCard.jsx";
+import FooterPhotoFrames from "../components/FooterPhotoFrames.jsx";
 
 /* The Sun has an easter egg: clicking it (in scene OR via this
    button fallback) opens a hidden message. The scene fires
-   `galactic:sunclick` as a CustomEvent which we listen for. */
-export default function FooterPlanet({ sectionLabel, planetName, heading, body, easterEggMessage, signature }) {
+   `galactic:sunclick` as a CustomEvent which we listen for.
+   `decorPhotos` are the couple's gate photos, shown as tilted frames
+   behind the farewell text (see FooterPhotoFrames) when
+   `photoFramesEnabled` is on. */
+export default function FooterPlanet({ sectionLabel, planetName, heading, body, easterEggMessage, signature, decorPhotos = [], decorReducedMotion = false, photoFramesEnabled }) {
+  // Frames render only when explicitly enabled. New/demo configs seed
+  // `photoFramesEnabled: true`; configs predating this field stay off, so the
+  // dashboard toggle (which reads !!value) always matches what's on screen.
+  const framesOn = !!photoFramesEnabled;
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const onClick = () => setOpen(true);
@@ -14,7 +22,11 @@ export default function FooterPlanet({ sectionLabel, planetName, heading, body, 
 
   return (
     <div className="section-stage">
-      <GlassCard title={sectionLabel} planetName={planetName}>
+      <GlassCard
+        title={sectionLabel}
+        planetName={planetName}
+        backdrop={framesOn ? <FooterPhotoFrames photos={decorPhotos} reducedMotion={decorReducedMotion} /> : null}
+      >
         <CardChild>
           <h2 className="h-1 center-text" style={{ marginBottom: "1rem" }}>{heading}</h2>
         </CardChild>
@@ -31,11 +43,13 @@ export default function FooterPlanet({ sectionLabel, planetName, heading, body, 
             </button>
           </div>
         </CardChild>
-        <CardChild>
-          <p className="mono faint center-text" style={{ marginTop: "2rem", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" }}>
-            {signature}
-          </p>
-        </CardChild>
+        {signature && (
+          <CardChild>
+            <p className="mono faint center-text" style={{ marginTop: "2rem", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" }}>
+              {signature}
+            </p>
+          </CardChild>
+        )}
       </GlassCard>
 
       {open && easterEggMessage && (

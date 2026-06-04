@@ -258,9 +258,120 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
   )
 }
 
+/** "budi-sinta" → "Budi Sinta" (last-resort title when nothing else is set). */
+function prettifySlug(slug: string): string {
+  return slug.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).trim() || slug
+}
+
+/** Pull the couple's name from the config (openingGate/hero) as a meta fallback. */
+function deriveCoupleName(config: any): string | null {
+  const sections = config?.sections
+  if (!Array.isArray(sections)) return null
+  for (const s of sections) {
+    const p = s?.props || {}
+    const name =
+      p.coupleName ||
+      p.names ||
+      (p.brideName && p.groomName ? `${p.brideName} & ${p.groomName}` : null)
+    if (typeof name === 'string' && name.trim()) return name.replace(/\s+/g, ' ').trim()
+  }
+  return null
+}
+
+/**
+ * First usable share image: the couple's explicit `meta.ogImage` (set in the
+ * dashboard "Judul & Deskripsi" tab), else the first http(s) photo found in the
+ * config (gate photo / portrait / gallery). Returns an absolute URL or null.
+ */
+function deriveOgImage(config: any): string | null {
+  const meta = config?.meta || {}
+  if (typeof meta.ogImage === 'string' && /^https?:\/\//i.test(meta.ogImage.trim())) {
+    return meta.ogImage.trim()
+  }
+  const sections = config?.sections
+  if (!Array.isArray(sections)) return null
+  const http = (v: any): string | null =>
+    typeof v === 'string' && /^https?:\/\//i.test(v) ? v : null
+  for (const s of sections) {
+    const p = s?.props || {}
+    const candidates = [
+      Array.isArray(p.gatePhotos) ? p.gatePhotos[0] : null,
+      p.portrait, p.portrait2, p.coverImage, p.image, p.backgroundImage,
+      Array.isArray(p.photos) ? (p.photos[0]?.src ?? p.photos[0]) : null,
+    ]
+    for (const c of candidates) {
+      const u = http(c)
+      if (u) return u
+    }
+  }
+  return null
+}
+
+/**
+ * Dynamic page metadata — drives the browser tab title and the WhatsApp /
+ * social link preview (og:title + og:description + og:image). Reads the couple's own
+ * `config.meta` (editable from the dashboard "Judul & Deskripsi" tab), falling
+ * back to their name, then a prettified slug. Never throws — a DB hiccup just
+ * yields the slug-based title.
+ */
 export async function generateMetadata({ params }: PageProps) {
-  return {
-    title: `${params.slug} — Wedding Invitation`,
-    description: 'A cinematic wedding invitation',
+  const { template, slug } = params
+  const fallbackTitle = prettifySlug(slug)
+
+  try {
+    if (!isValidTemplate(template)) {
+      return { title: fallbackTitle }
+    }
+
+    const hasSupabase =
+      !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+      !!process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    let config: any = null
+    if (hasSupabase) {
+      const admin = createSupabaseAdminClient()
+      const { data } = (await admin
+        .from('invitations')
+        .select('config')
+        .eq('slug', slug)
+        .maybeSingle()) as { data: { config: any } | null }
+      const isEmpty =
+        !data?.config || (typeof data.config === 'object' && Object.keys(data.config).length === 0)
+      config = isEmpty ? getDefaultConfig(template) : data!.config
+    } else {
+      config = getDefaultConfig(template)
+    }
+
+    const meta = (config && config.meta) || {}
+    const title =
+      (typeof meta.title === 'string' && meta.title.trim()) ||
+      deriveCoupleName(config) ||
+      fallbackTitle
+    const description =
+      (typeof meta.description === 'string' && meta.description.trim()) ||
+      'Undangan pernikahan digital.'
+    const ogImage = deriveOgImage(config)
+    const images = ogImage ? [ogImage] : undefined
+    const twitterCard: 'summary' | 'summary_large_image' = images ? 'summary_large_image' : 'summary'
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: 'website' as const,
+        ...(images ? { images } : {}),
+      },
+      twitter: {
+        card: twitterCard,
+        title,
+        description,
+        ...(images ? { images } : {}),
+      },
+    }
+  } catch {
+    return { title: fallbackTitle }
   }
 }

@@ -190,6 +190,9 @@ if (skipped.length) {
 console.log('')
 
 function generateTempPassword() {
-  // 12 hex chars = 48 bits, plenty for a temp credential the user resets later
-  return 'tmp_' + randomBytes(6).toString('hex')
+  // 12 hex chars = 48 bits, plenty for a temp credential the user resets later.
+  // Affixes keep it policy-compliant (uppercase + number + symbol, min 8):
+  // the hex supplies lowercase/digits, 'Tmp_' adds an uppercase + symbol, and
+  // '#9' guarantees a symbol + digit even if the hex happens to be all letters.
+  return 'Tmp_' + randomBytes(6).toString('hex') + '#9'
 }

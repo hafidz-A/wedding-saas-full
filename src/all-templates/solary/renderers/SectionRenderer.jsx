@@ -38,6 +38,13 @@ export default function SectionRenderer({ section, slug = "demo", gatePhotos = [
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
       : false;
 
+  // The closing (Sun) section also shows the gate photos as tilted frames
+  // behind its farewell text — feed it the same photo set + motion pref.
+  const extraProps =
+    section.type === "footerPlanet"
+      ? { decorPhotos: gatePhotos, decorReducedMotion: reducedMotion }
+      : {};
+
   return (
     <section
       id={section.id}
@@ -47,7 +54,7 @@ export default function SectionRenderer({ section, slug = "demo", gatePhotos = [
     >
       {showPhotoStars && <SectionPhotoStars photos={gatePhotos} reducedMotion={reducedMotion} />}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <Component {...(section.props || {})} slug={slug} />
+        <Component {...(section.props || {})} slug={slug} {...extraProps} />
       </div>
     </section>
   );

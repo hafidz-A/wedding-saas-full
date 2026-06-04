@@ -15,7 +15,6 @@ import { registrySchema } from './registry'
 import { accommodationsSchema } from './accommodations'
 import { faqSchema } from './faq'
 import { guestbookSchema } from './guestbook'
-import { playlistSchema } from './playlist'
 import { footerSchema } from './footer'
 import { quoteSchema } from './quote'
 
@@ -36,7 +35,6 @@ export const schemaRegistry: Record<string, SectionSchema> = {
   accommodations:    accommodationsSchema,
   faq:               faqSchema,
   guestbook:         guestbookSchema,
-  playlist:          playlistSchema,
   footer:            footerSchema,
 }
 
