@@ -599,6 +599,8 @@ export const dashboard = {
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
         // merges this over the lovebirds copy when template === 'solary'.
         solary: {
+          searchPlaceholder: 'Cari panduan…',
+          noResult: 'Tidak ada hasil. Coba kata kunci lain.',
           start: {
             title: 'Mulai di sini',
             summary: 'Kenalan dengan dashboard undangan Solary: status undangan, masa aktif, dan tombol penting di bar atas.',
@@ -1523,6 +1525,8 @@ export const dashboard = {
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
         // merges this over the lovebirds copy when template === 'solary'.
         solary: {
+          searchPlaceholder: 'Search guides…',
+          noResult: 'No results. Try another keyword.',
           start: {
             title: 'Start here',
             summary: 'Get oriented in your Solary dashboard: invitation status, active period, and the key buttons in the top bar.',
