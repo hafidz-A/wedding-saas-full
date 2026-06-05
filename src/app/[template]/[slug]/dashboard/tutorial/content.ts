@@ -4,6 +4,7 @@
 export type TutorialCategoryId =
   | 'start' | 'checklist' | 'editor' | 'sections' | 'palette' | 'ornament'
   | 'music' | 'rsvps' | 'gifts' | 'guests' | 'guestbook' | 'billing' | 'faq'
+  | 'quickstart' | 'experience' | 'photos'
 
 export type TutorialGroupId = 'prep' | 'fill' | 'data' | 'help'
 
@@ -21,6 +22,8 @@ export interface TutorialCategory {
   id: TutorialCategoryId
   /** when set, the subnav renders grouped (lovebirds). Solary omits it → flat. */
   group?: TutorialGroupId
+  /** dashboard tab this category documents; renders a solary-only "open tab" deep-link */
+  relatedTab?: string
   /** premium-only categories are hidden for non-premium plans */
   premiumOnly?: boolean
   /** number of numbered steps authored in the dict (steps[0..n-1]) */
@@ -80,26 +83,34 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
 // Copy lives under dashboard.tabs.tutorial.solary.<categoryId>; screenshots live at
 // public/tutorial/solary/<key>.png.
 export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
-  { id: 'start',     stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
+  { id: 'quickstart', relatedTab: 'editor', stepCount: 7, alwaysCount: 2, neverCount: 2, tipCount: 2,
+    shots: [] },
+  { id: 'start', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'start-header', captionKey: 'header' }] },
-  { id: 'editor',    stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 2,
+  { id: 'experience', stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2,
+    shots: [] },
+  { id: 'editor', relatedTab: 'editor', stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 2,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
       { key: 'editor-save',         captionKey: 'save' },
     ] },
-  { id: 'palette',   stepCount: 3, alwaysCount: 1, neverCount: 1, tipCount: 1,
+  { id: 'photos', relatedTab: 'editor', stepCount: 5, alwaysCount: 0, neverCount: 0, tipCount: 3,
+    shots: [] },
+  { id: 'palette', relatedTab: 'palette', stepCount: 3, alwaysCount: 1, neverCount: 1, tipCount: 1,
     shots: [{ key: 'palette-grid', captionKey: 'grid' }] },
-  { id: 'music',     stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
+  { id: 'music', relatedTab: 'music', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'music-upload', captionKey: 'upload' }] },
-  { id: 'rsvps',     stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 1,
+  { id: 'rsvps', relatedTab: 'rsvps', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 1,
     shots: [{ key: 'rsvps-table', captionKey: 'table' }] },
-  { id: 'gifts',     stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+  { id: 'gifts', relatedTab: 'gifts', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
     shots: [{ key: 'gifts-table', captionKey: 'table' }] },
-  { id: 'guests',    stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
+  { id: 'guests', relatedTab: 'guests', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'guests-share', captionKey: 'share' }] },
-  { id: 'guestbook', premiumOnly: true, stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+  { id: 'guestbook', premiumOnly: true, relatedTab: 'guestbook', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
+  { id: 'faq', faqCount: 8, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
+    shots: [] },
 ]
 
 /** Category list for a template's tutorial. Solary drops the ornament category. */

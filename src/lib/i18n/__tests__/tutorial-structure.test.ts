@@ -22,4 +22,23 @@ describe('tutorial content structure', () => {
   it('exposes four ordered groups', () => {
     expect(TUTORIAL_GROUPS).toEqual(['prep', 'fill', 'data', 'help'])
   })
+
+  it('solary exposes the 12 expected categories in order', () => {
+    expect(TUTORIAL_CATEGORIES_SOLARY.map((c) => c.id)).toEqual([
+      'quickstart', 'start', 'experience', 'editor', 'photos', 'palette',
+      'music', 'rsvps', 'gifts', 'guests', 'guestbook', 'faq',
+    ])
+  })
+
+  it('only the expected nine solary categories have a relatedTab', () => {
+    expect(TUTORIAL_CATEGORIES_SOLARY.filter((c) => c.relatedTab).map((c) => c.id)).toEqual([
+      'quickstart', 'editor', 'photos', 'palette', 'music', 'rsvps', 'gifts', 'guests', 'guestbook',
+    ])
+  })
+
+  it('lovebirds categories never set relatedTab (frozen)', () => {
+    for (const cat of TUTORIAL_CATEGORIES) {
+      expect(cat.relatedTab, `${cat.id} should have no relatedTab`).toBeUndefined()
+    }
+  })
 })
