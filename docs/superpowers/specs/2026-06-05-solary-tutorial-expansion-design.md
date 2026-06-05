@@ -46,10 +46,18 @@ We replace the rigid model with a flexible-but-minimal one:
   button (see Structure below).
 
 This keeps YAGNI: exactly one new block type (`faq`) and one new heading-override, not a general
-block engine. Lovebirds keeps its categories and copy unchanged; it only inherits the generic
-renderer niceties (search/ToC + deep-link), which is a deliberate, low-risk improvement, not a
-regression. (If the user wants lovebirds visually frozen, we can gate these behind
-`template === 'solary'`; default is shared.)
+block engine.
+
+**Lovebirds stays visually frozen** (user decision, 2026-06-05: *"solary aja"*). All new UI —
+search/ToC, deep-link buttons, FAQ block — is **solary-only**. The shared content-model refactor
+(counts → full arrays) is output-identical for lovebirds, so lovebirds renders exactly as before.
+The search input is gated behind `template === 'solary'`; lovebirds categories carry no
+`relatedTab`, so no deep-link buttons appear; lovebirds has no `faq` category. `headings.faq` is
+added to the shared headings but is simply unused by lovebirds.
+
+**Bilingual is mandatory** (user decision, 2026-06-05): every new and deepened string is authored in
+**both** the `id` and `en` dictionary trees. No category, step, tip, FAQ entry, heading, or button
+label may exist in one language only. Verification checks EN/ID parity (Testing below).
 
 ## Category set (solary) — 12 categories, in display order
 
@@ -135,14 +143,16 @@ isn't in the visible set (e.g. non-premium hiding guestbook — already covered 
    - Remove `stepCount/alwaysCount/neverCount/tipCount` from `TutorialCategory`; add
      `relatedTab?: string`.
    - Rebuild `TUTORIAL_CATEGORIES_SOLARY` to the 12-category list above (order + shots + relatedTab).
-   - Update `TUTORIAL_CATEGORIES` (lovebirds): drop counts, add `relatedTab` per category (maps to
-     its tab). Categories/order otherwise unchanged.
+   - Update `TUTORIAL_CATEGORIES` (lovebirds): drop counts **only** (output identical). **No
+     `relatedTab`** — lovebirds stays frozen. Categories/order/copy unchanged.
 
 2. **`TutorialTab.tsx`**
    - Render full dict arrays (delete the `list(n, …)` truncation; keep a small `arr(x)` =
      `Array.isArray(x) ? x.filter(Boolean) : []`).
-   - Add search input + `visibleCats` filter driving the subnav.
-   - Add the deep-link button (reads `cat.relatedTab`, `c.openTab`, calls `onOpenTab`).
+   - Add search input (**rendered only when `template === 'solary'`**) + `visibleCats` filter
+     driving the subnav.
+   - Add the deep-link button (reads `cat.relatedTab`, `c.openTab`, calls `onOpenTab`). Only solary
+     categories have `relatedTab`, so the button never appears on lovebirds.
    - Add a `<Faq>` renderer for `c.faq` (array of `{q,a}`) under `t.headings.faq`.
    - Use `c.stepsHeading ?? t.headings.steps` for the ordered-list heading.
    - New prop `onOpenTab?`. Keep the existing `onError` image hide-on-missing.
@@ -155,11 +165,12 @@ isn't in the visible set (e.g. non-premium hiding guestbook — already covered 
    (Tutorial already enabled for both templates; no change there.)
 
 5. **`lib/i18n/dictionaries/dashboard.ts`** (both `id` and `en` trees)
-   - Add `headings.faq` and a shared `openTab`-style label convention (per-category `openTab` copy).
-   - Under `tabs.tutorial.solary`: add `quickstart`, `experience`, `photos`, `faq` sub-objects and
-     deepen the 8 existing ones. Add `stepsHeading` where relabelled, `openTab` where deep-linked,
-     `faq` array for the FAQ category.
-   - Lovebirds flat copy: add `openTab` labels per category (no other copy changes).
+   - Add `headings.faq` (used only by solary) and the per-category `openTab` label convention.
+   - Under `tabs.tutorial.solary` in **both `id` and `en`**: add `quickstart`, `experience`,
+     `photos`, `faq` sub-objects and deepen the 8 existing ones. Add `stepsHeading` where relabelled,
+     `openTab` where deep-linked, `faq` array for the FAQ category. Author ID and EN together so
+     neither tree is missing a key.
+   - Lovebirds copy: **unchanged** (no `openTab`, no new keys).
 
 6. **`public/tutorial/solary/`** — new annotated PNGs (best-effort, see below).
 
@@ -209,8 +220,11 @@ the page. New text categories whose shots aren't captured simply render without 
 - `npx tsc --noEmit` (project typecheck) passes after the prop + model changes.
 - `/solary/dummy-solary/dashboard` → Tutorial tab shows all 12 categories; search filters pills;
   each deep-link button switches the dashboard to the right tab; FAQ renders as Q&A; ID/EN toggle
-  swaps every new + deepened string (no raw keys, no English leaking into ID).
-- Lovebirds dashboard → categories + copy unchanged; gains the search box + per-category deep-link
-  button (intended), nothing else regresses.
+  swaps **every** new + deepened string (no raw keys, no English leaking into ID, no ID leaking into
+  EN). Spot-check both languages on all 12 categories.
+- **EN/ID parity check:** every solary tutorial key present in the `id` tree exists in `en` and vice
+  versa (no fallbacks to raw keys in either language).
+- Lovebirds dashboard → **fully unchanged**: no search box, no deep-link buttons; same categories,
+  copy, and screenshots as before.
 - Missing-screenshot grace: temporarily reference a non-existent shot → its `<figure>` hides, page
   intact.
