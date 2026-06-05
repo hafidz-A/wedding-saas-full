@@ -448,6 +448,58 @@ export const dashboard = {
           tips: ['Lihat tab "Bayar, Masa Aktif & Upgrade" untuk detail proses upgrade.'],
           shots: { ledger: 'Ledger kehadiran tamu (terbuka setelah Premium).' },
         },
+        checklist: {
+          title: 'Dari nol sampai terbit',
+          summary: 'Peta singkat seluruh proses — dari isi data sampai undangan siap dibagikan. Ikuti urutannya; detail tiap langkah ada di tab masing-masing.',
+          steps: [
+            'Login, lalu pilih bahasa dashboard (ID/EN) sesuai selera.',
+            'Isi data inti di section Hero: nama pasangan, tanggal, dan lokasi acara.',
+            'Buka Editor Section — tata urutan, lalu isi teks & foto tiap bagian (lihat tab "Panduan tiap Section").',
+            'Unggah foto galeri dan, bila mau, satu lagu di tab Musik.',
+            'Pilih Palette warna dan ornamen latar sesuai nuansa kalian.',
+            'Isi rekening di Wedding Gift dan atur opsi di RSVP.',
+            'Klik "Lihat live" dan periksa undangan di HP maupun komputer.',
+            'Tambahkan daftar tamu dan siapkan template pesan di tab Tamu.',
+            'Pastikan masa aktif masih berlaku dan ubah status jadi Terbit.',
+            'Salin link personal tiap tamu dan bagikan lewat WhatsApp.',
+          ],
+          always: [
+            'Simpan tiap selesai mengisi satu bagian.',
+            'Cek "Lihat live" sebelum menandai selesai.',
+          ],
+          never: [
+            'Jangan loncat ke berbagi link sebelum status Terbit.',
+            'Jangan biarkan foto contoh/placeholder ikut terbit — ganti dengan foto kalian.',
+          ],
+          tips: [
+            'Kerjakan bertahap; tidak harus selesai sekali duduk — semua tersimpan.',
+            'Selesaikan data inti (nama, tanggal, lokasi) dulu, baru perindah tampilan.',
+          ],
+          shots: {},
+        },
+        billing: {
+          title: 'Bayar, Masa Aktif & Upgrade',
+          summary: 'Cara membaca masa aktif undangan, apa yang terjadi saat kedaluwarsa, dan cara upgrade ke Premium.',
+          steps: [
+            'Lihat status masa aktif di bar atas dashboard.',
+            'Kalau ada banner "belum bayar" atau masa aktif hampir habis, lakukan pembayaran sesuai instruksi.',
+            'Untuk fitur Premium (mis. Buku Tamu), klik "Upgrade ke Premium" dan bayar selisihnya.',
+            'Setelah pembayaran terdeteksi, status diperbarui otomatis — segarkan bila perlu.',
+          ],
+          always: [
+            'Bayar/perpanjang sebelum hari-H agar undangan tidak nonaktif saat dibutuhkan.',
+            'Simpan bukti pembayaran sampai status berubah aktif.',
+          ],
+          never: [
+            'Jangan biarkan masa aktif habis — saat kedaluwarsa, tamu tidak bisa membuka undangan.',
+            'Jangan ragu upgrade karena takut kehilangan data — semua isi tetap utuh.',
+          ],
+          tips: ['Upgrade Basic → Premium hanya menambah fitur; kamu cukup membayar selisih harga.'],
+          shots: {
+            status: 'Banner & status masa aktif di bar atas dashboard.',
+            upgrade: 'Tombol & alur upgrade ke Premium.',
+          },
+        },
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
         // merges this over the lovebirds copy when template === 'solary'.
         solary: {
@@ -1139,6 +1191,58 @@ export const dashboard = {
           never: ['Don\'t worry about upgrading — your invitation stays online and no data is lost.'],
           tips: ['See the "Active period & Upgrade" tab for details on the upgrade process.'],
           shots: { ledger: 'The guest attendance ledger (unlocked after Premium).' },
+        },
+        checklist: {
+          title: 'From zero to published',
+          summary: 'A short map of the whole process — from filling in your details to a shareable invitation. Follow the order; each step has its own tab here.',
+          steps: [
+            'Sign in, then pick your dashboard language (ID/EN).',
+            'Fill the core details in the Hero section: couple names, date, and venue.',
+            'Open the Section Editor — set the order, then fill the text & photos of each part (see the "Per-section guide" tab).',
+            'Upload your gallery photos and, if you like, one song in the Music tab.',
+            'Pick a color Palette and a background ornament that match your mood.',
+            'Add your accounts in Wedding Gift and set the options in RSVP.',
+            'Click "View live" and check the invitation on both phone and computer.',
+            'Add your guest list and prepare the message template in the Guests tab.',
+            'Make sure the active period is valid and switch the status to Published.',
+            'Copy each guest\'s personal link and share it via WhatsApp.',
+          ],
+          always: [
+            'Save after finishing each part.',
+            'Check "View live" before calling it done.',
+          ],
+          never: [
+            'Don\'t jump to sharing the link before the status is Published.',
+            'Don\'t let the sample/placeholder photos go live — replace them with your own.',
+          ],
+          tips: [
+            'Work in stages; you don\'t have to finish in one sitting — everything is saved.',
+            'Finish the core details (names, date, venue) first, then make it pretty.',
+          ],
+          shots: {},
+        },
+        billing: {
+          title: 'Active period & Upgrade',
+          summary: 'How to read your invitation\'s active period, what happens when it expires, and how to upgrade to Premium.',
+          steps: [
+            'Check the active-period status in the dashboard\'s top bar.',
+            'If an "unpaid" banner shows or the period is nearly over, pay following the instructions.',
+            'For Premium features (e.g. Guestbook), click "Upgrade to Premium" and pay the difference.',
+            'Once payment is detected, the status updates automatically — refresh if needed.',
+          ],
+          always: [
+            'Pay/renew before the big day so the invitation doesn\'t go inactive when you need it.',
+            'Keep your payment proof until the status turns active.',
+          ],
+          never: [
+            'Don\'t let the active period lapse — when it expires, guests can\'t open the invitation.',
+            'Don\'t hesitate to upgrade for fear of losing data — all your content stays intact.',
+          ],
+          tips: ['Upgrading Basic → Premium only adds features; you just pay the price difference.'],
+          shots: {
+            status: 'The active-period banner & status in the dashboard top bar.',
+            upgrade: 'The upgrade-to-Premium button & flow.',
+          },
         },
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
         // merges this over the lovebirds copy when template === 'solary'.
