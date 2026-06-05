@@ -236,11 +236,21 @@ export const dashboard = {
       },
       tutorial: {
         navTitle: 'Panduan Dashboard',
+        groups: {
+          prep: 'Persiapan',
+          fill: 'Mengisi undangan',
+          data: 'Tamu & data',
+          help: 'Akun & bantuan',
+        },
         headings: {
           steps: 'Cara pakai',
           always: 'Selalu lakukan',
           never: 'Jangan / jangan lupa',
           tips: 'Tips',
+          sees: 'Yang tamu lihat',
+          fill: 'Cara mengisi',
+          watch: 'Hati-hati',
+          faq: 'Tanya–jawab',
         },
         start: {
           title: 'Mulai di sini',
@@ -871,11 +881,21 @@ export const dashboard = {
       },
       tutorial: {
         navTitle: 'Dashboard Guide',
+        groups: {
+          prep: 'Getting started',
+          fill: 'Filling your invitation',
+          data: 'Guests & data',
+          help: 'Account & help',
+        },
         headings: {
           steps: 'How to',
           always: 'Always do',
           never: "Don't / don't forget",
           tips: 'Tips',
+          sees: 'What guests see',
+          fill: 'How to fill it',
+          watch: 'Watch out',
+          faq: 'Q&A',
         },
         start: {
           title: 'Start here',

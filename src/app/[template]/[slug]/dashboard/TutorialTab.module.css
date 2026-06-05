@@ -80,3 +80,39 @@
   margin-top: 6px;
   text-align: center;
 }
+
+/* grouped subnav (lovebirds) — each group wraps to its own line */
+.group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.group + .group { margin-top: 10px; }
+.groupLabel {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a7866;
+}
+.groupTabs { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* per-section guide cards */
+.guideList { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 4px; }
+.guideCard {
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #fbf7ee;
+}
+.guideTitle { font-size: 16px; font-weight: 600; margin: 0 0 8px; color: #2a2118; }
+.guideRow { margin: 4px 0; line-height: 1.5; color: #2a2118; }
+.guideLabel { font-weight: 600; color: #5c4a3a; margin-right: 4px; white-space: nowrap; }
+
+/* FAQ accordion */
+.faqList { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+.faqItem {
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fbf7ee;
+}
+.faqQ { font-weight: 600; cursor: pointer; color: #2a2118; list-style: none; }
+.faqQ::-webkit-details-marker { display: none; }
+.faqItem[open] .faqQ { margin-bottom: 8px; }
+.faqA { margin: 0; line-height: 1.55; color: #5c4a3a; }

@@ -42,12 +42,16 @@ export interface TutorialCategory {
 export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
   { id: 'start', group: 'prep', stepCount: 6, alwaysCount: 3, neverCount: 3, tipCount: 2,
     shots: [{ key: 'start-header', captionKey: 'header' }] },
+  { id: 'checklist', group: 'prep', stepCount: 10, alwaysCount: 2, neverCount: 2, tipCount: 2,
+    shots: [] },
   { id: 'editor', group: 'fill', stepCount: 6, alwaysCount: 4, neverCount: 4, tipCount: 3,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
       { key: 'editor-save',         captionKey: 'save' },
     ] },
+  { id: 'sections', group: 'fill', stepCount: 0, alwaysCount: 2, neverCount: 1, tipCount: 1,
+    sectionGuideCount: 14, shots: [] },
   { id: 'palette', group: 'fill', stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1,
     shots: [{ key: 'palette-grid', captionKey: 'grid' }] },
   { id: 'ornament', group: 'fill', stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1,
@@ -62,6 +66,13 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
     shots: [{ key: 'guests-share', captionKey: 'share' }] },
   { id: 'guestbook', group: 'data', premiumOnly: true, stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
+  { id: 'billing', group: 'help', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
+    shots: [
+      { key: 'billing-status',  captionKey: 'status' },
+      { key: 'billing-upgrade', captionKey: 'upgrade' },
+    ] },
+  { id: 'faq', group: 'help', stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
+    faqCount: 10, shots: [] },
 ]
 
 // Solary shares the same dashboard tabs as lovebirds EXCEPT the Background/Ornament
