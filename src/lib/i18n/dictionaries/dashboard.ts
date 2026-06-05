@@ -626,6 +626,7 @@ export const dashboard = {
           editor: {
             title: 'Editor Section',
             summary: 'Atur isi, foto, dan urutan tiap "planet" (bagian) undangan.',
+            openTab: 'Buka tab Editor →',
             steps: [
               'Tiap bagian Solary adalah sebuah planet di panel kiri — seret (drag) untuk mengubah urutannya.',
               'Klik sebuah planet untuk mengedit teks dan foto; unggah foto lewat tombol upload (maks 5 MB per gambar).',
@@ -657,6 +658,7 @@ export const dashboard = {
           palette: {
             title: 'Palette Warna',
             summary: 'Pilih skema warna kosmik yang akan dilihat tamu. Latar galaksi ikut menyesuaikan otomatis.',
+            openTab: 'Buka tab Palette →',
             steps: [
               'Pilih satu palette dari kelompok Gelap (Purple, Nebula, Rose, Emerald).',
               'Atau pilih dari kelompok Terang (Lavender, Sunburst, Rose, Botanical).',
@@ -670,6 +672,7 @@ export const dashboard = {
           music: {
             title: 'Musik Latar',
             summary: 'Lagu yang diputar di latar undangan lewat popup saat tamu membuka halaman.',
+            openTab: 'Buka tab Musik →',
             steps: [
               'Unggah satu file MP3 (maksimal 12 MB).',
               'Atur teks popup: judul dan tombol Terima/Tutup.',
@@ -689,6 +692,7 @@ export const dashboard = {
           rsvps: {
             title: 'RSVP',
             summary: 'Respons kehadiran dari tamu undangan.',
+            openTab: 'Buka tab RSVP →',
             steps: [
               'Lihat ringkasan: Respons, Hadir, Tidak hadir, dan estimasi tamu.',
               'Filter atau cari, lalu Unduh CSV untuk rekap.',
@@ -701,6 +705,7 @@ export const dashboard = {
           gifts: {
             title: 'Hadiah',
             summary: 'Konfirmasi amplop/hadiah yang dikirim tamu.',
+            openTab: 'Buka tab Hadiah →',
             steps: [
               'Lihat daftar konfirmasi dan total yang disebutkan.',
               'Cari nama atau akun, lalu Unduh CSV.',
@@ -712,6 +717,7 @@ export const dashboard = {
           guests: {
             title: 'Tamu',
             summary: 'Buat undangan personal dan bagikan link khusus tiap tamu.',
+            openTab: 'Buka tab Tamu →',
             steps: [
               'Tambahkan nama tamu.',
               'Salin link personal masing-masing tamu.',
@@ -731,6 +737,7 @@ export const dashboard = {
           guestbook: {
             title: 'Buku Tamu',
             summary: 'Catatan kehadiran tamu saat acara berlangsung (fitur Premium).',
+            openTab: 'Buka tab Buku Tamu →',
             steps: [
               'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya) untuk membukanya.',
               'Setelah Premium: daftar terisi otomatis dari RSVP yang menyatakan hadir; tambahkan tamu yang datang langsung lewat "+ Tamu Datang".',
@@ -738,6 +745,83 @@ export const dashboard = {
             always: ['Gunakan saat hari-H untuk mencatat kehadiran tamu (termasuk walk-in).'],
             never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
             shots: { ledger: 'Ledger kehadiran — otomatis dari RSVP + walk-in (terbuka setelah Premium).' },
+          },
+          quickstart: {
+            title: 'Quickstart 10 menit',
+            summary: 'Belum tahu mulai dari mana? Ikuti urutan ini sekali jalan — sekitar sepuluh menit, undangan tata-surya kamu siap dibagikan.',
+            openTab: 'Buka tab Editor →',
+            steps: [
+              'Isi data mempelai & acara: nama, tanggal, dan lokasi. Ini yang muncul di gerbang pembuka.',
+              'Buka tab Editor, lalu isi teks dan unggah foto untuk tiap planet (maks 5 MB per gambar).',
+              'Pilih palette warna di tab Palette — latar galaksi ikut menyesuaikan otomatis.',
+              'Atur musik latar di tab Musik: unggah satu MP3 lalu aktifkan toggle Aktif.',
+              'Klik "Lihat live" di bar atas untuk mengecek hasilnya seperti yang dilihat tamu.',
+              'Pastikan status berubah jadi Terbit — selama masih Draf, tamu belum bisa membuka.',
+              'Buka tab Tamu, buat link personal, lalu bagikan ke masing-masing tamu.',
+            ],
+            always: [
+              'Simpan tiap selesai mengisi satu planet supaya tidak ada yang hilang.',
+              'Kerjakan dari planet paling atas ke bawah — itu juga urutan tamu menjelajah.',
+            ],
+            never: [
+              'Jangan bagikan link sebelum status Terbit.',
+              'Jangan biarkan foto contoh ikut terbit — ganti dengan foto kalian.',
+            ],
+            tips: [
+              'Tidak harus selesai sekali duduk — semua tersimpan, lanjutkan kapan saja.',
+              'Solary penuh animasi; cek "Lihat live" sesering mungkin saat menata.',
+            ],
+            shots: {},
+          },
+          experience: {
+            title: 'Apa yang tamu lihat',
+            summary: 'Solary bukan halaman biasa — tamu menjelajah tata surya. Pahami momen-momen ini supaya kamu tahu yang sedang kamu atur.',
+            steps: [
+              'Gerbang pembuka menyapa tamu dengan nama mereka bila kamu mengirim link personal.',
+              'Scroll kosmik: kamera meluncur antar-planet, tiap planet adalah satu bagian undangan.',
+              'Welcome popup menampilkan satu–dua foto pilihan sebagai sambutan hangat.',
+              'Story carousel memutar kisah kalian sebagai rangkaian foto bergerak.',
+              'Photo-stars: foto galeri kamu melayang menjadi bintang berkelip di balik bagian lain.',
+              'Popup musik muncul saat halaman dibuka; tamu menekan "Terima" untuk memutar lagu.',
+            ],
+            tips: [
+              'Klik "Lihat live" di bar atas untuk mengalami semuanya sendiri sebelum membagikan.',
+              'Pilih foto galeri terbaik — sebagian dipakai jadi bintang latar di seluruh halaman.',
+            ],
+            shots: {},
+          },
+          photos: {
+            title: 'Panduan Foto',
+            summary: 'Di mana tiap foto muncul dan ukuran idealnya, supaya tidak ada yang pecah atau gepeng.',
+            openTab: 'Buka tab Editor →',
+            steps: [
+              'Gerbang pembuka: satu potret tegak tampil paling besar — pakai foto terbaik kalian.',
+              'Welcome popup: satu–dua foto sambutan saat halaman dibuka.',
+              'Story carousel: rangkaian foto kisah perjalanan kalian.',
+              'Galeri: kumpulan foto utama; sebagian otomatis dipakai jadi photo-stars.',
+              'Photo-stars: diambil otomatis dari galeri — tak perlu unggah terpisah.',
+            ],
+            tips: [
+              'Maksimal 5 MB per gambar; kalau lebih, perkecil dulu.',
+              'Pakai rasio wajar: potret untuk gerbang, lanskap atau persegi untuk galeri.',
+              'Foto galeri ikut jadi bintang latar — jadi pilih yang paling bagus.',
+            ],
+            shots: {},
+          },
+          faq: {
+            title: 'FAQ',
+            summary: 'Pertanyaan yang sering muncul dan solusi cepatnya.',
+            faqs: [
+              { q: 'Undangan tidak bisa dibuka tamu?', a: 'Cek statusnya harus Terbit (bukan Draf) dan masa aktif belum habis. Banner pembayaran di bar atas menandakan undangan bisa kedaluwarsa.' },
+              { q: 'Foto terlihat gepeng atau terpotong?', a: 'Pakai rasio wajar: potret untuk gerbang pembuka, lanskap atau persegi untuk galeri. Hindari gambar yang terlalu lebar atau terlalu sempit.' },
+              { q: 'Perubahan hilang setelah halaman di-reload?', a: 'Berarti belum tersimpan. Selalu klik Simpan sebelum menutup atau me-refresh halaman editor.' },
+              { q: 'Musik tidak berbunyi?', a: 'Aktifkan toggle Aktif di tab Musik, dan ingat tamu harus menekan "Terima" di popup — browser melarang musik berbunyi otomatis tanpa interaksi.' },
+              { q: 'Nama tamu tidak muncul di undangan?', a: 'Kirim link personal dari tab Tamu, bukan link generic. Hanya link personal yang menampilkan nama tamu.' },
+              { q: 'Bisakah menambah atau menghapus planet (bagian)?', a: 'Jumlah planet sudah tetap demi menjaga tata surya tetap utuh. Kamu bisa menata urutan dan mengganti jenis sebagian planet, tapi Galeri, RSVP, dan Hadiah terkunci.' },
+              { q: 'Masa aktif habis / undangan kedaluwarsa?', a: 'Selesaikan pembayaran sebelum hari-H. Status masa aktif ada di bar atas sebelah kanan.' },
+              { q: 'Bagaimana upgrade ke Premium (Buku Tamu)?', a: 'Cukup bayar selisihnya. Undangan tetap online selama proses, tidak ada data yang hilang.' },
+            ],
+            shots: {},
           },
         },
       },
@@ -1466,6 +1550,7 @@ export const dashboard = {
           editor: {
             title: 'Section Editor',
             summary: 'Arrange the content, photos, and order of each "planet" (section) of your invitation.',
+            openTab: 'Open Editor tab →',
             steps: [
               'Each Solary section is a planet in the left panel — drag to reorder.',
               'Click a planet to edit its text and photos; upload photos via the upload button (max 5 MB per image).',
@@ -1497,6 +1582,7 @@ export const dashboard = {
           palette: {
             title: 'Color Palette',
             summary: 'Pick the cosmic color scheme your guests will see. The galactic background adapts automatically.',
+            openTab: 'Open Palette tab →',
             steps: [
               'Pick a palette from the Dark group (Purple, Nebula, Rose, Emerald).',
               'Or pick from the Light group (Lavender, Sunburst, Rose, Botanical).',
@@ -1510,6 +1596,7 @@ export const dashboard = {
           music: {
             title: 'Background Music',
             summary: 'A song played in the background of your invitation via a popup when guests open the page.',
+            openTab: 'Open Music tab →',
             steps: [
               'Upload one MP3 file (max 12 MB).',
               'Set the popup text: title and the Accept/Dismiss buttons.',
@@ -1529,6 +1616,7 @@ export const dashboard = {
           rsvps: {
             title: 'RSVP',
             summary: 'Attendance responses from your guests.',
+            openTab: 'Open RSVP tab →',
             steps: [
               'See the summary: Responses, Attending, Declined, and the guest estimate.',
               'Filter or search, then Download CSV for a recap.',
@@ -1541,6 +1629,7 @@ export const dashboard = {
           gifts: {
             title: 'Gifts',
             summary: 'Confirmations of gifts/envelopes your guests send.',
+            openTab: 'Open Gifts tab →',
             steps: [
               'See the list of confirmations and the total mentioned.',
               'Search by name or account, then Download CSV.',
@@ -1552,6 +1641,7 @@ export const dashboard = {
           guests: {
             title: 'Guests',
             summary: 'Create personal invitations and share a unique link for each guest.',
+            openTab: 'Open Guests tab →',
             steps: [
               'Add a guest name.',
               'Copy each guest\'s personal link.',
@@ -1571,6 +1661,7 @@ export const dashboard = {
           guestbook: {
             title: 'Guestbook',
             summary: 'A record of guest attendance during the event (Premium feature).',
+            openTab: 'Open Guest Book tab →',
             steps: [
               'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference) to unlock it.',
               'Once Premium: the list fills in automatically from RSVPs marked attending; add guests who show up in person via "+ Walk-in".',
@@ -1578,6 +1669,83 @@ export const dashboard = {
             always: ['Use it on the day to record guest attendance (including walk-ins).'],
             never: ['Don\'t worry about upgrading — your invitation stays online the whole time, nothing is lost.'],
             shots: { ledger: 'The attendance ledger — auto-filled from RSVP + walk-ins (unlocked after Premium).' },
+          },
+          quickstart: {
+            title: '10-minute quickstart',
+            summary: 'Not sure where to begin? Follow this order once — about ten minutes and your solar-system invitation is ready to share.',
+            openTab: 'Open Editor tab →',
+            steps: [
+              'Fill in the couple & event details: names, date, and venue. This is what shows on the opening gate.',
+              'Open the Editor tab, then fill the text and upload a photo for each planet (max 5 MB per image).',
+              'Pick a colour palette in the Palette tab — the galaxy background adjusts automatically.',
+              'Set the background music in the Music tab: upload one MP3, then switch the Enabled toggle on.',
+              'Click "View live" in the top bar to check the result the way guests will see it.',
+              "Make sure the status flips to Published — while it's Draft, guests can't open it.",
+              'Open the Guests tab, create personal links, then share them with each guest.',
+            ],
+            always: [
+              'Save after finishing each planet so nothing gets lost.',
+              "Work from the top planet down — that's also the order guests explore.",
+            ],
+            never: [
+              "Don't share the link before the status is Published.",
+              "Don't let the sample photos go live — replace them with your own.",
+            ],
+            tips: [
+              "You don't have to finish in one sitting — everything is saved, continue anytime.",
+              'Solary is animation-heavy; check "View live" often as you arrange.',
+            ],
+            shots: {},
+          },
+          experience: {
+            title: 'What guests see',
+            summary: "Solary isn't an ordinary page — guests travel through a solar system. Knowing these moments helps you understand what you're setting up.",
+            steps: [
+              'The opening gate greets guests by name when you send a personal link.',
+              'A cosmic scroll: the camera glides between planets, each planet a section of the invitation.',
+              'A welcome popup shows one or two chosen photos as a warm greeting.',
+              'The story carousel plays your story as a sequence of moving photos.',
+              'Photo-stars: your gallery photos float as twinkling stars behind the other sections.',
+              'A music popup appears when the page opens; guests tap "Accept" to play the song.',
+            ],
+            tips: [
+              'Click "View live" in the top bar to experience it all yourself before sharing.',
+              'Pick your best gallery photos — some become background stars across the whole page.',
+            ],
+            shots: {},
+          },
+          photos: {
+            title: 'Photo guide',
+            summary: 'Where each photo appears and the ideal sizes, so nothing comes out blurry or stretched.',
+            openTab: 'Open Editor tab →',
+            steps: [
+              'Opening gate: one upright (portrait) photo shows largest — use your very best shot.',
+              'Welcome popup: one or two greeting photos when the page opens.',
+              'Story carousel: a sequence of photos telling your journey.',
+              'Gallery: your main photo set; some are used automatically as photo-stars.',
+              'Photo-stars: pulled automatically from the gallery — no separate upload needed.',
+            ],
+            tips: [
+              "Max 5 MB per image; if it's larger, shrink it first.",
+              'Use sensible ratios: portrait for the gate, landscape or square for the gallery.',
+              'Gallery photos also become background stars — so pick the best ones.',
+            ],
+            shots: {},
+          },
+          faq: {
+            title: 'FAQ',
+            summary: 'Common questions and their quick fixes.',
+            faqs: [
+              { q: "Guests can't open the invitation?", a: "Check that the status is Published (not Draft) and the active period hasn't ended. A payment banner in the top bar means the invitation can expire." },
+              { q: 'Photos look stretched or cropped?', a: 'Use sensible ratios: portrait for the opening gate, landscape or square for the gallery. Avoid images that are too wide or too narrow.' },
+              { q: 'Changes disappear after reloading the page?', a: "They weren't saved. Always click Save before closing or refreshing the editor." },
+              { q: "Music won't play?", a: 'Switch the Enabled toggle on in the Music tab, and remember guests must tap "Accept" in the popup — browsers block music from autoplaying without interaction.' },
+              { q: "Guest names don't show on the invitation?", a: "Send a personal link from the Guests tab, not the generic link. Only personal links display the guest's name." },
+              { q: 'Can I add or remove planets (sections)?', a: 'The number of planets is fixed to keep the solar system whole. You can reorder and change the type of some planets, but Gallery, RSVP, and Gifts are locked.' },
+              { q: 'Active period ended / invitation expired?', a: 'Complete payment before the big day. The active-period status is in the top-right of the top bar.' },
+              { q: 'How do I upgrade to Premium (Guest Book)?', a: 'Just pay the difference. Your invitation stays online throughout, and no data is lost.' },
+            ],
+            shots: {},
           },
         },
       },
