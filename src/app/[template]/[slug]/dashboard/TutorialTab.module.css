@@ -116,3 +116,35 @@
 .faqQ::-webkit-details-marker { display: none; }
 .faqItem[open] .faqQ { margin-bottom: 8px; }
 .faqA { margin: 0; line-height: 1.55; color: #5c4a3a; }
+
+/* solary search box + deep-link button */
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(42, 33, 24, 0.16);
+  background: #fff;
+  color: #2a2118;
+  font-family: inherit;
+  font-size: 14px;
+}
+.search:focus { outline: none; border-color: rgba(42, 33, 24, 0.5); }
+
+.noResult { color: #8a7866; font-size: 13px; margin: 0 0 16px; }
+
+.openTab {
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #2a2118;
+  background: #2a2118;
+  color: #f5efe3;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.openTab:hover { opacity: 0.85; }

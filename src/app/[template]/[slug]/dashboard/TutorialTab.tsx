@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { getTutorialCategories, TUTORIAL_GROUPS, type TutorialCategory } from './tutorial/content'
 import styles from './TutorialTab.module.css'
@@ -8,19 +8,23 @@ import styles from './TutorialTab.module.css'
 export default function TutorialTab({
   isPremium,
   template = 'lovebirds',
+  onOpenTab,
 }: {
   isPremium: boolean
   template?: string
+  onOpenTab?: (tab: string) => void
 }) {
   const dict = useDashboardDict()
+  const isSolary = template === 'solary'
   // Screenshots live at public/tutorial/<template>/<key>.png.
   const SHOT_BASE = `/tutorial/${template}`
-  // The tutorial copy tree is hand-authored; index it loosely by category id.
-  // Solary keeps its own copy under tutorial.solary.*, with headings/navTitle shared.
+  // Solary keeps its own copy under tutorial.solary.*, with headings/groups/navTitle shared.
   const root = (dict.tabs as any).tutorial
-  const t = template === 'solary' && root.solary ? { ...root, ...root.solary } : root
+  const t = isSolary && root.solary ? { ...root, ...root.solary } : root
   const cats = getTutorialCategories(template).filter((c) => !c.premiumOnly || isPremium)
   const [active, setActive] = useState<string>(cats[0]?.id ?? 'start')
+  const [query, setQuery] = useState('')
+
   const cat = cats.find((c) => c.id === active) ?? cats[0]
   const c = t[cat.id]
 
@@ -28,6 +32,20 @@ export default function TutorialTab({
     Array.from({ length: n }, (_, i) => arr?.[i]).filter(Boolean) as string[]
 
   const grouped = cats.some((x) => x.group)
+
+  // Solary renders a flat, searchable subnav; lovebirds renders grouped (no search).
+  const visibleCats = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return cats
+    return cats.filter((x) => {
+      const cc = t[x.id] ?? {}
+      const hay = [cc.title, cc.summary, ...(Array.isArray(cc.steps) ? cc.steps : [])]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return hay.includes(q)
+    })
+  }, [query, cats, t])
 
   const renderTab = (x: TutorialCategory) => (
     <button
@@ -41,6 +59,17 @@ export default function TutorialTab({
 
   return (
     <div className={styles.wrap}>
+      {isSolary && (
+        <input
+          className={styles.search}
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t.searchPlaceholder ?? ''}
+          aria-label={t.searchPlaceholder ?? 'Search'}
+        />
+      )}
+
       <nav className={styles.subnav}>
         {grouped
           ? TUTORIAL_GROUPS.map((g) => {
@@ -53,13 +82,20 @@ export default function TutorialTab({
                 </div>
               )
             })
-          : cats.map(renderTab)}
+          : visibleCats.map(renderTab)}
       </nav>
+      {isSolary && visibleCats.length === 0 && <p className={styles.noResult}>{t.noResult ?? ''}</p>}
 
       {c && (
         <>
           <h2 className={styles.title}>{c.title}</h2>
           <p className={styles.summary}>{c.summary}</p>
+
+          {cat.relatedTab && onOpenTab && c.openTab && (
+            <button className={styles.openTab} onClick={() => onOpenTab(cat.relatedTab!)}>
+              {c.openTab}
+            </button>
+          )}
 
           {cat.shots[0] && <Shot cat={cat} c={c} index={0} base={SHOT_BASE} />}
 

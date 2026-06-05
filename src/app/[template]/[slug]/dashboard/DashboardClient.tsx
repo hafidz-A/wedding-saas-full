@@ -314,7 +314,11 @@ export default function DashboardClient({
             )}
 
             {tab === 'tutorial' && (
-              <TutorialTab isPremium={invitation.plan === 'premium'} template={template} />
+              <TutorialTab
+                isPremium={invitation.plan === 'premium'}
+                template={template}
+                onOpenTab={(k) => setTab(k as TabKey)}
+              />
             )}
           </motion.div>
         </AnimatePresence>
