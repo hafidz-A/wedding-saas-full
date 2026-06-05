@@ -256,21 +256,26 @@ export const dashboard = {
           title: 'Mulai di sini',
           summary: 'Kenalan dengan dashboard: status undangan, masa aktif, dan tombol penting di bar atas.',
           steps: [
-            'Login pakai email & password undangan kamu.',
+            'Login pakai email & password undangan kamu. Lupa password? Pakai tautan "Lupa password" untuk reset lewat email.',
             'Perhatikan status Terbit/Draf: Draf = tamu belum bisa membuka; Terbit = undangan sudah live.',
             'Lihat status masa aktif di kanan atas. Kalau masih ada banner "belum bayar", undangan bisa kedaluwarsa.',
-            'Tombol "Lihat live" membuka undangan di tab baru. Toggle Bahasa mengganti tampilan ID/EN.',
+            'Tombol "Lihat live" membuka undangan di tab baru — pakai untuk mengecek hasil.',
+            'Toggle Bahasa (ID/EN) hanya mengubah tampilan dashboard & editor, bukan isi undangan tamu.',
+            'Jelajahi tab dashboard: Editor, Palette, Musik, RSVP, Hadiah, Tamu, dan lainnya — tiap tab punya panduannya di sini.',
           ],
           always: [
             'Pastikan status Terbit sebelum membagikan link ke tamu.',
             'Cek masa aktif belum berakhir.',
+            'Simpan setiap perubahan sebelum pindah tab atau menutup halaman.',
           ],
           never: [
             'Jangan bagikan link saat undangan masih Draf.',
             'Jangan lupa bayar sebelum hari-H supaya undangan tidak kedaluwarsa.',
+            'Jangan bagikan email & password dashboard ke tamu — itu hanya untuk kamu.',
           ],
           tips: [
             'Klik "Lihat live" tiap selesai mengedit untuk memastikan hasilnya benar.',
+            'Buka "Lihat live" di HP dan komputer — tampilan tamu bisa berbeda di layar kecil.',
           ],
           shots: {
             header: 'Bar atas: status Terbit/Draf, masa aktif, tombol Lihat live, dan toggle Bahasa.',
@@ -282,14 +287,16 @@ export const dashboard = {
           steps: [
             'Daftar bagian ada di panel kiri — seret (drag) untuk mengubah urutan.',
             'Klik sebuah bagian untuk mengedit teks dan foto; unggah foto lewat tombol upload.',
-            'Hero dan Footer terkunci di paling atas dan paling bawah — tidak bisa dipindah.',
-            'Susunan section sudah tetap — kamu tidak bisa menambah atau menghapus bagian, hanya menata dan mengisinya.',
-            'Galeri hanya boleh satu — Masonry atau SpringCoil. Buka "Ganti tipe section" untuk berpindah di antara keduanya. Klik Simpan saat selesai.',
+            'Hero terkunci di paling atas dan Footer di paling bawah — tidak bisa dipindah.',
+            'RSVP dan Hadiah wajib ada dan terkunci — tidak bisa dihapus atau dipindah.',
+            'Galeri hanya boleh satu — Masonry atau SpringCoil. Buka "Ganti tipe section" untuk berpindah di antara keduanya.',
+            'Susunan section sudah tetap (tidak ada Tambah/Hapus). Klik Simpan setiap selesai.',
           ],
           always: [
             'Klik Simpan setiap selesai mengedit.',
             'Cek hasil lewat "Lihat live".',
             'Pakai foto dengan rasio wajar supaya tidak gepeng.',
+            'Perpendek label bagian yang terlalu panjang supaya navbar rapi.',
           ],
           never: [
             'Jangan reload halaman sebelum Simpan — perubahan akan hilang.',
@@ -299,7 +306,8 @@ export const dashboard = {
           ],
           tips: [
             'Susun urutan bagian mengikuti alur cerita kalian.',
-            'Label bagian terlalu panjang? Persingkat supaya navbar rapi.',
+            'Foto berukuran besar lebih tajam; kompres dulu bila terlalu berat.',
+            'Lihat tab "Panduan tiap Section" untuk tahu cara mengisi tiap bagian.',
           ],
           shots: {
             list: 'Daftar bagian — seret untuk urutkan, edit isinya. Tidak ada tombol tambah/hapus.',
@@ -309,24 +317,34 @@ export const dashboard = {
         },
         palette: {
           title: 'Palette Warna',
-          summary: 'Pilih skema warna yang akan dilihat tamu.',
+          summary: 'Pilih skema warna yang akan dilihat tamu di undangan.',
           steps: [
-            'Pilih satu palette (Gelap Kosmik atau Terang Pastel).',
-            'Klik Simpan.',
+            'Telusuri pilihan palette yang tersedia.',
+            'Klik satu palette untuk menerapkannya — preview langsung berubah.',
+            'Klik Simpan agar palette tersimpan untuk tamu.',
           ],
-          always: ['Simpan setelah memilih palette.'],
+          always: [
+            'Simpan setelah memilih palette.',
+            'Cek hasilnya lewat "Lihat live".',
+          ],
           never: ['Jangan lupa Simpan — kalau tidak, tamu masih melihat palette lama.'],
+          tips: ['Pilih palette yang selaras dengan warna dominan foto kalian.'],
           shots: { grid: 'Grid palette — satu sedang dipilih.' },
         },
         ornament: {
           title: 'Latar / Ornamen',
           summary: 'Hiasan animasi yang melayang di halaman undangan.',
           steps: [
-            'Pilih ornamen: Burung, Kupu-kupu, atau Bertengger.',
+            'Pilih jenis ornamen: Burung, Kupu-kupu, atau Bertengger.',
+            'Lihat pratinjau gerakannya di layar.',
             'Klik Simpan.',
           ],
-          always: ['Simpan setelah mengganti ornamen.'],
+          always: [
+            'Simpan setelah mengganti ornamen.',
+            'Pastikan ornamen terbaca jelas di atas warna palette pilihanmu.',
+          ],
           never: ['Jangan pilih ornamen yang tabrakan dengan nuansa foto kalian.'],
+          tips: ['Ornamen halus biasanya lebih elegan daripada yang ramai.'],
           shots: { pick: 'Pilihan ornamen layar.' },
         },
         music: {
@@ -335,7 +353,8 @@ export const dashboard = {
           steps: [
             'Unggah satu file MP3 (maksimal 12 MB).',
             'Atur teks popup: judul dan tombol Terima/Tutup.',
-            'Aktifkan toggle Aktif, atur Loop, lalu klik Simpan.',
+            'Atur Loop bila ingin lagu mengulang.',
+            'Aktifkan toggle Aktif, lalu klik Simpan.',
           ],
           always: [
             'Aktifkan toggle Aktif kalau ingin musik muncul.',
@@ -343,9 +362,12 @@ export const dashboard = {
           ],
           never: [
             'Jangan unggah file lebih dari 12 MB.',
-            'Jangan lupa Aktif — kalau off, popup musik tidak muncul.',
+            'Jangan harap musik berbunyi otomatis — browser memblokir autoplay, jadi tamu harus menekan tombol di popup.',
           ],
-          tips: ['Pilih lagu lembut berdurasi panjang supaya tidak cepat mengulang.'],
+          tips: [
+            'Pilih lagu lembut berdurasi panjang supaya tidak cepat mengulang.',
+            'Pakai MP3 yang sudah dikompres agar undangan tetap ringan.',
+          ],
           shots: { upload: 'Panel unggah MP3 dan pengaturan teks popup.' },
         },
         rsvps: {
@@ -353,11 +375,18 @@ export const dashboard = {
           summary: 'Respons kehadiran dari tamu undangan.',
           steps: [
             'Lihat ringkasan: Respons, Hadir, Tidak hadir, dan estimasi tamu.',
-            'Filter atau cari, lalu Unduh CSV untuk rekap.',
+            'Filter atau cari nama tertentu.',
+            'Unduh CSV untuk rekap data.',
           ],
-          always: ['Segarkan untuk melihat respons terbaru.'],
+          always: [
+            'Segarkan untuk melihat respons terbaru.',
+            'Cocokkan estimasi tamu dengan kapasitas tempat acara.',
+          ],
           never: ['Jangan anggap kosong = error — terisi saat tamu submit form.'],
-          tips: ['Unduh CSV untuk rekap data RSVP kapan saja.'],
+          tips: [
+            'Unduh CSV untuk rekap data RSVP kapan saja.',
+            'Opsi menu di form mencerminkan pilihan yang kamu atur di section RSVP.',
+          ],
           shots: { table: 'Tabel RSVP beserta statistik di atasnya.' },
         },
         gifts: {
@@ -365,40 +394,58 @@ export const dashboard = {
           summary: 'Konfirmasi amplop/hadiah yang dikirim tamu.',
           steps: [
             'Lihat daftar konfirmasi dan total yang disebutkan.',
-            'Cari nama atau akun, lalu Unduh CSV.',
+            'Cari nama atau akun tertentu.',
+            'Unduh CSV untuk rekap.',
           ],
-          always: ['Cocokkan konfirmasi dengan mutasi rekening kalian sendiri.'],
-          never: ['Jangan jadikan angka di sini sebagai bukti transfer — ini input dari tamu.'],
+          always: [
+            'Cocokkan konfirmasi dengan mutasi rekening kalian sendiri.',
+            'Pastikan rekening di section Wedding Gift sudah benar.',
+          ],
+          never: [
+            'Jangan jadikan angka di sini sebagai bukti transfer — ini input dari tamu.',
+            'Jangan matikan konfirmasi di Wedding Gift kalau ingin tetap menerima data ini.',
+          ],
+          tips: ['Tab ini muncul saat tamu mengisi form konfirmasi di section Wedding Gift.'],
           shots: { table: 'Tabel konfirmasi hadiah.' },
         },
         guests: {
-          title: 'Tamu',
+          title: 'Tamu & Bagikan',
           summary: 'Buat undangan personal dan bagikan link khusus tiap tamu.',
           steps: [
-            'Tambahkan nama tamu.',
+            'Tambahkan nama tamu satu per satu.',
+            'Atur template pesan (gunakan {{name}} untuk nama dan {{url}} untuk link).',
             'Salin link personal masing-masing tamu.',
-            'Pakai template pesan untuk mengirim lewat WhatsApp.',
+            'Kirim lewat WhatsApp memakai tombol/template yang tersedia.',
           ],
           always: [
             'Pakai link personal supaya nama tamu muncul di undangan.',
-            'Cek nama sebelum mengirim.',
+            'Cek ejaan nama sebelum mengirim.',
+            'Atur template pesan terlebih dahulu sebelum mengirim massal.',
           ],
           never: [
             'Jangan kirim link generic kalau ingin sapaan personal.',
-            'Jangan lupa mengatur template pesan terlebih dahulu.',
+            'Jangan kirim ke semua orang sekaligus — sulit dipantau bila ada yang salah.',
           ],
-          tips: ['Kirim bertahap, jangan sekaligus, supaya mudah dipantau.'],
+          tips: [
+            'Kirim bertahap, jangan sekaligus, supaya mudah dipantau.',
+            'Coba buka link salah satu tamu sendiri untuk memastikan namanya benar.',
+          ],
           shots: { share: 'Daftar tamu dengan tombol salin link dan pesan.' },
         },
         guestbook: {
           title: 'Buku Tamu',
           summary: 'Catatan kehadiran tamu saat acara berlangsung (fitur Premium).',
           steps: [
-            'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya) untuk membukanya.',
-            'Setelah Premium, tandai tamu yang hadir saat acara.',
+            'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya).',
+            'Setelah Premium, buka Buku Tamu saat hari-H.',
+            'Tandai tamu yang hadir saat mereka tiba.',
           ],
-          always: ['Gunakan saat hari-H untuk mencatat kehadiran tamu.'],
+          always: [
+            'Gunakan saat hari-H untuk mencatat kehadiran tamu.',
+            'Siapkan perangkat yang terhubung internet di meja penerima tamu.',
+          ],
           never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
+          tips: ['Lihat tab "Bayar, Masa Aktif & Upgrade" untuk detail proses upgrade.'],
           shots: { ledger: 'Ledger kehadiran tamu (terbuka setelah Premium).' },
         },
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
@@ -901,21 +948,26 @@ export const dashboard = {
           title: 'Start here',
           summary: 'Get oriented: your invitation status, active period, and the key buttons in the top bar.',
           steps: [
-            'Sign in with your invitation email & password.',
+            'Sign in with your invitation email & password. Forgot it? Use the "Forgot password" link to reset via email.',
             'Watch the Published/Draft status: Draft = guests can\'t open it yet; Published = your invitation is live.',
             'Check the active-period status at the top right. If an "unpaid" banner is still showing, your invitation can expire.',
-            'The "View live" button opens your invitation in a new tab. The Language toggle switches ID/EN.',
+            'The "View live" button opens your invitation in a new tab — use it to check your work.',
+            'The Language toggle (ID/EN) only changes the dashboard & editor UI, not the invitation your guests see.',
+            'Explore the dashboard tabs: Editor, Palette, Music, RSVP, Gifts, Guests, and more — each has its own guide here.',
           ],
           always: [
             'Make sure the status is Published before sharing the link with guests.',
             'Check that the active period hasn\'t ended.',
+            'Save every change before switching tabs or closing the page.',
           ],
           never: [
             'Don\'t share the link while the invitation is still Draft.',
             'Don\'t forget to pay before the big day so your invitation doesn\'t expire.',
+            'Don\'t share your dashboard email & password with guests — those are just for you.',
           ],
           tips: [
             'Click "View live" after each edit to confirm the result looks right.',
+            'Open "View live" on both phone and computer — the guest view can differ on small screens.',
           ],
           shots: {
             header: 'Top bar: Published/Draft status, active period, View live button, and the Language toggle.',
@@ -927,14 +979,16 @@ export const dashboard = {
           steps: [
             'The section list is in the left panel — drag to reorder.',
             'Click a section to edit its text and photos; upload photos via the upload button.',
-            'Hero and Footer are locked to the very top and bottom — they can\'t be moved.',
-            'The set of sections is fixed — you can\'t add or remove sections, only arrange and fill them in.',
-            'You may only have one gallery — Masonry or SpringCoil. Use "Change section type" to switch between the two. Click Save when done.',
+            'Hero is locked to the very top and Footer to the very bottom — they can\'t be moved.',
+            'RSVP and Gifts are mandatory and locked — they can\'t be removed or moved.',
+            'You may only have one gallery — Masonry or SpringCoil. Use "Change section type" to switch between the two.',
+            'The set of sections is fixed (no Add/Remove). Click Save whenever you finish.',
           ],
           always: [
             'Click Save every time you finish editing.',
             'Check the result via "View live".',
             'Use photos with a sensible aspect ratio so they don\'t stretch.',
+            'Shorten overly long section labels so the navbar stays tidy.',
           ],
           never: [
             'Don\'t reload the page before saving — your changes will be lost.',
@@ -944,7 +998,8 @@ export const dashboard = {
           ],
           tips: [
             'Order the sections to follow your story.',
-            'Section label too long? Shorten it so the navbar stays tidy.',
+            'Larger photos look sharper; compress first if they\'re too heavy.',
+            'See the "Per-section guide" tab to learn how to fill each part.',
           ],
           shots: {
             list: 'Section list — drag to reorder and edit content. No add/remove buttons.',
@@ -954,24 +1009,34 @@ export const dashboard = {
         },
         palette: {
           title: 'Color Palette',
-          summary: 'Pick the color scheme your guests will see.',
+          summary: 'Pick the color scheme your guests will see on the invitation.',
           steps: [
-            'Pick one palette (Cosmic Dark or Pastel Light).',
-            'Click Save.',
+            'Browse the available palettes.',
+            'Click a palette to apply it — the preview updates instantly.',
+            'Click Save so the palette is stored for guests.',
           ],
-          always: ['Save after picking a palette.'],
+          always: [
+            'Save after picking a palette.',
+            'Check the result via "View live".',
+          ],
           never: ['Don\'t forget to Save — otherwise guests still see the old palette.'],
+          tips: ['Pick a palette that matches the dominant colors in your photos.'],
           shots: { grid: 'Palette grid — one is selected.' },
         },
         ornament: {
           title: 'Background / Ornaments',
           summary: 'Animated decorations that float across the invitation page.',
           steps: [
-            'Pick an ornament: Birds, Butterflies, or Perched.',
+            'Pick an ornament type: Birds, Butterflies, or Perched.',
+            'Preview its motion on screen.',
             'Click Save.',
           ],
-          always: ['Save after changing the ornament.'],
+          always: [
+            'Save after changing the ornament.',
+            'Make sure the ornament reads clearly over your chosen palette.',
+          ],
           never: ['Don\'t pick an ornament that clashes with the mood of your photos.'],
+          tips: ['Subtle ornaments usually look more elegant than busy ones.'],
           shots: { pick: 'Screen ornament options.' },
         },
         music: {
@@ -980,7 +1045,8 @@ export const dashboard = {
           steps: [
             'Upload one MP3 file (max 12 MB).',
             'Set the popup text: title and the Accept/Dismiss buttons.',
-            'Turn on the Enabled toggle, set Loop, then click Save.',
+            'Set Loop if you want the song to repeat.',
+            'Turn on the Enabled toggle, then click Save.',
           ],
           always: [
             'Turn on the Enabled toggle if you want the music to appear.',
@@ -988,9 +1054,12 @@ export const dashboard = {
           ],
           never: [
             'Don\'t upload a file larger than 12 MB.',
-            'Don\'t forget Enabled — if it\'s off, the music popup won\'t show.',
+            'Don\'t expect music to play on its own — browsers block autoplay, so guests must tap the popup button.',
           ],
-          tips: ['Pick a soft, long song so it doesn\'t loop too soon.'],
+          tips: [
+            'Pick a soft, long song so it doesn\'t loop too soon.',
+            'Use a compressed MP3 to keep the invitation light.',
+          ],
           shots: { upload: 'The MP3 upload panel and popup text settings.' },
         },
         rsvps: {
@@ -998,11 +1067,18 @@ export const dashboard = {
           summary: 'Attendance responses from your guests.',
           steps: [
             'See the summary: Responses, Attending, Declined, and the guest estimate.',
-            'Filter or search, then Download CSV for a recap.',
+            'Filter or search for a specific name.',
+            'Download CSV for a recap.',
           ],
-          always: ['Refresh to see the latest responses.'],
+          always: [
+            'Refresh to see the latest responses.',
+            'Match the guest estimate against your venue capacity.',
+          ],
           never: ['Don\'t assume empty = error — it fills in as guests submit the form.'],
-          tips: ['Download the CSV for an RSVP recap anytime.'],
+          tips: [
+            'Download the CSV for an RSVP recap anytime.',
+            'The form\'s meal options reflect what you set in the RSVP section.',
+          ],
           shots: { table: 'The RSVP table with stats above it.' },
         },
         gifts: {
@@ -1010,40 +1086,58 @@ export const dashboard = {
           summary: 'Confirmations of gifts/envelopes your guests send.',
           steps: [
             'See the list of confirmations and the total mentioned.',
-            'Search by name or account, then Download CSV.',
+            'Search for a specific name or account.',
+            'Download CSV for a recap.',
           ],
-          always: ['Cross-check confirmations against your own bank statement.'],
-          never: ['Don\'t treat the numbers here as proof of transfer — they\'re guest input.'],
+          always: [
+            'Cross-check confirmations against your own bank statement.',
+            'Make sure the accounts in the Wedding Gift section are correct.',
+          ],
+          never: [
+            'Don\'t treat the numbers here as proof of transfer — they\'re guest input.',
+            'Don\'t turn off confirmation in Wedding Gift if you still want to receive this data.',
+          ],
+          tips: ['This tab fills in when guests submit the confirmation form in the Wedding Gift section.'],
           shots: { table: 'The gift confirmation table.' },
         },
         guests: {
-          title: 'Guests',
+          title: 'Guests & Sharing',
           summary: 'Create personal invitations and share a unique link per guest.',
           steps: [
-            'Add a guest name.',
+            'Add guest names one by one.',
+            'Set the message template (use {{name}} for the name and {{url}} for the link).',
             'Copy each guest\'s personal link.',
-            'Use the message template to send it via WhatsApp.',
+            'Send via WhatsApp using the provided button/template.',
           ],
           always: [
             'Use the personal link so the guest\'s name appears in the invitation.',
-            'Check the name before sending.',
+            'Check the spelling of names before sending.',
+            'Set the message template first before sending in bulk.',
           ],
           never: [
             'Don\'t send the generic link if you want a personal greeting.',
-            'Don\'t forget to set the message template first.',
+            'Don\'t send to everyone at once — it\'s hard to track if something\'s wrong.',
           ],
-          tips: ['Send in batches, not all at once, so it\'s easier to track.'],
+          tips: [
+            'Send in batches, not all at once, so it\'s easier to track.',
+            'Open one guest\'s link yourself to confirm the name is correct.',
+          ],
           shots: { share: 'The guest list with copy-link and message buttons.' },
         },
         guestbook: {
           title: 'Guestbook',
           summary: 'A record of guest attendance during the event (Premium feature).',
           steps: [
-            'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference) to unlock it.',
-            'Once Premium, mark the guests who attend during the event.',
+            'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference).',
+            'Once Premium, open the Guestbook on the day.',
+            'Mark guests as present when they arrive.',
           ],
-          always: ['Use it on the day to record guest attendance.'],
-          never: ['Don\'t worry about upgrading — your invitation stays online the whole time, nothing is lost.'],
+          always: [
+            'Use it on the day to record guest attendance.',
+            'Have an internet-connected device ready at the reception desk.',
+          ],
+          never: ['Don\'t worry about upgrading — your invitation stays online and no data is lost.'],
+          tips: ['See the "Active period & Upgrade" tab for details on the upgrade process.'],
           shots: { ledger: 'The guest attendance ledger (unlocked after Premium).' },
         },
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
