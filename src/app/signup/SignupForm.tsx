@@ -11,6 +11,8 @@ import PrivacyContent from '@/components/legal/PrivacyContent'
 import RefundContent from '@/components/legal/RefundContent'
 import { CONSENT_VERSION } from '@/lib/legal/consent'
 import { isPasswordValid } from '@/lib/auth/passwordPolicy'
+import { pwnedPasswordCount } from '@/lib/auth/pwnedPassword'
+import { usePwnedPassword } from '@/lib/auth/usePwnedPassword'
 import PasswordChecklist from '@/components/auth/PasswordChecklist'
 
 /**
@@ -48,6 +50,7 @@ export default function SignupForm({
   const [openDoc, setOpenDoc] = useState<'privacy' | 'refund' | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const { pwned, checking } = usePwnedPassword(password)
 
   const consentMissing = !agreePrivacy || !agreeRefund
 
@@ -73,6 +76,14 @@ export default function SignupForm({
     }
 
     setSubmitting(true)
+
+    // Free, self-hosted leaked-password check (HIBP k-anonymity) — the
+    // equivalent of Supabase's Pro-only protection. Fails open on any error.
+    if ((await pwnedPasswordCount(password)) > 0) {
+      setError(rules.breached)
+      setSubmitting(false)
+      return
+    }
 
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -159,6 +170,16 @@ export default function SignupForm({
             style={input}
           />
           <PasswordChecklist password={password} labels={rules} />
+          {checking && (
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(42,33,24,0.55)' }}>
+              {rules.breachedChecking}
+            </p>
+          )}
+          {pwned && !checking && (
+            <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#E8553E', fontWeight: 600 }}>
+              {rules.breached}
+            </p>
+          )}
         </label>
 
         <label style={field}>

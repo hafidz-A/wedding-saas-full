@@ -7,6 +7,8 @@ import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
 import { isPasswordValid } from '@/lib/auth/passwordPolicy'
+import { pwnedPasswordCount } from '@/lib/auth/pwnedPassword'
+import { usePwnedPassword } from '@/lib/auth/usePwnedPassword'
 import PasswordChecklist from '@/components/auth/PasswordChecklist'
 
 /**
@@ -46,6 +48,7 @@ function ResetPasswordInner() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const { pwned, checking } = usePwnedPassword(password)
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -69,6 +72,13 @@ function ResetPasswordInner() {
     }
 
     setSubmitting(true)
+
+    // Free, self-hosted leaked-password check (HIBP k-anonymity). Fails open.
+    if ((await pwnedPasswordCount(password)) > 0) {
+      setError(rules.breached)
+      setSubmitting(false)
+      return
+    }
 
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -181,6 +191,16 @@ function ResetPasswordInner() {
             autoComplete="new-password"
           />
           <PasswordChecklist password={password} labels={rules} />
+          {checking && (
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(42,33,24,0.55)' }}>
+              {rules.breachedChecking}
+            </p>
+          )}
+          {pwned && !checking && (
+            <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#E8553E', fontWeight: 600 }}>
+              {rules.breached}
+            </p>
+          )}
         </label>
 
         <label style={{ display: 'grid', gap: 6 }}>

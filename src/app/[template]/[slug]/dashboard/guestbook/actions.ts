@@ -140,13 +140,15 @@ export async function addWalkInAttendance(input: {
       if (error?.code === '23505') {
         return { ok: false, code: 'duplicate', error: 'Guest already in the ledger' }
       }
-      return { ok: false, code: 'error', error: error?.message || 'Insert failed' }
+      console.error('[addWalkInAttendance]', error)
+      return { ok: false, code: 'error', error: 'Gagal menambahkan tamu. Coba lagi sebentar lagi.' }
     }
 
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     return { ok: true, row: fromDbRow(data) }
   } catch (e) {
-    return { ok: false, code: 'error', error: e instanceof Error ? e.message : 'Unexpected error' }
+    console.error('[addWalkInAttendance]', e)
+    return { ok: false, code: 'error', error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
   }
 }
 
@@ -163,10 +165,14 @@ export async function deleteAttendance(
       .delete()
       .eq('id', id)
       .eq('invitation_id', invitation_id)
-    if (error) return { ok: false, error: error.message }
+    if (error) {
+      console.error('[deleteAttendance]', error)
+      return { ok: false, error: 'Gagal menghapus entri. Coba lagi sebentar lagi.' }
+    }
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     return { ok: true }
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'Unexpected error' }
+    console.error('[deleteAttendance]', e)
+    return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
   }
 }

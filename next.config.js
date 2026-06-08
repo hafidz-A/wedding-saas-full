@@ -1,3 +1,33 @@
+// Content-Security-Policy in REPORT-ONLY mode: the browser reports violations
+// to the devtools console (and to report-uri if added) but blocks NOTHING, so
+// it is safe to ship to production. Use the reports to see exactly what needs
+// allow-listing, then graduate to an enforcing `Content-Security-Policy` header.
+//
+// Notes on the allowances below (driven by this app's stack):
+//   • script-src 'unsafe-inline'  → Next.js hydration bootstrap is inline. Moving
+//     to nonces later lets you drop this. 'unsafe-eval' is kept for now because
+//     React Fast Refresh (dev) uses eval; try removing it against a prod build.
+//   • style-src 'unsafe-inline'   → the template uses inline style objects +
+//     styled-jsx; unavoidable without a big refactor (low risk for styles).
+//   • img/media 'https:' blob: data: → Supabase Storage, Unsplash/Picsum, canvas
+//     (three.js), and owner-supplied music URLs.
+//   • connect-src *.supabase.co + wss → Supabase Auth/REST + Realtime.
+//   • frame-src 'self' → the editor PreviewPane embeds /<slug>?preview=1.
+const cspReportOnly = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "media-src 'self' blob: data: https:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "frame-src 'self'",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join('; ')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -31,6 +61,7 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains',
           },
+          { key: 'Content-Security-Policy-Report-Only', value: cspReportOnly },
         ],
       },
     ]

@@ -130,7 +130,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
       .single()
     if (error) {
       console.error('Onboarding insert error:', error)
-      return { ok: false, error: `DB error: ${error.message}` }
+      return { ok: false, error: 'Gagal menyimpan undangan. Coba lagi sebentar lagi.' }
     }
 
     revalidatePath('/[template]/[slug]', 'page')
@@ -145,7 +145,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     }
   } catch (e) {
     console.error('Onboarding unexpected error:', e)
-    return { ok: false, error: e instanceof Error ? e.message : 'Unexpected error' }
+    return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
   }
 }
 
@@ -221,7 +221,7 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     return { ok: true, invoiceUrl }
   } catch (e) {
     console.error('startCheckout error:', e)
-    return { ok: false, error: e instanceof Error ? e.message : 'Gagal memulai pembayaran' }
+    return { ok: false, error: 'Gagal memulai pembayaran. Coba lagi sebentar lagi.' }
   }
 }
 
@@ -283,7 +283,7 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
     return { ok: true, published: true, status: snap.status }
   } catch (e) {
     console.error('recheckPayment error:', e)
-    return { ok: false, error: e instanceof Error ? e.message : 'Gagal mengecek pembayaran' }
+    return { ok: false, error: 'Gagal mengecek pembayaran. Coba lagi sebentar lagi.' }
   }
 }
 
@@ -346,7 +346,7 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
     return { ok: true, invoiceUrl }
   } catch (e) {
     console.error('startUpgradeCheckout error:', e)
-    return { ok: false, error: e instanceof Error ? e.message : 'Gagal memulai upgrade' }
+    return { ok: false, error: 'Gagal memulai upgrade. Coba lagi sebentar lagi.' }
   }
 }
 
@@ -404,6 +404,6 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
     return { ok: true, published: true, status: snap.status }
   } catch (e) {
     console.error('recheckUpgrade error:', e)
-    return { ok: false, error: e instanceof Error ? e.message : 'Gagal mengecek upgrade' }
+    return { ok: false, error: 'Gagal mengecek upgrade. Coba lagi sebentar lagi.' }
   }
 }

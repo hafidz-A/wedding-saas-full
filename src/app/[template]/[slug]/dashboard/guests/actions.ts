@@ -160,11 +160,15 @@ export async function updateInviteMessageTemplate(
     const { error } = await (admin.from('invitations') as any)
       .update({ config: nextConfig })
       .eq('id', inv.id)
-    if (error) return { ok: false, error: error.message }
+    if (error) {
+      console.error('[updateInviteMessageTemplate]', error)
+      return { ok: false, error: 'Gagal menyimpan template pesan. Coba lagi sebentar lagi.' }
+    }
 
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     return { ok: true }
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'Unexpected error' }
+    console.error('[updateInviteMessageTemplate]', e)
+    return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
   }
 }

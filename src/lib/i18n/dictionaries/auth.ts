@@ -107,6 +107,8 @@ export const auth = {
       number: 'Mengandung angka (0–9)',
       symbol: 'Mengandung simbol (!@#$%…)',
       error: 'Password harus minimal 8 karakter serta mengandung huruf besar, angka, dan simbol.',
+      breached: '⚠️ Password ini pernah muncul di kebocoran data. Pilih password lain.',
+      breachedChecking: 'Memeriksa keamanan password…',
     },
   },
   en: {
@@ -217,6 +219,8 @@ export const auth = {
       number: 'Contains a number (0–9)',
       symbol: 'Contains a symbol (!@#$%…)',
       error: 'Password must be at least 8 characters and include an uppercase letter, a number, and a symbol.',
+      breached: '⚠️ This password has appeared in a data breach. Please choose another.',
+      breachedChecking: 'Checking password safety…',
     },
   },
 }
