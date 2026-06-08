@@ -5,19 +5,27 @@ import { useRouter } from 'next/navigation'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
 import {
+  setArrived,
+  updateAttendanceMeta,
+  setSouvenirTracking,
   deleteAttendance,
 } from './guestbook/actions'
 import { type AttendanceRow } from './guestbook/types'
 import WalkInDialog from './guestbook/WalkInDialog'
+import StatsRow from './guestbook/StatsRow'
+import LedgerTable from './guestbook/LedgerTable'
+import { downloadCsv } from './lib/csv'
+import { toCsvRows, type CsvLabels } from '@/lib/guestbook/csvRows'
+import { buildPrintHtml } from '@/lib/guestbook/printHtml'
 import {
-  sub, ghostBtn, primaryBtn, filterBtn, filterBtnActive, statBox, statLabel,
-  statValue, searchInput, badgeRsvp, badgeWalkin, deleteBtn,
+  sub, ghostBtn, primaryBtn, filterBtn, filterBtnActive, searchInput,
 } from './guestbook/styles'
 import tabs from './dashboardTabs.module.css'
 
 interface Props {
   slug: string
   attendances: AttendanceRow[]
+  souvenirEnabled: boolean
 }
 
 /** arrived_at desc, nulls last; then created_at desc as the tiebreaker. */
@@ -30,7 +38,7 @@ function sortLedger(rows: AttendanceRow[]): AttendanceRow[] {
   })
 }
 
-export default function GuestbookTab({ slug, attendances }: Props) {
+export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Props) {
   const t = useDashboardDict().tabs.guestbook
   const tc = useDashboardDict().tabs.common
   const confirmDialog = useConfirm()
@@ -45,7 +53,11 @@ export default function GuestbookTab({ slug, attendances }: Props) {
 
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'rsvp' | 'walkin'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'arrived' | 'not'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [souvenirOn, setSouvenirOn] = useState(souvenirEnabled)
+  useEffect(() => { setSouvenirOn(souvenirEnabled) }, [souvenirEnabled])
   const [refreshing, startRefresh] = useTransition()
   const [showDialog, setShowDialog] = useState(false)
 
@@ -53,15 +65,14 @@ export default function GuestbookTab({ slug, attendances }: Props) {
     const q = query.toLowerCase().trim()
     return sortLedger(
       rows.filter((r) => {
+        if (statusFilter === 'arrived' && !r.arrived_at) return false
+        if (statusFilter === 'not' && r.arrived_at) return false
         if (filter !== 'all' && r.source !== filter) return false
         if (!q) return true
         return r.name.toLowerCase().includes(q) || (r.note || '').toLowerCase().includes(q)
       }),
     )
-  }, [rows, query, filter])
-
-  const totalGuests = rows.reduce((sum, r) => sum + (r.guest_count || 0), 0)
-  const walkinCount = rows.filter((r) => r.source === 'walkin').length
+  }, [rows, query, filter, statusFilter])
 
   async function onDelete(id: string) {
     if (!(await confirmDialog({ message: t.deleteConfirm, tone: 'danger' }))) return
@@ -80,6 +91,81 @@ export default function GuestbookTab({ slug, attendances }: Props) {
     }
   }
 
+  async function onToggleArrived(row: AttendanceRow) {
+    const next = row.arrived_at ? null : new Date().toISOString()
+    setBusyId(row.id)
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, arrived_at: next } : r)))
+    const res = await setArrived(slug, row.id, !!next)
+    if (!res.ok) {
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, arrived_at: row.arrived_at } : r)))
+      await showAlert({ message: res.error || t.networkError })
+    }
+    setBusyId(null)
+  }
+
+  async function onToggleSouvenir(row: AttendanceRow) {
+    const next = !row.souvenir_taken
+    setBusyId(row.id)
+    setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, souvenir_taken: next } : r)))
+    const res = await updateAttendanceMeta(slug, row.id, { souvenirTaken: next })
+    if (!res.ok) {
+      setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, souvenir_taken: row.souvenir_taken } : r)))
+      await showAlert({ message: res.error || t.networkError })
+    }
+    setBusyId(null)
+  }
+
+  async function onTableChange(id: string, value: string) {
+    const trimmed = value.trim().slice(0, 24) || null
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, table_no: trimmed } : r)))
+    const res = await updateAttendanceMeta(slug, id, { tableNo: trimmed })
+    if (!res.ok) await showAlert({ message: res.error || t.networkError })
+  }
+
+  async function onToggleSouvenirTracking() {
+    const next = !souvenirOn
+    setSouvenirOn(next)
+    const res = await setSouvenirTracking(slug, next)
+    if (!res.ok) {
+      setSouvenirOn(!next)
+      await showAlert({ message: res.error || t.networkError })
+    }
+  }
+
+  const csvLabels: CsvLabels = {
+    name: t.colName, source: t.colSource, sourceRsvp: t.sourceRsvp, sourceWalkin: t.sourceWalkin,
+    guests: t.colGuests, note: t.colNote, arrived: t.colArrived,
+    arrivedYes: t.exportArrivedYes, arrivedNo: t.exportArrivedNo,
+    souvenir: t.colSouvenir, souvenirYes: t.souvenirYes, souvenirNo: t.souvenirNo, table: t.colTable,
+  }
+
+  function onExportCsv() {
+    const records = toCsvRows(filtered, { souvenirEnabled: souvenirOn, labels: csvLabels })
+    if (!downloadCsv(`buku-tamu-${new Date().toISOString().slice(0, 10)}.csv`, records)) {
+      void showAlert({ message: tc.nothingToExport })
+    }
+  }
+
+  function onPrint() {
+    const html = buildPrintHtml(filtered, { title: t.printTitle, souvenirEnabled: souvenirOn, labels: csvLabels })
+    const w = window.open('', '_blank')
+    if (!w) { void showAlert({ message: tc.nothingToExport }); return }
+    w.document.write(html)
+    w.document.close()
+    w.focus()
+    w.print()
+  }
+
+  useEffect(() => {
+    let id: ReturnType<typeof setInterval> | null = null
+    const start = () => { if (!id) id = setInterval(() => router.refresh(), 15000) }
+    const stop = () => { if (id) { clearInterval(id); id = null } }
+    const onVis = () => (document.visibilityState === 'visible' ? start() : stop())
+    onVis()
+    document.addEventListener('visibilitychange', onVis)
+    return () => { stop(); document.removeEventListener('visibilitychange', onVis) }
+  }, [router])
+
   return (
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
@@ -96,17 +182,22 @@ export default function GuestbookTab({ slug, attendances }: Props) {
           >
             {refreshing ? '…' : tc.refresh}
           </button>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, cursor: 'pointer' }}>
+            <input type="checkbox" checked={souvenirOn} onChange={onToggleSouvenirTracking} />
+            {t.souvenirToggle}
+          </label>
+          <button type="button" onClick={onExportCsv} style={ghostBtn}>{tc.downloadCsv}</button>
+          <button type="button" onClick={onPrint} style={ghostBtn}>{t.printBtn}</button>
           <button type="button" onClick={() => setShowDialog(true)} style={primaryBtn}>
             {t.addBtn}
           </button>
         </div>
       </header>
 
-      <div className={tabs.statsRow}>
-        <Stat label={t.statTotal} value={String(rows.length)} />
-        <Stat label={t.statGuests} value={String(totalGuests)} accent="#E8553E" />
-        <Stat label={t.statWalkins} value={String(walkinCount)} />
-      </div>
+      <StatsRow
+        rows={rows}
+        labels={{ statTotal: t.statTotal, statArrived: t.statArrived, statAttendeesArrived: t.statAttendeesArrived, statNotArrived: t.statNotArrived, statWalkins: t.statWalkins }}
+      />
 
       <div className={tabs.filterRow}>
         <input
@@ -128,6 +219,13 @@ export default function GuestbookTab({ slug, attendances }: Props) {
             </button>
           ))}
         </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {(['all', 'arrived', 'not'] as const).map((f) => (
+            <button key={f} type="button" onClick={() => setStatusFilter(f)} style={statusFilter === f ? filterBtnActive : filterBtn}>
+              {f === 'all' ? t.filterAll : f === 'arrived' ? t.filterArrived : t.filterNotArrived}
+            </button>
+          ))}
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -135,55 +233,23 @@ export default function GuestbookTab({ slug, attendances }: Props) {
       ) : filtered.length === 0 ? (
         <div className={tabs.empty}>{t.emptyFilter}</div>
       ) : (
-        <div className={tabs.tableWrap}>
-          <table className={tabs.table}>
-            <thead>
-              <tr>
-                <th>{t.colName}</th>
-                <th>{t.colSource}</th>
-                <th>{t.colGuests}</th>
-                <th>{t.colNote}</th>
-                <th>{t.colArrived}</th>
-                <th>{t.colActions}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r) => (
-                <tr key={r.id}>
-                  <td data-label={t.colName}>
-                    <strong style={{ color: '#2A2118' }}>{r.name}</strong>
-                  </td>
-                  <td data-label={t.colSource}>
-                    <span style={r.source === 'walkin' ? badgeWalkin : badgeRsvp}>
-                      {r.source === 'walkin' ? t.sourceWalkin : t.sourceRsvp}
-                    </span>
-                  </td>
-                  <td data-label={t.colGuests}>{r.guest_count}</td>
-                  <td data-label={t.colNote} className={tabs.tdEllipsis} title={r.note || ''}>
-                    {r.note || '—'}
-                  </td>
-                  <td data-label={t.colArrived}>
-                    {r.arrived_at
-                      ? new Date(r.arrived_at).toLocaleString('id-ID')
-                      : new Date(r.created_at).toLocaleDateString('id-ID')}
-                  </td>
-                  <td data-label={t.colActions}>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(r.id)}
-                      disabled={deletingId === r.id}
-                      style={deleteBtn}
-                      aria-label={t.deleteAria}
-                      title={t.deleteAria}
-                    >
-                      {deletingId === r.id ? '…' : '×'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <LedgerTable
+          rows={filtered}
+          souvenirEnabled={souvenirOn}
+          labels={{
+            colName: t.colName, colSource: t.colSource, colGuests: t.colGuests, colNote: t.colNote,
+            colArrived: t.colArrived, colActions: t.colActions, colSouvenir: t.colSouvenir, colTable: t.colTable,
+            sourceRsvp: t.sourceRsvp, sourceWalkin: t.sourceWalkin,
+            checkInBtn: t.checkInBtn, undoCheckIn: t.undoCheckIn, tablePlaceholder: t.tablePlaceholder,
+            deleteAria: t.deleteAria,
+          }}
+          busyId={busyId}
+          deletingId={deletingId}
+          onToggleArrived={onToggleArrived}
+          onToggleSouvenir={onToggleSouvenir}
+          onTableChange={onTableChange}
+          onDelete={onDelete}
+        />
       )}
 
       {showDialog && (
@@ -196,15 +262,6 @@ export default function GuestbookTab({ slug, attendances }: Props) {
           }}
         />
       )}
-    </div>
-  )
-}
-
-function Stat({ label, value, accent = '#2A2118' }: { label: string; value: string; accent?: string }) {
-  return (
-    <div style={statBox}>
-      <p style={statLabel}>{label}</p>
-      <p style={{ ...statValue, color: accent }}>{value}</p>
     </div>
   )
 }

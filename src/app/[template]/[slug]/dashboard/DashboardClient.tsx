@@ -292,7 +292,11 @@ export default function DashboardClient({
 
             {tab === 'guestbook' &&
               (hasGuestbook ? (
-                <GuestbookTab slug={slug} attendances={attendances} />
+                <GuestbookTab
+                  slug={slug}
+                  attendances={attendances}
+                  souvenirEnabled={(invitation.guestbook_souvenir_enabled as boolean) ?? false}
+                />
               ) : (
                 <GuestbookLocked invitationId={invitation.id} amountIDR={upgrade?.amountIDR ?? null} />
               ))}
