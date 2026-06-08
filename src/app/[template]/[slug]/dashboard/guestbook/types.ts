@@ -14,6 +14,8 @@ export interface AttendanceRow {
   source: 'rsvp' | 'walkin'
   note: string | null
   arrived_at: string | null
+  souvenir_taken: boolean
+  table_no: string | null
   created_at: string
 }
 
@@ -44,6 +46,8 @@ export interface AttendanceRowDb {
   source: 'rsvp' | 'walkin'
   note_enc: string | null
   arrived_at: string | null
+  souvenir_taken?: boolean | null
+  table_no?: string | null
   created_at: string
 }
 
@@ -63,6 +67,8 @@ export function fromDbRow(row: AttendanceRowDb): AttendanceRow {
     source: row.source,
     note: decryptAttendance(row.note_enc),
     arrived_at: row.arrived_at,
+    souvenir_taken: row.souvenir_taken ?? false,
+    table_no: row.table_no ?? null,
     created_at: row.created_at,
   }
 }
