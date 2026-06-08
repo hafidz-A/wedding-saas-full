@@ -176,3 +176,90 @@ export async function deleteAttendance(
     return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
   }
 }
+
+/** Toggle a guest's check-in (arrived) state. */
+export async function setArrived(
+  slug: string,
+  id: string,
+  arrived: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const invitation_id = await authorizeOwnership(slug)
+    const admin = createSupabaseAdminClient()
+    // Cast via `as any` at the from() level — new columns not yet in generated
+    // DB types (added by the 2026-06-08 migration, applied manually post-deploy).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('attendances') as any)
+      .update({ arrived_at: arrived ? new Date().toISOString() : null })
+      .eq('id', id)
+      .eq('invitation_id', invitation_id)
+    if (error) {
+      console.error('[setArrived]', error)
+      return { ok: false, error: 'Gagal memperbarui status kehadiran. Coba lagi.' }
+    }
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true }
+  } catch (e) {
+    console.error('[setArrived]', e)
+    return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi.' }
+  }
+}
+
+/** Update souvenir/table metadata for one attendance row. */
+export async function updateAttendanceMeta(
+  slug: string,
+  id: string,
+  patch: { souvenirTaken?: boolean; tableNo?: string | null },
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const invitation_id = await authorizeOwnership(slug)
+    const admin = createSupabaseAdminClient()
+    const update: Record<string, unknown> = {}
+    if (patch.souvenirTaken !== undefined) update.souvenir_taken = patch.souvenirTaken
+    if (patch.tableNo !== undefined) {
+      const t = (patch.tableNo ?? '').trim().slice(0, 24)
+      update.table_no = t || null
+    }
+    if (Object.keys(update).length === 0) return { ok: true }
+    // Cast via `as any` at the from() level — new columns not yet in generated DB types.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('attendances') as any)
+      .update(update)
+      .eq('id', id)
+      .eq('invitation_id', invitation_id)
+    if (error) {
+      console.error('[updateAttendanceMeta]', error)
+      return { ok: false, error: 'Gagal menyimpan. Coba lagi.' }
+    }
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true }
+  } catch (e) {
+    console.error('[updateAttendanceMeta]', e)
+    return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi.' }
+  }
+}
+
+/** Enable/disable the per-invitation souvenir & table tracking columns. */
+export async function setSouvenirTracking(
+  slug: string,
+  enabled: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const invitation_id = await authorizeOwnership(slug)
+    const admin = createSupabaseAdminClient()
+    // Cast via `as any` at the from() level — new column not yet in generated DB types.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('invitations') as any)
+      .update({ guestbook_souvenir_enabled: enabled })
+      .eq('id', invitation_id)
+    if (error) {
+      console.error('[setSouvenirTracking]', error)
+      return { ok: false, error: 'Gagal menyimpan pengaturan.' }
+    }
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true }
+  } catch (e) {
+    console.error('[setSouvenirTracking]', e)
+    return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi.' }
+  }
+}
