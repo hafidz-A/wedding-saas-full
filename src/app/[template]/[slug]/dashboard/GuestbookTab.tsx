@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
 import {
-  addWalkInAttendance,
   deleteAttendance,
-  searchWalkInGuests,
-  type WalkInGuestHit,
 } from './guestbook/actions'
 import { type AttendanceRow } from './guestbook/types'
+import WalkInDialog from './guestbook/WalkInDialog'
+import {
+  sub, ghostBtn, primaryBtn, filterBtn, filterBtnActive, statBox, statLabel,
+  statValue, searchInput, badgeRsvp, badgeWalkin, deleteBtn,
+} from './guestbook/styles'
 import tabs from './dashboardTabs.module.css'
 
 interface Props {
@@ -198,167 +200,6 @@ export default function GuestbookTab({ slug, attendances }: Props) {
   )
 }
 
-/* ──────────────── Walk-in dialog ──────────────── */
-
-function WalkInDialog({
-  slug,
-  onClose,
-  onAdded,
-}: {
-  slug: string
-  onClose: () => void
-  onAdded: (row: AttendanceRow) => void
-}) {
-  const t = useDashboardDict().tabs.guestbook
-  const [q, setQ] = useState('')
-  const [results, setResults] = useState<WalkInGuestHit[]>([])
-  const [searching, setSearching] = useState(false)
-  const [searched, setSearched] = useState(false)
-  const [picked, setPicked] = useState<WalkInGuestHit | null>(null)
-  const [count, setCount] = useState(1)
-  const [note, setNote] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  // Debounced typeahead — only while no guest is picked yet.
-  useEffect(() => {
-    if (picked) return
-    const term = q.trim()
-    if (!term) {
-      setResults([])
-      setSearched(false)
-      return
-    }
-    setSearching(true)
-    const handle = setTimeout(async () => {
-      try {
-        const hits = await searchWalkInGuests(slug, term)
-        setResults(hits)
-      } catch {
-        setResults([])
-      } finally {
-        setSearching(false)
-        setSearched(true)
-      }
-    }, 200)
-    return () => clearTimeout(handle)
-  }, [q, slug, picked])
-
-  async function onSave() {
-    if (!picked) return
-    setSaving(true)
-    setError(null)
-    try {
-      const res = await addWalkInAttendance({ slug, guestId: picked.id, count, note })
-      if (res.ok && res.row) {
-        onAdded(res.row)
-        return
-      }
-      setError(
-        res.code === 'duplicate'
-          ? t.errDuplicate
-          : res.code === 'not_found'
-          ? t.errNotFound
-          : res.error || t.errGeneric,
-      )
-    } catch (e: any) {
-      setError(e?.message || t.errGeneric)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div style={overlay} role="dialog" aria-modal="true" onClick={onClose}>
-      <div style={modal} onClick={(e) => e.stopPropagation()}>
-        <header style={modalHeader}>
-          <h3 style={{ margin: 0, fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 22 }}>
-            {t.dialogTitle}
-          </h3>
-          <button type="button" onClick={onClose} style={modalClose} aria-label={t.dialogCancel}>
-            ×
-          </button>
-        </header>
-
-        {!picked ? (
-          <>
-            <input
-              autoFocus
-              type="search"
-              placeholder={t.dialogSearchPlaceholder}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              style={{ ...searchInput, width: '100%' }}
-            />
-            <div style={{ marginTop: 10 }}>
-              {searching ? (
-                <p style={dialogHint}>{t.dialogSearching}</p>
-              ) : searched && results.length === 0 ? (
-                <p style={dialogHint}>{t.dialogNoResults}</p>
-              ) : (
-                <ul style={resultList}>
-                  {results.map((g) => (
-                    <li key={g.id}>
-                      <button type="button" style={resultRow} onClick={() => setPicked(g)}>
-                        <span style={{ fontWeight: 600, color: '#2A2118' }}>{g.name}</span>
-                        <span style={resultMeta}>
-                          {[g.group_label, g.phone_masked].filter(Boolean).join(' · ') || ''}
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <div style={pickedCard}>
-              <div>
-                <p style={{ margin: 0, fontWeight: 600, color: '#2A2118' }}>{picked.name}</p>
-                {picked.group_label && <p style={resultMeta}>{picked.group_label}</p>}
-              </div>
-              <button type="button" style={ghostBtn} onClick={() => setPicked(null)}>
-                {t.dialogChange}
-              </button>
-            </div>
-
-            <label style={fieldLabel}>{t.dialogCountLabel}</label>
-            <input
-              type="number"
-              min={1}
-              max={20}
-              value={count}
-              onChange={(e) => setCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
-              style={{ ...searchInput, width: 120 }}
-            />
-
-            <label style={fieldLabel}>{t.dialogNoteLabel}</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={t.dialogNotePlaceholder}
-              rows={2}
-              style={{ ...searchInput, width: '100%', resize: 'vertical', fontFamily: 'inherit' }}
-            />
-
-            {error && <p style={errorText}>{error}</p>}
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'flex-end' }}>
-              <button type="button" style={ghostBtn} onClick={onClose} disabled={saving}>
-                {t.dialogCancel}
-              </button>
-              <button type="button" style={primaryBtn} onClick={onSave} disabled={saving}>
-                {saving ? t.dialogSaving : t.dialogSave}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
 function Stat({ label, value, accent = '#2A2118' }: { label: string; value: string; accent?: string }) {
   return (
     <div style={statBox}>
@@ -367,29 +208,3 @@ function Stat({ label, value, accent = '#2A2118' }: { label: string; value: stri
     </div>
   )
 }
-
-// ── Styles ──
-const sub: React.CSSProperties = { margin: '4px 0 0', fontSize: 13, color: 'rgba(42,33,24,0.6)', maxWidth: 540, lineHeight: 1.5 }
-const ghostBtn: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.2)', background: 'transparent', cursor: 'pointer', fontSize: 12, letterSpacing: '0.1em' }
-const primaryBtn: React.CSSProperties = { padding: '8px 16px', borderRadius: 999, border: 'none', background: '#2A2118', color: '#F5EFE3', cursor: 'pointer', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }
-const filterBtn: React.CSSProperties = { padding: '8px 12px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.16)', background: 'transparent', cursor: 'pointer', fontSize: 12 }
-const filterBtnActive: React.CSSProperties = { ...filterBtn, background: '#2A2118', color: '#F5EFE3', borderColor: '#2A2118' }
-const statBox: React.CSSProperties = { background: '#fff', borderRadius: 12, padding: 14, border: '1px solid rgba(42,33,24,0.06)' }
-const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(42,33,24,0.55)' }
-const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 22 }
-const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: '#fff' }
-const badgeRsvp: React.CSSProperties = { display: 'inline-block', padding: '3px 9px', borderRadius: 999, fontSize: 11, background: 'rgba(45,140,78,0.12)', color: '#2D8C4E', whiteSpace: 'nowrap' }
-const badgeWalkin: React.CSSProperties = { display: 'inline-block', padding: '3px 9px', borderRadius: 999, fontSize: 11, background: 'rgba(232,85,62,0.12)', color: '#E8553E', whiteSpace: 'nowrap' }
-const deleteBtn: React.CSSProperties = { width: 28, height: 28, borderRadius: '50%', border: '1px solid rgba(196,63,42,0.25)', background: 'transparent', color: '#C43F2A', cursor: 'pointer', fontSize: 18, lineHeight: 1, display: 'grid', placeItems: 'center' }
-
-const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(42,33,24,0.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 1000 }
-const modal: React.CSSProperties = { width: 'min(440px, 100%)', background: '#F5EFE3', borderRadius: 18, padding: 24, boxShadow: '0 24px 70px rgba(42,33,24,0.3)', maxHeight: '85vh', overflowY: 'auto' }
-const modalHeader: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }
-const modalClose: React.CSSProperties = { width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(42,33,24,0.2)', background: 'transparent', cursor: 'pointer', fontSize: 20, lineHeight: 1 }
-const dialogHint: React.CSSProperties = { margin: 0, fontSize: 13, color: 'rgba(42,33,24,0.6)', lineHeight: 1.5, padding: '8px 0' }
-const resultList: React.CSSProperties = { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 260, overflowY: 'auto' }
-const resultRow: React.CSSProperties = { width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.1)', background: '#fff', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 2 }
-const resultMeta: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
-const pickedCard: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 14px', borderRadius: 12, background: '#fff', border: '1px solid rgba(42,33,24,0.1)', marginBottom: 14 }
-const fieldLabel: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(42,33,24,0.7)', margin: '12px 0 6px', letterSpacing: '0.04em' }
-const errorText: React.CSSProperties = { margin: '12px 0 0', fontSize: 13, color: '#C43F2A' }
