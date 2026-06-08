@@ -91,8 +91,15 @@ export async function importGuests(
   text: string,
 ): Promise<{ inserted: number }> {
   const invitation_id = await authorizeOwnership(slug)
+  // DoS guards: bound the raw paste size and the number of rows per import.
+  if (text.length > 1_000_000) {
+    throw new Error('Data impor terlalu besar. Bagi menjadi beberapa bagian.')
+  }
   const rows = parseGuestImport(text)
   if (rows.length === 0) return { inserted: 0 }
+  if (rows.length > 5000) {
+    throw new Error('Maksimal 5000 tamu per impor. Bagi daftar menjadi beberapa bagian.')
+  }
   const admin = createSupabaseAdminClient()
   const { error, count } = await admin
     .from('guests')

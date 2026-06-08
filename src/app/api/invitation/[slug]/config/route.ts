@@ -34,6 +34,12 @@ export async function PUT(req: Request, { params }: Ctx) {
     return NextResponse.json({ error: 'config.sections must be an array' }, { status: 400 })
   }
 
+  // DoS guard: the config holds text + image URLs (not binary), so a real one is
+  // well under this. Reject anything pathologically large before it hits the DB.
+  if (JSON.stringify(config).length > 512 * 1024) {
+    return NextResponse.json({ error: 'Config too large' }, { status: 413 })
+  }
+
   const supabase = createSupabaseAdminClient()
 
   // Top-level config keys owned by dedicated dashboard tabs (Music, Palette,

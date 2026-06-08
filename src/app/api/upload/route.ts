@@ -55,10 +55,14 @@ export async function POST(req: Request) {
   const path = `${invitation.id}/${Date.now()}-${safeName}`
   const bytes = new Uint8Array(await file.arrayBuffer())
 
-  // Defense-in-depth: the declared MIME is client-controlled, so for images
-  // confirm the actual file signature (magic bytes) matches. Blocks a polyglot
-  // / mislabeled file slipping in under an image content-type.
-  if (!isAudio && !imageSignatureMatches(file.type, bytes)) {
+  // Defense-in-depth: the declared MIME is client-controlled, so confirm the
+  // actual file signature (magic bytes) matches. Blocks a polyglot / mislabeled
+  // / arbitrary binary slipping in under an image or audio content-type.
+  if (isAudio) {
+    if (!audioSignatureMatches(bytes)) {
+      return NextResponse.json({ error: 'File content does not look like a valid audio file' }, { status: 400 })
+    }
+  } else if (!imageSignatureMatches(file.type, bytes)) {
     return NextResponse.json({ error: 'File content does not match its image type' }, { status: 400 })
   }
 
@@ -94,4 +98,25 @@ function imageSignatureMatches(mime: string, b: Uint8Array): boolean {
     default:
       return false
   }
+}
+
+/**
+ * True if the buffer starts with one of the common audio container signatures.
+ * Lenient by design (matches the format family, not the exact declared MIME)
+ * because browsers report m4a/aac content-types inconsistently — the goal is to
+ * block non-audio binaries, not to police the exact codec.
+ */
+function audioSignatureMatches(b: Uint8Array): boolean {
+  if (b.length < 12) return false
+  const ascii = (offset: number, s: string) => {
+    for (let i = 0; i < s.length; i++) if (b[offset + i] !== s.charCodeAt(i)) return false
+    return true
+  }
+  if (ascii(0, 'ID3')) return true                         // MP3 with ID3v2 tag
+  if (b[0] === 0xff && (b[1] & 0xe0) === 0xe0) return true  // MPEG / ADTS frame sync (mp3, aac)
+  if (ascii(0, 'RIFF') && ascii(8, 'WAVE')) return true     // WAV
+  if (ascii(0, 'OggS')) return true                         // OGG / Opus
+  if (ascii(4, 'ftyp')) return true                         // M4A / MP4 audio (ISO-BMFF)
+  if (ascii(0, 'ADIF')) return true                         // AAC ADIF
+  return false
 }
