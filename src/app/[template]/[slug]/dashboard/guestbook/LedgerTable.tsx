@@ -2,13 +2,14 @@
 
 import type React from 'react'
 import { type AttendanceRow } from './types'
-import { badgeRsvp, badgeWalkin, deleteBtn } from './styles'
+import { badgeRsvp, badgeWalkin, badgeUnlisted, deleteBtn } from './styles'
+import { attendanceCategory } from '@/lib/guestbook/category'
 import tabs from '../dashboardTabs.module.css'
 
 interface Labels {
   colName: string; colSource: string; colGuests: string; colNote: string
   colArrived: string; colActions: string; colSouvenir: string; colTable: string
-  sourceRsvp: string; sourceWalkin: string
+  sourceRsvp: string; sourceWalkin: string; sourceUnlisted: string
   checkInBtn: string; undoCheckIn: string; tablePlaceholder: string
   deleteAria: string
 }
@@ -47,12 +48,13 @@ export default function LedgerTable({
         <tbody>
           {rows.map((r) => {
             const arrived = !!r.arrived_at
+            const cat = attendanceCategory(r)
             return (
               <tr key={r.id}>
                 <td data-label={t.colName}><strong style={{ color: '#2A2118' }}>{r.name}</strong></td>
                 <td data-label={t.colSource}>
-                  <span style={r.source === 'walkin' ? badgeWalkin : badgeRsvp}>
-                    {r.source === 'walkin' ? t.sourceWalkin : t.sourceRsvp}
+                  <span style={cat === 'unlisted' ? badgeUnlisted : cat === 'walkin' ? badgeWalkin : badgeRsvp}>
+                    {cat === 'unlisted' ? t.sourceUnlisted : cat === 'walkin' ? t.sourceWalkin : t.sourceRsvp}
                   </span>
                 </td>
                 <td data-label={t.colGuests}>{r.guest_count}</td>

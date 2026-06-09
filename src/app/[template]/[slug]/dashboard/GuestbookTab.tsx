@@ -16,6 +16,7 @@ import StatsRow from './guestbook/StatsRow'
 import LedgerTable from './guestbook/LedgerTable'
 import { downloadCsv } from './lib/csv'
 import { toCsvRows, type CsvLabels } from '@/lib/guestbook/csvRows'
+import { attendanceCategory } from '@/lib/guestbook/category'
 import { buildPrintHtml } from '@/lib/guestbook/printHtml'
 import {
   sub, ghostBtn, primaryBtn, filterBtn, filterBtnActive, searchInput,
@@ -52,7 +53,7 @@ export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Pro
   useEffect(() => { setRows(attendances) }, [attendances])
 
   const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState<'all' | 'rsvp' | 'walkin'>('all')
+  const [filter, setFilter] = useState<'all' | 'rsvp' | 'walkin' | 'unlisted'>('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'arrived' | 'not'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -67,7 +68,7 @@ export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Pro
       rows.filter((r) => {
         if (statusFilter === 'arrived' && !r.arrived_at) return false
         if (statusFilter === 'not' && r.arrived_at) return false
-        if (filter !== 'all' && r.source !== filter) return false
+        if (filter !== 'all' && attendanceCategory(r) !== filter) return false
         if (!q) return true
         return r.name.toLowerCase().includes(q) || (r.note || '').toLowerCase().includes(q)
       }),
@@ -208,14 +209,14 @@ export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Pro
           style={searchInput}
         />
         <div style={{ display: 'flex', gap: 6 }}>
-          {(['all', 'rsvp', 'walkin'] as const).map((f) => (
+          {(['all', 'rsvp', 'walkin', 'unlisted'] as const).map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFilter(f)}
               style={filter === f ? filterBtnActive : filterBtn}
             >
-              {f === 'all' ? t.filterAll : f === 'rsvp' ? t.filterRsvp : t.filterWalkin}
+              {f === 'all' ? t.filterAll : f === 'rsvp' ? t.filterRsvp : f === 'walkin' ? t.filterWalkin : t.filterUnlisted}
             </button>
           ))}
         </div>
@@ -239,7 +240,7 @@ export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Pro
           labels={{
             colName: t.colName, colSource: t.colSource, colGuests: t.colGuests, colNote: t.colNote,
             colArrived: t.colArrived, colActions: t.colActions, colSouvenir: t.colSouvenir, colTable: t.colTable,
-            sourceRsvp: t.sourceRsvp, sourceWalkin: t.sourceWalkin,
+            sourceRsvp: t.sourceRsvp, sourceWalkin: t.sourceWalkin, sourceUnlisted: t.sourceUnlisted,
             checkInBtn: t.checkInBtn, undoCheckIn: t.undoCheckIn, tablePlaceholder: t.tablePlaceholder,
             deleteAria: t.deleteAria,
           }}
