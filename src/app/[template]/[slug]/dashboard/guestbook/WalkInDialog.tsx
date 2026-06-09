@@ -25,7 +25,7 @@ export default function WalkInDialog({
   const [searching, setSearching] = useState(false)
   const [searched, setSearched] = useState(false)
   const [picked, setPicked] = useState<WalkInGuestHit | null>(null)
-  const [count, setCount] = useState(1)
+  const [count, setCount] = useState<number | ''>(1)
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,10 +59,12 @@ export default function WalkInDialog({
 
   async function onSave() {
     if (!picked) return
+    const c = count === '' ? 0 : count
+    if (c < 1) { setError(t.countMin); return }
     setSaving(true)
     setError(null)
     try {
-      const res = await addWalkInAttendance({ slug, guestId: picked.id, count, note })
+      const res = await addWalkInAttendance({ slug, guestId: picked.id, count: c, note })
       if (res.ok && res.row) {
         onAdded(res.row)
         return
@@ -90,12 +92,14 @@ export default function WalkInDialog({
   async function onSaveUnlisted() {
     const name = manualName.trim()
     if (!name) { setError(t.unlistedNameRequired); return }
+    const c = count === '' ? 0 : count
+    if (c < 1) { setError(t.countMin); return }
     const ok = await confirmDialog({ message: t.unlistedConfirm.replace('{name}', name), tone: 'danger' })
     if (!ok) return
     setSaving(true)
     setError(null)
     try {
-      const res = await addUnlistedAttendance({ slug, name, count, note })
+      const res = await addUnlistedAttendance({ slug, name, count: c, note })
       if (res.ok && res.row) {
         onAdded(res.row)
         return
@@ -135,10 +139,16 @@ export default function WalkInDialog({
             <label style={fieldLabel}>{t.dialogCountLabel}</label>
             <input
               type="number"
+              inputMode="numeric"
               min={1}
               max={20}
               value={count}
-              onChange={(e) => setCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === '') { setCount(''); return }
+                const n = Math.floor(Number(v))
+                if (!Number.isNaN(n)) setCount(Math.min(20, Math.max(1, n)))
+              }}
               style={{ ...searchInput, width: 120 }}
             />
 
@@ -177,10 +187,16 @@ export default function WalkInDialog({
             <label style={fieldLabel}>{t.dialogCountLabel}</label>
             <input
               type="number"
+              inputMode="numeric"
               min={1}
               max={20}
               value={count}
-              onChange={(e) => setCount(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === '') { setCount(''); return }
+                const n = Math.floor(Number(v))
+                if (!Number.isNaN(n)) setCount(Math.min(20, Math.max(1, n)))
+              }}
               style={{ ...searchInput, width: 120 }}
             />
 
