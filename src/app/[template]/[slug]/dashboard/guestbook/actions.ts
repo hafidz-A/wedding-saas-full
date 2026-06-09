@@ -1,5 +1,6 @@
 'use server'
 
+import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
@@ -309,4 +310,35 @@ export async function setSouvenirTracking(
     console.error('[setSouvenirTracking]', e)
     return { ok: false, error: 'Terjadi kesalahan tak terduga. Coba lagi.' }
   }
+}
+
+/** Get the invitation's check-in token, generating + storing one on first use. */
+export async function ensureCheckinToken(slug: string): Promise<{ ok: boolean; token?: string; error?: string }> {
+  try {
+    const invitation_id = await authorizeOwnership(slug)
+    const admin = createSupabaseAdminClient()
+    const { data: row } = (await admin
+      .from('invitations').select('checkin_token').eq('id', invitation_id).maybeSingle()) as { data: { checkin_token: string | null } | null }
+    if (row?.checkin_token) return { ok: true, token: row.checkin_token }
+    const token = randomBytes(16).toString('hex')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('invitations') as any).update({ checkin_token: token }).eq('id', invitation_id)
+    if (error) { console.error('[ensureCheckinToken]', error); return { ok: false, error: 'Gagal membuat token.' } }
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true, token }
+  } catch (e) { console.error('[ensureCheckinToken]', e); return { ok: false, error: 'Terjadi kesalahan tak terduga.' } }
+}
+
+/** Rotate the token, invalidating the old QR. */
+export async function regenerateCheckinToken(slug: string): Promise<{ ok: boolean; token?: string; error?: string }> {
+  try {
+    const invitation_id = await authorizeOwnership(slug)
+    const admin = createSupabaseAdminClient()
+    const token = randomBytes(16).toString('hex')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('invitations') as any).update({ checkin_token: token }).eq('id', invitation_id)
+    if (error) { console.error('[regenerateCheckinToken]', error); return { ok: false, error: 'Gagal mengganti token.' } }
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true, token }
+  } catch (e) { console.error('[regenerateCheckinToken]', e); return { ok: false, error: 'Terjadi kesalahan tak terduga.' } }
 }
