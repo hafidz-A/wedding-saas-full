@@ -11,6 +11,7 @@ export const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: '
 export const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: '#fff' }
 export const badgeRsvp: React.CSSProperties = { display: 'inline-block', padding: '3px 9px', borderRadius: 999, fontSize: 11, background: 'rgba(45,140,78,0.12)', color: '#2D8C4E', whiteSpace: 'nowrap' }
 export const badgeWalkin: React.CSSProperties = { display: 'inline-block', padding: '3px 9px', borderRadius: 999, fontSize: 11, background: 'rgba(232,85,62,0.12)', color: '#E8553E', whiteSpace: 'nowrap' }
+export const badgeUnlisted: React.CSSProperties = { display: 'inline-block', padding: '3px 9px', borderRadius: 999, fontSize: 11, background: 'rgba(180,120,20,0.14)', color: '#9A6A12', whiteSpace: 'nowrap' }
 export const deleteBtn: React.CSSProperties = { width: 28, height: 28, borderRadius: '50%', border: '1px solid rgba(196,63,42,0.25)', background: 'transparent', color: '#C43F2A', cursor: 'pointer', fontSize: 18, lineHeight: 1, display: 'grid', placeItems: 'center' }
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(42,33,24,0.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 1000 }
 export const modal: React.CSSProperties = { width: 'min(440px, 100%)', background: '#F5EFE3', borderRadius: 18, padding: 24, boxShadow: '0 24px 70px rgba(42,33,24,0.3)', maxHeight: '85vh', overflowY: 'auto' }
