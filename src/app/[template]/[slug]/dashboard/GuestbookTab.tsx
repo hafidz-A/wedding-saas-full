@@ -14,6 +14,7 @@ import { type AttendanceRow } from './guestbook/types'
 import WalkInDialog from './guestbook/WalkInDialog'
 import StatsRow from './guestbook/StatsRow'
 import LedgerTable from './guestbook/LedgerTable'
+import CheckinQrCard from './guestbook/CheckinQrCard'
 import { downloadCsv } from './lib/csv'
 import { toCsvRows, type CsvLabels } from '@/lib/guestbook/csvRows'
 import { attendanceCategory } from '@/lib/guestbook/category'
@@ -25,6 +26,7 @@ import tabs from './dashboardTabs.module.css'
 
 interface Props {
   slug: string
+  template: string
   attendances: AttendanceRow[]
   souvenirEnabled: boolean
 }
@@ -39,7 +41,7 @@ function sortLedger(rows: AttendanceRow[]): AttendanceRow[] {
   })
 }
 
-export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Props) {
+export default function GuestbookTab({ slug, template, attendances, souvenirEnabled }: Props) {
   const t = useDashboardDict().tabs.guestbook
   const tc = useDashboardDict().tabs.common
   const confirmDialog = useConfirm()
@@ -194,6 +196,8 @@ export default function GuestbookTab({ slug, attendances, souvenirEnabled }: Pro
           </button>
         </div>
       </header>
+
+      <CheckinQrCard slug={slug} template={template} />
 
       <StatsRow
         rows={rows}

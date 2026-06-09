@@ -294,6 +294,7 @@ export default function DashboardClient({
               (hasGuestbook ? (
                 <GuestbookTab
                   slug={slug}
+                  template={template}
                   attendances={attendances}
                   souvenirEnabled={(invitation.guestbook_souvenir_enabled as boolean) ?? false}
                 />
