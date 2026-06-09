@@ -283,11 +283,70 @@ async function backfillConfigs() {
   console.log(`invitations.config: ${n} row(s) ${DRY_RUN ? 'would be' : ''} encrypted`)
 }
 
+/* ────────────────────────── 5. guestbook_notes (tier-2) ─────── */
+
+async function backfillGuestbookNotes() {
+  const { data, error } = await supabase.from('guestbook_notes').select('*')
+  if (error) {
+    if (/does not exist|relation|column/i.test(error.message)) {
+      console.log('guestbook_notes:    columns not present — skipped')
+      return
+    }
+    console.error('guestbook_notes select failed:', error.message)
+    return
+  }
+  let n = 0
+  for (const g of data || []) {
+    if (g.guest_name_enc != null) continue // already encrypted
+    if (g.guest_name == null && g.message == null) continue
+    const patch = {
+      guest_name_enc: encryptField(g.guest_name),
+      message_enc: encryptField(g.message),
+    }
+    n++
+    if (!DRY_RUN) {
+      const { error: upErr } = await supabase.from('guestbook_notes').update(patch).eq('id', g.id)
+      if (upErr) console.error(`  note ${g.id} update failed:`, upErr.message)
+    }
+  }
+  console.log(`guestbook_notes:    ${n} row(s) ${DRY_RUN ? 'would be' : ''} encrypted`)
+}
+
+/* ────────────────────────── 6. playlist_songs (tier-2) ───────── */
+
+async function backfillPlaylist() {
+  const { data, error } = await supabase.from('playlist_songs').select('*')
+  if (error) {
+    if (/does not exist|relation|column/i.test(error.message)) {
+      console.log('playlist_songs:     columns not present — skipped')
+      return
+    }
+    console.error('playlist_songs select failed:', error.message)
+    return
+  }
+  let n = 0
+  for (const p of data || []) {
+    if (p.suggested_by_enc != null) continue
+    if (p.suggested_by == null) continue
+    n++
+    if (!DRY_RUN) {
+      const { error: upErr } = await supabase
+        .from('playlist_songs')
+        .update({ suggested_by_enc: encryptField(p.suggested_by) })
+        .eq('id', p.id)
+      if (upErr) console.error(`  song ${p.id} update failed:`, upErr.message)
+    }
+  }
+  console.log(`playlist_songs:     ${n} row(s) ${DRY_RUN ? 'would be' : ''} encrypted`)
+}
+
 /* ────────────────────────── run ─────────────────────────────── */
 
 await backfillRsvps()
 await backfillGifts()
 await backfillAttendances()
 await backfillConfigs()
+await backfillGuestbookNotes()
+await backfillPlaylist()
 
 console.log(`\n✓ ${DRY_RUN ? 'Dry run complete — re-run without --dry-run to apply.' : 'Backfill complete.'}`)

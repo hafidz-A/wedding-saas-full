@@ -6,6 +6,7 @@ import { isValidTemplate, getDefaultConfig } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { decryptConfig } from '@/lib/crypto/config'
+import { decryptField } from '@/lib/crypto/app'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 
 interface PageProps {
@@ -120,7 +121,7 @@ export default async function Page({ params }: PageProps) {
     if (invitationId) {
       const { data: notes } = await admin
         .from('guestbook_notes')
-        .select('id, guest_name, message, color, created_at')
+        .select('id, guest_name_enc, message_enc, color, created_at')
         .eq('invitation_id', invitationId)
         .eq('is_approved', true)
         .order('created_at', { ascending: false })
@@ -152,8 +153,8 @@ function injectGuestbookNotes(config: any, dbNotes: any[]) {
   if (!config?.sections) return config
   const mapped = dbNotes.map((n) => ({
     id: n.id,
-    name: n.guest_name,
-    message: n.message,
+    name: decryptField(n.guest_name_enc),
+    message: decryptField(n.message_enc),
     color: n.color || 'gold',
   }))
   return {

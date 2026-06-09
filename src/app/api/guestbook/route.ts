@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
+import { encryptField, decryptField } from '@/lib/crypto/app'
 
 const ALLOWED_COLORS = new Set(['gold', 'coral', 'sky', 'emerald', 'purple'])
 const RATE_LIMIT_MS = 30_000 // 30 seconds between submissions per slug
@@ -73,12 +74,12 @@ export async function POST(req: Request) {
   const { data: inserted, error } = await (supabase.from('guestbook_notes') as any)
     .insert({
       invitation_id: invitation.id,
-      guest_name: name,
-      message,
+      guest_name_enc: encryptField(name),
+      message_enc: encryptField(message),
       color,
       is_approved: true,
     })
-    .select('id, guest_name, message, color, created_at')
+    .select('id, guest_name_enc, message_enc, color, created_at')
     .single()
 
   if (error || !inserted) {
@@ -91,8 +92,8 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     id: inserted.id,
-    name: inserted.guest_name,
-    message: inserted.message,
+    name: decryptField(inserted.guest_name_enc),
+    message: decryptField(inserted.message_enc),
     color: inserted.color,
     createdAt: inserted.created_at,
   })
