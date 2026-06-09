@@ -152,6 +152,53 @@ export async function addWalkInAttendance(input: {
   }
 }
 
+/**
+ * Add an UNLISTED walk-in — a guest not in the imported guests list. No guestId;
+ * stored as source='walkin' with guest_id=null (distinguished from a listed
+ * walk-in by the null guest_id). Name is encrypted like every attendance name.
+ */
+export async function addUnlistedAttendance(input: {
+  slug: string
+  name: string
+  count: number
+  note?: string | null
+}): Promise<AddWalkInResult> {
+  try {
+    const invitation_id = await authorizeOwnership(input.slug)
+    const name = String(input.name || '').trim().slice(0, 120)
+    if (!name) return { ok: false, code: 'error', error: 'Nama wajib diisi.' }
+    const count = Math.min(20, Math.max(1, Number(input.count) || 1))
+    const note = input.note?.trim() || null
+    const admin = createSupabaseAdminClient()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = (await (admin.from('attendances') as any)
+      .insert({
+        invitation_id,
+        guest_id: null,
+        rsvp_id: null,
+        name_enc: encryptField(name),
+        guest_count: count,
+        source: 'walkin',
+        note_enc: encryptField(note),
+        arrived_at: new Date().toISOString(),
+      })
+      .select()
+      .single()) as { data: AttendanceRowDb | null; error: { message: string } | null }
+
+    if (error || !data) {
+      console.error('[addUnlistedAttendance]', error)
+      return { ok: false, code: 'error', error: 'Gagal menambahkan tamu. Coba lagi sebentar lagi.' }
+    }
+
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true, row: fromDbRow(data) }
+  } catch (e) {
+    console.error('[addUnlistedAttendance]', e)
+    return { ok: false, code: 'error', error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
+  }
+}
+
 /** Remove an attendance row (correcting a mistaken entry). */
 export async function deleteAttendance(
   slug: string,
