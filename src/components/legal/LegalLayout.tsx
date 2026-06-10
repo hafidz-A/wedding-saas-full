@@ -33,8 +33,6 @@ export default function LegalLayout({
           {draftNote && <p className={styles.draftNote}>{draftNote}</p>}
           <div style={body} className={styles.prose}>{children}</div>
           <p style={footerLinks}>
-            <Link href="/terms" style={link}>Syarat &amp; Ketentuan</Link>
-            {' · '}
             <Link href="/privacy" style={link}>Kebijakan Privasi</Link>
             {' · '}
             <Link href="/refund" style={link}>Pengembalian Dana</Link>
