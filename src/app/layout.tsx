@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { BRAND } from '@/lib/brand'
 import { Cormorant_Garamond, DM_Sans, Pinyon_Script, Great_Vibes, Plus_Jakarta_Sans, Sacramento, Kameron } from 'next/font/google'
 import '../styles/global.css'
 
@@ -56,9 +57,9 @@ const kameron = Kameron({
 })
 
 export const metadata: Metadata = {
-  title: 'finWedding — Undangan Pernikahan Digital',
+  title: `${BRAND} — Undangan Digital`,
   description:
-    'finWedding — undangan pernikahan digital yang sinematik. Pilih template, isi cerita kalian, bagikan link.',
+    `${BRAND} — undangan digital yang sinematik untuk setiap momen. Pilih kategori, pilih template, bagikan link.`,
 }
 
 /**

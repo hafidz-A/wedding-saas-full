@@ -6,7 +6,7 @@ export const common = {
       templates: 'Template',
       login: 'Masuk',
       signup: 'Buat Undangan',
-      rights: '© 2026 finWedding. Dibuat untuk momen tak terlupakan.',
+      rights: '© 2026 FinCards. Dibuat untuk momen tak terlupakan.',
     },
     langToggle: { label: 'Bahasa' },
     notFound: {
@@ -63,7 +63,7 @@ export const common = {
       templates: 'Templates',
       login: 'Login',
       signup: 'Create Invitation',
-      rights: '© 2026 finWedding. Crafted for unforgettable moments.',
+      rights: '© 2026 FinCards. Crafted for unforgettable moments.',
     },
     langToggle: { label: 'Language' },
     notFound: {
