@@ -103,7 +103,8 @@
   font-style: normal;
   font-weight: 400;
   font-size: clamp(44px, 6.5vw, 84px);
-  line-height: 1.05;
+  line-height: 1.16;
+  letter-spacing: 0.01em;
   color: var(--color-charcoal);
   margin: 0;
 }
@@ -112,6 +113,9 @@
   display: inline-block;
   overflow: hidden;
   vertical-align: top;
+  /* Guarantee a gap between words — the masked inline-block can otherwise
+     swallow the trailing space and run the words together. */
+  margin-right: 0.2em;
 }
 
 .word {

@@ -7,6 +7,7 @@ export const templateCatalog = [
   {
     id: 'lovebirds',
     label: 'Lovebirds',
+    category: 'wedding',
     description:
       'Undangan sinematik hangat — kartu foto polaroid, animasi botanical, dan section lengkap (RSVP, gift, galeri, guestbook).',
     demoSlug: 'demo-lovebirds',
@@ -23,6 +24,7 @@ export const templateCatalog = [
   {
     id: 'solary',
     label: 'Solary',
+    category: 'wedding',
     description:
       'Tema tata surya futuristik — planet 3D Three.js, perjalanan antar-planet saat scroll, dan palette switcher.',
     demoSlug: 'demo-solary',

@@ -37,6 +37,8 @@ export interface TemplateVibe {
   id: TemplateId
   label: string
   demoSlug: string
+  /** Invitation category this template belongs to (see config/categories.js). */
+  category: string
   palettes: PaletteVibe[]
 }
 
@@ -96,6 +98,6 @@ const solaryPalettes: PaletteVibe[] = SOLARY_ORDER.map((key) => {
 })
 
 export const TEMPLATE_VIBES: TemplateVibe[] = [
-  { id: 'lovebirds', label: 'Lovebirds', demoSlug: 'demo-lovebirds', palettes: lovebirdsPalettes },
-  { id: 'solary', label: 'Solary', demoSlug: 'demo-solary', palettes: solaryPalettes },
+  { id: 'lovebirds', label: 'Lovebirds', demoSlug: 'demo-lovebirds', category: 'wedding', palettes: lovebirdsPalettes },
+  { id: 'solary', label: 'Solary', demoSlug: 'demo-solary', category: 'wedding', palettes: solaryPalettes },
 ]

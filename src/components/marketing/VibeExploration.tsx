@@ -9,6 +9,7 @@ import type { Dict } from '@/lib/i18n'
 import { getCatalogEntry } from '@/config/templateCatalog'
 import { useReveal } from '@/hooks/useReveal'
 import { TEMPLATE_VIBES, type PaletteVibe, type TemplateId } from './vibeData'
+import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories'
 import { VibeBackdrop } from './VibeBackdrop'
 import styles from './VibeExploration.module.css'
 
@@ -95,6 +96,7 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
   const { ref } = useReveal<HTMLDivElement>()
   const innerRef = useRef<HTMLDivElement>(null)
   const [pinned, setPinned] = useState(false)
+  const [category, setCategory] = useState(DEFAULT_CATEGORY)
   const [templateIndex, setTemplateIndex] = useState(0)
   const [paletteIndex, setPaletteIndex] = useState(0)
   const [plansOpen, setPlansOpen] = useState(false)
@@ -162,17 +164,32 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
     if (typeof window === 'undefined') return
     const id = window.setTimeout(() => ScrollTrigger.refresh(), 60)
     return () => window.clearTimeout(id)
-  }, [templateIndex, paletteIndex, plansOpen])
+  }, [templateIndex, paletteIndex, plansOpen, category])
 
-  const template = TEMPLATE_VIBES[templateIndex]
-  const palette = template.palettes[paletteIndex]
+  // Categories that actually have at least one template (others = "coming soon").
+  const activeCategories = useMemo(() => new Set(TEMPLATE_VIBES.map((tpl) => tpl.category)), [])
+  // Templates of the selected category — the carousel only cycles within these.
+  const filtered = useMemo(() => TEMPLATE_VIBES.filter((tpl) => tpl.category === category), [category])
+
+  const safeIndex = Math.min(templateIndex, Math.max(0, filtered.length - 1))
+  const template = filtered[safeIndex] ?? TEMPLATE_VIBES[0]
+  const palette = template.palettes[paletteIndex] ?? template.palettes[0]
   const catalog = getCatalogEntry(template.id)
   const copy = t.byTemplate[template.id]
   const isDark = palette.mode === 'dark'
 
   const switchTemplate = (next: number) => {
-    const len = TEMPLATE_VIBES.length
+    const len = filtered.length
+    if (len === 0) return
     setTemplateIndex(((next % len) + len) % len)
+    setPaletteIndex(0)
+    setPlansOpen(false)
+  }
+
+  const switchCategory = (id: string) => {
+    if (!activeCategories.has(id) || id === category) return
+    setCategory(id)
+    setTemplateIndex(0)
     setPaletteIndex(0)
     setPlansOpen(false)
   }
@@ -217,6 +234,49 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
           <h2 className={styles.heading} style={{ color: palette.fg }}>
             {t.subheading}
           </h2>
+
+          {/* Category picker — filters the template carousel in place. Categories
+              with no template yet show as disabled "coming soon" chips. */}
+          <div
+            role="tablist"
+            aria-label="Category"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 22 }}
+          >
+            {CATEGORIES.map((c) => {
+              const has = activeCategories.has(c.id)
+              const selected = c.id === category && has
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="tab"
+                  disabled={!has}
+                  aria-selected={selected}
+                  onClick={() => switchCategory(c.id)}
+                  style={{
+                    padding: '7px 16px',
+                    borderRadius: 999,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: '0.04em',
+                    cursor: has ? 'pointer' : 'not-allowed',
+                    border: `1px solid ${selected ? palette.accent : palette.surfaceBorder}`,
+                    background: selected ? `${palette.accent}1f` : 'transparent',
+                    color: selected ? palette.accent : palette.fgMuted,
+                    opacity: has ? 1 : 0.5,
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {categoryLabel(c.id, lang)}
+                  {!has && (
+                    <span style={{ marginLeft: 6, fontSize: 11, opacity: 0.85 }}>
+                      · {lang === 'id' ? 'Segera' : 'Soon'}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </header>
 
         {/* Template carousel */}
@@ -248,13 +308,13 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
               </motion.span>
             </AnimatePresence>
             <span className={styles.dots} aria-hidden="true">
-              {TEMPLATE_VIBES.map((tpl, i) => (
+              {filtered.map((tpl, i) => (
                 <span
                   key={tpl.id}
                   className={styles.dot}
                   style={{
-                    background: i === templateIndex ? palette.accent : palette.surfaceBorder,
-                    width: i === templateIndex ? 22 : 7,
+                    background: i === safeIndex ? palette.accent : palette.surfaceBorder,
+                    width: i === safeIndex ? 22 : 7,
                   }}
                 />
               ))}

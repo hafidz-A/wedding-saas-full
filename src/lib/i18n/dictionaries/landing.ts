@@ -1,8 +1,8 @@
 export const landing = {
   id: {
     hero: {
-      kicker: 'UNDANGAN PERNIKAHAN DIGITAL',
-      title: 'Kisah cintamu, dirangkai sinematik.',
+      kicker: 'UNDANGAN DIGITAL',
+      title: 'Momen berhargamu, dirangkai sinematik.',
       subtitle:
         'Bikin undangan digital premium yang memukau dari scroll pertama sampai RSVP. Pilih template, isi cerita kalian, bagikan link.',
       ctaPrimary: 'Buat Undangan',
@@ -13,8 +13,8 @@ export const landing = {
       body: 'Kami merajut cerita cinta Anda menjadi sebuah pengalaman sinematik yang emosional dan memukau — sebuah gerbang indah menuju awal yang baru.',
     },
     vibeExploration: {
-      heading: 'Temukan Vibe Pernikahan Kalian',
-      subheading: 'Geser antar template, lalu pilih palette-nya. Latar halaman ini ikut berubah persis seperti undangan kalian nanti.',
+      heading: 'Temukan Vibe Undanganmu',
+      subheading: 'Pilih kategori, geser antar template, lalu pilih palette-nya. Latar halaman ini ikut berubah persis seperti undanganmu nanti.',
       templateEyebrow: 'Template',
       paletteLabel: 'Pilih Palette',
       ambienceLabel: 'Ambience',
@@ -111,8 +111,8 @@ export const landing = {
   },
   en: {
     hero: {
-      kicker: 'DIGITAL WEDDING INVITATIONS',
-      title: 'Your love story, told cinematically.',
+      kicker: 'DIGITAL INVITATIONS',
+      title: 'Your moment, told cinematically.',
       subtitle:
         'Craft a premium digital invitation that captivates from the first scroll to the RSVP. Pick a template, add your story, share the link.',
       ctaPrimary: 'Create Invitation',
@@ -123,8 +123,8 @@ export const landing = {
       body: 'We weave your love story into a cinematic, emotional, and captivating experience — a beautiful entrance to your new beginning.',
     },
     vibeExploration: {
-      heading: 'Discover Your Wedding Vibe',
-      subheading: 'Swipe between templates, then pick a palette. This page repaints itself to look exactly like your future invitation.',
+      heading: 'Discover Your Invitation Vibe',
+      subheading: 'Pick a category, swipe between templates, then pick a palette. This page repaints itself to look exactly like your future invitation.',
       templateEyebrow: 'Template',
       paletteLabel: 'Choose a palette',
       ambienceLabel: 'Ambience',
