@@ -53,12 +53,16 @@
   --color-paper: #ffffff;
   --color-ink: #1a1a1a;
 
-  /* ---------- Typography ---------- */
-  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
-  --font-body: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
-  --font-script: 'Great Vibes', 'Alex Brush', cursive;
-  --font-serif-soft: var(--font-kameron), 'Kameron', 'Cormorant Garamond', serif;
-  --font-display-classy: var(--font-sacramento), 'Sacramento', cursive;
+  /* ---------- Typography ----------
+     Three-family system (loaded via next/font in src/app/layout.tsx):
+       Cormorant Garamond → display + body
+       Great Vibes        → every script accent
+       Plus Jakarta Sans  → template body (lovebirds/solary override --font-body)
+     The names below are kept as aliases so existing CSS keeps resolving. */
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif; /* shadowed by next/font var on <html> */
+  --font-body: var(--font-display);
+  --font-script: var(--font-greatvibes), 'Great Vibes', cursive;
+  --font-display-classy: var(--font-greatvibes), 'Great Vibes', cursive;
   --font-body-fun: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
 
   /* ---------- Spacing ----------

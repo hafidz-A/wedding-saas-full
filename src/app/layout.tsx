@@ -1,33 +1,24 @@
 import type { Metadata, Viewport } from 'next'
 import { BRAND } from '@/lib/brand'
-import { Cormorant_Garamond, DM_Sans, Pinyon_Script, Great_Vibes, Plus_Jakarta_Sans, Sacramento, Kameron } from 'next/font/google'
+import { Cormorant_Garamond, Great_Vibes, Plus_Jakarta_Sans } from 'next/font/google'
 import '../styles/global.css'
 
+// Consolidated type system — exactly three families:
+//   Cormorant Garamond → display + body (dapur/marketing)
+//   Great Vibes        → all script accents (names, monograms, classy titles)
+//   Plus Jakarta Sans  → template body (lovebirds/solary)
+// Legacy variables (--font-body, --font-script, --font-display-classy) are
+// aliased to these in src/styles/tokens.css so existing CSS keeps working.
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  // 700 included for solary headings (ex-Fraunces 700–800) — real bold,
+  // not synthesized faux-bold.
+  weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 })
 
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-body',
-  display: 'swap',
-})
-
-const pinyon = Pinyon_Script({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-script',
-  display: 'swap',
-})
-
-// Lovebirds heading script (Great Vibes) + body sans (Plus Jakarta Sans).
-// Loaded globally so they're available; applied only on the lovebirds route
-// (src/all-templates/lovebirds/styles/theme.css) via these CSS variables.
 const greatVibes = Great_Vibes({
   subsets: ['latin'],
   weight: ['400'],
@@ -39,20 +30,6 @@ const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-jakarta',
-  display: 'swap',
-})
-
-const sacramento = Sacramento({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-sacramento',
-  display: 'swap',
-})
-
-const kameron = Kameron({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-kameron',
   display: 'swap',
 })
 
@@ -82,7 +59,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${cormorant.variable} ${dmSans.variable} ${pinyon.variable} ${greatVibes.variable} ${jakarta.variable} ${sacramento.variable} ${kameron.variable}`}>
+    <html lang="id" className={`${cormorant.variable} ${greatVibes.variable} ${jakarta.variable}`}>
       {/* No hardcoded background here: each template owns its own (Lovebirds
           cream via body.lovebirds-route, Solary dark via body.solary-route),
           and the dapur pages (login/onboarding/marketing/dashboard) each set

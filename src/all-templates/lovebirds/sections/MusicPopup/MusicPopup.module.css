@@ -51,7 +51,7 @@
 .title, .subtitle { overflow-wrap: break-word; word-break: normal; }
 
 .title {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-style: normal;
   font-weight: 600;
   font-size: 15px;

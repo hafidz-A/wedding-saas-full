@@ -186,7 +186,9 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
       }}
     >
       <a href="#intro" style={{
-        fontFamily: "var(--font-display)", fontSize: 18, letterSpacing: "0.1em",
+        // Couple-name brand in Great Vibes — script needs a larger size to
+        // read at navbar scale, and zero tracking (it breaks cursive joins).
+        fontFamily: "var(--font-script)", fontSize: 24, fontWeight: 400, letterSpacing: "normal",
         display: "inline-flex", alignItems: "center", gap: 10, flex: "0 0 auto",
       }}>
         <span aria-hidden="true" style={{

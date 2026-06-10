@@ -99,10 +99,14 @@
   margin: 0 0 1rem;
 }
 .gate-couple {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 8vw, 5.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  /* Couple names in Great Vibes script. Script rules: weight stays 400 (no
+     faux-bold), letter-spacing normal (tracking breaks cursive joins), and
+     looser line-height so tall ascenders/descenders don't clip. */
+  font-family: var(--font-script);
+  font-weight: 400;
+  font-size: clamp(3rem, 9vw, 6rem);
+  line-height: 1.2;
+  letter-spacing: normal;
   margin: 0 0 1rem;
 }
 .gate-greet {
@@ -821,7 +825,7 @@
   bottom: 4px;
   right: 10px;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-style: italic;
   font-size: clamp(2.4rem, 11vw, 3.6rem);
   line-height: 0.8;

@@ -238,7 +238,7 @@
 }
 
 .coupleName {
-  font-family: var(--font-sacramento, var(--font-greatvibes), cursive);
+  font-family: var(--font-greatvibes), cursive;
   font-style: normal;
   font-weight: 400;
   font-size: clamp(48px, 10vw, 88px);
@@ -373,7 +373,7 @@
 }
 
 .monogram {
-  font-family: var(--font-sacramento, var(--font-greatvibes), cursive);
+  font-family: var(--font-greatvibes), cursive;
   font-style: normal;
   font-size: clamp(14px, 1.8vw, 20px);
   color: var(--color-charcoal-light);

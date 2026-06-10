@@ -34,13 +34,13 @@ body.lovebirds-route {
   /* ---------- Fonts — scoped to the invitation card only ----------
      These reference next/font loaders defined in src/app/layout.tsx (literal
      family names do NOT work — next/font exposes fonts only via these vars):
-       --font-greatvibes → Great Vibes (headings, the romantic script)
+       --font-greatvibes → Great Vibes (headings + names/monogram — every
+                           script accent now resolves to Great Vibes)
        --font-jakarta    → Plus Jakarta Sans (body)
-     Names/monogram keep --font-script (Pinyon Script) from layout — not
-     overridden here. If a functional heading reads poorly in script, override
-     that section's title to var(--font-serif-soft) / serif locally. */
+     If a functional heading reads poorly in script, override that section's
+     title to var(--font-display) / serif locally. */
   --font-display: var(--font-greatvibes), 'Cormorant Garamond', serif;
-  --font-body: var(--font-jakarta), 'DM Sans', sans-serif;
+  --font-body: var(--font-jakarta), sans-serif;
 }
 
 /* Component variations */
@@ -368,7 +368,7 @@ body.lovebirds-route {
   border: 1px solid rgba(42,33,24,0.08);
 }
 .person-arch-portal .pname {
-  font-family: var(--font-script-fun, var(--font-script));
+  font-family: var(--font-script);
   font-size: 38px;
   color: var(--color-charcoal);
   margin: 0;
@@ -388,7 +388,7 @@ body.lovebirds-route {
 }
 .variant-classy-fun .script,
 .variant-classy-fun .pname {
-  font-family: var(--font-script-fun, var(--font-script)) !important;
+  font-family: var(--font-script) !important;
 }
 .variant-classy-fun .eyebrow,
 .variant-classy-fun .eyebrow-demo {

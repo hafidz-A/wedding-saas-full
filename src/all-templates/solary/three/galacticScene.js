@@ -195,7 +195,11 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     // (via scale = W/512) applies to both mobile and desktop. Raise/lower it
     // to taste — bigger also reads sharper since larger glyphs survive the
     // texture's mip filtering better.
-    ctx.font = `bold ${Math.round(22 * scale)}px 'Space Mono', monospace`;
+    // Canvas can't resolve CSS var() — read the next/font Jakarta family
+    // (hashed name) off the root element so the caption matches DOM labels.
+    const jakartaFamily =
+      getComputedStyle(document.documentElement).getPropertyValue('--font-jakarta').trim() || 'system-ui';
+    ctx.font = `bold ${Math.round(22 * scale)}px ${jakartaFamily}, system-ui, sans-serif`;
     ctx.textAlign = "center";
     ctx.fillText((caption || "Memory").toUpperCase(), W / 2, H - 48 * scale);
   }

@@ -2,19 +2,21 @@
    tokens.css — non-color primitives.
    Color tokens are written into :root at runtime by themeBus.
    ============================================================
-   2026-05-27: Adopted style-guide-add.html aesthetics:
-   - Fraunces (heavier weights up to 900) for display
-   - Pinyon Script for calligraphic accents
-   - Plus Jakarta Sans for body
-   - Space Mono for mono / labels
+   2026-06-10: Consolidated to the 3-family system (next/font loaders in
+   src/app/layout.tsx):
+   - Cormorant Garamond for display — inherited from the global --font-display
+     (no override here; Fraunces retired, it was never actually loaded)
+   - Great Vibes for calligraphic accents (Pinyon Script retired)
+   - Plus Jakarta Sans for body AND for --font-mono labels (Space Mono
+     retired — keep the label look via uppercase + letter-spacing + weight)
    - Radii bumped, spring easing added
    ============================================================ */
 :root {
-  /* Type */
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --font-script:  "Pinyon Script", "Cormorant Garamond", cursive;
-  --font-body:    "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
-  --font-mono:    "Space Mono", "JetBrains Mono", ui-monospace, monospace;
+  /* Type — --font-display intentionally NOT redefined: solary headings use
+     the global Cormorant Garamond from layout.tsx. */
+  --font-script:  var(--font-greatvibes), "Great Vibes", cursive;
+  --font-body:    var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  --font-mono:    var(--font-jakarta), system-ui, -apple-system, sans-serif;
 
   --fs-display:   clamp(2.4rem, 7vw, 6rem);
   --fs-h1:        clamp(1.9rem, 4.6vw, 3.6rem);

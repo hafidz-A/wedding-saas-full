@@ -23,7 +23,7 @@
 .header { text-align: center; margin-bottom: clamp(40px, 5vw, 64px); }
 
 .eyebrow {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;
@@ -44,7 +44,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: clamp(13px, 1.3vw, 15px);
   line-height: 1.55;
   color: var(--fg-muted, var(--color-charcoal-light));
@@ -53,7 +53,7 @@
 }
 
 .intro {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: clamp(14px, 1.3vw, 16px);
   line-height: 1.65;
   color: var(--fg-muted, var(--color-charcoal-light));
@@ -184,7 +184,7 @@
 .cardHeaderText { display: flex; flex-direction: column; gap: 2px; }
 
 .cardKind {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   text-transform: uppercase;
   letter-spacing: 0.22em;
   font-size: 10px;
@@ -193,7 +193,7 @@
 }
 
 .cardName {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-style: normal;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -213,7 +213,7 @@
 }
 
 .cardLabel {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 9.5px;
@@ -287,7 +287,7 @@
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 600;
   text-align: center;
@@ -336,7 +336,7 @@
 }
 
 .addressLabel {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   text-transform: uppercase;
   letter-spacing: 0.32em;
   font-size: 11px;
@@ -346,7 +346,7 @@
 }
 
 .addressText {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 15px;
   line-height: 1.65;
   color: var(--fg, var(--color-charcoal));
@@ -360,7 +360,7 @@
   text-align: center;
 }
 .registryTitle {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-style: normal;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -369,7 +369,7 @@
   margin: 0 0 8px;
 }
 .registryMessage {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 15px;
   line-height: 1.65;
   color: var(--fg-muted, rgba(42, 33, 24, 0.7));
@@ -413,13 +413,13 @@ a.registryCard:hover {
   display: block;
 }
 .registryName {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-weight: 600;
   font-size: clamp(16px, 1.7vw, 19px);
   color: var(--fg, var(--color-charcoal));
 }
 .registryDesc {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 13px;
   line-height: 1.5;
   color: var(--fg-muted, rgba(42, 33, 24, 0.65));
@@ -444,7 +444,7 @@ a.registryCard:hover {
   border-radius: 999px;
   background: var(--button-bg, var(--fg, var(--color-charcoal)));
   color: var(--button-fg, var(--color-cream));
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.16em;
@@ -472,7 +472,7 @@ a.registryCard:hover {
 }
 
 .formIntro {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 14px;
   line-height: 1.6;
   color: var(--fg-muted, var(--color-charcoal-light));
@@ -489,7 +489,7 @@ a.registryCard:hover {
 .field { display: grid; gap: 7px; }
 
 .label {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.22em;
@@ -504,7 +504,7 @@ a.registryCard:hover {
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.12));
   border-radius: 10px;
   padding: 13px 16px;
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 15px;
   width: 100%;
   outline: 0;
@@ -536,7 +536,7 @@ a.registryCard:hover {
 }
 
 .error {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   color: var(--color-coral, #E8553E);
   font-size: 13px;
   letter-spacing: 0.02em;
@@ -555,7 +555,7 @@ a.registryCard:hover {
   background: transparent;
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.2));
   color: var(--fg, var(--color-charcoal));
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -569,7 +569,7 @@ a.registryCard:hover {
   border-radius: 999px;
   background: var(--fg, var(--color-charcoal));
   color: var(--bg, var(--color-cream));
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -617,7 +617,7 @@ a.registryCard:hover {
 }
 
 .successText {
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   color: var(--fg-muted, var(--color-charcoal-light));
   font-size: 15px;
   line-height: 1.6;
@@ -630,7 +630,7 @@ a.registryCard:hover {
   border: 1px solid var(--fg, var(--color-charcoal));
   background: transparent;
   color: var(--fg, var(--color-charcoal));
-  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-family: var(--font-body, sans-serif);
   font-size: 12.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;

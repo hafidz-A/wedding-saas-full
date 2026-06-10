@@ -28,10 +28,11 @@
   box-shadow: 2px 2px 0 var(--color-line);
   margin: 0;
 }
-/* Headings — heavier weights to match Fraunces neo-brutalist look */
-.h-display { font-weight: 800; }
+/* Headings — 700 is Cormorant Garamond's heaviest loaded weight (no 800/900;
+   anything higher would render as smeared faux-bold) */
+.h-display { font-weight: 700; }
 .h-1 { font-weight: 700; }
-.h-2 { font-weight: 800; }
+.h-2 { font-weight: 700; }
 .h-3 { font-weight: 700; font-style: italic; }
 .script {
   font-family: var(--font-script);
