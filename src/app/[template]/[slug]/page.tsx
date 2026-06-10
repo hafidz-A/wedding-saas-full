@@ -142,7 +142,12 @@ export default async function Page({ params }: PageProps) {
   // unsaved configs don't render dropped sections. No-op for other templates.
   if (templateId === 'lovebirds') config = migrateLovebirdsConfig(config)
 
-  return <InvitationView config={config} slug={slug} templateId={templateId} isDemo={isDemoSlug} />
+  // No DB-backed row (demo slug / local fallback): drop the slug so the
+  // RSVP / gift / guestbook sections use their simulated-success mode
+  // instead of POSTing a slug the API will 404 ("Invitation not found").
+  const submitSlug = invitationId ? slug : null
+
+  return <InvitationView config={config} slug={submitSlug} templateId={templateId} isDemo={isDemoSlug} />
 }
 
 /**

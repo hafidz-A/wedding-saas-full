@@ -34,6 +34,13 @@
   width: 100vw;
   height: 100vh;
   z-index: 1; /* subtle ambient backdrop — sits behind page content (z-index 2), shows through transparent sections */
+  /* Dimmed: the branch + birds sit in the viewport's reading band and show
+     through the glassy section cards (Schedule, Event Details, Gift …) at
+     full vibrancy, making the text over them unreadable. As a watermark the
+     composition stays charming in the gaps BETWEEN sections without fighting
+     any text on top of it. Applies everywhere the canvas is reused (public
+     invitations, live demo, marketing Vibe explorer). */
+  opacity: 0.4;
   pointer-events: none;
   display: none;
 }

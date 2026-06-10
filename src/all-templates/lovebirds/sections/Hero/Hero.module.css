@@ -11,7 +11,12 @@
   position: relative;
   height: 250vh;
   background: var(--color-cream);
+  /* Horizontal clip: blast photos / petals / gateGlow (110vw) fly past the
+     viewport edge and would otherwise widen the document on phones, letting
+     the whole template pan right. `clip` (not `hidden`) so the inner
+     position:sticky stage keeps pinning. Vertical stays visible. */
   overflow: visible;
+  overflow-x: clip;
   z-index: 2;
   --gate: 0;
   --hint: 1;

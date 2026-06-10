@@ -34,6 +34,12 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--color-charcoal);
+  /* Second horizontal lock (see html note above). Some mobile browsers let a
+     touch-pan reach content that only the html-level rule clips; `clip` never
+     creates a scroll container, so doubling it on body is safe and stops the
+     "template can be dragged right on the phone" bug. Old browsers without
+     `clip` support simply ignore this line and keep the html fallback. */
+  overflow-x: clip;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

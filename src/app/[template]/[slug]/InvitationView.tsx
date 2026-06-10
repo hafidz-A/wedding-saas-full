@@ -21,7 +21,7 @@ export default function InvitationView({
   config, slug, templateId, isDemo = false,
 }: {
   config: any
-  slug: string
+  slug: string | null
   templateId: string
   isDemo?: boolean
 }) {
