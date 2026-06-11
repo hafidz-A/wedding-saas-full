@@ -10,6 +10,8 @@
    to a fetch() backend later without touching components.
    ============================================================ */
 
+import { demoImg } from "../../../lib/demoImages.js";
+
 export const pageConfig = {
   meta: {
     title: "Aruna & Daksa — A Galactic Wedding",            // [CONTOH]
@@ -74,9 +76,9 @@ export const pageConfig = {
         tagline: "Two stars, one orbit. You are invited to witness a once-in-a-lifetime alignment.", // [CONTOH]
         ctaLabel: "Get Started",
         gatePhotos: [
-          "https://picsum.photos/seed/gate-1/300/400",
-          "https://picsum.photos/seed/gate-2/300/400",
-          "https://picsum.photos/seed/gate-3/300/400",
+          demoImg("coupleClassic", 400),
+          demoImg("coupleCasual", 400),
+          demoImg("coupleSunset", 400),
         ],
       },
       schema: {
@@ -99,10 +101,10 @@ export const pageConfig = {
         sectionLabel: "Welcome",
         heading: "We found each other in the deep blue.",    // [CONTOH]
         body: "A short prelude before the journey: who we are, where we met, and the gravity that pulled us together.", // [CONTOH]
-        portrait: "https://picsum.photos/seed/aruna-daksa-portrait/800/1000", // [CONTOH] demo via picsum.photos
+        portrait: demoImg("coupleClassic", 1000),            // [CONTOH] demo via Unsplash registry
         portraitCaption: "Bali, 2023",                       // [CONTOH]
         layout: "single",                                    // [CONTOH] "single" | "duo"
-        portrait2: "https://picsum.photos/seed/aruna-daksa-portrait-2/800/1000", // [CONTOH] used when layout="duo"
+        portrait2: demoImg("coupleCasual", 1000),            // [CONTOH] used when layout="duo"
         portraitCaption2: "Jakarta, 2024",                   // [CONTOH]
       },
       schema: {
@@ -130,8 +132,8 @@ export const pageConfig = {
             label: "First Orbit",
             desc: "We crossed paths at a friend's birthday in Bandung.",
             photos: [
-              "https://picsum.photos/seed/first-orbit-1/600/600",
-              "https://picsum.photos/seed/first-orbit-2/600/600",
+              demoImg("galleryBirthday", 600),
+              demoImg("storyFirstMeet", 600),
             ],
           },
           {
@@ -145,9 +147,9 @@ export const pageConfig = {
             label: "Aligned",
             desc: "We moved to the same city. Coffee mornings became routine.",
             photos: [
-              "https://picsum.photos/seed/aligned-1/600/600",
-              "https://picsum.photos/seed/aligned-2/600/600",
-              "https://picsum.photos/seed/aligned-3/600/600",
+              demoImg("galleryCoffee", 600),
+              demoImg("galleryCityLights", 600),
+              demoImg("galleryCooking", 600),
             ],
           },
           {
@@ -155,7 +157,7 @@ export const pageConfig = {
             label: "The Proposal",
             desc: "Under a meteor shower on Mount Bromo. She said yes.",
             photos: [
-              "https://picsum.photos/seed/proposal-1/600/600",
+              demoImg("storyProposal", 600),
             ],
           },
           {
@@ -163,8 +165,8 @@ export const pageConfig = {
             label: "The Wedding",
             desc: "And here we are — inviting you to our alignment.",
             photos: [
-              "https://picsum.photos/seed/wedding-1/600/600",
-              "https://picsum.photos/seed/wedding-2/600/600",
+              demoImg("storyWedding", 600),
+              demoImg("coupleClassic", 600),
             ],
           },
         ],
@@ -186,26 +188,26 @@ export const pageConfig = {
         planetName: "Saturn",
         sectionLabel: "Gallery of Memories",
         heading: "Four rings. Four eras of us.",            // [CONTOH]
-        // 16–20 ring photos. Demo via picsum.photos (CORS-safe, deterministic by seed).
+        // 16–20 ring photos. Demo via the curated Unsplash registry (src/lib/demoImages.js).
         photos: [                                            // [CONTOH]
-          { src: "https://picsum.photos/seed/first-coffee/1200/1600",    caption: "First Coffee" },
-          { src: "https://picsum.photos/seed/bandung-sunset/1200/1600",  caption: "Bandung Sunset" },
-          { src: "https://picsum.photos/seed/beach-drive/1200/1600",     caption: "Beach Drive" },
-          { src: "https://picsum.photos/seed/hiking-day/1200/1600",      caption: "Hiking Day" },
-          { src: "https://picsum.photos/seed/movie-night/1200/1600",     caption: "Movie Night" },
-          { src: "https://picsum.photos/seed/birthday-dinner/1200/1600", caption: "Birthday Dinner" },
-          { src: "https://picsum.photos/seed/anniversary/1200/1600",     caption: "Anniversary" },
-          { src: "https://picsum.photos/seed/sunrise-hike/1200/1600",    caption: "Sunrise Hike" },
-          { src: "https://picsum.photos/seed/the-question/1200/1600",    caption: "The Question" },
-          { src: "https://picsum.photos/seed/she-said-yes/1200/1600",    caption: "She Said Yes" },
-          { src: "https://picsum.photos/seed/celebration/1200/1600",     caption: "Celebration" },
-          { src: "https://picsum.photos/seed/venue-visit/1200/1600",     caption: "Venue Visit" },
-          { src: "https://picsum.photos/seed/dress-fitting/1200/1600",   caption: "Dress Fitting" },
-          { src: "https://picsum.photos/seed/cake-tasting/1200/1600",    caption: "Cake Tasting" },
-          { src: "https://picsum.photos/seed/pre-wed-shoot/1200/1600",   caption: "Pre-wed Shoot" },
-          { src: "https://picsum.photos/seed/family-brunch/1200/1600",   caption: "Family Brunch" },
-          { src: "https://picsum.photos/seed/save-the-date/1200/1600",   caption: "Save the Date" },
-          { src: "https://picsum.photos/seed/last-steps/1200/1600",      caption: "Last Steps" },
+          { src: demoImg("galleryCoffee", 1200),       caption: "First Coffee" },
+          { src: demoImg("gallerySunsetWalk", 1200),   caption: "Bandung Sunset" },
+          { src: demoImg("galleryRoadTrip", 1200),     caption: "Beach Drive" },
+          { src: demoImg("galleryHiking", 1200),       caption: "Hiking Day" },
+          { src: demoImg("galleryMovieNight", 1200),   caption: "Movie Night" },
+          { src: demoImg("galleryBirthday", 1200),     caption: "Birthday Dinner" },
+          { src: demoImg("galleryAnniversary", 1200),  caption: "Anniversary" },
+          { src: demoImg("gallerySunrise", 1200),      caption: "Sunrise Hike" },
+          { src: demoImg("storyProposal", 1200),       caption: "The Question" },
+          { src: demoImg("coupleSunset", 1200),        caption: "She Said Yes" },
+          { src: demoImg("galleryCelebration", 1200),  caption: "Celebration" },
+          { src: demoImg("galleryVenue", 1200),        caption: "Venue Visit" },
+          { src: demoImg("galleryDressFitting", 1200), caption: "Dress Fitting" },
+          { src: demoImg("galleryCakeTasting", 1200),  caption: "Cake Tasting" },
+          { src: demoImg("galleryPreWedShoot", 1200),  caption: "Pre-wed Shoot" },
+          { src: demoImg("galleryBrunch", 1200),       caption: "Family Brunch" },
+          { src: demoImg("gallerySaveTheDate", 1200),  caption: "Save the Date" },
+          { src: demoImg("galleryRings", 1200),        caption: "Last Steps" },
         ],
       },
       schema: {
@@ -304,14 +306,14 @@ export const pageConfig = {
         heading: "The constellation by our side.",          // [CONTOH]
         groups: [                                            // [CONTOH]
           { label: "Bridesmaids", members: [
-            { name: "Maya",  role: "Maid of Honor", avatar: "https://picsum.photos/seed/maya-bridesmaid/400/400" },
-            { name: "Sasha", role: "Bridesmaid",    avatar: "https://picsum.photos/seed/sasha-bridesmaid/400/400" },
-            { name: "Putri", role: "Bridesmaid",    avatar: "https://picsum.photos/seed/putri-bridesmaid/400/400" },
+            { name: "Maya",  role: "Maid of Honor", avatar: demoImg("partyMaidOfHonor", 400) },
+            { name: "Sasha", role: "Bridesmaid",    avatar: demoImg("partyBridesmaid2", 400) },
+            { name: "Putri", role: "Bridesmaid",    avatar: demoImg("partyBridesmaid3", 400) },
           ]},
           { label: "Groomsmen", members: [
-            { name: "Rio",  role: "Best Man",  avatar: "https://picsum.photos/seed/rio-bestman/400/400" },
-            { name: "Aldi", role: "Groomsman", avatar: "https://picsum.photos/seed/aldi-groomsman/400/400" },
-            { name: "Bima", role: "Groomsman", avatar: "https://picsum.photos/seed/bima-groomsman/400/400" },
+            { name: "Rio",  role: "Best Man",  avatar: demoImg("partyBestMan", 400) },
+            { name: "Aldi", role: "Groomsman", avatar: demoImg("partyGroomsman2", 400) },
+            { name: "Bima", role: "Groomsman", avatar: demoImg("partyGroomsman3", 400) },
           ]},
         ],
       },
