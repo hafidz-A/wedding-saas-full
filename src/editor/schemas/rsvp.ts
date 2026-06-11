@@ -17,7 +17,6 @@ export const rsvpSchema: SectionSchema = {
         { key: 'label', label: { id: 'Label (tampilan)', en: 'Label (display)' }, type: 'text' },
       ],
     },
-    { key: 'maxGuests', label: { id: 'Maks tamu per RSVP', en: 'Max guests per RSVP' }, type: 'text' },
   ],
   defaults: {
     title: 'Will You Join Us?',
@@ -27,6 +26,5 @@ export const rsvpSchema: SectionSchema = {
       { value: 'fish',       label: 'Pan-Seared Fish'   },
       { value: 'vegetarian', label: 'Garden Vegetarian' },
     ],
-    maxGuests: '5',
   },
 }

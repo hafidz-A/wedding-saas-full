@@ -81,23 +81,20 @@ export default function PrivacyContent() {
       <h2>10. Fitur Amplop Digital</h2>
       <p>Fitur amplop digital yang tersedia pada layanan [NAMA APLIKASI] hanya berfungsi sebagai sarana untuk menampilkan informasi rekening bank, dompet digital, atau metode pemberian hadiah lain yang dimasukkan oleh Pengguna. [NAMA APLIKASI] tidak menerima, menguasai, menampung, memproses, atau mendistribusikan dana hadiah yang diberikan kepada Pengguna melalui rekening atau metode pembayaran yang ditampilkan pada undangan. Seluruh transaksi hadiah berlangsung secara langsung antara pemberi hadiah dan Pengguna.</p>
 
-      <h2>11. Penolakan untuk Tujuan Pemasaran</h2>
-      <p>Pengguna berhak untuk meminta kami agar tidak memanfaatkan Data Pribadi Pengguna untuk tujuan pemasaran. Kami akan memberitahu Pengguna dan meminta persetujuan dari Pengguna sebelum kami menggunakan Data Pribadi Pengguna untuk tujuan tersebut. Bahkan setelah Pengguna memberikan persetujuan atas penggunaan Data Pribadi untuk tujuan pemasaran, Pengguna dapat setiap saat menarik persetujuan tersebut dengan menghubungi kami melalui email resmi [NAMA APLIKASI].</p>
-
-      <h2>12. Cookies</h2>
+      <h2>11. Cookies</h2>
       <p>[NAMA APLIKASI] dapat menggunakan cookies dan teknologi serupa untuk menjalankan layanan, menyimpan preferensi pengguna, memahami penggunaan layanan, meningkatkan pengalaman pengguna, dan menjaga keamanan sistem.</p>
 
-      <h2>13. Persetujuan Penggunaan</h2>
+      <h2>12. Persetujuan Penggunaan</h2>
       <p>Pengguna mengakui bahwa apabila Pengguna tidak memberikan informasi atau data yang relevan atau menarik persetujuan sehubungan dengan pengumpulan, penggunaan dan/atau pengungkapan informasi atau data sebagaimana dijelaskan dalam Kebijakan Privasi ini, maka [NAMA APLIKASI] mungkin tidak dapat menyediakan sebagian atau seluruh layanan kepada Pengguna.</p>
       <p>Pengguna menjamin bahwa setiap Data Pribadi yang diberikan kepada [NAMA APLIKASI], baik milik Pengguna maupun milik pihak lain yang disampaikan oleh Pengguna, telah diberikan berdasarkan dasar hukum yang sah sesuai ketentuan peraturan perundang-undangan yang berlaku.</p>
 
-      <h2>14. Hukum yang Berlaku</h2>
+      <h2>13. Hukum yang Berlaku</h2>
       <p>Kebijakan Privasi ini berlaku berdasarkan peraturan perundang-undangan dan hukum di Negara Kesatuan Republik Indonesia. Setiap perselisihan yang terkait dengan atau muncul dari situs ini akan tunduk dan diatur berdasarkan aturan hukum yang sama.</p>
 
-      <h2>15. Perubahan Kebijakan Privasi</h2>
+      <h2>14. Perubahan Kebijakan Privasi</h2>
       <p>[NAMA APLIKASI] berhak mengubah atau memperbarui Kebijakan Privasi ini dari waktu ke waktu. Setiap perubahan akan diumumkan melalui situs web atau media komunikasi resmi [NAMA APLIKASI] dan berlaku sejak tanggal yang ditetapkan.</p>
 
-      <h2>16. Hubungi [NAMA APLIKASI]</h2>
+      <h2>15. Hubungi [NAMA APLIKASI]</h2>
       <p>Untuk informasi lebih lanjut, Pengguna dapat menghubungi [NAMA APLIKASI] melalui:</p>
       <ul>
         <li>WhatsApp: <code>[…]</code></li>

@@ -270,7 +270,6 @@ export const defaultConfig = {
           { value: 'vegan',      label: 'Vegan Option'        },
           { value: 'kids',       label: 'Kids Plate'          },
         ],
-        maxGuests: 5,
       },
     },
 

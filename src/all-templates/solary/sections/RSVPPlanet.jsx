@@ -9,14 +9,17 @@ import { useGuest } from "../contexts/GuestContext.jsx";
 const schema = z.object({
   guest_name: z.string().min(2, "Required").max(120),
   attending: z.enum(["yes", "no"]),
-  guest_count: z.coerce.number().int().min(1).max(20),
+  guest_count: z.coerce.number().int().min(1),
   meal_choice: z.string().optional(),
   message: z.string().max(600).optional(),
 });
 
+const sentKey = (slug) => `rsvp-sent:${slug}`;
+const isRealSlug = (slug) => !!slug && slug !== "demo";
+
 export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, whatsappNumber, menuOptions = [], slug = "demo" }) {
   const { name } = useGuest();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue, reset } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { guest_name: name || "", attending: "yes", guest_count: 1, meal_choice: menuOptions[0] || "", message: "" },
   });
@@ -24,6 +27,15 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
   const attending = watch("attending");
   const [sent, setSent] = useState(false);
   const [sendError, setSendError] = useState(null);
+
+  // One RSVP per device: a real invitation remembers the submission across
+  // reloads. Demo/standalone resets on refresh by design.
+  useEffect(() => {
+    if (!isRealSlug(slug)) return;
+    try {
+      if (window.localStorage.getItem(sentKey(slug))) setSent(true);
+    } catch { /* storage blocked — fall back to in-session lock */ }
+  }, [slug]);
 
   const onSubmit = async (data) => {
     setSendError(null);
@@ -40,13 +52,12 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
       setSendError(err?.message || "Gagal mengirim. Coba lagi.");
       return;
     }
+    if (isRealSlug(slug)) {
+      try {
+        window.localStorage.setItem(sentKey(slug), new Date().toISOString());
+      } catch { /* storage blocked — in-session lock still applies */ }
+    }
     setSent(true);
-  };
-
-  const resetForm = () => {
-    setSent(false);
-    setSendError(null);
-    reset({ guest_name: name || "", attending: "yes", guest_count: 1, meal_choice: menuOptions[0] || "", message: "" });
   };
 
   return (
@@ -66,10 +77,9 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
             <div className="center-text" style={{ marginTop: "0.5rem", padding: "1.75rem 1.5rem", border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)" }}>
               <div style={{ fontSize: 30, color: "var(--color-accent)", marginBottom: 10 }}>✦</div>
               <h3 className="h-3" style={{ marginBottom: 6 }}>Terima kasih</h3>
-              <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14, marginBottom: 16 }}>
+              <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14 }}>
                 RSVP Anda telah kami catat. Sampai jumpa di hari bahagia kami.
               </p>
-              <button type="button" className="btn-ghost" onClick={resetForm}>Kirim RSVP lain</button>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
@@ -99,7 +109,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                 </div>
                 <div className="form-row">
                   <label className="form-label" htmlFor="rsvp-guests">Total guests</label>
-                  <input id="rsvp-guests" type="number" min="1" max="20" className="form-input" {...register("guest_count")} />
+                  <input id="rsvp-guests" type="number" min="1" className="form-input" {...register("guest_count")} />
                 </div>
               </div>
               {menuOptions.length > 0 && (

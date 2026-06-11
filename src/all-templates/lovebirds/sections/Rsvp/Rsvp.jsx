@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import ThreeDTilt from '../../components/ThreeDTilt.jsx'
@@ -10,18 +10,24 @@ const DEFAULTS = {
   title: 'Will You Join Us?',
   subtitle: '',
   mealOptions: [],
-  maxGuests: 5,
 }
 
+const sentKey = (slug) => `rsvp-sent:${slug}`
+
 export default function Rsvp(props) {
-  const { title, subtitle, mealOptions, maxGuests: rawMaxGuests, slug } = { ...DEFAULTS, ...props }
-  // Coerce to a positive integer. Editor stores the field as text so any
-  // garbage value ("werwer", "", null) should fall back to the default of 5.
-  const parsedMax = Number.parseInt(rawMaxGuests, 10)
-  const maxGuests = Number.isFinite(parsedMax) && parsedMax > 0 ? parsedMax : 5
+  const { title, subtitle, mealOptions, slug } = { ...DEFAULTS, ...props }
   const { ref, isVisible } = useScrollReveal()
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+
+  // One RSVP per device: a real invitation remembers the submission across
+  // reloads. Demo/standalone (no slug) resets on refresh by design.
+  useEffect(() => {
+    if (!slug) return
+    try {
+      if (window.localStorage.getItem(sentKey(slug))) setSubmitted(true)
+    } catch { /* storage blocked — fall back to in-session lock */ }
+  }, [slug])
 
   const {
     register,
@@ -29,7 +35,6 @@ export default function Rsvp(props) {
     control,
     watch,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm({
     defaultValues: {
       name: '',
@@ -67,15 +72,13 @@ export default function Rsvp(props) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || 'Submission failed')
       }
+      try {
+        window.localStorage.setItem(sentKey(slug), new Date().toISOString())
+      } catch { /* storage blocked — in-session lock still applies */ }
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err.message || 'Gagal mengirim. Coba lagi.')
     }
-  }
-
-  const handleReset = () => {
-    setSubmitted(false)
-    reset()
   }
 
   return (
@@ -148,7 +151,7 @@ export default function Rsvp(props) {
                       <Controller
                         name="guestCount"
                         control={control}
-                        rules={{ min: 1, max: maxGuests }}
+                        rules={{ min: 1 }}
                         render={({ field }) => (
                           <div className={styles.stepper}>
                             <button
@@ -163,12 +166,9 @@ export default function Rsvp(props) {
                             <button
                               type="button"
                               className={styles.stepBtn}
-                              onClick={() =>
-                                field.onChange(Math.min(maxGuests, (field.value || 1) + 1))
-                              }
+                              onClick={() => field.onChange((field.value || 1) + 1)}
                               aria-label="Increase guest count"
                             >+</button>
-                            <span className={styles.stepHint}>Max {maxGuests}</span>
                           </div>
                         )}
                       />
@@ -225,9 +225,6 @@ export default function Rsvp(props) {
               <p className={styles.successText}>
                 Your RSVP has been recorded. We cannot wait to celebrate with you.
               </p>
-              <button type="button" className={styles.resetBtn} onClick={handleReset}>
-                Submit another response
-              </button>
             </div>
           </ThreeDTilt>
         )}

@@ -412,7 +412,24 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
                       style={{ color: palette.fg, borderColor: palette.accent }}
                     >
                       {t.liveReview}
-                      <span aria-hidden="true">↗</span>
+                      {/* Inline SVG, not the ↗ glyph: U+2197 falls back to the
+                          emoji font on many phones, breaking the elegant look. */}
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="13"
+                        height="13"
+                        aria-hidden="true"
+                        style={{ flexShrink: 0 }}
+                      >
+                        <path
+                          d="M6 18 18 6M9 6h9v9"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </Link>
                     <button
                       type="button"

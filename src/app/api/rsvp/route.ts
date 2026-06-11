@@ -51,7 +51,9 @@ export async function POST(req: Request) {
   }
 
   const cleanName = String(guest_name).slice(0, 120)
-  const cleanCount = Math.min(20, Math.max(1, Number(guest_count) || 1))
+  // No product-level max — couples decide how many companions a guest may
+  // bring. 999 is only an abuse guard against absurd payloads.
+  const cleanCount = Math.min(999, Math.max(1, Number(guest_count) || 1))
   const cleanMessage = message ? String(message).slice(0, 500) : null
 
   const { data: rsvp, error } = (await (supabase.from('rsvps') as any)

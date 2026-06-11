@@ -92,6 +92,10 @@
   color: rgba(42, 33, 24, 0.25);
   font-weight: 500;
   line-height: 1;
+  /* Flex shrink let the span collapse to one digit wide on phones, stacking
+     "0" above "1". Keep "01" on a single horizontal line at every width. */
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .tabBtnSelected .tabNum {
