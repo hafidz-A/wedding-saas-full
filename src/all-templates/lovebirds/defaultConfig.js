@@ -1,5 +1,7 @@
 /* Default page config — bundled demo data, rendered when no Supabase row exists. */
 
+import { demoImg } from '../../lib/demoImages.js'
+
 // Calculate a dynamic future date for the demo so the countdown is always active and counting down
 const now = new Date()
 // Target next year if we are already past November 15th of the current year
@@ -41,17 +43,16 @@ export const defaultConfig = {
         welcomeText: 'Welcome, our dear guest',
         scrollHint: 'Scroll to enter',
         countdownEnabled: true,
-        gateImage:
-          'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80',
+        gateImage: demoImg('coupleGate', 2000),
         blastPhotos: [
-          'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&fit=crop&w=500&q=80',
-          'https://images.unsplash.com/photo-1542042161784-26ab9e041e2e?auto=format&fit=crop&w=500&q=80',
+          demoImg('bridePortrait', 500),
+          demoImg('storyWedding', 500),
+          demoImg('storyFirstMeet', 500),
+          demoImg('coupleClassic', 500),
+          demoImg('galleryRoadTrip', 500),
+          demoImg('galleryFirstDance', 500),
+          demoImg('galleryCoffee', 500),
+          demoImg('galleryFamilyDinner', 500),
         ],
         petals: ['coral', 'gold', 'emerald', 'gold', 'purple', 'coral', 'emerald', 'gold'],
       },
@@ -85,8 +86,7 @@ export const defaultConfig = {
             title: 'The First Meeting',
             description:
               'A quiet evening by the sea, where laughter became the language we both understood without saying a single word.',
-            image:
-              'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=80',
+            image: demoImg('storyFirstMeet', 1400),
           },
           {
             id: 'card-2',
@@ -95,8 +95,7 @@ export const defaultConfig = {
             title: 'Our First Date',
             description:
               'Bonfires, salty wind, and the sky turning gold — we knew this was the start of something we would never forget.',
-            image:
-              'https://images.unsplash.com/photo-1502139214982-d0ad755818d8?auto=format&fit=crop&w=1400&q=80',
+            image: demoImg('storyFirstDate', 1400),
           },
           {
             id: 'card-3',
@@ -105,8 +104,7 @@ export const defaultConfig = {
             title: 'Our Holiday Together',
             description:
               'Silly hats, shared snacks, and the kind of joy you only get when home is wherever the other person is.',
-            image:
-              'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=1400&q=80',
+            image: demoImg('storyHoliday', 1400),
           },
           {
             id: 'card-4',
@@ -115,8 +113,7 @@ export const defaultConfig = {
             title: 'The Proposal',
             description:
               'A single quiet question on a slow Sunday — answered with tears, laughter, and a yes that has not stopped ringing since.',
-            image:
-              'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1400&q=80',
+            image: demoImg('storyProposal', 1400),
           },
           {
             id: 'card-5',
@@ -125,8 +122,7 @@ export const defaultConfig = {
             title: 'The Wedding Day',
             description:
               'And here we are — surrounded by the people we love, ready to begin the next chapter of our story together.',
-            image:
-              'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=1400&q=80',
+            image: demoImg('storyWedding', 1400),
           },
         ],
       },
@@ -185,7 +181,7 @@ export const defaultConfig = {
           {
             role: 'Bride',
             name: 'Amara Sastrawijaya',
-            photo: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=800&q=80',
+            photo: demoImg('bridePortrait', 800),
             parents: 'Daughter of Mr. & Mrs. Sastrawijaya',
             bio: 'A daughter, a dreamer, a designer of warm spaces and warmer conversations. Born in Bandung, in love with quiet mornings.',
             instagram: '@amara.s',
@@ -194,7 +190,7 @@ export const defaultConfig = {
           {
             role: 'Groom',
             name: 'Rizky Pratama',
-            photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+            photo: demoImg('groomPortrait', 800),
             parents: 'Son of Mr. & Mrs. Pratama',
             bio: 'A son, a builder, a believer in slow Sundays. Born in Jakarta, made better by every shared meal with Amara.',
             instagram: '@rizky.p',
@@ -215,22 +211,22 @@ export const defaultConfig = {
         sectionTitle: 'Memories',
         sectionSubtitle: 'A small collection of our favorite memories together',
         photos: [
-          { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80', alt: 'The proposal' },
-          { src: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=600&q=80', alt: 'Just us' },
-          { src: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?auto=format&fit=crop&w=600&q=80', alt: 'Birthday surprise' },
-          { src: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=600&q=80', alt: 'Our wedding' },
-          { src: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80', alt: 'Lazy Sunday' },
-          { src: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=600&q=80', alt: 'Road trip' },
-          { src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=600&q=80', alt: 'Holiday together' },
-          { src: 'https://images.unsplash.com/photo-1502139214982-d0ad755818d8?auto=format&fit=crop&w=600&q=80', alt: 'First date' },
-          { src: 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?auto=format&fit=crop&w=600&q=80', alt: 'Coffee mornings' },
-          { src: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&w=600&q=80', alt: 'City lights' },
-          { src: 'https://images.unsplash.com/photo-1521336575822-6da63fb45455?auto=format&fit=crop&w=600&q=80', alt: 'Sunset walk' },
-          { src: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=600&q=80', alt: 'The proposal 2' },
-          { src: 'https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?auto=format&fit=crop&w=600&q=80', alt: 'First holiday' },
-          { src: 'https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?auto=format&fit=crop&w=600&q=80', alt: 'Cooking together' },
-          { src: 'https://images.unsplash.com/photo-1542042161784-26ab9e041e2e?auto=format&fit=crop&w=600&q=80', alt: 'Family dinner' },
-          { src: 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=600&q=80', alt: 'First dance' },
+          { src: demoImg('storyProposal', 600),       alt: 'The proposal' },
+          { src: demoImg('coupleCasual', 600),        alt: 'Just us' },
+          { src: demoImg('galleryBirthday', 600),     alt: 'Birthday surprise' },
+          { src: demoImg('coupleClassic', 600),       alt: 'Our wedding' },
+          { src: demoImg('gallerySunrise', 600),      alt: 'Lazy Sunday' },
+          { src: demoImg('galleryRoadTrip', 600),     alt: 'Road trip' },
+          { src: demoImg('storyHoliday', 600),        alt: 'Holiday together' },
+          { src: demoImg('storyFirstDate', 600),      alt: 'First date' },
+          { src: demoImg('galleryCoffee', 600),       alt: 'Coffee mornings' },
+          { src: demoImg('galleryCityLights', 600),   alt: 'City lights' },
+          { src: demoImg('gallerySunsetWalk', 600),   alt: 'Sunset walk' },
+          { src: demoImg('galleryRings', 600),        alt: 'The rings' },
+          { src: demoImg('galleryBeach', 600),        alt: 'First holiday' },
+          { src: demoImg('galleryCooking', 600),      alt: 'Cooking together' },
+          { src: demoImg('galleryFamilyDinner', 600), alt: 'Family dinner' },
+          { src: demoImg('galleryFirstDance', 600),   alt: 'First dance' },
         ],
       },
     },
@@ -328,8 +324,8 @@ export const defaultConfig = {
         coupleName: 'Amara & Rizky',
         // Two photos shown as tilted polaroids below the monogram (bride, groom).
         photos: [
-          { src: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=600&q=80', alt: 'Amara' },
-          { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80', alt: 'Rizky' },
+          { src: demoImg('bridePortrait', 600), alt: 'Amara' },
+          { src: demoImg('groomPortrait', 600), alt: 'Rizky' },
         ],
         socials: [
           { id: 's-ig',   label: 'Instagram', url: '#'                          },
