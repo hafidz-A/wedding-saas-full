@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { Dict } from '@/lib/i18n'
 import { useReveal } from '@/hooks/useReveal'
+import { demoImg } from '@/lib/demoImages'
 import styles from './Features.module.css'
 
 interface FeatureTab {
@@ -76,14 +77,14 @@ export function Features({ t }: { t: Dict['landing']['features'] }) {
               className={`${styles.polaroid} ${styles.polaroid1}`}
               whileHover={{ rotate: -8, scale: 1.05 }}
             >
-              <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=300&q=80" alt="" />
+              <img src={demoImg('coupleClassic', 300)} alt="" />
               <span>Sweetest Vows</span>
             </motion.div>
             <motion.div 
               className={`${styles.polaroid} ${styles.polaroid2}`}
               whileHover={{ rotate: 10, scale: 1.05 }}
             >
-              <img src="https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=300&q=80" alt="" />
+              <img src={demoImg('coupleSunset', 300)} alt="" />
               <span>Infinite Love</span>
             </motion.div>
           </div>

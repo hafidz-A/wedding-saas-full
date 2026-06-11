@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 import { useUpload } from '../lib/useUpload'
+import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 
 interface Props {
   label: string
@@ -14,6 +15,7 @@ interface Props {
 export default function ImageField({ label, value, onChange, slug, help }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
   const { upload, isUploading, error } = useUpload(slug)
+  const t = useDashboardDict().editor
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -52,6 +54,7 @@ export default function ImageField({ label, value, onChange, slug, help }: Props
       </div>
       {error && <span style={errStyle}>{error}</span>}
       {help && <span style={hlp}>{help}</span>}
+      {!value && <span style={hintStyle}>{t.imageEmptyHint}</span>}
     </div>
   )
 }
@@ -66,3 +69,4 @@ const btn:  React.CSSProperties = { padding: '8px 14px', borderRadius: 999, back
 const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: 'transparent', color: '#2A2118', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid rgba(42,33,24,0.2)', cursor: 'pointer' }
 const errStyle: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
 const hlp:  React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
+const hintStyle: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)', fontStyle: 'italic' }
