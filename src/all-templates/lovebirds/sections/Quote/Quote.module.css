@@ -5,12 +5,22 @@
 
 /* Dark palettes: the verse band must match the dark page so the theme's
    light --fg text (used by QuoteBlock) stays readable — a cream band here
-   would render light text on cream = invisible. */
+   would render light text on cream = invisible. Every theme in themes.js
+   with a light --fg needs a row here (hexes mirror the theme's --bg). */
 :global(body.theme-dark-luxury) .quote {
   background: #2A2118;
 }
 :global(body.theme-midnight-stardust) .quote {
   background: #1E222D;
+}
+:global(body.theme-royal-plum) .quote {
+  background: #4A0E1D;
+}
+:global(body.theme-forest-mist) .quote {
+  background: #12291B;
+}
+:global(body.theme-terracotta-oasis) .quote {
+  background: #8E3A21;
 }
 
 .inner {
