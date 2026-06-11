@@ -18,9 +18,9 @@ export const DEMO_PHOTOS = {
   groomPortrait:   '1507003211169-0a1dd7228f2d', // groom/man solo portrait
 
   // — story moments (lovebirds OurStory + solary storyPlanet) —
-  storyFirstMeet:  '1522098635833-216c03d81fbe', // couple by the sea
+  storyFirstMeet:  '1563196638-8c9457546e5f',    // couple holding hands by the sea
   storyFirstDate:  '1475738972911-5b44ce984c42', // bonfire / evening date
-  storyHoliday:    '1543589077-47d81606c1bf',    // festive holiday together
+  storyHoliday:    '1530789253388-582c481c54b0', // couple on holiday (Cappadocia balloons)
   storyProposal:   '1532712938310-34cb3982ef74', // proposal moment
   storyWedding:    '1465495976277-4387d4b0b4c6', // ceremony / arch
 
