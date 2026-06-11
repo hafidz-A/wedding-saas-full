@@ -1,4 +1,5 @@
 import type { SectionSchema } from '../types'
+import { demoImg } from '@/lib/demoImages'
 
 export const teamPlanetSchema: SectionSchema = {
   type: 'teamPlanet',
@@ -32,8 +33,8 @@ export const teamPlanetSchema: SectionSchema = {
     sectionLabel: 'Bridal Party',
     heading: 'The constellation by our side.',
     groups: [
-      { label: 'Bridesmaids', members: [{ name: 'Maya', role: 'Maid of Honor', avatar: '' }] },
-      { label: 'Groomsmen',   members: [{ name: 'Rio',  role: 'Best Man',      avatar: '' }] },
+      { label: 'Bridesmaids', members: [{ name: 'Maya', role: 'Maid of Honor', avatar: demoImg('partyMaidOfHonor', 400) }] },
+      { label: 'Groomsmen',   members: [{ name: 'Rio',  role: 'Best Man',      avatar: demoImg('partyBestMan', 400) }] },
     ],
   },
 }

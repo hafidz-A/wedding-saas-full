@@ -1,4 +1,5 @@
 import type { SectionSchema } from '../types'
+import { demoImg } from '@/lib/demoImages'
 
 export const giftPlanetSchema: SectionSchema = {
   type: 'giftPlanet',
@@ -44,8 +45,8 @@ export const giftPlanetSchema: SectionSchema = {
     registryTitle: 'Wishlist Kami',
     registryMessage: 'Bila Anda berkenan memberi hadiah, berikut beberapa hal yang kami impikan.',
     wishlist: [
-      { name: 'Set Peralatan Masak', description: 'Untuk memasak bersama di dapur baru kami.', image: 'https://picsum.photos/seed/wishlist-cook/400/300', url: '' },
-      { name: 'Voucher Bulan Madu', description: 'Membantu kami menjelajah destinasi impian.', image: 'https://picsum.photos/seed/wishlist-honeymoon/400/300', url: '' },
+      { name: 'Set Peralatan Masak', description: 'Untuk memasak bersama di dapur baru kami.', image: demoImg('wishlistCookware', 600), url: '' },
+      { name: 'Voucher Bulan Madu', description: 'Membantu kami menjelajah destinasi impian.', image: demoImg('wishlistHoneymoon', 600), url: '' },
     ],
   },
 }

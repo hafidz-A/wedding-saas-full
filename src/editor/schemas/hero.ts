@@ -1,4 +1,5 @@
 import type { SectionSchema } from './types'
+import { demoImg } from '@/lib/demoImages'
 
 export const heroSchema: SectionSchema = {
   type: 'hero',
@@ -25,12 +26,12 @@ export const heroSchema: SectionSchema = {
     welcomeText: 'Welcome, our dear guest',
     scrollHint: 'Scroll to enter',
     countdownEnabled: true,
-    gateImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=80',
+    gateImage: demoImg('coupleGate', 2000),
     blastPhotos: [
-      'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?auto=format&fit=crop&w=500&q=80',
-      'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=500&q=80',
+      demoImg('bridePortrait', 500),
+      demoImg('storyWedding', 500),
+      demoImg('storyFirstMeet', 500),
+      demoImg('coupleClassic', 500),
     ],
   },
 }

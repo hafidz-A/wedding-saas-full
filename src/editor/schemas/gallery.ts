@@ -1,4 +1,5 @@
 import type { SectionSchema } from './types'
+import { demoImg } from '@/lib/demoImages'
 
 export const gallerySchema: SectionSchema = {
   type: 'gallery',
@@ -23,10 +24,10 @@ export const gallerySchema: SectionSchema = {
     title: 'Moments',
     subtitle: 'A small collection of our favorite memories',
     images: [
-      { id: 'g1', src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80', caption: 'The proposal',  tall: true  },
-      { id: 'g2', src: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=900&q=80', caption: 'A road trip',   tall: false },
-      { id: 'g3', src: 'https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?auto=format&fit=crop&w=900&q=80', caption: 'First holiday', tall: false },
-      { id: 'g4', src: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=900&q=80', caption: 'Lazy Sunday',   tall: true  },
+      { id: 'g1', src: demoImg('storyProposal', 900),   caption: 'The proposal',  tall: true  },
+      { id: 'g2', src: demoImg('galleryRoadTrip', 900), caption: 'A road trip',   tall: false },
+      { id: 'g3', src: demoImg('galleryBeach', 900),    caption: 'First holiday', tall: false },
+      { id: 'g4', src: demoImg('galleryCoffee', 900),   caption: 'Lazy Sunday',   tall: true  },
     ],
   },
 }

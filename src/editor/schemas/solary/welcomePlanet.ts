@@ -1,4 +1,5 @@
 import type { SectionSchema } from '../types'
+import { demoImg } from '@/lib/demoImages'
 
 export const welcomePlanetSchema: SectionSchema = {
   type: 'welcomePlanet',
@@ -21,7 +22,7 @@ export const welcomePlanetSchema: SectionSchema = {
     sectionLabel: 'Welcome',
     heading: 'We found each other in the deep blue.',
     body: 'A short prelude before the journey: who we are, where we met, and the gravity that pulled us together.',
-    portrait: 'https://picsum.photos/seed/welcome-portrait/800/1000',
+    portrait: demoImg('coupleClassic', 1000),
     portraitCaption: 'Bali, 2023',
   },
 }

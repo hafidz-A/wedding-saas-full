@@ -1,4 +1,5 @@
 import type { SectionSchema } from './types'
+import { demoImg } from '@/lib/demoImages'
 
 export const weddingPartySchema: SectionSchema = {
   type: 'weddingParty',
@@ -23,8 +24,8 @@ export const weddingPartySchema: SectionSchema = {
     title: 'Wedding Party',
     subtitle: 'The people who make our story brighter',
     people: [
-      { id: 'p1', name: 'Maya Larasati', role: 'Maid of Honor', photo: '' },
-      { id: 'p2', name: 'Dimas Aji',     role: 'Best Man',      photo: '' },
+      { id: 'p1', name: 'Maya Larasati', role: 'Maid of Honor', photo: demoImg('partyMaidOfHonor', 800) },
+      { id: 'p2', name: 'Dimas Aji',     role: 'Best Man',      photo: demoImg('partyBestMan', 800) },
     ],
   },
 }

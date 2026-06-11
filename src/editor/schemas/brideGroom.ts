@@ -1,4 +1,5 @@
 import type { SectionSchema } from './types'
+import { demoImg } from '@/lib/demoImages'
 
 export const brideGroomSchema: SectionSchema = {
   type: 'brideGroom',
@@ -31,7 +32,7 @@ export const brideGroomSchema: SectionSchema = {
       {
         role: 'Bride',
         name: 'Aurelia Sastrawijaya',
-        photo: 'https://images.unsplash.com/photo-1525186402429-b4ff38bedec6?auto=format&fit=crop&w=800&q=80',
+        photo: demoImg('bridePortrait', 800),
         parents: 'Daughter of Mr. & Mrs. Sastrawijaya',
         bio: 'A daughter, a dreamer, a designer of warm spaces and warmer conversations.',
         instagram: '@aurelia.s',
@@ -40,7 +41,7 @@ export const brideGroomSchema: SectionSchema = {
       {
         role: 'Groom',
         name: 'Hadyan Pratama',
-        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+        photo: demoImg('groomPortrait', 800),
         parents: 'Son of Mr. & Mrs. Pratama',
         bio: 'A son, a builder, a believer in slow Sundays.',
         instagram: '@hadyan.p',
