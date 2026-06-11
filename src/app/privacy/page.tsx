@@ -1,19 +1,21 @@
+import { getLang } from '@/lib/i18n/getLang'
 import LegalLayout from '@/components/legal/LegalLayout'
 import PrivacyContent from '@/components/legal/PrivacyContent'
 
 export const metadata = {
-  title: 'Kebijakan Privasi',
-  description: 'Kebijakan Privasi & pelindungan data pribadi (UU PDP).',
+  title: 'Kebijakan Privasi — Privacy Policy',
+  description: 'Kebijakan Privasi & pelindungan data pribadi (UU PDP) — Privacy Policy under Indonesian Law No. 27 of 2022.',
 }
 
 export default function PrivacyPage() {
+  const lang = getLang()
+  const en = lang === 'en'
   return (
     <LegalLayout
-      title="Kebijakan Privasi"
-      updated="[TANGGAL]"
-      draftNote="DRAF — mengacu pada UU No. 27 Tahun 2022 (UU PDP). Lengkapi placeholder [.​..] dan minta peninjauan penasihat hukum sebelum dipublikasikan."
+      title={en ? 'Privacy Policy' : 'Kebijakan Privasi'}
+      updated={en ? '11 June 2026' : '11 Juni 2026'}
     >
-      <PrivacyContent />
+      <PrivacyContent lang={lang} />
     </LegalLayout>
   )
 }

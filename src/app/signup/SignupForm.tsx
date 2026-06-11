@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Dict } from '@/lib/i18n'
+import type { Lang } from '@/lib/i18n/config'
 import { safeNext } from '@/lib/auth/safeNext'
 import LegalModal from '@/components/legal/LegalModal'
 import PrivacyContent from '@/components/legal/PrivacyContent'
@@ -36,9 +37,11 @@ import PasswordChecklist from '@/components/auth/PasswordChecklist'
 export default function SignupForm({
   dict,
   rules,
+  lang = 'id',
 }: {
   dict: Dict['auth']['signup']
   rules: Dict['auth']['passwordRules']
+  lang?: Lang
 }) {
   const router = useRouter()
   const next = safeNext(useSearchParams().get('next'))
@@ -252,12 +255,12 @@ export default function SignupForm({
 
       {openDoc === 'privacy' && (
         <LegalModal title={dict.consentPrivacy} closeLabel={dict.modalClose} onClose={() => setOpenDoc(null)}>
-          <PrivacyContent />
+          <PrivacyContent lang={lang} />
         </LegalModal>
       )}
       {openDoc === 'refund' && (
         <LegalModal title={dict.consentRefund} closeLabel={dict.modalClose} onClose={() => setOpenDoc(null)}>
-          <RefundContent />
+          <RefundContent lang={lang} />
         </LegalModal>
       )}
     </main>

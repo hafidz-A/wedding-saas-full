@@ -8,20 +8,21 @@ import styles from './legal.module.css'
 /**
  * Shared presentational shell for the legal pages (/terms, /privacy, /refund).
  * Matches the warm-cream aesthetic of the profile + expired-invitation views.
+ * Bilingual chrome: the "last updated" label and footer links follow the
+ * site language (fin_lang cookie), same as the SiteNav.
  */
 export default function LegalLayout({
   title,
   updated,
-  draftNote,
   children,
 }: {
   title: string
   updated?: string
-  draftNote?: string
   children: ReactNode
 }) {
   const lang = getLang()
   const t = getDict(lang)
+  const en = lang === 'en'
 
   return (
     <>
@@ -29,13 +30,16 @@ export default function LegalLayout({
       <main style={page}>
         <article style={wrap}>
           <h1 style={h1}>{title}</h1>
-          {updated && <p style={meta}>Terakhir diperbarui: {updated}</p>}
-          {draftNote && <p className={styles.draftNote}>{draftNote}</p>}
+          {updated && (
+            <p style={meta}>{en ? 'Last updated' : 'Terakhir diperbarui'}: {updated}</p>
+          )}
           <div style={body} className={styles.prose}>{children}</div>
           <p style={footerLinks}>
-            <Link href="/privacy" style={link}>Kebijakan Privasi</Link>
+            <Link href="/terms" style={link}>{en ? 'Terms & Conditions' : 'Syarat & Ketentuan'}</Link>
             {' · '}
-            <Link href="/refund" style={link}>Pengembalian Dana</Link>
+            <Link href="/privacy" style={link}>{en ? 'Privacy Policy' : 'Kebijakan Privasi'}</Link>
+            {' · '}
+            <Link href="/refund" style={link}>{en ? 'Refund Policy' : 'Pengembalian Dana'}</Link>
           </p>
         </article>
       </main>
