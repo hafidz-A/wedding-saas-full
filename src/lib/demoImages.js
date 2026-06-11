@@ -11,24 +11,24 @@
 export const DEMO_PHOTOS = {
   // — couple & portraits —
   coupleGate:      '1519741497674-611481863552', // bride & groom, classic formal
-  coupleClassic:   '1606800052052-a08af7148866', // wedding-day couple
-  coupleCasual:    '1521336575822-6da63fb45455', // couple casual outdoors
+  coupleClassic:   '1529636798458-92182e662485', // wedding-day couple
+  coupleCasual:    '1516589178581-6cd7833ae3b2', // couple casual outdoors
   coupleSunset:    '1474552226712-ac0f0961a954', // couple silhouette at sunset
   bridePortrait:   '1525186402429-b4ff38bedec6', // bride solo portrait
   groomPortrait:   '1507003211169-0a1dd7228f2d', // groom/man solo portrait
 
   // — story moments (lovebirds OurStory + solary storyPlanet) —
-  storyFirstMeet:  '1502635385003-ee1e6a1a742d', // couple by the sea
-  storyFirstDate:  '1502139214982-d0ad755818d8', // bonfire / evening date
-  storyHoliday:    '1530103862676-de8c9debad1d', // festive hats / holiday fun
-  storyProposal:   '1522673607200-164d1b6ce486', // hands + ring proposal
+  storyFirstMeet:  '1522098635833-216c03d81fbe', // couple by the sea
+  storyFirstDate:  '1475738972911-5b44ce984c42', // bonfire / evening date
+  storyHoliday:    '1543589077-47d81606c1bf',    // festive holiday together
+  storyProposal:   '1532712938310-34cb3982ef74', // proposal moment
   storyWedding:    '1465495976277-4387d4b0b4c6', // ceremony / arch
 
   // — gallery moments —
   galleryCoffee:        '1495474472287-4d71bcdd2085', // coffee
-  galleryRoadTrip:      '1511285560929-80b456fea0bc', // road trip / car
-  gallerySunsetWalk:    '1476900543704-4312b78632f8', // sunset walk
-  galleryCityLights:    '1469371670807-013ccf25f16a', // city night
+  galleryRoadTrip:      '1469854523086-cc02fe5d8800', // road trip / car
+  gallerySunsetWalk:    '1494774157365-9e04c6720e47', // sunset couple silhouette
+  galleryCityLights:    '1519501025264-65ba15a82390', // city night
   galleryCooking:       '1556911220-bff31c812dba',    // cooking at home
   galleryFamilyDinner:  '1414235077428-338989a2e8c0', // dinner table
   galleryBeach:         '1507525428034-b723cf961d3e', // beach
@@ -39,14 +39,13 @@ export const DEMO_PHOTOS = {
   gallerySunrise:       '1470252649378-9c29740c9fa8', // sunrise sky
   galleryCelebration:   '1492684223066-81342ee5ff30', // sparklers celebration
   galleryVenue:         '1519167758481-83f550bb49b3', // garden venue
-  galleryDressFitting:  '1595777457583-95e059d581b8', // bridal dress
+  galleryDressFitting:  '1583391733956-3750e0ff4e8b', // bridal dress
   galleryCakeTasting:   '1535141192574-5d4897c12636', // wedding cake
-  galleryPreWedShoot:   '1583939003579-730e3918a45a', // pre-wedding shoot
+  galleryPreWedShoot:   '1494955870715-979ca4f13bf0', // pre-wedding shoot
   galleryBrunch:        '1529543544282-ea669407fca3', // brunch spread
   gallerySaveTheDate:   '1607190074257-dd4b7af0309f', // stationery / invites
   galleryRings:         '1605100804763-247f67b3557e', // wedding rings
-  galleryFirstDance:    '1523438885200-e635ba2c371e', // first dance
-  galleryGraduation:    '1523580494863-6f3031224c94', // graduation / milestone
+  galleryFirstDance:    '1520342868574-5fa3804e551c', // first dance
 
   // — wedding party / team —
   partyMaidOfHonor:  '1494790108377-be9c29b29330', // woman portrait 1
