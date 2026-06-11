@@ -140,7 +140,9 @@ export const pageConfig = {
             year: "2021",
             label: "Gravity",
             desc: "A long-distance year that pulled us closer, not apart.",
-            photos: [],
+            photos: [
+              demoImg("gallerySunsetWalk", 600),
+            ],
           },
           {
             year: "2023",
