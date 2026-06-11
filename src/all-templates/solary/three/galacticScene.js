@@ -47,25 +47,29 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
   const SUN = { radius: 4.6 };
 
+  /* `photo` = real NASA-imagery texture in /public/solary/textures (lazy-loaded,
+     swapped over the procedural canvas texture once downloaded — see
+     loadAstroTexture below). `bump` = bumpScale derived from the same map so
+     craters/cloud bands catch the sunlight; 0/absent = no bump (gas/cloud tops). */
   const PLANETS = [
     { key:"mercury", radius:0.55, orbit:10, angleSpeed:0.34, spinSpeed:0.30, tilt:0.03, phase:0.2,
-      base:"#bcae9c", dark:"#5a4d3a", terrain:"craters" },
+      base:"#bcae9c", dark:"#5a4d3a", terrain:"craters", photo:"mercury.webp", bump:0.05 },
     { key:"venus",   radius:0.78, orbit:14, angleSpeed:0.26, spinSpeed:0.18, tilt:0.05, phase:1.4,
-      base:"#e6c08a", dark:"#a07a40", terrain:"swirl", atmosphere:"#f6d99a" },
+      base:"#e6c08a", dark:"#a07a40", terrain:"swirl", atmosphere:"#f6d99a", photo:"venus.webp" },
     { key:"earth",   radius:0.82, orbit:18, angleSpeed:0.22, spinSpeed:0.50, tilt:0.41, phase:2.6,
-      base:"#2f6b8a", dark:"#143042", land:"#3c8052", terrain:"oceans", atmosphere:"#88d0ee" },
+      base:"#2f6b8a", dark:"#143042", land:"#3c8052", terrain:"oceans", atmosphere:"#88d0ee", photo:"earth.webp", bump:0.04 },
     { key:"mars",    radius:0.65, orbit:23, angleSpeed:0.19, spinSpeed:0.46, tilt:0.44, phase:3.7,
-      base:"#c45c3a", dark:"#7a2e1a", terrain:"dunes" },
+      base:"#c45c3a", dark:"#7a2e1a", terrain:"dunes", photo:"mars.webp", bump:0.05 },
     { key:"jupiter", radius:2.0,  orbit:32, angleSpeed:0.11, spinSpeed:0.95, tilt:0.05, phase:4.9,
-      base:"#d39a6a", dark:"#5a2f10", band:"#f4d5a8", terrain:"bands" },
+      base:"#d39a6a", dark:"#5a2f10", band:"#f4d5a8", terrain:"bands", photo:"jupiter.webp", bump:0.015 },
     { key:"saturn",  radius:1.7,  orbit:42, angleSpeed:0.08, spinSpeed:0.88, tilt:0.47, phase:0.8, cameraDistMult: 7.5,
-      base:"#e2b97a", dark:"#7a4e1f", band:"#f5dba7", terrain:"bands",
+      base:"#e2b97a", dark:"#7a4e1f", band:"#f5dba7", terrain:"bands", photo:"saturn.webp", bump:0.01,
       rings: { inner: 2.2, outer: 3.7, color:"#e8c89a" } },
     { key:"uranus",  radius:1.15, orbit:52, angleSpeed:0.055, spinSpeed:0.65, tilt:1.71, phase:5.5,
-      base:"#9ad5db", dark:"#3a6a72", terrain:"smooth", atmosphere:"#c0eff3",
+      base:"#9ad5db", dark:"#3a6a72", terrain:"smooth", atmosphere:"#c0eff3", photo:"uranus.webp",
       rings: { inner: 1.5, outer: 1.9, color:"#a8d8df", opacity: 0.25 } },
     { key:"neptune", radius:1.05, orbit:62, angleSpeed:0.04, spinSpeed:0.62, tilt:0.49, phase:3.1,
-      base:"#2f55c8", dark:"#0a1c5e", band:"#7da6ff", terrain:"bands", atmosphere:"#7da3ff" },
+      base:"#2f55c8", dark:"#0a1c5e", band:"#7da6ff", terrain:"bands", atmosphere:"#7da3ff", photo:"neptune.webp", bump:0.01 },
   ];
   const PLANET_MAP = Object.fromEntries(PLANETS.map(p => [p.key, p]));
 
@@ -389,13 +393,16 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
        outer haze → fully transparent. Stops chosen so the slope is
        continuous; no visible discontinuities. */
     const g = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    g.addColorStop(0.00, "rgba(255,210,120,0.95)");
-    g.addColorStop(0.08, "rgba(255,180,80,0.75)");
-    g.addColorStop(0.18, "rgba(255,150,55,0.42)");
-    g.addColorStop(0.30, "rgba(255,140,55,0.22)");
-    g.addColorStop(0.45, "rgba(255,160,80,0.11)");
-    g.addColorStop(0.62, "rgba(255,180,110,0.05)");
-    g.addColorStop(0.82, "rgba(255,200,140,0.018)");
+    /* Hotter core: near-white centre reads as incandescent plasma,
+       then a long warm falloff so the corona breathes far into space. */
+    g.addColorStop(0.00, "rgba(255,248,230,1)");
+    g.addColorStop(0.05, "rgba(255,232,170,0.92)");
+    g.addColorStop(0.11, "rgba(255,196,100,0.62)");
+    g.addColorStop(0.20, "rgba(255,160,60,0.36)");
+    g.addColorStop(0.32, "rgba(255,145,55,0.19)");
+    g.addColorStop(0.47, "rgba(255,160,80,0.10)");
+    g.addColorStop(0.64, "rgba(255,182,112,0.045)");
+    g.addColorStop(0.84, "rgba(255,205,145,0.016)");
     g.addColorStop(1.00, "rgba(0,0,0,0)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, size, size);
@@ -479,10 +486,100 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   let solarSystemOpacity = 1.0;
 
   /* ============================================================
+     PHOTO TEXTURES — real astro imagery, lazy-loaded
+     ------------------------------------------------------------
+     The scene mounts instantly with the procedural canvas textures
+     above, then upgrades each body to a real photograph once its
+     .webp finishes downloading (~30-140KB each, see
+     public/solary/textures/README.md for sources + licenses).
+     On load failure the procedural texture simply stays — no
+     regression offline.
+     ============================================================ */
+  const TEXTURE_BASE = "/solary/textures/";
+  const astroLoader = new THREE.TextureLoader();
+  function loadAstroTexture(file, onReady) {
+    astroLoader.load(
+      TEXTURE_BASE + file,
+      (tex) => {
+        if ("SRGBColorSpace" in THREE) tex.colorSpace = THREE.SRGBColorSpace;
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.anisotropy = isMobile ? 4 : 8;
+        onReady(tex);
+      },
+      undefined,
+      () => { /* keep procedural fallback */ },
+    );
+  }
+
+  /* Swap a mesh's map to the loaded photo. Invisible (gate phase) →
+     instant; visible → crossfade via an overlay clone so there's no
+     visible "pop". `fadeEntry` is the mesh's fadingObjects record. */
+  function swapMeshTexture(mesh, fadeEntry, tex, { bumpScale = 0 } = {}) {
+    const applyTo = (mat) => {
+      mat.map = tex;
+      if (bumpScale && mat.isMeshStandardMaterial) {
+        mat.bumpMap = tex;
+        mat.bumpScale = bumpScale;
+      }
+      mat.needsUpdate = true;
+    };
+    const oldMat = mesh.material;
+    const oldMap = oldMat.map;
+    if (solarSystemOpacity < 0.05) {
+      applyTo(oldMat);
+      oldMap?.dispose?.();
+      return;
+    }
+    const newMat = oldMat.clone();
+    newMat.transparent = true;
+    applyTo(newMat);
+    const overlay = new THREE.Mesh(mesh.geometry, newMat);
+    overlay.scale.setScalar(1.002); // avoid z-fighting with the base mesh
+    const tempEntry = { material: newMat, baseOpacity: 0 };
+    fadingObjects.push(tempEntry);
+    mesh.add(overlay);
+    gsap.to(tempEntry, {
+      baseOpacity: fadeEntry.baseOpacity,
+      duration: 1.4,
+      ease: "power2.inOut",
+      onComplete: () => {
+        mesh.remove(overlay);
+        const i = fadingObjects.indexOf(tempEntry);
+        if (i >= 0) fadingObjects.splice(i, 1);
+        mesh.material = newMat;
+        fadeEntry.material = newMat;
+        oldMat.dispose();
+        oldMap?.dispose?.();
+      },
+    });
+  }
+
+  /* ============================================================
      STARFIELDS
      ============================================================ */
+  /* Realistic stellar tints (blue-white O/B → white A → yellow G →
+     orange K/M), weighted toward white/yellow like a real night sky.
+     Stored as vertex colors → zero per-frame cost. */
+  const STAR_TINTS = [
+    [0.62, 0.71, 1.0],  // blue-white
+    [0.78, 0.84, 1.0],  // pale blue
+    [1.0, 1.0, 1.0],    // white
+    [1.0, 0.96, 0.86],  // warm white
+    [1.0, 0.87, 0.65],  // yellow-orange
+    [1.0, 0.72, 0.52],  // orange-red
+  ];
+  const STAR_TINT_WEIGHTS = [0.08, 0.14, 0.34, 0.26, 0.13, 0.05];
+  function pickStarTint() {
+    let r = Math.random();
+    for (let i = 0; i < STAR_TINTS.length; i++) {
+      r -= STAR_TINT_WEIGHTS[i];
+      if (r <= 0) return STAR_TINTS[i];
+    }
+    return STAR_TINTS[2];
+  }
   function makeStarfield(count, radius, size, opacity) {
     const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const u = Math.random(), v = Math.random();
       const theta = u * Math.PI * 2, phi = Math.acos(2 * v - 1);
@@ -490,12 +587,19 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
       positions[i*3+0] = r * Math.sin(phi) * Math.cos(theta);
       positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
       positions[i*3+2] = r * Math.cos(phi);
+      const tint = pickStarTint();
+      const lum = 0.7 + Math.random() * 0.3; // brightness variation per star
+      colors[i*3+0] = tint[0] * lum;
+      colors[i*3+1] = tint[1] * lum;
+      colors[i*3+2] = tint[2] * lum;
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     const mat = new THREE.PointsMaterial({
       map: getPointSprite(),
       color: 0xffffff,
+      vertexColors: true,
       size, sizeAttenuation: true,
       transparent: true, opacity,
       depthWrite: false,
@@ -515,10 +619,13 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   const sunGroup = new THREE.Group();
   const sunTex = makeSunTexture(themeBus.current.sun);
   const sunMat = new THREE.MeshBasicMaterial({ map: sunTex, transparent: true });
-  fadingObjects.push({ material: sunMat, baseOpacity: 1.0 });
+  const sunFadeEntry = { material: sunMat, baseOpacity: 1.0 };
+  fadingObjects.push(sunFadeEntry);
   const sunCore = new THREE.Mesh(new THREE.SphereGeometry(SUN.radius, 64, 64), sunMat);
   sunCore.userData.isSun = true;
   sunGroup.add(sunCore);
+  /* Real solar-surface photograph (granulation + active regions). */
+  loadAstroTexture("sun.webp", (tex) => swapMeshTexture(sunCore, sunFadeEntry, tex));
   /* Corona = ONE big camera-facing sprite with smooth radial-gradient
      alpha. Replaces the old 7 nested shell spheres, which showed
      visible concentric ring boundaries no matter how many we stacked.
@@ -532,7 +639,7 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     opacity: 1,
   }));
   fadingObjects.push({ material: sunGlowSprite.material, baseOpacity: 1.0 });
-  sunGlowSprite.scale.setScalar(SUN.radius * 6.5);
+  sunGlowSprite.scale.setScalar(SUN.radius * 7.2);
   sunGroup.add(sunGlowSprite);
   /* coronaShells kept for the existing animation code (rotates them);
      we leave it empty so the tick loop's loop is a no-op. */
@@ -590,8 +697,14 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
         transparent: true,
       })
     );
-    fadingObjects.push({ material: mesh.material, baseOpacity: 1.0 });
+    const meshFadeEntry = { material: mesh.material, baseOpacity: 1.0 };
+    fadingObjects.push(meshFadeEntry);
     g.add(mesh);
+
+    if (p.photo) {
+      loadAstroTexture(p.photo, (photoTex) =>
+        swapMeshTexture(mesh, meshFadeEntry, photoTex, { bumpScale: p.bump || 0 }));
+    }
 
     if (p.atmosphere) {
       /* Inner atmosphere — tight halo right against the planet. */
@@ -630,11 +743,41 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
         side: THREE.DoubleSide, depthWrite: false,
       });
       const baseOpacity = (p.rings.opacity ?? 0.65) * 0.92;
-      fadingObjects.push({ material: ringMat, baseOpacity });
+      const ringFadeEntry = { material: ringMat, baseOpacity };
+      fadingObjects.push(ringFadeEntry);
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.rotation.order = 'ZYX';
       ring.rotation.set(Math.PI / 2 + 0.08, 0, p.key === 'saturn' ? SATURN_RING_ROLL : 0);
       g.add(ring);
+
+      if (p.key === "saturn") {
+        /* Real ring photograph (Cassini division, A/B/C bands + alpha gaps).
+           RingGeometry's default UVs are planar — remap u to the radial
+           fraction so the 1D strip texture wraps around the annulus. */
+        const posAttr = ringGeo.attributes.position;
+        const uvAttr = ringGeo.attributes.uv;
+        const v3 = new THREE.Vector3();
+        for (let i = 0; i < posAttr.count; i++) {
+          v3.fromBufferAttribute(posAttr, i);
+          const radial = (v3.length() - p.rings.inner) / (p.rings.outer - p.rings.inner);
+          uvAttr.setXY(i, radial, 0.5);
+        }
+        uvAttr.needsUpdate = true;
+        loadAstroTexture("saturn-ring.webp", (ringTex) => {
+          ringTex.wrapS = THREE.ClampToEdgeWrapping;
+          const applyRingTex = () => {
+            ringMat.map = ringTex;
+            ringMat.color.set("#ffffff");
+            ringMat.needsUpdate = true;
+            ringFadeEntry.baseOpacity = 1.0;
+          };
+          if (solarSystemOpacity < 0.05) { applyRingTex(); return; }
+          gsap.to(ringFadeEntry, { baseOpacity: 0, duration: 0.4, ease: "power1.in", onComplete: () => {
+            applyRingTex();
+            gsap.fromTo(ringFadeEntry, { baseOpacity: 0 }, { baseOpacity: 1.0, duration: 0.9, ease: "power1.out" });
+          }});
+        });
+      }
     }
 
     g.userData = { meshRef: mesh, ...p };
@@ -649,39 +792,93 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     p.currentSpin = p.spinSpeed;
   });
 
-  /* Asteroid belts */
-  function makeAsteroidBelt(orbitMid, width, count) {
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = orbitMid + (Math.random() - 0.5) * width;
-      positions[i*3+0] = Math.cos(a) * r;
-      positions[i*3+1] = (Math.random() - 0.5) * 0.6;
-      positions[i*3+2] = Math.sin(a) * r;
-      colors[i*3+0] = 0.7 + Math.random() * 0.3;
-      colors[i*3+1] = 0.55 + Math.random() * 0.4;
-      colors[i*3+2] = 0.25 + Math.random() * 0.3;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    const mat = new THREE.PointsMaterial({
-      map: getPointSprite(),
-      size: 0.32, sizeAttenuation: true,
-      vertexColors: true,
-      transparent: true, opacity: 0.9,
-      depthWrite: false,
-      alphaTest: 0.02,
+  /* Asteroid belts — irregular shaded rock sprites instead of soft
+     glowing dots. 3 sprite variants, drawn once each; the belt splits
+     its (unchanged) particle budget across them, so the only cost is
+     2 extra draw calls per belt. */
+  let _rockSprites = null;
+  function getRockSprites() {
+    if (_rockSprites) return _rockSprites;
+    _rockSprites = [0, 1, 2].map((variant) => {
+      const size = 64;
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = size;
+      const ctx = cv.getContext("2d");
+      const cx = size / 2, cy = size / 2;
+      /* Irregular silhouette: jagged polygon with per-vertex noise. */
+      const verts = 11;
+      ctx.beginPath();
+      for (let i = 0; i <= verts; i++) {
+        const a = (i % verts / verts) * Math.PI * 2;
+        const r = 20 * (0.62 + noise(i % verts, variant * 17 + 3) * 0.55);
+        const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      /* Lit top-left → shadowed bottom-right, like sun-grazed rock. */
+      const grad = ctx.createRadialGradient(cx - 8, cy - 8, 2, cx, cy, 27);
+      grad.addColorStop(0, "#e9dfcf");
+      grad.addColorStop(0.5, "#9d8f7b");
+      grad.addColorStop(1, "#372f25");
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.save();
+      ctx.clip();
+      for (let i = 0; i < 6; i++) {
+        const a = noise(i, variant + 31) * Math.PI * 2;
+        const d = 4 + noise(i, variant + 9) * 11;
+        ctx.fillStyle = `rgba(28,22,16,${(0.22 + noise(i, variant) * 0.3).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 1.5 + noise(i, variant + 5) * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      const tex = new THREE.CanvasTexture(cv);
+      if ("SRGBColorSpace" in THREE) tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
     });
-    return new THREE.Points(geo, mat);
+    return _rockSprites;
   }
-  const beltMain = makeAsteroidBelt(27.5, 2.0, PERF.asteroidBeltMain);
-  fadingObjects.push({ material: beltMain.material, baseOpacity: 0.9 });
+
+  function makeAsteroidBelt(orbitMid, width, count, opacity) {
+    const group = new THREE.Group();
+    const sprites = getRockSprites();
+    const per = Math.ceil(count / sprites.length);
+    sprites.forEach((sprite, si) => {
+      const positions = new Float32Array(per * 3);
+      const colors = new Float32Array(per * 3);
+      for (let i = 0; i < per; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = orbitMid + (Math.random() - 0.5) * width;
+        positions[i*3+0] = Math.cos(a) * r;
+        positions[i*3+1] = (Math.random() - 0.5) * 0.6;
+        positions[i*3+2] = Math.sin(a) * r;
+        /* Rocky grey-browns (C/S-type asteroids) instead of gold. */
+        const v = 0.42 + Math.random() * 0.42;
+        colors[i*3+0] = Math.min(1, v * (1.0 + Math.random() * 0.18));
+        colors[i*3+1] = v * (0.88 + Math.random() * 0.1);
+        colors[i*3+2] = v * (0.72 + Math.random() * 0.12);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      const mat = new THREE.PointsMaterial({
+        map: sprite,
+        size: 0.3 + si * 0.08, sizeAttenuation: true,
+        vertexColors: true,
+        transparent: true, opacity,
+        depthWrite: false,
+        alphaTest: 0.06,
+      });
+      fadingObjects.push({ material: mat, baseOpacity: opacity });
+      group.add(new THREE.Points(geo, mat));
+    });
+    return group;
+  }
+  const beltMain = makeAsteroidBelt(27.5, 2.0, PERF.asteroidBeltMain, 0.95);
   scene.add(beltMain);
-  const beltInner = makeAsteroidBelt(11.8, 0.4, PERF.asteroidBeltInner);
-  fadingObjects.push({ material: beltInner.material, baseOpacity: 0.5 });
-  beltInner.material.opacity = 0.5; scene.add(beltInner);
+  const beltInner = makeAsteroidBelt(11.8, 0.4, PERF.asteroidBeltInner, 0.55);
+  scene.add(beltInner);
 
   /* ============================================================
      SATURN PHOTO RING — sprites parented to Saturn group, share
@@ -1041,14 +1238,20 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     const sun = new THREE.Color(tokens.sun);
     /* Sun light tint blends sun + glow for warm coherence. */
     sunLight.color.copy(sun.clone().lerp(glow, 0.25));
+    /* Sun surface + corona: gentle multiply-tint toward the palette's sun
+       color so the photo texture stays realistic but follows the theme. */
+    sunCore.material.color.set("#ffffff").lerp(sun, 0.3);
+    sunGlowSprite.material.color.set("#ffffff").lerp(sun, 0.35);
     ambient.color.set(0x000000).lerpColors(new THREE.Color(0x444a7a), accent, 0.2);
-    /* Star colors */
-    [starsFar, starsMid, starsNear].forEach((p) => p.material.color.copy(glow).lerp(new THREE.Color(0xffffff), 0.55));
-    /* Asteroid belts color */
+    /* Star colors — stars carry realistic per-vertex tints, so the theme
+       only multiplies in subtly to avoid washing out the variety. */
+    [starsFar, starsMid, starsNear].forEach((p) => p.material.color.copy(glow).lerp(new THREE.Color(0xffffff), 0.78));
+    /* Asteroid belts — groups of rock-sprite Points; keep tint near-neutral
+       so the rocks read as grey-brown stone, not theme-colored glitter. */
     [beltMain, beltInner].forEach((b) => {
-      if (b && b.material) {
-        b.material.color.copy(glow).lerp(new THREE.Color(0xffffff), 0.35);
-      }
+      b?.children?.forEach((pts) => {
+        if (pts.material) pts.material.color.copy(glow).lerp(new THREE.Color(0xffffff), 0.7);
+      });
     });
     /* Atmospheres get tinted toward accent */
     Object.entries(atmosphereMeshes).forEach(([key, mesh]) => {
@@ -1064,8 +1267,14 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
       }
       group.children.forEach((child) => {
         if (child.geometry instanceof THREE.RingGeometry && child.material) {
-          const baseColor = new THREE.Color(PLANET_MAP[key].rings?.color || tokens.accent);
-          child.material.color.copy(baseColor).lerp(accent, 0.4);
+          if (child.material.map) {
+            /* Photo-textured ring (Saturn): near-white multiply so the real
+               ring bands stay visible; just a whisper of theme accent. */
+            child.material.color.set("#ffffff").lerp(accent, 0.12);
+          } else {
+            const baseColor = new THREE.Color(PLANET_MAP[key].rings?.color || tokens.accent);
+            child.material.color.copy(baseColor).lerp(accent, 0.4);
+          }
         }
       });
     });
