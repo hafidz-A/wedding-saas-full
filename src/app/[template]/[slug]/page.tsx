@@ -8,6 +8,7 @@ import { getDict } from '@/lib/i18n'
 import { decryptConfig } from '@/lib/crypto/config'
 import { decryptField } from '@/lib/crypto/app'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
+import { fillEmptyImages } from '@/lib/config/fillEmptyImages'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -141,6 +142,10 @@ export default async function Page({ params }: PageProps) {
   // Lovebirds: fold registry→weddingGift + strip guestbook/countdown so old/
   // unsaved configs don't render dropped sections. No-op for other templates.
   if (templateId === 'lovebirds') config = migrateLovebirdsConfig(config)
+
+  // Render-time only: blank image slots fall back to contextual demo photos.
+  // Never persisted — the editor still sees the owner's real (empty) value.
+  config = fillEmptyImages(config)
 
   // No DB-backed row (demo slug / local fallback): drop the slug so the
   // RSVP / gift / guestbook sections use their simulated-success mode
