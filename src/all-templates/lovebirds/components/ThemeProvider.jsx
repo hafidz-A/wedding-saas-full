@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { applyTheme, isThemeName, DEFAULT_THEME_NAME, THEME_ORDER } from '../config/applyTheme.js'
+import { applyTheme, clearTheme, isThemeName, DEFAULT_THEME_NAME, THEME_ORDER } from '../config/applyTheme.js'
 
 const ThemeContext = createContext(null)
 const STORAGE_KEY = 'lovebirds:theme'
@@ -60,6 +60,10 @@ export default function ThemeProvider({
       try { sessionStorage.setItem(STORAGE_KEY, theme) } catch {}
     }
   }, [theme, allowGuestSwitch])
+
+  // On unmount (SPA nav away from the invitation) scrub the inline vars +
+  // theme-* class off <body> so other routes don't inherit this palette.
+  useEffect(() => () => clearTheme(), [])
 
   // Persist ornament choice in demo mode.
   useEffect(() => {

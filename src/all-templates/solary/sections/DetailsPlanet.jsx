@@ -27,8 +27,12 @@ export default function DetailsPlanet({ sectionLabel, planetName, heading, cards
                 </div>
                 <div style={{ fontFamily: "var(--font-display)", fontSize: "1.25rem", lineHeight: 1.2, marginBottom: 4 }}>{c.primary}</div>
                 {c.secondary && <div style={{ color: "var(--color-fg-mute)", fontSize: 14 }}>{c.secondary}</div>}
-                {c.actionLabel && (
-                  <a href={c.actionHref || "#"} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", borderBottom: "1px solid var(--color-accent)", paddingBottom: 2 }}>
+                {c.actionLabel && c.actionHref && c.actionHref !== "#" && (
+                  <a
+                    href={c.actionHref}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", borderBottom: "1px solid var(--color-accent)", paddingBottom: 2 }}
+                  >
                     {c.actionLabel} <span>↗</span>
                   </a>
                 )}

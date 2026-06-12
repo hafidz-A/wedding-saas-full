@@ -17,8 +17,17 @@ export function installRhythm(cfg) {
   let boundaries = [];
   let rafScheduled = false;
   let lastTransitionId = null;
+  let lastTravelDir = 0; /* direction the in-flight travel:start was fired for */
+  let wasInTransition = false;
   let lastScrollY = 0;
   let scrollDir = 1; /* +1 = scrolling down, -1 = scrolling up */
+  let destroyed = false;
+  const pendingTimers = new Set();
+  const later = (fn, ms) => {
+    const id = setTimeout(() => { pendingTimers.delete(id); if (!destroyed) fn(); }, ms);
+    pendingTimers.add(id);
+    return id;
+  };
 
   function planetKey(section) {
     return section.props?.planetKey || section.planet?.key || null;
@@ -116,10 +125,16 @@ export function installRhythm(cfg) {
       const destName = scrollDir >= 0 ? cur.toName : cur.fromName;
       const destKey = scrollDir >= 0 ? cur.to : cur.from;
       const origKey = scrollDir >= 0 ? cur.from : cur.to;
-      if (lastTransitionId !== cur.tid && t > 0.05 && t < 0.95) {
+      /* Re-fire on a NEW transition stage, or when the user reverses
+         direction mid-transition (so the overlay names the planet they
+         are actually heading toward, not the abandoned destination). */
+      const dirFlipped = lastTransitionId === cur.tid && lastTravelDir !== 0 && lastTravelDir !== scrollDir;
+      if ((lastTransitionId !== cur.tid || dirFlipped) && t > 0.05 && t < 0.95) {
         lastTransitionId = cur.tid;
+        lastTravelDir = scrollDir;
         fire("galactic:travel:start", { from: origKey, to: destKey, planetName: destName });
       }
+      wasInTransition = true;
       if (t >= 0.95 || t <= 0.05) {
         if (lastTransitionId) {
           fire("galactic:travel:end", { tid: cur.tid });
@@ -134,14 +149,20 @@ export function installRhythm(cfg) {
         fire("galactic:travel:end", { tid: lastTransitionId });
         lastTransitionId = null;
       }
+      lastTravelDir = 0;
       scene.setActive(cur.key);
       /* Broadcast the active section so each GlassCard can reveal itself
          exactly when the camera frames its planet (and hide during transit),
-         keeping card and camera in sync for ANY section arrangement. */
-      if (window.__activeSolarySectionId !== cur.id) {
+         keeping card and camera in sync for ANY section arrangement.
+         Also re-fire when LANDING out of a transition even if the id is
+         unchanged: travel:start hid every card, and a guest who reversed
+         back into the SAME section would otherwise never get the reveal
+         signal again (card gone until they wander to another section). */
+      if (window.__activeSolarySectionId !== cur.id || wasInTransition) {
         window.__activeSolarySectionId = cur.id;
         fire("solary:section", { id: cur.id, key: cur.key });
       }
+      wasInTransition = false;
     }
   }
   function onScroll() {
@@ -150,24 +171,44 @@ export function installRhythm(cfg) {
     requestAnimationFrame(applyScroll);
   }
 
+  function onResize() { rebuildBoundaries(); onScroll(); }
+
   function boot() {
-    if (installed) return;
-    if (!window.galacticScene) { setTimeout(boot, 60); return; }
-    if (!insertStages()) { setTimeout(boot, 60); return; }
+    if (installed || destroyed) return;
+    if (!window.galacticScene) { later(boot, 60); return; }
+    if (!insertStages()) { later(boot, 60); return; }
     rebuildBoundaries();
     applyScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", () => { rebuildBoundaries(); onScroll(); });
+    window.addEventListener("resize", onResize);
     if (window.__lenis?.on) window.__lenis.on("scroll", onScroll);
-    setTimeout(() => { rebuildBoundaries(); onScroll(); }, 600);
-    setTimeout(() => { rebuildBoundaries(); onScroll(); }, 1800);
+    later(() => { rebuildBoundaries(); onScroll(); }, 600);
+    later(() => { rebuildBoundaries(); onScroll(); }, 1800);
     installed = true;
     window.galacticRhythm = { rebuildBoundaries, applyScroll };
   }
 
   function waitForReact(retries = 100) {
     if (document.querySelector("main")?.children.length > 1) boot();
-    else if (retries > 0) setTimeout(() => waitForReact(retries - 1), 50);
+    else if (retries > 0) later(() => waitForReact(retries - 1), 50);
   }
   waitForReact();
+
+  /* Teardown — Shell calls this on unmount/config change so listeners and
+     timers never stack up across re-installs (editor live preview). */
+  return function uninstallRhythm() {
+    destroyed = true;
+    pendingTimers.forEach(clearTimeout);
+    pendingTimers.clear();
+    if (installed) {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      try { window.__lenis?.off?.("scroll", onScroll); } catch {}
+      if (window.galacticRhythm?.rebuildBoundaries === rebuildBoundaries) {
+        delete window.galacticRhythm;
+      }
+      installed = false;
+    }
+    if (window.__activeSolarySectionId !== undefined) delete window.__activeSolarySectionId;
+  };
 }

@@ -166,6 +166,12 @@
 
 /* Responsive — keep flight natural on small screens */
 @media (max-width: 768px) {
+  /* drop-shadow on a wing-flapping SVG forces a filter re-raster every
+     frame — measured as the single biggest FPS killer on phones (3→22fps
+     when the birds were hidden). The shadow is invisible at these sizes
+     anyway; kill it on mobile only. */
+  .lovebird { filter: none; }
+
   .lovebird-1  { width: 64px; height: 64px; }
   .lovebird-2  { width: 56px; height: 56px; }
   .lovebird-3  { width: 48px; height: 48px; }

@@ -160,10 +160,10 @@ export default function EventDetails(props) {
         <div className={styles.events}>
           {events.map((ev, i) =>
             useStacked ? (
-              <EventCardStacked key={ev.id} event={ev} />
+              <EventCardStacked key={ev.id ?? i} event={ev} />
             ) : (
               <EventCardPinned
-                key={ev.id}
+                key={ev.id ?? i}
                 event={ev}
                 index={i}
                 total={events.length}

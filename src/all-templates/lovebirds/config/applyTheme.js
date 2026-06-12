@@ -48,3 +48,17 @@ export function applyTheme(name) {
   body.classList.add(`theme-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`)
   return key
 }
+
+/* Remove everything applyTheme() painted onto <body>. Called when the
+   lovebirds shell unmounts (SPA navigation away) so the theme vars and
+   `theme-*` class don't leak onto marketing/dashboard routes. Every theme
+   shares the same var keys, so the default theme's keys cover them all. */
+export function clearTheme() {
+  if (typeof document === 'undefined' || !document.body) return
+  const body = document.body
+  for (const k of Object.keys(resolveTheme(DEFAULT_THEME_NAME))) {
+    body.style.removeProperty(k)
+  }
+  body.style.removeProperty('--page-bg')
+  body.classList.forEach((c) => { if (c.startsWith('theme-')) body.classList.remove(c) })
+}

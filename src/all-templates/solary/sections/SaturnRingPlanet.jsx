@@ -64,17 +64,13 @@ export default function SaturnRingPlanet({ sectionLabel, planetName, heading, ph
           window.galacticScene?.setSaturnAssemblyProgress?.(self.progress);
         },
         onRefresh: (self) => {
-          console.log("[saturn] ScrollTrigger refresh, progress:", self.progress.toFixed(3));
           window.galacticScene?.setSaturnAssemblyProgress?.(self.progress);
         },
       });
 
       /* Force ScrollTrigger to recompute now that scene + DOM are ready. */
       setTimeout(() => {
-        try {
-          ScrollTrigger.refresh();
-          console.log("[saturn] post-refresh progress:", trigger?.progress?.toFixed(3));
-        } catch (e) { console.error("[saturn] refresh failed:", e); }
+        try { ScrollTrigger.refresh(); } catch {}
       }, 50);
 
       /* Safety fallback: if 2 seconds pass and progress is still 0

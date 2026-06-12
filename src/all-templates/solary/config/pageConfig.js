@@ -22,9 +22,12 @@ export const pageConfig = {
   },
 
   /* Background music — path relative to /public. Audio popup
-     in the OpeningGate respects autoplay policy. */
+     in the OpeningGate respects autoplay policy.
+     src is null by default: /audio/ambient.mp3 never existed in public/,
+     so the demo offered a music popup whose accept button played nothing
+     (plus two 404s per visit). Real invitations set music.url instead. */
   audio: {
-    src: "/audio/ambient.mp3",                               // [CONTOH] drop file in public/audio/
+    src: null,                                               // [CONTOH] drop a file in public/audio/ and point here
     enabledByDefault: false,
     volume: 0.45,
   },

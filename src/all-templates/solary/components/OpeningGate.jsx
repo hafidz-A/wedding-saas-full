@@ -41,7 +41,14 @@ export default function OpeningGate({ eyebrow, coupleName, tagline, ctaLabel = "
   const handleStart = (e) => {
     e.preventDefault();
     const lenis = window.__lenis;
-    const target = document.getElementById("neptune");
+    /* Scroll to whatever section FOLLOWS the gate — section ids are
+       config-defined, so a hardcoded id breaks on custom arrangements. */
+    const own = rootRef.current?.closest("section[id]");
+    let target = own?.nextElementSibling;
+    while (target && !(target.tagName === "SECTION" && target.id)) {
+      target = target.nextElementSibling;
+    }
+    if (!target) target = document.querySelectorAll("main > section[id]")[1] || null;
     if (lenis?.scrollTo && target) {
       lenis.scrollTo(target, { duration: 2.0, easing: (t) => 1 - Math.pow(1 - t, 3) });
     } else if (target) {

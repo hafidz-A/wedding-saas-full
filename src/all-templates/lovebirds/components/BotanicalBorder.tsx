@@ -86,11 +86,11 @@ function getInitialSectionId() {
   return document.querySelector<HTMLElement>('[data-section]')?.dataset.section || 'hero'
 }
 
-function generateStems(seed: number): Stem[] {
+function generateStems(seed: number, stemCount: number = STEM_COUNT): Stem[] {
   const rng = mulberry32(seed)
 
-  return Array.from({ length: STEM_COUNT }, (_, i) => {
-    const yStart = 10 + i * (880 / STEM_COUNT)
+  return Array.from({ length: stemCount }, (_, i) => {
+    const yStart = 10 + i * (880 / stemCount)
     const yEnd = yStart + 90 + rng() * 70
 
     return {
@@ -280,13 +280,18 @@ export const BotanicalSketchLayer = React.memo(({
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const hasEnteredRef = useRef(false)
-  const [windowWidth, setWindowWidth] = useState(() => {
-    if (typeof window === 'undefined') return 1024
-    return window.innerWidth
-  })
+  // MUST start at the same value on server and first client render — reading
+  // window.innerWidth in the initializer made SSR emit the desktop width
+  // (clamp(120px…)) while a phone hydrated with the mobile width, throwing a
+  // React hydration-mismatch error on every mobile load. The ResizeObserver
+  // below fires once on observe and corrects the width right after mount.
+  const [windowWidth, setWindowWidth] = useState(1024)
 
   const resolvedSeed = useMemo(() => seed ?? Date.now(), [seed])
-  const stems = useMemo(() => generateStems(resolvedSeed), [resolvedSeed])
+  // Phones render fewer stems: each stem is dozens of stroked paths across a
+  // 100vh layer, and rastering two of those at DPR 3 was a measured FPS sink.
+  const stemCount = windowWidth < 768 ? 5 : STEM_COUNT
+  const stems = useMemo(() => generateStems(resolvedSeed, stemCount), [resolvedSeed, stemCount])
 
   const svgWidth = windowWidth < 480
     ? mobileWidth
@@ -606,6 +611,13 @@ export const BotanicalBorder = React.memo(() => {
         section: activeSection,
         seed: sectionSeed,
         leaving: false,
+      }
+
+      // Phones: swap layers instantly instead of crossfading — the crossfade
+      // keeps TWO full-height SVG layers alive for ~1.85s per section change,
+      // which doubled the raster load exactly while the page is scrolling.
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+        return [nextLayer]
       }
 
       return [

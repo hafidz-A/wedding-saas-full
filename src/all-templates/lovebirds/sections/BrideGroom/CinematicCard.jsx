@@ -102,7 +102,7 @@ export default function CinematicCard({
     // Start the idle float as soon as the section is fully on screen (which is
     // also when the compressed entrance finishes) so the cards are never left
     // sitting static and bare for the rest of the scroll.
-    ScrollTrigger.create({
+    const idleFloatTrigger = ScrollTrigger.create({
       trigger: stTrigger,
       start: selfTrigger ? 'top 55%' : 'top top',
       onEnter: () => el.classList.add(styles.idleFloat),
@@ -110,11 +110,12 @@ export default function CinematicCard({
     })
 
     return () => {
+      // Kill ONLY this card's triggers. On desktop both cards (and the
+      // DummyCardLayers) share the section element as `trigger`, so the old
+      // ScrollTrigger.getAll() sweep nuked the sibling card's animations too.
       tl.scrollTrigger?.kill()
       tl.kill()
-      ScrollTrigger.getAll().forEach((st) => {
-        if (st.trigger === stTrigger) st.kill()
-      })
+      idleFloatTrigger.kill()
     }
   }, [direction, triggerRef, selfTrigger, startPct, endPct, tiltStrength, distance, isRight])
 

@@ -19,11 +19,13 @@ export default function CountdownPlanet({
   targetDate, endDate, venueName, venueAddress,
 }) {
   const target = useMemo(() => new Date(targetDate).getTime(), [targetDate]);
-  const [t, setT] = useState(() => diff(target));
+  const validDate = Number.isFinite(target);
+  const [t, setT] = useState(() => (validDate ? diff(target) : { d: 0, h: 0, m: 0, s: 0, done: false }));
   useEffect(() => {
+    if (!validDate) return; // invalid/missing date — don't tick NaN every second
     const id = setInterval(() => setT(diff(target)), 1000);
     return () => clearInterval(id);
-  }, [target]);
+  }, [target, validDate]);
 
   const cells = [
     { v: t.d, label: "Days" },
@@ -55,7 +57,7 @@ export default function CountdownPlanet({
         )}
         <CardChild>
           <div style={{ display: "flex", justifyContent: "center" }}>
-            {t.done ? (
+            {!validDate ? null : t.done ? (
               <p className="mono" style={{ fontSize: 14, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)" }}>
                 The alignment has begun ✦
               </p>
@@ -71,16 +73,18 @@ export default function CountdownPlanet({
             )}
           </div>
         </CardChild>
-        <CardChild>
-          <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: "1.75rem", flexWrap: "wrap" }}>
-            <button className="btn-primary" onClick={() => downloadIcs(calEvent)}>
-              Add to Calendar (.ics) <span>↓</span>
-            </button>
-            <a className="btn-ghost" href={googleCalUrl(calEvent)} target="_blank" rel="noopener noreferrer">
-              Google Calendar <span>↗</span>
-            </a>
-          </div>
-        </CardChild>
+        {validDate && (
+          <CardChild>
+            <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: "1.75rem", flexWrap: "wrap" }}>
+              <button className="btn-primary" onClick={() => downloadIcs(calEvent)}>
+                Add to Calendar (.ics) <span>↓</span>
+              </button>
+              <a className="btn-ghost" href={googleCalUrl(calEvent)} target="_blank" rel="noopener noreferrer">
+                Google Calendar <span>↗</span>
+              </a>
+            </div>
+          </CardChild>
+        )}
       </GlassCard>
     </div>
   );

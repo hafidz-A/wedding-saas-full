@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Ornaments.css'
 import { resolveOrnamentTheme } from '../config/ornamentThemes.js'
 import { useTheme } from './ThemeProvider.jsx'
@@ -25,6 +25,26 @@ const SHAPES = {
 
 const BG_BIRDS = [5, 6, 7, 8, 9]
 const FG_BIRDS = [1, 2, 3]
+// Phones get a lighter flock: every flapping bird re-rasters its SVG layer
+// continuously, and 8 of them was a measured FPS sink on mid-range devices.
+const BG_BIRDS_MOBILE = [5, 6, 7]
+const FG_BIRDS_MOBILE = [1, 2]
+
+// Hydration-safe breakpoint: MUST start false on both server and first
+// client render (same pattern as GlobalBackground's useBreakpoint), then
+// reads the real value after mount. A decorative layer trimming its bird
+// count a frame later is invisible; a hydration mismatch is not.
+function useIsNarrow(maxWidth = 768) {
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${maxWidth}px)`)
+    const sync = (e) => setNarrow(e.matches ?? mql.matches)
+    setNarrow(mql.matches)
+    mql.addEventListener?.('change', sync)
+    return () => mql.removeEventListener?.('change', sync)
+  }, [maxWidth])
+  return narrow
+}
 
 export default function Ornaments() {
   // Live values from ThemeProvider — in demo these change as the guest switches
@@ -32,15 +52,18 @@ export default function Ornaments() {
   // couple's saved defaults. The flying SVG birds inherit colour via CSS
   // (var(--accent)); the perched canvas resolves its palette below.
   const { theme: paletteKey, ornamentType } = useTheme()
+  const isNarrow = useIsNarrow()
   const isPerched = ornamentType === 'perched'
   const inner = SHAPES[ornamentType] || SHAPES.birds
+  const bgBirds = isNarrow ? BG_BIRDS_MOBILE : BG_BIRDS
+  const fgBirds = isNarrow ? FG_BIRDS_MOBILE : FG_BIRDS
 
   return (
     <div className="lovebirds-ornament-root" aria-hidden="true">
       {!isPerched && (
         <>
           <div className="lovebirds-fly-zone-bg">
-            {BG_BIRDS.map((n) => (
+            {bgBirds.map((n) => (
               <div key={n} className={`lovebird-parallax-wrap p-wrap-${n}`}>
                 <svg className={`lovebird lovebird-${n}`} viewBox="0 0 64 64"
                      dangerouslySetInnerHTML={{ __html: inner }} />
@@ -48,7 +71,7 @@ export default function Ornaments() {
             ))}
           </div>
           <div className="lovebirds-fly-zone-fg">
-            {FG_BIRDS.map((n) => (
+            {fgBirds.map((n) => (
               <div key={n} className={`lovebird-parallax-wrap p-wrap-${n}`}>
                 <svg className={`lovebird lovebird-${n}`} viewBox="0 0 64 64"
                      dangerouslySetInnerHTML={{ __html: inner }} />

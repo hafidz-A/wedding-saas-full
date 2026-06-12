@@ -49,8 +49,27 @@ function startGyro() {
   window.addEventListener('deviceorientation', onDeviceOrientation)
 }
 
+function stopGyro() {
+  if (!gyroListening) return
+  gyroListening = false
+  window.removeEventListener('deviceorientation', onDeviceOrientation)
+  if (gyroRaf) {
+    cancelAnimationFrame(gyroRaf)
+    gyroRaf = 0
+  }
+  gyroBase = null
+  // gyroRequested intentionally stays true — the iOS permission was already
+  // granted/denied once; re-asking on the next mount would be noise.
+}
+
 function requestGyro() {
-  if (gyroRequested) return
+  if (gyroRequested) {
+    // Permission flow already ran once this session — just (re)attach the
+    // listener (no-op while it's still active). On iOS without permission
+    // the listener simply receives no events.
+    startGyro()
+    return
+  }
   gyroRequested = true
   const DOE = typeof DeviceOrientationEvent !== 'undefined' ? DeviceOrientationEvent : null
   if (DOE && typeof DOE.requestPermission === 'function') {
@@ -68,7 +87,12 @@ function requestGyro() {
 function subscribeGyro(fn) {
   gyroSubs.add(fn)
   requestGyro()
-  return () => gyroSubs.delete(fn)
+  return () => {
+    gyroSubs.delete(fn)
+    // Last card gone (e.g. SPA nav off the invitation) → release the global
+    // listener instead of leaking it for the rest of the session.
+    if (gyroSubs.size === 0) stopGyro()
+  }
 }
 
 /**

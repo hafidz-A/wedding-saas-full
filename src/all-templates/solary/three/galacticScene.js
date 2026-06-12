@@ -982,10 +982,7 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
        its own large canvas texture, so this is also the GPU-memory ceiling. */
     const photos = allPhotos.slice(0, 30);
 
-    if (!photos.length) {
-      console.log("[saturn] setSaturnPhotos called with empty array — sprites cleared");
-      return;
-    }
+    if (!photos.length) return;
 
     const N = photos.length;
     /* Keep ~15% breathing room between cards: circumference ≥ N × cardW ×
@@ -1024,7 +1021,6 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
       photoObj.sprite = sprite;
       activePhotos.push(photoObj);
     });
-    console.log(`[saturn] ${N} sprites created. photoRingGroup children:`, photoRingGroup.children.length, "parented to saturn:", planetGroups.saturn === photoRingGroup.parent);
   }
 
   /* Andromeda — large opening backdrop */
@@ -1058,7 +1054,7 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     };
     scene.add(sprite); comets.push(sprite);
   }
-  setInterval(() => { if (Math.random() < 0.5) spawnComet(); }, 7000);
+  const cometInterval = setInterval(() => { if (Math.random() < 0.5) spawnComet(); }, 7000);
 
   /* ============================================================
      WISH STARS — appended via API
@@ -1218,8 +1214,9 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
   canvas.style.pointerEvents = "none";
   canvas.addEventListener("pointerdown", () => { /* noop */ }, { passive: true });
   /* Re-enable pointer for the click handler by listening on window
-     and doing the raycaster check ourselves. */
-  window.addEventListener("click", (e) => {
+     and doing the raycaster check ourselves. Named so destroy() can
+     remove it — otherwise the raycaster keeps firing on other pages. */
+  const onWindowClick = (e) => {
     if (solarSystemOpacity < 0.9) return;
     /* Ignore clicks on UI (cards, buttons). Only count clicks on
        the bare canvas area. */
@@ -1245,7 +1242,8 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
     const hit = raycaster.intersectObject(sunCore, false);
     if (hit.length) window.dispatchEvent(new CustomEvent("galactic:sunclick"));
-  });
+  };
+  window.addEventListener("click", onWindowClick);
 
   /* ============================================================
      THEME — react to palette changes
@@ -1308,7 +1306,7 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     });
   }
   applyTheme(themeBus.current);
-  themeBus.subscribe(applyTheme);
+  const unsubscribeTheme = themeBus.subscribe(applyTheme);
 
   /* ============================================================
      RAF LOOP
@@ -1693,7 +1691,22 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
     destroy() {
       cancelAnimationFrame(raf);
+      clearInterval(cometInterval);
+      unsubscribeTheme();
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("click", onWindowClick);
+      /* Free GPU memory: every geometry/material/texture in the graph.
+         Without this each visit to a Solary route leaks the full scene
+         (planet spheres, starfields, card canvases) until context loss. */
+      scene.traverse((obj) => {
+        obj.geometry?.dispose?.();
+        const mats = Array.isArray(obj.material) ? obj.material : (obj.material ? [obj.material] : []);
+        mats.forEach((m) => {
+          m.map?.dispose?.();
+          m.bumpMap?.dispose?.();
+          m.dispose?.();
+        });
+      });
       renderer.dispose();
       canvas.remove();
       delete window.galacticScene;

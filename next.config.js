@@ -12,7 +12,9 @@
 //   • img/media 'https:' blob: data: → Supabase Storage, Unsplash/Picsum, canvas
 //     (three.js), and owner-supplied music URLs.
 //   • connect-src *.supabase.co + wss → Supabase Auth/REST + Realtime.
-//   • frame-src 'self' → the editor PreviewPane embeds /<slug>?preview=1.
+//   • frame-src 'self' + google.com → the editor PreviewPane embeds
+//     /<slug>?preview=1, and the EventDetails section embeds a Google Maps
+//     iframe (violations were already showing up in report-only mode).
 const cspReportOnly = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -21,7 +23,7 @@ const cspReportOnly = [
   "font-src 'self' data:",
   "media-src 'self' blob: data: https:",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-  "frame-src 'self'",
+  "frame-src 'self' https://www.google.com https://maps.google.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "form-action 'self'",

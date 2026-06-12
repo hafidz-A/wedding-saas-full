@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { sectionRegistry } from '../registry.js'
 import styles from './FloatingNavbar.module.css'
@@ -72,14 +72,20 @@ export default function FloatingNavbar({ sections = [], threshold = 600 }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [threshold])
 
-  // Build the list of visible nav items.
-  const items = sections
-    .filter((s) => s.enabled !== false && !s.navHidden)
-    .filter((s) => Boolean(sectionRegistry[s.type]))
-    .map((s) => {
-      const raw = s.navLabel || DEFAULT_LABELS[s.type] || s.id
-      return { id: s.id, label: stackLabel(raw), flatLabel: flatLabel(raw) }
-    })
+  // Build the list of visible nav items. Memoized — a fresh array identity on
+  // every render made the IntersectionObserver effect below tear down and
+  // recreate the observer on every activeId change while scrolling.
+  const items = useMemo(
+    () =>
+      sections
+        .filter((s) => s.enabled !== false && !s.navHidden)
+        .filter((s) => Boolean(sectionRegistry[s.type]))
+        .map((s) => {
+          const raw = s.navLabel || DEFAULT_LABELS[s.type] || s.id
+          return { id: s.id, label: stackLabel(raw), flatLabel: flatLabel(raw) }
+        }),
+    [sections],
+  )
 
   // Track which section the user is currently viewing
   useEffect(() => {

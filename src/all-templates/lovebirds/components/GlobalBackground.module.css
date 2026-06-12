@@ -154,6 +154,11 @@
 
 /* ── Tablet portrait (600–767px) ── */
 @media (max-width: 767px) {
+  /* washPulse animates scale+opacity on a blur()ed layer, which re-composites
+     the filter every frame — measurable jank on phones. A static glow looks
+     the same at this size. */
+  .wash { animation: none; opacity: 0.55; }
+
   .ornamentTR,
   .ornamentBL { opacity: 0.25; }
 

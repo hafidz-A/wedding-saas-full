@@ -83,7 +83,6 @@ export default function Rsvp(props) {
 
   return (
     <section
-      id="rsvp"
       ref={ref}
       className={`${styles.section} ${isVisible ? styles.visible : ''}`}
       aria-label="RSVP"
@@ -166,7 +165,7 @@ export default function Rsvp(props) {
                             <button
                               type="button"
                               className={styles.stepBtn}
-                              onClick={() => field.onChange((field.value || 1) + 1)}
+                              onClick={() => field.onChange(Math.min(99, (field.value || 1) + 1))}
                               aria-label="Increase guest count"
                             >+</button>
                           </div>
@@ -197,9 +196,14 @@ export default function Rsvp(props) {
                   <textarea
                     className={styles.textarea}
                     rows={4}
+                    maxLength={500}
                     placeholder="Wishes, songs, dietary notes…"
-                    {...register('message', { maxLength: 500 })}
+                    aria-invalid={errors.message ? 'true' : 'false'}
+                    {...register('message', {
+                      maxLength: { value: 500, message: 'Maksimal 500 karakter' },
+                    })}
                   />
+                  {errors.message && <span className={styles.error}>{errors.message.message}</span>}
                 </label>
               </div>
 

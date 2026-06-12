@@ -83,6 +83,9 @@ export default function GalleryMasonry({
                   {/* Broken URL → hide the broken-image icon/alt text so the
                       cell's soft placeholder background shows instead. */}
                   <img
+                    /* keyed by src so swapping the photo in the editor
+                       remounts the element and clears onError's display:none */
+                    key={photo.src}
                     src={photo.src}
                     alt={photo.alt || ''}
                     loading="lazy"

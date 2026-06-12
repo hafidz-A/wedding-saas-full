@@ -29,9 +29,14 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
   }, [accounts]);
 
   const copy = (n, k) => {
-    navigator.clipboard?.writeText(n);
-    setCopied(k);
-    setTimeout(() => setCopied(null), 1500);
+    // Only show "Copied" when the write actually succeeded (clipboard API
+    // is unavailable on non-HTTPS or can be permission-blocked).
+    const p = navigator.clipboard?.writeText?.(String(n));
+    if (!p) return;
+    p.then(() => {
+      setCopied(k);
+      setTimeout(() => setCopied(null), 1500);
+    }).catch(() => {});
   };
 
   const useAccount = (a) => {

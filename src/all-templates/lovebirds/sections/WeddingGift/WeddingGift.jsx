@@ -244,7 +244,6 @@ export default function WeddingGift(props) {
 
   return (
     <section
-      id="wedding-gift"
       ref={ref}
       className={`${styles.section} ${isVisible ? styles.visible : ''}`}
       aria-label="Wedding Gift"
@@ -404,9 +403,14 @@ export default function WeddingGift(props) {
                       <textarea
                         className={styles.textarea}
                         rows={4}
+                        maxLength={500}
                         placeholder="Doa, ucapan, atau pesan kecil…"
-                        {...register('message', { maxLength: 500 })}
+                        aria-invalid={errors.message ? 'true' : 'false'}
+                        {...register('message', {
+                          maxLength: { value: 500, message: 'Maksimal 500 karakter' },
+                        })}
                       />
+                      {errors.message && <span className={styles.error}>{errors.message.message}</span>}
                     </label>
                   </div>
 

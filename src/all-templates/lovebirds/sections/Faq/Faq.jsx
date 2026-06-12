@@ -22,7 +22,7 @@ function Chevron({ open }) {
 export default function Faq(props) {
   const { title, subtitle, items } = { ...DEFAULTS, ...props }
   const { ref, isVisible } = useScrollReveal()
-  const [openId, setOpenId] = useState(items?.[0]?.id ?? null)
+  const [openId, setOpenId] = useState(items?.length ? items[0].id ?? 0 : null)
 
   const toggle = (id) => setOpenId((curr) => (curr === id ? null : id))
 
@@ -40,13 +40,16 @@ export default function Faq(props) {
         </header>
 
         <div className={styles.list} role="list">
-          {items.map((item) => {
-            const open = openId === item.id
-            const panelId = `faq-panel-${item.id}`
-            const btnId = `faq-trigger-${item.id}`
+          {items.map((item, idx) => {
+            // Fall back to the index so id-less items from the editor don't
+            // share `undefined` (which opened/closed every panel at once).
+            const itemId = item.id ?? idx
+            const open = openId === itemId
+            const panelId = `faq-panel-${itemId}`
+            const btnId = `faq-trigger-${itemId}`
             return (
               <div
-                key={item.id}
+                key={itemId}
                 role="listitem"
                 className={`${styles.item} ${open ? styles.itemOpen : ''}`}
               >
@@ -56,7 +59,7 @@ export default function Faq(props) {
                   className={styles.trigger}
                   aria-expanded={open}
                   aria-controls={panelId}
-                  onClick={() => toggle(item.id)}
+                  onClick={() => toggle(itemId)}
                 >
                   <span className={styles.question}>{item.q}</span>
                   <Chevron open={open} />

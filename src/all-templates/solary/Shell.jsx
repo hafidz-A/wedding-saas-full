@@ -24,11 +24,12 @@ import { AudioProvider } from './contexts/AudioContext.jsx'
 import { GuestProvider } from './contexts/GuestContext.jsx'
 import { JourneyProvider } from './contexts/JourneyContext.jsx'
 
-import { startSmoothScroll } from './utils/smoothScroll.js'
+import { startSmoothScroll, stopSmoothScroll } from './utils/smoothScroll.js'
 import { mountGalacticScene } from './three/galacticScene.js'
 import { installRhythm } from './utils/rhythm.js'
 import { defaultConfig } from './defaultConfig.js'
 import { normalizeSolaryConfig } from './config/normalizeConfig.js'
+import { clearPaletteFromDOM } from './config/themeTokens.js'
 
 /**
  * Solary render shell — port of the standalone galactic-wedding
@@ -62,10 +63,12 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
     [visible],
   )
   const music = config.music || {}
-  const audioSrc = (music.enabled !== false && music.url) ? music.url : config.audio?.src
+  // music.enabled === false means the couple turned music OFF — do not fall
+  // back to the legacy default track. The legacy fallback only applies to
+  // configs that predate the music object (enabled undefined).
+  const audioSrc = music.enabled === false ? null : (music.url || config.audio?.src)
 
   const effSlug = slug || config.meta?.slug || 'demo'
-  const sectionIds = visible.map((s) => s.id)
   // Gate photos double as the floating "photo-stars" scattered behind every
   // non-photo section (see SectionRenderer's PHOTO_BACKED_TYPES).
   const gatePhotos = useMemo(() => {
@@ -89,16 +92,20 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
       mountGalacticScene({ starfieldDensity: config.scene?.starfieldDensity })
     }
     const lenis = startSmoothScroll(config.scene?.lenis)
+    let refreshTimer = 0
     if (lenis?.on) {
       lenis.on('scroll', ScrollTrigger.update)
-      setTimeout(() => ScrollTrigger.refresh(), 100)
+      refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 100)
     }
-    installRhythm(config)
+    const uninstallRhythm = installRhythm(config)
 
     return () => {
-      try {
-        window.galacticScene?.destroy?.()
-      } catch {}
+      clearTimeout(refreshTimer)
+      try { uninstallRhythm?.() } catch {}
+      try { lenis?.off?.('scroll', ScrollTrigger.update) } catch {}
+      try { stopSmoothScroll() } catch {}
+      try { window.galacticScene?.destroy?.() } catch {}
+      try { clearPaletteFromDOM() } catch {}
     }
   }, [config])
 
@@ -129,7 +136,7 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
               acceptLabel={music.acceptLabel}
               dismissLabel={music.dismissLabel}
             />
-            <SectionArrows sectionIds={sectionIds} />
+            <SectionArrows allSections={allSections} />
           </JourneyProvider>
         </GuestProvider>
       </AudioProvider>

@@ -196,17 +196,36 @@ export function applyPaletteToDOM(name) {
   // Sync class on body (convert camelCase key to kebab-case)
   const body = document.body;
   if (body) {
-    // Remove existing theme classes
-    body.classList.forEach((cls) => {
-      if (cls.startsWith("theme-")) {
-        body.classList.remove(cls);
-      }
-    });
+    // Remove existing theme classes (snapshot first — removing while
+    // iterating a live DOMTokenList can skip entries)
+    Array.from(body.classList)
+      .filter((cls) => cls.startsWith("theme-"))
+      .forEach((cls) => body.classList.remove(cls));
     const canonicalId = p.id || name;
     const kebabName = canonicalId.replace(/([A-Z])/g, "-$1").toLowerCase();
     body.classList.add(`theme-${kebabName}`);
   }
   return p;
+}
+
+/* Remove everything applyPaletteToDOM wrote — Solary's palette vars and
+   theme-* body class must not leak into other routes after a client-side
+   navigation away. Called by the Shell's unmount cleanup. */
+const PALETTE_VARS = [
+  "--color-bg", "--color-bg-soft", "--color-surface", "--color-fg",
+  "--color-fg-mute", "--color-fg-faint", "--color-line", "--color-line-soft",
+  "--color-accent", "--color-accent-soft", "--color-glow", "--color-glow-rgb",
+  "--color-star", "--theme-mode",
+];
+export function clearPaletteFromDOM() {
+  if (typeof document === "undefined") return;
+  const r = document.documentElement.style;
+  PALETTE_VARS.forEach((v) => r.removeProperty(v));
+  if (document.body) {
+    Array.from(document.body.classList)
+      .filter((cls) => cls.startsWith("theme-"))
+      .forEach((cls) => document.body.classList.remove(cls));
+  }
 }
 
 /* Snapshot of the active palette readable from non-React code

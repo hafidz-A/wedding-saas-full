@@ -53,18 +53,40 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
   }, []);
 
   useEffect(() => {
+    /* Primary signal: the rhythm's `solary:section` event. The old
+       IntersectionObserver-only tracking used ratio thresholds (0.25+)
+       that tall sections (Story = N×100vh, max ratio ~1/N) can NEVER
+       reach, so the active item silently stuck on a previous section
+       and the prev/next arrows navigated from the wrong index. */
+    let gotSignal = false;
+    const onSection = (e) => {
+      gotSignal = true;
+      if (e.detail?.id) setActiveId(e.detail.id);
+    };
+    window.addEventListener("solary:section", onSection);
+    if (typeof window !== "undefined" && window.__activeSolarySectionId != null) {
+      gotSignal = true;
+      setActiveId(window.__activeSolarySectionId);
+    }
+
+    /* Fallback for when the scene/rhythm isn't running (reduced setups). */
     const sections = allSections.map((s) => document.getElementById(s.id)).filter(Boolean);
-    if (!sections.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActiveId(visible.target.id);
-      },
-      { threshold: [0.25, 0.5, 0.75] }
-    );
+    const io = sections.length
+      ? new IntersectionObserver(
+          (entries) => {
+            if (gotSignal) return;
+            const visible = entries.filter((e) => e.isIntersecting)
+              .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+            if (visible) setActiveId(visible.target.id);
+          },
+          { threshold: [0.25, 0.5, 0.75] }
+        )
+      : null;
     sections.forEach((s) => io.observe(s));
-    return () => io.disconnect();
+    return () => {
+      window.removeEventListener("solary:section", onSection);
+      io?.disconnect();
+    };
   }, [allSections]);
 
   useEffect(() => {
@@ -107,8 +129,12 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
     const fromKey = fromSection?.planetKey || fromSection?.id || "andromeda";
 
     /* Suspend rhythm so scroll passing through intermediate transition
-       stages doesn't fight the GSAP camera arc. */
+       stages doesn't fight the GSAP camera arc. Token-based: only the
+       LATEST jump's timeout may release, so rapid clicks can't un-suspend
+       a jump still in flight. */
+    const token = Symbol("jump");
     window.__rhythmSuspended = true;
+    window.__rhythmSuspendToken = token;
     window.dispatchEvent(new CustomEvent("galactic:travel:start", {
       detail: { from: fromKey, to: destKey, planetName: destName },
     }));
@@ -123,7 +149,9 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
        +200 ms buffer for any tail lerp. */
     const totalMs = Math.max(PAGE_SCROLL_DURATION, cameraDuration) * 1000 + 200;
     setTimeout(() => {
+      if (window.__rhythmSuspendToken !== token) return; // a newer jump owns the suspend
       window.__rhythmSuspended = false;
+      delete window.__rhythmSuspendToken;
       /* Rhythm was suspended during the arc, so announce the destination
          section ourselves — this reveals the destination card on arrival. */
       window.__activeSolarySectionId = targetSection.id;
@@ -185,7 +213,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
         gap: 12, overflow: "visible",
       }}
     >
-      <a href="#intro" style={{
+      <a href={`#${allSections[0]?.id || "intro"}`} style={{
         // Couple-name brand in Great Vibes — script needs a larger size to
         // read at navbar scale, and zero tracking (it breaks cursive joins).
         fontFamily: "var(--font-script)", fontSize: 24, fontWeight: 400, letterSpacing: "normal",

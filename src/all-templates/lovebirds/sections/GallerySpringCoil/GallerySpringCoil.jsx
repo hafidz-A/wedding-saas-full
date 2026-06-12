@@ -23,9 +23,11 @@ const buildConfig = (N) => {
     rotationPerPhoto: 360 / safeN,
     // A whisper of rise per photo — the path reads as a circle, not a climb.
     pitchY: Math.max(6, Math.min(26, 240 / safeN)),
-    // Ring widens with N: circumference ≈ N × cardWidth × 1.05, clamped so
+    // Ring widens with N: circumference ≈ N × cardWidth × 0.92, clamped so
     // small sets still look like a ring and huge sets don't blow the stage.
-    radius: Math.max(260, Math.min(560, (safeN * cardWidth * 1.05) / (2 * Math.PI))),
+    // 0.92 (was 1.05) pulls the left/right neighbours ~15% closer to the
+    // front card; the min clamp dropped 260 → 235 so small sets tighten too.
+    radius: Math.max(235, Math.min(560, (safeN * cardWidth * 0.92) / (2 * Math.PI))),
     // The RING leans back a touch so its circular path is visible on screen;
     // the cards themselves counter-rotate and stay perfectly upright.
     ringTiltX: 14,
@@ -644,6 +646,9 @@ function CoilPhoto({ photo, index, config, cardRef, hasEntered, onOpen }) {
           <span className="gsc-coilFrame">
             {photo.src ? (
               <img
+                /* keyed by src so editing the photo remounts the element and
+                   clears a previous onError display:none */
+                key={photo.src}
                 className="gsc-coilImage"
                 src={photo.src}
                 alt={label}
@@ -713,14 +718,22 @@ export default function GallerySpringCoil({
     let raf = 0
     let inView = false
 
-    // Performance flags computed once. On mobile we skip the per-frame
-    // CSS filter:blur — it's the single most expensive op in the loop
-    // (forces fragment re-paint of the whole card every frame). The
-    // visual loss is minor; the FPS gain on phones is huge.
-    const isMobile =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(max-width: 760px)').matches
-    const useBlur = !isMobile
+    // Live media query (read per frame, not captured once) so a resize or
+    // orientation flip across 760px updates the blur-skip + radius scale
+    // without remounting the section.
+    const mobileMQL = window.matchMedia('(max-width: 760px)')
+
+    // Per-card button lookup cached — the old code ran querySelector on
+    // every card on every frame (~880 calls/s measured on a 16-photo ring).
+    const buttonCache = new WeakMap()
+    const getButton = (card) => {
+      let button = buttonCache.get(card)
+      if (button === undefined) {
+        button = card.querySelector('.gsc-coilButton')
+        buttonCache.set(card, button)
+      }
+      return button
+    }
 
     /**
      * Pure transform computation — no scheduling. Reads scrollProgress
@@ -732,6 +745,14 @@ export default function GallerySpringCoil({
      * when it last left.
      */
     const renderFrame = () => {
+      const isMobile = mobileMQL.matches
+      // Skip per-frame CSS filter:blur on mobile — it's the single most
+      // expensive op in the loop (forces fragment re-paint of the whole
+      // card every frame). The visual loss is minor; the FPS gain is huge.
+      const useBlur = !isMobile
+      // Pull the ring in on phones: the cards are smaller there, and the
+      // full-size radius pushed the side photos off a 390px screen.
+      const radius = config.radius * (isMobile ? 0.85 : 1)
       const progress = scrollProgress.current
       const activeRaw = progress * (total - 1)
       const nextActive = clampIndex(Math.round(activeRaw), total)
@@ -748,6 +769,13 @@ export default function GallerySpringCoil({
       const pitchRad = ((config.ringTiltX + tiltX) * Math.PI) / 180
       const sinPitch = Math.sin(pitchRad)
       const cosPitch = Math.cos(pitchRad)
+      // The 14° ring pitch lifts the near (front) card by radius×sin(pitch)
+      // above the anchor, which sat the whole composition too high in the
+      // scene (front card measured ~120px above centre, clipping under the
+      // header on phones). Drop the ring by that lift plus a small constant
+      // so the front card rests just below the scene's vertical centre.
+      const ringLift =
+        radius * Math.sin((config.ringTiltX * Math.PI) / 180) + 16
 
       coil.style.transform = `translateY(${riseY}px)`
 
@@ -755,7 +783,7 @@ export default function GallerySpringCoil({
         const card = cardsRef.current[index]
         if (!card) continue
 
-        const button = card.querySelector('.gsc-coilButton')
+        const button = getButton(card)
         const staticAngle = index * config.rotationPerPhoto
         const effective = ((staticAngle + rotY) % 360 + 360) % 360
         const depthNorm = effective > 180 ? 360 - effective : effective
@@ -782,14 +810,14 @@ export default function GallerySpringCoil({
         // ring pitch, riding the carousel yaw. The card itself is a pure
         // translate3d + scale — upright, facing the screen, slice-proof.
         const theta = ((staticAngle + yawBase) * Math.PI) / 180
-        const ringX = Math.sin(theta) * config.radius
-        const ringZ = Math.cos(theta) * config.radius
+        const ringX = Math.sin(theta) * radius
+        const ringZ = Math.cos(theta) * radius
         const x3 = ringX
         const y3 = -ringZ * sinPitch
         const z3 = ringZ * cosPitch
 
         card.style.transform = [
-          `translate3d(${x3.toFixed(2)}px, ${(y3 + yOffset).toFixed(2)}px, ${z3.toFixed(2)}px)`,
+          `translate3d(${x3.toFixed(2)}px, ${(y3 + yOffset + ringLift).toFixed(2)}px, ${z3.toFixed(2)}px)`,
           `scale(${scale.toFixed(3)})`,
         ].join(' ')
         card.style.zIndex = String(Math.round((1 - depthT) * 40 + easedFrontness * 100))
@@ -807,23 +835,35 @@ export default function GallerySpringCoil({
       }
     }
 
-    const applyFrame = () => {
-      if (!inView) {
+    // Event-driven rendering: the coil's output depends ONLY on the scroll
+    // progress and the mouse position, so there is nothing to animate while
+    // both are still. The old free-running rAF loop re-wrote 16–30 cards'
+    // styles every frame even when idle (measured ~90% main-thread busy on
+    // a throttled phone); now a frame is rendered only when ScrollTrigger's
+    // onUpdate or a pointermove actually changes the inputs.
+    const requestRender = () => {
+      if (!inView || raf) return
+      raf = requestAnimationFrame(() => {
         raf = 0
-        return
-      }
-      renderFrame()
-      raf = requestAnimationFrame(applyFrame)
+        renderFrame()
+      })
     }
 
     const startLoop = () => {
       inView = true
-      // Sync render BEFORE scheduling the rAF — guarantees the first
+      // Sync render BEFORE the next paint — guarantees the first
       // paint after re-enter shows the correct coil layout, fixing the
       // "stuck at top" / "cards flat" bug where the browser would paint
       // a stale transform before the next rAF tick.
       renderFrame()
-      if (!raf) raf = requestAnimationFrame(applyFrame)
+    }
+
+    const stopLoop = () => {
+      inView = false
+      if (raf) {
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
     }
 
     const observer = new IntersectionObserver(
@@ -845,14 +885,21 @@ export default function GallerySpringCoil({
         x: (event.clientX - rect.left) / rect.width,
         y: (event.clientY - rect.top) / rect.height,
       }
+      requestRender()
     }
 
     const onPointerLeave = () => {
       mouse.current = { x: 0.5, y: 0.5 }
+      requestRender()
     }
 
-    scene.addEventListener('pointermove', onPointerMove)
-    scene.addEventListener('pointerleave', onPointerLeave)
+    // Mouse parallax is a hover affordance — on touch devices pointermove
+    // only fires mid-swipe and just burned getBoundingClientRect reads.
+    const hoverCapable = !window.matchMedia('(hover: none)').matches
+    if (hoverCapable) {
+      scene.addEventListener('pointermove', onPointerMove)
+      scene.addEventListener('pointerleave', onPointerLeave)
+    }
 
     // iPad orientation flip (landscape⇄portrait) is the classic breaker here:
     // iPadOS reports the new innerWidth/innerHeight a beat AFTER the
@@ -895,7 +942,7 @@ export default function GallerySpringCoil({
           startLoop()
         },
         onLeave: () => {
-          inView = false
+          stopLoop()
           setGallerySketchVisible(false)
           // Don't reset — cards keep their last computed state. When the
           // section re-enters, startLoop()'s sync renderFrame() will
@@ -903,12 +950,13 @@ export default function GallerySpringCoil({
           // the first paint, so there's no "stuck at top" flash.
         },
         onLeaveBack: () => {
-          inView = false
+          stopLoop()
           setGallerySketchVisible(false)
         },
         onUpdate: (self) => {
           scrollProgress.current = self.progress
-          startLoop()
+          inView = true
+          requestRender()
         },
         onRefresh: (self) => {
           // After GSAP recalculates on viewport resize/orientation flip,
@@ -942,6 +990,36 @@ export default function GallerySpringCoil({
       ctx.revert()
     }
   }, [config, total])
+
+  // Lock page scroll while the lightbox is open. The section underneath is
+  // pinned + scrubbed — without the lock, wheel/touch scrolling behind the
+  // modal kept rotating the coil (and could unpin it entirely), so closing
+  // the lightbox dropped the guest somewhere else on the page.
+  const lightboxOpen = lightboxIndex !== null
+  useEffect(() => {
+    if (!lightboxOpen) return undefined
+    const html = document.documentElement
+    const prevHtml = html.style.overflow
+    const prevBody = document.body.style.overflow
+    html.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    // overflow:hidden alone is not enough here: Lenis turns wheel events
+    // into PROGRAMMATIC scrolls (window.scrollTo), which overflow:hidden
+    // does not block. Intercept wheel/touchmove in the capture phase so
+    // neither the native scroll nor Lenis's window-level listener runs.
+    const blockScroll = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    window.addEventListener('wheel', blockScroll, { passive: false, capture: true })
+    window.addEventListener('touchmove', blockScroll, { passive: false, capture: true })
+    return () => {
+      html.style.overflow = prevHtml
+      document.body.style.overflow = prevBody
+      window.removeEventListener('wheel', blockScroll, { capture: true })
+      window.removeEventListener('touchmove', blockScroll, { capture: true })
+    }
+  }, [lightboxOpen])
 
   // Lightbox keyboard controls.
   useEffect(() => {

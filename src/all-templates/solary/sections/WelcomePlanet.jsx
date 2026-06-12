@@ -37,7 +37,20 @@ export default function WelcomePlanet({ sectionLabel, planetName, heading, body,
         </CardChild>
         <CardChild>
           <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
-            <a className="btn-ghost" href="#uranus" onClick={(e) => { e.preventDefault(); document.getElementById("uranus")?.scrollIntoView({ behavior: "smooth" }); }}>
+            <a className="btn-ghost" href="#next-section" onClick={(e) => {
+              e.preventDefault();
+              /* Next section after this one — ids are config-defined, so a
+                 hardcoded "#uranus" breaks on custom arrangements. */
+              const own = e.currentTarget.closest("section[id]");
+              let target = own?.nextElementSibling;
+              while (target && !(target.tagName === "SECTION" && target.id)) {
+                target = target.nextElementSibling;
+              }
+              if (!target) return;
+              const lenis = window.__lenis;
+              if (lenis?.scrollTo) lenis.scrollTo(target, { duration: 2.0, easing: (t) => 1 - Math.pow(1 - t, 3) });
+              else target.scrollIntoView({ behavior: "smooth" });
+            }}>
               Our Story <span>→</span>
             </a>
           </div>
@@ -49,6 +62,9 @@ export default function WelcomePlanet({ sectionLabel, planetName, heading, body,
 
 function SafeImage({ src, alt, caption }) {
   const [failed, setFailed] = React.useState(!src);
+  // Reset on src change — without this, swapping in a NEW photo from the
+  // editor after one failed load would never display the replacement.
+  React.useEffect(() => { setFailed(!src); }, [src]);
   return (
     <figure style={{ margin: 0, maxWidth: 360, width: "100%" }}>
       <div style={{

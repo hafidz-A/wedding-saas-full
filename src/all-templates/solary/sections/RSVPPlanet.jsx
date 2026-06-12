@@ -9,7 +9,11 @@ import { useGuest } from "../contexts/GuestContext.jsx";
 const schema = z.object({
   guest_name: z.string().min(2, "Required").max(120),
   attending: z.enum(["yes", "no"]),
-  guest_count: z.coerce.number().int().min(1),
+  guest_count: z.coerce
+    .number({ invalid_type_error: "Masukkan jumlah tamu yang valid" })
+    .int("Masukkan angka bulat")
+    .min(1, "Minimal 1 tamu")
+    .max(999, "Maksimal 999 tamu"),
   meal_choice: z.string().optional(),
   message: z.string().max(600).optional(),
 });
@@ -80,6 +84,16 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
               <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14 }}>
                 RSVP Anda telah kami catat. Sampai jumpa di hari bahagia kami.
               </p>
+              {whatsappNumber && (
+                <a
+                  className="btn-ghost"
+                  style={{ marginTop: 14, display: "inline-flex" }}
+                  href={`https://wa.me/${String(whatsappNumber).replace(/\D/g, "")}`}
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  Hubungi via WhatsApp ↗
+                </a>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
@@ -109,7 +123,8 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                 </div>
                 <div className="form-row">
                   <label className="form-label" htmlFor="rsvp-guests">Total guests</label>
-                  <input id="rsvp-guests" type="number" min="1" className="form-input" {...register("guest_count")} />
+                  <input id="rsvp-guests" type="number" min="1" max="999" className="form-input" {...register("guest_count")} />
+                  {errors.guest_count && <span className="form-error">{errors.guest_count.message}</span>}
                 </div>
               </div>
               {menuOptions.length > 0 && (
@@ -128,6 +143,18 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
               <button type="submit" className="form-button" disabled={isSubmitting}>
                 {isSubmitting ? "Mengirim…" : "Kirim RSVP →"}
               </button>
+              {whatsappNumber && (
+                <p className="mono faint center-text" style={{ fontSize: 11, letterSpacing: "0.18em", marginTop: 10 }}>
+                  atau konfirmasi langsung via{" "}
+                  <a
+                    href={`https://wa.me/${String(whatsappNumber).replace(/\D/g, "")}`}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{ color: "var(--color-accent)", textDecoration: "underline" }}
+                  >
+                    WhatsApp ↗
+                  </a>
+                </p>
+              )}
             </form>
           )}
         </CardChild>

@@ -66,19 +66,39 @@ export function normalizeSolaryConfig(config) {
   // canonical PLANET_POOL in journey order. We override any stored planetKey so
   // a reordered/swapped section always adopts the planet of the slot it lands
   // in — never carries its old planet with it.
+  //
+  // Exceptions to pure position:
+  // • saturnRing ALWAYS gets Saturn — its photo ring is physically parented to
+  //   the Saturn group in the 3D scene, so framing any other planet would show
+  //   an empty sky while the photos orbit off-camera.
+  // • Disabled sections are skipped entirely (they don't render, so they must
+  //   not consume a planet from the pool and shift everything after them).
+  // • If more middle sections exist than pool planets, the pool CYCLES —
+  //   revisiting a planet beats falling back to 'andromeda', which fades the
+  //   whole solar system out (activeKey 'andromeda' → opacity 0).
   const sections = config.sections;
-  const lastIdx = sections.length - 1;
+  const enabled = sections.filter((s) => s.enabled !== false);
+  const lastEnabledIdx = enabled.length - 1;
+  const hasSaturnRing = enabled.some(
+    (s, i) => s.type === 'saturnRing' && i !== 0 && i !== lastEnabledIdx,
+  );
+  const pool = hasSaturnRing ? PLANET_POOL.filter((k) => k !== 'saturn') : PLANET_POOL;
+
   let poolIdx = 0;
+  const planetByEnabledIdx = new Map();
+  enabled.forEach((s, i) => {
+    let key;
+    if (s.type === 'openingGate' || i === 0) key = 'andromeda';
+    else if (s.type === 'footerPlanet' || i === lastEnabledIdx) key = 'sun';
+    else if (s.type === 'saturnRing') key = 'saturn';
+    else {
+      key = pool[poolIdx % pool.length];
+      poolIdx += 1;
+    }
+    planetByEnabledIdx.set(s, key);
+  });
 
-  const planetFor = (s, idx) => {
-    if (s.type === 'openingGate' || idx === 0) return 'andromeda';
-    if (s.type === 'footerPlanet' || idx === lastIdx) return 'sun';
-    const key = PLANET_POOL[poolIdx] || 'andromeda';
-    poolIdx += 1;
-    return key;
-  };
-
-  const out = sections.map((s, idx) => {
+  const out = sections.map((s) => {
     const props = s.props || {};
     const next = { ...props };
 
@@ -86,8 +106,9 @@ export function normalizeSolaryConfig(config) {
     const label = fixLabel(s.type, props.sectionLabel);
     if (label !== props.sectionLabel) next.sectionLabel = label;
 
-    // 2. positional planet — always derived, overriding stored values
-    const key = planetFor(s, idx);
+    // 2. positional planet — always derived, overriding stored values.
+    //    Disabled sections keep a harmless placeholder (they never render).
+    const key = planetByEnabledIdx.get(s) || 'andromeda';
     next.planetKey = key;
     next.planetName = cap(key);
 

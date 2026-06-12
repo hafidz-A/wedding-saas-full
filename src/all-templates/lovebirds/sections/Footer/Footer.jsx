@@ -85,9 +85,14 @@ export default function Footer(props) {
                 className={`${styles.photoCard} ${i === 0 ? styles.photoLeft : styles.photoRight}`}
               >
                 <img
+                  /* keyed by src so swapping the photo in the editor remounts
+                     the element; note onError hides the PARENT card, which a
+                     remount alone wouldn't undo — reset it on load instead */
+                  key={p.src}
                   src={p.src}
                   alt={p.alt || ''}
                   loading="lazy"
+                  onLoad={(e) => { e.currentTarget.parentElement.style.display = '' }}
                   onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
                 />
               </div>
