@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { motion, AnimatePresence } from 'motion/react'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import ThreeDTilt from '../../components/ThreeDTilt.jsx'
+import { formatThousands } from '../../../../lib/formatThousands.js'
 import styles from './WeddingGift.module.css'
 
 /* ============================================================================
@@ -377,19 +378,23 @@ export default function WeddingGift(props) {
 
                     <label className={styles.field}>
                       <span className={styles.label}>Nominal (opsional)</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        className={styles.input}
-                        placeholder="mis. 500.000"
-                        {...register('amount', {
-                          pattern: {
-                            value: /^[0-9.,\s]*$/,
-                            message: 'Hanya angka',
-                          },
-                        })}
+                      <Controller
+                        name="amount"
+                        control={control}
+                        render={({ field }) => (
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            className={styles.input}
+                            placeholder="mis. 500.000"
+                            name={field.name}
+                            ref={field.ref}
+                            value={field.value}
+                            onBlur={field.onBlur}
+                            onChange={(e) => field.onChange(formatThousands(e.target.value))}
+                          />
+                        )}
                       />
-                      {errors.amount && <span className={styles.error}>{errors.amount.message}</span>}
                     </label>
                   </div>
 

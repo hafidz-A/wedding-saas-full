@@ -49,7 +49,7 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
   if (doneName) {
     return (
       <div style={card}>
-        <div style={{ fontSize: 44, marginBottom: 6 }}>✓</div>
+        <div style={{ fontSize: 44, marginBottom: 6, color: '#2D8C4E' }}>✓</div>
         <h1 style={h1}>Selamat datang, {doneName}!</h1>
         <p style={p}>Kehadiran Anda sudah tercatat. Terima kasih 🤍</p>
       </div>
@@ -81,8 +81,8 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
         </>
       ) : (
         <>
-          <p style={{ ...p, fontSize: 18, color: '#f5f5f5' }}>Anda <strong>{picked.name}</strong>?</p>
-          {error && <p style={{ ...hint, color: '#ff8a7a' }}>{error}</p>}
+          <p style={{ ...p, fontSize: 18, color: '#2A2118' }}>Anda <strong>{picked.name}</strong>?</p>
+          {error && <p style={{ ...hint, color: '#E8553E' }}>{error}</p>}
           <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
             <button type="button" style={ghostBtn} onClick={() => { setPicked(null); setError(null) }} disabled={saving}>Bukan</button>
             <button type="button" style={primaryBtn} onClick={confirm} disabled={saving}>{saving ? 'Menyimpan…' : 'Ya, saya hadir'}</button>
@@ -93,12 +93,14 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
   )
 }
 
-const card: React.CSSProperties = { width: 'min(440px, 100%)', background: '#1b1a22', border: '1px solid #2e2c38', borderRadius: 18, padding: 28, textAlign: 'center' }
-const h1: React.CSSProperties = { fontSize: 22, margin: '0 0 10px' }
-const p: React.CSSProperties = { color: '#b9b6c6', margin: '0 0 8px', lineHeight: 1.5 }
-const input: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 12, border: '1px solid #3a3847', background: '#12111a', color: '#f5f5f5', outline: 'none' }
-const hint: React.CSSProperties = { color: '#9a97a8', fontSize: 14, margin: '4px 0' }
+/* Mirrors the dashboard palette (white card on cream, #2A2118 ink, dark pill
+   primary button) so the guest-facing check-in feels like the same product. */
+const card: React.CSSProperties = { width: 'min(440px, 100%)', background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(42,33,24,0.08)', borderRadius: 18, padding: 28, textAlign: 'center', boxShadow: '0 20px 60px rgba(42,33,24,0.12)' }
+const h1: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, margin: '0 0 10px', color: '#2A2118' }
+const p: React.CSSProperties = { color: '#5C4A3A', margin: '0 0 8px', lineHeight: 1.5 }
+const input: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 12, border: '1px solid rgba(42,33,24,0.18)', background: '#fff', color: '#2A2118', outline: 'none' }
+const hint: React.CSSProperties = { color: 'rgba(42,33,24,0.55)', fontSize: 14, margin: '4px 0' }
 const list: React.CSSProperties = { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }
-const rowBtn: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 12, border: '1px solid #3a3847', background: '#23212e', color: '#f5f5f5', cursor: 'pointer', textAlign: 'left' }
-const ghostBtn: React.CSSProperties = { flex: 1, padding: '13px', borderRadius: 999, border: '1px solid #3a3847', background: 'transparent', color: '#f5f5f5', cursor: 'pointer', fontSize: 15 }
-const primaryBtn: React.CSSProperties = { flex: 2, padding: '13px', borderRadius: 999, border: 'none', background: '#e8c46a', color: '#1b1a22', cursor: 'pointer', fontSize: 15, fontWeight: 600 }
+const rowBtn: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 12, border: '1px solid rgba(42,33,24,0.15)', background: '#fff', color: '#2A2118', cursor: 'pointer', textAlign: 'left' }
+const ghostBtn: React.CSSProperties = { flex: 1, padding: '13px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.25)', background: 'transparent', color: '#2A2118', cursor: 'pointer', fontSize: 15 }
+const primaryBtn: React.CSSProperties = { flex: 2, padding: '13px', borderRadius: 999, border: 'none', background: '#2A2118', color: '#F5EFE3', cursor: 'pointer', fontSize: 15, fontWeight: 600 }

@@ -46,11 +46,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invitation not published' }, { status: 403 })
   }
 
-  // Normalize amount — strip thousand separators, allow empty
+  // Normalize amount — strip thousand separators, allow empty.
+  // Dots are Indonesian thousand separators ("500.000"), never decimals,
+  // so every non-digit must go or Number() reads 500.000 as five hundred.
   let normalizedAmount: number | null = null
   if (amount !== undefined && amount !== null && String(amount).trim() !== '') {
-    const cleaned = String(amount).replace(/[^\d.]/g, '')
-    const parsed = Number(cleaned)
+    const cleaned = String(amount).replace(/\D/g, '')
+    const parsed = cleaned === '' ? NaN : Number(cleaned)
     if (!Number.isFinite(parsed) || parsed < 0) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
     }

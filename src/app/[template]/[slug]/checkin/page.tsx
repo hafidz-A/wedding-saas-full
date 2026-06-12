@@ -37,7 +37,9 @@ export default async function CheckinPage({
   )
 }
 
-const wrap: React.CSSProperties = { minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 20, background: '#0f0e13', color: '#f5f5f5', fontFamily: 'system-ui, -apple-system, sans-serif' }
-const card: React.CSSProperties = { width: 'min(440px, 100%)', background: '#1b1a22', border: '1px solid #2e2c38', borderRadius: 18, padding: 28, textAlign: 'center' }
-const h1: React.CSSProperties = { fontSize: 22, margin: '0 0 8px' }
-const p: React.CSSProperties = { color: '#b9b6c6', margin: 0, lineHeight: 1.5 }
+/* Mirrors the dashboard palette (cream gradient page, white card, #2A2118 ink)
+   so the guest-facing check-in feels like the same product. */
+const wrap: React.CSSProperties = { minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 20, background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)', color: '#2A2118', fontFamily: 'var(--font-body, system-ui)' }
+const card: React.CSSProperties = { width: 'min(440px, 100%)', background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(42,33,24,0.08)', borderRadius: 18, padding: 28, textAlign: 'center', boxShadow: '0 20px 60px rgba(42,33,24,0.12)' }
+const h1: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, margin: '0 0 8px', color: '#2A2118' }
+const p: React.CSSProperties = { color: '#5C4A3A', margin: 0, lineHeight: 1.5 }

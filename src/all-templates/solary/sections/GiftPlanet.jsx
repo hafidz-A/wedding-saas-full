@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import GlassCard, { CardChild } from "../components/GlassCard.jsx";
 import { submitGift } from "../services/gift.js";
 import { useGuest } from "../contexts/GuestContext.jsx";
+import { formatThousands } from "../../../lib/formatThousands.js";
 
 /* GiftPlanet — bank accounts + gift-confirmation form.
    Content mirrors the lovebirds Wedding Gift flow (accounts with copy +
@@ -164,7 +165,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
                   </div>
                   <div className="form-row">
                     <label className="form-label" htmlFor="gift-amount">Nominal (opsional)</label>
-                    <input id="gift-amount" className="form-input" inputMode="numeric" placeholder="mis. 500.000" value={draft.amount} onChange={(e) => setDraft((d) => ({ ...d, amount: e.target.value }))} />
+                    <input id="gift-amount" className="form-input" inputMode="numeric" placeholder="mis. 500.000" value={draft.amount} onChange={(e) => setDraft((d) => ({ ...d, amount: formatThousands(e.target.value) }))} />
                   </div>
                 </div>
                 <div className="form-row">

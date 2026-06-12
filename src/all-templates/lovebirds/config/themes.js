@@ -115,14 +115,17 @@ export const themes = {
       'radial-gradient(50% 40% at 50% 80%, rgba(200, 90, 50, 0.18), transparent 70%),' +
       'radial-gradient(40% 30% at 85% 15%, rgba(110, 130, 104, 0.18), transparent 70%),' +
       'linear-gradient(180deg, #FAF2EA 0%, #EAD0A8 100%)',
-    '--fg': '#C85A32',
-    '--fg-muted': '#6E8268',
+    /* fg is a deep clay brown (NOT the terracotta accent) — using #C85A32 as
+       body text washed out against the peach-sand bg and clashed with the
+       palette name. Terracotta stays as the accent/button signature. */
+    '--fg': '#46281A',
+    '--fg-muted': '#5A6B52',
     '--accent': '#C85A32',
     '--accent-soft': '#EAD0A8',
     '--glass-bg': 'rgba(255, 255, 255, 0.65)',
     '--glass-border': 'rgba(255, 255, 255, 0.5)',
-    '--glass-text': '#C85A32',
-    '--glass-text-muted': '#6E8268',
+    '--glass-text': '#46281A',
+    '--glass-text-muted': '#5A6B52',
     '--button-bg': '#C85A32',
     '--button-fg': '#FAF2EA',
   },
