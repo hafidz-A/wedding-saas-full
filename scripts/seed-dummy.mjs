@@ -388,13 +388,32 @@ if (seedData) {
     console.log('  (Buku Tamu skipped — apply supabase/migrations/2026-05-30_attendances.sql)')
   }
 
-  // ── guestbook_notes (Ucapan) — plaintext by design ──
-  const noteRows = [
-    { guest_name: 'Budi Santoso', message: 'Bahagia selalu untuk kalian berdua!', color: 'gold' },
-    { guest_name: 'Siti Rahayu', message: 'Semoga menjadi keluarga sakinah 🤍', color: 'coral' },
-    { guest_name: 'Agus Wijaya', message: 'Barakallahu lakuma!', color: 'sky' },
-    { guest_name: 'Dewi Lestari', message: 'Selamat menempuh hidup baru!', color: 'emerald' },
-  ].map((n) => ({ invitation_id: invitationId, is_approved: true, ...n }))
+  // ── guestbook_notes (Ucapan) — encrypted since tier-2 (2026-06-09);
+  //    plaintext fallback for DBs where the migration isn't applied yet ──
+  const noteEnc = !!encApp && (await columnExists('guestbook_notes', 'guest_name_enc'))
+  const notePlan = [
+    { name: 'Budi Santoso', message: 'Bahagia selalu untuk kalian berdua!', color: 'gold' },
+    { name: 'Siti Rahayu', message: 'Semoga menjadi keluarga sakinah 🤍', color: 'coral' },
+    { name: 'Agus Wijaya', message: 'Barakallahu lakuma!', color: 'sky' },
+    { name: 'Dewi Lestari', message: 'Selamat menempuh hidup baru!', color: 'emerald' },
+  ]
+  const noteRows = notePlan.map((n) =>
+    noteEnc
+      ? {
+          invitation_id: invitationId,
+          guest_name_enc: encApp(n.name),
+          message_enc: encApp(n.message),
+          color: n.color,
+          is_approved: true,
+        }
+      : {
+          invitation_id: invitationId,
+          guest_name: n.name,
+          message: n.message,
+          color: n.color,
+          is_approved: true,
+        },
+  )
   {
     const { error } = await supabase.from('guestbook_notes').insert(noteRows)
     if (error) console.warn('  notes insert failed:', error.message)
