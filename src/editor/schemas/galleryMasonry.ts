@@ -14,6 +14,10 @@ export const galleryMasonrySchema: SectionSchema = {
       label: { id: 'Foto', en: 'Photos' },
       itemLabelKey: 'alt',
       newItem: { src: '', alt: '' },
+      // The 5 belts animate on FIXED durations: more photos = taller belts =
+      // visibly racing scroll. ~30 is the most before the motion looks wrong.
+      // GalleryMasonry.jsx clamps to the same number at render.
+      maxItems: 30,
       itemFields: [
         { type: 'image', key: 'src', label: { id: 'Foto', en: 'Photo' } },
         { type: 'text',  key: 'alt', label: { id: 'Keterangan', en: 'Caption' } },

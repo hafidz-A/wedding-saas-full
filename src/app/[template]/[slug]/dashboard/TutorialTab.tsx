@@ -31,15 +31,27 @@ export default function TutorialTab({
   const list = (n: number, arr: string[] | undefined): string[] =>
     Array.from({ length: n }, (_, i) => arr?.[i]).filter(Boolean) as string[]
 
-  const grouped = cats.some((x) => x.group)
-
-  // Solary renders a flat, searchable subnav; lovebirds renders grouped (no search).
+  // Both templates render the grouped subnav with a search box on top. The
+  // query matches every text surface a category carries: title, summary,
+  // steps, bullets, section-guide cards, and FAQ entries.
   const visibleCats = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return cats
     return cats.filter((x) => {
       const cc = t[x.id] ?? {}
-      const hay = [cc.title, cc.summary, ...(Array.isArray(cc.steps) ? cc.steps : [])]
+      const guideText = (Array.isArray(cc.sectionGuides) ? cc.sectionGuides : [])
+        .flatMap((g: any) => [g?.title, g?.sees, g?.fill, g?.watch])
+      const faqText = (Array.isArray(cc.faqs) ? cc.faqs : [])
+        .flatMap((f: any) => [f?.q, f?.a])
+      const hay = [
+        cc.title, cc.summary,
+        ...(Array.isArray(cc.steps) ? cc.steps : []),
+        ...(Array.isArray(cc.always) ? cc.always : []),
+        ...(Array.isArray(cc.never) ? cc.never : []),
+        ...(Array.isArray(cc.tips) ? cc.tips : []),
+        ...guideText,
+        ...faqText,
+      ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
@@ -59,32 +71,28 @@ export default function TutorialTab({
 
   return (
     <div className={styles.wrap}>
-      {isSolary && (
-        <input
-          className={styles.search}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t.searchPlaceholder ?? ''}
-          aria-label={t.searchPlaceholder ?? 'Search'}
-        />
-      )}
+      <input
+        className={styles.search}
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={t.searchPlaceholder ?? ''}
+        aria-label={t.searchPlaceholder ?? 'Search'}
+      />
 
       <nav className={styles.subnav}>
-        {grouped
-          ? TUTORIAL_GROUPS.map((g) => {
-              const inGroup = cats.filter((x) => x.group === g)
-              if (!inGroup.length) return null
-              return (
-                <div key={g} className={styles.group}>
-                  <span className={styles.groupLabel}>{t.groups?.[g] ?? g}</span>
-                  <div className={styles.groupTabs}>{inGroup.map(renderTab)}</div>
-                </div>
-              )
-            })
-          : visibleCats.map(renderTab)}
+        {TUTORIAL_GROUPS.map((g) => {
+          const inGroup = visibleCats.filter((x) => x.group === g)
+          if (!inGroup.length) return null
+          return (
+            <div key={g} className={styles.group}>
+              <span className={styles.groupLabel}>{t.groups?.[g] ?? g}</span>
+              <div className={styles.groupTabs}>{inGroup.map(renderTab)}</div>
+            </div>
+          )
+        })}
       </nav>
-      {isSolary && visibleCats.length === 0 && <p className={styles.noResult}>{t.noResult ?? ''}</p>}
+      {visibleCats.length === 0 && <p className={styles.noResult}>{t.noResult ?? ''}</p>}
 
       {c && (
         <>

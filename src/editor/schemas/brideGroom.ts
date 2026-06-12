@@ -12,6 +12,9 @@ export const brideGroomSchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { role: '', name: '', photo: '', parents: '', bio: '', instagram: '', direction: 'right' },
+      // Full-bleed alternating profile cards — meant for the couple (2),
+      // tolerates a few extras before the section scrolls forever.
+      maxItems: 4,
       itemFields: [
         { key: 'role',      label: { id: 'Peran', en: 'Role' },        type: 'text' },
         { key: 'name',      label: { id: 'Nama', en: 'Name' },         type: 'text' },

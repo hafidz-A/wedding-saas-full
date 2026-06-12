@@ -65,6 +65,10 @@ export interface ImageArrayField extends BaseField {
   itemIsObject?: boolean
   /** Property name of the URL when itemIsObject is true (default: 'src'). */
   urlKey?: string
+  /** Hard cap on the number of items. Pick the number just below where the
+   *  section's layout/animation visually breaks — renderers clamp to the same
+   *  number as a second line of defense for legacy configs. */
+  maxItems?: number
 }
 export interface StringArrayField extends BaseField {
   type: 'stringArray'
@@ -79,6 +83,10 @@ export interface ObjectArrayField extends BaseField {
   newItem: Record<string, unknown>
   /** Label key from the item used in the row header (e.g. 'title', 'name'). */
   itemLabelKey?: string
+  /** Hard cap on the number of items. Pick the number just below where the
+   *  section's layout/animation visually breaks — renderers clamp to the same
+   *  number as a second line of defense for legacy configs. */
+  maxItems?: number
 }
 
 export type FieldDef =

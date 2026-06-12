@@ -137,7 +137,7 @@ function renderField(
     case 'select':     return <SelectField   key={f.key} label={label} value={value ?? ''} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={(v) => onChange(v)} help={help} />
     case 'image':      return <ImageField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
     case 'audio':      return <AudioField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
-    case 'imageArray': return <ImageArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} slug={slug} onChange={(v) => onChange(v)} help={help} />
+    case 'imageArray': return <ImageArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} slug={slug} onChange={(v) => onChange(v)} help={help} maxItems={f.maxItems} />
     case 'stringArray': return <StringArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} itemPlaceholder={f.itemPlaceholder} onChange={(v) => onChange(v)} help={help} />
     case 'objectArray':return <ObjectArrayField
                                 key={f.key}
@@ -146,6 +146,7 @@ function renderField(
                                 itemFields={f.itemFields}
                                 newItem={f.newItem}
                                 itemLabelKey={f.itemLabelKey}
+                                maxItems={f.maxItems}
                                 slug={slug}
                                 lang={lang}
                                 onChange={(v) => onChange(v)}

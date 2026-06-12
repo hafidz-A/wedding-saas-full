@@ -28,6 +28,7 @@ export const giftPlanetSchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { name: '', description: '', image: '', url: '' },
+      maxItems: 12,
       itemFields: [
         { key: 'name',        label: { id: 'Nama', en: 'Name' }, type: 'text' },
         { key: 'description', label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 2 },

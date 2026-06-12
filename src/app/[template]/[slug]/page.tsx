@@ -147,6 +147,12 @@ export default async function Page({ params }: PageProps) {
   // Never persisted — the editor still sees the owner's real (empty) value.
   config = fillEmptyImages(config)
 
+  // DEMO ONLY: lovebirds previews show BOTH gallery styles back-to-back so
+  // visitors can compare them, each with a note explaining that a real
+  // invitation picks one. Real configs are untouched — the editor policy
+  // still allows exactly one gallery.
+  if (isDemoSlug && templateId === 'lovebirds') config = addDemoSecondGallery(config)
+
   // No DB-backed row (demo slug / local fallback): drop the slug so the
   // RSVP / gift / guestbook sections use their simulated-success mode
   // instead of POSTing a slug the API will 404 ("Invitation not found").
@@ -175,6 +181,67 @@ function injectGuestbookNotes(config: any, dbNotes: any[]) {
         : s,
     ),
   }
+}
+
+/**
+ * Demo previews only: duplicate the lovebirds gallery as its sibling style
+ * (Masonry ↔ Spring Coil) right after the original, with a friendly note on
+ * each, so visitors comparing templates see both layouts in one scroll.
+ * Returns a NEW config; never runs for real invitations.
+ */
+function addDemoSecondGallery(config: any) {
+  if (!config?.sections) return config
+  const idx = config.sections.findIndex(
+    (s: any) => s.type === 'galleryMasonry' || s.type === 'gallerySpringCoil',
+  )
+  if (idx === -1) return config
+  const original = config.sections[idx]
+  if (config.sections.some((s: any) => s.id === 'demo-gallery-alt')) return config
+
+  const isMasonry = original.type === 'galleryMasonry'
+  // masonry uses {src, alt}; spring-coil uses {src, caption} — carry the text over.
+  const photos = (original.props?.photos || []).map((p: any) => {
+    const text = p.alt ?? p.caption ?? ''
+    return { src: p.src ?? '', alt: text, caption: text }
+  })
+  const note = (style: string, other: string) =>
+    `Ini galeri gaya ${style}. Di demo ini kami pajang dua-duanya biar kamu gampang membandingkan — saat membuat undangan nanti, kamu tinggal pilih salah satu: ${style} atau ${other}.`
+  const altSection = isMasonry
+    ? {
+        id: 'demo-gallery-alt',
+        type: 'gallerySpringCoil',
+        enabled: true,
+        navLabel: 'Gallery 2',
+        props: {
+          sectionTitle: original.props?.sectionTitle || 'Moments',
+          sectionSubtitle: 'Gaya kedua: Spring Coil',
+          photos,
+          demoNote: note('Spring Coil', 'Masonry'),
+        },
+      }
+    : {
+        id: 'demo-gallery-alt',
+        type: 'galleryMasonry',
+        enabled: true,
+        navLabel: 'Gallery 2',
+        props: {
+          eyebrow: 'Our Moments',
+          sectionTitle: original.props?.sectionTitle || 'Memories',
+          sectionSubtitle: 'Gaya kedua: Masonry',
+          photos,
+          demoNote: note('Masonry', 'Spring Coil'),
+        },
+      }
+  const sections = config.sections.slice()
+  sections[idx] = {
+    ...original,
+    props: {
+      ...(original.props || {}),
+      demoNote: note(isMasonry ? 'Masonry' : 'Spring Coil', isMasonry ? 'Spring Coil' : 'Masonry'),
+    },
+  }
+  sections.splice(idx + 1, 0, altSection)
+  return { ...config, sections }
 }
 
 function NotReadyInvitationView({ slug }: { slug: string }) {

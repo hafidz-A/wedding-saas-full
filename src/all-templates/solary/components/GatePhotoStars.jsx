@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./GatePhotoStars.module.css";
 
 const MAX_CONCURRENT = 6;
@@ -16,14 +16,17 @@ function randomSpot() {
 export default function GatePhotoStars({ photos = [], reducedMotion = false }) {
   const list = useMemo(() => (Array.isArray(photos) ? photos.filter(Boolean) : []), [photos]);
   const [sparks, setSparks] = useState([]);
+  // Counter must survive effect re-runs: when `photos` changes identity the
+  // effect restarts, and a reset `let id = 0` would mint key 1 again while
+  // old sparks with the same keys are still alive → duplicate React keys.
+  const idRef = useRef(0);
 
   useEffect(() => {
     if (!list.length || reducedMotion) return undefined;
-    let id = 0;
     const spawn = () => {
       const spot = randomSpot();
       const photo = list[Math.floor(Math.random() * list.length)];
-      const spark = { key: ++id, photo, x: spot.x, y: spot.y, rot: Math.random() * 16 - 8 };
+      const spark = { key: ++idRef.current, photo, x: spot.x, y: spot.y, rot: Math.random() * 16 - 8 };
       setSparks((s) => [...s, spark].slice(-MAX_CONCURRENT));
       window.setTimeout(() => setSparks((s) => s.filter((k) => k.key !== spark.key)), LIFETIME_MS);
     };

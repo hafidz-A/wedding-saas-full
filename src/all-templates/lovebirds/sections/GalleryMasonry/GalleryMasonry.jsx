@@ -18,10 +18,20 @@ const COL_RATIOS = [
 const COL_SPEEDS = ['20s', '26s', '16s', '22s', '18s']
 const COL_DIRS   = ['up', 'down', 'up', 'down', 'up']
 
-function distributeToColumns(photos) {
+/* The 5 belts animate on FIXED durations, so more photos = taller belts =
+   faster scroll. Past ~30 the motion visibly races; the editor caps the
+   field at the same number (galleryMasonry schema maxItems). */
+export const MAX_PHOTOS = 30
+
+export function distributeToColumns(photos) {
+  // Guard the repeat-fill below: with an empty list the while-loop could
+  // never reach `needed` and would spin forever, freezing the page.
+  const source = photos.slice(0, MAX_PHOTOS)
+  if (source.length === 0) return [[], [], [], [], []]
+
   const needed = 20
-  let pool = [...photos]
-  while (pool.length < needed) pool = [...pool, ...photos]
+  let pool = [...source]
+  while (pool.length < needed) pool = [...pool, ...source]
 
   const cols = [[], [], [], [], []]
   pool.forEach((photo, i) => cols[i % 5].push(photo))
@@ -33,11 +43,14 @@ export default function GalleryMasonry({
   sectionTitle = 'Memories',
   sectionSubtitle = 'A small collection of our favorite memories together',
   photos = [],
+  demoNote = '',
 }) {
   const cols = distributeToColumns(photos)
 
   return (
     <section className={styles.section}>
+      {/* Demo previews only — explains that a real invitation picks ONE gallery style. */}
+      {demoNote && <p style={demoNoteStyle}>{demoNote}</p>}
       <div className={styles.header}>
         {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
         <h2 className={styles.title}>{sectionTitle}</h2>
@@ -83,4 +96,19 @@ export default function GalleryMasonry({
       </div>
     </section>
   )
+}
+
+const demoNoteStyle = {
+  width: 'fit-content',
+  maxWidth: 'min(86vw, 560px)',
+  margin: '0 auto 28px',
+  padding: '10px 22px',
+  borderRadius: 999,
+  background: 'var(--glass-bg, rgba(255,255,255,0.6))',
+  border: '1px solid var(--glass-border, rgba(42,33,24,0.12))',
+  color: 'var(--fg-muted, rgba(42,33,24,0.7))',
+  fontFamily: 'var(--font-body, sans-serif)',
+  fontSize: 13,
+  lineHeight: 1.55,
+  textAlign: 'center',
 }

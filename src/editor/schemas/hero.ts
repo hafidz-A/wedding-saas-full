@@ -14,7 +14,9 @@ export const heroSchema: SectionSchema = {
     { key: 'scrollHint',       label: { id: 'Petunjuk scroll', en: 'Scroll hint' },       type: 'text' },
     { key: 'countdownEnabled', label: { id: 'Tampilkan hitung mundur', en: 'Show countdown' }, type: 'boolean' },
     { key: 'gateImage',        label: { id: 'Gambar gerbang', en: 'Gate image' },         type: 'image' },
-    { key: 'blastPhotos',      label: { id: 'Foto sebaran', en: 'Blast photos' },         type: 'imageArray' },
+    // Each blast photo is its own animated element scattering from the gate —
+    // past 12 the scatter turns into clutter and the open animation chugs.
+    { key: 'blastPhotos',      label: { id: 'Foto sebaran', en: 'Blast photos' },         type: 'imageArray', maxItems: 12 },
   ],
   defaults: {
     monogram: 'A & H',

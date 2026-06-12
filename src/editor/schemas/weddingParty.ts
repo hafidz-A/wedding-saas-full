@@ -13,6 +13,7 @@ export const weddingPartySchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { id: '', name: '', role: '', photo: '' },
+      maxItems: 12,
       itemFields: [
         { key: 'name',  label: { id: 'Nama', en: 'Name' },   type: 'text' },
         { key: 'role',  label: { id: 'Peran', en: 'Role' },  type: 'text' },

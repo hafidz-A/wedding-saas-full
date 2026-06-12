@@ -1,9 +1,14 @@
 /* ============================================================
    fillEmptyImages — render-time fallback so a published
    invitation NEVER shows an empty image slot. Walks
-   config.sections[*].props and fills blank image-bearing fields
-   with contextual photos from the demo registry. Pure: returns
-   a new config, never mutates, never persisted to the DB.
+   config.sections[*].props and:
+   - SINGLE image fields (portrait, avatar, gateImage, …): blank
+     → filled with a contextual photo from the demo registry.
+   - PHOTO ARRAYS (gallery photos, blastPhotos, gatePhotos, …):
+     blank entries are COMPACTED AWAY, not demo-filled — if the
+     couple filled slots 1 and 3 of 4, guests see exactly their
+     2 photos in order, never a stranger's demo photo.
+   Pure: returns a new config, never mutates, never persisted.
    Wired in app/[template]/[slug]/page.tsx (public render +
    editor preview iframe + demo-* slugs, both templates).
    ============================================================ */
@@ -75,14 +80,16 @@ function walk(node, sectionType, pick, holder) {
       const { pool, width } = poolFor(key, node, sectionType)
       out[key] = pick(pool, width)
     } else if (IMAGE_ARRAY_FIELDS.has(key) && Array.isArray(value)) {
-      out[key] = value.map((entry) => {
-        if (typeof entry === 'string') {
-          if (!blank(entry)) return entry
-          const { pool, width } = poolFor(key, node, sectionType)
-          return pick(pool, width)
-        }
-        return walk(entry, sectionType, pick, node)
-      })
+      // Compact: drop slots the couple never filled so the remaining photos
+      // close ranks (1,_,3,_ → 1,3). Demo-filling here would show guests
+      // photos that aren't the couple's.
+      out[key] = value
+        .filter((entry) => {
+          if (typeof entry === 'string') return !blank(entry)
+          if (entry && typeof entry === 'object' && 'src' in entry) return !blank(entry.src)
+          return true
+        })
+        .map((entry) => (typeof entry === 'string' ? entry : walk(entry, sectionType, pick, node)))
     } else if (value && typeof value === 'object') {
       out[key] = walk(value, sectionType, pick, node)
     } else {

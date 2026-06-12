@@ -12,6 +12,7 @@ export const teamPlanetSchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'label',
       newItem: { label: '', members: [] },
+      maxItems: 6,
       itemFields: [
         { key: 'label', label: { id: 'Nama grup', en: 'Group label' }, type: 'text' },
         {
@@ -20,6 +21,7 @@ export const teamPlanetSchema: SectionSchema = {
           type: 'objectArray',
           itemLabelKey: 'name',
           newItem: { name: '', role: '', avatar: '' },
+          maxItems: 12,
           itemFields: [
             { key: 'name',   label: { id: 'Nama', en: 'Name' }, type: 'text' },
             { key: 'role',   label: { id: 'Peran', en: 'Role' }, type: 'text' },

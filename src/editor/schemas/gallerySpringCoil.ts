@@ -13,6 +13,10 @@ export const gallerySpringCoilSchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'caption',
       newItem: { src: '', caption: '' },
+      // The carousel ring widens with the photo count (GallerySpringCoil
+      // buildConfig) so up to 30 upright cards stay readable; the renderer
+      // clamps to the same number.
+      maxItems: 30,
       itemFields: [
         { key: 'src',     label: { id: 'Gambar', en: 'Image' },       type: 'image' },
         { key: 'caption', label: { id: 'Keterangan', en: 'Caption' }, type: 'text' },

@@ -12,6 +12,9 @@ export const ourStorySchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'title',
       newItem: { id: '', year: '', date: '', title: '', description: '', image: '' },
+      // The stack/deck animation reads each card individually — past 10 the
+      // pinned scroll gets very long and the deck shuffle loses meaning.
+      maxItems: 10,
       itemFields: [
         { key: 'year',        label: { id: 'Tahun', en: 'Year' },          type: 'text' },
         { key: 'date',        label: { id: 'Tanggal', en: 'Date' },        type: 'text' },

@@ -11,11 +11,14 @@ export const storyPlanetSchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'label',
       newItem: { year: '', label: '', desc: '', photos: [] },
+      // Chapters drive the pinned rail / mobile deck; photo dots in the
+      // polaroid cluster get unreadable past 8 per chapter.
+      maxItems: 8,
       itemFields: [
         { key: 'year',   label: { id: 'Tahun', en: 'Year' }, type: 'text' },
         { key: 'label',  label: { id: 'Label', en: 'Label' }, type: 'text' },
         { key: 'desc',   label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 3 },
-        { key: 'photos', label: { id: 'Foto', en: 'Photos' }, type: 'imageArray' },
+        { key: 'photos', label: { id: 'Foto', en: 'Photos' }, type: 'imageArray', maxItems: 8 },
       ],
     },
   ],

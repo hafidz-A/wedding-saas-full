@@ -1,5 +1,12 @@
-// Structure for the lovebirds dashboard tutorial. Copy lives in the i18n dict
-// under dashboard.tabs.tutorial.<categoryId>; this file only declares shape.
+// Structure for the dashboard tutorials. Copy lives in the i18n dict
+// under dashboard.tabs.tutorial.<categoryId> (lovebirds) and
+// dashboard.tabs.tutorial.solary.<categoryId> (solary overrides);
+// this file only declares shape.
+//
+// BOTH templates share the same architecture: grouped subnav + search +
+// section-guide cards + FAQ accordion. Categories differ only where the
+// templates genuinely differ (e.g. solary has no Ornament tab, lovebirds
+// has no planet metaphor).
 
 export type TutorialCategoryId =
   | 'start' | 'checklist' | 'editor' | 'sections' | 'palette' | 'ornament'
@@ -8,7 +15,7 @@ export type TutorialCategoryId =
 
 export type TutorialGroupId = 'prep' | 'fill' | 'data' | 'help'
 
-/** Ordered groups for the lovebirds subnav. Label dict key: tutorial.groups.<id> */
+/** Ordered groups for the subnav. Label dict key: tutorial.groups.<id> */
 export const TUTORIAL_GROUPS: TutorialGroupId[] = ['prep', 'fill', 'data', 'help']
 
 export interface TutorialShot {
@@ -20,9 +27,9 @@ export interface TutorialShot {
 
 export interface TutorialCategory {
   id: TutorialCategoryId
-  /** when set, the subnav renders grouped (lovebirds). Solary omits it → flat. */
-  group?: TutorialGroupId
-  /** dashboard tab this category documents; renders a solary-only "open tab" deep-link */
+  /** subnav group — both templates render grouped */
+  group: TutorialGroupId
+  /** dashboard tab this category documents; renders an "open tab" deep-link */
   relatedTab?: string
   /** premium-only categories are hidden for non-premium plans */
   premiumOnly?: boolean
@@ -47,7 +54,9 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
     shots: [{ key: 'start-header', captionKey: 'header' }] },
   { id: 'checklist', group: 'prep', stepCount: 10, alwaysCount: 2, neverCount: 2, tipCount: 2,
     shots: [] },
-  { id: 'editor', group: 'fill', stepCount: 6, alwaysCount: 4, neverCount: 4, tipCount: 3,
+  { id: 'experience', group: 'prep', stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2,
+    shots: [] },
+  { id: 'editor', group: 'fill', stepCount: 6, alwaysCount: 4, neverCount: 4, tipCount: 4,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
@@ -55,6 +64,8 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
     ] },
   { id: 'sections', group: 'fill', stepCount: 0, alwaysCount: 2, neverCount: 1, tipCount: 1,
     sectionGuideCount: 14, shots: [] },
+  { id: 'photos', group: 'fill', stepCount: 6, alwaysCount: 2, neverCount: 2, tipCount: 3,
+    shots: [] },
   { id: 'palette', group: 'fill', stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1,
     shots: [{ key: 'palette-grid', captionKey: 'grid' }] },
   { id: 'ornament', group: 'fill', stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1,
@@ -75,41 +86,47 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
       { key: 'billing-upgrade', captionKey: 'upgrade' },
     ] },
   { id: 'faq', group: 'help', stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
-    faqCount: 10, shots: [] },
+    faqCount: 12, shots: [] },
 ]
 
-// Solary shares the same dashboard tabs as lovebirds EXCEPT the Background/Ornament
-// tab — solary renders its own Three.js galactic scene, so that category is dropped.
-// Copy lives under dashboard.tabs.tutorial.solary.<categoryId>; screenshots live at
+// Solary mirrors the lovebirds architecture (groups + section guides + FAQ),
+// minus the Ornament category — solary's backdrop is its Three.js galactic
+// scene, there is no ornament to configure. The planet metaphor gets its own
+// extra categories (quickstart, experience, photos). Copy lives under
+// dashboard.tabs.tutorial.solary.<categoryId>; screenshots at
 // public/tutorial/solary/<key>.png.
 export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
-  { id: 'quickstart', relatedTab: 'editor', stepCount: 7, alwaysCount: 2, neverCount: 2, tipCount: 2,
+  { id: 'quickstart', group: 'prep', relatedTab: 'editor', stepCount: 7, alwaysCount: 2, neverCount: 2, tipCount: 2,
     shots: [] },
-  { id: 'start', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
+  { id: 'start', group: 'prep', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'start-header', captionKey: 'header' }] },
-  { id: 'experience', stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2,
+  { id: 'experience', group: 'prep', stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2,
     shots: [] },
-  { id: 'editor', relatedTab: 'editor', stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 2,
+  { id: 'editor', group: 'fill', relatedTab: 'editor', stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 3,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
       { key: 'editor-save',         captionKey: 'save' },
     ] },
-  { id: 'photos', relatedTab: 'editor', stepCount: 5, alwaysCount: 0, neverCount: 0, tipCount: 3,
+  { id: 'sections', group: 'fill', relatedTab: 'editor', stepCount: 0, alwaysCount: 2, neverCount: 1, tipCount: 1,
+    sectionGuideCount: 14, shots: [] },
+  { id: 'photos', group: 'fill', relatedTab: 'editor', stepCount: 5, alwaysCount: 0, neverCount: 0, tipCount: 3,
     shots: [] },
-  { id: 'palette', relatedTab: 'palette', stepCount: 3, alwaysCount: 1, neverCount: 1, tipCount: 1,
+  { id: 'palette', group: 'fill', relatedTab: 'palette', stepCount: 3, alwaysCount: 1, neverCount: 1, tipCount: 1,
     shots: [{ key: 'palette-grid', captionKey: 'grid' }] },
-  { id: 'music', relatedTab: 'music', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
+  { id: 'music', group: 'fill', relatedTab: 'music', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'music-upload', captionKey: 'upload' }] },
-  { id: 'rsvps', relatedTab: 'rsvps', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 1,
+  { id: 'rsvps', group: 'data', relatedTab: 'rsvps', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 1,
     shots: [{ key: 'rsvps-table', captionKey: 'table' }] },
-  { id: 'gifts', relatedTab: 'gifts', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+  { id: 'gifts', group: 'data', relatedTab: 'gifts', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
     shots: [{ key: 'gifts-table', captionKey: 'table' }] },
-  { id: 'guests', relatedTab: 'guests', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
+  { id: 'guests', group: 'data', relatedTab: 'guests', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'guests-share', captionKey: 'share' }] },
-  { id: 'guestbook', premiumOnly: true, relatedTab: 'guestbook', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+  { id: 'guestbook', group: 'data', premiumOnly: true, relatedTab: 'guestbook', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
-  { id: 'faq', faqCount: 8, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
+  { id: 'billing', group: 'help', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
+    shots: [] },
+  { id: 'faq', group: 'help', faqCount: 11, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
     shots: [] },
 ]
 

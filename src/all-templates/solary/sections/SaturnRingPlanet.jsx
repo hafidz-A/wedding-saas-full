@@ -18,7 +18,15 @@ import Lightbox from "../components/Lightbox.jsx";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function SaturnRingPlanet({ sectionLabel, planetName, heading, photos = [] }) {
+/* Must match the clamp inside galacticScene.setSaturnPhotos (and the editor's
+   saturnRing schema maxItems). The scene grows the photo orbit with the
+   count, so 30 cards still keep breathing room. */
+const MAX_RING_PHOTOS = 30;
+
+export default function SaturnRingPlanet({ sectionLabel, planetName, heading, photos: allPhotos = [] }) {
+  // useMemo keeps the array identity stable — it feeds the effect deps below,
+  // and a fresh slice() every render would re-create the ScrollTrigger.
+  const photos = React.useMemo(() => allPhotos.slice(0, MAX_RING_PHOTOS), [allPhotos]);
   const [active, setActive] = useState(null);
   const sectionAnchorRef = useRef(null);
 

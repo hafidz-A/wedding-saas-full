@@ -254,7 +254,9 @@ export default function Hero(props) {
   const viewportScale = useViewportScale()
  
   const blastLayout = useMemo(() => {
-    const photos = cfg.blastPhotos || []
+    // Cap matches the editor (hero schema blastPhotos maxItems: 12) — each
+    // blast photo animates independently, more turns the scatter to clutter.
+    const photos = (cfg.blastPhotos || []).slice(0, 12)
     // Base distance adapts to viewport: full on desktop, compressed on mobile
     // so photos stay visible and don't fly off-screen
     const baseDistance = 330 * viewportScale

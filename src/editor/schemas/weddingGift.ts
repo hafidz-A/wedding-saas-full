@@ -43,6 +43,7 @@ export const weddingGiftSchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'name',
       newItem: { id: '', name: '', description: '', image: '', url: '', accent: 'coral' },
+      maxItems: 12,
       itemFields: [
         { key: 'name',        label: { id: 'Nama', en: 'Name' },               type: 'text' },
         { key: 'description', label: { id: 'Deskripsi', en: 'Description' },    type: 'textarea', rows: 2 },

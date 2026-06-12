@@ -23,18 +23,27 @@ interface Props {
   slug: string
   lang: Lang
   onChange: (next: Record<string, unknown>[]) => void
+  maxItems?: number
+}
+
+// Date.now() alone collides on fast double-clicks → duplicate React keys →
+// rows render/remove erratically. Add a random suffix so every id is unique.
+function newItemId() {
+  return `item-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
 }
 
 export default function ObjectArrayField({
-  label, value, itemFields, newItem, itemLabelKey, slug, lang, onChange,
+  label, value, itemFields, newItem, itemLabelKey, slug, lang, onChange, maxItems,
 }: Props) {
   const t = useDashboardDict().editor
   const confirmDialog = useConfirm()
   const items = Array.isArray(value) ? value : []
   const [openIdx, setOpenIdx] = useState<number | null>(items.length === 1 ? 0 : null)
+  const atMax = maxItems != null && items.length >= maxItems
 
   function add() {
-    const next = [...items, { ...newItem, id: `item-${Date.now()}` }]
+    if (atMax) return
+    const next = [...items, { ...newItem, id: newItemId() }]
     onChange(next)
     setOpenIdx(next.length - 1)
   }
@@ -66,9 +75,10 @@ export default function ObjectArrayField({
   return (
     <div style={wrap}>
       <div style={head}>
-        <span style={lbl}>{label}</span>
-        <button type="button" style={btn} onClick={add}>{t.addItem}</button>
+        <span style={lbl}>{label}{maxItems != null && <span style={count}> {items.length}/{maxItems}</span>}</span>
+        <button type="button" style={{ ...btn, opacity: atMax ? 0.45 : 1, cursor: atMax ? 'default' : 'pointer' }} onClick={add} disabled={atMax}>{t.addItem}</button>
       </div>
+      {atMax && <span style={hint}>{t.maxItemsFull.replace('{max}', String(maxItems))}</span>}
 
       <div style={list}>
         {items.map((item, i) => {
@@ -99,9 +109,9 @@ export default function ObjectArrayField({
                       case 'boolean':  return <BooleanField  key={f.key} label={fLabel} value={v} onChange={onChange} help={fHelp} />
                       case 'select':   return <SelectField   key={f.key} label={fLabel} value={v} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={onChange} help={fHelp} />
                       case 'image':    return <ImageField    key={f.key} label={fLabel} value={v} slug={slug} onChange={onChange} help={fHelp} />
-                      case 'imageArray':  return <ImageArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} slug={slug} onChange={onChange} help={fHelp} />
+                      case 'imageArray':  return <ImageArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} slug={slug} onChange={onChange} help={fHelp} maxItems={f.maxItems} />
                       case 'stringArray': return <StringArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemPlaceholder={f.itemPlaceholder} onChange={onChange} help={fHelp} />
-                      case 'objectArray': return <ObjectArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemFields={f.itemFields} newItem={f.newItem} itemLabelKey={f.itemLabelKey} slug={slug} lang={lang} onChange={onChange} />
+                      case 'objectArray': return <ObjectArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemFields={f.itemFields} newItem={f.newItem} itemLabelKey={f.itemLabelKey} slug={slug} lang={lang} onChange={onChange} maxItems={f.maxItems} />
                       default:
                         return <div key={f.key} style={{ fontSize: 12, color: '#E8553E' }}>{t.unsupportedField} {f.type}</div>
                     }
@@ -132,6 +142,8 @@ function defaultForField(f: FieldDef): unknown {
 const wrap: React.CSSProperties = { display: 'grid', gap: 10 }
 const head: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
 const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.6)', flex: 1 }
+const count:React.CSSProperties = { letterSpacing: '0.06em', color: 'rgba(42,33,24,0.45)' }
+const hint: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
 const btn:  React.CSSProperties = { padding: '6px 12px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
 const list: React.CSSProperties = { display: 'grid', gap: 8 }
 const card: React.CSSProperties = { border: '1px solid rgba(42,33,24,0.12)', borderRadius: 10, background: '#fff' }

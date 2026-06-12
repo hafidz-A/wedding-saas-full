@@ -8,23 +8,35 @@ import { BotanicalSketchLayer } from '../../components/BotanicalBorder.tsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* Carousel-style ring: upright cards facing the screen (no coil tilt — the
+   per-card counter-rotation in renderFrame keeps every photo flat to the
+   viewer), a ring radius that widens with the photo count so up to 30 cards
+   keep breathing room, and a far perspective so the front card is a gentle
+   zoom rather than an in-your-face blowup. */
 const buildConfig = (N) => {
   const safeN = Math.max(1, N)
+  const cardWidth = 150
+  const cardHeight = 194
 
   return {
     scrollPerPhoto: 130,
     rotationPerPhoto: 360 / safeN,
-    pitchY: Math.max(52, Math.min(85, 640 / safeN)),
-    radius: Math.max(220, Math.min(300, 175 + safeN * 5)),
-    coilTiltX: 11,
-    cardWidth: 160,
-    cardHeight: 206,
-    frontScale: 1.18,
-    neighborGap: 75,
-    depthOpacityMin: 0.15,
-    depthBlurMax: 4.0,
-    depthScaleMin: 0.35,
-    sideOpacityMax: 0.32,
+    // A whisper of rise per photo — the path reads as a circle, not a climb.
+    pitchY: Math.max(6, Math.min(26, 240 / safeN)),
+    // Ring widens with N: circumference ≈ N × cardWidth × 1.05, clamped so
+    // small sets still look like a ring and huge sets don't blow the stage.
+    radius: Math.max(260, Math.min(560, (safeN * cardWidth * 1.05) / (2 * Math.PI))),
+    // The RING leans back a touch so its circular path is visible on screen;
+    // the cards themselves counter-rotate and stay perfectly upright.
+    ringTiltX: 14,
+    cardWidth,
+    cardHeight,
+    frontScale: 1.12,
+    neighborGap: 56,
+    depthOpacityMin: 0.12,
+    depthBlurMax: 3.0,
+    depthScaleMin: 0.4,
+    sideOpacityMax: 0.3,
   }
 }
 
@@ -51,7 +63,9 @@ const COMPONENT_STYLES = `
   position: absolute;
   inset: 0;
   z-index: 10;
-  perspective: 550px;
+  /* Far perspective = "camera pulled back": the front card zooms gently
+     instead of blowing up, and the widened ring still fits the stage. */
+  perspective: 1500px;
   perspective-origin: 50% 48%;
 }
 
@@ -123,9 +137,11 @@ const COMPONENT_STYLES = `
   height: var(--gsc-card-h, 230px);
   overflow: visible;
   pointer-events: none;
-  transform-style: preserve-3d;
+  /* flat, NOT preserve-3d: the cards are billboarded (always face the
+     viewer), and keeping their subtree in the 3D context made Chrome slice
+     frame decorations (border/shadow/outline) into stray gold slivers. */
+  transform-style: flat;
   will-change: transform, opacity, filter;
-  transition: box-shadow 0.35s ease;
 }
 
 .gsc-coilButton {
@@ -141,6 +157,10 @@ const COMPONENT_STYLES = `
 }
 
 .gsc-coilFrame {
+  /* MUST be block: this is a <span>, and as an inline box containing a block
+     <img> it fragments — the empty fragments then paint the highlight ring
+     as a detached vertical gold sliver at the card's centre. */
+  display: block;
   position: relative;
   width: 100%;
   height: 100%;
@@ -148,23 +168,36 @@ const COMPONENT_STYLES = `
   border: 1px solid var(--glass-border, rgba(255,255,255,0.34));
   border-radius: 12px;
   background: var(--glass-bg, rgba(255,255,255,0.16));
-  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: border-color 0.35s ease;
+}
+
+/* The active-card highlight is painted INSIDE the frame (overflow: hidden)
+   — outlines and box-shadows on these 3D-transformed cards get projected as
+   detached gold slivers by the preserve-3d context, so nothing decorative
+   may live outside the card's own clip. */
+.gsc-coilFrame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--color-gold, #F5C842);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
 }
 
 .gsc-coilCard[data-front="true"] .gsc-coilFrame {
   border-color: rgba(255,255,255,0.95);
-  box-shadow:
-    0 0 0 2px var(--color-gold, #F5C842),
-    0 0 0 4px rgba(255,255,255,0.9),
-    0 24px 75px rgba(42,33,24,0.38),
-    0 0 100px rgba(245,200,66,0.35);
 }
 
-.gsc-coilButton:focus-visible .gsc-coilFrame {
-  box-shadow:
-    0 0 0 2px var(--bg, #f5f0eb),
-    0 0 0 5px var(--accent, rgba(200,180,150,0.5)),
-    0 18px 70px rgba(0,0,0,0.22);
+.gsc-coilCard[data-front="true"] .gsc-coilFrame::after {
+  opacity: 1;
+}
+
+/* Keyboard focus uses the same inside-the-clip ring (3D-safe). */
+.gsc-coilButton:focus-visible .gsc-coilFrame::after {
+  opacity: 1;
+  border-color: var(--accent, #C8B496);
 }
 
 .gsc-coilEntry,
@@ -273,6 +306,21 @@ const COMPONENT_STYLES = `
   font-family: var(--font-body, sans-serif);
   font-size: clamp(15px, 2vw, 22px);
   letter-spacing: 0.08em;
+  line-height: 1.55;
+}
+
+/* Demo-preview ribbon (only rendered when the demoNote prop is set). */
+.gsc-demoNote {
+  width: fit-content;
+  max-width: min(86vw, 560px);
+  margin: 14px 0 0;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: var(--glass-bg, rgba(255,255,255,0.6));
+  border: 1px solid var(--glass-border, rgba(42,33,24,0.12));
+  color: var(--fg-muted, rgba(42,33,24,0.7));
+  font-family: var(--font-body, sans-serif);
+  font-size: 13px;
   line-height: 1.55;
 }
 
@@ -392,18 +440,13 @@ const COMPONENT_STYLES = `
     will-change: transform, opacity;
   }
 
-  /* Simpler box-shadow for the active card on mobile — the desktop
-     version stacks 3 shadows including a 90px coloured glow, which is
-     expensive to paint inside the scroll loop. Same visual emphasis,
-     fraction of the cost. */
-  .gsc-coilCard[data-front="true"] .gsc-coilFrame {
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,0.7),
-      0 8px 24px rgba(0,0,0,0.22);
+  /* Thinner highlight ring on mobile. */
+  .gsc-coilFrame::after {
+    border-width: 1px;
   }
 
   .gsc-stage {
-    perspective: 720px;
+    perspective: 1250px;
   }
 
   .gsc-title {
@@ -417,9 +460,16 @@ const COMPONENT_STYLES = `
 }
 `
 
+/* The carousel ring widens with the photo count (buildConfig.radius), so 30
+   upright cards stay readable. The editor caps the field at the same number
+   (gallerySpringCoil schema maxItems). */
+const MAX_PHOTOS = 30
+
 function normalizePhotos(photos) {
-  return photos.map((photo, index) => ({
-    id: photo.id ?? index,
+  return photos.slice(0, MAX_PHOTOS).map((photo, index) => ({
+    // Guard against duplicate/empty ids in stored configs — a repeated React
+    // key makes cards vanish or stick when one is removed from the middle.
+    id: photo.id ? `${photo.id}-${index}` : index,
     src: photo.src || '',
     caption: photo.caption || photo.alt || '',
   }))
@@ -617,6 +667,7 @@ export default function GallerySpringCoil({
   photos = [],
   sectionTitle = 'Moments',
   sectionSubtitle = 'Memori kami menjalin dalam spiral kenangan',
+  demoNote = '',
 }) {
   const displayPhotos = useMemo(() => normalizePhotos(photos), [photos])
   const total = displayPhotos.length
@@ -687,11 +738,18 @@ export default function GallerySpringCoil({
       const rotY = -(activeRaw * config.rotationPerPhoto)
       const activeBaseY = (activeRaw - (total - 1) / 2) * config.pitchY
       const riseY = -activeBaseY
-      const tiltX = (mouse.current.y - 0.5) * 7
-      const tiltY = (mouse.current.x - 0.5) * 10
+      // Mouse parallax kept deliberately small — a soft drift, never dizzying.
+      const tiltX = (mouse.current.y - 0.5) * 3
+      const tiltY = (mouse.current.x - 0.5) * 5
+      // The ring's yaw/pitch are baked into per-card translate3d positions
+      // below — no rotations ever reach the DOM. Rotated card planes inside
+      // preserve-3d made Chrome slice frame decorations into gold slivers.
+      const yawBase = rotY + tiltY
+      const pitchRad = ((config.ringTiltX + tiltX) * Math.PI) / 180
+      const sinPitch = Math.sin(pitchRad)
+      const cosPitch = Math.cos(pitchRad)
 
-      coil.style.transform =
-        `rotateX(${config.coilTiltX + tiltX}deg) rotateY(${rotY + tiltY}deg) translateY(${riseY}px)`
+      coil.style.transform = `translateY(${riseY}px)`
 
       for (let index = 0; index < total; index += 1) {
         const card = cardsRef.current[index]
@@ -720,10 +778,18 @@ export default function GallerySpringCoil({
         // changes meaningfully (saves the GPU from re-rasterising the
         // card sub-tree on every single frame).
         if (useBlur) card.style.filter = `blur(${blur.toFixed(2)}px)`
+        // Ring position computed in JS: a circle in XZ, leaned back by the
+        // ring pitch, riding the carousel yaw. The card itself is a pure
+        // translate3d + scale — upright, facing the screen, slice-proof.
+        const theta = ((staticAngle + yawBase) * Math.PI) / 180
+        const ringX = Math.sin(theta) * config.radius
+        const ringZ = Math.cos(theta) * config.radius
+        const x3 = ringX
+        const y3 = -ringZ * sinPitch
+        const z3 = ringZ * cosPitch
+
         card.style.transform = [
-          `rotateY(${staticAngle}deg)`,
-          `translateZ(${config.radius}px)`,
-          `translateY(${yOffset}px)`,
+          `translate3d(${x3.toFixed(2)}px, ${(y3 + yOffset).toFixed(2)}px, ${z3.toFixed(2)}px)`,
           `scale(${scale.toFixed(3)})`,
         ].join(' ')
         card.style.zIndex = String(Math.round((1 - depthT) * 40 + easedFrontness * 100))
@@ -944,10 +1010,12 @@ export default function GallerySpringCoil({
           <div className="gsc-vignette" aria-hidden="true" />
           <div className="gsc-fade" aria-hidden="true" />
 
-          {(sectionTitle || sectionSubtitle) && (
+          {(sectionTitle || sectionSubtitle || demoNote) && (
             <header className="gsc-header">
               {sectionTitle && <h2 className="gsc-title">{sectionTitle}</h2>}
               {sectionSubtitle && <p className="gsc-subtitle">{sectionSubtitle}</p>}
+              {/* Demo previews only — explains that a real invitation picks ONE gallery style. */}
+              {demoNote && <p className="gsc-demoNote">{demoNote}</p>}
             </header>
           )}
 

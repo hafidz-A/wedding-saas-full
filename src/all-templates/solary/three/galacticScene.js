@@ -892,10 +892,18 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
      foto ada di belakang body planet (bukan dim, benar-benar hilang).
 
      Sprite size dinaikkan jadi 1.25×1.55 untuk "dipertegass". */
-  const SATURN_PHOTO_RING_R = 4.8;      // clearly outside ring outer (3.7)
+  const SATURN_PHOTO_RING_R = 4.8;      // MINIMUM radius — clearly outside ring outer (3.7)
   const SATURN_PHOTO_ABOVE  = 0;        // sebidang dengan plane ring
   const SATURN_PHOTO_CARD_W = 1.25;     // ~1.9× sebelumnya (0.65)
   const SATURN_PHOTO_CARD_H = 1.55;     // ~1.8× sebelumnya (0.85)
+  /* Photo-ring geometry adapts to the photo count so up to 30 cards keep a
+     sliver of space between them instead of fusing shut. The radius may only
+     grow a little (a wide orbit shoves the front cards into the camera), so
+     past ~24 photos the CARDS shrink instead. Recomputed in setSaturnPhotos;
+     the animation loop reads these variables. */
+  const SATURN_PHOTO_RING_R_MAX = 5.5;
+  let photoRingR = SATURN_PHOTO_RING_R;
+  let photoCardScale = 1;
   const SATURN_BODY_R        = 1.7;     // saturn sphere radius (for occlusion test)
   const SATURN_PHOTO_MAX_ANISO = Math.min(16, renderer.capabilities?.getMaxAnisotropy?.() ?? 16);
   /* Card texture resolution. The whole card — photo + baked caption — is one
@@ -960,7 +968,7 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     return { tex, canvas };
   }
 
-  function setSaturnPhotos(photos = []) {
+  function setSaturnPhotos(allPhotos = []) {
     /* Clear existing sprites + dispose textures. */
     photoSprites.forEach(s => {
       photoRingGroup.remove(s);
@@ -970,12 +978,22 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
     photoSprites = [];
     activePhotos = [];
 
+    /* Clamp to 30 (matches the editor's saturnRing maxItems) — each card is
+       its own large canvas texture, so this is also the GPU-memory ceiling. */
+    const photos = allPhotos.slice(0, 30);
+
     if (!photos.length) {
       console.log("[saturn] setSaturnPhotos called with empty array — sprites cleared");
       return;
     }
 
     const N = photos.length;
+    /* Keep ~15% breathing room between cards: circumference ≥ N × cardW ×
+       1.15. First let the orbit grow (up to a modest cap), then shrink the
+       cards to absorb the rest — 30 photos = orbit 5.5 + cards at ~80%. */
+    const neededR = (N * SATURN_PHOTO_CARD_W * 1.15) / (2 * Math.PI);
+    photoRingR = Math.min(SATURN_PHOTO_RING_R_MAX, Math.max(SATURN_PHOTO_RING_R, neededR));
+    photoCardScale = Math.min(1, (2 * Math.PI * photoRingR) / (N * SATURN_PHOTO_CARD_W * 1.15));
     const tokens = themeBus.current;
 
     photos.forEach((p, i) => {
@@ -994,10 +1012,10 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
         depthTest: true, depthWrite: false,
       });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(SATURN_PHOTO_CARD_W, SATURN_PHOTO_CARD_H, 1);
+      sprite.scale.set(SATURN_PHOTO_CARD_W * photoCardScale, SATURN_PHOTO_CARD_H * photoCardScale, 1);
       sprite.position.set(
-        Math.cos(angle) * SATURN_PHOTO_RING_R,
-        Math.sin(angle) * SATURN_PHOTO_RING_R,
+        Math.cos(angle) * photoRingR,
+        Math.sin(angle) * photoRingR,
         -SATURN_PHOTO_ABOVE,
       );
       sprite.userData = { baseAngle: angle, src: p.src, caption: p.caption };
@@ -1440,8 +1458,8 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
            local XY ends up as saturn-local XZ (the ring plane), and
            local -Z becomes saturn-local +Y (above the ring). */
         const angle = sprite.userData.baseAngle + saturnPhotoRotation;
-        const tx = Math.cos(angle) * SATURN_PHOTO_RING_R;
-        const ty = Math.sin(angle) * SATURN_PHOTO_RING_R;
+        const tx = Math.cos(angle) * photoRingR;
+        const ty = Math.sin(angle) * photoRingR;
         const tz = -SATURN_PHOTO_ABOVE;
 
         /* Lerp from gathered point → ring target. */
@@ -1486,7 +1504,7 @@ export function mountGalacticScene({ starfieldDensity = 8000 } = {}) {
 
         /* Ringan depth cue tetap dipertahankan supaya foto di belakang
            tampak sedikit lebih dim (depth perception), tapi tidak agresif. */
-        const depthDiff = (spriteDist - saturnDist) / SATURN_PHOTO_RING_R;
+        const depthDiff = (spriteDist - saturnDist) / photoRingR;
         const zNorm = Math.max(-1, Math.min(1, -depthDiff));
         const subtleDepthDim = 0.75 + 0.25 * zNorm; // range [0.5, 1.0]
 

@@ -13,9 +13,10 @@ describe('tutorial content structure', () => {
     }
   })
 
-  it('solary categories stay flat (no group)', () => {
+  it('every solary category has a valid group (shared grouped architecture)', () => {
     for (const cat of TUTORIAL_CATEGORIES_SOLARY) {
-      expect(cat.group, `${cat.id} should have no group`).toBeUndefined()
+      expect(cat.group, `${cat.id} missing group`).toBeTruthy()
+      expect(TUTORIAL_GROUPS).toContain(cat.group)
     }
   })
 
@@ -23,16 +24,36 @@ describe('tutorial content structure', () => {
     expect(TUTORIAL_GROUPS).toEqual(['prep', 'fill', 'data', 'help'])
   })
 
-  it('solary exposes the 12 expected categories in order', () => {
-    expect(TUTORIAL_CATEGORIES_SOLARY.map((c) => c.id)).toEqual([
-      'quickstart', 'start', 'experience', 'editor', 'photos', 'palette',
-      'music', 'rsvps', 'gifts', 'guests', 'guestbook', 'faq',
+  it('lovebirds exposes the 15 expected categories in order', () => {
+    expect(TUTORIAL_CATEGORIES.map((c) => c.id)).toEqual([
+      'start', 'checklist', 'experience', 'editor', 'sections', 'photos',
+      'palette', 'ornament', 'music', 'rsvps', 'gifts', 'guests', 'guestbook',
+      'billing', 'faq',
     ])
   })
 
-  it('only the expected nine solary categories have a relatedTab', () => {
+  it('solary exposes the 14 expected categories in order (no ornament — solary has none)', () => {
+    expect(TUTORIAL_CATEGORIES_SOLARY.map((c) => c.id)).toEqual([
+      'quickstart', 'start', 'experience', 'editor', 'sections', 'photos',
+      'palette', 'music', 'rsvps', 'gifts', 'guests', 'guestbook', 'billing', 'faq',
+    ])
+  })
+
+  it('solary never gains an ornament category — the backdrop is its 3D scene', () => {
+    expect(TUTORIAL_CATEGORIES_SOLARY.some((c) => c.id === 'ornament')).toBe(false)
+  })
+
+  it('both templates ship a per-section guide with 14 cards', () => {
+    const lb = TUTORIAL_CATEGORIES.find((c) => c.id === 'sections')
+    const so = TUTORIAL_CATEGORIES_SOLARY.find((c) => c.id === 'sections')
+    expect(lb?.sectionGuideCount).toBe(14)
+    expect(so?.sectionGuideCount).toBe(14)
+  })
+
+  it('only the expected solary categories have a relatedTab deep-link', () => {
     expect(TUTORIAL_CATEGORIES_SOLARY.filter((c) => c.relatedTab).map((c) => c.id)).toEqual([
-      'quickstart', 'editor', 'photos', 'palette', 'music', 'rsvps', 'gifts', 'guests', 'guestbook',
+      'quickstart', 'editor', 'sections', 'photos', 'palette', 'music',
+      'rsvps', 'gifts', 'guests', 'guestbook',
     ])
   })
 
