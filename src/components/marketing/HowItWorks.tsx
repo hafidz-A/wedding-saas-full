@@ -12,7 +12,7 @@ export function HowItWorks({ t }: { t: Dict['landing']['howItWorks'] }) {
     <section className={styles.section} ref={ref}>
       <div className={`${styles.inner} ${revealed ? styles.revealed : ''}`}>
         <header className={styles.head}>
-          <span className={styles.kicker}>THE JOURNEY</span>
+          <span className={styles.kicker}>HOW IT WORKS</span>
           <h2 className={styles.heading}>{t.heading}</h2>
         </header>
 

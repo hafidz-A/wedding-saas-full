@@ -2,11 +2,11 @@ export const common = {
   id: {
     nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan', myTemplate: 'My Template' },
     footer: {
-      tagline: 'Undangan pernikahan digital yang sinematik.',
+      tagline: 'Undangan digital yang terasa seperti film pendek.',
       templates: 'Template',
       login: 'Masuk',
       signup: 'Buat Undangan',
-      rights: '© 2026 FinCards. Dibuat untuk momen tak terlupakan.',
+      rights: '© 2026 FinCards. Untuk momen yang cuma sekali.',
     },
     langToggle: { label: 'Bahasa' },
     notFound: {
@@ -29,7 +29,7 @@ export const common = {
       myTemplatesTitle: 'Undangan saya',
       empty: 'Belum ada undangan',
       emptyBody: 'Pilih desain favoritmu, lalu mulai rancang undangan pertamamu — cuma butuh beberapa menit.',
-      browseTemplates: 'Jelajahi Template',
+      browseTemplates: 'Lihat Semua Template',
       viewPublic: 'Lihat undangan',
       openDashboard: 'Buka dashboard',
     },
@@ -59,11 +59,11 @@ export const common = {
   en: {
     nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template' },
     footer: {
-      tagline: 'Cinematic digital wedding invitations.',
+      tagline: 'Digital invitations that feel like short films.',
       templates: 'Templates',
       login: 'Login',
       signup: 'Create Invitation',
-      rights: '© 2026 FinCards. Crafted for unforgettable moments.',
+      rights: '© 2026 FinCards. For the moments you only get once.',
     },
     langToggle: { label: 'Language' },
     notFound: {

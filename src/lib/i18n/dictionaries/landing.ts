@@ -2,18 +2,18 @@ export const landing = {
   id: {
     hero: {
       kicker: 'UNDANGAN DIGITAL',
-      title: 'Momen berhargamu, dirangkai sinematik.',
+      title: 'Undangan? Ini lebih mirip film pendek.',
       subtitle:
-        'Bikin undangan digital premium yang memukau dari scroll pertama sampai RSVP. Pilih template, isi cerita kalian, bagikan link.',
+        'Tamu scroll, cerita kalian terbuka scene demi scene — dari gerbang pembuka sampai RSVP. Pilih template, isi cerita, bagikan link-nya.',
       ctaPrimary: 'Buat Undangan',
       ctaSecondary: 'Lihat Template',
     },
     emotionalHook: {
-      title: 'Lebih dari sekadar undangan digital.',
-      body: 'Kami merajut cerita cinta Anda menjadi sebuah pengalaman sinematik yang emosional dan memukau — sebuah gerbang indah menuju awal yang baru.',
+      title: 'Undangan adalah kesan pertama acara kalian.',
+      body: 'Sebelum tamu melihat dekorasi atau mendengar lagu pertama, mereka membuka link ini. Jadi kami membuat momen itu terasa: foto kalian, lagu kalian, cerita kalian — terbuka pelan-pelan di layar tamu.',
     },
     vibeExploration: {
-      heading: 'Temukan Vibe Undanganmu',
+      heading: 'Coba Vibe-nya Langsung di Halaman Ini',
       subheading: 'Pilih kategori, geser antar template, lalu pilih palette-nya. Latar halaman ini ikut berubah persis seperti undanganmu nanti.',
       templateEyebrow: 'Template',
       paletteLabel: 'Pilih Palette',
@@ -41,20 +41,20 @@ export const landing = {
       },
     },
     features: {
-      heading: 'Semua yang kalian butuhkan',
-      subheading: 'Fitur lengkap untuk undangan yang terasa hangat dan personal.',
+      heading: 'Cantik di depan, rapi di belakang',
+      subheading: 'RSVP terkumpul sendiri, amplop digital langsung ke rekening kalian, musik main otomatis. Kalian tinggal fokus ke acaranya.',
       items: [
         {
           title: 'RSVP & Manajemen Tamu',
-          body: 'Kelola daftar tamu, konfirmasi kehadiran, plus-one, dan ucapan — rapi dalam satu dashboard.',
+          body: 'Siapa hadir, bawa berapa orang, pesan mereka apa — masuk sendiri ke dashboard. Nggak ada lagi rekap manual di notes HP.',
         },
         {
           title: 'Musik Latar',
-          body: 'Setel lagu favorit kalian, otomatis main begitu undangan dibuka.',
+          body: 'Upload lagu kalian, dan musiknya mulai begitu tamu membuka undangan. Detail kecil yang paling sering bikin terharu.',
         },
         {
           title: 'Galeri, Cerita & Amplop Digital',
-          body: 'Timeline kisah, galeri foto, dan amplop digital (transfer bank) — lengkap.',
+          body: 'Kisah kalian dalam timeline, foto-foto terbaik, dan amplop digital yang transfernya langsung masuk ke rekening kalian.',
         },
       ],
     },
@@ -82,22 +82,24 @@ export const landing = {
         { title: 'Bagikan link', body: 'Sebar ke tamu lewat WhatsApp — pantau RSVP real-time.' },
       ],
     },
+    // TODO: verifikasi — kutipan testimonial & nama pasangan di bawah ini placeholder/demo,
+    // ganti dengan testimoni asli sebelum launch publik (berlaku untuk blok id & en).
     testimonials: {
       heading: 'Kata Mereka Yang Berbahagia',
-      subheading: 'Kisah dari pasangan yang telah mengukir awal perjalanan indahnya bersama kami.',
+      subheading: 'Dari pasangan yang undangannya sudah lebih dulu disebar.',
       items: [
         {
-          quote: 'Tamu-tamu kami sangat kagum dengan template Solary yang kami gunakan. Animasi 3D tata suryanya benar-benar unik dan belum pernah mereka lihat sebelumnya.',
+          quote: 'Tamu kami sampai nanya bikinnya di mana. Planet 3D-nya beneran bergerak pas di-scroll — belum ada yang pernah lihat undangan kayak gini.',
           author: 'Aria & Kirana',
           plan: 'Solary Template',
         },
         {
-          quote: 'Lovebirds sangat sesuai dengan estetika rustic dan vintage pernikahan kami. Polaroid slider dan sentuhan musik latar membuat banyak kerabat terharu saat membukanya.',
+          quote: 'Lovebirds pas banget sama tema rustic kami. Begitu musiknya mulai dan polaroid-nya bergeser, beberapa kerabat kami nangis beneran.',
           author: 'Dito & Rania',
           plan: 'Lovebirds Template',
         },
         {
-          quote: 'Dashboard datanya mempermudah pendaftaran tamu secara instan. Konfirmasi kehadiran dan ucapan tamu terangkum rapi tanpa repot.',
+          quote: 'Kami nggak pernah rekap RSVP manual. Siapa hadir, bawa berapa orang, ucapannya apa — tinggal buka dashboard, semuanya sudah di sana.',
           author: 'Rian & Siska',
           plan: 'Premium Tier',
         },
@@ -105,25 +107,25 @@ export const landing = {
     },
     finalCta: {
       title: 'Siap bikin undangan kalian?',
-      subtitle: 'Bangun dan lihat hasilnya sebelum dipublish.',
-      cta: 'Buat Undangan',
+      subtitle: 'Rancang dulu sampai puas, lihat preview-nya — bayar hanya saat mau diterbitkan.',
+      cta: 'Mulai Rancang Sekarang',
     },
   },
   en: {
     hero: {
       kicker: 'DIGITAL INVITATIONS',
-      title: 'Your moment, told cinematically.',
+      title: 'An invitation? More like a short film.',
       subtitle:
-        'Craft a premium digital invitation that captivates from the first scroll to the RSVP. Pick a template, add your story, share the link.',
+        'Guests scroll, and your story unfolds scene by scene — from the opening gate to the RSVP. Pick a template, add your story, share the link.',
       ctaPrimary: 'Create Invitation',
       ctaSecondary: 'Browse Templates',
     },
     emotionalHook: {
-      title: 'More than a digital invitation.',
-      body: 'We weave your love story into a cinematic, emotional, and captivating experience — a beautiful entrance to your new beginning.',
+      title: 'The invitation is your event’s first impression.',
+      body: 'Before anyone sees the venue or hears the first song, they open this link. So we make that moment count: your photos, your song, your story — unfolding slowly on every guest’s screen.',
     },
     vibeExploration: {
-      heading: 'Discover Your Invitation Vibe',
+      heading: 'Try the Vibe, Right on This Page',
       subheading: 'Pick a category, swipe between templates, then pick a palette. This page repaints itself to look exactly like your future invitation.',
       templateEyebrow: 'Template',
       paletteLabel: 'Choose a palette',
@@ -151,20 +153,20 @@ export const landing = {
       },
     },
     features: {
-      heading: 'Everything you need',
-      subheading: 'A complete toolkit for an invitation that feels warm and personal.',
+      heading: 'Pretty up front, organized backstage',
+      subheading: 'RSVPs collect themselves, the digital envelope goes straight to your account, the music plays itself. You focus on the day.',
       items: [
         {
           title: 'RSVP & Guest Management',
-          body: 'Manage your guest list, attendance, plus-ones, and wishes — all in one tidy dashboard.',
+          body: 'Who’s coming, how many they’re bringing, what they wrote — it all lands in your dashboard on its own. No more tallying in your phone notes.',
         },
         {
           title: 'Background Music',
-          body: 'Set your favorite song to play the moment the invitation opens.',
+          body: 'Upload your song, and it starts the moment a guest opens the invitation. The small detail that moves people most.',
         },
         {
           title: 'Gallery, Story & Digital Gift',
-          body: 'Story timeline, photo gallery, and digital gift (bank transfer) — all included.',
+          body: 'Your story on a timeline, your best photos, and a digital envelope where transfers go straight to your own account.',
         },
       ],
     },
@@ -193,21 +195,21 @@ export const landing = {
       ],
     },
     testimonials: {
-      heading: 'Stories of Happily Ever After',
-      subheading: 'Hear from couples who crafted their unforgettable first impressions with us.',
+      heading: 'Word From the Newlyweds',
+      subheading: 'From couples whose invitations are already out in the world.',
       items: [
         {
-          quote: 'Our guests were completely amazed by the Solary template. The 3D solar system animation was incredibly unique and unlike anything they had seen before.',
+          quote: 'Our guests kept asking where we made it. The 3D planets actually move as you scroll — nobody had seen an invitation like it.',
           author: 'Aria & Kirana',
           plan: 'Solary Template',
         },
         {
-          quote: 'Lovebirds matched our rustic, vintage theme perfectly. The polaroid layouts and romantic background music moved many of our friends to tears.',
+          quote: 'Lovebirds fit our rustic theme perfectly. The moment the music started and the polaroids slid in, a few of our relatives genuinely teared up.',
           author: 'Dito & Rania',
           plan: 'Lovebirds Template',
         },
         {
-          quote: 'The RSVP dashboard simplified guest list tracking immensely. Attendance details and wishing notes were automatically sorted without any stress.',
+          quote: 'We never tallied a single RSVP by hand. Who’s coming, how many they’re bringing, what they wrote — it’s all just there in the dashboard.',
           author: 'Rian & Siska',
           plan: 'Premium Tier',
         },
@@ -215,8 +217,8 @@ export const landing = {
     },
     finalCta: {
       title: 'Ready to create yours?',
-      subtitle: 'Build it and preview before you publish.',
-      cta: 'Create Invitation',
+      subtitle: 'Design it your way, preview the whole thing — pay only when you’re ready to publish.',
+      cta: 'Start Designing Now',
     },
   },
 }

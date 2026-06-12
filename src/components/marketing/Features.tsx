@@ -99,7 +99,7 @@ export function Features({ t }: { t: Dict['landing']['features'] }) {
     <section id="features" className={styles.section} ref={ref}>
       <div className={`${styles.inner} ${revealed ? styles.revealed : ''}`}>
         <header className={styles.head}>
-          <span className={styles.kicker}>ELEVATED FEATURES</span>
+          <span className={styles.kicker}>BEHIND THE SCENES</span>
           <h2 className={styles.heading}>{t.heading}</h2>
           <p className={styles.subheading}>{t.subheading}</p>
         </header>

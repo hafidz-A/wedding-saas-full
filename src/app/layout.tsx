@@ -36,7 +36,7 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: `${BRAND} — Undangan Digital`,
   description:
-    `${BRAND} — undangan digital yang sinematik untuk setiap momen. Pilih kategori, pilih template, bagikan link.`,
+    `${BRAND} — undangan digital yang terasa seperti film pendek. Rancang dulu sampai puas, bayar saat mau diterbitkan, sebar link-nya lewat WhatsApp.`,
 }
 
 /**

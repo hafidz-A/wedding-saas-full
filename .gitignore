@@ -37,3 +37,6 @@ Thumbs.db
 .superpowers/
 .playwright-mcp/
 .texture-raw/
+
+# Microsoft Office lock files
+~$*
