@@ -15,9 +15,11 @@ interface Props {
   template: string
   initialConfig: PageConfig
   initialIsPublished: boolean
+  /** invitation.updated_at at page load — used for optimistic-concurrency on save. */
+  initialUpdatedAt?: string | null
 }
 
-export default function EditorRoot({ slug, template, initialConfig, initialIsPublished }: Props) {
+export default function EditorRoot({ slug, template, initialConfig, initialIsPublished, initialUpdatedAt }: Props) {
   // Lovebirds: fold registry→weddingGift + strip guestbook/countdown on load.
   const migrated =
     template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig
@@ -30,7 +32,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   const t = useDashboardDict().editor
 
   return (
-    <EditorProvider slug={slug} initialConfig={safeConfig}>
+    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt}>
       <div className={styles.wrap}>
         <div className={styles.topBar}>
           <button

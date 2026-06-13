@@ -1,6 +1,7 @@
 'use client'
 
 import AnimatedReveal from '../components/AnimatedReveal.jsx'
+import { safeExternalUrl } from '@/lib/safeUrl'
 import styles from './blocks.module.css'
 
 /**
@@ -20,7 +21,7 @@ export default function CTAButtonBlock({
   const className = `${styles.cta} ${styles[`cta-${variant}`] || ''} ${styles[`cta-align-${align}`] || ''}`
 
   const button = href ? (
-    <a className={className} href={href}>
+    <a className={className} href={safeExternalUrl(href)}>
       {label}
     </a>
   ) : (

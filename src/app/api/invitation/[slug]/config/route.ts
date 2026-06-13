@@ -49,9 +49,22 @@ export async function PUT(req: Request, { params }: Ctx) {
   // Always take them from the freshly-read DB row instead of the editor payload.
   const PRESERVE_KEYS = ['music', 'bgGif', 'theme', 'meta', 'inviteMessageTemplate']
   const { data: existing } = await (supabase.from('invitations') as any)
-    .select('config')
+    .select('config, updated_at')
     .eq('id', owner.id)
     .single()
+
+  // Optimistic concurrency: if the editor sent the updated_at it loaded with,
+  // and the row has been written since (another tab/device), reject rather than
+  // silently clobber the newer sections. The client surfaces this as a "reload"
+  // prompt. A missing baseUpdatedAt (older client) skips the check — no regression.
+  const baseUpdatedAt = typeof body?.baseUpdatedAt === 'string' ? body.baseUpdatedAt : null
+  if (baseUpdatedAt && existing?.updated_at && existing.updated_at !== baseUpdatedAt) {
+    return NextResponse.json(
+      { error: 'Undangan ini sudah diubah dari tab atau perangkat lain. Muat ulang halaman dulu sebelum menyimpan.' },
+      { status: 409 },
+    )
+  }
+
   const mergedConfig: any = { ...config }
   for (const key of PRESERVE_KEYS) {
     if (existing?.config && key in existing.config) mergedConfig[key] = existing.config[key]

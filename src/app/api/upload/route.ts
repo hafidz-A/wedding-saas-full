@@ -9,6 +9,10 @@ const ALLOWED_AUDIO_MIMES = new Set(['audio/mpeg', 'audio/mp3', 'audio/wav', 'au
 const ALLOWED_MIMES = new Set([...ALLOWED_IMAGE_MIMES, ...ALLOWED_AUDIO_MIMES])
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024 // 12 MB
+// Hard per-invitation storage ceiling. Galleries cap at 30 photos (~5 MB each)
+// + audio; 300 MB leaves generous headroom while stopping a runaway upload
+// loop from ballooning the Storage bill.
+const MAX_TOTAL_BYTES = 300 * 1024 * 1024 // 300 MB
 
 /**
  * POST /api/upload (multipart)
@@ -48,6 +52,30 @@ export async function POST(req: Request) {
   if (file.size > maxBytes) {
     const maxMb = Math.round(maxBytes / 1024 / 1024)
     return NextResponse.json({ error: `File too large (max ${maxMb} MB)` }, { status: 400 })
+  }
+
+  // --- per-invitation storage quota ---
+  // Sum the sizes already stored under this invitation's folder and refuse the
+  // upload if adding this file would exceed the ceiling. Best-effort: a list
+  // error fails OPEN (does not block the owner) — the abuse case we care about
+  // is sustained growth, which this still bounds on the next successful list.
+  try {
+    const { data: existingFiles } = await supabase.storage
+      .from(BUCKET)
+      .list(invitation.id, { limit: 1000 })
+    const usedBytes = (existingFiles ?? []).reduce(
+      (sum, f: any) => sum + (f?.metadata?.size ?? 0),
+      0,
+    )
+    if (usedBytes + file.size > MAX_TOTAL_BYTES) {
+      const maxMb = Math.round(MAX_TOTAL_BYTES / 1024 / 1024)
+      return NextResponse.json(
+        { error: `Kuota penyimpanan undangan penuh (maks ${maxMb} MB). Hapus media lama dulu.` },
+        { status: 413 },
+      )
+    }
+  } catch (e) {
+    console.error('[upload quota] list failed (allowing):', e)
   }
 
   // --- upload ---

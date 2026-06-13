@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { enforceRateLimit } from '@/lib/security/rate-limit'
+import { enforceRateLimit, getClientIp } from '@/lib/security/rate-limit'
 import { encryptField, decryptField } from '@/lib/crypto/app'
 
 const ALLOWED_COLORS = new Set(['gold', 'coral', 'sky', 'emerald', 'purple'])
-const RATE_LIMIT_MS = 30_000 // 30 seconds between submissions per slug
+const RATE_LIMIT_MS = 30_000 // 30 seconds between submissions per guest (slug+IP)
 
-// In-memory per-slug last-submit timestamps. Resets on server restart,
-// which is acceptable for a soft anti-spam rate limit on a small site.
-const lastSubmitBySlug = new Map<string, number>()
+// In-memory per-(slug, IP) last-submit timestamps. Keyed by IP so one guest
+// spamming can't lock the whole reception out — at a live event many guests
+// behind different connections submit within the same 30s window. Resets on
+// server restart, which is acceptable for a soft anti-spam rate limit.
+const lastSubmitByKey = new Map<string, number>()
 
 /**
  * POST /api/guestbook
@@ -46,9 +48,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Pesan harus 1-240 karakter' }, { status: 400 })
   }
 
-  // Rate limit
+  // Soft per-guest rate limit (slug + IP), so one guest can't lock others out.
   const now = Date.now()
-  const last = lastSubmitBySlug.get(slug)
+  const rlKey = `${slug}:${getClientIp(req)}`
+  const last = lastSubmitByKey.get(rlKey)
   if (last && now - last < RATE_LIMIT_MS) {
     const waitMs = RATE_LIMIT_MS - (now - last)
     return NextResponse.json(
@@ -87,7 +90,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Gagal simpan note' }, { status: 500 })
   }
 
-  lastSubmitBySlug.set(slug, now)
+  lastSubmitByKey.set(rlKey, now)
 
   return NextResponse.json({
     ok: true,

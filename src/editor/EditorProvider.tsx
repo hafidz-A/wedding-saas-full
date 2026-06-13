@@ -301,6 +301,8 @@ interface ProviderProps {
   slug: string
   initialConfig: PageConfig
   children: ReactNode
+  /** invitation.updated_at at load — sent back on save for conflict detection. */
+  initialUpdatedAt?: string | null
 }
 
 // Section types that used to exist but were removed/moved. Stripped on
@@ -317,7 +319,7 @@ function cleanConfig(input: PageConfig): PageConfig {
   }
 }
 
-export function EditorProvider({ slug, initialConfig, children }: ProviderProps) {
+export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt }: ProviderProps) {
   const cleaned = cleanConfig(initialConfig)
   const [state, dispatch] = useReducer(reducer, {
     config: cleaned,
@@ -325,7 +327,7 @@ export function EditorProvider({ slug, initialConfig, children }: ProviderProps)
     selectedSectionId: cleaned.sections[0]?.id ?? null,
     isSaving: false,
     saveError: null,
-    lastSavedAt: null,
+    lastSavedAt: initialUpdatedAt ?? null,
   })
 
   const isDirty = useMemo(() => !deepEqual(state.config, state.initialConfig), [state.config, state.initialConfig])
@@ -352,7 +354,9 @@ export function EditorProvider({ slug, initialConfig, children }: ProviderProps)
       const res = await fetch(`/api/invitation/${slug}/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ config: state.config }),
+        // baseUpdatedAt lets the server reject a save that would clobber a newer
+        // version written from another tab/device since this one loaded.
+        body: JSON.stringify({ config: state.config, baseUpdatedAt: state.lastSavedAt }),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))

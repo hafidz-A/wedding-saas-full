@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { isValidCallbackToken, getXenditInvoice, isPaidStatus } from '@/lib/payments/xendit'
+import { isValidCallbackToken, getXenditInvoice, isPaidStatus, invitationIdFromExternalId } from '@/lib/payments/xendit'
 import { resolvePlan } from '@/lib/payments/plans'
 import { publishPaidInvitation, applyPaidUpgrade } from '@/lib/payments/publish'
 
@@ -39,10 +39,19 @@ export async function POST(req: Request) {
     return handleUpgrade(admin, body)
   }
 
+  // Correlate by the invitation id embedded in OUR external id, NOT by the
+  // invitation's currently-stored xendit_external_id. If the owner opened
+  // checkout twice, the row stores only the latest invoice; paying an earlier
+  // one would otherwise never match. The id-prefix is stable across retries.
+  const invIdFromExt = invitationIdFromExternalId(body.external_id)
+  if (!invIdFromExt) {
+    console.error('[xendit webhook] unparseable external_id', body.external_id)
+    return NextResponse.json({ ok: true })
+  }
   const { data: inv } = (await admin
     .from('invitations')
     .select('id, plan, template_id, is_paid, xendit_invoice_id')
-    .eq('xendit_external_id', body.external_id)
+    .eq('id', invIdFromExt)
     .maybeSingle()) as {
     data: {
       id: string
@@ -60,13 +69,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
-  // Authoritative verification: re-fetch the invoice from Xendit rather than
-  // trusting the webhook body alone. Confirms it is genuinely paid AND that the
-  // amount equals the plan price (defends against tampered/mismatched callbacks
-  // and against a plan-price change between checkout and payment).
+  // Authoritative verification: re-fetch THE INVOICE THAT FIRED THIS WEBHOOK
+  // (body.id) rather than the row's stored invoice — they can differ if the
+  // owner re-opened checkout. Confirms it is genuinely paid AND that the amount
+  // equals the plan price (defends against tampered/mismatched callbacks and a
+  // plan-price change between checkout and payment).
   let verified = false
   try {
-    const snap = await getXenditInvoice(inv.xendit_invoice_id ?? body.id ?? '')
+    const snap = await getXenditInvoice(body.id ?? inv.xendit_invoice_id ?? '')
     verified =
       snap.externalId === body.external_id &&
       isPaidStatus(snap.status) &&

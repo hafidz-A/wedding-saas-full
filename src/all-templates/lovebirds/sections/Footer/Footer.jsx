@@ -3,6 +3,7 @@
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import styles from './Footer.module.css'
 import { deriveMonogram } from '../../config/monogram.js'
+import { safeExternalUrl } from '@/lib/safeUrl'
 
 const DEFAULTS = {
   monogram: 'A & R',
@@ -108,7 +109,7 @@ export default function Footer(props) {
             {socials.map((s) => (
               <li key={s.id}>
                 <a
-                  href={s.url}
+                  href={safeExternalUrl(s.url)}
                   className={styles.socialLink}
                   aria-label={s.label}
                   target="_blank"

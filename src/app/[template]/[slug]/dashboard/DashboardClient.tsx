@@ -270,6 +270,7 @@ export default function DashboardClient({
                 template={template}
                 initialConfig={invitation.config ?? { sections: [] }}
                 initialIsPublished={!!invitation.is_published}
+                initialUpdatedAt={invitation.updated_at ?? null}
               />
             )}
 

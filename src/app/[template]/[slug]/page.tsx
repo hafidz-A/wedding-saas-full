@@ -406,14 +406,31 @@ export async function generateMetadata({ params }: PageProps) {
       !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
       !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
+    const isDemoSlug = slug.startsWith('demo-') || slug === 'rizky-amara'
+
     let config: any = null
     if (hasSupabase) {
       const admin = createSupabaseAdminClient()
       const { data } = (await admin
         .from('invitations')
-        .select('config')
+        .select('config, is_published, is_paid, expires_at')
         .eq('slug', slug)
-        .maybeSingle()) as { data: { config: any } | null }
+        .maybeSingle()) as {
+        data: { config: any; is_published: boolean; is_paid: boolean; expires_at: string | null } | null
+      }
+
+      // Privacy gate: only a LIVE invitation (published + paid + not expired)
+      // exposes the couple's real title/description/photo in <head> and link
+      // previews. A draft/unpaid/expired row (whose page 404s) must NOT leak
+      // the couple's name or OG image to anyone who guesses the slug. Demo
+      // slugs are intentionally public previews.
+      const isExpired =
+        !!data?.expires_at && Date.parse(data.expires_at) < Date.now()
+      const isLive = !!data?.is_published && !!data?.is_paid && !isExpired
+      if (!isDemoSlug && (!data || !isLive)) {
+        return { title: fallbackTitle }
+      }
+
       const isEmpty =
         !data?.config || (typeof data.config === 'object' && Object.keys(data.config).length === 0)
       config = isEmpty ? getDefaultConfig(template) : data!.config

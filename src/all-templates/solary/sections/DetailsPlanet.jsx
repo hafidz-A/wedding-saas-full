@@ -1,5 +1,6 @@
 import React from "react";
 import GlassCard, { CardChild } from "../components/GlassCard.jsx";
+import { safeExternalUrl } from "@/lib/safeUrl";
 
 const ICONS = {
   pin: <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13Z"/><circle cx="12" cy="9" r="2.5"/></svg>,
@@ -29,7 +30,7 @@ export default function DetailsPlanet({ sectionLabel, planetName, heading, cards
                 {c.secondary && <div style={{ color: "var(--color-fg-mute)", fontSize: 14 }}>{c.secondary}</div>}
                 {c.actionLabel && c.actionHref && c.actionHref !== "#" && (
                   <a
-                    href={c.actionHref}
+                    href={safeExternalUrl(c.actionHref)}
                     target="_blank" rel="noopener noreferrer"
                     style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", borderBottom: "1px solid var(--color-accent)", paddingBottom: 2 }}
                   >

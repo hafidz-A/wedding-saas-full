@@ -1,5 +1,6 @@
 import React from "react";
 import GlassCard, { CardChild } from "../components/GlassCard.jsx";
+import { safeExternalUrl } from "@/lib/safeUrl";
 
 const PLATFORM_LABEL = { youtube: "YouTube", instagram: "Instagram", zoom: "Zoom", other: "Live" };
 
@@ -17,7 +18,7 @@ export default function LiveStreamPlanet({ sectionLabel, planetName, heading, pl
             </div>
             {scheduledAt && <div style={{ color: "var(--color-fg-mute)", marginBottom: 18, fontSize: 14 }}>{scheduledAt}</div>}
             {url && (
-              <a href={url} target="_blank" rel="noopener noreferrer" className="form-button" style={{ display: "inline-block", textDecoration: "none" }}>
+              <a href={safeExternalUrl(url)} target="_blank" rel="noopener noreferrer" className="form-button" style={{ display: "inline-block", textDecoration: "none" }}>
                 Watch Live →
               </a>
             )}

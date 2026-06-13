@@ -2,10 +2,12 @@
  * Xendit Invoice API wrapper + webhook token check.
  * SERVER ONLY — never import from a 'use client' file (uses the secret key).
  */
+import { timingSafeStrEqual } from '@/lib/security/timing'
 
 export function isValidCallbackToken(received: string | null): boolean {
   const expected = process.env.XENDIT_CALLBACK_TOKEN
-  return !!expected && !!received && received === expected
+  if (!expected || !received) return false
+  return timingSafeStrEqual(received, expected)
 }
 
 interface CreateInvoiceArgs {
@@ -90,4 +92,39 @@ export async function getXenditInvoice(invoiceId: string): Promise<XenditInvoice
 /** Whether a Xendit invoice status counts as successfully paid. */
 export function isPaidStatus(status: string): boolean {
   return status === 'PAID' || status === 'SETTLED'
+}
+
+/**
+ * Best-effort expire an outstanding Xendit invoice. Called before creating a
+ * replacement invoice for the same invitation so an abandoned-but-still-payable
+ * invoice can't be paid later (which would take money for a product the webhook
+ * can no longer correlate). Swallows errors — a failed expire must never block
+ * a fresh checkout, and an already-paid/expired invoice returning 4xx is fine.
+ */
+export async function expireXenditInvoice(invoiceId: string): Promise<void> {
+  const key = process.env.XENDIT_SECRET_KEY
+  if (!key || !invoiceId) return
+  try {
+    await fetch(`https://api.xendit.co/invoices/${encodeURIComponent(invoiceId)}/expire!`, {
+      method: 'POST',
+      headers: { authorization: `Basic ${Buffer.from(`${key}:`).toString('base64')}` },
+    })
+  } catch (e) {
+    console.error('[xendit expire] failed (ignored):', e)
+  }
+}
+
+/**
+ * Extract the invitation id embedded in an external id we minted at checkout.
+ * Format: `inv_<invitationId>_<timestamp>` (initial purchase) — the id is a
+ * UUID, which contains hyphens but never underscores, so splitting on `_` is
+ * unambiguous. Returns null for any other shape (e.g. `upg_…`).
+ */
+export function invitationIdFromExternalId(externalId: string | undefined | null): string | null {
+  if (!externalId || !externalId.startsWith('inv_')) return null
+  const parts = externalId.split('_')
+  // ['inv', '<uuid>', '<ts>']
+  if (parts.length < 3) return null
+  const id = parts[1]
+  return id && id.length > 0 ? id : null
 }

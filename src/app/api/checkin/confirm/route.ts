@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
 import { decryptField as decryptGuest } from '@/lib/guests/crypto'
 import { decryptField as decryptApp, encryptField as encryptApp } from '@/lib/crypto/app'
+import { timingSafeStrEqual } from '@/lib/security/timing'
 
 export async function POST(req: Request) {
   const limited = await enforceRateLimit(req, 'checkin-confirm', { windowMs: 60_000, max: 15 })
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     .select('id, is_published, is_paid, checkin_token')
     .eq('slug', slug)
     .maybeSingle()) as { data: { id: string; is_published: boolean; is_paid: boolean; checkin_token: string | null } | null }
-  if (!inv || !inv.is_published || !inv.is_paid || !inv.checkin_token || inv.checkin_token !== token) {
+  if (!inv || !inv.is_published || !inv.is_paid || !inv.checkin_token || !timingSafeStrEqual(inv.checkin_token, token)) {
     return NextResponse.json({ error: 'Link tidak valid' }, { status: 403 })
   }
 

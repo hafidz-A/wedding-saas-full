@@ -6,7 +6,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
 import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { resolvePlan, resolveUpgrade } from '@/lib/payments/plans'
-import { createXenditInvoice, getXenditInvoice, isPaidStatus } from '@/lib/payments/xendit'
+import { createXenditInvoice, getXenditInvoice, isPaidStatus, expireXenditInvoice } from '@/lib/payments/xendit'
 import { publishPaidInvitation, applyPaidUpgrade } from '@/lib/payments/publish'
 import { rateLimit } from '@/lib/security/rate-limit'
 
@@ -191,15 +191,21 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, slug, plan, template_id, owner_user_id, email')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, xendit_invoice_id')
       .eq('id', invitationId)
       .maybeSingle()) as {
-      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null } | null
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; xendit_invoice_id: string | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    if (inv.is_paid) return { ok: false, error: 'Undangan ini sudah dibayar' }
 
     const resolved = await resolvePlan(inv.template_id, inv.plan)
     if (!resolved) return { ok: false, error: 'Plan tidak valid' }
+
+    // Expire any prior outstanding invoice so a customer who re-opens checkout
+    // can't accidentally pay an old link the webhook would no longer publish
+    // against (and to prevent a double-charge across two live invoices).
+    if (inv.xendit_invoice_id) await expireXenditInvoice(inv.xendit_invoice_id)
 
     const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
     const externalId = `inv_${inv.id}_${Date.now()}`

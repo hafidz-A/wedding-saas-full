@@ -33,10 +33,29 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
+const DESCRIPTION = `${BRAND} — undangan digital yang terasa seperti film pendek. Rancang dulu sampai puas, bayar saat mau diterbitkan, sebar link-nya lewat WhatsApp.`
+
 export const metadata: Metadata = {
+  // metadataBase makes relative OG/twitter image URLs resolve to absolute ones
+  // (required for correct WhatsApp/social link previews of the marketing site).
+  metadataBase: new URL(SITE_URL),
+  // Plain string (no title.template) on purpose: invitation pages set their own
+  // absolute <title> via generateMetadata and must NOT inherit the brand suffix.
   title: `${BRAND} — Undangan Digital`,
-  description:
-    `${BRAND} — undangan digital yang terasa seperti film pendek. Rancang dulu sampai puas, bayar saat mau diterbitkan, sebar link-nya lewat WhatsApp.`,
+  description: DESCRIPTION,
+  openGraph: {
+    title: `${BRAND} — Undangan Digital`,
+    description: DESCRIPTION,
+    type: 'website',
+    url: SITE_URL,
+    siteName: BRAND,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${BRAND} — Undangan Digital`,
+    description: DESCRIPTION,
+  },
 }
 
 /**

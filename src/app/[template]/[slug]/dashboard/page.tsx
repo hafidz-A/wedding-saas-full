@@ -1,5 +1,7 @@
+import { redirect } from 'next/navigation'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { isValidTemplate } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict, type Dict } from '@/lib/i18n'
 import { activePeriodStatus } from '@/lib/payments/active-period'
@@ -51,6 +53,21 @@ export default async function DashboardPage({ params }: PageProps) {
 
   if (!invitation) return <NoSuchInvitation slug={slug} dict={t.dashboard.page} />
 
+  // 1b. Canonicalise the URL to the invitation's real template_id. The editor
+  //     tabs are template-aware (lock rules, palette/meta schema), so a URL with
+  //     the wrong template segment must not drive them — redirect to the truth.
+  if (
+    invitation.template_id &&
+    invitation.template_id !== template &&
+    isValidTemplate(invitation.template_id)
+  ) {
+    redirect(`/${invitation.template_id}/${slug}/dashboard`)
+  }
+  const canonicalTemplate =
+    invitation.template_id && isValidTemplate(invitation.template_id)
+      ? invitation.template_id
+      : template
+
   // 2. Who is the current user?
   const serverClient = createSupabaseServerClient()
   const { data: { user } } = await serverClient.auth.getUser()
@@ -87,7 +104,7 @@ export default async function DashboardPage({ params }: PageProps) {
       <PaymentGate
         invitationId={invitation.id}
         slug={slug}
-        template={template}
+        template={canonicalTemplate}
         status={period.status}
       />
     )
@@ -149,7 +166,7 @@ export default async function DashboardPage({ params }: PageProps) {
   return (
     <DashboardClient
       slug={slug}
-      template={template}
+      template={canonicalTemplate}
       invitation={invitationDecrypted}
       rsvps={rsvpsDec}
       gifts={giftsDec}

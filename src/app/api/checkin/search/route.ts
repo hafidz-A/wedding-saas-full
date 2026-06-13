@@ -4,6 +4,7 @@ import { enforceRateLimit } from '@/lib/security/rate-limit'
 import { decryptField as decryptGuest } from '@/lib/guests/crypto'
 import { decryptField as decryptApp } from '@/lib/crypto/app'
 import { matchCheckinNames, type CheckinCandidate } from '@/lib/checkin/match'
+import { timingSafeStrEqual } from '@/lib/security/timing'
 
 export async function POST(req: Request) {
   const limited = await enforceRateLimit(req, 'checkin-search', { windowMs: 60_000, max: 30 })
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     .eq('slug', slug)
     .maybeSingle()) as { data: { id: string; is_published: boolean; is_paid: boolean; checkin_token: string | null } | null }
   // Token-gate: no token match → no names, ever.
-  if (!inv || !inv.is_published || !inv.is_paid || !inv.checkin_token || inv.checkin_token !== token) {
+  if (!inv || !inv.is_published || !inv.is_paid || !inv.checkin_token || !timingSafeStrEqual(inv.checkin_token, token)) {
     return NextResponse.json({ matches: [] })
   }
 

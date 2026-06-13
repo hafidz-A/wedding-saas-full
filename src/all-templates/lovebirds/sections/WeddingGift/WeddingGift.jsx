@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import { formatThousands } from '../../../../lib/formatThousands.js'
+import { safeExternalUrl } from '@/lib/safeUrl'
 import styles from './WeddingGift.module.css'
 
 /* ============================================================================
@@ -288,7 +289,7 @@ export default function WeddingGift(props) {
                 )
                 const key = p.id || p.name || idx
                 return link ? (
-                  <a key={key} className={styles.registryCard} href={link} target="_blank" rel="noopener noreferrer">
+                  <a key={key} className={styles.registryCard} href={safeExternalUrl(link)} target="_blank" rel="noopener noreferrer">
                     {body}
                   </a>
                 ) : (

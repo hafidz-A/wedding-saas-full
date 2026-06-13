@@ -3,6 +3,7 @@ import GlassCard, { CardChild } from "../components/GlassCard.jsx";
 import { submitGift } from "../services/gift.js";
 import { useGuest } from "../contexts/GuestContext.jsx";
 import { formatThousands } from "../../../lib/formatThousands.js";
+import { safeExternalUrl } from "@/lib/safeUrl";
 
 /* GiftPlanet — bank accounts + gift-confirmation form.
    Content mirrors the lovebirds Wedding Gift flow (accounts with copy +
@@ -129,7 +130,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
                   );
                   const cardStyle = { border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)", overflow: "hidden", display: "flex", flexDirection: "column", textDecoration: "none", color: "inherit" };
                   return link ? (
-                    <a key={i} href={link} target="_blank" rel="noopener noreferrer" style={cardStyle}>{inner}</a>
+                    <a key={i} href={safeExternalUrl(link)} target="_blank" rel="noopener noreferrer" style={cardStyle}>{inner}</a>
                   ) : (
                     <div key={i} style={cardStyle}>{inner}</div>
                   );
