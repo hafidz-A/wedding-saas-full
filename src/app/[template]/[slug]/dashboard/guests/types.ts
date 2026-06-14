@@ -8,6 +8,8 @@ export interface GuestRow {
   phone_e164: string | null
   group_label: string | null
   notes: string | null
+  rsvpToken: string | null
+  tokenUsedAt: string | null
   sent_at: string | null
   created_at: string
   updated_at: string
@@ -21,6 +23,8 @@ export interface GuestRowDb {
   phone_enc: string | null
   group_label: string | null
   notes_enc: string | null
+  rsvp_token_enc: string | null
+  token_used_at: string | null
   sent_at: string | null
   created_at: string
   updated_at: string
@@ -39,6 +43,8 @@ export function fromDbRow(row: GuestRowDb): GuestRow {
     phone_e164: decryptField(row.phone_enc),
     group_label: row.group_label,
     notes: decryptField(row.notes_enc),
+    rsvpToken: decryptField(row.rsvp_token_enc),
+    tokenUsedAt: row.token_used_at,
     sent_at: row.sent_at,
     created_at: row.created_at,
     updated_at: row.updated_at,
