@@ -21,23 +21,23 @@ describe('buildWhatsAppUrl', () => {
 
 describe('renderMessageTemplate', () => {
   it('replaces {{name}} placeholder', () => {
-    expect(renderMessageTemplate('Halo {{name}}', { name: 'Agus', url: '' }))
+    expect(renderMessageTemplate('Halo {{name}}', { name: 'Agus', url: '', token: '' }))
       .toBe('Halo Agus')
   })
   it('replaces {{url}} placeholder', () => {
-    expect(renderMessageTemplate('Buka {{url}}', { name: '', url: 'https://w.id/agus' }))
+    expect(renderMessageTemplate('Buka {{url}}', { name: '', url: 'https://w.id/agus', token: '' }))
       .toBe('Buka https://w.id/agus')
   })
   it('accepts Indonesian alias {{nama}}', () => {
-    expect(renderMessageTemplate('Halo {{nama}}', { name: 'Agus', url: '' }))
+    expect(renderMessageTemplate('Halo {{nama}}', { name: 'Agus', url: '', token: '' }))
       .toBe('Halo Agus')
   })
   it('accepts Indonesian alias {{link}}', () => {
-    expect(renderMessageTemplate('Klik {{link}}', { name: '', url: 'https://w.id/x' }))
+    expect(renderMessageTemplate('Klik {{link}}', { name: '', url: 'https://w.id/x', token: '' }))
       .toBe('Klik https://w.id/x')
   })
   it('tolerates whitespace inside braces', () => {
-    expect(renderMessageTemplate('Halo {{ nama }}', { name: 'Agus', url: '' }))
+    expect(renderMessageTemplate('Halo {{ nama }}', { name: 'Agus', url: '', token: '' }))
       .toBe('Halo Agus')
   })
   it('leaves unknown placeholders intact', () => {
@@ -55,11 +55,5 @@ describe('renderMessageTemplate token', () => {
   })
   it('still replaces name and url', () => {
     expect(renderMessageTemplate('{{nama}} {{link}} {{kode}}', vars)).toBe('Budi https://x.test/a 428913')
-  })
-})
-
-describe('buildWhatsAppUrl', () => {
-  it('uses wa.me/<phone> when phone present', () => {
-    expect(buildWhatsAppUrl({ phoneE164: '628123', message: 'hi' })).toBe('https://wa.me/628123?text=hi')
   })
 })
