@@ -125,7 +125,7 @@ describe('addGuest token', () => {
 
 describe('regenerateGuestToken', () => {
   it('resets used + writes a new hash scoped by invitation_id (IDOR-safe)', async () => {
-    const fake = createFakeSupabase({ tables: { guests: { update: { data: null } } } })
+    const fake = createFakeSupabase({ tables: { guests: { update: { data: null, count: 1 } } } })
     mockAdmin.mockReturnValue(fake as any)
     const { token } = await regenerateGuestToken('slug', 'g1')
     expect(token).toMatch(/^\d{6}$/)
@@ -140,5 +140,28 @@ describe('regenerateGuestToken', () => {
   it('throws when not the owner', async () => {
     mockOwner.mockResolvedValue(null)
     await expect(regenerateGuestToken('slug', 'g1')).rejects.toThrow(/Forbidden/)
+  })
+
+  it('throws when the guest does not exist (no row updated)', async () => {
+    const fake = createFakeSupabase({ tables: { guests: { update: { data: null, count: 0 } } } })
+    mockAdmin.mockReturnValue(fake as any)
+    await expect(regenerateGuestToken('slug', 'nope')).rejects.toThrow(/not found/i)
+  })
+})
+
+describe('importGuests token', () => {
+  it('issues a distinct encrypted token + hash per inserted row', async () => {
+    const fake = createFakeSupabase({ tables: { guests: { select: { data: [], error: null }, insert: { data: null, count: 2 } } } })
+    mockAdmin.mockReturnValue(fake as any)
+    await importGuests('slug', 'Budi\nSari')
+    const ins = fake.lastCall('insert')
+    const rows = ins?.value as any[]
+    expect(Array.isArray(rows)).toBe(true)
+    expect(rows).toHaveLength(2)
+    rows.forEach((r) => {
+      expect(r.rsvp_token_enc).toBeTruthy()
+      expect(r.rsvp_token_hash).toMatch(/^[0-9a-f]{64}$/)
+    })
+    expect(rows[0].rsvp_token_hash).not.toBe(rows[1].rsvp_token_hash)
   })
 })

@@ -111,7 +111,8 @@ export async function importGuests(
   const { data: existing } = (await admin
     .from('guests')
     .select('rsvp_token_hash')
-    .eq('invitation_id', invitation_id)) as { data: { rsvp_token_hash: string | null }[] | null }
+    .eq('invitation_id', invitation_id)
+    .limit(10_000)) as { data: { rsvp_token_hash: string | null }[] | null }
   const usedHashes = new Set((existing || []).map((r) => r.rsvp_token_hash).filter(Boolean) as string[])
 
   const insertRows = rows.map((r) => {
@@ -174,16 +175,20 @@ export async function regenerateGuestToken(
   const invitation_id = await authorizeOwnership(slug)
   const admin = createSupabaseAdminClient()
   const token = generateToken()
-  const { error } = await (admin.from('guests') as any)
-    .update({
-      rsvp_token_enc: encryptToken(token),
-      rsvp_token_hash: hashToken(invitation_id, token),
-      token_used_at: null,
-      token_regenerated_at: new Date().toISOString(),
-    })
+  const { error, count } = await (admin.from('guests') as any)
+    .update(
+      {
+        rsvp_token_enc: encryptToken(token),
+        rsvp_token_hash: hashToken(invitation_id, token),
+        token_used_at: null,
+        token_regenerated_at: new Date().toISOString(),
+      },
+      { count: 'exact' },
+    )
     .eq('id', id)
     .eq('invitation_id', invitation_id)
   if (error) throw new Error(error.message)
+  if (!count) throw new Error('Guest not found')
   revalidatePath('/[template]/[slug]/dashboard', 'page')
   return { token }
 }
