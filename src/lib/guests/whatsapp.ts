@@ -17,14 +17,16 @@ export function buildWhatsAppUrl({ phoneE164, message }: BuildWhatsAppArgs): str
 export interface TemplateVars {
   name: string
   url: string
+  token: string
 }
 
 /**
  * renderMessageTemplate — replace placeholders in the couple's message.
  *
  * Supported placeholders (English + Indonesian aliases):
- *   {{name}} / {{nama}}    → guest's display name
- *   {{url}}  / {{link}}    → public invitation URL
+ *   {{name}}  / {{nama}}   → guest's display name
+ *   {{url}}   / {{link}}   → public invitation URL
+ *   {{token}} / {{kode}}   → guest's single-use RSVP code
  *
  * Unknown placeholders are left in place so a typo doesn't silently
  * swallow part of the message.
@@ -33,4 +35,5 @@ export function renderMessageTemplate(template: string, vars: TemplateVars): str
   return template
     .replace(/\{\{\s*(name|nama)\s*\}\}/gi, vars.name)
     .replace(/\{\{\s*(url|link)\s*\}\}/gi, vars.url)
+    .replace(/\{\{\s*(token|kode)\s*\}\}/gi, vars.token)
 }
