@@ -7,6 +7,7 @@ import { verifyOwnership } from '@/editor/lib/auth'
 import { parseGuestImport } from '@/lib/guests/parse-import'
 import { normalizePhone } from '@/lib/guests/phone'
 import { encryptField } from '@/lib/guests/crypto'
+import { generateToken, hashToken, encryptToken } from '@/lib/guests/token'
 import { fromDbRow, type GuestRow, type GuestRowDb } from './types'
 
 /**
@@ -29,6 +30,7 @@ export async function addGuest(
   if (!name) throw new Error('Name is required')
   const phoneE164 = input.phoneRaw ? normalizePhone(input.phoneRaw) : null
   const admin = createSupabaseAdminClient()
+  const token = generateToken()
   const { data, error } = (await admin
     .from('guests')
     .insert({
@@ -36,6 +38,8 @@ export async function addGuest(
       name_enc: encryptField(name),
       phone_enc: encryptField(phoneE164),
       group_label: input.groupLabel?.trim() || null,
+      rsvp_token_enc: encryptToken(token),
+      rsvp_token_hash: hashToken(invitation_id, token),
     } as any)
     .select()
     .single()) as { data: GuestRowDb | null; error: { message: string } | null }
@@ -101,16 +105,35 @@ export async function importGuests(
     throw new Error('Maksimal 5000 tamu per impor. Bagi daftar menjadi beberapa bagian.')
   }
   const admin = createSupabaseAdminClient()
+  // Existing hashes for this invitation → guarantee the batch never collides
+  // with codes already issued (the unique index would otherwise reject the
+  // whole insert).
+  const { data: existing } = (await admin
+    .from('guests')
+    .select('rsvp_token_hash')
+    .eq('invitation_id', invitation_id)) as { data: { rsvp_token_hash: string | null }[] | null }
+  const usedHashes = new Set((existing || []).map((r) => r.rsvp_token_hash).filter(Boolean) as string[])
+
+  const insertRows = rows.map((r) => {
+    let token = generateToken()
+    let h = hashToken(invitation_id, token)
+    while (usedHashes.has(h)) {
+      token = generateToken()
+      h = hashToken(invitation_id, token)
+    }
+    usedHashes.add(h)
+    return {
+      invitation_id,
+      name_enc: encryptField(r.name),
+      phone_enc: encryptField(r.phoneE164),
+      rsvp_token_enc: encryptToken(token),
+      rsvp_token_hash: h,
+    }
+  })
+
   const { error, count } = await admin
     .from('guests')
-    .insert(
-      rows.map((r) => ({
-        invitation_id,
-        name_enc: encryptField(r.name),
-        phone_enc: encryptField(r.phoneE164),
-      })) as any,
-      { count: 'exact' },
-    )
+    .insert(insertRows as any, { count: 'exact' })
   if (error) throw new Error(error.message)
   revalidatePath('/[template]/[slug]/dashboard', 'page')
   return { inserted: count ?? rows.length }
@@ -136,6 +159,33 @@ export async function unmarkGuestSent(slug: string, id: string): Promise<void> {
     .eq('invitation_id', invitation_id)
   if (error) throw new Error(error.message)
   revalidatePath('/[template]/[slug]/dashboard', 'page')
+}
+
+/**
+ * Regenerate a guest's single-use RSVP token (owner error-recovery). Writes a
+ * fresh enc + hash, clears token_used_at so the new code works, and stamps
+ * token_regenerated_at. Scoped by invitation_id so an owner can never touch
+ * another couple's guest (IDOR). Returns the new plaintext code for display.
+ */
+export async function regenerateGuestToken(
+  slug: string,
+  id: string,
+): Promise<{ token: string }> {
+  const invitation_id = await authorizeOwnership(slug)
+  const admin = createSupabaseAdminClient()
+  const token = generateToken()
+  const { error } = await (admin.from('guests') as any)
+    .update({
+      rsvp_token_enc: encryptToken(token),
+      rsvp_token_hash: hashToken(invitation_id, token),
+      token_used_at: null,
+      token_regenerated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('invitation_id', invitation_id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/[template]/[slug]/dashboard', 'page')
+  return { token }
 }
 
 /**

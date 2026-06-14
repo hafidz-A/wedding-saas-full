@@ -10,7 +10,8 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { encryptField as encGuest } from '@/lib/guests/crypto'
-import { addGuest, updateGuest, deleteGuest, importGuests, updateInviteMessageTemplate } from '../actions'
+import { addGuest, updateGuest, deleteGuest, importGuests, updateInviteMessageTemplate, regenerateGuestToken } from '../actions'
+import { hashToken } from '@/lib/guests/token'
 
 const mockAdmin = vi.mocked(createSupabaseAdminClient)
 const mockOwner = vi.mocked(verifyOwnership)
@@ -107,5 +108,37 @@ describe('updateInviteMessageTemplate', () => {
     const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
     expect(upd.value.config.inviteMessageTemplate).toBe('Hi {{name}} {{url}}')
     expect(upd.value.config.meta).toBeDefined() // preserved
+  })
+})
+
+describe('addGuest token', () => {
+  it('writes an encrypted token + hash on insert', async () => {
+    const fake = createFakeSupabase({ tables: { guests: { insert: { data: guestRow() } } } })
+    mockAdmin.mockReturnValue(fake as any)
+    await addGuest('slug', { name: 'Budi' })
+    const ins = fake.lastCall('insert')
+    expect(ins?.value.rsvp_token_enc).toBeTruthy()
+    expect(ins?.value.rsvp_token_hash).toMatch(/^[0-9a-f]{64}$/)
+    expect(ins?.value.rsvp_token_enc).not.toMatch(/^\d{6}$/) // not plaintext
+  })
+})
+
+describe('regenerateGuestToken', () => {
+  it('resets used + writes a new hash scoped by invitation_id (IDOR-safe)', async () => {
+    const fake = createFakeSupabase({ tables: { guests: { update: { data: null } } } })
+    mockAdmin.mockReturnValue(fake as any)
+    const { token } = await regenerateGuestToken('slug', 'g1')
+    expect(token).toMatch(/^\d{6}$/)
+    const upd = fake.lastCall('update')
+    expect(upd?.value.token_used_at).toBeNull()
+    expect(upd?.value.rsvp_token_hash).toBe(hashToken('inv-1', token))
+    const filters = fake._calls.filter((c) => c.kind === 'filter')
+    expect(filters.some((f) => f.column === 'invitation_id' && f.value === 'inv-1')).toBe(true)
+    expect(filters.some((f) => f.column === 'id' && f.value === 'g1')).toBe(true)
+  })
+
+  it('throws when not the owner', async () => {
+    mockOwner.mockResolvedValue(null)
+    await expect(regenerateGuestToken('slug', 'g1')).rejects.toThrow(/Forbidden/)
   })
 })
