@@ -13,8 +13,12 @@ export function generateToken(): string {
  * digits in two couples' lists hash differently.
  */
 export function hashToken(invitationId: string, token: string): string {
-  const key = loadKey(process.env.GUESTS_ENCRYPTION_KEY, 'GUESTS_ENCRYPTION_KEY')
-  return createHmac('sha256', key).update(`${invitationId}:${token}`).digest('hex')
+  const masterKey = loadKey(process.env.GUESTS_ENCRYPTION_KEY, 'GUESTS_ENCRYPTION_KEY')
+  // Domain-separate the HMAC key from the AES-GCM usage of the same master key:
+  // derive a dedicated 32-byte sub-key so rotating one usage never silently
+  // changes the other. The label is versioned so a future scheme can coexist.
+  const hmacKey = createHmac('sha256', masterKey).update('rsvp-token-hmac-v1').digest()
+  return createHmac('sha256', hmacKey).update(`${invitationId}:${token}`).digest('hex')
 }
 
 /** Reversible ciphertext of the code, so the owner can read/copy + WA-blast it. */
@@ -31,6 +35,8 @@ export function decryptToken(enc: string | null | undefined): string | null {
  * collides with itself. Throws if asked for more than the space allows.
  */
 export function generateUniqueTokens(count: number): string[] {
+  // Cap below 100% fill: at 900k the expected draw count is ~2.3M (~0.2s) and
+  // tail risk stays bounded. Do not raise this limit.
   if (count > 900_000) throw new Error('Terlalu banyak kode unik diminta')
   const set = new Set<string>()
   while (set.size < count) set.add(generateToken())

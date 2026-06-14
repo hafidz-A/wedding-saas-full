@@ -41,4 +41,7 @@ describe('generateUniqueTokens', () => {
     expect(new Set(list).size).toBe(2000)
     list.forEach((t) => expect(t).toMatch(/^\d{6}$/))
   })
+  it('throws when count exceeds the code space guard', () => {
+    expect(() => generateUniqueTokens(900_001)).toThrow(/Terlalu banyak/)
+  })
 })
