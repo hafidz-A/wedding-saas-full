@@ -23,6 +23,8 @@ describe('consumeGuestToken', () => {
     const filters = fake._calls.filter((c) => c.kind === 'filter')
     expect(filters.some((f) => f.column === 'invitation_id' && f.value === 'inv-1')).toBe(true)
     expect(filters.some((f) => f.column === 'rsvp_token_hash' && f.value === hashToken('inv-1', '123456'))).toBe(true)
+    // the single-use race guard must be applied: token_used_at IS NULL
+    expect(filters.some((f) => f.column === 'token_used_at' && f.value === null)).toBe(true)
   })
 
   it('returns false when no unused row matched (wrong or already-used)', async () => {

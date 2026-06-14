@@ -25,6 +25,8 @@ export async function consumeGuestToken(
     .is('token_used_at', null)
     .select('id')
     .maybeSingle()
+  // Throws the PostgrestError on DB failure — the caller MUST catch it and
+  // return a generic response (never surface the raw error to the client).
   if (error) throw error
   return !!data
 }
