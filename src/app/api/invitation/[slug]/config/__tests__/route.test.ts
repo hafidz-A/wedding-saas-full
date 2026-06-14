@@ -1,0 +1,93 @@
+import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest'
+import { randomBytes } from 'node:crypto'
+import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
+
+vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
+vi.mock('@/editor/lib/auth', () => ({ verifyOwnership: vi.fn() }))
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { verifyOwnership } from '@/editor/lib/auth'
+import { PUT } from '../route'
+
+const mockAdmin = vi.mocked(createSupabaseAdminClient)
+const mockOwner = vi.mocked(verifyOwnership)
+beforeAll(() => {
+  process.env.APP_ENCRYPTION_KEY = randomBytes(32).toString('base64')
+})
+beforeEach(() => {
+  vi.clearAllMocks()
+})
+
+const OWNER = { id: 'inv-1', owner_user_id: 'user-1' }
+const ctx = { params: { slug: 'rizky-amara' } }
+function put(body: any, raw = false) {
+  return new Request('http://localhost/api/invitation/rizky-amara/config', {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: raw ? (body as string) : JSON.stringify(body),
+  })
+}
+const validConfig = { sections: [{ id: 'hero', type: 'hero', props: {} }] }
+
+describe('PUT /api/invitation/[slug]/config', () => {
+  it('403 when not the owner — and never reads the DB', async () => {
+    mockOwner.mockResolvedValue(null)
+    const res = await PUT(put({ config: validConfig }), ctx)
+    expect(res.status).toBe(403)
+    expect(mockAdmin).not.toHaveBeenCalled()
+  })
+
+  it('400 for invalid JSON, missing config, and non-array sections', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({ tables: { invitations: { select: { data: { config: {}, updated_at: 'T1' } }, update: {} } } }) as any,
+    )
+    expect((await PUT(put('x', true), ctx)).status).toBe(400)
+    expect((await PUT(put({}), ctx)).status).toBe(400) // missing config
+    expect((await PUT(put({ config: { sections: 'nope' } }), ctx)).status).toBe(400)
+  })
+
+  it('413 when the config is pathologically large', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(createFakeSupabase() as any)
+    const huge = { sections: [], pad: 'x'.repeat(530 * 1024) }
+    expect((await PUT(put({ config: huge }), ctx)).status).toBe(413)
+  })
+
+  it('409 on optimistic-concurrency mismatch (row changed since load)', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({ tables: { invitations: { select: { data: { config: {}, updated_at: 'T2-newer' } }, update: {} } } }) as any,
+    )
+    const res = await PUT(put({ config: validConfig, baseUpdatedAt: 'T1-stale' }), ctx)
+    expect(res.status).toBe(409)
+  })
+
+  it('happy path: saves, and preserves other-tab keys (music) from the DB row', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: {
+          select: { data: { config: { music: { url: 'real.mp3' }, theme: { defaultPalette: 'gold' } }, updated_at: 'T1' } },
+          update: {},
+        },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    // Editor payload tries to write a STALE music value — route must ignore it.
+    const res = await PUT(put({ config: { ...validConfig, music: { url: 'STALE.mp3' } }, baseUpdatedAt: 'T1' }), ctx)
+    expect(res.status).toBe(200)
+    expect((await res.json()).ok).toBe(true)
+    const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
+    expect(upd.value.config.music.url).toBe('real.mp3') // preserved from DB, not the editor payload
+  })
+
+  it('500 when the update fails', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({
+        tables: { invitations: { select: { data: { config: {}, updated_at: 'T1' } }, update: { error: { message: 'x' } } } },
+      }) as any,
+    )
+    expect((await PUT(put({ config: validConfig, baseUpdatedAt: 'T1' }), ctx)).status).toBe(500)
+  })
+})

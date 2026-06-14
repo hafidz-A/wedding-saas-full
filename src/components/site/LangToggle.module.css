@@ -13,7 +13,10 @@
 }
 .pill {
   position: absolute; inset: 0;
-  background: var(--color-coral);
+  /* Deeper coral than the global brand --color-coral (#E8553E) so the white
+     active label clears WCAG AA contrast (≥4.5:1 for 12px bold). #C7402B ≈ 5.0:1
+     vs #fff; brand coral elsewhere is untouched. */
+  background: #C7402B;
   border-radius: var(--border-radius-pill);
   z-index: 0;
 }
