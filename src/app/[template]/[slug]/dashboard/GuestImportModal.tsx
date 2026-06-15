@@ -5,6 +5,7 @@ import { parseGuestImport } from '@/lib/guests/parse-import'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { importGuests } from './guests/actions'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 export default function GuestImportModal({
   slug,
@@ -14,6 +15,8 @@ export default function GuestImportModal({
   onClose: () => void
 }) {
   const t = useDashboardDict().modals.import
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const [text, setText] = useState('')
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -25,10 +28,12 @@ export default function GuestImportModal({
     setError(null)
     startTransition(async () => {
       try {
-        await importGuests(slug, text)
+        const { inserted } = await importGuests(slug, text)
+        fb.ok(fm.guestsImported.replace('{n}', String(inserted)))
         onClose()
       } catch (e) {
         setError(e instanceof Error ? e.message : t.importError)
+        fb.fail(fm.importFail)
       }
     })
   }

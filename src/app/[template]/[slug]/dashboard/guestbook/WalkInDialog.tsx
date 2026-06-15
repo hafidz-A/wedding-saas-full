@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useDashboardDict } from '../DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { addWalkInAttendance, addUnlistedAttendance, searchWalkInGuests, type WalkInGuestHit } from './actions'
 import { type AttendanceRow } from './types'
 import {
@@ -31,6 +32,8 @@ export default function WalkInDialog({
   const [error, setError] = useState<string | null>(null)
   const [manualMode, setManualMode] = useState(false)
   const [manualName, setManualName] = useState('')
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const confirmDialog = useConfirm()
 
   // Debounced typeahead — only while no guest is picked yet.
@@ -66,6 +69,7 @@ export default function WalkInDialog({
     try {
       const res = await addWalkInAttendance({ slug, guestId: picked.id, count: c, note })
       if (res.ok && res.row) {
+        fb.ok(fm.walkinAdded)
         onAdded(res.row)
         return
       }
@@ -76,8 +80,10 @@ export default function WalkInDialog({
           ? t.errNotFound
           : res.error || t.errGeneric,
       )
+      fb.fail(fm.updateFail)
     } catch (e: any) {
       setError(e?.message || t.errGeneric)
+      fb.fail(fm.updateFail)
     } finally {
       setSaving(false)
     }
@@ -101,12 +107,15 @@ export default function WalkInDialog({
     try {
       const res = await addUnlistedAttendance({ slug, name, count: c, note })
       if (res.ok && res.row) {
+        fb.ok(fm.guestAdded)
         onAdded(res.row)
         return
       }
       setError(res.error || t.errGeneric)
+      fb.fail(fm.updateFail)
     } catch (e: any) {
       setError(e?.message || t.errGeneric)
+      fb.fail(fm.updateFail)
     } finally {
       setSaving(false)
     }

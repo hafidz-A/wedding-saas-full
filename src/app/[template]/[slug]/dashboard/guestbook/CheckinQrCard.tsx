@@ -4,11 +4,14 @@ import { useState } from 'react'
 import QRCode from 'qrcode'
 import { useDashboardDict } from '../DashboardI18nProvider'
 import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { ensureCheckinToken, regenerateCheckinToken } from './actions'
 import { ghostBtn, primaryBtn, statBox } from './styles'
 
 export default function CheckinQrCard({ slug, template }: { slug: string; template: string }) {
   const t = useDashboardDict().tabs.guestbook
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const confirmDialog = useConfirm()
   const showAlert = useAlert()
   const [dataUrl, setDataUrl] = useState<string | null>(null)
@@ -31,8 +34,13 @@ export default function CheckinQrCard({ slug, template }: { slug: string; templa
     if (!(await confirmDialog({ message: t.checkinQrRegenerateConfirm, tone: 'danger' }))) return
     setBusy(true)
     const res = await regenerateCheckinToken(slug)
-    if (res.ok && res.token) await render(res.token)
-    else await showAlert({ message: res.error || t.networkError })
+    if (res.ok && res.token) {
+      await render(res.token)
+      fb.ok(fm.checkinTokenReset)
+    } else {
+      await showAlert({ message: res.error || t.networkError })
+      fb.fail(fm.updateFail)
+    }
     setBusy(false)
   }
 

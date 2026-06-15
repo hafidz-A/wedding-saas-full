@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 interface Props {
   slug: string
@@ -11,6 +12,8 @@ interface Props {
 
 export default function SaveBar({ slug, initialIsPublished }: Props) {
   const t = useDashboardDict().editor
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const { isDirty, isSaving, saveError, save, lastSavedAt } = useEditor()
   const [isPublished, setIsPublished] = useState(initialIsPublished)
   const [publishBusy, setPublishBusy] = useState(false)
@@ -29,9 +32,11 @@ export default function SaveBar({ slug, initialIsPublished }: Props) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         setPublishErr(err.error || `HTTP ${res.status}`)
+        fb.fail(fm.publishFail)
         return
       }
       setIsPublished(next)
+      fb.ok(next ? fm.published : fm.setToDraft)
     } finally {
       setPublishBusy(false)
     }

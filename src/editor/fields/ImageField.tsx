@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { useUpload } from '../lib/useUpload'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 interface Props {
   label: string
@@ -16,12 +17,19 @@ export default function ImageField({ label, value, onChange, slug, help }: Props
   const fileInput = useRef<HTMLInputElement>(null)
   const { upload, isUploading, error } = useUpload(slug)
   const t = useDashboardDict().editor
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     const url = await upload(file)
-    if (url) onChange(url)
+    if (url) {
+      onChange(url)
+      fb.ok(fm.imageUploaded)
+    } else {
+      fb.fail(fm.uploadFail)
+    }
     e.target.value = ''
   }
 

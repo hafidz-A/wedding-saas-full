@@ -18,6 +18,7 @@ import { type GuestRow } from './guests/types'
 import { type AttendanceRow } from './guestbook/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
 import { DialogProvider } from '@/components/dashboard/DialogProvider'
+import { FeedbackProvider } from '@/components/dashboard/FeedbackProvider'
 import { LangToggle } from '@/components/site/LangToggle'
 import { startCheckout } from '@/app/onboarding/actions'
 import { activePeriodStatus } from '@/lib/payments/active-period'
@@ -97,6 +98,7 @@ export default function DashboardClient({
   return (
     <DashboardI18nProvider dict={dict} lang={lang}>
     <DialogProvider labels={dict.chrome.dialog}>
+    <FeedbackProvider>
     <main
       style={{
         minHeight: '100vh',
@@ -330,6 +332,7 @@ export default function DashboardClient({
         </AnimatePresence>
       </section>
     </main>
+    </FeedbackProvider>
     </DialogProvider>
     </DashboardI18nProvider>
   )

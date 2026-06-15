@@ -5,6 +5,7 @@ import { updateGuest } from './guests/actions'
 import { type GuestRow } from './guests/types'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 /**
  * Per-guest edit modal — opened from the GuestsTab "✎" button on each row.
@@ -27,6 +28,8 @@ export default function GuestEditModal({
   onClose: () => void
 }) {
   const t = useDashboardDict().modals.edit
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const [name, setName] = useState(guest.name)
   const [phone, setPhone] = useState(formatPhoneDisplay(guest.phone_e164))
   const [group, setGroup] = useState(guest.group_label || '')
@@ -44,9 +47,11 @@ export default function GuestEditModal({
           groupLabel: group || null,
           notes: notes || null,
         })
+        fb.ok(fm.guestUpdated)
         onClose()
       } catch (e) {
         setError(e instanceof Error ? e.message : t.saveError)
+        fb.fail(fm.saveFail)
       }
     })
   }

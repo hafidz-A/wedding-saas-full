@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 const TYPES = ['birds', 'butterflies', 'perched'] as const
 type OrnamentType = typeof TYPES[number]
@@ -25,6 +26,8 @@ const PREVIEW: Record<OrnamentType, string> = {
 
 export default function OrnamentTab({ slug, initial }: { slug: string; initial?: string }) {
   const t = (useDashboardDict().tabs as any).ornament
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const [type, setType] = useState<OrnamentType>(
     (TYPES as readonly string[]).includes(initial || '') ? (initial as OrnamentType) : 'birds',
   )
@@ -39,9 +42,10 @@ export default function OrnamentTab({ slug, initial }: { slug: string; initial?:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ornamentType: type }),
       })
-      if (!res.ok) { const e = await res.json().catch(() => ({})); setMsg({ kind: 'err', text: e.error || t.saveFailed }); return }
+      if (!res.ok) { const e = await res.json().catch(() => ({})); setMsg({ kind: 'err', text: e.error || t.saveFailed }); fb.fail(fm.saveFail); return }
       setMsg({ kind: 'ok', text: t.savedOk })
-    } catch (e: any) { setMsg({ kind: 'err', text: e?.message || t.networkError }) }
+      fb.ok(fm.ornamentSaved)
+    } catch (e: any) { setMsg({ kind: 'err', text: e?.message || t.networkError }); fb.fail(fm.saveFail) }
     finally { setSaving(false) }
   }
 

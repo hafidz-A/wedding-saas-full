@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { downloadCsv } from './lib/csv'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useAlert } from '@/components/dashboard/DialogProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import tabs from './dashboardTabs.module.css'
 
 export interface GiftRow {
@@ -34,6 +35,8 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
   const dd = useDashboardDict()
   const t = dd.tabs.gifts
   const tc = dd.tabs.common
+  const fm = dd.feedback
+  const fb = useFeedback()
   const showAlert = useAlert()
   const [query, setQuery] = useState('')
   const router = useRouter()
@@ -67,7 +70,7 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
           </button>
           <button
             type="button"
-            onClick={async () => { if (!downloadCsv(`gifts-${new Date().toISOString().slice(0, 10)}.csv`, gifts as unknown as Record<string, unknown>[])) await showAlert({ message: tc.nothingToExport }) }}
+            onClick={async () => { if (downloadCsv(`gifts-${new Date().toISOString().slice(0, 10)}.csv`, gifts as unknown as Record<string, unknown>[])) fb.ok(fm.csvDownloaded); else await showAlert({ message: tc.nothingToExport }) }}
             style={primaryBtn}
           >
             {tc.downloadCsv}

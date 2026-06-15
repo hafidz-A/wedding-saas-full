@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 interface MusicSettings {
   url?: string
@@ -31,6 +32,8 @@ const DEFAULTS: Required<Omit<MusicSettings, 'url'>> & { url: string } = {
 
 export default function MusicTab({ slug, initial }: Props) {
   const t = useDashboardDict().tabs.music
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const confirmDialog = useConfirm()
   const [music, setMusic] = useState<typeof DEFAULTS>({
     ...DEFAULTS,
@@ -59,12 +62,15 @@ export default function MusicTab({ slug, initial }: Props) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         setSaveMsg({ kind: 'err', text: err.error || `${t.uploadFailed} (${res.status})` })
+        fb.fail(fm.uploadFail)
         return
       }
       const data = await res.json()
       update('url', data.url)
+      fb.ok(fm.musicUploaded)
     } catch (err: any) {
       setSaveMsg({ kind: 'err', text: err?.message || t.uploadFailed })
+      fb.fail(fm.uploadFail)
     } finally {
       setUploading(false)
       e.target.value = ''
@@ -86,11 +92,14 @@ export default function MusicTab({ slug, initial }: Props) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         setSaveMsg({ kind: 'err', text: err.error || `${t.saveFailed} (${res.status})` })
+        fb.fail(fm.saveFail)
         return
       }
       setSaveMsg({ kind: 'ok', text: t.savedMsg })
+      fb.ok(fm.musicSaved)
     } catch (err: any) {
       setSaveMsg({ kind: 'err', text: err?.message || t.networkError })
+      fb.fail(fm.saveFail)
     } finally {
       setSaving(false)
     }
@@ -107,10 +116,16 @@ export default function MusicTab({ slug, initial }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ music: null }),
       })
-      if (res.ok) setSaveMsg({ kind: 'ok', text: t.cleared })
-      else setSaveMsg({ kind: 'err', text: `${t.clearFailed} (${res.status})` })
+      if (res.ok) {
+        setSaveMsg({ kind: 'ok', text: t.cleared })
+        fb.ok(fm.musicRemoved)
+      } else {
+        setSaveMsg({ kind: 'err', text: `${t.clearFailed} (${res.status})` })
+        fb.fail(fm.saveFail)
+      }
     } catch (err: any) {
       setSaveMsg({ kind: 'err', text: err?.message || t.networkError })
+      fb.fail(fm.saveFail)
     } finally {
       setSaving(false)
     }

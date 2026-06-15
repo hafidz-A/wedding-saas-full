@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 type Swatch = { key: string; label: string; swatch: string }
 
@@ -39,6 +40,8 @@ const TEMPLATE_PALETTES: Record<string, { dark: Swatch[]; light: Swatch[]; fallb
 
 export default function PaletteTab({ slug, template, initial }: { slug: string; template?: string; initial?: string }) {
   const t = useDashboardDict().tabs.palette
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const groups = (template && TEMPLATE_PALETTES[template]) || TEMPLATE_PALETTES.lovebirds
   const [palette, setPalette] = useState(initial || groups.fallback)
   const [saving, setSaving] = useState(false)
@@ -56,11 +59,14 @@ export default function PaletteTab({ slug, template, initial }: { slug: string; 
       if (!res.ok) {
         const e = await res.json().catch(() => ({}))
         setMsg({ kind: 'err', text: e.error || t.saveFailed })
+        fb.fail(fm.saveFail)
         return
       }
       setMsg({ kind: 'ok', text: t.savedOk })
+      fb.ok(fm.paletteSaved)
     } catch (e: any) {
       setMsg({ kind: 'err', text: e?.message || t.networkError })
+      fb.fail(fm.saveFail)
     } finally {
       setSaving(false)
     }

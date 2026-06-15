@@ -1,0 +1,80 @@
+.toastWrap {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  width: max-content;
+  max-width: 92vw;
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 16px 9px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: #2a2118;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  max-width: min(86vw, 440px);
+  animation: fbToastIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reduced {
+  animation: fbToastFade 0.18s ease;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.ok .icon {
+  background: #2d8c4e;
+}
+
+.fail .icon {
+  background: #d14545;
+}
+
+.msg {
+  padding-right: 2px;
+}
+
+@keyframes fbToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fbToastFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

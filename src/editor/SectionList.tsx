@@ -16,6 +16,7 @@ import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 interface Props {
   slug: string
@@ -30,6 +31,8 @@ export default function SectionList({ slug, template }: Props) {
   } = useEditor()
   const policy = getTemplatePolicy(template)
   const t = useDashboardDict().editor
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const lang = useDashboardLang()
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
@@ -101,7 +104,7 @@ export default function SectionList({ slug, template }: Props) {
                   isSelected={s.id === selectedSectionId}
                   onSelect={() => selectSection(s.id)}
                   onToggleEnabled={() => toggleSectionEnabled(s.id)}
-                  onRemove={() => removeSection(s.id)}
+                  onRemove={() => { removeSection(s.id); fb.ok(fm.sectionRemoved) }}
                   draggable={!posLocked && !typeAnchored && !mandatory}
                   canRemove={canRemoveSectionType(s.type, policy)}
                   canDisable={!disableLocked && !typeLocked && !mandatory}
@@ -116,7 +119,7 @@ export default function SectionList({ slug, template }: Props) {
         <div style={{ padding: 12 }}>
           <AddSectionMenu
             template={template}
-            onAdd={(type, label, defaults) => addSection(type, label, defaults)}
+            onAdd={(type, label, defaults) => { addSection(type, label, defaults); fb.ok(fm.sectionAdded) }}
           />
         </div>
       )}

@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from 'react'
 import { deepEqual } from './lib/deepEqual'
+import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 export interface SectionEntry {
   id: string
@@ -320,6 +322,8 @@ function cleanConfig(input: PageConfig): PageConfig {
 }
 
 export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt }: ProviderProps) {
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const cleaned = cleanConfig(initialConfig)
   const [state, dispatch] = useReducer(reducer, {
     config: cleaned,
@@ -361,14 +365,17 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         dispatch({ type: 'SAVE_ERROR', message: err.error || `HTTP ${res.status}` })
+        fb.fail(fm.saveFail)
         return
       }
       const data = await res.json()
       dispatch({ type: 'SAVE_SUCCESS', savedAt: data.savedAt || new Date().toISOString() })
+      fb.ok(fm.changesSaved)
     } catch (e: any) {
       dispatch({ type: 'SAVE_ERROR', message: e?.message || 'Network error' })
+      fb.fail(fm.saveFail)
     }
-  }, [slug, state.config])
+  }, [slug, state.config, fb, fm])
 
   const value: EditorContextValue = {
     ...state,

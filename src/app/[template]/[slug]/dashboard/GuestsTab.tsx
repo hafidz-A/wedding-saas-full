@@ -18,6 +18,7 @@ import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import styles from './GuestsTab.module.css'
 
 interface Props {
@@ -29,6 +30,8 @@ interface Props {
 
 export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: Props) {
   const t = useDashboardDict().tabs.guests
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const confirmDialog = useConfirm()
   const router = useRouter()
   const [query, setQuery] = useState('')
@@ -72,9 +75,11 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     setTemplateSaving(false)
     if (!result.ok) {
       setTemplateError(result.error || t.saveError)
+      fb.fail(fm.saveFail)
       return
     }
     setTemplateSaved(true)
+    fb.ok(fm.messageSaved)
     setTimeout(() => setTemplateSaved(false), 2500)
     router.refresh()
   }
@@ -109,6 +114,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     // Open WA tab immediately (browser permission is tied to user gesture
     // — must happen synchronously inside the click handler, not awaited).
     window.open(url, '_blank', 'noopener,noreferrer')
+    fb.ok(fm.waOpened)
     // Optimistic: stamp sent_at locally NOW so the badge flips green
     // without waiting for the server round-trip.
     const sentAt = new Date().toISOString()
@@ -120,6 +126,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         // Roll back optimistic update on error
         console.error(e)
         setLocalGuests((prev) => prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)))
+        fb.fail(fm.waMarkFail)
       }
     })
   }
@@ -142,8 +149,10 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         setLocalGuests((prev) =>
           prev.map((x) => (x.id === g.id ? { ...x, rsvpToken: token, tokenUsedAt: null } : x)),
         )
+        fb.ok(fm.codeRegenerated)
       } catch (e) {
         console.error(e)
+        fb.fail(fm.codeRegenFail)
       }
     })
   }
@@ -183,10 +192,12 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
       try {
         const real = await addGuest(slug, { name, phoneRaw: rawPhone })
         setLocalGuests((prev) => prev.map((x) => (x.id === tempId ? real : x)))
+        fb.ok(fm.guestAdded)
       } catch (e) {
         console.error(e)
         // Roll back the temp row on failure
         setLocalGuests((prev) => prev.filter((x) => x.id !== tempId))
+        fb.fail(fm.guestAddFail)
       }
     })
   }
@@ -411,11 +422,13 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         startTransition(async () => {
                           try {
                             await unmarkGuestSent(slug, g.id)
+                            fb.ok(fm.markUndone)
                           } catch (e) {
                             // restore on failure
                             setLocalGuests((prev) =>
                               prev.map((x) => (x.id === g.id ? { ...x, sent_at: g.sent_at } : x)),
                             )
+                            fb.fail(fm.updateFail)
                           }
                         })
                       }}
@@ -434,9 +447,11 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                       startTransition(async () => {
                         try {
                           await deleteGuest(slug, g.id)
+                          fb.ok(fm.guestDeleted)
                         } catch (e) {
                           // restore on failure
                           setLocalGuests((prev) => [...prev, g])
+                          fb.fail(fm.guestDeleteFail)
                         }
                       })
                     }}

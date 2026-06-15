@@ -18,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useUpload } from '../lib/useUpload'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 interface Props {
   label: string
@@ -32,6 +33,8 @@ export default function ImageArrayField({ label, value, onChange, slug, help, ma
   const t = useDashboardDict().editor
   const fileInput = useRef<HTMLInputElement>(null)
   const { upload, isUploading, error } = useUpload(slug)
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   const items = Array.isArray(value) ? value : []
@@ -47,7 +50,11 @@ export default function ImageArrayField({ label, value, onChange, slug, help, ma
       const url = await upload(f)
       if (url) urls.push(url)
     }
-    if (urls.length) onChange([...items, ...urls])
+    if (urls.length) {
+      onChange([...items, ...urls])
+      fb.ok(fm.imageUploaded)
+    }
+    if (urls.length < files.length) fb.fail(fm.uploadFail)
     e.target.value = ''
   }
 

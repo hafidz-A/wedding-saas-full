@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 
 interface MetaSettings {
   title?: string
@@ -20,6 +21,8 @@ const DESC_MAX = 200
 
 export default function MetaTab({ slug, template, initial }: Props) {
   const t = useDashboardDict().tabs.meta
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const [title, setTitle] = useState(initial?.title ?? '')
   const [description, setDescription] = useState(initial?.description ?? '')
   const [ogImage, setOgImage] = useState(initial?.ogImage ?? '')
@@ -50,12 +53,15 @@ export default function MetaTab({ slug, template, initial }: Props) {
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         setMsg({ kind: 'err', text: err.error || `${t.uploadFailed} (${res.status})` })
+        fb.fail(fm.uploadFail)
         return
       }
       const data = await res.json()
       setOgImage(data.url)
+      fb.ok(fm.imageUploaded)
     } catch (err: any) {
       setMsg({ kind: 'err', text: err?.message || t.uploadFailed })
+      fb.fail(fm.uploadFail)
     } finally {
       setUploading(false)
       e.target.value = ''
@@ -74,11 +80,14 @@ export default function MetaTab({ slug, template, initial }: Props) {
       if (!res.ok) {
         const e = await res.json().catch(() => ({}))
         setMsg({ kind: 'err', text: e.error || t.saveFailed })
+        fb.fail(fm.saveFail)
         return
       }
       setMsg({ kind: 'ok', text: t.savedOk })
+      fb.ok(fm.detailsSaved)
     } catch (e: any) {
       setMsg({ kind: 'err', text: e?.message || t.networkError })
+      fb.fail(fm.saveFail)
     } finally {
       setSaving(false)
     }

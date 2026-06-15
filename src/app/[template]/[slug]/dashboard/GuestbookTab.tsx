@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
+import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import {
   setArrived,
   updateAttendanceMeta,
@@ -44,6 +45,8 @@ function sortLedger(rows: AttendanceRow[]): AttendanceRow[] {
 export default function GuestbookTab({ slug, template, attendances, souvenirEnabled }: Props) {
   const t = useDashboardDict().tabs.guestbook
   const tc = useDashboardDict().tabs.common
+  const fm = useDashboardDict().feedback
+  const fb = useFeedback()
   const confirmDialog = useConfirm()
   const showAlert = useAlert()
   const router = useRouter()
@@ -84,11 +87,14 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
       const res = await deleteAttendance(slug, id)
       if (!res.ok) {
         await showAlert({ message: res.error || t.deleteFailed })
+        fb.fail(fm.updateFail)
         return
       }
       setRows((prev) => prev.filter((r) => r.id !== id))
+      fb.ok(fm.entryRemoved)
     } catch (e: any) {
       await showAlert({ message: e?.message || t.networkError })
+      fb.fail(fm.updateFail)
     } finally {
       setDeletingId(null)
     }
@@ -102,6 +108,9 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
     if (!res.ok) {
       setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, arrived_at: row.arrived_at } : r)))
       await showAlert({ message: res.error || t.networkError })
+      fb.fail(fm.updateFail)
+    } else {
+      fb.ok(fm.checkinUpdated)
     }
     setBusyId(null)
   }
@@ -114,6 +123,9 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
     if (!res.ok) {
       setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, souvenir_taken: row.souvenir_taken } : r)))
       await showAlert({ message: res.error || t.networkError })
+      fb.fail(fm.updateFail)
+    } else {
+      fb.ok(fm.souvenirUpdated)
     }
     setBusyId(null)
   }
@@ -122,7 +134,12 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
     const trimmed = value.trim().slice(0, 24) || null
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, table_no: trimmed } : r)))
     const res = await updateAttendanceMeta(slug, id, { tableNo: trimmed })
-    if (!res.ok) await showAlert({ message: res.error || t.networkError })
+    if (!res.ok) {
+      await showAlert({ message: res.error || t.networkError })
+      fb.fail(fm.updateFail)
+    } else {
+      fb.ok(fm.tableSaved)
+    }
   }
 
   async function onToggleSouvenirTracking() {
@@ -132,6 +149,9 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
     if (!res.ok) {
       setSouvenirOn(!next)
       await showAlert({ message: res.error || t.networkError })
+      fb.fail(fm.updateFail)
+    } else {
+      fb.ok(fm.souvenirTrackingUpdated)
     }
   }
 
