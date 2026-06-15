@@ -576,16 +576,20 @@ export const dashboard = {
           title: 'Buku Tamu',
           summary: 'Catatan kehadiran tamu saat acara berlangsung (fitur Premium).',
           steps: [
-            'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya).',
-            'Setelah Premium, buka Buku Tamu saat hari-H.',
-            'Tandai tamu yang hadir saat mereka tiba.',
+            'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya) untuk membukanya.',
+            'Setelah Premium, daftar hadir terisi otomatis dari RSVP yang menyatakan hadir; tambahkan tamu yang datang langsung lewat "+ Tamu Datang".',
+            'Saat tamu tiba, klik "Hadir" untuk check-in — atau tampilkan/cetak QR Check-in agar tamu scan sendiri di meja penerima.',
+            'Pantau rekap di atas (Total entri, Tamu hadir riil, Walk-in), lalu Unduh CSV atau Cetak daftar untuk panitia.',
           ],
           always: [
             'Gunakan saat hari-H untuk mencatat kehadiran tamu.',
             'Siapkan perangkat yang terhubung internet di meja penerima tamu.',
           ],
           never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
-          tips: ['Lihat tab "Bayar, Masa Aktif & Upgrade" untuk detail proses upgrade.'],
+          tips: [
+            'Lihat tab "Bayar, Masa Aktif & Upgrade" untuk detail proses upgrade.',
+            'Pelacakan Souvenir dan nomor meja bersifat opsional — nyalakan bila panitia membutuhkannya.',
+          ],
           shots: { ledger: 'Ledger kehadiran tamu (terbuka setelah Premium).' },
         },
         checklist: {
@@ -892,11 +896,14 @@ export const dashboard = {
             openTab: 'Buka tab Buku Tamu →',
             steps: [
               'Kalau undanganmu masih Basic, tab ini terkunci — klik "Upgrade ke Premium" (cukup bayar selisihnya) untuk membukanya.',
-              'Setelah Premium: daftar terisi otomatis dari RSVP yang menyatakan hadir; tambahkan tamu yang datang langsung lewat "+ Tamu Datang".',
+              'Setelah Premium, daftar hadir terisi otomatis dari RSVP yang menyatakan hadir; tambahkan tamu walk-in lewat "+ Tamu Datang".',
+              'Tandai "Hadir" saat tamu tiba — atau pakai QR Check-in: tampilkan/cetak QR supaya tamu scan sendiri di meja penerima.',
+              'Pantau rekap (Total entri, Tamu hadir riil, Walk-in), lalu Unduh CSV atau Cetak daftar untuk panitia.',
             ],
             always: ['Gunakan saat hari-H untuk mencatat kehadiran tamu (termasuk walk-in).'],
             never: ['Jangan khawatir saat upgrade — undanganmu tetap online, tidak ada data yang hilang.'],
-            shots: { ledger: 'Ledger kehadiran — otomatis dari RSVP + walk-in (terbuka setelah Premium).' },
+            tips: ['Pelacakan Souvenir dan nomor meja bersifat opsional — nyalakan bila panitia membutuhkannya.'],
+            shots: { ledger: 'Ledger kehadiran — otomatis dari RSVP + walk-in, plus QR Check-in (terbuka setelah Premium).' },
           },
           quickstart: {
             title: 'Quickstart 10 menit',
@@ -1752,16 +1759,20 @@ export const dashboard = {
           title: 'Guestbook',
           summary: 'A record of guest attendance during the event (Premium feature).',
           steps: [
-            'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference).',
-            'Once Premium, open the Guestbook on the day.',
-            'Mark guests as present when they arrive.',
+            'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference) to unlock it.',
+            'Once Premium, the attendance list fills in automatically from RSVPs marked attending; add people who show up via "+ Walk-in".',
+            'As guests arrive, click "Arrived" to check them in — or show/print the QR Check-in so they scan themselves at the welcome desk.',
+            'Watch the tallies up top (Total entries, Guests arrived, Walk-ins), then Download CSV or Print the list for your team.',
           ],
           always: [
             'Use it on the day to record guest attendance.',
             'Have an internet-connected device ready at the reception desk.',
           ],
           never: ['Don\'t worry about upgrading — your invitation stays online and no data is lost.'],
-          tips: ['See the "Active period & Upgrade" tab for details on the upgrade process.'],
+          tips: [
+            'See the "Active period & Upgrade" tab for details on the upgrade process.',
+            'Souvenir tracking and table numbers are optional — turn them on if your team needs them.',
+          ],
           shots: { ledger: 'The guest attendance ledger (unlocked after Premium).' },
         },
         checklist: {
@@ -2068,10 +2079,13 @@ export const dashboard = {
             openTab: 'Open Guest Book tab →',
             steps: [
               'If your invitation is still Basic, this tab is locked — click "Upgrade to Premium" (just pay the difference) to unlock it.',
-              'Once Premium: the list fills in automatically from RSVPs marked attending; add guests who show up in person via "+ Walk-in".',
+              'Once Premium, the list fills in automatically from RSVPs marked attending; add walk-ins via "+ Walk-in".',
+              'Mark "Arrived" as guests turn up — or use QR Check-in: show/print the QR so guests scan themselves at the desk.',
+              'Watch the tallies (Total entries, Guests arrived, Walk-ins), then Download CSV or Print for your team.',
             ],
             always: ['Use it on the day to record guest attendance (including walk-ins).'],
             never: ['Don\'t worry about upgrading — your invitation stays online the whole time, nothing is lost.'],
+            tips: ['Souvenir tracking and table numbers are optional — turn them on if your team needs them.'],
             shots: { ledger: 'The attendance ledger — auto-filled from RSVP + walk-ins (unlocked after Premium).' },
           },
           quickstart: {

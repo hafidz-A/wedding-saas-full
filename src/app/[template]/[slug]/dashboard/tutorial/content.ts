@@ -79,7 +79,7 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
     shots: [{ key: 'gifts-table', captionKey: 'table' }] },
   { id: 'guests', group: 'data', stepCount: 4, alwaysCount: 3, neverCount: 2, tipCount: 2,
     shots: [{ key: 'guests-share', captionKey: 'share' }] },
-  { id: 'guestbook', group: 'data', premiumOnly: true, stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1,
+  { id: 'guestbook', group: 'data', premiumOnly: true, stepCount: 4, alwaysCount: 2, neverCount: 1, tipCount: 2,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
   { id: 'billing', group: 'help', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [
@@ -124,7 +124,7 @@ export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
     shots: [{ key: 'gifts-table', captionKey: 'table' }] },
   { id: 'guests', group: 'data', relatedTab: 'guests', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'guests-share', captionKey: 'share' }] },
-  { id: 'guestbook', group: 'data', premiumOnly: true, relatedTab: 'guestbook', stepCount: 2, alwaysCount: 1, neverCount: 1, tipCount: 0,
+  { id: 'guestbook', group: 'data', premiumOnly: true, relatedTab: 'guestbook', stepCount: 4, alwaysCount: 1, neverCount: 1, tipCount: 1,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
   { id: 'billing', group: 'help', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [] },
