@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { buildWhatsAppUrl, renderMessageTemplate } from '@/lib/guests/whatsapp'
 import { buildGuestLink } from '@/lib/guests/guestLink'
-import { formatPhoneDisplay } from '@/lib/guests/phone'
+import { formatPhoneDisplay, normalizePhone } from '@/lib/guests/phone'
 import {
   addGuest,
   deleteGuest,
@@ -148,11 +148,20 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     })
   }
 
-  const handleAdd = (form: FormData) => {
+  const handleAdd = async (form: FormData) => {
     const rawName = String(form.get('name') || '')
     const rawPhone = String(form.get('phone') || '')
     const name = rawName.trim()
     if (!name) return
+    // Duplicate guard: same name (case-insensitive) AND same number already on
+    // the list → ask first, with an assertive (red) confirm.
+    const newPhone = normalizePhone(rawPhone)
+    const isDup = localGuests.some(
+      (g) => g.name.trim().toLowerCase() === name.toLowerCase() && g.phone_e164 === newPhone,
+    )
+    if (isDup && !(await confirmDialog({ message: t.dupConfirm.replace('{name}', name), tone: 'danger' }))) {
+      return
+    }
     // Optimistic: drop a temp row in immediately so the user sees instant feedback
     const tempId = `temp-${Date.now()}-${Math.random()}`
     const tempRow: GuestRow = {
