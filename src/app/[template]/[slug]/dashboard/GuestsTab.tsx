@@ -19,11 +19,6 @@ import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import styles from './GuestsTab.module.css'
 
-const DEFAULT_TEMPLATE =
-  'Halo {{name}}, dengan hormat kami mengundang Anda ke acara pernikahan kami. ' +
-  'Detail lengkap di sini: {{url}}' +
-  '\n\nKode RSVP kamu: {{kode}} (sekali pakai)'
-
 interface Props {
   slug: string
   guests: GuestRow[]
@@ -50,7 +45,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
 
   // Editable global template state — initialized from invitation config,
   // saved server-side via updateInviteMessageTemplate when "Simpan" clicked.
-  const [template, setTemplate] = useState(messageTemplate || DEFAULT_TEMPLATE)
+  const [template, setTemplate] = useState(messageTemplate || t.defaultInviteMessage)
   const [templateOpen, setTemplateOpen] = useState(false)
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
@@ -115,11 +110,21 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     })
   }
 
-  const handleRegenerate = (g: GuestRow) => {
+  const handleRegenerate = async (g: GuestRow) => {
     if (pending) return
+    // Warn the owner before regenerating a code for a guest who already RSVP'd:
+    // the new code can be used for an ucapan but never to RSVP again.
+    if (
+      g.rsvpSubmittedAt &&
+      !(await confirmDialog({ message: t.regenerateConfirmRsvped.replace('{name}', g.name), tone: 'danger' }))
+    ) {
+      return
+    }
     startTransition(async () => {
       try {
         const { token } = await regenerateGuestToken(slug, g.id)
+        // rsvpSubmittedAt is intentionally preserved — regenerate never clears
+        // the permanent RSVP-completed marker (mirrors the server).
         setLocalGuests((prev) =>
           prev.map((x) => (x.id === g.id ? { ...x, rsvpToken: token, tokenUsedAt: null } : x)),
         )
@@ -215,7 +220,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
             )}
             <button
               type="button"
-              onClick={() => setTemplate(messageTemplate || DEFAULT_TEMPLATE)}
+              onClick={() => setTemplate(messageTemplate || t.defaultInviteMessage)}
               style={ghostBtn}
               disabled={templateSaving}
             >
@@ -357,18 +362,22 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     ✎
                   </button>
                   <span className={styles.token}>
-                    Kode: <code>{g.rsvpToken || '—'}</code>
-                    {g.tokenUsedAt && <em className={styles.tokenUsed}> (terpakai)</em>}
+                    {t.tokenLabel}: <code>{g.rsvpToken || '—'}</code>
+                    {g.rsvpSubmittedAt ? (
+                      <em className={styles.tokenUsed}> {t.tokenRsvpedBadge}</em>
+                    ) : (
+                      g.tokenUsedAt && <em className={styles.tokenUsed}> {t.tokenUsedBadge}</em>
+                    )}
                   </span>
                   <button
                     type="button"
                     className={styles.regenBtn}
                     onClick={() => handleRegenerate(g)}
                     disabled={pending}
-                    aria-label={`Buat ulang kode RSVP untuk ${g.name}`}
-                    title="Buat kode baru (kode lama langsung tidak berlaku)"
+                    aria-label={t.regenerateAria.replace('{name}', g.name)}
+                    title={t.regenerateTitle}
                   >
-                    Buat ulang kode
+                    {t.regenerateBtn}
                   </button>
                   {g.sent_at && (
                     <button

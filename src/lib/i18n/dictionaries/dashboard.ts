@@ -184,6 +184,18 @@ export const dashboard = {
         deleteConfirmPrefix: 'Hapus',
         deleteConfirmSuffix: '?',
         deleteTitle: 'Hapus',
+        tokenLabel: 'Kode',
+        tokenUsedBadge: '(terpakai)',
+        tokenRsvpedBadge: '(sudah RSVP)',
+        regenerateBtn: 'Buat ulang kode',
+        regenerateTitle: 'Buat kode baru — kode lama langsung hangus',
+        regenerateAria: 'Buat ulang kode RSVP untuk {name}',
+        regenerateConfirmRsvped:
+          '{name} sudah mengisi RSVP. Kode baru cuma bisa dipakai untuk menulis ucapan, bukan RSVP lagi. Tetap buat kode baru?',
+        defaultInviteMessage:
+          'Halo {{name}}, dengan tulus kami mengundangmu ke pernikahan kami. ' +
+          'Selengkapnya di sini: {{url}}' +
+          '\n\nKode RSVP kamu: {{kode}} (sekali pakai)',
       },
       guestbook: {
         title: 'Buku Tamu',
@@ -1288,6 +1300,18 @@ export const dashboard = {
         deleteConfirmPrefix: 'Delete',
         deleteConfirmSuffix: '?',
         deleteTitle: 'Delete',
+        tokenLabel: 'Code',
+        tokenUsedBadge: '(used)',
+        tokenRsvpedBadge: '(RSVP’d)',
+        regenerateBtn: 'New code',
+        regenerateTitle: 'Make a new code — the old one stops working right away',
+        regenerateAria: 'Make a new RSVP code for {name}',
+        regenerateConfirmRsvped:
+          '{name} has already RSVP’d. A new code only lets them leave a message, not RSVP again. Make a new code anyway?',
+        defaultInviteMessage:
+          'Hi {{name}}, we’d truly love for you to celebrate our wedding with us. ' +
+          'All the details are here: {{url}}' +
+          '\n\nYour RSVP code: {{kode}} (one-time use)',
       },
       guestbook: {
         title: 'Guestbook',
