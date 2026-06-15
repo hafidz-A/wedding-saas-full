@@ -13,7 +13,7 @@ function isRealSlug(slug) {
   return !!slug && slug !== "demo";
 }
 
-export async function submitRSVP({ slug = "demo", guest_name, attending, guest_count, meal_choice, message }) {
+export async function submitRSVP({ slug = "demo", guest_name, attending, guest_count, meal_choice, message, token }) {
   if (!isRealSlug(slug)) {
     await new Promise((r) => setTimeout(r, 700));
     return { ok: true, simulated: true };
@@ -29,6 +29,7 @@ export async function submitRSVP({ slug = "demo", guest_name, attending, guest_c
       guest_count,
       meal_choice: meal_choice || null,
       message: message || null,
+      token: token || "",
     }),
   });
 

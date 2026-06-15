@@ -8,6 +8,7 @@ import { useGuest } from "../contexts/GuestContext.jsx";
 
 const schema = z.object({
   guest_name: z.string().min(2, "Required").max(120),
+  token: z.string().regex(/^\d{6}$/, "Kode harus 6 angka"),
   attending: z.enum(["yes", "no"]),
   guest_count: z.coerce
     .number({ invalid_type_error: "Masukkan jumlah tamu yang valid" })
@@ -23,9 +24,16 @@ const isRealSlug = (slug) => !!slug && slug !== "demo";
 
 export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, whatsappNumber, menuOptions = [], slug = "demo" }) {
   const { name } = useGuest();
+
+  // Preview iframe loads /<template>/<slug>?preview=1 — simulate so the owner
+  // can test the form without consuming a real token.
+  const isPreview =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("preview") === "1";
+
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { guest_name: name || "", attending: "yes", guest_count: 1, meal_choice: menuOptions[0] || "", message: "" },
+    defaultValues: { guest_name: name || "", token: "", attending: "yes", guest_count: 1, meal_choice: menuOptions[0] || "", message: "" },
   });
   useEffect(() => { if (name) setValue("guest_name", name); }, [name, setValue]);
   const attending = watch("attending");
@@ -43,6 +51,15 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
 
   const onSubmit = async (data) => {
     setSendError(null);
+
+    // In preview mode, simulate success so the owner can test the form
+    // without consuming a real token. The live endpoint has no backdoor.
+    if (isPreview) {
+      await new Promise((r) => setTimeout(r, 700));
+      setSent(true);
+      return;
+    }
+
     try {
       await submitRSVP({
         slug,
@@ -51,6 +68,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
         guest_count: data.guest_count,
         meal_choice: data.meal_choice,
         message: data.message,
+        token: data.token,
       });
     } catch (err) {
       setSendError(err?.message || "Gagal mengirim. Coba lagi.");
@@ -101,6 +119,21 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                 <label className="form-label" htmlFor="rsvp-name">Your name</label>
                 <input id="rsvp-name" className="form-input" placeholder="Full name as on invitation" {...register("guest_name")} />
                 {errors.guest_name && <span className="form-error">{errors.guest_name.message}</span>}
+              </div>
+              <div className="form-row">
+                <label className="form-label" htmlFor="rsvp-token">Kode undangan (6 angka)</label>
+                <input
+                  id="rsvp-token"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  className="form-input"
+                  placeholder={isPreview ? "123456" : "••••••"}
+                  {...register("token")}
+                />
+                <span className="form-hint" style={{ fontSize: 11, color: "var(--color-fg-mute)", marginTop: 4, display: "block" }}>1 kode = 1 kali kirim.</span>
+                {errors.token && <span className="form-error">{errors.token.message}</span>}
               </div>
               <div className="form-row-2">
                 <div className="form-row">
