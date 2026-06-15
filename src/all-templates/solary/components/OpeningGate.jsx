@@ -3,7 +3,7 @@ import { useGuest } from "../contexts/GuestContext.jsx";
 import GatePhotoStars from "./GatePhotoStars.jsx";
 
 export default function OpeningGate({ eyebrow, coupleName, tagline, ctaLabel = "Get Started", gatePhotos = [] }) {
-  const { name } = useGuest();
+  const { name, preview } = useGuest();
   const rootRef = useRef(null);
   const [faded, setFaded] = useState(false);
 
@@ -61,7 +61,11 @@ export default function OpeningGate({ eyebrow, coupleName, tagline, ctaLabel = "
       <GatePhotoStars photos={gatePhotos} reducedMotion={reducedMotion} />
       <div className="gate-card">
         <p className="gate-eyebrow">{eyebrow}</p>
-        {name && <p className="gate-greet">Dear {name},</p>}
+        {name ? (
+          <p className="gate-greet">Welcome, dear {name}</p>
+        ) : (
+          preview && <p className="gate-greet">Welcome, dear [Guest name]</p>
+        )}
         <h1 className="gate-couple">{coupleName}</h1>
         <p className="gate-tagline">{tagline}</p>
         <button className="gate-cta" onClick={handleStart}>

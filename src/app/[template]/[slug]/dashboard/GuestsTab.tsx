@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { buildWhatsAppUrl, renderMessageTemplate } from '@/lib/guests/whatsapp'
+import { buildGuestLink } from '@/lib/guests/guestLink'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
 import {
   addGuest,
@@ -46,10 +47,22 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
   // Editable global template state — initialized from invitation config,
   // saved server-side via updateInviteMessageTemplate when "Simpan" clicked.
   const [template, setTemplate] = useState(messageTemplate || t.defaultInviteMessage)
-  const [templateOpen, setTemplateOpen] = useState(false)
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
   const [templateError, setTemplateError] = useState<string | null>(null)
+
+  // Whether the template differs from what's saved (gates "confirm change").
+  const templateDirty = template !== (messageTemplate || t.defaultInviteMessage)
+  // Live preview of the message a guest actually receives (sample guest Ahmad).
+  const previewMessage = useMemo(
+    () =>
+      renderMessageTemplate(template, {
+        name: 'Ahmad',
+        url: buildGuestLink(publicUrl, 'Ahmad'),
+        token: '123456',
+      }),
+    [template, publicUrl],
+  )
 
   async function saveTemplate() {
     setTemplateSaving(true)
@@ -88,7 +101,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     const source = g.notes && g.notes.trim() ? g.notes : template
     const message = renderMessageTemplate(source, {
       name: g.name,
-      url: publicUrl,
+      // Personalized link so the opening gate greets the guest by name.
+      url: buildGuestLink(publicUrl, g.name),
       token: g.rsvpToken || '',
     })
     const url = buildWhatsAppUrl({ phoneE164: g.phone_e164, message })
@@ -178,60 +192,59 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           </p>
         </div>
         <div className={styles.headerActions}>
-          <button
-            type="button"
-            onClick={() => setTemplateOpen((o) => !o)}
-            style={{
-              ...ghostBtn,
-              background: templateOpen ? '#2A2118' : 'transparent',
-              color: templateOpen ? '#fff' : '#2A2118',
-            }}
-          >
-            {t.defaultMsgBtn}
-          </button>
           <button type="button" onClick={() => setShowImport(true)} style={ghostBtn}>
             {t.importBtn}
           </button>
         </div>
       </header>
 
-      {templateOpen && (
-        <div className={styles.templatePanel}>
-          <p className={styles.templateHint}>{t.templateHint}</p>
-          <textarea
-            value={template}
-            onChange={(e) => setTemplate(e.target.value)}
-            rows={6}
-            style={{
-              ...input,
-              width: '100%',
-              boxSizing: 'border-box',
-              fontFamily: 'inherit',
-              resize: 'vertical',
-              minHeight: 100,
-            }}
-          />
-          <div className={styles.templateActions}>
-            {templateError && (
-              <span style={{ fontSize: 13, color: '#E8553E', marginRight: 'auto' }}>{templateError}</span>
-            )}
-            {templateSaved && !templateError && (
-              <span style={{ fontSize: 13, color: '#2D8C4E', marginRight: 'auto' }}>{t.savedMsg}</span>
-            )}
-            <button
-              type="button"
-              onClick={() => setTemplate(messageTemplate || t.defaultInviteMessage)}
-              style={ghostBtn}
-              disabled={templateSaving}
-            >
-              {t.reset}
-            </button>
-            <button type="button" onClick={saveTemplate} disabled={templateSaving} style={primaryBtn}>
-              {templateSaving ? t.saving : t.save}
-            </button>
-          </div>
+      {/* Always-visible WhatsApp message editor — the owner sees exactly what
+          will be sent and can edit it inline, then confirm the change. */}
+      <div className={styles.templatePanel}>
+        <h3 className={styles.templateHeading}>{t.templateHeading}</h3>
+        <p className={styles.templateHint}>{t.templateHint}</p>
+        <textarea
+          value={template}
+          onChange={(e) => setTemplate(e.target.value)}
+          rows={5}
+          style={{
+            ...input,
+            width: '100%',
+            boxSizing: 'border-box',
+            fontFamily: 'inherit',
+            resize: 'vertical',
+            minHeight: 90,
+          }}
+        />
+        <div className={styles.templatePreview}>
+          <span className={styles.templatePreviewLabel}>{t.templatePreviewLabel}</span>
+          <pre className={styles.templatePreviewBody}>{previewMessage}</pre>
         </div>
-      )}
+        <div className={styles.templateActions}>
+          {templateError && (
+            <span style={{ fontSize: 13, color: '#E8553E', marginRight: 'auto' }}>{templateError}</span>
+          )}
+          {templateSaved && !templateError && (
+            <span style={{ fontSize: 13, color: '#2D8C4E', marginRight: 'auto' }}>{t.savedMsg}</span>
+          )}
+          <button
+            type="button"
+            onClick={() => setTemplate(messageTemplate || t.defaultInviteMessage)}
+            style={ghostBtn}
+            disabled={templateSaving || !templateDirty}
+          >
+            {t.reset}
+          </button>
+          <button
+            type="button"
+            onClick={saveTemplate}
+            disabled={templateSaving || !templateDirty}
+            style={primaryBtn}
+          >
+            {templateSaving ? t.saving : t.confirmChange}
+          </button>
+        </div>
+      </div>
 
       <form action={handleAdd} className={styles.addForm}>
         <input name="name" placeholder={t.namePlaceholder} required style={input} />

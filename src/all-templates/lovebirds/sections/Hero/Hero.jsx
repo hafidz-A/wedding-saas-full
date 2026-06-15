@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './Hero.module.css'
 import { deriveMonogram } from '../../config/monogram.js'
+import { readGuestName, readPreviewMode } from '../../utils/guestName.js'
 
 const DEFAULTS = {
   coupleName: '',
@@ -247,6 +248,16 @@ function DecorCorners() {
 
 export default function Hero(props) {
   const cfg = { ...DEFAULTS, ...props }
+
+  // Personalized greeting from the ?to= link the owner sends. Read after mount
+  // (not during render) so SSR and the first client render match — avoids a
+  // hydration mismatch on this gate.
+  const [guestName, setGuestName] = useState(null)
+  const [isPreview, setIsPreview] = useState(false)
+  useEffect(() => {
+    setGuestName(readGuestName())
+    setIsPreview(readPreviewMode())
+  }, [])
     const containerRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
@@ -443,6 +454,11 @@ export default function Hero(props) {
           }}
         >
           <div className={styles.glassCard}>
+            {guestName ? (
+              <p className={styles.gateGreet}>Welcome, dear {guestName}</p>
+            ) : (
+              isPreview && <p className={styles.gateGreet}>Welcome, dear [Guest name]</p>
+            )}
             <p className={styles.welcomeText}>{cfg.welcomeText}</p>
             <h1 className={styles.coupleName}>
               <span className={styles.namePart}>{cfg.brideName}</span>

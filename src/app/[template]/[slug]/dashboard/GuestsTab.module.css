@@ -47,11 +47,43 @@
   border-radius: 12px;
 }
 
+.templateHeading {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2A2118;
+}
+
 .templateHint {
   margin: 0 0 10px;
   font-size: 13px;
   color: #5C4A3A;
   line-height: 1.6;
+}
+
+.templatePreview {
+  margin-top: 10px;
+}
+
+.templatePreviewLabel {
+  display: block;
+  font-size: 12px;
+  color: #8A7F70;
+  margin-bottom: 4px;
+}
+
+.templatePreviewBody {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #2A2118;
+  background: #fff;
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 
 .templateActions {

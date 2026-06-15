@@ -242,6 +242,16 @@
   margin: 0;
 }
 
+/* Personalized "Welcome, dear <name>" — warm script line above the label. */
+.gateGreet {
+  font-family: var(--font-greatvibes), cursive;
+  font-size: clamp(20px, 3.2vw, 30px);
+  line-height: 1.1;
+  color: var(--glass-text, var(--color-charcoal));
+  margin: 0 0 6px;
+  opacity: 0.92;
+}
+
 .coupleName {
   font-family: var(--font-greatvibes), cursive;
   font-style: normal;
