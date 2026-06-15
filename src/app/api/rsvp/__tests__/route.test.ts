@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest'
 import { randomBytes } from 'node:crypto'
 import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
+import { consumeGuestToken } from '@/lib/guests/tokenGate'
 
 // Replace the admin client; each test configures the fake via mockReturnValue.
 vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
@@ -12,6 +13,8 @@ const mockAdmin = vi.mocked(createSupabaseAdminClient)
 beforeAll(() => {
   // encryptField reads this at call-time; required for the insert path.
   process.env.APP_ENCRYPTION_KEY = randomBytes(32).toString('base64')
+  // hashToken (consumeGuestToken) reads this; required for the token-gate path.
+  process.env.GUESTS_ENCRYPTION_KEY = randomBytes(32).toString('base64')
 })
 beforeEach(() => {
   vi.clearAllMocks()
@@ -74,9 +77,9 @@ describe('POST /api/rsvp', () => {
   })
 
   it('happy path: 200, encrypts guest name, and auto-populates attendance when attending', async () => {
-    const fake = liveFake()
+    const fake = liveTokenFake()
     mockAdmin.mockReturnValue(fake as any)
-    const res = await POST(post({ slug: 'x', guest_name: 'Budi Santoso', attending: true, guest_count: 2 }))
+    const res = await POST(post({ slug: 'x', guest_name: 'Budi Santoso', attending: true, guest_count: 2, token: '123456' }))
     expect(res.status).toBe(200)
     expect((await res.json()).ok).toBe(true)
 
@@ -91,17 +94,17 @@ describe('POST /api/rsvp', () => {
   })
 
   it('does NOT create an attendance row when not attending', async () => {
-    const fake = liveFake()
+    const fake = liveTokenFake()
     mockAdmin.mockReturnValue(fake as any)
-    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: false }))
+    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: false, token: '123456' }))
     expect(res.status).toBe(200)
     expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
   })
 
   it('clamps absurd guest_count to the abuse ceiling (999)', async () => {
-    const fake = liveFake()
+    const fake = liveTokenFake()
     mockAdmin.mockReturnValue(fake as any)
-    await POST(post({ slug: 'x', guest_name: 'A', attending: true, guest_count: 100000 }))
+    await POST(post({ slug: 'x', guest_name: 'A', attending: true, guest_count: 100000, token: '123456' }))
     const rsvpInsert = fake._calls.find((c) => c.kind === 'insert' && c.table === 'rsvps')
     expect(rsvpInsert!.value.guest_count).toBe(999)
   })
@@ -111,11 +114,12 @@ describe('POST /api/rsvp', () => {
       createFakeSupabase({
         tables: {
           invitations: { select: { data: LIVE } },
+          guests: { update: { data: { id: 'g1' } } },
           rsvps: { insert: { data: null, error: { message: 'boom' } } },
         },
       }) as any,
     )
-    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true }))
+    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true, token: '123456' }))
     expect(res.status).toBe(500)
   })
 
@@ -123,5 +127,42 @@ describe('POST /api/rsvp', () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ rpc: { rl_hit: { data: false } } }) as any)
     const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true }))
     expect(res.status).toBe(429)
+  })
+})
+
+// liveFake() plus a consumable token row scripted on the guests table.
+function liveTokenFake(tokenRow: any = { id: 'g1' }) {
+  return createFakeSupabase({
+    rpc: { rl_hit: { data: true } },
+    tables: {
+      invitations: { select: { data: LIVE } },
+      guests: { update: { data: tokenRow } },
+      rsvps: { insert: { data: { id: 'rsvp-1' } } },
+      attendances: { insert: { data: { id: 'att-1' } } },
+    },
+  })
+}
+
+describe('POST /api/rsvp token gate', () => {
+  beforeAll(() => { process.env.GUESTS_ENCRYPTION_KEY = randomBytes(32).toString('base64') })
+
+  it('rejects with 403 when the token is missing', async () => {
+    mockAdmin.mockReturnValue(liveTokenFake() as any)
+    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true }))
+    expect(res.status).toBe(403)
+  })
+
+  it('rejects with 403 when the token does not match an unused row', async () => {
+    mockAdmin.mockReturnValue(liveTokenFake(null) as any) // update matched 0 rows
+    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true, token: '000000' }))
+    expect(res.status).toBe(403)
+  })
+
+  it('records the RSVP when a valid token is consumed', async () => {
+    const fake = liveTokenFake()
+    mockAdmin.mockReturnValue(fake as any)
+    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true, token: '123456' }))
+    expect(res.status).toBe(200)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'rsvps')).toBe(true)
   })
 })

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { encryptField } from '@/lib/crypto/app'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
+import { consumeGuestToken } from '@/lib/guests/tokenGate'
 
 /**
  * POST /api/rsvp
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { slug, guest_name, attending, guest_count, meal_choice, message } = body || {}
+  const { slug, guest_name, attending, guest_count, meal_choice, message, token } = body || {}
 
   if (!slug || !guest_name || typeof attending !== 'boolean') {
     return NextResponse.json(
@@ -48,6 +49,20 @@ export async function POST(req: Request) {
   // (published AND paid). Blocks writes to a draft/unpaid row reached directly.
   if (!invitation.is_published || !invitation.is_paid) {
     return NextResponse.json({ error: 'Invitation not published' }, { status: 403 })
+  }
+
+  // Single-use token gate: only an invited guest holding a valid, unused code
+  // may submit. Consume atomically before any write. Generic error — no
+  // wrong-vs-used oracle. Preview/demo never reaches here (the form simulates).
+  let tokenOk: boolean
+  try {
+    tokenOk = await consumeGuestToken(supabase, invitation.id, String(token || ''))
+  } catch (e) {
+    console.error('[rsvp token]', e)
+    return NextResponse.json({ error: 'Gagal memvalidasi kode. Coba lagi.' }, { status: 500 })
+  }
+  if (!tokenOk) {
+    return NextResponse.json({ error: 'Kode tidak valid atau sudah dipakai' }, { status: 403 })
   }
 
   const cleanName = String(guest_name).slice(0, 120)
