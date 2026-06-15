@@ -122,21 +122,21 @@ export default function Rsvp(props) {
 
               <div className={styles.row}>
                 <label className={styles.field}>
-                  <span className={styles.label}>Kode undangan (6 angka)</span>
+                  <span className={styles.label}>Invitation code</span>
                   <input
                     type="text"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
                     className={styles.input}
-                    placeholder={isPreview ? '123456' : '••••••'}
+                    placeholder={isPreview ? '123456' : '6-digit code'}
                     aria-invalid={errors.token ? 'true' : 'false'}
                     {...register('token', {
-                      required: 'Masukkan kode undangan dari WhatsApp',
-                      pattern: { value: /^\d{6}$/, message: 'Kode harus 6 angka' },
+                      required: 'Enter the 6-digit code from your invite',
+                      pattern: { value: /^\d{6}$/, message: 'The code is 6 digits' },
                     })}
                   />
-                  <span className={styles.hint}>1 kode = 1 kali kirim. Hubungi pemilik jika kode gagal.</span>
+                  <span className={styles.hint}>The 6-digit code from your invite — it only works once.</span>
                   {errors.token && <span className={styles.error}>{errors.token.message}</span>}
                 </label>
               </div>

@@ -8,7 +8,7 @@ import { useGuest } from "../contexts/GuestContext.jsx";
 
 const schema = z.object({
   guest_name: z.string().min(2, "Required").max(120),
-  token: z.string().regex(/^\d{6}$/, "Kode harus 6 angka"),
+  token: z.string().regex(/^\d{6}$/, "The code is 6 digits"),
   attending: z.enum(["yes", "no"]),
   guest_count: z.coerce
     .number({ invalid_type_error: "Masukkan jumlah tamu yang valid" })
@@ -121,7 +121,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                 {errors.guest_name && <span className="form-error">{errors.guest_name.message}</span>}
               </div>
               <div className="form-row">
-                <label className="form-label" htmlFor="rsvp-token">Kode undangan (6 angka)</label>
+                <label className="form-label" htmlFor="rsvp-token">Invitation code</label>
                 <input
                   id="rsvp-token"
                   type="text"
@@ -129,10 +129,10 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                   autoComplete="one-time-code"
                   maxLength={6}
                   className="form-input"
-                  placeholder={isPreview ? "123456" : "••••••"}
+                  placeholder={isPreview ? "123456" : "6-digit code"}
                   {...register("token")}
                 />
-                <span className="form-hint" style={{ fontSize: 11, color: "var(--color-fg-mute)", marginTop: 4, display: "block" }}>1 kode = 1 kali kirim.</span>
+                <span className="form-hint" style={{ fontSize: 11, color: "var(--color-fg-mute)", marginTop: 4, display: "block" }}>The 6-digit code from your invite — it only works once.</span>
                 {errors.token && <span className="form-error">{errors.token.message}</span>}
               </div>
               <div className="form-row-2">
