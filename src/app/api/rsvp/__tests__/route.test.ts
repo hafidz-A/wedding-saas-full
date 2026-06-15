@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, vi } from 'vitest'
 import { randomBytes } from 'node:crypto'
 import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
-import { consumeGuestToken } from '@/lib/guests/tokenGate'
 
 // Replace the admin client; each test configures the fake via mockReturnValue.
 vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
@@ -144,18 +143,23 @@ function liveTokenFake(tokenRow: any = { id: 'g1' }) {
 }
 
 describe('POST /api/rsvp token gate', () => {
-  beforeAll(() => { process.env.GUESTS_ENCRYPTION_KEY = randomBytes(32).toString('base64') })
-
-  it('rejects with 403 when the token is missing', async () => {
-    mockAdmin.mockReturnValue(liveTokenFake() as any)
+  it('rejects with 403 when the token is missing, and writes nothing', async () => {
+    const fake = liveTokenFake()
+    mockAdmin.mockReturnValue(fake as any)
     const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true }))
     expect(res.status).toBe(403)
+    // Gate must prevent any write reaching the DB.
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'rsvps')).toBe(false)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
   })
 
-  it('rejects with 403 when the token does not match an unused row', async () => {
-    mockAdmin.mockReturnValue(liveTokenFake(null) as any) // update matched 0 rows
+  it('rejects with 403 when the token does not match an unused row, and writes nothing', async () => {
+    const fake = liveTokenFake(null) // update matched 0 rows
+    mockAdmin.mockReturnValue(fake as any)
     const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true, token: '000000' }))
     expect(res.status).toBe(403)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'rsvps')).toBe(false)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
   })
 
   it('records the RSVP when a valid token is consumed', async () => {
