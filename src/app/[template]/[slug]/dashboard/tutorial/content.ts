@@ -56,9 +56,10 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
     shots: [] },
   { id: 'experience', group: 'prep', stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2,
     shots: [] },
-  { id: 'editor', group: 'fill', stepCount: 6, alwaysCount: 4, neverCount: 4, tipCount: 4,
+  { id: 'editor', group: 'fill', stepCount: 7, alwaysCount: 4, neverCount: 4, tipCount: 5,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
+      { key: 'editor-reorder',      captionKey: 'reorder' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
       { key: 'editor-save',         captionKey: 'save' },
     ] },
@@ -86,7 +87,7 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
       { key: 'billing-upgrade', captionKey: 'upgrade' },
     ] },
   { id: 'faq', group: 'help', stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
-    faqCount: 12, shots: [] },
+    faqCount: 13, shots: [] },
 ]
 
 // Solary mirrors the lovebirds architecture (groups + section guides + FAQ),
@@ -102,9 +103,10 @@ export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
     shots: [{ key: 'start-header', captionKey: 'header' }] },
   { id: 'experience', group: 'prep', stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2,
     shots: [] },
-  { id: 'editor', group: 'fill', relatedTab: 'editor', stepCount: 5, alwaysCount: 3, neverCount: 4, tipCount: 3,
+  { id: 'editor', group: 'fill', relatedTab: 'editor', stepCount: 6, alwaysCount: 3, neverCount: 4, tipCount: 4,
     shots: [
       { key: 'editor-list',         captionKey: 'list' },
+      { key: 'editor-reorder',      captionKey: 'reorder' },
       { key: 'editor-gallery-rule', captionKey: 'galleryRule' },
       { key: 'editor-save',         captionKey: 'save' },
     ] },
@@ -126,7 +128,7 @@ export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
   { id: 'billing', group: 'help', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [] },
-  { id: 'faq', group: 'help', faqCount: 11, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
+  { id: 'faq', group: 'help', faqCount: 12, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
     shots: [] },
 ]
 
