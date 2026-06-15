@@ -364,6 +364,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     className={styles.regenBtn}
                     onClick={() => handleRegenerate(g)}
                     disabled={pending}
+                    aria-label={`Buat ulang kode RSVP untuk ${g.name}`}
                     title="Buat kode baru (kode lama langsung tidak berlaku)"
                   >
                     Buat ulang kode
