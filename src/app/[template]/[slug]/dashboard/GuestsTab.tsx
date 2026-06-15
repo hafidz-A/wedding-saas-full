@@ -10,6 +10,7 @@ import {
   markGuestSent,
   unmarkGuestSent,
   updateInviteMessageTemplate,
+  regenerateGuestToken,
 } from './guests/actions'
 import { type GuestRow } from './guests/types'
 import GuestImportModal from './GuestImportModal'
@@ -20,7 +21,8 @@ import styles from './GuestsTab.module.css'
 
 const DEFAULT_TEMPLATE =
   'Halo {{name}}, dengan hormat kami mengundang Anda ke acara pernikahan kami. ' +
-  'Detail lengkap di sini: {{url}}'
+  'Detail lengkap di sini: {{url}}' +
+  '\n\nKode RSVP kamu: {{kode}} (sekali pakai)'
 
 interface Props {
   slug: string
@@ -109,6 +111,20 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         // Roll back optimistic update on error
         console.error(e)
         setLocalGuests((prev) => prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)))
+      }
+    })
+  }
+
+  const handleRegenerate = (g: GuestRow) => {
+    if (pending) return
+    startTransition(async () => {
+      try {
+        const { token } = await regenerateGuestToken(slug, g.id)
+        setLocalGuests((prev) =>
+          prev.map((x) => (x.id === g.id ? { ...x, rsvpToken: token, tokenUsedAt: null } : x)),
+        )
+      } catch (e) {
+        console.error(e)
       }
     })
   }
@@ -338,6 +354,19 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     title={t.editTitle}
                   >
                     ✎
+                  </button>
+                  <span className={styles.token}>
+                    Kode: <code>{g.rsvpToken || '—'}</code>
+                    {g.tokenUsedAt && <em className={styles.tokenUsed}> (terpakai)</em>}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.regenBtn}
+                    onClick={() => handleRegenerate(g)}
+                    disabled={pending}
+                    title="Buat kode baru (kode lama langsung tidak berlaku)"
+                  >
+                    Buat ulang kode
                   </button>
                   {g.sent_at && (
                     <button

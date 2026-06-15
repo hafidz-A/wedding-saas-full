@@ -211,3 +211,9 @@
     font-size: 13px;
   }
 }
+
+/* ── RSVP token display + regenerate button ── */
+.token { font-size: .85rem; opacity: .85; }
+.token code { letter-spacing: .12em; font-weight: 600; }
+.tokenUsed { color: #b45309; font-style: normal; }
+.regenBtn { font-size: .8rem; }
