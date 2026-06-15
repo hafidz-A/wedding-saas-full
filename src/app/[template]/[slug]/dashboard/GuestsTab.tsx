@@ -145,6 +145,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
       notes: null,
       rsvpToken: null,
       tokenUsedAt: null,
+      rsvpSubmittedAt: null,
       sent_at: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

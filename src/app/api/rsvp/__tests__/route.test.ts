@@ -169,4 +169,22 @@ describe('POST /api/rsvp token gate', () => {
     expect(res.status).toBe(200)
     expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'rsvps')).toBe(true)
   })
+
+  it('returns 409 when the guest already submitted an RSVP (regenerated code)', async () => {
+    const fake = createFakeSupabase({
+      rpc: { rl_hit: { data: true } },
+      tables: {
+        invitations: { select: { data: LIVE } },
+        // atomic consume matches 0 rows (rsvp_submitted_at not null), diagnostic
+        // select then reveals the guest already RSVP'd.
+        guests: { update: { data: null }, select: { data: { rsvp_submitted_at: '2026-06-15T00:00:00Z' } } },
+        rsvps: { insert: { data: { id: 'rsvp-1' } } },
+        attendances: { insert: { data: { id: 'att-1' } } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true, token: '123456' }))
+    expect(res.status).toBe(409)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'rsvps')).toBe(false)
+  })
 })

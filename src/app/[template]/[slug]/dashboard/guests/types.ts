@@ -10,6 +10,7 @@ export interface GuestRow {
   notes: string | null
   rsvpToken: string | null
   tokenUsedAt: string | null
+  rsvpSubmittedAt: string | null
   sent_at: string | null
   created_at: string
   updated_at: string
@@ -25,6 +26,7 @@ export interface GuestRowDb {
   notes_enc: string | null
   rsvp_token_enc: string | null
   token_used_at: string | null
+  rsvp_submitted_at: string | null
   sent_at: string | null
   created_at: string
   updated_at: string
@@ -45,6 +47,7 @@ export function fromDbRow(row: GuestRowDb): GuestRow {
     notes: decryptField(row.notes_enc),
     rsvpToken: decryptField(row.rsvp_token_enc),
     tokenUsedAt: row.token_used_at,
+    rsvpSubmittedAt: row.rsvp_submitted_at,
     sent_at: row.sent_at,
     created_at: row.created_at,
     updated_at: row.updated_at,

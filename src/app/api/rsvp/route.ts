@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { encryptField } from '@/lib/crypto/app'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
-import { consumeGuestToken } from '@/lib/guests/tokenGate'
+import { consumeGuestTokenForRsvp, markGuestRsvpSubmitted } from '@/lib/guests/tokenGate'
 
 /**
  * POST /api/rsvp
@@ -51,18 +51,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invitation not published' }, { status: 403 })
   }
 
-  // Single-use token gate: only an invited guest holding a valid, unused code
-  // may submit. Consume atomically before any write. Generic error — no
-  // wrong-vs-used oracle. Preview/demo never reaches here (the form simulates).
-  let tokenOk: boolean
+  // Single-use token gate + duplicate-RSVP guard. Consume only if the code is
+  // valid, unused, AND the guest hasn't already RSVP'd. Generic 403 (no
+  // wrong-vs-used oracle); friendly 409 for a guest who already submitted (e.g.
+  // the owner regenerated their code). Preview/demo never reaches here (the
+  // form simulates).
+  let check
   try {
-    tokenOk = await consumeGuestToken(supabase, invitation.id, String(token || ''))
+    check = await consumeGuestTokenForRsvp(supabase, invitation.id, String(token || ''))
   } catch (e) {
     console.error('[rsvp token]', e)
-    return NextResponse.json({ error: 'Gagal memvalidasi kode. Coba lagi.' }, { status: 500 })
+    return NextResponse.json({ error: 'Couldn’t verify your code. Please try again.' }, { status: 500 })
   }
-  if (!tokenOk) {
-    return NextResponse.json({ error: 'Kode tidak valid atau sudah dipakai' }, { status: 403 })
+  if (check.result === 'already_rsvped') {
+    return NextResponse.json({ error: 'You’ve already submitted your RSVP.' }, { status: 409 })
+  }
+  if (check.result !== 'ok') {
+    return NextResponse.json(
+      { error: 'Invalid or already-used code. Ask the couple for a new one.' },
+      { status: 403 },
+    )
   }
 
   const cleanName = String(guest_name).slice(0, 120)
@@ -107,6 +115,12 @@ export async function POST(req: Request) {
       console.warn('[rsvp→attendance]', attErr.message ?? attErr)
     }
   }
+
+  // Permanent RSVP-completed marker — set AFTER the row is safely inserted so a
+  // failed insert above (which returns 500 earlier) stays recoverable via token
+  // regenerate. Blocks a duplicate RSVP even if the owner later regenerates the
+  // guest's code.
+  await markGuestRsvpSubmitted(supabase, check.guestId)
 
   return NextResponse.json({ ok: true })
 }
