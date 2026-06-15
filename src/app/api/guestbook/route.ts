@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { enforceRateLimit, getClientIp } from '@/lib/security/rate-limit'
 import { encryptField, decryptField } from '@/lib/crypto/app'
+import { consumeGuestToken } from '@/lib/guests/tokenGate'
 
 const ALLOWED_COLORS = new Set(['gold', 'coral', 'sky', 'emerald', 'purple'])
 const RATE_LIMIT_MS = 30_000 // 30 seconds between submissions per guest (slug+IP)
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
   const message = String(body?.message || '').trim()
   const rawColor = String(body?.color || 'gold').trim()
   const color = ALLOWED_COLORS.has(rawColor) ? rawColor : 'gold'
+  const token = String(body?.token || '').trim()
 
   // Validation
   if (!slug) return NextResponse.json({ error: 'Slug required' }, { status: 400 })
@@ -71,6 +73,19 @@ export async function POST(req: Request) {
 
   if (!invitation || !invitation.is_published || !invitation.is_paid) {
     return NextResponse.json({ error: 'Undangan tidak ditemukan' }, { status: 404 })
+  }
+
+  // Single-use token gate (truly single-use: an ucapan consumes the same code
+  // an RSVP would). Generic error, atomic consume, preview never reaches here.
+  let tokenOk: boolean
+  try {
+    tokenOk = await consumeGuestToken(supabase, invitation.id, token)
+  } catch (e) {
+    console.error('[guestbook token]', e)
+    return NextResponse.json({ error: 'Gagal memvalidasi kode. Coba lagi.' }, { status: 500 })
+  }
+  if (!tokenOk) {
+    return NextResponse.json({ error: 'Kode tidak valid atau sudah dipakai' }, { status: 403 })
   }
 
   // Insert note — auto-approved per project config (no manual moderation).
