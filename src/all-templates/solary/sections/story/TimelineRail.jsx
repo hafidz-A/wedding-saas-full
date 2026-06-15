@@ -34,7 +34,7 @@ const TimelineRail = forwardRef(function TimelineRail(
       {items.map((it, i) => {
         const isActive = i === activeIndex;
         const distance = Math.abs(i - activeIndex);
-        const hasPhotos = Array.isArray(it.photos) && it.photos.length > 0;
+        const hasPhotos = !!(it.photo || (Array.isArray(it.photos) && it.photos[0]));
         return (
           <li
             key={`${it.year}-${i}`}

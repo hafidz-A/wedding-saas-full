@@ -1,27 +1,31 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TimelineRail from "./TimelineRail.jsx";
 import MemoryViewport from "./MemoryViewport.jsx";
 import ConnectorPipe from "./ConnectorPipe.jsx";
 
-/* Desktop Experience — pinned dual-panel, parallax-in-parallax.
+/* Desktop Experience — pinned dual-panel, SCRUB-CONTINUOUS.
 
    Mekanika:
-   - Outer container tinggi = items.length × 100vh (full content, no inner
-     scrollbar). Page scroll alami menyajikan satu item per "halaman".
-   - Inner sticky container 100vh menampung 2-column UI.
-   - Left rail: filmstrip — semua item di-render bertumpuk vertikal,
-     strip di-translateY supaya dot item aktif selalu di TENGAH viewport
-     rail. Items di luar fade lewat CSS mask + opacity per-item.
-   - ScrollTrigger pemetaan progress scroll outer → activeIndex.
-     Reverse scroll (user balik dari planet di bawah) otomatis reverse
-     activeIndex karena progress turun dari 1.0 → 0.0.
-   - Connector pipa: origin (rail center) & target (cluster center) statis
-     → cuma recompute saat resize. Pipa visible kalau active punya foto.
-   - reduced-motion → outer collapse ke flow normal, strip render statis. */
+   - Outer container tinggi = items.length × 100vh. Inner sticky 100vh menahan
+     panel (kamera galaxy HOLD di planet) selama cerita dituturkan.
+   - Satu ScrollTrigger memetakan progress scroll → posisi chapter KONTINU
+     (floatPos ∈ [0, n-1]). Yang kontinu ditulis LANGSUNG ke DOM lewat ref
+     (tanpa setState per-frame) supaya 60fps & terasa "sedang discroll":
+       • Filmstrip rail meluncur mulus (translateY di-interpolasi antar dot).
+       • Garis progres terisi mengikuti scroll.
+       • Shell fade-out di fase scroll-out.
+     Yang diskret (teks + foto chapter) hanya berubah saat indeks bulat ganti
+     (activeIndex = round(floatPos)) → cross-fade ringan, tanpa filter blur.
+   - Connector pipa: origin (rail center) & target (foto) statis → recompute
+     saat resize / ganti foto saja.
+   - reduced-motion → outer collapse ke flow normal, strip statis. */
 
 gsap.registerPlugin(ScrollTrigger);
+
+const photoOf = (item) =>
+  (item && (item.photo || (Array.isArray(item.photos) ? item.photos[0] : ""))) || "";
 
 export default function StoryDesktopExperience({
   sectionLabel,
@@ -31,30 +35,41 @@ export default function StoryDesktopExperience({
 }) {
   const outerRef = useRef(null);
   const stickyRef = useRef(null);
+  const shellRef = useRef(null);
   const railViewportRef = useRef(null);
   const stripRef = useRef(null);
   const viewportRef = useRef(null);
+  const progressRef = useRef(null);
   const itemRefs = useRef([]);
+
+  /* Continuous geometry — written by the ScrollTrigger, never via setState. */
+  const dotOffsetsRef = useRef([]); // dotTopInStrip per item
+  const railCenterRef = useRef(0);
+  const floatPosRef = useRef(0);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [stripTranslateY, setStripTranslateY] = useState(0);
   const [pipePoints, setPipePoints] = useState(null);
-  const [shellOpacity, setShellOpacity] = useState(1);
 
   const activeItem = items[activeIndex];
-  const hasActivePhoto =
-    !!activeItem &&
-    Array.isArray(activeItem.photos) &&
-    activeItem.photos.length > 0;
+  const hasActivePhoto = !!photoOf(activeItem);
 
-  const lastPhotoIndex = useMemo(() => {
-    for (let i = activeIndex; i >= 0; i--) {
-      const p = items[i]?.photos;
-      if (Array.isArray(p) && p.length > 0) return i;
-    }
-    return -1;
-  }, [activeIndex, items]);
+  /* translateY supaya dot di posisi `fp` (boleh pecahan) jatuh di rail center. */
+  function tyForFloat(fp) {
+    const offs = dotOffsetsRef.current;
+    if (!offs.length) return 0;
+    const max = offs.length - 1;
+    const clamped = Math.max(0, Math.min(max, fp));
+    const lo = Math.floor(clamped);
+    const hi = Math.min(max, lo + 1);
+    const f = clamped - lo;
+    const dot = offs[lo] + (offs[hi] - offs[lo]) * f;
+    return railCenterRef.current - dot;
+  }
+  function writeStrip(fp) {
+    const el = stripRef.current;
+    if (el) el.style.transform = `translate3d(0, ${tyForFloat(fp)}px, 0)`;
+  }
 
   /* Reduced motion */
   useEffect(() => {
@@ -66,26 +81,36 @@ export default function StoryDesktopExperience({
     return () => mq.removeEventListener?.("change", handler);
   }, []);
 
-  /* ScrollTrigger — progress outer (FULL section) → activeIndex + fade-out.
-     Outer height = items.length × 100vh, sticky height = 100vh.
-     - Pinned range = (items.length - 1) × 100vh of scroll (CSS sticky natural).
-     - Scroll-out range = 100vh (panel exits viewport naturally).
-     - end: "bottom top" → progress 1 right when section bottom = viewport top
-       (= section truly ends, transition immediately after).
+  /* Measure each item's dot offset within the strip + rail center so the strip
+     can glide continuously. Recompute on items change + resize. */
+  useLayoutEffect(() => {
+    function measure() {
+      const railEl = railViewportRef.current;
+      if (!railEl) return;
+      railCenterRef.current = railEl.clientHeight / 2;
+      dotOffsetsRef.current = items.map((_, i) => {
+        const itemEl = itemRefs.current[i];
+        if (!itemEl) return 0;
+        const dotEl = itemEl.querySelector(".timeline-dot");
+        const dotTopInItem = dotEl ? dotEl.offsetTop + dotEl.offsetHeight / 2 : 14;
+        return itemEl.offsetTop + dotTopInItem;
+      });
+      if (!reducedMotion) writeStrip(floatPosRef.current);
+    }
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, reducedMotion]);
 
-     activeIndex bergerak di [0, pinnedFraction] dari progress.
-     Sisanya [pinnedFraction, 1] dipakai untuk fade-out shell → eliminate
-     "dead zone" perception. Saat transisi rhythm.js fire, panel sudah
-     ~fully faded + ~scrolled out → transisi terasa intentional. */
+  /* ScrollTrigger — progress outer → floatPos (continuous) + activeIndex
+     (discrete) + shell fade. Outer = n×100vh, sticky = 100vh. */
   useEffect(() => {
     if (reducedMotion) return;
     if (!outerRef.current) return;
     const n = items.length;
     if (n < 1) return;
 
-    /* Fraction of section where panel is "pinned" (active items shown).
-       = (outer_height - sticky_height) / outer_height
-       Dengan outer = n × 100vh dan sticky = 100vh → (n-1)/n. */
     const pinnedFraction = n > 1 ? (n - 1) / n : 0.85;
 
     const trigger = ScrollTrigger.create({
@@ -94,20 +119,32 @@ export default function StoryDesktopExperience({
       end: "bottom top",
       onUpdate: (self) => {
         const p = self.progress;
-        /* activeIndex hanya bergerak di pinned phase */
         const itemP = Math.min(1, p / pinnedFraction);
-        const idx = Math.min(n - 1, Math.max(0, Math.floor(itemP * n)));
+        const floatPos = itemP * Math.max(0, n - 1);
+        floatPosRef.current = floatPos;
+
+        /* continuous — direct DOM writes (no re-render) */
+        writeStrip(floatPos);
+        if (progressRef.current) {
+          progressRef.current.style.transform = `scaleY(${Math.max(0.0001, itemP)})`;
+        }
+
+        /* discrete — text + photo swap only when the integer changes */
+        const idx = Math.min(n - 1, Math.max(0, Math.round(floatPos)));
         setActiveIndex((prev) => (prev === idx ? prev : idx));
 
-        /* Fade-out shell di scroll-out phase */
-        if (p > pinnedFraction) {
-          const fadeP = (p - pinnedFraction) / (1 - pinnedFraction);
-          /* fade slightly aggressive — opacity hits 0 at fadeP ~0.85
-             supaya panel benar-benar invisible sebelum transition fire */
-          const o = Math.max(0, 1 - fadeP * 1.18);
-          setShellOpacity((prev) => (Math.abs(prev - o) < 0.01 ? prev : o));
-        } else {
-          setShellOpacity((prev) => (prev === 1 ? prev : 1));
+        /* shell fade-out in the scroll-out phase */
+        const shell = shellRef.current;
+        if (shell) {
+          if (p > pinnedFraction) {
+            const fadeP = (p - pinnedFraction) / (1 - pinnedFraction);
+            const o = Math.max(0, 1 - fadeP * 1.18);
+            shell.style.opacity = String(o);
+            shell.style.transform = `translate3d(0, ${(1 - o) * -16}px, 0)`;
+          } else {
+            shell.style.opacity = "1";
+            shell.style.transform = "translate3d(0, 0, 0)";
+          }
         }
       },
     });
@@ -115,10 +152,9 @@ export default function StoryDesktopExperience({
     const refreshTimer = setTimeout(() => {
       try {
         ScrollTrigger.refresh();
-        /* Force rhythm.js to rebuild boundaries karena section ini sekarang
-           N × 100vh, sangat berbeda dari section lain. Tanpa rebuild yang
-           akurat, probe rhythm bisa salah deteksi → travel overlay timing off
-           dan scene.setActive() bisa lompat ke planet salah. */
+        /* Force rhythm.js to rebuild boundaries — section is now N×100vh, very
+           different from other sections. Without an accurate rebuild the rhythm
+           probe can mis-detect → travel overlay timing off / camera jumps. */
         if (window.galacticRhythm?.rebuildBoundaries) {
           window.galacticRhythm.rebuildBoundaries();
           window.galacticRhythm.applyScroll?.();
@@ -126,8 +162,7 @@ export default function StoryDesktopExperience({
       } catch {}
     }, 160);
 
-    /* Retry rebuild beberapa kali karena rhythm.js sendiri rebuild
-       di 600ms & 1800ms — pastikan kita re-trigger setelahnya juga. */
+    /* Retry rebuild — rhythm.js itself rebuilds at 600ms & 1800ms. */
     const retryTimers = [400, 900, 2000].map((delay) =>
       setTimeout(() => {
         if (window.galacticRhythm?.rebuildBoundaries) {
@@ -143,65 +178,36 @@ export default function StoryDesktopExperience({
     };
   }, [items.length, reducedMotion]);
 
-  /* Compute strip translateY supaya dot item aktif (activeIndex) ada
-     di vertical center rail viewport. */
-  useLayoutEffect(() => {
-    if (reducedMotion) {
-      setStripTranslateY(0);
-      return;
-    }
-    const itemEl = itemRefs.current[activeIndex];
-    const railEl = railViewportRef.current;
-    if (!itemEl || !railEl) return;
-
-    /* Cari posisi DOT di dalam item (timeline-dot diposisikan absolute
-       di top: 14px relative ke item). */
-    const dotEl = itemEl.querySelector(".timeline-dot");
-    const itemTopInStrip = itemEl.offsetTop;
-    const dotTopInItem = dotEl ? dotEl.offsetTop + (dotEl.offsetHeight / 2) : 14;
-    const dotTopInStrip = itemTopInStrip + dotTopInItem;
-
-    const railH = railEl.clientHeight;
-    const railCenter = railH / 2;
-
-    const ty = railCenter - dotTopInStrip;
-    setStripTranslateY(ty);
-  }, [activeIndex, reducedMotion, items]);
-
-  /* Compute pipe endpoints — rail center (left) → cluster center (right).
-     Statis relatif ke sticky container, hanya recompute saat resize. */
+  /* Compute pipe endpoints — rail center (left) → photo center (right).
+     Static relative to the sticky container; recompute on resize / photo. */
   useEffect(() => {
     function compute() {
       const container = stickyRef.current;
       const railEl = railViewportRef.current;
-      const cluster = viewportRef.current?.querySelector(".polaroid-cluster");
-      if (!container || !railEl) { setPipePoints(null); return; }
+      const photo = viewportRef.current?.querySelector(".story-polaroid");
+      if (!container || !railEl) {
+        setPipePoints(null);
+        return;
+      }
 
       const cRect = container.getBoundingClientRect();
       const rRect = railEl.getBoundingClientRect();
 
       const from = {
-        x: rRect.right - cRect.left, /* right edge of rail viewport */
-        y: rRect.top + rRect.height / 2 - cRect.top, /* vertical center */
+        x: rRect.right - cRect.left,
+        y: rRect.top + rRect.height / 2 - cRect.top,
       };
 
-      let to;
-      if (cluster) {
-        const vRect = cluster.getBoundingClientRect();
-        to = {
-          x: vRect.left + vRect.width / 2 - cRect.left,
-          y: vRect.top + vRect.height / 2 - cRect.top,
-        };
-      } else {
-        /* fallback target — right panel center */
-        const viewportEl = viewportRef.current;
-        if (!viewportEl) { setPipePoints(null); return; }
-        const vRect = viewportEl.getBoundingClientRect();
-        to = {
-          x: vRect.left + vRect.width / 2 - cRect.left,
-          y: vRect.top + vRect.height / 2 - cRect.top,
-        };
+      const targetEl = photo || viewportRef.current;
+      if (!targetEl) {
+        setPipePoints(null);
+        return;
       }
+      const vRect = targetEl.getBoundingClientRect();
+      const to = {
+        x: vRect.left + vRect.width / 2 - cRect.left,
+        y: vRect.top + vRect.height / 2 - cRect.top,
+      };
 
       setPipePoints({ from, to });
     }
@@ -212,7 +218,7 @@ export default function StoryDesktopExperience({
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", compute);
     };
-  }, [items.length, hasActivePhoto]);
+  }, [items.length, hasActivePhoto, activeIndex]);
 
   const totalVh = Math.max(1, items.length) * 100;
 
@@ -241,6 +247,7 @@ export default function StoryDesktopExperience({
         }}
       >
         <div
+          ref={shellRef}
           className="story-desktop__shell glass-card"
           style={{
             width: "min(1080px, 100%)",
@@ -250,10 +257,6 @@ export default function StoryDesktopExperience({
             gap: "1rem",
             position: "relative",
             overflow: "hidden",
-            opacity: reducedMotion ? 1 : shellOpacity,
-            transform: reducedMotion
-              ? "none"
-              : `translate3d(0, ${(1 - shellOpacity) * -16}px, 0)`,
             willChange: reducedMotion ? "auto" : "opacity, transform",
           }}
         >
@@ -308,13 +311,19 @@ export default function StoryDesktopExperience({
                 position: "relative",
                 overflow: "hidden",
                 paddingLeft: "clamp(1rem, 3vw, 2rem)",
-                /* soft fade-out top/bottom for filmstrip feel */
                 WebkitMaskImage:
                   "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
                 maskImage:
                   "linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)",
               }}
             >
+              {/* Scroll progress track — fills as you scroll the section */}
+              {!reducedMotion && (
+                <div className="story-progress" aria-hidden="true">
+                  <span className="story-progress__fill" ref={progressRef} />
+                </div>
+              )}
+
               <div
                 ref={stripRef}
                 className="story-desktop__strip"
@@ -325,10 +334,6 @@ export default function StoryDesktopExperience({
                   right: 0,
                   paddingLeft: "clamp(1rem, 3vw, 2rem)",
                   paddingRight: "0.5rem",
-                  transform: `translate3d(0, ${stripTranslateY}px, 0)`,
-                  transition: reducedMotion
-                    ? "none"
-                    : "transform 800ms cubic-bezier(0.32, 0.72, 0, 1)",
                   willChange: "transform",
                 }}
               >
@@ -340,7 +345,7 @@ export default function StoryDesktopExperience({
               </div>
             </div>
 
-            {/* Right: memory viewport (cluster) */}
+            {/* Right: memory viewport (single photo) */}
             <div
               ref={viewportRef}
               style={{
@@ -351,14 +356,10 @@ export default function StoryDesktopExperience({
                 minHeight: 360,
               }}
             >
-              <MemoryViewport
-                items={items}
-                activeIndex={activeIndex}
-                lastPhotoIndex={lastPhotoIndex}
-              />
+              <MemoryViewport items={items} activeIndex={activeIndex} />
             </div>
 
-            {/* Connector pipa overlay */}
+            {/* Connector pipe overlay */}
             <ConnectorPipe
               fromPoint={pipePoints?.from}
               toPoint={pipePoints?.to}

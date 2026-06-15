@@ -655,43 +655,99 @@
   opacity: 0.5;
 }
 
-/* Polaroid — physical photo print look */
-.polaroid {
-  will-change: transform, opacity, filter;
-  border-radius: 2px;
-}
-.polaroid img {
-  display: block;
-}
-.polaroid-cluster {
-  position: relative;
+/* Story polaroid — single light photo print (the stacked carousel was removed).
+   Slimmer frame + warm off-white + soft shadow so it doesn't read as a heavy
+   white mass on the dark cosmic backdrop. Story-scoped — does NOT touch the
+   shared --bg-polaroid / --shadow-polaroid tokens used by other components. */
+.story-polaroid {
+  margin: 0;
+  background: #f3eee4;
+  padding: 8px 8px 22px;
+  border-radius: 5px;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5);
+  transform: rotate(-1.5deg);
   will-change: transform, opacity;
+  max-width: 320px;
+}
+.story-polaroid__well {
+  position: relative;
+  width: 260px;
+  max-width: 70vw;
+  aspect-ratio: 4 / 5;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--color-bg-soft);
+}
+.story-polaroid__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.story-polaroid__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(120% 90% at 30% 20%, rgba(var(--color-glow-rgb, 193, 155, 255), 0.18), transparent 60%),
+    var(--color-surface);
+}
+.story-polaroid__star {
+  font-size: clamp(2rem, 9vw, 3rem);
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+.story-polaroid__num {
+  position: absolute;
+  bottom: 4px;
+  right: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: clamp(1.8rem, 8vw, 2.6rem);
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
 }
 
-/* Tap-to-advance deck affordances */
-.polaroid-cluster[data-interactive="true"] { cursor: pointer; }
-.polaroid-cluster[data-interactive="true"]:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 8px;
-  border-radius: 6px;
+/* Scroll progress indicator — the explicit "you are scrolling" cue.
+   Vertical by default (desktop rail column); .--h is the mobile horizontal bar. */
+.story-progress {
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--color-line-soft);
+  overflow: hidden;
+  z-index: 1;
 }
-.polaroid__img--front { animation: storyPhotoIn 280ms ease; }
-@keyframes storyPhotoIn { from { opacity: 0; } to { opacity: 1; } }
-
-.story-photo-dots { display: flex; gap: 6px; justify-content: center; }
-.story-photo-dots span {
-  width: 6px; height: 6px; border-radius: 999px;
-  background: var(--color-line);
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-.story-photo-dots span[data-active="true"] {
+.story-progress__fill {
+  display: block;
+  width: 100%;
+  height: 100%;
   background: var(--color-accent);
-  transform: scale(1.25);
+  transform: scaleY(0.0001);
+  transform-origin: top center;
+  will-change: transform;
 }
-
-/* Responsive: shrink the deck on short landscape viewports so it never clips */
-@media (orientation: landscape) and (max-height: 560px) {
-  .polaroid-cluster { transform: scale(0.8); }
+.story-progress--h {
+  position: relative;
+  left: auto;
+  top: auto;
+  bottom: auto;
+  width: min(180px, 60%);
+  height: 2px;
+  margin: 0 auto;
+  flex: 0 0 auto;
+}
+.story-progress--h .story-progress__fill {
+  transform: scaleX(0.0001);
+  transform-origin: left center;
 }
 
 /* Connector pipe — SVG overlay */
@@ -745,7 +801,7 @@
   margin-top: 4px;
 }
 
-/* ---- Stage (the card deck) ---- */
+/* ---- Stage (single photo) ---- */
 .story-mobile__stage {
   position: relative;
   width: 100%;
@@ -753,86 +809,37 @@
   height: min(46svh, 360px);
   flex: 1 1 auto;
   min-height: 0;
-}
-.story-mobile__cards {
-  position: absolute;
-  inset: 0;
-  /* Overlap every card in a single centered grid cell so motion's x/y/rotate/
-     scale are pure offsets from center (no translate(-50%,-50%) conflict). */
   display: grid;
   place-items: center;
 }
-
-/* Each card — Solary polaroid/glass frame */
-.story-mobile__card {
-  /* Stack all cards in the same grid cell; motion drives the transform. */
-  grid-area: 1 / 1;
-  width: min(74%, 280px);
-  height: 100%;
-  transform-origin: center center;
-  /* No CSS transition: motion (motion/react) owns transform/opacity/filter.
-     In reduced-motion the slot presets are applied as static inline styles. */
-  will-change: transform, opacity;
-  background: var(--bg-polaroid);
-  border: 3px solid var(--color-polaroid-border);
-  box-shadow: var(--shadow-polaroid);
-  border-radius: var(--r-1, 12px);
-  padding: 10px 10px 28px;
+/* Parent-driven parallax wrapper (the photo drifts as you scroll). */
+.story-mobile__parallax {
+  display: grid;
+  place-items: center;
+  will-change: transform;
 }
-.story-mobile__card[data-interactive="true"] { cursor: pointer; }
-.story-mobile__card[data-interactive="true"]:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 6px;
+/* On mobile, size the polaroid by HEIGHT so it never overflows the stage. */
+.story-mobile__stage .story-polaroid__well {
+  width: auto;
+  height: min(42svh, 320px);
+  max-width: 78vw;
 }
 
-.story-mobile__photo {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
-  overflow: hidden;
-  background: var(--color-bg-soft);
-}
-.story-mobile__img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.story-mobile__img--front { animation: storyPhotoIn 280ms ease; }
-
-/* Cosmic placeholder for chapters without a photo */
-.story-mobile__placeholder {
-  position: absolute;
-  inset: 0;
+/* Reduced-motion fallback list — every chapter readable without scroll-pinning */
+.story-mobile__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 5vh, 2.5rem);
+}
+.story-mobile__list-item {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(120% 90% at 30% 20%, rgba(var(--color-glow-rgb, 193,155,255), 0.18), transparent 60%),
-    var(--color-surface);
-}
-.story-mobile__placeholder-star {
-  font-size: clamp(2rem, 9vw, 3rem);
-  color: var(--color-accent);
-  opacity: 0.7;
-  text-shadow: 0 0 24px rgba(var(--color-glow-rgb, 193,155,255), 0.5);
-}
-
-/* Big italic chapter number overlay (corner) */
-.story-mobile__num {
-  position: absolute;
-  bottom: 4px;
-  right: 10px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-style: italic;
-  font-size: clamp(2.4rem, 11vw, 3.6rem);
-  line-height: 0.8;
-  color: rgba(255, 255, 255, 0.82);
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
-  z-index: 2;
+  gap: 1rem;
+  text-align: center;
 }
 
 /* ---- Description panel ---- */
@@ -851,10 +858,10 @@
   margin-bottom: 0.5rem;
 }
 
-/* Short / landscape viewports: shrink the stage so deck + text fit */
+/* Short / landscape viewports: shrink the stage so photo + text fit */
 @media (orientation: landscape) and (max-height: 560px) {
   .story-mobile__stage { height: min(44svh, 220px); }
-  .story-mobile__card { width: min(40%, 240px); }
+  .story-mobile__stage .story-polaroid__well { height: min(38svh, 200px); }
   .story-mobile__desc { min-height: 4.5rem; }
 }
 @media (max-height: 680px) and (orientation: portrait) {
@@ -883,17 +890,13 @@
   .story-mobile__shell {
     max-height: none !important;
   }
-  .story-mobile__card {
-    transition: none !important;
-  }
   .timeline-dot,
   .timeline-dot--active {
     transition: none !important;
   }
-  .polaroid {
+  .story-polaroid {
     will-change: auto;
   }
-  .polaroid__img--front { animation: none; }
 }
 
 /* Detail cards grid — neo-brutalist */

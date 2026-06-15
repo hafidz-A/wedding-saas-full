@@ -62,6 +62,25 @@ describe('normalizeSolaryConfig — positional planets', () => {
     expect(middleKeys).not.toContain('sun')
   })
 
+  it('folds legacy story timeline photos[] into a single photo and drops the array', () => {
+    const c = { sections: [
+      { id: 'a', type: 'openingGate', props: {} },
+      { id: 's', type: 'storyPlanet', props: { timeline: [
+        { year: '2019', label: 'A', desc: '', photos: ['/one.jpg', '/two.jpg'] },
+        { year: '2020', label: 'B', desc: '', photos: [] },
+        { year: '2021', label: 'C', desc: '', photo: '/explicit.jpg', photos: ['/ignored.jpg'] },
+      ] } },
+      { id: 'z', type: 'footerPlanet', props: {} },
+    ] }
+    const out = normalizeSolaryConfig(c)
+    const tl = out.sections.find((s) => s.type === 'storyPlanet').props.timeline
+    expect(tl[0].photo).toBe('/one.jpg')
+    expect(tl[0].photos).toBeUndefined()
+    expect(tl[1].photo).toBe('')           // empty array → empty string
+    expect(tl[2].photo).toBe('/explicit.jpg') // explicit photo wins over photos[0]
+    expect(tl[2].photos).toBeUndefined()
+  })
+
   it('default 8-middle arrangement keeps its canonical planets (incl. gallery on saturn)', () => {
     const out = normalizeSolaryConfig(cfg([
       'openingGate', 'welcomePlanet', 'storyPlanet', 'saturnRing', 'countdownPlanet',

@@ -134,51 +134,37 @@ export const pageConfig = {
             year: "2019",
             label: "First Orbit",
             desc: "We crossed paths at a friend's birthday in Bandung.",
-            photos: [
-              demoImg("galleryBirthday", 600),
-              demoImg("storyFirstMeet", 600),
-            ],
+            photo: demoImg("galleryBirthday", 600),
           },
           {
             year: "2021",
             label: "Gravity",
             desc: "A long-distance year that pulled us closer, not apart.",
-            photos: [
-              demoImg("gallerySunsetWalk", 600),
-            ],
+            photo: demoImg("gallerySunsetWalk", 600),
           },
           {
             year: "2023",
             label: "Aligned",
             desc: "We moved to the same city. Coffee mornings became routine.",
-            photos: [
-              demoImg("galleryCoffee", 600),
-              demoImg("galleryCityLights", 600),
-              demoImg("galleryCooking", 600),
-            ],
+            photo: demoImg("galleryCoffee", 600),
           },
           {
             year: "2025",
             label: "The Proposal",
             desc: "Under a meteor shower on Mount Bromo. She said yes.",
-            photos: [
-              demoImg("storyProposal", 600),
-            ],
+            photo: demoImg("storyProposal", 600),
           },
           {
             year: "2027",
             label: "The Wedding",
             desc: "And here we are — inviting you to our alignment.",
-            photos: [
-              demoImg("storyWedding", 600),
-              demoImg("coupleClassic", 600),
-            ],
+            photo: demoImg("storyWedding", 600),
           },
         ],
       },
       schema: {
         heading:  { kind: "text" },
-        timeline: { kind: "objectArray", fields: { year:"text", label:"text", desc:"textarea", photos:"imageArray" } },
+        timeline: { kind: "objectArray", fields: { year:"text", label:"text", desc:"textarea", photo:"image" } },
       },
     },
 

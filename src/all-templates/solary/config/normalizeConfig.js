@@ -112,6 +112,20 @@ export function normalizeSolaryConfig(config) {
     next.planetKey = key;
     next.planetName = cap(key);
 
+    // 3. self-heal the story timeline: the stacked-photo carousel was removed,
+    //    so each chapter now carries a single `photo`. Fold a legacy `photos[]`
+    //    into `photo` (first item wins) and drop the array so the rendered scene
+    //    matches the single-photo schema. An explicit `photo` always wins.
+    //    Harmless for sections without a timeline (only storyPlanet has one).
+    if (Array.isArray(next.timeline)) {
+      next.timeline = next.timeline.map((item) => {
+        if (!item || typeof item !== 'object') return item;
+        const { photos, ...rest } = item;
+        const photo = rest.photo || (Array.isArray(photos) ? photos[0] : '') || '';
+        return { ...rest, photo };
+      });
+    }
+
     return { ...s, props: next };
   });
 
