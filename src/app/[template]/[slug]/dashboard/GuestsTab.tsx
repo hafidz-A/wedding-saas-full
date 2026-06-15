@@ -89,7 +89,11 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
   const handleSend = (g: GuestRow) => {
     // Per-guest override via notes_enc, fallback to global template.
     const source = g.notes && g.notes.trim() ? g.notes : template
-    const message = renderMessageTemplate(source, { name: g.name, url: publicUrl })
+    const message = renderMessageTemplate(source, {
+      name: g.name,
+      url: publicUrl,
+      token: g.rsvpToken || '',
+    })
     const url = buildWhatsAppUrl({ phoneE164: g.phone_e164, message })
     // Open WA tab immediately (browser permission is tied to user gesture
     // — must happen synchronously inside the click handler, not awaited).
@@ -123,6 +127,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
       phone_e164: null, // will be set properly when server response arrives
       group_label: null,
       notes: null,
+      rsvpToken: null,
+      tokenUsedAt: null,
       sent_at: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

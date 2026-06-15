@@ -42,15 +42,23 @@ export default function Rsvp(props) {
       guestCount: 1,
       meal: mealOptions[0]?.value || '',
       message: '',
+      token: '',
     },
   })
 
   const attending = watch('attending')
 
+  // Preview iframe loads /<template>/<slug>?preview=1 — in preview we never hit
+  // the live API; we simulate so the owner can test the form. 123456 is the
+  // demo code (cosmetic only; the live endpoint has no 123456 backdoor).
+  const isPreview =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('preview') === '1'
+
   const onSubmit = async (data) => {
     setSubmitError(null)
-    // Standalone mode (no slug) — simulate success
-    if (!slug) {
+    // Standalone (no slug) OR preview — simulate success, never call the API.
+    if (!slug || isPreview) {
       await new Promise((r) => setTimeout(r, 900))
       setSubmitted(true)
       return
@@ -66,6 +74,7 @@ export default function Rsvp(props) {
           guest_count: data.guestCount,
           meal_choice: data.meal || null,
           message: data.message || null,
+          token: data.token,
         }),
       })
       if (!res.ok) {
@@ -108,6 +117,27 @@ export default function Rsvp(props) {
                     {...register('name', { required: 'Please enter your name' })}
                   />
                   {errors.name && <span className={styles.error}>{errors.name.message}</span>}
+                </label>
+              </div>
+
+              <div className={styles.row}>
+                <label className={styles.field}>
+                  <span className={styles.label}>Kode undangan (6 angka)</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    className={styles.input}
+                    placeholder={isPreview ? '123456' : '••••••'}
+                    aria-invalid={errors.token ? 'true' : 'false'}
+                    {...register('token', {
+                      required: 'Masukkan kode undangan dari WhatsApp',
+                      pattern: { value: /^\d{6}$/, message: 'Kode harus 6 angka' },
+                    })}
+                  />
+                  <span className={styles.hint}>1 kode = 1 kali kirim. Hubungi pemilik jika kode gagal.</span>
+                  {errors.token && <span className={styles.error}>{errors.token.message}</span>}
                 </label>
               </div>
 
