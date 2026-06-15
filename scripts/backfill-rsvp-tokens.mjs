@@ -94,6 +94,9 @@ const { data: guests, error } = await db
   .from('guests')
   .select('id, invitation_id, rsvp_token_hash')
   .is('rsvp_token_hash', null)
+  // Lift PostgREST's default ~1000-row cap so one run covers realistic guest
+  // counts. (Re-running is safe/idempotent if a deployment ever exceeds this.)
+  .limit(50_000)
 
 if (error) {
   console.error('Failed to fetch guests:', error.message)
@@ -108,6 +111,7 @@ console.log(`Guests needing a token: ${guests.length}${DRY ? ' (dry run)' : ''}`
 const seen = new Map() // invitation_id -> Set<hash>
 
 let done = 0
+let errs = 0
 for (const g of guests) {
   const set = seen.get(g.invitation_id) ?? new Set()
 
@@ -131,6 +135,7 @@ for (const g of guests) {
 
     if (upErr) {
       console.error(`Failed for guest ${g.id}:`, upErr.message)
+      errs++
       continue
     }
   }
@@ -138,5 +143,6 @@ for (const g of guests) {
   done++
 }
 
-console.log(`${DRY ? 'Would update' : 'Updated'} ${done} guests.`)
-process.exit(0)
+console.log(`${DRY ? 'Would update' : 'Updated'} ${done} guests.${errs ? ` ${errs} failed.` : ''}`)
+// Non-zero exit on partial failure so an operator (or CI) notices.
+process.exit(errs > 0 ? 1 : 0)
