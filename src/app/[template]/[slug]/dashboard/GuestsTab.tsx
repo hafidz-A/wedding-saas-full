@@ -157,11 +157,13 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     })
   }
 
-  const handleAdd = async (form: FormData) => {
+  // Returns true if a guest was actually added (so the caller can reset the
+  // form), false if it was empty or the duplicate confirm was cancelled.
+  const handleAdd = async (form: FormData): Promise<boolean> => {
     const rawName = String(form.get('name') || '')
     const rawPhone = String(form.get('phone') || '')
     const name = rawName.trim()
-    if (!name) return
+    if (!name) return false
     // Duplicate guard: same name (case-insensitive) AND same number already on
     // the list → ask first, with an assertive (red) confirm.
     const newPhone = normalizePhone(rawPhone)
@@ -169,7 +171,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
       (g) => g.name.trim().toLowerCase() === name.toLowerCase() && g.phone_e164 === newPhone,
     )
     if (isDup && !(await confirmDialog({ message: t.dupConfirm.replace('{name}', name), tone: 'danger' }))) {
-      return
+      return false
     }
     // Optimistic: drop a temp row in immediately so the user sees instant feedback
     const tempId = `temp-${Date.now()}-${Math.random()}`
@@ -200,6 +202,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         fb.fail(fm.guestAddFail)
       }
     })
+    return true
   }
 
   return (
@@ -266,7 +269,20 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         </div>
       </div>
 
-      <form action={handleAdd} className={styles.addForm}>
+      <form
+        onSubmit={(e) => {
+          // React 18 has no reliable auto-reset for an async function `action`,
+          // which left the fields filled after a successful add (looked like it
+          // failed → re-click → false duplicate). Handle it explicitly and reset
+          // the form ourselves only when a guest was actually added.
+          e.preventDefault()
+          const formEl = e.currentTarget
+          void handleAdd(new FormData(formEl)).then((added) => {
+            if (added) formEl.reset()
+          })
+        }}
+        className={styles.addForm}
+      >
         <input name="name" placeholder={t.namePlaceholder} required style={input} />
         <input name="phone" placeholder={t.phonePlaceholder} style={input} />
         <button type="submit" disabled={pending} style={primaryBtn}>
