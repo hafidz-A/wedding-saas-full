@@ -453,7 +453,7 @@ export const dashboard = {
             'Foto galeri rasio wajar (potret 4:5, lanskap 3:2, atau persegi) paling aman dari kepotong.',
             'Urutkan foto galeri dengan menyeretnya di editor.',
           ],
-          shots: {},
+          shots: { map: 'Di mana tiap foto muncul beserta batas jumlahnya. Slot kosong otomatis dilewati di undangan.' },
         },
         palette: {
           title: 'Palette Warna',
@@ -615,7 +615,7 @@ export const dashboard = {
             'Kerjakan bertahap; tidak harus selesai sekali duduk — semua tersimpan.',
             'Selesaikan data inti (nama, tanggal, lokasi) dulu, baru perindah tampilan.',
           ],
-          shots: {},
+          shots: { roadmap: 'Peta urutan dari login sampai bagikan — kerjakan bertahap, semua tersimpan otomatis.' },
         },
         billing: {
           title: 'Bayar, Masa Aktif & Upgrade',
@@ -923,7 +923,7 @@ export const dashboard = {
               'Tidak harus selesai sekali duduk — semua tersimpan, lanjutkan kapan saja.',
               'Solary penuh animasi; cek "Lihat live" sesering mungkin saat menata.',
             ],
-            shots: {},
+            shots: { roadmap: 'Urutan quickstart ~10 menit, dari data sampai bagikan link.' },
           },
           experience: {
             title: 'Apa yang tamu lihat',
@@ -958,7 +958,7 @@ export const dashboard = {
               'Pakai rasio wajar: potret untuk gerbang, lanskap atau persegi untuk galeri.',
               'Foto galeri ikut jadi bintang latar — jadi pilih yang paling bagus.',
             ],
-            shots: {},
+            shots: { map: 'Di mana tiap foto muncul; galeri Saturnus juga jadi photo-stars latar.' },
           },
           sections: {
             title: 'Panduan tiap Planet',
@@ -1629,7 +1629,7 @@ export const dashboard = {
             'Sensible ratios (portrait 4:5, landscape 3:2, or square) are safest from cropping.',
             'Reorder gallery photos by dragging them in the editor.',
           ],
-          shots: {},
+          shots: { map: 'Where each photo appears and its maximum count. Empty slots are skipped automatically on the invitation.' },
         },
         palette: {
           title: 'Color Palette',
@@ -1791,7 +1791,7 @@ export const dashboard = {
             'Work in stages; you don\'t have to finish in one sitting — everything is saved.',
             'Finish the core details (names, date, venue) first, then make it pretty.',
           ],
-          shots: {},
+          shots: { roadmap: 'The path from login to sharing — work step by step; everything saves automatically.' },
         },
         billing: {
           title: 'Active period & Upgrade',
@@ -2099,7 +2099,7 @@ export const dashboard = {
               "You don't have to finish in one sitting — everything is saved, continue anytime.",
               'Solary is animation-heavy; check "View live" often as you arrange.',
             ],
-            shots: {},
+            shots: { roadmap: 'The ~10-minute quickstart order, from details to sharing the link.' },
           },
           experience: {
             title: 'What guests see',
@@ -2134,7 +2134,7 @@ export const dashboard = {
               'Use sensible ratios: portrait for the gate, landscape or square for the gallery.',
               'Gallery photos also become background stars — so pick the best ones.',
             ],
-            shots: {},
+            shots: { map: 'Where each photo appears; the Saturn gallery also becomes background photo-stars.' },
           },
           sections: {
             title: 'Per-planet guide',
