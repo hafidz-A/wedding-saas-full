@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -11,7 +12,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from './EditorProvider'
 import { getSchemaRegistry } from './schemas'
-import { getTemplatePolicy, computeSafeOrder, isTypeAnchored, isTypeLockedFor, isMandatoryType, canAddSections, canRemoveSectionType } from './templatePolicy'
+import { getTemplatePolicy, computeSafeOrder, computeSwapOrder, isTypeAnchored, isTypeLockedFor, isMandatoryType, canAddSections, canRemoveSectionType } from './templatePolicy'
 import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
@@ -36,10 +37,30 @@ export default function SectionList({ slug, template }: Props) {
   const lang = useDashboardLang()
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+  const [dragMode, setDragMode] = useState<'move' | 'swap'>('move')
 
   function onDragEnd(e: DragEndEvent) {
     const { active, over } = e
     if (!over || active.id === over.id) return
+
+    // Swap mode: exchange the two cards. A locked/mandatory card BETWEEN them
+    // is untouched, so swap can cross an anchor that the move/insert path can't.
+    if (dragMode === 'swap') {
+      if (policy) {
+        const ids = config.sections.map((s) => s.id)
+        const next = computeSwapOrder(ids, String(active.id), String(over.id), policy, config.sections)
+        if (next) reorderSectionsById(next)
+        else fb.fail(t.swapBlocked)
+        return
+      }
+      const from = config.sections.findIndex((s) => s.id === active.id)
+      const to = config.sections.findIndex((s) => s.id === over.id)
+      if (from < 0 || to < 0) return
+      const ids = config.sections.map((s) => s.id)
+      ;[ids[from], ids[to]] = [ids[to], ids[from]]
+      reorderSectionsById(ids)
+      return
+    }
 
     // Lovebirds: anchored-by-type model — anchors (hero/footer) can't move and
     // the dropped slot is clamped to stay between them.
@@ -84,6 +105,18 @@ export default function SectionList({ slug, template }: Props) {
     <aside style={wrap}>
       <header style={hdr}>
         <p style={kicker}>{t.sectionsHeader}</p>
+        <div style={modeToggle} role="group" aria-label={t.dragModeHint} title={t.dragModeHint}>
+          <button
+            type="button"
+            onClick={() => setDragMode('move')}
+            style={dragMode === 'move' ? modeBtnActive : modeBtn}
+          >⇅ {t.dragModeMove}</button>
+          <button
+            type="button"
+            onClick={() => setDragMode('swap')}
+            style={dragMode === 'swap' ? modeBtnActive : modeBtn}
+          >⇄ {t.dragModeSwap}</button>
+        </div>
       </header>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -141,8 +174,11 @@ export default function SectionList({ slug, template }: Props) {
 /* Width + border come from the parent (.sectionList in EditorRoot.module.css)
    so this aside stays responsive. We just need flex column layout. */
 const wrap: React.CSSProperties = { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'transparent' }
-const hdr:  React.CSSProperties = { padding: '18px 16px 8px' }
+const hdr:  React.CSSProperties = { padding: '18px 16px 8px', display: 'flex', flexDirection: 'column', gap: 8 }
 const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: '#E8553E' }
+const modeToggle: React.CSSProperties = { display: 'inline-flex', alignSelf: 'flex-start', borderRadius: 8, background: 'rgba(42,33,24,0.06)', padding: 2, gap: 2 }
+const modeBtn: React.CSSProperties = { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(42,33,24,0.55)', padding: '4px 8px', borderRadius: 6 }
+const modeBtnActive: React.CSSProperties = { ...modeBtn, background: '#E8553E', color: '#fff' }
 const list: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, padding: '4px 8px', flex: 1, overflow: 'auto' }
 const ftr:  React.CSSProperties = { padding: 12, borderTop: '1px solid rgba(42,33,24,0.08)' }
 const previewLink: React.CSSProperties = { display: 'block', textAlign: 'center', padding: '10px 14px', borderRadius: 10, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', textDecoration: 'none' }
