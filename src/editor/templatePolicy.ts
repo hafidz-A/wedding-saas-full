@@ -212,3 +212,44 @@ export function computeSafeOrder(
   }
   return next
 }
+
+/**
+ * A slot that cannot take part in a swap: position-locked by id, anchored by
+ * type (lovebirds hero/footer), or mandatory by type (rsvp/gift). This is
+ * exactly the inverse of SectionRow's `draggable` gate.
+ */
+export function isSlotFixed(
+  section: { id: string; type: string },
+  policy: TemplatePolicy,
+): boolean {
+  if (isPositionLocked(section.id, policy)) return true
+  if (isTypeAnchored(section.type, policy)) return true
+  if (isMandatoryType(section.type, policy)) return true
+  return false
+}
+
+/**
+ * Swap two slots by id. Returns the new id order, or null if the swap is
+ * illegal: active === over, an id is missing, or EITHER endpoint is a fixed
+ * slot. Because only the two endpoints move, any locked/mandatory card BETWEEN
+ * them stays at its index — which is what lets a swap cross a locked anchor.
+ */
+export function computeSwapOrder(
+  order: string[],
+  activeId: string,
+  overId: string,
+  policy: TemplatePolicy,
+  sections: { id: string; type: string }[],
+): string[] | null {
+  if (activeId === overId) return null
+  const active = sections.find((s) => s.id === activeId)
+  const over = sections.find((s) => s.id === overId)
+  if (!active || !over) return null
+  if (isSlotFixed(active, policy) || isSlotFixed(over, policy)) return null
+  const from = order.indexOf(activeId)
+  const to = order.indexOf(overId)
+  if (from < 0 || to < 0) return null
+  const next = order.slice()
+  ;[next[from], next[to]] = [next[to], next[from]]
+  return next
+}

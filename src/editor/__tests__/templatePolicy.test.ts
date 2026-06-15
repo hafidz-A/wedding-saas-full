@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getTemplatePolicy, computeSafeOrder, isMandatoryType, availableSwapTypes } from '../templatePolicy'
+import { getTemplatePolicy, computeSafeOrder, computeSwapOrder, isSlotFixed, isMandatoryType, availableSwapTypes } from '../templatePolicy'
 
 describe('lovebirds gallery swap group', () => {
   const lb = getTemplatePolicy('lovebirds')!
@@ -48,5 +48,76 @@ describe('mandatory RSVP/Gift locks', () => {
     const opts = availableSwapTypes(reg, sections, solary, 'neptune', 'welcomePlanet')
     expect(opts).not.toContain('rsvpPlanet')
     expect(opts).not.toContain('giftPlanet')
+  })
+})
+
+describe('computeSwapOrder (swap mode)', () => {
+  const solary = getTemplatePolicy('solary')!
+  // Mirrors the real Solary order: intro/saturn/sun position-locked, earth/mercury mandatory.
+  const solarySections = [
+    { id: 'intro', type: 'openingGate' },
+    { id: 'neptune', type: 'welcomePlanet' },
+    { id: 'uranus', type: 'storyPlanet' },
+    { id: 'saturn', type: 'saturnRing' },
+    { id: 'jupiter', type: 'countdownPlanet' },
+    { id: 'mars', type: 'detailsPlanet' },
+    { id: 'earth', type: 'rsvpPlanet' },
+    { id: 'venus', type: 'teamPlanet' },
+    { id: 'mercury', type: 'giftPlanet' },
+    { id: 'sun', type: 'footerPlanet' },
+  ]
+  const solaryOrder = solarySections.map((s) => s.id)
+
+  it('swaps two free cards across a position-locked card, leaving it put', () => {
+    const next = computeSwapOrder(solaryOrder, 'uranus', 'jupiter', solary, solarySections)
+    expect(next).not.toBeNull()
+    // saturn keeps its index (3); the two free cards exchanged.
+    expect(next![3]).toBe('saturn')
+    expect(next![2]).toBe('jupiter')
+    expect(next![4]).toBe('uranus')
+  })
+
+  it('swaps two free cards across a mandatory card, leaving it put', () => {
+    const next = computeSwapOrder(solaryOrder, 'mars', 'venus', solary, solarySections)
+    expect(next).not.toBeNull()
+    expect(next![6]).toBe('earth') // rsvp (mandatory) unmoved
+    expect(next![5]).toBe('venus')
+    expect(next![7]).toBe('mars')
+  })
+
+  it('rejects swapping onto a position-locked card', () => {
+    expect(computeSwapOrder(solaryOrder, 'uranus', 'saturn', solary, solarySections)).toBeNull()
+  })
+
+  it('rejects swapping onto a mandatory card', () => {
+    expect(computeSwapOrder(solaryOrder, 'uranus', 'earth', solary, solarySections)).toBeNull()
+  })
+
+  it('rejects active === over', () => {
+    expect(computeSwapOrder(solaryOrder, 'uranus', 'uranus', solary, solarySections)).toBeNull()
+  })
+
+  it('lovebirds: swaps two free cards across rsvp; rejects swapping onto an anchor', () => {
+    const lb = getTemplatePolicy('lovebirds')!
+    const lbSections = [
+      { id: 'h', type: 'hero' },
+      { id: 'q', type: 'quote' },
+      { id: 'r', type: 'rsvp' },
+      { id: 's', type: 'schedule' },
+      { id: 'f', type: 'footer' },
+    ]
+    const lbOrder = lbSections.map((s) => s.id)
+    const ok = computeSwapOrder(lbOrder, 'q', 's', lb, lbSections)
+    expect(ok).toEqual(['h', 's', 'r', 'q', 'f'])
+    // hero is anchored — can't be a swap target.
+    expect(computeSwapOrder(lbOrder, 'q', 'h', lb, lbSections)).toBeNull()
+  })
+
+  it('isSlotFixed: locked id, anchored type, mandatory type are fixed; free is not', () => {
+    expect(isSlotFixed({ id: 'saturn', type: 'saturnRing' }, solary)).toBe(true)
+    expect(isSlotFixed({ id: 'earth', type: 'rsvpPlanet' }, solary)).toBe(true)
+    expect(isSlotFixed({ id: 'uranus', type: 'storyPlanet' }, solary)).toBe(false)
+    const lb = getTemplatePolicy('lovebirds')!
+    expect(isSlotFixed({ id: 'h', type: 'hero' }, lb)).toBe(true)
   })
 })
