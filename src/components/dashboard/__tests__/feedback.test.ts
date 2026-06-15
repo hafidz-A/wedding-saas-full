@@ -1,7 +1,6 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import {
   toastQueueReducer,
-  prefersFinePointer,
   prefersReducedMotion,
   TOAST_CAP,
   type Toast,
@@ -43,19 +42,13 @@ describe('media helpers', () => {
     vi.unstubAllGlobals()
   })
 
-  it('prefersFinePointer reads (pointer: fine)', () => {
-    vi.stubGlobal('window', { matchMedia: (q: string) => ({ matches: q.includes('fine') }) })
-    expect(prefersFinePointer()).toBe(true)
-  })
-
   it('prefersReducedMotion reads the reduce query', () => {
     vi.stubGlobal('window', { matchMedia: (q: string) => ({ matches: q.includes('reduce') }) })
     expect(prefersReducedMotion()).toBe(true)
   })
 
-  it('both return false during SSR (no window)', () => {
+  it('returns false during SSR (no window)', () => {
     vi.stubGlobal('window', undefined)
-    expect(prefersFinePointer()).toBe(false)
     expect(prefersReducedMotion()).toBe(false)
   })
 })
