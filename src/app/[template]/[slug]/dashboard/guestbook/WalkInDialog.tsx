@@ -13,10 +13,13 @@ import {
 
 export default function WalkInDialog({
   slug,
+  existingRows = [],
   onClose,
   onAdded,
 }: {
   slug: string
+  /** Names/ids already in the ledger — used to warn that a pick will reconcile. */
+  existingRows?: { guest_id: string | null; name: string }[]
   onClose: () => void
   onAdded: (row: AttendanceRow) => void
 }) {
@@ -121,6 +124,14 @@ export default function WalkInDialog({
     }
   }
 
+  const pickedInBook =
+    !!picked &&
+    existingRows.some(
+      (r) =>
+        (picked.id && r.guest_id === picked.id) ||
+        r.name.trim().toLowerCase() === picked.name.trim().toLowerCase(),
+    )
+
   return (
     <div style={overlay} role="dialog" aria-modal="true" onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
@@ -144,6 +155,23 @@ export default function WalkInDialog({
                 {t.dialogChange}
               </button>
             </div>
+
+            {pickedInBook && (
+              <p
+                style={{
+                  margin: '10px 0 0',
+                  padding: '9px 12px',
+                  borderRadius: 8,
+                  background: 'rgba(232,85,62,0.08)',
+                  border: '1px solid rgba(232,85,62,0.25)',
+                  color: '#C43F2A',
+                  fontSize: 12,
+                  lineHeight: 1.5,
+                }}
+              >
+                {t.alreadyInBook}
+              </p>
+            )}
 
             <label style={fieldLabel}>{t.dialogCountLabel}</label>
             <input

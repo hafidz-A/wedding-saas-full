@@ -280,6 +280,7 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
       {showDialog && (
         <WalkInDialog
           slug={slug}
+          existingRows={rows.map((r) => ({ guest_id: r.guest_id, name: r.name }))}
           onClose={() => setShowDialog(false)}
           onAdded={(row) => {
             setRows((prev) => [row, ...prev.filter((r) => r.id !== row.id)])
