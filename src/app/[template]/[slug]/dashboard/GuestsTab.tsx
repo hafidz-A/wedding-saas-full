@@ -426,7 +426,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     aria-label={t.regenerateAria.replace('{name}', g.name)}
                     title={t.regenerateTitle}
                   >
-                    {t.regenerateBtn}
+                    <span aria-hidden>↻</span> {t.regenerateBtn}
                   </button>
                   {g.sent_at && (
                     <button
