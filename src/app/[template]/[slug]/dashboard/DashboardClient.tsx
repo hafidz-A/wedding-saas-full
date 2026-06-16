@@ -3,13 +3,9 @@
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import EditorRoot from '@/editor/EditorRoot'
 import RsvpsTab, { type RsvpRow } from './RsvpsTab'
 import GiftsTab, { type GiftRow } from './GiftsTab'
-import MusicTab from './MusicTab'
-import OrnamentTab from './OrnamentTab'
-import PaletteTab from './PaletteTab'
-import MetaTab from './MetaTab'
+import EditorWorkspace, { type EditorSubTab } from './EditorWorkspace'
 import TutorialTab from './TutorialTab'
 import GuestsTab from './GuestsTab'
 import GuestbookTab from './GuestbookTab'
@@ -69,31 +65,31 @@ export default function DashboardClient({
     })
   }
 
-  type TabKey =
-    | 'rsvps' | 'gifts' | 'guests' | 'guestbook'
-    | 'editor' | 'music' | 'ornament' | 'palette' | 'meta' | 'tutorial'
+  // Editing surfaces (section editor, palette, music, meta, ornament) are now
+  // consolidated UNDER one "Editor" top-tab as sub-tabs — so every editable
+  // thing lives in one place. The remaining top tabs are data views + tutorial.
+  type TabKey = 'rsvps' | 'gifts' | 'guests' | 'guestbook' | 'editor' | 'tutorial'
 
   const [tab, setTab] = useState<TabKey>('rsvps')
+  const [editorSub, setEditorSub] = useState<EditorSubTab>('section')
+
+  // Tutorial deep-links can target an editor sub-tab (e.g. 'palette') — route
+  // those to the Editor top-tab with the right sub-tab selected.
+  const EDITOR_SUBS = ['section', 'palette', 'music', 'meta', 'ornament']
+  function openTab(k: string) {
+    if (k === 'editor' || EDITOR_SUBS.includes(k)) {
+      setTab('editor')
+      if (EDITOR_SUBS.includes(k)) setEditorSub(k as EditorSubTab)
+    } else {
+      setTab(k as TabKey)
+    }
+  }
 
   // Buku Tamu (attendance ledger) is a Premium feature. The tab is always shown;
   // non-Premium plans see a locked card with a "pay the difference" upgrade CTA.
   const hasGuestbook = invitation.plan === 'premium'
 
-  const tabKeys: TabKey[] = (() => {
-    const keys: TabKey[] = ['rsvps', 'gifts', 'guests']
-    keys.push('guestbook')
-    keys.push('editor')
-    keys.push('palette')
-    keys.push('music')
-    keys.push('meta')
-    // The Background (Latar) tab swaps the invitation's background GIF — only
-    // meaningful for lovebirds. Solary renders its own Three.js galactic scene,
-    // so the tab is hidden there.
-    if (template !== 'solary') keys.push('ornament')
-    // Tutorial tab — both templates have their own categorized guide + screenshots.
-    keys.push('tutorial')
-    return keys
-  })()
+  const tabKeys: TabKey[] = ['rsvps', 'gifts', 'guests', 'guestbook', 'editor', 'tutorial']
 
   return (
     <DashboardI18nProvider dict={dict} lang={lang}>
@@ -267,12 +263,12 @@ export default function DashboardClient({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
           >
             {tab === 'editor' && (
-              <EditorRoot
+              <EditorWorkspace
                 slug={slug}
                 template={template}
-                initialConfig={invitation.config ?? { sections: [] }}
-                initialIsPublished={!!invitation.is_published}
-                initialUpdatedAt={invitation.updated_at ?? null}
+                invitation={invitation}
+                sub={editorSub}
+                onSubChange={setEditorSub}
               />
             )}
 
@@ -305,27 +301,11 @@ export default function DashboardClient({
                 <GuestbookLocked invitationId={invitation.id} amountIDR={upgrade?.amountIDR ?? null} />
               ))}
 
-            {tab === 'music' && (
-              <MusicTab slug={slug} initial={invitation.config?.music ?? null} />
-            )}
-
-            {tab === 'ornament' && (
-              <OrnamentTab slug={slug} initial={invitation.config?.theme?.ornamentType} />
-            )}
-
-            {tab === 'palette' && (
-              <PaletteTab slug={slug} template={template} initial={invitation.config?.theme?.defaultPalette} />
-            )}
-
-            {tab === 'meta' && (
-              <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} />
-            )}
-
             {tab === 'tutorial' && (
               <TutorialTab
                 isPremium={invitation.plan === 'premium'}
                 template={template}
-                onOpenTab={(k) => setTab(k as TabKey)}
+                onOpenTab={(k) => openTab(k)}
               />
             )}
           </motion.div>
