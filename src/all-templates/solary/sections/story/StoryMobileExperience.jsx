@@ -143,7 +143,7 @@ export default function StoryMobileExperience({
                 <span style={{ opacity: 0.55, padding: "0 6px" }}>·</span>{" "}
                 <strong>{planetName}</strong>
               </div>
-              <h2 className="h-2 center-text" style={{ margin: 0 }}>{heading}</h2>
+              <h2 className="h-2 center-text" style={{ marginTop: 0, marginBottom: 0 }}>{heading}</h2>
             </div>
             <ol className="story-mobile__list">
               {items.map((it, idx) => (
@@ -203,7 +203,7 @@ export default function StoryMobileExperience({
               <span style={{ opacity: 0.55, padding: "0 6px" }}>·</span>{" "}
               <strong>{planetName}</strong>
             </div>
-            <h2 className="h-2 center-text" style={{ margin: 0, marginBottom: "0.35rem" }}>
+            <h2 className="h-2 center-text" style={{ marginTop: 0, marginBottom: "0.35rem" }}>
               {heading}
             </h2>
             <div className="story-mobile__chapter mono" aria-live="polite">
