@@ -1,46 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
-import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { useConfirm } from '@/components/dashboard/DialogProvider'
 
-interface Props {
-  slug: string
-  initialIsPublished: boolean
-}
-
-export default function SaveBar({ slug, initialIsPublished }: Props) {
+/**
+ * Status + publish + save controls. Stateless about publish/conflict — those
+ * live in EditorProvider so a top and a bottom SaveBar render the same thing.
+ * Can be rendered more than once.
+ */
+export default function SaveBar() {
   const t = useDashboardDict().editor
-  const fm = useDashboardDict().feedback
-  const fb = useFeedback()
-  const { isDirty, isSaving, saveError, save, lastSavedAt } = useEditor()
-  const [isPublished, setIsPublished] = useState(initialIsPublished)
-  const [publishBusy, setPublishBusy] = useState(false)
-  const [publishErr, setPublishErr] = useState<string | null>(null)
-
-  async function togglePublish() {
-    const next = !isPublished
-    setPublishBusy(true)
-    setPublishErr(null)
-    try {
-      const res = await fetch(`/api/invitation/${slug}/publish`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_published: next }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        setPublishErr(err.error || `HTTP ${res.status}`)
-        fb.fail(fm.publishFail)
-        return
-      }
-      setIsPublished(next)
-      fb.ok(next ? fm.published : fm.setToDraft)
-    } finally {
-      setPublishBusy(false)
-    }
-  }
+  const {
+    isDirty, isSaving, saveError, save, lastSavedAt,
+    isPublished, publishBusy, publishError, togglePublish,
+  } = useEditor()
 
   return (
     <div style={wrap}>
@@ -55,7 +30,7 @@ export default function SaveBar({ slug, initialIsPublished }: Props) {
           <span style={savedTxt}>{t.upToDate}</span>
         )}
         {saveError && <span style={errTxt}>{saveError}</span>}
-        {publishErr && <span style={errTxt}>{publishErr}</span>}
+        {publishError && <span style={errTxt}>{publishError}</span>}
       </div>
 
       <button
@@ -77,6 +52,36 @@ export default function SaveBar({ slug, initialIsPublished }: Props) {
       </button>
     </div>
   )
+}
+
+/**
+ * Watches for a 409 save conflict and shows ONE reload dialog. Mounted once
+ * (in EditorRoot), separate from SaveBar which may render multiple times.
+ */
+export function SaveConflictDialog() {
+  const { saveConflict, clearSaveConflict } = useEditor()
+  const t = useDashboardDict().editor
+  const confirmDialog = useConfirm()
+  const firing = useRef(false)
+
+  useEffect(() => {
+    if (!saveConflict || firing.current) return
+    firing.current = true
+    void (async () => {
+      const reload = await confirmDialog({
+        title: t.conflictTitle,
+        message: t.conflictBody,
+        confirmLabel: t.conflictReload,
+        cancelLabel: t.conflictDismiss,
+        tone: 'danger',
+      })
+      clearSaveConflict()
+      firing.current = false
+      if (reload) window.location.reload()
+    })()
+  }, [saveConflict, confirmDialog, clearSaveConflict, t])
+
+  return null
 }
 
 const wrap: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12 }

@@ -95,9 +95,14 @@ export default function MetaTab({ slug, template, initial }: Props) {
 
   return (
     <div style={card}>
-      <header>
-        <h2 style={h2}>{t.title}</h2>
-        <p style={sub}>{t.subtitle}</p>
+      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <div>
+          <h2 style={h2}>{t.title}</h2>
+          <p style={sub}>{t.subtitle}</p>
+        </div>
+        <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
+          {saving ? t.saving : t.save}
+        </button>
       </header>
 
       {/* ── Text fields ── */}

@@ -140,11 +140,16 @@ export default function MusicTab({ slug, initial }: Props) {
           <h2 style={h2}>{t.title}</h2>
           <p style={sub}>{t.subtitle}</p>
         </div>
-        {music.url && (
-          <span style={music.enabled ? badgeOn : badgeOff}>
-            {music.enabled ? t.on : t.off}
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {music.url && (
+            <span style={music.enabled ? badgeOn : badgeOff}>
+              {music.enabled ? t.on : t.off}
+            </span>
+          )}
+          <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
+            {saving ? t.saving : t.save}
+          </button>
+        </div>
       </header>
 
       {/* ── Upload ── */}

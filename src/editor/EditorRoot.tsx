@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { EditorProvider, type PageConfig } from './EditorProvider'
 import SectionList from './SectionList'
 import FieldEditor from './FieldEditor'
-import SaveBar from './SaveBar'
+import SaveBar, { SaveConflictDialog } from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
@@ -32,7 +32,8 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   const t = useDashboardDict().editor
 
   return (
-    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt}>
+    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialIsPublished={initialIsPublished}>
+      <SaveConflictDialog />
       <div className={styles.wrap}>
         <div className={styles.topBar}>
           <button
@@ -43,7 +44,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
           >
             {previewOpen ? t.hidePreview : t.showPreview}
           </button>
-          <SaveBar slug={slug} initialIsPublished={initialIsPublished} />
+          <SaveBar />
         </div>
 
         <div className={styles.editorRow}>
@@ -56,6 +57,13 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
         </div>
 
         {previewOpen && <PreviewPane slug={slug} template={template} />}
+      </div>
+
+      {/* Second save bar, sticky to the viewport bottom so a scrolled-down
+          owner still sees the save/publish controls. Shares state with the top
+          one via EditorProvider. */}
+      <div className={styles.bottomBar}>
+        <SaveBar />
       </div>
     </EditorProvider>
   )

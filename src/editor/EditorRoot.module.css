@@ -27,6 +27,26 @@
   flex-wrap: wrap;
 }
 
+/* Sticky bottom save bar — mirrors the top one, follows the viewport so the
+   owner is reminded to save while scrolling. */
+.bottomBar {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(42, 33, 24, 0.12);
+}
+
 .editorRow {
   display: flex;
   min-height: 480px;

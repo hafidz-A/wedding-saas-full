@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from 'react'
 import { deepEqual } from './lib/deepEqual'
@@ -289,6 +290,14 @@ interface EditorContextValue extends State {
   save: () => Promise<void>
   changeSectionType: (sectionId: string, newType: string, defaults?: Record<string, unknown>) => void
   reorderSectionsById: (order: string[]) => void
+  /** Publish toggle lives here (not in SaveBar) so multiple save bars share it. */
+  isPublished: boolean
+  publishBusy: boolean
+  publishError: string | null
+  togglePublish: () => Promise<void>
+  /** True once a save was rejected with 409 (another tab/device wrote first). */
+  saveConflict: boolean
+  clearSaveConflict: () => void
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null)
@@ -305,6 +314,8 @@ interface ProviderProps {
   children: ReactNode
   /** invitation.updated_at at load — sent back on save for conflict detection. */
   initialUpdatedAt?: string | null
+  /** Published state at load — owned here so every SaveBar instance agrees. */
+  initialIsPublished?: boolean
 }
 
 // Section types that used to exist but were removed/moved. Stripped on
@@ -321,7 +332,7 @@ function cleanConfig(input: PageConfig): PageConfig {
   }
 }
 
-export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt }: ProviderProps) {
+export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt, initialIsPublished }: ProviderProps) {
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
   const cleaned = cleanConfig(initialConfig)
@@ -333,6 +344,37 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
     saveError: null,
     lastSavedAt: initialUpdatedAt ?? null,
   })
+
+  // Publish toggle + save-conflict flag live in the provider (not SaveBar) so a
+  // top and a bottom SaveBar render the same state.
+  const [isPublished, setIsPublished] = useState(!!initialIsPublished)
+  const [publishBusy, setPublishBusy] = useState(false)
+  const [publishError, setPublishError] = useState<string | null>(null)
+  const [saveConflict, setSaveConflict] = useState(false)
+  const clearSaveConflict = useCallback(() => setSaveConflict(false), [])
+
+  const togglePublish = useCallback(async () => {
+    const next = !isPublished
+    setPublishBusy(true)
+    setPublishError(null)
+    try {
+      const res = await fetch(`/api/invitation/${slug}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_published: next }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        setPublishError(err.error || `HTTP ${res.status}`)
+        fb.fail(fm.publishFail)
+        return
+      }
+      setIsPublished(next)
+      fb.ok(next ? fm.published : fm.setToDraft)
+    } finally {
+      setPublishBusy(false)
+    }
+  }, [isPublished, slug, fb, fm])
 
   const isDirty = useMemo(() => !deepEqual(state.config, state.initialConfig), [state.config, state.initialConfig])
 
@@ -365,7 +407,10 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
         dispatch({ type: 'SAVE_ERROR', message: err.error || `HTTP ${res.status}` })
-        fb.fail(fm.saveFail)
+        // 409 = another tab/device saved since this one loaded. Raise a flag the
+        // SaveBar turns into a "muat ulang halaman" dialog (vs the generic toast).
+        if (res.status === 409) setSaveConflict(true)
+        else fb.fail(fm.saveFail)
         return
       }
       const data = await res.json()
@@ -404,6 +449,12 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
     changeSectionType: (sectionId, newType, defaults) =>
       dispatch({ type: 'CHANGE_SECTION_TYPE', sectionId, newType, defaults }),
     reorderSectionsById: (order) => dispatch({ type: 'REORDER_SECTIONS_BY_ID', order }),
+    isPublished,
+    publishBusy,
+    publishError,
+    togglePublish,
+    saveConflict,
+    clearSaveConflict,
   }
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>

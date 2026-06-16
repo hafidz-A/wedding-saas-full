@@ -112,7 +112,12 @@ export default function PaletteTab({ slug, template, initial }: { slug: string; 
 
   return (
     <div style={card}>
-      <header><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></header>
+      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <div><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></div>
+        <button type="button" style={btnPrimary} onClick={save} disabled={saving}>
+          {saving ? t.saving : t.save}
+        </button>
+      </header>
       <Group title={t.groupDark} items={groups.dark} />
       <Group title={t.groupLight} items={groups.light} />
 

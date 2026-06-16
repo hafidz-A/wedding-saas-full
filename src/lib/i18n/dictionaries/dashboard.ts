@@ -1137,6 +1137,11 @@ export const dashboard = {
       published: 'Terbit ●',
       draft: 'Draf ○',
       save: 'Simpan',
+      conflictTitle: 'Perubahan tidak bisa disimpan',
+      conflictBody:
+        'Undangan ini sudah diubah dari tab atau perangkat lain. Muat ulang halaman ini dulu (perubahan terbaru akan dimuat), atau tutup tab dashboard lain yang masih terbuka, sebelum menyimpan lagi.',
+      conflictReload: 'Muat ulang halaman',
+      conflictDismiss: 'Nanti dulu',
       sectionsHeader: 'Bagian',
       addSection: '+ Tambah bagian',
       openPreview: 'Buka preview ↗',
@@ -2325,6 +2330,11 @@ export const dashboard = {
       published: 'Published ●',
       draft: 'Draft ○',
       save: 'Save',
+      conflictTitle: "Changes couldn't be saved",
+      conflictBody:
+        'This invitation was changed from another tab or device. Reload this page first (the latest version will load), or close the other open dashboard tab, before saving again.',
+      conflictReload: 'Reload page',
+      conflictDismiss: 'Not now',
       sectionsHeader: 'Sections',
       addSection: '+ Add section',
       openPreview: 'Open preview ↗',
