@@ -367,7 +367,7 @@ export const dashboard = {
             'Lihat status masa aktif di kanan atas. Kalau masih ada banner "belum bayar", undangan bisa kedaluwarsa.',
             'Tombol "Lihat live" membuka undangan di tab baru — pakai untuk mengecek hasil.',
             'Toggle Bahasa (ID/EN) hanya mengubah tampilan dashboard & editor, bukan isi undangan tamu.',
-            'Buka satu per satu tab dashboard: Editor, Palette, Musik, RSVP, Hadiah, Tamu, dan lainnya — tiap tab punya panduannya di sini.',
+            'Buka satu per satu tab dashboard: Editor (berisi sub-tab Bagian, Palette, Musik, Judul & Deskripsi), RSVP, Hadiah, Tamu, dan lainnya — tiap tab punya panduannya di sini.',
           ],
           always: [
             'Pastikan status Terbit sebelum membagikan link ke tamu.',
@@ -389,7 +389,7 @@ export const dashboard = {
         },
         editor: {
           title: 'Editor Section',
-          summary: 'Atur isi, foto, dan urutan setiap bagian undangan.',
+          summary: 'Tab Editor menyatukan semua yang bisa diedit — Bagian, Palette, Musik, Judul & Deskripsi, dan Ornamen — lewat sub-tab di atas. Di sub-tab Bagian ini: atur isi, foto, dan urutan setiap bagian undangan.',
           steps: [
             'Daftar bagian ada di panel kiri — seret (drag) untuk mengubah urutan.',
             'Di atas daftar ada dua mode reorder: "Geser" (menyisipkan kartu ke posisi baru — perilaku biasa) dan "Tukar" (menukar posisi dua kartu). Pilih "Tukar" bila ingin dua bagian saling bertukar tempat.',
@@ -470,7 +470,7 @@ export const dashboard = {
         },
         palette: {
           title: 'Palette Warna',
-          summary: 'Pilih skema warna yang akan dilihat tamu di undangan.',
+          summary: 'Ada di tab Editor → Palette. Pilih skema warna yang akan dilihat tamu di undangan.',
           steps: [
             'Telusuri pilihan palette yang tersedia.',
             'Klik satu palette untuk menerapkannya — preview langsung berubah.',
@@ -486,7 +486,7 @@ export const dashboard = {
         },
         ornament: {
           title: 'Latar / Ornamen',
-          summary: 'Hiasan animasi yang melayang di halaman undangan.',
+          summary: 'Ada di tab Editor → Ornamen. Hiasan animasi yang melayang di halaman undangan.',
           steps: [
             'Pilih jenis ornamen: Burung, Kupu-kupu, atau Bertengger.',
             'Lihat pratinjau gerakannya di layar.',
@@ -502,7 +502,7 @@ export const dashboard = {
         },
         music: {
           title: 'Musik Latar',
-          summary: 'Lagu yang diputar di latar undangan lewat popup — bisa dari MP3, link audio, YouTube, atau pustaka bawaan.',
+          summary: 'Ada di tab Editor → Musik. Lagu yang diputar di latar undangan lewat popup — bisa dari MP3, link audio, YouTube, atau pustaka bawaan.',
           steps: [
             'Pilih sumber musik: Upload MP3 (maks 12 MB), Link audio, YouTube, atau Pustaka lagu bawaan.',
             'Atur teks popup: judul dan tombol Terima/Tutup.',
@@ -612,7 +612,7 @@ export const dashboard = {
             'Login, lalu pilih bahasa dashboard (ID/EN) sesuai selera.',
             'Isi data inti di section Hero: nama pasangan, tanggal, dan lokasi acara.',
             'Buka Editor Section — tata urutan, lalu isi teks & foto tiap bagian (lihat tab "Panduan tiap Section").',
-            'Unggah foto galeri dan, bila mau, satu lagu di tab Musik.',
+            'Unggah foto galeri dan, bila mau, satu lagu di tab Editor → Musik.',
             'Pilih Palette warna dan ornamen latar sesuai nuansa kalian.',
             'Isi rekening di Wedding Gift dan atur opsi di RSVP.',
             'Klik "Lihat live" dan periksa undangan di HP maupun komputer.',
@@ -790,7 +790,7 @@ export const dashboard = {
           },
           editor: {
             title: 'Editor Section',
-            summary: 'Atur isi, foto, dan urutan tiap "planet" (bagian) undangan.',
+            summary: 'Tab Editor menyatukan semua yang bisa diedit — Bagian, Palette, Musik, dan Judul & Deskripsi — lewat sub-tab di atas. Di sub-tab Bagian ini: atur isi, foto, dan urutan tiap "planet" (bagian) undangan.',
             openTab: 'Buka tab Editor →',
             steps: [
               'Tiap bagian Solary adalah sebuah planet di panel kiri — seret (drag) untuk mengubah urutannya.',
@@ -826,8 +826,8 @@ export const dashboard = {
           },
           palette: {
             title: 'Palette Warna',
-            summary: 'Pilih skema warna kosmik yang akan dilihat tamu. Latar galaksi ikut menyesuaikan otomatis.',
-            openTab: 'Buka tab Palette →',
+            summary: 'Ada di tab Editor → Palette. Pilih skema warna kosmik yang akan dilihat tamu. Latar galaksi ikut menyesuaikan otomatis.',
+            openTab: 'Buka Palette di Editor →',
             steps: [
               'Pilih satu palette dari kelompok Gelap (Purple, Nebula, Rose, Emerald).',
               'Atau pilih dari kelompok Terang (Lavender, Sunburst, Rose, Botanical).',
@@ -840,8 +840,8 @@ export const dashboard = {
           },
           music: {
             title: 'Musik Latar',
-            summary: 'Lagu yang diputar di latar undangan lewat popup — dari MP3, link audio, YouTube, atau pustaka bawaan.',
-            openTab: 'Buka tab Musik →',
+            summary: 'Ada di tab Editor → Musik. Lagu yang diputar di latar undangan lewat popup — dari MP3, link audio, YouTube, atau pustaka bawaan.',
+            openTab: 'Buka Musik di Editor →',
             steps: [
               'Pilih sumber musik: Upload MP3 (maks 12 MB), Link audio, YouTube, atau Pustaka lagu bawaan.',
               'Atur teks popup: judul dan tombol Terima/Tutup.',
@@ -925,8 +925,8 @@ export const dashboard = {
             steps: [
               'Isi data mempelai & acara: nama, tanggal, dan lokasi. Ini yang muncul di gerbang pembuka.',
               'Buka tab Editor, lalu isi teks dan unggah foto untuk tiap planet (maks 5 MB per gambar).',
-              'Pilih palette warna di tab Palette — latar galaksi ikut menyesuaikan otomatis.',
-              'Atur musik latar di tab Musik: unggah satu MP3 lalu aktifkan toggle Aktif.',
+              'Pilih palette warna di tab Editor → Palette — latar galaksi ikut menyesuaikan otomatis.',
+              'Atur musik latar di tab Editor → Musik: pilih sumber (MP3, link, YouTube, atau pustaka) lalu aktifkan toggle Aktif.',
               'Klik "Lihat live" di bar atas untuk mengecek hasilnya seperti yang dilihat tamu.',
               'Pastikan status berubah jadi Terbit — selama masih Draf, tamu belum bisa membuka.',
               'Buka tab Tamu, buat link personal, lalu bagikan ke masing-masing tamu.',
@@ -1077,7 +1077,7 @@ export const dashboard = {
               { q: 'Undangan tidak bisa dibuka tamu?', a: 'Cek statusnya harus Terbit (bukan Draf) dan masa aktif belum habis. Banner pembayaran di bar atas menandakan undangan bisa kedaluwarsa.' },
               { q: 'Foto terlihat gepeng atau terpotong?', a: 'Pakai rasio wajar: potret untuk gerbang pembuka, lanskap atau persegi untuk galeri. Hindari gambar yang terlalu lebar atau terlalu sempit.' },
               { q: 'Perubahan hilang setelah halaman di-reload?', a: 'Berarti belum tersimpan. Selalu klik Simpan sebelum menutup atau me-refresh halaman editor.' },
-              { q: 'Musik tidak berbunyi?', a: 'Aktifkan toggle Aktif di tab Musik, dan ingat tamu harus menekan "Terima" di popup — browser melarang musik berbunyi otomatis tanpa interaksi.' },
+              { q: 'Musik tidak berbunyi?', a: 'Aktifkan toggle Aktif di tab Editor → Musik, dan ingat tamu harus menekan "Terima" di popup — browser melarang musik berbunyi otomatis tanpa interaksi.' },
               { q: 'Nama tamu tidak muncul di undangan?', a: 'Kirim link personal dari tab Tamu, bukan link generic. Hanya link personal yang menampilkan nama tamu.' },
               { q: 'Bisakah menambah atau menghapus planet (bagian)?', a: 'Jumlah planet sudah tetap demi menjaga tata surya tetap utuh. Kamu bisa menata urutan dan mengganti jenis sebagian planet, tapi Galeri, RSVP, dan Hadiah terkunci.' },
               { q: 'Masa aktif habis / undangan kedaluwarsa?', a: 'Selesaikan pembayaran sebelum hari-H. Status masa aktif ada di bar atas sebelah kanan.' },
@@ -1174,7 +1174,7 @@ export const dashboard = {
       unknownSection: 'Bagian tidak dikenal',
       legacyTitlePrefix: 'Bagian',
       legacyTitleSuffix: 'sudah tidak tersedia',
-      legacyDesc: 'Tipe bagian ini sudah dihapus atau dipindah ke fitur lain (mis. musik kini ada di tab Musik). Bagian ini aman dihapus — tidak ditampilkan di halaman undangan.',
+      legacyDesc: 'Tipe bagian ini sudah dihapus atau dipindah ke fitur lain (mis. musik kini ada di tab Editor → Musik). Bagian ini aman dihapus — tidak ditampilkan di halaman undangan.',
       removeThisSection: 'Hapus bagian ini',
       addItem: '+ Tambah',
       removeItemConfirm: 'Hapus item ini?',
@@ -1570,7 +1570,7 @@ export const dashboard = {
             'Check the active-period status at the top right. If an "unpaid" banner is still showing, your invitation can expire.',
             'The "View live" button opens your invitation in a new tab — use it to check your work.',
             'The Language toggle (ID/EN) only changes the dashboard & editor UI, not the invitation your guests see.',
-            'Open each dashboard tab in turn: Editor, Palette, Music, RSVP, Gifts, Guests, and more — each has its own guide here.',
+            'Open each dashboard tab in turn: Editor (with the Sections, Palette, Music, Title & Description sub-tabs), RSVP, Gifts, Guests, and more — each has its own guide here.',
           ],
           always: [
             'Make sure the status is Published before sharing the link with guests.',
@@ -1592,7 +1592,7 @@ export const dashboard = {
         },
         editor: {
           title: 'Section Editor',
-          summary: 'Arrange the content, photos, and order of every part of your invitation.',
+          summary: 'The Editor tab brings together everything you can edit — Sections, Palette, Music, Title & Description, and Ornament — via the sub-tabs above. In this Sections sub-tab: arrange the content, photos, and order of every part of your invitation.',
           steps: [
             'The section list is in the left panel — drag to reorder.',
             'Above the list are two reorder modes: "Move" (inserts a card at a new position — the usual behavior) and "Swap" (exchanges two cards\' positions). Pick "Swap" when you want two sections to trade places.',
@@ -1673,7 +1673,7 @@ export const dashboard = {
         },
         palette: {
           title: 'Color Palette',
-          summary: 'Pick the color scheme your guests will see on the invitation.',
+          summary: 'Found in the Editor tab → Palette. Pick the color scheme your guests will see on the invitation.',
           steps: [
             'Browse the available palettes.',
             'Click a palette to apply it — the preview updates instantly.',
@@ -1689,7 +1689,7 @@ export const dashboard = {
         },
         ornament: {
           title: 'Background / Ornaments',
-          summary: 'Animated decorations that float across the invitation page.',
+          summary: 'Found in the Editor tab → Ornament. Animated decorations that float across the invitation page.',
           steps: [
             'Pick an ornament type: Birds, Butterflies, or Perched.',
             'Preview its motion on screen.',
@@ -1705,7 +1705,7 @@ export const dashboard = {
         },
         music: {
           title: 'Background Music',
-          summary: 'A song played in the background of your invitation via a popup — from an MP3, an audio link, YouTube, or the built-in library.',
+          summary: 'Found in the Editor tab → Music. A song played in the background of your invitation via a popup — from an MP3, an audio link, YouTube, or the built-in library.',
           steps: [
             'Pick a music source: Upload MP3 (max 12 MB), Audio link, YouTube, or the built-in Library.',
             'Set the popup text: title and the Accept/Dismiss buttons.',
@@ -1815,7 +1815,7 @@ export const dashboard = {
             'Sign in, then pick your dashboard language (ID/EN).',
             'Fill the core details in the Hero section: couple names, date, and venue.',
             'Open the Section Editor — set the order, then fill the text & photos of each part (see the "Per-section guide" tab).',
-            'Upload your gallery photos and, if you like, one song in the Music tab.',
+            'Upload your gallery photos and, if you like, one song in the Editor → Music sub-tab.',
             'Pick a color Palette and a background ornament that match your mood.',
             'Add your accounts in Wedding Gift and set the options in RSVP.',
             'Click "View live" and check the invitation on both phone and computer.',
@@ -1993,7 +1993,7 @@ export const dashboard = {
           },
           editor: {
             title: 'Section Editor',
-            summary: 'Arrange the content, photos, and order of each "planet" (section) of your invitation.',
+            summary: 'The Editor tab brings together everything you can edit — Sections, Palette, Music, and Title & Description — via the sub-tabs above. In this Sections sub-tab: arrange the content, photos, and order of each "planet" (section) of your invitation.',
             openTab: 'Open Editor tab →',
             steps: [
               'Each Solary section is a planet in the left panel — drag to reorder.',
@@ -2029,8 +2029,8 @@ export const dashboard = {
           },
           palette: {
             title: 'Color Palette',
-            summary: 'Pick the cosmic color scheme your guests will see. The galactic background adapts automatically.',
-            openTab: 'Open Palette tab →',
+            summary: 'Found in the Editor tab → Palette. Pick the cosmic color scheme your guests will see. The galactic background adapts automatically.',
+            openTab: 'Open Palette in Editor →',
             steps: [
               'Pick a palette from the Dark group (Purple, Nebula, Rose, Emerald).',
               'Or pick from the Light group (Lavender, Sunburst, Rose, Botanical).',
@@ -2043,8 +2043,8 @@ export const dashboard = {
           },
           music: {
             title: 'Background Music',
-            summary: 'A song played in the background of your invitation via a popup — from an MP3, an audio link, YouTube, or the built-in library.',
-            openTab: 'Open Music tab →',
+            summary: 'Found in the Editor tab → Music. A song played in the background of your invitation via a popup — from an MP3, an audio link, YouTube, or the built-in library.',
+            openTab: 'Open Music in Editor →',
             steps: [
               'Pick a music source: Upload MP3 (max 12 MB), Audio link, YouTube, or the built-in Library.',
               'Set the popup text: title and the Accept/Dismiss buttons.',
@@ -2128,8 +2128,8 @@ export const dashboard = {
             steps: [
               'Fill in the couple & event details: names, date, and venue. This is what shows on the opening gate.',
               'Open the Editor tab, then fill the text and upload a photo for each planet (max 5 MB per image).',
-              'Pick a colour palette in the Palette tab — the galaxy background adjusts automatically.',
-              'Set the background music in the Music tab: upload one MP3, then switch the Enabled toggle on.',
+              'Pick a colour palette in the Editor → Palette sub-tab — the galaxy background adjusts automatically.',
+              'Set the background music in the Editor → Music sub-tab: pick a source (MP3, link, YouTube, or library), then switch the Enabled toggle on.',
               'Click "View live" in the top bar to check the result the way guests will see it.',
               "Make sure the status flips to Published — while it's Draft, guests can't open it.",
               'Open the Guests tab, create personal links, then share them with each guest.',
@@ -2280,7 +2280,7 @@ export const dashboard = {
               { q: "Guests can't open the invitation?", a: "Check that the status is Published (not Draft) and the active period hasn't ended. A payment banner in the top bar means the invitation can expire." },
               { q: 'Photos look stretched or cropped?', a: 'Use sensible ratios: portrait for the opening gate, landscape or square for the gallery. Avoid images that are too wide or too narrow.' },
               { q: 'Changes disappear after reloading the page?', a: "They weren't saved. Always click Save before closing or refreshing the editor." },
-              { q: "Music won't play?", a: 'Switch the Enabled toggle on in the Music tab, and remember guests must tap "Accept" in the popup — browsers block music from autoplaying without interaction.' },
+              { q: "Music won't play?", a: 'Switch the Enabled toggle on in the Editor → Music sub-tab, and remember guests must tap "Accept" in the popup — browsers block music from autoplaying without interaction.' },
               { q: "Guest names don't show on the invitation?", a: "Send a personal link from the Guests tab, not the generic link. Only personal links display the guest's name." },
               { q: 'Can I add or remove planets (sections)?', a: 'The number of planets is fixed to keep the solar system whole. You can reorder and change the type of some planets, but Gallery, RSVP, and Gifts are locked.' },
               { q: 'Active period ended / invitation expired?', a: 'Complete payment before the big day. The active-period status is in the top-right of the top bar.' },
@@ -2377,7 +2377,7 @@ export const dashboard = {
       unknownSection: 'Unknown section',
       legacyTitlePrefix: 'Section',
       legacyTitleSuffix: 'is no longer available',
-      legacyDesc: 'This section type has been removed or moved to another feature (e.g. music now lives in the Music tab). This section is safe to delete — it is not shown on the invitation page.',
+      legacyDesc: 'This section type has been removed or moved to another feature (e.g. music now lives in the Editor → Music sub-tab). This section is safe to delete — it is not shown on the invitation page.',
       removeThisSection: 'Remove this section',
       addItem: '+ Add',
       removeItemConfirm: 'Remove this item?',
