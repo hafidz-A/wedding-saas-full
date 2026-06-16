@@ -68,18 +68,61 @@ describe('addWalkInAttendance', () => {
     expect(r).toMatchObject({ ok: false, code: 'not_found' })
   })
 
-  it('maps a unique-violation to a friendly duplicate result', async () => {
-    mockAdmin.mockReturnValue(
-      createFakeSupabase({
-        tables: {
-          invitations: { select: { data: { plan: 'premium' } } },
-          guests: { select: { data: { id: 'g1', name_enc: encGuest('Budi'), invitation_id: 'inv-1' } } },
-          attendances: { insert: { error: { code: '23505', message: 'dup' } } },
+  it('inserts source=walkin for an invited guest who has NOT RSVP’d', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'premium' } } },
+        guests: { select: { data: { id: 'g1', name_enc: encGuest('Budi'), invitation_id: 'inv-1', rsvp_submitted_at: null } } },
+        attendances: {
+          select: { data: null }, // no existing ledger row
+          insert: { data: { id: 'a1', invitation_id: 'inv-1', guest_id: 'g1', rsvp_id: null, name_enc: 'Budi', guest_count: 2, source: 'walkin', note_enc: null, arrived_at: 't', created_at: 't' } },
         },
-      }) as any,
-    )
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    const r = await addWalkInAttendance({ slug: 'slug', guestId: 'g1', count: 2 })
+    expect(r).toMatchObject({ ok: true, updated: false })
+    const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'attendances')!
+    expect(ins.value.source).toBe('walkin')
+    expect(ins.value.guest_id).toBe('g1')
+  })
+
+  it('inserts source=rsvp when the guest already filled the RSVP', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'premium' } } },
+        guests: { select: { data: { id: 'g1', name_enc: encGuest('Budi'), invitation_id: 'inv-1', rsvp_submitted_at: '2026-06-15T00:00:00Z' } } },
+        attendances: {
+          select: { data: null },
+          insert: { data: { id: 'a1', invitation_id: 'inv-1', guest_id: 'g1', rsvp_id: null, name_enc: 'Budi', guest_count: 1, source: 'rsvp', note_enc: null, arrived_at: 't', created_at: 't' } },
+        },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
     const r = await addWalkInAttendance({ slug: 'slug', guestId: 'g1', count: 1 })
-    expect(r).toMatchObject({ ok: false, code: 'duplicate' })
+    expect(r.ok).toBe(true)
+    const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'attendances')!
+    expect(ins.value.source).toBe('rsvp')
+  })
+
+  it('reconciles the head-count when the guest already has a ledger row', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'premium' } } },
+        guests: { select: { data: { id: 'g1', name_enc: encGuest('Budi'), invitation_id: 'inv-1', rsvp_submitted_at: '2026-06-15T00:00:00Z' } } },
+        attendances: {
+          select: { data: { id: 'a1' } }, // existing row → update path
+          update: { data: { id: 'a1', invitation_id: 'inv-1', guest_id: 'g1', rsvp_id: null, name_enc: 'Budi', guest_count: 5, source: 'rsvp', note_enc: null, arrived_at: 't', created_at: 't' } },
+        },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    const r = await addWalkInAttendance({ slug: 'slug', guestId: 'g1', count: 5 })
+    expect(r).toMatchObject({ ok: true, updated: true })
+    const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'attendances')!
+    expect(upd.value.guest_count).toBe(5)
+    expect(upd.value.source).toBe('rsvp')
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
   })
 })
 
@@ -89,12 +132,12 @@ describe('addUnlistedAttendance', () => {
     expect((await addUnlistedAttendance({ slug: 'slug', name: '   ', count: 1 })).ok).toBe(false)
   })
 
-  it('inserts with guest_id null and an encrypted name', async () => {
+  it('inserts with guest_id null, source=unregistered, and an encrypted name', async () => {
     const fake = createFakeSupabase({
       tables: {
         invitations: { select: { data: { plan: 'premium' } } },
         attendances: {
-          insert: { data: { id: 'a1', invitation_id: 'inv-1', guest_id: null, rsvp_id: null, name_enc: 'Tamu Tak Terdaftar', guest_count: 3, source: 'walkin', note_enc: null, arrived_at: 't', created_at: 't' } },
+          insert: { data: { id: 'a1', invitation_id: 'inv-1', guest_id: null, rsvp_id: null, name_enc: 'Tamu Tak Terdaftar', guest_count: 3, source: 'unregistered', note_enc: null, arrived_at: 't', created_at: 't' } },
         },
       },
     })
@@ -103,7 +146,7 @@ describe('addUnlistedAttendance', () => {
     expect(r.ok).toBe(true)
     const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'attendances')!
     expect(ins.value.guest_id).toBeNull()
-    expect(ins.value.source).toBe('walkin')
+    expect(ins.value.source).toBe('unregistered')
     expect(ins.value.name_enc).not.toBe('Tamu Tak Terdaftar') // encrypted at rest
   })
 })

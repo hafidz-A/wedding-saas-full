@@ -3,7 +3,7 @@ import { buildPrintHtml } from '../printHtml'
 import { type CsvLabels } from '../csvRows'
 
 const L: CsvLabels = {
-  name: 'Nama', source: 'Sumber', sourceRsvp: 'RSVP', sourceWalkin: 'Walk-in',
+  name: 'Nama', source: 'Sumber', sourceRsvp: 'RSVP', sourceWalkin: 'Walk-in', sourceUnlisted: 'Tak terdaftar',
   guests: 'Jumlah', note: 'Catatan', arrived: 'Kehadiran', arrivedYes: 'Hadir', arrivedNo: 'Belum',
   souvenir: 'Souvenir', souvenirYes: 'Ya', souvenirNo: 'Tidak', table: 'Meja',
 }

@@ -156,7 +156,7 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
   }
 
   const csvLabels: CsvLabels = {
-    name: t.colName, source: t.colSource, sourceRsvp: t.sourceRsvp, sourceWalkin: t.sourceWalkin,
+    name: t.colName, source: t.colSource, sourceRsvp: t.sourceRsvp, sourceWalkin: t.sourceWalkin, sourceUnlisted: t.sourceUnlisted,
     guests: t.colGuests, note: t.colNote, arrived: t.colArrived,
     arrivedYes: t.exportArrivedYes, arrivedNo: t.exportArrivedNo,
     souvenir: t.colSouvenir, souvenirYes: t.souvenirYes, souvenirNo: t.souvenirNo, table: t.colTable,

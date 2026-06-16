@@ -11,7 +11,7 @@ export interface AttendanceRow {
   rsvp_id: string | null
   name: string
   guest_count: number
-  source: 'rsvp' | 'walkin'
+  source: 'rsvp' | 'walkin' | 'unregistered'
   note: string | null
   arrived_at: string | null
   souvenir_taken: boolean
@@ -43,7 +43,7 @@ export interface AttendanceRowDb {
   rsvp_id: string | null
   name_enc: string
   guest_count: number
-  source: 'rsvp' | 'walkin'
+  source: 'rsvp' | 'walkin' | 'unregistered'
   note_enc: string | null
   arrived_at: string | null
   souvenir_taken?: boolean | null

@@ -104,7 +104,9 @@ export async function POST(req: Request) {
     const { error: attErr } = await (supabase.from('attendances') as any).insert({
       invitation_id: invitation.id,
       rsvp_id: rsvp.id,
-      guest_id: null,
+      // Link to the guest so the dashboard can reconcile a later manual entry
+      // (update the head-count) instead of creating a duplicate ledger row.
+      guest_id: check.guestId ?? null,
       name_enc: encryptField(cleanName),
       guest_count: cleanCount,
       source: 'rsvp',

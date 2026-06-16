@@ -98,14 +98,21 @@ export async function searchWalkInGuests(
 export interface AddWalkInResult {
   ok: boolean
   row?: AttendanceRow
+  /** true when an existing ledger row was reconciled (head-count updated). */
+  updated?: boolean
   code?: 'duplicate' | 'not_found' | 'error'
   error?: string
 }
 
 /**
- * Add a walk-in attendance, matched to an existing guests row. Verifies the
- * guest belongs to the invitation, then inserts source='walkin'. The unique
- * index on (invitation_id, guest_id) protects against double-add → 'duplicate'.
+ * Add (or reconcile) an attendance for an existing guests row. Verifies the
+ * guest belongs to the invitation, then:
+ *   • source follows the guest's real state — 'rsvp' if they already filled the
+ *     RSVP (kept even when the committee records arrival manually), else
+ *     'walkin' (invited but no RSVP).
+ *   • if the guest already has a ledger row (their own RSVP, or a prior entry),
+ *     UPDATE the head-count instead of rejecting — the real count can differ
+ *     from what they wrote ("kalau jumlahnya berbeda di update aja").
  */
 export async function addWalkInAttendance(input: {
   slug: string
@@ -120,10 +127,10 @@ export async function addWalkInAttendance(input: {
     // Security: the guest must belong to THIS invitation.
     const { data: guest } = (await admin
       .from('guests')
-      .select('id, name_enc, invitation_id')
+      .select('id, name_enc, invitation_id, rsvp_submitted_at')
       .eq('id', input.guestId)
       .maybeSingle()) as {
-      data: { id: string; name_enc: string; invitation_id: string } | null
+      data: { id: string; name_enc: string; invitation_id: string; rsvp_submitted_at: string | null } | null
     }
     if (!guest || guest.invitation_id !== invitation_id) {
       return { ok: false, code: 'not_found', error: 'Guest not found for this invitation' }
@@ -132,9 +139,35 @@ export async function addWalkInAttendance(input: {
     const name = decryptField(guest.name_enc) ?? ''
     const count = Math.min(20, Math.max(1, Number(input.count) || 1))
     const note = input.note?.trim() || null
+    const source: AttendanceRowDb['source'] = guest.rsvp_submitted_at ? 'rsvp' : 'walkin'
+    const nowIso = new Date().toISOString()
 
-    const { data, error } = (await admin
+    // Reconcile: does this guest already have a ledger row?
+    const { data: existing } = (await admin
       .from('attendances')
+      .select('id')
+      .eq('invitation_id', invitation_id)
+      .eq('guest_id', guest.id)
+      .maybeSingle()) as { data: { id: string } | null }
+
+    if (existing) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = (await (admin.from('attendances') as any)
+        .update({ guest_count: count, note_enc: encryptField(note), source, arrived_at: nowIso })
+        .eq('id', existing.id)
+        .eq('invitation_id', invitation_id)
+        .select()
+        .single()) as { data: AttendanceRowDb | null; error: { message: string } | null }
+      if (error || !data) {
+        console.error('[addWalkInAttendance update]', error)
+        return { ok: false, code: 'error', error: 'Gagal memperbarui tamu. Coba lagi sebentar lagi.' }
+      }
+      revalidatePath('/[template]/[slug]/dashboard', 'page')
+      return { ok: true, row: fromDbRow(data), updated: true }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = (await (admin.from('attendances') as any)
       .insert({
         invitation_id,
         guest_id: guest.id,
@@ -143,26 +176,34 @@ export async function addWalkInAttendance(input: {
         // re-encrypted here under the app key for the attendances domain.
         name_enc: encryptField(name),
         guest_count: count,
-        source: 'walkin',
+        source,
         note_enc: encryptField(note),
-        arrived_at: new Date().toISOString(),
-      } as any)
+        arrived_at: nowIso,
+      })
       .select()
-      .single()) as {
-      data: AttendanceRowDb | null
-      error: { message: string; code?: string } | null
-    }
+      .single()) as { data: AttendanceRowDb | null; error: { message: string; code?: string } | null }
 
     if (error || !data) {
+      // Race: another insert won between our select and insert → update instead.
       if (error?.code === '23505') {
-        return { ok: false, code: 'duplicate', error: 'Guest already in the ledger' }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: upd } = (await (admin.from('attendances') as any)
+          .update({ guest_count: count, note_enc: encryptField(note), source, arrived_at: nowIso })
+          .eq('invitation_id', invitation_id)
+          .eq('guest_id', guest.id)
+          .select()
+          .single()) as { data: AttendanceRowDb | null }
+        if (upd) {
+          revalidatePath('/[template]/[slug]/dashboard', 'page')
+          return { ok: true, row: fromDbRow(upd), updated: true }
+        }
       }
       console.error('[addWalkInAttendance]', error)
       return { ok: false, code: 'error', error: 'Gagal menambahkan tamu. Coba lagi sebentar lagi.' }
     }
 
     revalidatePath('/[template]/[slug]/dashboard', 'page')
-    return { ok: true, row: fromDbRow(data) }
+    return { ok: true, row: fromDbRow(data), updated: false }
   } catch (e) {
     console.error('[addWalkInAttendance]', e)
     return { ok: false, code: 'error', error: 'Terjadi kesalahan tak terduga. Coba lagi sebentar lagi.' }
@@ -170,9 +211,9 @@ export async function addWalkInAttendance(input: {
 }
 
 /**
- * Add an UNLISTED walk-in — a guest not in the imported guests list. No guestId;
- * stored as source='walkin' with guest_id=null (distinguished from a listed
- * walk-in by the null guest_id). Name is encrypted like every attendance name.
+ * Add an UNLISTED attendee — someone not in the imported guests list. No
+ * guestId; stored as source='unregistered' ("tak terdaftar") with guest_id=null.
+ * Name is encrypted like every attendance name.
  */
 export async function addUnlistedAttendance(input: {
   slug: string
@@ -196,7 +237,7 @@ export async function addUnlistedAttendance(input: {
         rsvp_id: null,
         name_enc: encryptField(name),
         guest_count: count,
-        source: 'walkin',
+        source: 'unregistered',
         note_enc: encryptField(note),
         arrived_at: new Date().toISOString(),
       })

@@ -1,7 +1,7 @@
 export interface LedgerStatInput {
   arrived_at: string | null
   guest_count: number
-  source: 'rsvp' | 'walkin'
+  source: 'rsvp' | 'walkin' | 'unregistered'
 }
 
 export interface LedgerStats {
@@ -22,7 +22,9 @@ export function computeStats(rows: LedgerStatInput[]): LedgerStats {
       arrivedCount++
       attendeesArrived += r.guest_count || 0
     }
-    if (r.source === 'walkin') walkinCount++
+    // Everyone who arrived without filling the RSVP (invited walk-in OR
+    // unregistered) counts toward the "walk-in" stat.
+    if (r.source !== 'rsvp') walkinCount++
   }
   return {
     totalEntries: rows.length,

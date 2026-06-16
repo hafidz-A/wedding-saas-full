@@ -1,12 +1,12 @@
 export interface CsvLabels {
-  name: string; source: string; sourceRsvp: string; sourceWalkin: string
+  name: string; source: string; sourceRsvp: string; sourceWalkin: string; sourceUnlisted: string
   guests: string; note: string; arrived: string; arrivedYes: string; arrivedNo: string
   souvenir: string; souvenirYes: string; souvenirNo: string; table: string
 }
 
 export interface CsvInputRow {
   name: string
-  source: 'rsvp' | 'walkin'
+  source: 'rsvp' | 'walkin' | 'unregistered'
   guest_count: number
   note: string | null
   arrived_at: string | null
@@ -22,7 +22,7 @@ export function toCsvRows(
   return rows.map((r) => {
     const out: Record<string, string> = {
       [L.name]: r.name,
-      [L.source]: r.source === 'walkin' ? L.sourceWalkin : L.sourceRsvp,
+      [L.source]: r.source === 'rsvp' ? L.sourceRsvp : r.source === 'unregistered' ? L.sourceUnlisted : L.sourceWalkin,
       [L.guests]: String(r.guest_count),
       [L.note]: r.note ?? '',
       [L.arrived]: r.arrived_at ? L.arrivedYes : L.arrivedNo,
