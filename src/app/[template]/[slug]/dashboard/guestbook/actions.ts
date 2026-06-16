@@ -6,7 +6,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { planHasGuestbook } from '@/lib/payments/plans'
 import { decryptField } from '@/lib/guests/crypto'
-import { encryptField } from '@/lib/crypto/app'
+import { encryptField, decryptField as decryptAppField } from '@/lib/crypto/app'
 import { fromDbRow, type AttendanceRow, type AttendanceRowDb } from './types'
 
 /**
@@ -139,22 +139,39 @@ export async function addWalkInAttendance(input: {
     const name = decryptField(guest.name_enc) ?? ''
     const count = Math.min(20, Math.max(1, Number(input.count) || 1))
     const note = input.note?.trim() || null
-    const source: AttendanceRowDb['source'] = guest.rsvp_submitted_at ? 'rsvp' : 'walkin'
     const nowIso = new Date().toISOString()
 
-    // Reconcile: does this guest already have a ledger row?
-    const { data: existing } = (await admin
+    // Find an existing ledger row for THIS person so we reconcile (update the
+    // head-count) instead of duplicating. Match by guest_id first; fall back to
+    // a same-name row that isn't linked to a guest yet — e.g. the guest's own
+    // RSVP row (which may predate guest-linking, so its guest_id is null). This
+    // is why manually adding an RSVP'd guest updates their RSVP entry rather
+    // than spawning a separate Walk-in row.
+    const { data: candidates } = (await admin
       .from('attendances')
-      .select('id')
-      .eq('invitation_id', invitation_id)
-      .eq('guest_id', guest.id)
-      .maybeSingle()) as { data: { id: string } | null }
+      .select('id, guest_id, source, name_enc')
+      .eq('invitation_id', invitation_id)) as {
+      data: { id: string; guest_id: string | null; source: AttendanceRowDb['source']; name_enc: string }[] | null
+    }
+    const rows = candidates ?? []
+    const target = name.trim().toLowerCase()
+    const decName = (enc: string): string => {
+      try { return (decryptAppField(enc) ?? '').trim().toLowerCase() } catch { return (enc ?? '').trim().toLowerCase() }
+    }
+    const match =
+      rows.find((r) => r.guest_id === guest.id) ??
+      (target ? rows.find((r) => r.guest_id == null && decName(r.name_enc) === target) : undefined)
 
-    if (existing) {
+    // Source follows the guest's real state; an existing RSVP row stays 'rsvp'
+    // even if the guest's rsvp_submitted_at flag wasn't set on this record.
+    const source: AttendanceRowDb['source'] =
+      guest.rsvp_submitted_at || match?.source === 'rsvp' ? 'rsvp' : 'walkin'
+
+    if (match) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = (await (admin.from('attendances') as any)
-        .update({ guest_count: count, note_enc: encryptField(note), source, arrived_at: nowIso })
-        .eq('id', existing.id)
+        .update({ guest_id: guest.id, guest_count: count, note_enc: encryptField(note), source, arrived_at: nowIso })
+        .eq('id', match.id)
         .eq('invitation_id', invitation_id)
         .select()
         .single()) as { data: AttendanceRowDb | null; error: { message: string } | null }
@@ -184,20 +201,6 @@ export async function addWalkInAttendance(input: {
       .single()) as { data: AttendanceRowDb | null; error: { message: string; code?: string } | null }
 
     if (error || !data) {
-      // Race: another insert won between our select and insert → update instead.
-      if (error?.code === '23505') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: upd } = (await (admin.from('attendances') as any)
-          .update({ guest_count: count, note_enc: encryptField(note), source, arrived_at: nowIso })
-          .eq('invitation_id', invitation_id)
-          .eq('guest_id', guest.id)
-          .select()
-          .single()) as { data: AttendanceRowDb | null }
-        if (upd) {
-          revalidatePath('/[template]/[slug]/dashboard', 'page')
-          return { ok: true, row: fromDbRow(upd), updated: true }
-        }
-      }
       console.error('[addWalkInAttendance]', error)
       return { ok: false, code: 'error', error: 'Gagal menambahkan tamu. Coba lagi sebentar lagi.' }
     }
