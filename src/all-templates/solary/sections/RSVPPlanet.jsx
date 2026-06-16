@@ -19,9 +19,6 @@ const schema = z.object({
   message: z.string().max(600).optional(),
 });
 
-const sentKey = (slug) => `rsvp-sent:${slug}`;
-const isRealSlug = (slug) => !!slug && slug !== "demo";
-
 export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, whatsappNumber, menuOptions = [], slug = "demo" }) {
   const { name } = useGuest();
 
@@ -40,14 +37,10 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
   const [sent, setSent] = useState(false);
   const [sendError, setSendError] = useState(null);
 
-  // One RSVP per device: a real invitation remembers the submission across
-  // reloads. Demo/standalone resets on refresh by design.
-  useEffect(() => {
-    if (!isRealSlug(slug)) return;
-    try {
-      if (window.localStorage.getItem(sentKey(slug))) setSent(true);
-    } catch { /* storage blocked — fall back to in-session lock */ }
-  }, [slug]);
+  // The thank-you screen only shows after submitting in THIS page view. We do
+  // not persist it across reloads — reopening the invitation must always show
+  // the form again (a second guest may share the device; the single-use token
+  // is what stops a real double-RSVP, enforced server-side).
 
   const onSubmit = async (data) => {
     setSendError(null);
@@ -74,11 +67,6 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
       setSendError(err?.message || "Gagal mengirim. Coba lagi.");
       return;
     }
-    if (isRealSlug(slug)) {
-      try {
-        window.localStorage.setItem(sentKey(slug), new Date().toISOString());
-      } catch { /* storage blocked — in-session lock still applies */ }
-    }
     setSent(true);
   };
 
@@ -98,20 +86,13 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
           {sent ? (
             <div className="center-text" style={{ marginTop: "0.5rem", padding: "1.75rem 1.5rem", border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)" }}>
               <div style={{ fontSize: 30, color: "var(--color-accent)", marginBottom: 10 }}>✦</div>
-              <h3 className="h-3" style={{ marginBottom: 6 }}>Terima kasih</h3>
-              <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14 }}>
-                RSVP Anda telah kami catat. Sampai jumpa di hari bahagia kami.
+              <h3 className="h-3" style={{ marginBottom: 6 }}>
+                {name ? `Terima kasih, ${name}` : "Terima kasih sudah mengisi"}
+              </h3>
+              <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14, lineHeight: 1.6 }}>
+                Kabar darimu sudah kami terima dengan penuh syukur. Doa dan
+                restumu sangat berarti bagi kami berdua. ♡
               </p>
-              {whatsappNumber && (
-                <a
-                  className="btn-ghost"
-                  style={{ marginTop: 14, display: "inline-flex" }}
-                  href={`https://wa.me/${String(whatsappNumber).replace(/\D/g, "")}`}
-                  target="_blank" rel="noopener noreferrer"
-                >
-                  Hubungi via WhatsApp ↗
-                </a>
-              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
