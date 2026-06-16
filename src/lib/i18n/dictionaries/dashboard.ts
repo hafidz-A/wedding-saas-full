@@ -501,9 +501,9 @@ export const dashboard = {
         },
         music: {
           title: 'Musik Latar',
-          summary: 'Lagu yang diputar di latar undangan lewat popup.',
+          summary: 'Lagu yang diputar di latar undangan lewat popup — bisa dari MP3, link audio, YouTube, atau pustaka bawaan.',
           steps: [
-            'Unggah satu file MP3 (maksimal 12 MB).',
+            'Pilih sumber musik: Upload MP3 (maks 12 MB), Link audio, YouTube, atau Pustaka lagu bawaan.',
             'Atur teks popup: judul dan tombol Terima/Tutup.',
             'Atur Loop bila ingin lagu mengulang.',
             'Aktifkan toggle Aktif, lalu klik Simpan.',
@@ -839,10 +839,10 @@ export const dashboard = {
           },
           music: {
             title: 'Musik Latar',
-            summary: 'Lagu yang diputar di latar undangan lewat popup saat tamu membuka halaman.',
+            summary: 'Lagu yang diputar di latar undangan lewat popup — dari MP3, link audio, YouTube, atau pustaka bawaan.',
             openTab: 'Buka tab Musik →',
             steps: [
-              'Unggah satu file MP3 (maksimal 12 MB).',
+              'Pilih sumber musik: Upload MP3 (maks 12 MB), Link audio, YouTube, atau Pustaka lagu bawaan.',
               'Atur teks popup: judul dan tombol Terima/Tutup.',
               'Aktifkan toggle Aktif, atur Loop, lalu klik Simpan.',
             ],
@@ -1703,9 +1703,9 @@ export const dashboard = {
         },
         music: {
           title: 'Background Music',
-          summary: 'A song played in the background of your invitation via a popup.',
+          summary: 'A song played in the background of your invitation via a popup — from an MP3, an audio link, YouTube, or the built-in library.',
           steps: [
-            'Upload one MP3 file (max 12 MB).',
+            'Pick a music source: Upload MP3 (max 12 MB), Audio link, YouTube, or the built-in Library.',
             'Set the popup text: title and the Accept/Dismiss buttons.',
             'Set Loop if you want the song to repeat.',
             'Turn on the Enabled toggle, then click Save.',
@@ -2041,10 +2041,10 @@ export const dashboard = {
           },
           music: {
             title: 'Background Music',
-            summary: 'A song played in the background of your invitation via a popup when guests open the page.',
+            summary: 'A song played in the background of your invitation via a popup — from an MP3, an audio link, YouTube, or the built-in library.',
             openTab: 'Open Music tab →',
             steps: [
-              'Upload one MP3 file (max 12 MB).',
+              'Pick a music source: Upload MP3 (max 12 MB), Audio link, YouTube, or the built-in Library.',
               'Set the popup text: title and the Accept/Dismiss buttons.',
               'Turn on the Enabled toggle, set Loop, then click Save.',
             ],
