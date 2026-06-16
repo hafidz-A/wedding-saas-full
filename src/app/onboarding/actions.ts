@@ -7,7 +7,8 @@ import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
 import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { resolvePlan, resolveUpgrade } from '@/lib/payments/plans'
 import { createXenditInvoice, getXenditInvoice, isPaidStatus, expireXenditInvoice } from '@/lib/payments/xendit'
-import { publishPaidInvitation, applyPaidUpgrade } from '@/lib/payments/publish'
+import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod } from '@/lib/payments/publish'
+import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
 
 /** Max unpaid draft invitations a single account may stack up (anti-abuse). */
@@ -290,6 +291,116 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
   } catch (e) {
     console.error('recheckPayment error:', e)
     return { ok: false, error: 'Gagal mengecek pembayaran. Coba lagi sebentar lagi.' }
+  }
+}
+
+/**
+ * Start a renewal for an already-paid invitation whose active period has run
+ * out. Re-bills the SAME plan (no plan change — that's the separate upgrade
+ * flow) via a Xendit invoice keyed by a `ren_` external id, so the webhook
+ * extends the active period instead of treating it as a first purchase (which
+ * its `is_paid` guard would reject). Returns the hosted invoice URL.
+ */
+export async function startRenewal(invitationId: string): Promise<CheckoutResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`checkout:${user.id}`, { windowMs: 60_000, max: 6 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak percobaan pembayaran. Coba lagi sebentar lagi.' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, expires_at, xendit_invoice_id')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; expires_at: string | null; xendit_invoice_id: string | null } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+
+    const period = activePeriodStatus(inv, Date.now())
+    if (period.status !== 'expired') {
+      return { ok: false, error: 'Undangan ini masih aktif — belum perlu diperpanjang.' }
+    }
+
+    const resolved = await resolvePlan(inv.template_id, inv.plan)
+    if (!resolved) return { ok: false, error: 'Plan tidak valid' }
+
+    // Expire the prior invoice so an old link can't be paid against later.
+    if (inv.xendit_invoice_id) await expireXenditInvoice(inv.xendit_invoice_id)
+
+    const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const externalId = `ren_${inv.id}_${Date.now()}`
+    const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
+
+    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
+      externalId,
+      amountIDR: resolved.amountIDR,
+      payerEmail: inv.email ?? user.email ?? undefined,
+      description: `Perpanjang undangan ${inv.slug} — plan ${inv.plan}`,
+      successUrl: `${dash}?renewed=1`,
+      failureUrl: `${dash}?renewal=failed`,
+    })
+
+    await (admin.from('invitations') as any)
+      .update({ xendit_invoice_id: invoiceId, xendit_external_id: externalId })
+      .eq('id', inv.id)
+
+    return { ok: true, invoiceUrl }
+  } catch (e) {
+    console.error('startRenewal error:', e)
+    return { ok: false, error: 'Gagal memulai perpanjangan. Coba lagi sebentar lagi.' }
+  }
+}
+
+/**
+ * Manual fallback for a missed renewal webhook. Re-fetches the latest `ren_`
+ * invoice from Xendit and, if genuinely paid for the current plan price,
+ * extends the active period. Safe to call repeatedly.
+ */
+export async function recheckRenewal(invitationId: string): Promise<RecheckResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`recheck:${user.id}`, { windowMs: 60_000, max: 12 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak permintaan cek pembayaran. Coba lagi sebentar lagi.' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, plan, template_id, owner_user_id, is_paid, expires_at, xendit_invoice_id, xendit_external_id')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: { id: string; plan: string; template_id: string; owner_user_id: string; is_paid: boolean; expires_at: string | null; xendit_invoice_id: string | null; xendit_external_id: string | null } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+
+    const period = activePeriodStatus(inv, Date.now())
+    if (period.status !== 'expired') return { ok: true, published: true, status: 'ACTIVE' }
+
+    if (!inv.xendit_invoice_id || !inv.xendit_external_id?.startsWith('ren_'))
+      return { ok: false, error: 'Belum ada transaksi perpanjangan untuk undangan ini' }
+
+    const resolved = await resolvePlan(inv.template_id, inv.plan)
+    if (!resolved) return { ok: false, error: 'Plan tidak valid' }
+
+    const snap = await getXenditInvoice(inv.xendit_invoice_id)
+    if (!isPaidStatus(snap.status) || snap.amountIDR !== resolved.amountIDR) {
+      return { ok: true, published: false, status: snap.status }
+    }
+
+    await extendActivePeriod(admin, inv)
+    revalidatePath('/[template]/[slug]', 'page')
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    revalidatePath('/profile', 'page')
+    return { ok: true, published: true, status: snap.status }
+  } catch (e) {
+    console.error('recheckRenewal error:', e)
+    return { ok: false, error: 'Gagal mengecek perpanjangan. Coba lagi sebentar lagi.' }
   }
 }
 

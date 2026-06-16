@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { recheckPayment } from '@/app/onboarding/actions'
+import { recheckPayment, recheckRenewal } from '@/app/onboarding/actions'
 
 /**
  * "Saya sudah bayar — cek ulang" CTA. Fallback for when the Xendit webhook was
@@ -13,11 +13,14 @@ import { recheckPayment } from '@/app/onboarding/actions'
  */
 export default function RecheckPaymentButton({
   invitationId,
+  mode = 'payment',
   label = 'Saya sudah bayar — cek ulang',
   checkingLabel = 'Mengecek…',
   stillPendingLabel = 'Pembayaran belum terkonfirmasi. Tunggu sebentar lalu coba lagi.',
 }: {
   invitationId: string
+  /** 'payment' rechecks an initial purchase; 'renewal' rechecks an expired-period extension. */
+  mode?: 'payment' | 'renewal'
   label?: string
   checkingLabel?: string
   stillPendingLabel?: string
@@ -28,7 +31,9 @@ export default function RecheckPaymentButton({
   function onClick() {
     setMsg(null)
     start(async () => {
-      const res = await recheckPayment(invitationId)
+      const res = mode === 'renewal'
+        ? await recheckRenewal(invitationId)
+        : await recheckPayment(invitationId)
       if (res.ok && res.published) {
         window.location.reload()
       } else if (res.ok) {

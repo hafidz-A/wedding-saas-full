@@ -39,6 +39,26 @@ export async function applyPaidUpgrade(
 }
 
 /**
+ * Apply a verified, PAID renewal: recompute the active period from the CURRENT
+ * plan's duration (Premium = lifetime = no expiry) and re-publish. Does NOT
+ * touch is_paid or the plan — a renewal extends the same plan, never changes it.
+ * The CALLER must verify the payment (PAID + correct amount) first.
+ */
+export async function extendActivePeriod(
+  admin: any,
+  inv: PublishableInvitation,
+  nowMs: number = Date.now(),
+): Promise<void> {
+  const resolved = await resolvePlan(inv.template_id, inv.plan)
+  await (admin.from('invitations') as any)
+    .update({
+      is_published: true,
+      expires_at: resolved ? resolved.expiresAt(nowMs) : null,
+    })
+    .eq('id', inv.id)
+}
+
+/**
  * Flip an invitation to paid + published and stamp its active period.
  *
  * Shared by the Xendit webhook and the manual "recheck payment" action so both

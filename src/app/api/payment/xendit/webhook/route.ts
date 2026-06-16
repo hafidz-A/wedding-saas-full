@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { isValidCallbackToken, getXenditInvoice, isPaidStatus, invitationIdFromExternalId } from '@/lib/payments/xendit'
+import { isValidCallbackToken, getXenditInvoice, isPaidStatus, invitationIdFromExternalId, renewalIdFromExternalId } from '@/lib/payments/xendit'
 import { resolvePlan } from '@/lib/payments/plans'
-import { publishPaidInvitation, applyPaidUpgrade } from '@/lib/payments/publish'
+import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod } from '@/lib/payments/publish'
 
 /**
  * Xendit invoice webhook. Authenticated by the `x-callback-token` header
@@ -37,6 +37,13 @@ export async function POST(req: Request) {
   // them here: verify + bump the invitation's plan WITHOUT touching publish state.
   if (body.external_id.startsWith('upg_')) {
     return handleUpgrade(admin, body)
+  }
+
+  // Renewal callbacks are keyed by a `ren_` external id. The invitation is
+  // already paid, so the initial-purchase path below (which refuses paid rows)
+  // would skip it — handle here by EXTENDING the active period instead.
+  if (body.external_id.startsWith('ren_')) {
+    return handleRenewal(admin, body)
   }
 
   // Correlate by the invitation id embedded in OUR external id, NOT by the
@@ -171,5 +178,62 @@ async function handleUpgrade(
     to_plan: upg.to_plan,
     template_id: inv.template_id,
   })
+  return NextResponse.json({ ok: true })
+}
+
+/**
+ * Apply a verified PAID renewal callback: re-verify the payment against Xendit
+ * (paid + amount equals the CURRENT plan price), then extend the invitation's
+ * active period via extendActivePeriod (no plan/is_paid change). Always ACKs 200.
+ */
+async function handleRenewal(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  body: { id?: string; external_id?: string; amount?: number; paid_amount?: number },
+) {
+  const invId = renewalIdFromExternalId(body.external_id)
+  if (!invId) {
+    console.error('[xendit webhook] unparseable renewal external_id', body.external_id)
+    return NextResponse.json({ ok: true })
+  }
+
+  const { data: inv } = (await admin
+    .from('invitations')
+    .select('id, plan, template_id, xendit_invoice_id')
+    .eq('id', invId)
+    .maybeSingle()) as {
+    data: { id: string; plan: string; template_id: string; xendit_invoice_id: string | null } | null
+  }
+  if (!inv) return NextResponse.json({ ok: true })
+
+  const resolved = await resolvePlan(inv.template_id, inv.plan)
+  if (!resolved) {
+    console.error('[xendit webhook] unknown plan (renewal)', inv.template_id, inv.plan)
+    return NextResponse.json({ ok: true })
+  }
+
+  let verified = false
+  try {
+    const snap = await getXenditInvoice(body.id ?? inv.xendit_invoice_id ?? '')
+    verified =
+      snap.externalId === body.external_id &&
+      isPaidStatus(snap.status) &&
+      snap.amountIDR === resolved.amountIDR
+    if (!verified) {
+      console.error('[xendit webhook] renewal verification failed', {
+        external_id: body.external_id,
+        snapStatus: snap.status,
+        snapAmount: snap.amountIDR,
+        expected: resolved.amountIDR,
+      })
+    }
+  } catch (e) {
+    const reported = body.paid_amount ?? body.amount
+    verified = reported === resolved.amountIDR
+    console.error('[xendit webhook] renewal re-fetch failed, used body amount', e)
+  }
+
+  if (!verified) return NextResponse.json({ ok: true })
+
+  await extendActivePeriod(admin, inv)
   return NextResponse.json({ ok: true })
 }

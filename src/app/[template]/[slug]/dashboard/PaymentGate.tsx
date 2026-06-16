@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useTransition } from 'react'
-import { startCheckout } from '@/app/onboarding/actions'
+import { useState, useTransition } from 'react'
+import { startCheckout, startRenewal } from '@/app/onboarding/actions'
 import RecheckPaymentButton from '@/app/profile/RecheckPaymentButton'
 import { useDashboardDict } from './DashboardI18nProvider'
 
@@ -31,13 +31,18 @@ export default function PaymentGate({
   status: 'draft' | 'expired'
 }) {
   const [pending, start] = useTransition()
+  const [err, setErr] = useState<string | null>(null)
   const t = useDashboardDict().paymentGate
   const isExpired = status === 'expired'
 
   function onPay() {
+    setErr(null)
     start(async () => {
-      const res = await startCheckout(invitationId)
+      // Expired = already paid once, just out of active period → renew (extend).
+      // startCheckout refuses paid rows, so it would silently do nothing here.
+      const res = isExpired ? await startRenewal(invitationId) : await startCheckout(invitationId)
       if (res.ok && res.invoiceUrl) window.location.href = res.invoiceUrl
+      else setErr(res.error ?? 'Gagal memproses pembayaran. Coba lagi sebentar lagi.')
     })
   }
 
@@ -59,11 +64,11 @@ export default function PaymentGate({
           )}
         </div>
 
-        {!isExpired && (
-          <div style={{ marginBottom: 22 }}>
-            <RecheckPaymentButton invitationId={invitationId} />
-          </div>
-        )}
+        {err && <p style={{ color: '#C43F2A', fontSize: 13, margin: '0 0 16px', lineHeight: 1.5 }}>{err}</p>}
+
+        <div style={{ marginBottom: 22 }}>
+          <RecheckPaymentButton invitationId={invitationId} mode={isExpired ? 'renewal' : 'payment'} />
+        </div>
 
         <p style={muted}>
           {t.slugLabel}: <code style={code}>{slug}</code>

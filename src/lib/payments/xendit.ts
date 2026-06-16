@@ -128,3 +128,17 @@ export function invitationIdFromExternalId(externalId: string | undefined | null
   const id = parts[1]
   return id && id.length > 0 ? id : null
 }
+
+/**
+ * Extract the invitation id from a RENEWAL external id we minted at checkout.
+ * Format: `ren_<invitationId>_<timestamp>`. Returns null for any other shape
+ * (e.g. `inv_…` initial purchase or `upg_…` upgrade).
+ */
+export function renewalIdFromExternalId(externalId: string | undefined | null): string | null {
+  if (!externalId || !externalId.startsWith('ren_')) return null
+  const parts = externalId.split('_')
+  // ['ren', '<uuid>', '<ts>']
+  if (parts.length < 3) return null
+  const id = parts[1]
+  return id && id.length > 0 ? id : null
+}
