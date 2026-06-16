@@ -4,9 +4,13 @@ import { useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { parseYouTubeId, type MusicSourceKind } from '@/lib/music/source'
+import { MUSIC_LIBRARY } from '@/lib/music/library'
 
 interface MusicSettings {
+  source?: MusicSourceKind
   url?: string
+  youtubeId?: string
   enabled?: boolean
   title?: string
   subtitle?: string
@@ -20,8 +24,10 @@ interface Props {
   initial?: MusicSettings | null
 }
 
-const DEFAULTS: Required<Omit<MusicSettings, 'url'>> & { url: string } = {
+const DEFAULTS: Required<Omit<MusicSettings, 'url' | 'youtubeId'>> & { url: string; youtubeId: string } = {
+  source: 'upload',
   url: '',
+  youtubeId: '',
   enabled: true,
   title: 'Putar musik latar?',
   subtitle: 'Nikmati pengalaman undangan lebih lengkap',
@@ -35,10 +41,15 @@ export default function MusicTab({ slug, initial }: Props) {
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
   const confirmDialog = useConfirm()
-  const [music, setMusic] = useState<typeof DEFAULTS>({
-    ...DEFAULTS,
-    ...(initial || {}),
+  const [music, setMusic] = useState<typeof DEFAULTS>(() => {
+    const merged = { ...DEFAULTS, ...(initial || {}) }
+    // Legacy configs predate `source` — infer it so the right input shows.
+    if (!initial?.source) merged.source = merged.youtubeId ? 'youtube' : 'upload'
+    return merged
   })
+  const [ytInput, setYtInput] = useState(
+    initial?.youtubeId ? `https://youtu.be/${initial.youtubeId}` : '',
+  )
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
@@ -81,7 +92,8 @@ export default function MusicTab({ slug, initial }: Props) {
     setSaving(true)
     setSaveMsg(null)
     try {
-      const payload = music.url
+      const hasTrack = music.source === 'youtube' ? !!music.youtubeId : !!music.url
+      const payload = hasTrack
         ? { music }
         : { music: null }
       const res = await fetch(`/api/invitation/${slug}/music`, {
@@ -132,6 +144,7 @@ export default function MusicTab({ slug, initial }: Props) {
   }
 
   const filename = music.url ? music.url.split('/').pop()?.replace(/^\d+-/, '') : null
+  const hasTrack = music.source === 'youtube' ? !!music.youtubeId : !!music.url
 
   return (
     <div style={card}>
@@ -141,7 +154,7 @@ export default function MusicTab({ slug, initial }: Props) {
           <p style={sub}>{t.subtitle}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          {music.url && (
+          {hasTrack && (
             <span style={music.enabled ? badgeOn : badgeOff}>
               {music.enabled ? t.on : t.off}
             </span>
@@ -152,42 +165,119 @@ export default function MusicTab({ slug, initial }: Props) {
         </div>
       </header>
 
-      {/* ── Upload ── */}
+      {/* ── Source ── */}
       <section style={section}>
-        <h3 style={h3}>{t.s1}</h3>
-        {music.url ? (
-          <div style={audioRow}>
-            <div style={{ display: 'grid', gap: 6, flex: 1, minWidth: 0 }}>
-              <span style={fname} title={filename || ''}>{filename || 'audio.mp3'}</span>
-              <audio src={music.url} controls preload="metadata" style={{ width: '100%', height: 36 }} />
-            </div>
-            <div style={btnsCol}>
-              <button type="button" style={btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
-                {uploading ? t.uploading : t.replace}
+        <h3 style={h3}>{t.sourceLabel}</h3>
+        <div style={segWrap} role="group" aria-label={t.sourceLabel}>
+          {(['upload', 'url', 'youtube', 'library'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => update('source', s)}
+              style={music.source === s ? segActive : segBtn}
+            >
+              {t.sources[s]}
+            </button>
+          ))}
+        </div>
+
+        {music.source === 'upload' && (
+          <>
+            {music.url ? (
+              <div style={audioRow}>
+                <div style={{ display: 'grid', gap: 6, flex: 1, minWidth: 0 }}>
+                  <span style={fname} title={filename || ''}>{filename || 'audio.mp3'}</span>
+                  <audio src={music.url} controls preload="metadata" style={{ width: '100%', height: 36 }} />
+                </div>
+                <div style={btnsCol}>
+                  <button type="button" style={btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
+                    {uploading ? t.uploading : t.replace}
+                  </button>
+                  <button type="button" style={btnGhostDanger} onClick={() => update('url', '')}>
+                    {t.remove}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" style={btnPrimary} onClick={() => fileInput.current?.click()} disabled={uploading}>
+                {uploading ? t.uploading : t.upload}
               </button>
-              <button type="button" style={btnGhostDanger} onClick={() => update('url', '')}>
-                {t.remove}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            style={btnPrimary}
-            onClick={() => fileInput.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? t.uploading : t.upload}
-          </button>
+            )}
+            <input
+              ref={fileInput}
+              type="file"
+              accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/aac,audio/x-m4a,audio/mp4"
+              hidden
+              onChange={onPickFile}
+            />
+            <p style={help}>{t.help}</p>
+          </>
         )}
-        <input
-          ref={fileInput}
-          type="file"
-          accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/aac,audio/x-m4a,audio/mp4"
-          hidden
-          onChange={onPickFile}
-        />
-        <p style={help}>{t.help}</p>
+
+        {music.source === 'url' && (
+          <>
+            <input
+              type="url"
+              value={music.url}
+              onChange={(e) => update('url', e.target.value)}
+              placeholder="https://…/lagu.mp3"
+              style={input}
+            />
+            {music.url && /^https?:\/\//i.test(music.url) && (
+              <audio src={music.url} controls preload="metadata" style={{ width: '100%', height: 36 }} />
+            )}
+            <p style={help}>{t.urlHelp}</p>
+          </>
+        )}
+
+        {music.source === 'youtube' && (
+          <>
+            <input
+              type="url"
+              value={ytInput}
+              onChange={(e) => {
+                setYtInput(e.target.value)
+                update('youtubeId', parseYouTubeId(e.target.value) || '')
+              }}
+              placeholder="https://youtu.be/…"
+              style={input}
+            />
+            {music.youtubeId ? (
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`https://img.youtube.com/vi/${music.youtubeId}/mqdefault.jpg`}
+                  alt=""
+                  style={{ width: 120, borderRadius: 8 }}
+                />
+                <span style={{ fontSize: 12, color: '#2D8C4E' }}>{t.ytDetected}</span>
+              </div>
+            ) : ytInput.trim() ? (
+              <span style={{ fontSize: 12, color: '#E8553E' }}>{t.ytInvalid}</span>
+            ) : null}
+            <p style={help}>{t.ytHelp}</p>
+          </>
+        )}
+
+        {music.source === 'library' && (
+          <>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {MUSIC_LIBRARY.map((track) => (
+                <label key={track.id} style={libRow}>
+                  <input
+                    type="radio"
+                    name="music-library"
+                    checked={music.url === track.url}
+                    onChange={() => update('url', track.url)}
+                  />
+                  <span style={{ flex: 1 }}>{track.title}</span>
+                  <audio src={track.url} controls preload="none" style={{ height: 32 }} />
+                </label>
+              ))}
+            </div>
+            <p style={help}>{t.libraryHelp}</p>
+          </>
+        )}
       </section>
 
       {/* ── Popup wording ── */}
@@ -224,7 +314,7 @@ export default function MusicTab({ slug, initial }: Props) {
           <span style={saveMsg.kind === 'ok' ? msgOk : msgErr}>{saveMsg.text}</span>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
-          {music.url && (
+          {hasTrack && (
             <button type="button" style={btnGhostDanger} onClick={clearMusic} disabled={saving}>
               {t.clearAll}
             </button>
@@ -308,3 +398,7 @@ const badgeOn: React.CSSProperties = { padding: '4px 10px', borderRadius: 999, b
 const badgeOff: React.CSSProperties = { ...badgeOn, background: 'rgba(42,33,24,0.08)', color: 'rgba(42,33,24,0.6)' }
 const msgOk: React.CSSProperties = { fontSize: 12, color: '#2D8C4E' }
 const msgErr: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
+const segWrap: React.CSSProperties = { display: 'inline-flex', flexWrap: 'wrap', gap: 4, background: 'rgba(42,33,24,0.06)', borderRadius: 999, padding: 4, alignSelf: 'flex-start' }
+const segBtn: React.CSSProperties = { padding: '7px 14px', borderRadius: 999, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'rgba(42,33,24,0.6)' }
+const segActive: React.CSSProperties = { ...segBtn, background: '#2A2118', color: '#F5EFE3', fontWeight: 500 }
+const libRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.1)', background: '#fff', fontSize: 13 }

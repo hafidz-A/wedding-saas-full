@@ -22,7 +22,7 @@ const MusicPopup = lazy(() => import('./sections/MusicPopup/index.js'))
 export default function Shell({ config, slug, isDemo = false }) {
   const sections = config?.sections || []
   const music = config?.music
-  const musicActive = music?.url && music.enabled !== false
+  const musicActive = (music?.url || music?.youtubeId) && music.enabled !== false
 
   // Tag <body> so Lovebirds' cream theme applies for this route only
   // (the shared app global.css carries just resets/tokens now).
@@ -49,6 +49,7 @@ export default function Shell({ config, slug, isDemo = false }) {
         <Suspense fallback={null}>
           <MusicPopup
             audioUrl={music.url}
+            youtubeId={music.youtubeId}
             title={music.title}
             subtitle={music.subtitle}
             acceptLabel={music.acceptLabel}

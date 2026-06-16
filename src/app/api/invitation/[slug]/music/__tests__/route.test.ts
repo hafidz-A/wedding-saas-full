@@ -58,6 +58,28 @@ describe('PUT /api/invitation/[slug]/music', () => {
     expect(upd.value.config.music.acceptLabel).toBe('Putar') // default label
   })
 
+  it('parses a youtube url into youtubeId', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    const fake = createFakeSupabase({ tables: { invitations: { select: { data: { config: {} } }, update: {} } } })
+    mockAdmin.mockReturnValue(fake as any)
+    const res = await PUT(put({ music: { source: 'youtube', url: 'https://youtu.be/dQw4w9WgXcQ' } }), ctx)
+    expect(res.status).toBe(200)
+    const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
+    expect(upd.value.config.music.youtubeId).toBe('dQw4w9WgXcQ')
+    expect(upd.value.config.music.url).toBe('')
+    expect(upd.value.config.music.source).toBe('youtube')
+  })
+
+  it('rejects an unsafe (non-http) audio url', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    const fake = createFakeSupabase({ tables: { invitations: { select: { data: { config: {} } }, update: {} } } })
+    mockAdmin.mockReturnValue(fake as any)
+    const res = await PUT(put({ music: { source: 'url', url: 'javascript:alert(1)' } }), ctx)
+    expect(res.status).toBe(200)
+    const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
+    expect(upd.value.config.music.url).toBe('')
+  })
+
   it('500 when the update fails', async () => {
     mockOwner.mockResolvedValue(OWNER)
     mockAdmin.mockReturnValue(
