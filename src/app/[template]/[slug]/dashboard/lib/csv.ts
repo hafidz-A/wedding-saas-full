@@ -1,6 +1,25 @@
 import { buildCsv } from '@/lib/csv/buildCsv'
 
 /**
+ * Return rows without the given columns, preserving the order of the remaining
+ * keys. Used to keep internal columns (id, created_at) out of owner-facing CSV
+ * exports.
+ */
+export function omitColumns<T extends Record<string, unknown>>(
+  rows: T[],
+  keys: string[],
+): Record<string, unknown>[] {
+  const drop = new Set(keys)
+  return rows.map((row) => {
+    const out: Record<string, unknown> = {}
+    for (const k of Object.keys(row)) {
+      if (!drop.has(k)) out[k] = row[k]
+    }
+    return out
+  })
+}
+
+/**
  * Client-side CSV download. Delegates serialisation (escaping + formula-
  * injection guard) to buildCsv, prepends a UTF-8 BOM so Excel opens it with
  * the right encoding, and triggers the download. Returns false when there's

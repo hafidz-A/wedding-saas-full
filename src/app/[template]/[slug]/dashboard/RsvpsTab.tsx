@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { downloadCsv } from './lib/csv'
+import { downloadCsv, omitColumns } from './lib/csv'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useAlert } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
@@ -66,7 +66,7 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
           </button>
           <button
             type="button"
-            onClick={async () => { if (downloadCsv(`rsvps-${new Date().toISOString().slice(0, 10)}.csv`, rsvps as unknown as Record<string, unknown>[])) fb.ok(fm.csvDownloaded); else await showAlert({ message: tc.nothingToExport }) }}
+            onClick={async () => { if (downloadCsv(`rsvps-${new Date().toISOString().slice(0, 10)}.csv`, omitColumns(rsvps as unknown as Record<string, unknown>[], ['id', 'created_at']))) fb.ok(fm.csvDownloaded); else await showAlert({ message: tc.nothingToExport }) }}
             style={primaryBtn}
           >
             {tc.downloadCsv}
