@@ -19,7 +19,7 @@ const schema = z.object({
   message: z.string().max(600).optional(),
 });
 
-export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, whatsappNumber, menuOptions = [], slug = "demo" }) {
+export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, menuOptions = [], slug = "demo" }) {
   const { name } = useGuest();
 
   // Preview iframe loads /<template>/<slug>?preview=1 — simulate so the owner
@@ -157,18 +157,6 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
               <button type="submit" className="form-button" disabled={isSubmitting}>
                 {isSubmitting ? "Mengirim…" : "Kirim RSVP →"}
               </button>
-              {whatsappNumber && (
-                <p className="mono faint center-text" style={{ fontSize: 11, letterSpacing: "0.18em", marginTop: 10 }}>
-                  atau konfirmasi langsung via{" "}
-                  <a
-                    href={`https://wa.me/${String(whatsappNumber).replace(/\D/g, "")}`}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{ color: "var(--color-accent)", textDecoration: "underline" }}
-                  >
-                    WhatsApp ↗
-                  </a>
-                </p>
-              )}
             </form>
           )}
         </CardChild>
