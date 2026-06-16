@@ -38,6 +38,17 @@ const TEMPLATE_PALETTES: Record<string, { dark: Swatch[]; light: Swatch[]; fallb
   lovebirds: { dark: LOVEBIRDS_DARK, light: LOVEBIRDS_LIGHT, fallback: 'warmCream' },
 }
 
+/** Pick black or white text for legibility on a given background hex. */
+function readableOn(hex: string): string {
+  const h = hex.replace('#', '')
+  if (h.length < 6) return '#fff'
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return lum > 0.6 ? '#1a1a1a' : '#fff'
+}
+
 export default function PaletteTab({ slug, template, initial }: { slug: string; template?: string; initial?: string }) {
   const t = useDashboardDict().tabs.palette
   const fm = useDashboardDict().feedback
@@ -91,11 +102,33 @@ export default function PaletteTab({ slug, template, initial }: { slug: string; 
     </section>
   )
 
+  const allSwatches = [...groups.dark, ...groups.light]
+  const activeSwatch = allSwatches.find((p) => p.key === palette) ?? allSwatches[0]
+  const isDarkPalette = groups.dark.some((p) => p.key === palette)
+  const accent = activeSwatch?.swatch ?? '#7D53DE'
+  const previewBg = isDarkPalette ? '#1c1830' : '#faf7f0'
+  const previewFg = isDarkPalette ? '#f4f0ff' : '#2a2118'
+  const previewMute = isDarkPalette ? 'rgba(244,240,255,0.62)' : 'rgba(42,33,24,0.62)'
+
   return (
     <div style={card}>
       <header><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></header>
       <Group title={t.groupDark} items={groups.dark} />
       <Group title={t.groupLight} items={groups.light} />
+
+      {/* Live preview — re-colors instantly when a swatch is selected. */}
+      <section style={section}>
+        <h3 style={h3}>{t.previewLabel}</h3>
+        <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(42,33,24,0.1)' }}>
+          <div style={{ background: previewBg, color: previewFg, padding: '26px 22px', display: 'grid', gap: 10, transition: 'background 0.25s ease, color 0.25s ease' }}>
+            <span style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: accent }}>{t.previewEyebrow}</span>
+            <span style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, lineHeight: 1.1 }}>{t.previewHeading}</span>
+            <span style={{ fontSize: 13, color: previewMute, lineHeight: 1.6, maxWidth: 360 }}>{t.previewBody}</span>
+            <span style={{ justifySelf: 'start', marginTop: 6, padding: '9px 18px', borderRadius: 999, background: accent, color: readableOn(accent), fontSize: 12, letterSpacing: '0.08em', fontWeight: 500 }}>{t.previewButton}</span>
+          </div>
+        </div>
+      </section>
+
       <footer style={footer}>
         {msg && <span style={msg.kind === 'ok' ? msgOk : msgErr}>{msg.text}</span>}
         <button type="button" style={btnPrimary} onClick={save} disabled={saving}>
