@@ -22,9 +22,11 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 interface Props {
   slug: string
   template: string
+  /** Fired when a section row is tapped — used on mobile to open the edit sheet. */
+  onSectionOpen?: (id: string) => void
 }
 
-export default function SectionList({ slug, template }: Props) {
+export default function SectionList({ slug, template, onSectionOpen }: Props) {
   const {
     config, selectedSectionId,
     reorderSections, reorderSectionsById,
@@ -135,7 +137,7 @@ export default function SectionList({ slug, template }: Props) {
                   section={s}
                   label={localizeLabel(getSchemaRegistry(template)[s.type]?.label ?? s.type, lang)}
                   isSelected={s.id === selectedSectionId}
-                  onSelect={() => selectSection(s.id)}
+                  onSelect={() => { selectSection(s.id); onSectionOpen?.(s.id) }}
                   onToggleEnabled={() => toggleSectionEnabled(s.id)}
                   onRemove={() => { removeSection(s.id); fb.ok(fm.sectionRemoved) }}
                   draggable={!posLocked && !typeAnchored && !mandatory}

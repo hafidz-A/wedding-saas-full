@@ -75,6 +75,10 @@
   }
 }
 
+/* Field-editor bottom sheet — only ever shown on mobile (EditorRoot gates the
+   render on useIsMobile; this keeps it hidden on desktop as a safety net). */
+.sheetScrim { display: none; }
+
 @media (max-width: 767.98px) {
   .topBar {
     padding: 12px 14px;
@@ -87,9 +91,67 @@
     width: 100%;
     border-right: none;
     border-bottom: 1px solid rgba(42, 33, 24, 0.08);
-    max-height: 220px;
+    max-height: 50vh;
   }
+  /* On mobile the inline pane is replaced by the tap-to-open sheet. */
   .fieldPane {
-    padding: 16px;
+    display: none;
   }
+
+  .sheetScrim {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(20, 15, 10, 0.5);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .sheet {
+    width: 100%;
+    max-height: 85vh;
+    background: #fff;
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.28);
+    animation: sheetUp 0.22s ease;
+  }
+  .sheetHandle {
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(42, 33, 24, 0.2);
+    margin: 10px auto 4px;
+  }
+  .sheetHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px 12px;
+    border-bottom: 1px solid rgba(42, 33, 24, 0.08);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(42, 33, 24, 0.6);
+  }
+  .sheetClose {
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    color: rgba(42, 33, 24, 0.6);
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .sheetBody {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 16px 28px;
+  }
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }

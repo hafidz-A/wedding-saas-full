@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { EditorProvider, type PageConfig } from './EditorProvider'
 import SectionList from './SectionList'
 import FieldEditor from './FieldEditor'
+import FieldEditorSheet from './FieldEditorSheet'
 import SaveBar, { SaveConflictDialog } from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
@@ -29,6 +30,8 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   }
 
   const [previewOpen, setPreviewOpen] = useState(true)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const isMobile = useIsMobile()
   const t = useDashboardDict().editor
 
   return (
@@ -49,14 +52,29 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
 
         <div className={styles.editorRow}>
           <div className={styles.sectionList}>
-            <SectionList slug={slug} template={template} />
+            <SectionList
+              slug={slug}
+              template={template}
+              onSectionOpen={() => setSheetOpen(true)}
+            />
           </div>
           <main className={styles.fieldPane}>
-            <FieldEditor slug={slug} template={template} />
+            {!isMobile && <FieldEditor slug={slug} template={template} />}
           </main>
         </div>
 
         {previewOpen && <PreviewPane slug={slug} template={template} />}
+
+        {isMobile && (
+          <FieldEditorSheet
+            open={sheetOpen}
+            onClose={() => setSheetOpen(false)}
+            title={t.editSectionTitle}
+            closeLabel={t.sheetCloseAria}
+          >
+            <FieldEditor slug={slug} template={template} />
+          </FieldEditorSheet>
+        )}
       </div>
 
       {/* Second save bar, sticky to the viewport bottom so a scrolled-down
@@ -67,6 +85,19 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
       </div>
     </EditorProvider>
   )
+}
+
+/** True on phone-width viewports — drives the field-editor bottom sheet. */
+function useIsMobile(): boolean {
+  const [mobile, setMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767.98px)')
+    const sync = () => setMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+  return mobile
 }
 
 const previewToggle: React.CSSProperties = {
