@@ -6,6 +6,7 @@ import {
   availableSwapTypes,
   canAddSections,
   canRemoveSectionType,
+  validateSectionsAgainstPolicy,
 } from '../templatePolicy'
 
 const ids = ['intro','neptune','uranus','saturn','jupiter','mars','earth','venus','mercury','sun']
@@ -144,5 +145,75 @@ describe('section count locking', () => {
   it('no policy: add + remove allowed', () => {
     expect(canAddSections(null)).toBe(true)
     expect(canRemoveSectionType('quote', null)).toBe(true)
+  })
+})
+
+describe('validateSectionsAgainstPolicy (server-side config guard)', () => {
+  // A realistic lovebirds saved config: hero + footer (locked types),
+  // rsvp + weddingGift (mandatory), plus a couple of swappable sections.
+  const lovebirdsPrev = [
+    { id: 'hero-1', type: 'hero' },
+    { id: 'story-1', type: 'ourStory' },
+    { id: 'rsvp-1', type: 'rsvp' },
+    { id: 'gift-1', type: 'weddingGift' },
+    { id: 'footer-1', type: 'footer' },
+  ]
+  // A realistic solary saved config: locked-by-id intro/saturn/sun + mandatory
+  // rsvpPlanet/giftPlanet + a swappable planet.
+  const solaryPrev = [
+    { id: 'intro', type: 'intro' },
+    { id: 'venus', type: 'storyPlanet' },
+    { id: 'mars', type: 'rsvpPlanet' },
+    { id: 'jupiter', type: 'giftPlanet' },
+    { id: 'saturn', type: 'saturn' },
+    { id: 'sun', type: 'sun' },
+  ]
+
+  it('returns null for an unknown template (no policy → no extra constraint)', () => {
+    expect(validateSectionsAgainstPolicy('mystery', [{ id: 'a', type: 'x' }], null)).toBeNull()
+  })
+
+  it('accepts a same-count reorder/edit (the normal editor save)', () => {
+    const reordered = [...lovebirdsPrev].reverse()
+    expect(validateSectionsAgainstPolicy('lovebirds', reordered, lovebirdsPrev)).toBeNull()
+    const solReordered = [...solaryPrev].reverse()
+    expect(validateSectionsAgainstPolicy('solary', solReordered, solaryPrev)).toBeNull()
+  })
+
+  it('rejects dropping a mandatory section (lovebirds rsvp / weddingGift)', () => {
+    const noRsvp = lovebirdsPrev.filter((s) => s.type !== 'rsvp')
+    const v = validateSectionsAgainstPolicy('lovebirds', noRsvp, lovebirdsPrev)
+    expect(v?.code).toBe('missing_mandatory')
+  })
+
+  it('rejects dropping a mandatory planet (solary giftPlanet)', () => {
+    const noGift = solaryPrev.filter((s) => s.type !== 'giftPlanet')
+    const v = validateSectionsAgainstPolicy('solary', noGift, solaryPrev)
+    expect(v?.code).toBe('missing_mandatory')
+  })
+
+  it('rejects dropping a locked-by-type anchor (lovebirds hero/footer)', () => {
+    // Keep mandatory present so the locked-type check is what trips.
+    const noFooter = lovebirdsPrev.filter((s) => s.type !== 'footer')
+    const v = validateSectionsAgainstPolicy('lovebirds', noFooter, lovebirdsPrev)
+    expect(['missing_locked_type', 'count_changed']).toContain(v?.code)
+  })
+
+  it('rejects dropping a locked-by-id slot (solary intro)', () => {
+    const noIntro = solaryPrev.filter((s) => s.id !== 'intro')
+    const v = validateSectionsAgainstPolicy('solary', noIntro, solaryPrev)
+    expect(['missing_locked_slot', 'count_changed']).toContain(v?.code)
+  })
+
+  it('rejects an absurd section count on a fixed-count template (the "30 sections" attack)', () => {
+    const thirty = Array.from({ length: 30 }, (_, i) => ({ id: `x${i}`, type: 'ourStory' }))
+    // keep mandatory + locked present so only the count check can trip
+    const attack = [...lovebirdsPrev, ...thirty]
+    const v = validateSectionsAgainstPolicy('lovebirds', attack, lovebirdsPrev)
+    expect(v?.code).toBe('count_changed')
+  })
+
+  it('skips the count check on first save (no previous config)', () => {
+    expect(validateSectionsAgainstPolicy('lovebirds', lovebirdsPrev, null)).toBeNull()
   })
 })

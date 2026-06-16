@@ -165,6 +165,67 @@ export function availableSwapTypes(
   return [currentType, ...rest]
 }
 
+export interface PolicyViolation {
+  code: 'missing_mandatory' | 'missing_locked_type' | 'missing_locked_slot' | 'too_many' | 'count_changed'
+  message: string
+}
+
+/**
+ * Server-side guard that mirrors the editor's structural constraints. The editor
+ * UI already enforces these, but the PUT /config route must NOT trust the client:
+ * a crafted request could otherwise drop a mandatory RSVP/Gift section, blow past
+ * the section cap, or delete a locked anchor (hero/footer, intro/sun). Returns the
+ * FIRST violation found, or null when `nextSections` satisfies the policy.
+ *
+ *   - mandatory types (rsvp/gift) must all survive
+ *   - locked-by-type anchors (lovebirds hero/footer) must survive
+ *   - position-locked slots by id (solary intro/saturn/sun) must survive
+ *   - fixed-count templates (fixedSections / lockSectionCount): the section count
+ *     may not change relative to the previously-saved config (no add/remove)
+ *   - cap-only templates (maxSections without a fixed count): never exceed the cap
+ *
+ * `prevSections` is the section list currently persisted (null on first save).
+ */
+export function validateSectionsAgainstPolicy(
+  template: string | null | undefined,
+  nextSections: { id?: string; type?: string }[],
+  prevSections: { id?: string; type?: string }[] | null,
+): PolicyViolation | null {
+  const policy = template ? getTemplatePolicy(template) : null
+  if (!policy) return null
+
+  for (const t of policy.mandatoryTypes ?? []) {
+    if (!nextSections.some((s) => s.type === t)) {
+      return { code: 'missing_mandatory', message: `Section wajib "${t}" tidak boleh dihapus.` }
+    }
+  }
+  for (const t of policy.lockedTypes ?? []) {
+    if (!nextSections.some((s) => s.type === t)) {
+      return { code: 'missing_locked_type', message: `Section terkunci "${t}" tidak boleh dihapus.` }
+    }
+  }
+  for (const [id, lock] of Object.entries(policy.locks)) {
+    if (!(lock.lockPosition || lock.lockType || lock.lockDisable)) continue
+    if (!nextSections.some((s) => s.id === id)) {
+      return { code: 'missing_locked_slot', message: `Section terkunci "${id}" tidak boleh dihapus.` }
+    }
+  }
+
+  const fixedCount = policy.fixedSections || policy.lockSectionCount
+  if (fixedCount) {
+    // No add/remove. The cap is implied by the fixed count, so we compare to the
+    // saved config rather than maxSections (default configs may legitimately
+    // exceed maxSections, which only governs the "add section" affordance).
+    if (prevSections && nextSections.length !== prevSections.length) {
+      return { code: 'count_changed', message: 'Jumlah section tidak boleh ditambah atau dikurangi.' }
+    }
+  } else if (policy.maxSections != null && nextSections.length > policy.maxSections) {
+    return { code: 'too_many', message: `Maksimal ${policy.maxSections} section.` }
+  }
+
+  return null
+}
+
 export function isPositionLocked(id: string, policy: TemplatePolicy): boolean {
   return !!policy.locks[id]?.lockPosition
 }

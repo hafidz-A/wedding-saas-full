@@ -4,17 +4,33 @@ import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
+import { planHasGuestbook } from '@/lib/payments/plans'
 import { decryptField } from '@/lib/guests/crypto'
 import { encryptField } from '@/lib/crypto/app'
 import { fromDbRow, type AttendanceRow, type AttendanceRowDb } from './types'
 
 /**
- * Verify the calling user owns the invitation for this slug, then return the
- * invitation_id. Single source of truth: editor/lib/auth.verifyOwnership.
+ * Verify the calling user owns the invitation for this slug AND that the
+ * invitation is on a plan that unlocks Buku Tamu (Premium), then return the
+ * invitation_id. The dashboard hides the tab for non-Premium plans, but the
+ * server must not trust the client: every attendance-ledger mutation flows
+ * through here, so a crafted request can't write to the ledger (or read the
+ * walk-in guest list) without actually upgrading. Single source of truth for
+ * ownership: editor/lib/auth.verifyOwnership.
  */
 async function authorizeOwnership(slug: string): Promise<string> {
   const owner = await verifyOwnership(slug)
   if (!owner) throw new Error('Forbidden — not the owner of this invitation')
+
+  const admin = createSupabaseAdminClient()
+  const { data: inv } = (await admin
+    .from('invitations')
+    .select('plan')
+    .eq('id', owner.id)
+    .maybeSingle()) as { data: { plan: string | null } | null }
+  if (!inv || !planHasGuestbook(inv.plan ?? '')) {
+    throw new Error('Forbidden — Buku Tamu requires the Premium plan')
+  }
   return owner.id
 }
 

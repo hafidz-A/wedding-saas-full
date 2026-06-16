@@ -4,7 +4,9 @@ import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
 
 vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
 vi.mock('@/editor/lib/auth', () => ({ verifyOwnership: vi.fn() }))
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+// unstable_cache is pulled in transitively via payments/plans → template-plans
+// (the new server-side Premium gate); keep it a passthrough so the graph loads.
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), unstable_cache: (fn: any) => fn }))
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { encryptField as encGuest } from '@/lib/guests/crypto'
@@ -38,6 +40,8 @@ describe('searchWalkInGuests', () => {
     mockAdmin.mockReturnValue(
       createFakeSupabase({
         tables: {
+          // authorizeOwnership now re-checks the plan server-side (Premium gate).
+          invitations: { select: { data: { plan: 'premium' } } },
           guests: {
             select: {
               data: [
@@ -58,7 +62,7 @@ describe('searchWalkInGuests', () => {
 describe('addWalkInAttendance', () => {
   it('SECURITY: refuses a guest from another invitation', async () => {
     mockAdmin.mockReturnValue(
-      createFakeSupabase({ tables: { guests: { select: { data: { id: 'g1', name_enc: encGuest('X'), invitation_id: 'OTHER-inv' } } } } }) as any,
+      createFakeSupabase({ tables: { invitations: { select: { data: { plan: 'premium' } } }, guests: { select: { data: { id: 'g1', name_enc: encGuest('X'), invitation_id: 'OTHER-inv' } } } } }) as any,
     )
     const r = await addWalkInAttendance({ slug: 'slug', guestId: 'g1', count: 1 })
     expect(r).toMatchObject({ ok: false, code: 'not_found' })
@@ -68,6 +72,7 @@ describe('addWalkInAttendance', () => {
     mockAdmin.mockReturnValue(
       createFakeSupabase({
         tables: {
+          invitations: { select: { data: { plan: 'premium' } } },
           guests: { select: { data: { id: 'g1', name_enc: encGuest('Budi'), invitation_id: 'inv-1' } } },
           attendances: { insert: { error: { code: '23505', message: 'dup' } } },
         },
@@ -80,13 +85,14 @@ describe('addWalkInAttendance', () => {
 
 describe('addUnlistedAttendance', () => {
   it('requires a name', async () => {
-    mockAdmin.mockReturnValue(createFakeSupabase() as any)
+    mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: { plan: 'premium' } } } } }) as any)
     expect((await addUnlistedAttendance({ slug: 'slug', name: '   ', count: 1 })).ok).toBe(false)
   })
 
   it('inserts with guest_id null and an encrypted name', async () => {
     const fake = createFakeSupabase({
       tables: {
+        invitations: { select: { data: { plan: 'premium' } } },
         attendances: {
           insert: { data: { id: 'a1', invitation_id: 'inv-1', guest_id: null, rsvp_id: null, name_enc: 'Tamu Tak Terdaftar', guest_count: 3, source: 'walkin', note_enc: null, arrived_at: 't', created_at: 't' } },
         },
@@ -104,7 +110,7 @@ describe('addUnlistedAttendance', () => {
 
 describe('deleteAttendance', () => {
   it('scopes the delete by invitation_id (IDOR guard)', async () => {
-    const fake = createFakeSupabase({ tables: { attendances: { delete: {} } } })
+    const fake = createFakeSupabase({ tables: { invitations: { select: { data: { plan: 'premium' } } }, attendances: { delete: {} } } })
     mockAdmin.mockReturnValue(fake as any)
     const r = await deleteAttendance('slug', 'att-9')
     expect(r.ok).toBe(true)
@@ -115,12 +121,14 @@ describe('deleteAttendance', () => {
 
 describe('ensureCheckinToken', () => {
   it('returns the existing token without rotating it', async () => {
-    mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: { checkin_token: 'existing-tok' } } } } }) as any)
+    // First invitations.select is the Premium gate (authorizeOwnership); the
+    // second is the action's own checkin_token read — scripted in order.
+    mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: [{ data: { plan: 'premium' } }, { data: { checkin_token: 'existing-tok' } }] } } }) as any)
     expect(await ensureCheckinToken('slug')).toEqual({ ok: true, token: 'existing-tok' })
   })
 
   it('generates and stores a fresh token on first use', async () => {
-    const fake = createFakeSupabase({ tables: { invitations: { select: { data: { checkin_token: null } }, update: {} } } })
+    const fake = createFakeSupabase({ tables: { invitations: { select: [{ data: { plan: 'premium' } }, { data: { checkin_token: null } }], update: {} } } })
     mockAdmin.mockReturnValue(fake as any)
     const r = await ensureCheckinToken('slug')
     expect(r.ok).toBe(true)

@@ -91,3 +91,50 @@ describe('PUT /api/invitation/[slug]/config', () => {
     expect((await PUT(put({ config: validConfig, baseUpdatedAt: 'T1' }), ctx)).status).toBe(500)
   })
 })
+
+describe('PUT /api/invitation/[slug]/config — server-side template policy', () => {
+  const lovebirdsPrev = [
+    { id: 'hero-1', type: 'hero', props: {} },
+    { id: 'rsvp-1', type: 'rsvp', props: {} },
+    { id: 'gift-1', type: 'weddingGift', props: {} },
+    { id: 'footer-1', type: 'footer', props: {} },
+  ]
+  function fakeWith(prev: any[]) {
+    return createFakeSupabase({
+      tables: {
+        invitations: {
+          select: { data: { config: { sections: prev }, updated_at: 'T1', template_id: 'lovebirds' } },
+          update: {},
+        },
+      },
+    })
+  }
+
+  it('422 when a crafted save drops a mandatory section (rsvp)', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(fakeWith(lovebirdsPrev) as any)
+    const noRsvp = { sections: lovebirdsPrev.filter((s) => s.type !== 'rsvp') }
+    const res = await PUT(put({ config: noRsvp, baseUpdatedAt: 'T1' }), ctx)
+    expect(res.status).toBe(422)
+  })
+
+  it('422 when a crafted save balloons the section count past the fixed count', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    const fake = fakeWith(lovebirdsPrev)
+    mockAdmin.mockReturnValue(fake as any)
+    const thirty = Array.from({ length: 30 }, (_, i) => ({ id: `x${i}`, type: 'ourStory', props: {} }))
+    const attack = { sections: [...lovebirdsPrev, ...thirty] }
+    const res = await PUT(put({ config: attack, baseUpdatedAt: 'T1' }), ctx)
+    expect(res.status).toBe(422)
+    // ...and nothing is written to the DB.
+    expect(fake._calls.some((c) => c.kind === 'update' && c.table === 'invitations')).toBe(false)
+  })
+
+  it('200 for a legitimate same-count reorder', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(fakeWith(lovebirdsPrev) as any)
+    const reordered = { sections: [...lovebirdsPrev].reverse() }
+    const res = await PUT(put({ config: reordered, baseUpdatedAt: 'T1' }), ctx)
+    expect(res.status).toBe(200)
+  })
+})

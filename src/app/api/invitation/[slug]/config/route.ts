@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { encryptConfig } from '@/lib/crypto/config'
+import { validateSectionsAgainstPolicy } from '@/editor/templatePolicy'
 
 interface Ctx {
   params: { slug: string }
@@ -49,7 +50,7 @@ export async function PUT(req: Request, { params }: Ctx) {
   // Always take them from the freshly-read DB row instead of the editor payload.
   const PRESERVE_KEYS = ['music', 'bgGif', 'theme', 'meta', 'inviteMessageTemplate']
   const { data: existing } = await (supabase.from('invitations') as any)
-    .select('config, updated_at')
+    .select('config, updated_at, template_id')
     .eq('id', owner.id)
     .single()
 
@@ -63,6 +64,18 @@ export async function PUT(req: Request, { params }: Ctx) {
       { error: 'Undangan ini sudah diubah dari tab atau perangkat lain. Muat ulang halaman dulu sebelum menyimpan.' },
       { status: 409 },
     )
+  }
+
+  // Re-enforce the template's structural policy server-side. The editor UI
+  // already blocks these, but a crafted PUT must not be able to drop a mandatory
+  // RSVP/Gift section, exceed the section cap, or remove a locked anchor.
+  const violation = validateSectionsAgainstPolicy(
+    existing?.template_id,
+    config.sections,
+    Array.isArray(existing?.config?.sections) ? existing.config.sections : null,
+  )
+  if (violation) {
+    return NextResponse.json({ error: violation.message }, { status: 422 })
   }
 
   const mergedConfig: any = { ...config }
