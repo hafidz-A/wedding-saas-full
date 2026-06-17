@@ -93,6 +93,16 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                 Kabar darimu sudah kami terima dengan penuh syukur. Doa dan
                 restumu sangat berarti bagi kami berdua. ♡
               </p>
+              {whatsappNumber && (
+                <a
+                  className="btn-ghost"
+                  style={{ marginTop: 16, display: "inline-flex" }}
+                  href={`https://wa.me/${String(whatsappNumber).replace(/\D/g, "")}`}
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  Konfirmasi via WhatsApp ↗
+                </a>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="form-grid">
