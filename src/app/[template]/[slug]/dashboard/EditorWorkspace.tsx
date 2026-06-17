@@ -38,6 +38,12 @@ export default function EditorWorkspace({
   const labels = useDashboardDict().chrome.tabs
   const keys = editorSubTabs(template)
 
+  // Couple's real names + date (from the hero section) so the Palette preview
+  // shows their actual card instead of placeholder copy.
+  const hero = invitation.config?.sections?.find((s: any) => s.type === 'hero')?.props
+  const coupleName: string | undefined = hero?.coupleName
+  const weddingDate: string | undefined = hero?.weddingDate
+
   return (
     <div>
       <nav style={subnav} role="tablist" aria-label={labels.editor}>
@@ -66,7 +72,13 @@ export default function EditorWorkspace({
           />
         )}
         {sub === 'palette' && (
-          <PaletteTab slug={slug} template={template} initial={invitation.config?.theme?.defaultPalette} />
+          <PaletteTab
+            slug={slug}
+            template={template}
+            initial={invitation.config?.theme?.defaultPalette}
+            coupleName={coupleName}
+            weddingDate={weddingDate}
+          />
         )}
         {sub === 'music' && <MusicTab slug={slug} initial={invitation.config?.music ?? null} />}
         {sub === 'meta' && (

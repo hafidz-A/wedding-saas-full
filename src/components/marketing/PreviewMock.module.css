@@ -1,0 +1,117 @@
+/* Themed invitation preview card — shared by the marketing Vibe Explorer and
+   the dashboard Palette tab so both render an identical mockup. Recoloured per
+   palette via inline styles on the elements. */
+
+.mock {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  min-width: 0;
+  margin: 0 auto;
+  aspect-ratio: 4 / 5;
+  max-height: min(56vh, 460px);
+  border-radius: 20px;
+  border: 1px solid;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mockGlow {
+  position: absolute;
+  inset: 0;
+  filter: blur(28px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.mockOrbits {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 118%;
+  height: 118%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.mockLeaf {
+  position: absolute;
+  font-size: 40px;
+  line-height: 1;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.mockLeafL { top: 18px; left: 18px; transform: rotate(-20deg); }
+.mockLeafR { bottom: 18px; right: 18px; transform: rotate(160deg); }
+
+.mockBody {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+}
+
+.mockEyebrow {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.mockNames {
+  font-family: var(--font-script), var(--font-display), cursive;
+  font-size: clamp(40px, 9vw, 58px);
+  line-height: 1.05;
+}
+
+.mockRule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 60%;
+}
+.mockRule > span:first-child,
+.mockRule > span:last-child {
+  flex: 1;
+  height: 1px;
+  display: block;
+}
+.mockRuleDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.mockDate {
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mockPill {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 9px 22px;
+  border-radius: 999px;
+}
+
+/* On the marketing layout the card sits in a grid cell and left-aligns on
+   desktop; the dashboard centres it inside a flex panel, so margin is moot. */
+@media (min-width: 1024px) {
+  .mock { margin: 0; }
+}
