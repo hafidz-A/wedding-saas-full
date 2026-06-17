@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
-import { parseYouTubeId } from '@/lib/music/source'
 import { safeExternalUrl } from '@/lib/safeUrl'
 
 interface Ctx {
@@ -72,35 +71,20 @@ export async function PUT(req: Request, { params }: Ctx) {
   return NextResponse.json({ ok: true, savedAt, music: sanitized })
 }
 
-const VALID_SOURCES = new Set(['upload', 'url', 'youtube', 'library'])
-
 function sanitizeMusic(input: any) {
   const trimText = (v: any, max = 60) =>
     typeof v === 'string' ? v.trim().slice(0, max) : undefined
 
-  // Source resolution: trust an explicit valid `source`, otherwise infer from
-  // whichever field is present. YouTube stores a parsed id; the rest store an
-  // http(s) url (rejecting javascript:/data: and other unsafe schemes).
-  let source: string | undefined =
-    typeof input.source === 'string' && VALID_SOURCES.has(input.source) ? input.source : undefined
-  let url = ''
-  let youtubeId: string | undefined
-
-  const looksYouTube = !!(input.youtubeId || parseYouTubeId(input.url))
-  if (source === 'youtube' || (!source && looksYouTube)) {
-    source = 'youtube'
-    youtubeId = parseYouTubeId(input.youtubeId || input.url) || undefined
-  } else {
-    const raw = typeof input.url === 'string' ? input.url.trim() : ''
-    const safe = safeExternalUrl(raw)
-    url = /^https?:\/\//i.test(safe) ? safe : ''
-    if (!source) source = url ? 'url' : undefined
-  }
+  // Only mp3 upload is supported. The track is always an http(s) URL to the
+  // uploaded file (rejecting javascript:/data: and other unsafe schemes).
+  // Legacy youtube/url/library fields are intentionally ignored/stripped.
+  const raw = typeof input.url === 'string' ? input.url.trim() : ''
+  const safe = safeExternalUrl(raw)
+  const url = /^https?:\/\//i.test(safe) ? safe : ''
 
   return {
-    ...(source ? { source } : {}),
+    source: 'upload',
     url,
-    ...(youtubeId ? { youtubeId } : {}),
     enabled: input.enabled !== false,
     title: trimText(input.title) || 'Putar musik latar?',
     subtitle: trimText(input.subtitle, 120) || 'Nikmati pengalaman undangan lebih lengkap',

@@ -187,8 +187,12 @@ for (const tpl of ['lovebirds', 'solary'] as Template[]) {
     // On-demand only: the normal e2e suite must not log in / overwrite assets.
     test.skip(process.env.CAPTURE !== '1', 'Run via: npm run capture:tutorial')
     test.setTimeout(300_000)
+    // Optional: ONLY=music-upload,palette-grid limits which shots are recaptured.
+    const only = (process.env.ONLY || '').split(',').map((s) => s.trim()).filter(Boolean)
+    const shots = only.length ? SHOTS[tpl].filter((s) => only.includes(s.key)) : SHOTS[tpl]
+    if (!shots.length) return
     await login(page, tpl)
-    for (const shot of SHOTS[tpl]) {
+    for (const shot of shots) {
       await shot.go(page)
       await page.waitForTimeout(400)
       await capture(page, tpl, shot)
