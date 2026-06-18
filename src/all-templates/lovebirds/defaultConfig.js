@@ -1,6 +1,6 @@
 /* Default page config — bundled demo data, rendered when no Supabase row exists. */
 
-import { demoImg } from '../../lib/demoImages.js'
+import { lovebirdsImg as demoImg } from './demoImages.js'
 
 // Calculate a dynamic future date for the demo so the countdown is always active and counting down
 const now = new Date()

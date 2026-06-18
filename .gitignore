@@ -46,3 +46,6 @@ Thumbs.db
 
 # Microsoft Office lock files
 ~$*
+
+# Scratch dir for demo-image curation
+.tmp/
