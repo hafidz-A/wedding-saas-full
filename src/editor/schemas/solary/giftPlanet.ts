@@ -1,5 +1,5 @@
 import type { SectionSchema } from '../types'
-import { demoImg } from '@/lib/demoImages'
+import { solaryImg as demoImg } from '@/all-templates/solary/demoImages'
 
 export const giftPlanetSchema: SectionSchema = {
   type: 'giftPlanet',

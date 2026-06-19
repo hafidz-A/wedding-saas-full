@@ -8,14 +8,21 @@
    freely. The renderer never imports this file directly — go
    through getConfig() (config/getConfig.js). That lets us swap
    to a fetch() backend later without touching components.
+
+   Visual direction: "starlit romance" (grounded). User-facing copy
+   is timeless-wedding language; the planetKey/planetName fields stay
+   for now because they bind to the 3D scene (engine softening is a
+   separate, pending task). See docs/solary-visual-foundation.md v2.
    ============================================================ */
 
-import { demoImg } from "../../../lib/demoImages.js";
+// Solary reuses the local Lovebirds photo set via solaryImg (drop-in for the
+// shared demoImg; unmatched keys fall back to the Unsplash registry).
+import { solaryImg as demoImg } from "../demoImages.js";
 
 export const pageConfig = {
   meta: {
-    title: "Aruna & Daksa — A Galactic Wedding",            // [CONTOH]
-    description: "An interstellar invitation. 02 · 14 · 2027.", // [CONTOH]
+    title: "Aruna & Daksa — A Wedding Celebration",          // [CONTOH]
+    description: "A wedding invitation. 02 · 14 · 2027.",     // [CONTOH]
     locale: "id-ID",
     timezone: "Asia/Jakarta",
     slug: "demo",                                            // SaaS slug
@@ -33,9 +40,10 @@ export const pageConfig = {
   },
 
   /* Defaults for the active visual palette. The runtime
-     palette switcher overrides this. */
+     palette switcher overrides this. Default is a warm, light,
+     premium palette (Golden Champagne) per the grounded direction. */
   theme: {
-    defaultPalette: "cosmicDark",
+    defaultPalette: "sunburstLight",
     paletteOptions: [
       "cosmicDark",
       "nebulaDark",
@@ -74,9 +82,9 @@ export const pageConfig = {
       props: {
         planetKey: "andromeda",
         planetName: "Andromeda",
-        eyebrow: "An Interstellar Invitation",               // [CONTOH]
+        eyebrow: "You Are Invited",                          // [CONTOH]
         coupleName: "Aruna  &  Daksa",                       // [CONTOH]
-        tagline: "Two stars, one orbit. You are invited to witness a once-in-a-lifetime alignment.", // [CONTOH]
+        tagline: "Two hearts, one story. You are invited to witness the beginning of our forever.", // [CONTOH]
         ctaLabel: "Get Started",
         gatePhotos: [
           demoImg("coupleClassic", 400),
@@ -103,7 +111,7 @@ export const pageConfig = {
         planetName: "Neptune",
         sectionLabel: "Welcome",
         heading: "We found each other in the deep blue.",    // [CONTOH]
-        body: "A short prelude before the journey: who we are, where we met, and the gravity that pulled us together.", // [CONTOH]
+        body: "A short prelude: who we are, where we met, and what drew us together.", // [CONTOH]
         portrait: demoImg("coupleClassic", 1000),            // [CONTOH] demo via Unsplash registry
         portraitCaption: "Bali, 2023",                       // [CONTOH]
         layout: "single",                                    // [CONTOH] "single" | "duo"
@@ -128,36 +136,36 @@ export const pageConfig = {
         planetKey: "uranus",
         planetName: "Uranus",
         sectionLabel: "Our Story",
-        heading: "A timeline written in starlight.",         // [CONTOH]
+        heading: "The story of us, year by year.",           // [CONTOH]
         timeline: [                                          // [CONTOH]
           {
             year: "2019",
-            label: "First Orbit",
+            label: "First Meeting",
             desc: "We crossed paths at a friend's birthday in Bandung.",
             photo: demoImg("galleryBirthday", 600),
           },
           {
             year: "2021",
-            label: "Gravity",
+            label: "Miles Apart",
             desc: "A long-distance year that pulled us closer, not apart.",
             photo: demoImg("gallerySunsetWalk", 600),
           },
           {
             year: "2023",
-            label: "Aligned",
+            label: "Finally Together",
             desc: "We moved to the same city. Coffee mornings became routine.",
             photo: demoImg("galleryCoffee", 600),
           },
           {
             year: "2025",
             label: "The Proposal",
-            desc: "Under a meteor shower on Mount Bromo. She said yes.",
+            desc: "Under a starlit sky on Mount Bromo. She said yes.",
             photo: demoImg("storyProposal", 600),
           },
           {
             year: "2027",
             label: "The Wedding",
-            desc: "And here we are — inviting you to our alignment.",
+            desc: "And here we are — inviting you to our wedding.",
             photo: demoImg("storyWedding", 600),
           },
         ],
@@ -178,27 +186,28 @@ export const pageConfig = {
         planetKey: "saturn",
         planetName: "Saturn",
         sectionLabel: "Gallery of Memories",
-        heading: "Four rings. Four eras of us.",            // [CONTOH]
-        // 16–20 ring photos. Demo via the curated Unsplash registry (src/lib/demoImages.js).
+        heading: "A gallery of us — era by era.",           // [CONTOH]
+        // 16–20 ring photos. Demo via the local Lovebirds illustration set
+        // (solaryImg). Captions match what each illustration actually shows.
         photos: [                                            // [CONTOH]
-          { src: demoImg("galleryCoffee", 1200),       caption: "First Coffee" },
-          { src: demoImg("gallerySunsetWalk", 1200),   caption: "Bandung Sunset" },
-          { src: demoImg("galleryRoadTrip", 1200),     caption: "Beach Drive" },
-          { src: demoImg("galleryHiking", 1200),       caption: "Hiking Day" },
-          { src: demoImg("galleryMovieNight", 1200),   caption: "Movie Night" },
-          { src: demoImg("galleryBirthday", 1200),     caption: "Birthday Dinner" },
-          { src: demoImg("galleryAnniversary", 1200),  caption: "Anniversary" },
-          { src: demoImg("gallerySunrise", 1200),      caption: "Sunrise Hike" },
-          { src: demoImg("storyProposal", 1200),       caption: "The Question" },
-          { src: demoImg("coupleSunset", 1200),        caption: "She Said Yes" },
-          { src: demoImg("galleryCelebration", 1200),  caption: "Celebration" },
-          { src: demoImg("galleryVenue", 1200),        caption: "Venue Visit" },
-          { src: demoImg("galleryDressFitting", 1200), caption: "Dress Fitting" },
-          { src: demoImg("galleryCakeTasting", 1200),  caption: "Cake Tasting" },
-          { src: demoImg("galleryPreWedShoot", 1200),  caption: "Pre-wed Shoot" },
-          { src: demoImg("galleryBrunch", 1200),       caption: "Family Brunch" },
-          { src: demoImg("gallerySaveTheDate", 1200),  caption: "Save the Date" },
-          { src: demoImg("galleryRings", 1200),        caption: "Last Steps" },
+          { src: demoImg("galleryCoffee", 1200),       caption: "Coffee Mornings" },
+          { src: demoImg("gallerySunsetWalk", 1200),   caption: "Sunset Walk" },
+          { src: demoImg("galleryRoadTrip", 1200),     caption: "The Open Road" },
+          { src: demoImg("galleryHiking", 1200),       caption: "Beach Escape" },
+          { src: demoImg("galleryMovieNight", 1200),   caption: "City Lights" },
+          { src: demoImg("galleryBirthday", 1200),     caption: "Birthday Surprise" },
+          { src: demoImg("galleryAnniversary", 1200),  caption: "A Toast Together" },
+          { src: demoImg("gallerySunrise", 1200),      caption: "Sunrise Sky" },
+          { src: demoImg("storyProposal", 1200),       caption: "The Proposal" },
+          { src: demoImg("coupleGate", 1200),          caption: "Just the Two of Us" },
+          { src: demoImg("galleryCelebration", 1200),  caption: "Our First Dance" },
+          { src: demoImg("galleryVenue", 1200),        caption: "Picnic for Two" },
+          { src: demoImg("galleryDressFitting", 1200), caption: "The Bride" },
+          { src: demoImg("galleryCakeTasting", 1200),  caption: "Cooking Together" },
+          { src: demoImg("galleryPreWedShoot", 1200),  caption: "Bonfire Nights" },
+          { src: demoImg("galleryBrunch", 1200),       caption: "Where We Met" },
+          { src: demoImg("groomPortrait", 1200),       caption: "The Groom" },
+          { src: demoImg("galleryRings", 1200),        caption: "The Rings" },
         ],
       },
       schema: {
@@ -248,10 +257,10 @@ export const pageConfig = {
         cards: [                                             // [CONTOH]
           { icon: "pin",     label: "Venue",   primary: "Plataran Menteng",   secondary: "Jl. HOS Cokroaminoto 42, Jakarta", actionLabel: "Open Map", actionHref: "#" },
           { icon: "clock",   label: "Time",    primary: "16:00 — 22:00 WIB",  secondary: "Doors open 15:30" },
-          { icon: "sparkle", label: "Dress",   primary: "Cosmic Black Tie",   secondary: "Deep tones, metallic accents welcome" },
+          { icon: "sparkle", label: "Dress",   primary: "Garden Black Tie",   secondary: "Deep tones, metallic accents welcome" },
           { icon: "car",     label: "Parking", primary: "Valet available",    secondary: "Complimentary for guests" },
         ],
-        quote: "Wear what makes you feel like a constellation.",     // [CONTOH]
+        quote: "Wear what makes you feel radiant.",                   // [CONTOH]
         quoteAttribution: "Dress code note from the couple",          // [CONTOH]
       },
       schema: {
@@ -271,7 +280,7 @@ export const pageConfig = {
         planetKey: "earth",
         planetName: "Earth",
         sectionLabel: "RSVP",
-        heading: "Please confirm your orbit by 31 January.", // [CONTOH]
+        heading: "Please confirm your attendance by 31 January.", // [CONTOH]
         deadline: "2027-01-31",                              // [CONTOH]
         whatsappNumber: "+62 812-1234-5678",                 // [CONTOH]
         menuOptions: ["Nusantara", "Mediterranean", "Vegetarian"], // [CONTOH]
@@ -294,7 +303,7 @@ export const pageConfig = {
         planetKey: "venus",
         planetName: "Venus",
         sectionLabel: "Bridal Party",
-        heading: "The constellation by our side.",          // [CONTOH]
+        heading: "The dearest people by our side.",          // [CONTOH]
         groups: [                                            // [CONTOH]
           { label: "Bridesmaids", members: [
             { name: "Maya",  role: "Maid of Honor", avatar: demoImg("partyMaidOfHonor", 400) },
@@ -348,11 +357,11 @@ export const pageConfig = {
       props: {
         planetKey: "sun",
         planetName: "Sun",
-        sectionLabel: "End of Transmission",
-        heading: "Thank you for traveling with us.",        // [CONTOH]
-        body: "We can't wait to share that day with you. Until then, walk well, dear traveller.", // [CONTOH]
+        sectionLabel: "With Love",
+        heading: "Thank you for celebrating with us.",       // [CONTOH]
+        body: "We can't wait to share that day with you. Until then, with all our love.", // [CONTOH]
         easterEggMessage: "We're so glad you came this far. We love you. ✦", // [CONTOH] — appears on sun click
-        signature: "Made with light. Galactic Wedding Engine v3.0.",
+        signature: "Made with love.",
         photoFramesEnabled: true, // tilted photo frames behind the closing text
       },
       schema: {
