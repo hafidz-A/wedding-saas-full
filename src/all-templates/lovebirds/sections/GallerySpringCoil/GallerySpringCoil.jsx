@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from 'motion/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { BotanicalSketchLayer } from '../../components/BotanicalBorder.tsx'
+import { SHAPES } from '../../components/Ornaments.jsx'
+import { useTheme } from '../../components/ThemeProvider.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -495,137 +497,46 @@ function clampIndex(index, total) {
 }
 
 /**
- * Blooming bouquet — replaces the old static silhouette. Stems & ribbon
- * fade in first, then four flower clusters bloom from the base up to the
- * crown, each cluster scaling from 0.3→1 with a stagger so the bouquet
- * grows "from stem to crown" as the section enters viewport. Stacks many
- * overlapping circles per cluster to give a packed 3D appearance.
+ * Ornament frame — replaces the old flower bouquet. Renders a small cluster of
+ * the couple's CHOSEN ornament motif (flying birds / butterflies / perched
+ * bird), tinted with the saved palette's accent via the live `--accent` CSS
+ * var so it re-themes for free when the palette changes. Each motif drifts up
+ * and fades in when the section enters the viewport.
  *
- * `animate` flips true once the parent section enters the viewport (via
- * the existing IntersectionObserver in GallerySpringCoil).
+ * `shape` is the inner SVG markup for one motif (from the shared Ornaments
+ * SHAPES set); `animate` flips true once the section enters view.
  */
-function BloomingBouquet({ animate }) {
-  const clusterTransition = (delay) => ({
-    duration: 0.85,
-    delay,
-    ease: [0.16, 1, 0.3, 1],
-  })
-
-  // Colour palette — botanical hues that read as a wedding bouquet:
-  //   stems/ribbon → sage green
-  //   leaves       → deeper sage
-  //   cluster 1    → blush roses (pink/rose)
-  //   cluster 2    → lavender / lilac
-  //   cluster 3    → peach / apricot
-  //   crown        → sunlit yellow
-  const c = {
-    stem:        '#6b8e5f',
-    ribbon:      '#7d9c6f',
-    leaf:        '#5e8755',
-    roseOuter:   '#c9577a',
-    roseInner:   '#ee9eb3',
-    lavOuter:    '#7c5fa5',
-    lavInner:    '#b8a3da',
-    peachOuter:  '#d9854c',
-    peachInner:  '#f6b884',
-    crownOuter:  '#caa636',
-    crownInner:  '#f3c95a',
-  }
-
+function OrnamentFrame({ shape, animate }) {
+  // Three motifs staggered up the corner — bottom-large to top-small — so the
+  // frame reads as a few ornaments fluttering up rather than a flat row.
+  const motifs = [
+    { x: 44, y: 196, s: 1.7, o: 0.92, delay: 0.15 },
+    { x: 6, y: 120, s: 1.15, o: 0.7, delay: 0.4 },
+    { x: 96, y: 60, s: 0.85, o: 0.5, delay: 0.62 },
+  ]
   return (
-    <svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
-      {/* Base: stems + ribbon — fades in first */}
-      <motion.g
-        initial={{ opacity: 0 }}
-        animate={animate ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <g stroke={c.stem} strokeWidth="2.2" fill="none" opacity="0.8" strokeLinecap="round">
-          <path d="M 100 230 C 90 260 78 290 66 320" />
-          <path d="M 100 230 L 100 320" />
-          <path d="M 100 230 C 110 260 122 290 134 320" />
-        </g>
-        <path d="M 76 245 L 124 245 L 121 275 L 79 275 Z" fill={c.ribbon} opacity="0.75" />
-        <path d="M 70 240 Q 58 258 64 285 Q 76 275 79 260 Z" fill={c.ribbon} opacity="0.55" />
-        <path d="M 130 240 Q 142 258 136 285 Q 124 275 121 260 Z" fill={c.ribbon} opacity="0.55" />
-      </motion.g>
-
-      {/* Leaves — frame the bouquet */}
-      <motion.g
-        initial={{ opacity: 0 }}
-        animate={animate ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        fill={c.leaf}
-      >
-        <ellipse cx="46"  cy="190" rx="14" ry="44" opacity="0.6" transform="rotate(-32 46 190)" />
-        <ellipse cx="154" cy="190" rx="14" ry="44" opacity="0.6" transform="rotate(32 154 190)" />
-        <ellipse cx="30"  cy="135" rx="11" ry="34" opacity="0.5" transform="rotate(-55 30 135)" />
-        <ellipse cx="170" cy="135" rx="11" ry="34" opacity="0.5" transform="rotate(55 170 135)" />
-        <ellipse cx="74"  cy="225" rx="9"  ry="22" opacity="0.55" transform="rotate(-20 74 225)" />
-        <ellipse cx="126" cy="225" rx="9"  ry="22" opacity="0.55" transform="rotate(20 126 225)" />
-      </motion.g>
-
-      {/* Cluster 1 — base roses (pink/rose) */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0.3, y: 40 }}
-        animate={animate ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.3, y: 40 }}
-        transition={clusterTransition(0.55)}
-        style={{ transformOrigin: '100px 210px', transformBox: 'fill-box' }}
-      >
-        <circle cx="100" cy="210" r="24" fill={c.roseOuter} opacity="0.7" />
-        <circle cx="100" cy="210" r="14" fill={c.roseInner} />
-        <circle cx="74"  cy="214" r="20" fill={c.roseOuter} opacity="0.65" />
-        <circle cx="74"  cy="214" r="12" fill={c.roseInner} />
-        <circle cx="126" cy="214" r="20" fill={c.roseOuter} opacity="0.65" />
-        <circle cx="126" cy="214" r="12" fill={c.roseInner} />
-        <circle cx="58"  cy="225" r="14" fill={c.roseOuter} opacity="0.55" />
-        <circle cx="142" cy="225" r="14" fill={c.roseOuter} opacity="0.55" />
-      </motion.g>
-
-      {/* Cluster 2 — middle lavender (purple) */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0.3, y: 30 }}
-        animate={animate ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.3, y: 30 }}
-        transition={clusterTransition(0.85)}
-        style={{ transformOrigin: '100px 160px', transformBox: 'fill-box' }}
-      >
-        <circle cx="100" cy="150" r="24" fill={c.lavOuter} opacity="0.7" />
-        <circle cx="100" cy="150" r="14" fill={c.lavInner} />
-        <circle cx="72"  cy="165" r="19" fill={c.lavOuter} opacity="0.65" />
-        <circle cx="72"  cy="165" r="12" fill={c.lavInner} />
-        <circle cx="128" cy="165" r="19" fill={c.lavOuter} opacity="0.65" />
-        <circle cx="128" cy="165" r="12" fill={c.lavInner} />
-        <circle cx="48"  cy="178" r="13" fill={c.lavOuter} opacity="0.55" />
-        <circle cx="152" cy="178" r="13" fill={c.lavOuter} opacity="0.55" />
-      </motion.g>
-
-      {/* Cluster 3 — upper peach (apricot) */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0.3, y: 30 }}
-        animate={animate ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.3, y: 30 }}
-        transition={clusterTransition(1.15)}
-        style={{ transformOrigin: '100px 110px', transformBox: 'fill-box' }}
-      >
-        <circle cx="100" cy="105" r="22" fill={c.peachOuter} opacity="0.75" />
-        <circle cx="100" cy="105" r="13" fill={c.peachInner} />
-        <circle cx="78"  cy="118" r="17" fill={c.peachOuter} opacity="0.65" />
-        <circle cx="78"  cy="118" r="11" fill={c.peachInner} />
-        <circle cx="122" cy="118" r="17" fill={c.peachOuter} opacity="0.65" />
-        <circle cx="122" cy="118" r="11" fill={c.peachInner} />
-      </motion.g>
-
-      {/* Crown — sunlit yellow at the top */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0.3, y: 30 }}
-        animate={animate ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.3, y: 30 }}
-        transition={clusterTransition(1.45)}
-        style={{ transformOrigin: '100px 70px', transformBox: 'fill-box' }}
-      >
-        <circle cx="100" cy="70" r="24" fill={c.crownOuter} opacity="0.8" />
-        <circle cx="100" cy="70" r="15" fill={c.crownInner} />
-        <circle cx="100" cy="40" r="16" fill={c.crownOuter} opacity="0.75" />
-        <circle cx="100" cy="40" r="10" fill={c.crownInner} />
-      </motion.g>
+    <svg
+      viewBox="0 0 200 320"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="xMidYMax meet"
+      // Tint every motif with the live palette accent. Birds/butterflies have
+      // no explicit fill (they inherit `fill`); the perched bird uses
+      // currentColor — `color` covers it. Both follow --accent.
+      style={{ fill: 'var(--accent, #E8553E)', color: 'var(--accent, #E8553E)' }}
+    >
+      {motifs.map((m, i) => (
+        <motion.g
+          key={i}
+          initial={{ opacity: 0, y: 24 }}
+          animate={animate ? { opacity: m.o, y: 0 } : { opacity: 0, y: 24 }}
+          transition={{ duration: 0.7, delay: m.delay, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <g
+            transform={`translate(${m.x} ${m.y}) scale(${m.s})`}
+            dangerouslySetInnerHTML={{ __html: shape }}
+          />
+        </motion.g>
+      ))}
     </svg>
   )
 }
@@ -690,6 +601,10 @@ export default function GallerySpringCoil({
   const displayPhotos = useMemo(() => normalizePhotos(photos), [photos])
   const total = displayPhotos.length
   const config = useMemo(() => buildConfig(total), [total])
+  // The couple's saved ornament motif (birds / butterflies / perched) frames
+  // the scene instead of the old flower bouquet, tinted via --accent in CSS.
+  const { ornamentType } = useTheme()
+  const ornamentShape = SHAPES[ornamentType] || SHAPES.birds
   // Deterministic seed (no Date.now) so server and client render identical
   // botanical paths — avoids a React hydration mismatch on the SVG `d` attrs.
   const gallerySketchSeed = useMemo(() => (0x6d2b79f5 ^ total) >>> 0, [total])
@@ -1085,13 +1000,13 @@ export default function GallerySpringCoil({
             style={{ position: 'absolute' }}
           />
 
-          {/* Blooming bouquets framing the coil scene — animate from
-              stem to crown when the section enters viewport. */}
+          {/* The couple's saved ornament motif frames the coil scene at left &
+              right (replaces the old flower bouquet), tinted to the palette. */}
           <div className="gsc-bouquet gsc-bouquetLeft" aria-hidden="true">
-            <BloomingBouquet animate={hasEntered} />
+            <OrnamentFrame shape={ornamentShape} animate={hasEntered} />
           </div>
           <div className="gsc-bouquet gsc-bouquetRight" aria-hidden="true">
-            <BloomingBouquet animate={hasEntered} />
+            <OrnamentFrame shape={ornamentShape} animate={hasEntered} />
           </div>
 
           <div className="gsc-stage">

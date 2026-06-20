@@ -86,10 +86,13 @@
   margin-bottom: 12px;
 }
 .quoteText {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(20px, 2.6vw, 32px);
-  line-height: 1.4;
+  /* Plain body type (NOT the Great Vibes script that --font-display resolves
+     to in lovebirds) so a long verse reads cleanly, consistent with the rest
+     of the template's body copy. */
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: clamp(19px, 2.4vw, 28px);
+  line-height: 1.6;
   color: var(--fg, var(--color-charcoal));
   margin: 0 0 16px;
 }

@@ -85,7 +85,11 @@ export default function EditorWorkspace({
           <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} />
         )}
         {sub === 'ornament' && (
-          <OrnamentTab slug={slug} initial={invitation.config?.theme?.ornamentType} />
+          <OrnamentTab
+            slug={slug}
+            initial={invitation.config?.theme?.ornamentType}
+            palette={invitation.config?.theme?.defaultPalette}
+          />
         )}
       </div>
     </div>

@@ -47,15 +47,23 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
   const [localGuests, setLocalGuests] = useState<GuestRow[]>(guests)
   useEffect(() => { setLocalGuests(guests) }, [guests])
 
-  // Editable global template state — initialized from invitation config,
-  // saved server-side via updateInviteMessageTemplate when "Simpan" clicked.
-  const [template, setTemplate] = useState(messageTemplate || t.defaultInviteMessage)
+  // The guest message MUST carry the one-time RSVP code placeholder, or guests
+  // can't RSVP (the form requires the 6-digit code). Legacy lovebirds configs
+  // were seeded with a message that omitted {{kode}}; upgrade them transparently
+  // by appending the localized code line so every sent message still includes it.
+  const ensureCode = (s: string) =>
+    /\{\{\s*(token|kode)\s*\}\}/i.test(s) ? s : `${s.trimEnd()}${t.codeLineAppend}`
+  const initialTemplate = messageTemplate ? ensureCode(messageTemplate) : t.defaultInviteMessage
+
+  // Editable global template state — initialized from invitation config (with the
+  // code line ensured), saved server-side via updateInviteMessageTemplate.
+  const [template, setTemplate] = useState(initialTemplate)
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
   const [templateError, setTemplateError] = useState<string | null>(null)
 
-  // Whether the template differs from what's saved (gates "confirm change").
-  const templateDirty = template !== (messageTemplate || t.defaultInviteMessage)
+  // Whether the template differs from the (code-ensured) baseline.
+  const templateDirty = template !== initialTemplate
   // Live preview of the message a guest actually receives (sample guest Ahmad).
   const previewMessage = useMemo(
     () =>
@@ -252,7 +260,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           )}
           <button
             type="button"
-            onClick={() => setTemplate(messageTemplate || t.defaultInviteMessage)}
+            onClick={() => setTemplate(initialTemplate)}
             style={ghostBtn}
             disabled={templateSaving || !templateDirty}
           >

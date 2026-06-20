@@ -9,6 +9,7 @@ import { resolveUpgrade } from '@/lib/payments/plans'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
+import { DashboardI18nProvider } from './DashboardI18nProvider'
 import { fromDbRow } from './guests/types'
 import { fromDbRow as attendanceFromDbRow } from './guestbook/types'
 import { decryptField as appDecrypt } from '@/lib/crypto/app'
@@ -100,13 +101,19 @@ export default async function DashboardPage({ params }: PageProps) {
   //     unpaid case (expired view is closed for everyone).
   const period = activePeriodStatus(invitation, Date.now())
   if (period.status === 'draft' || period.status === 'expired') {
+    // PaymentGate is a client component that reads the dashboard dictionary via
+    // useDashboardDict(), so it MUST be wrapped in the provider — otherwise the
+    // hook throws and the whole gate (incl. the Perpanjang button) crashes with
+    // a client-side exception instead of rendering.
     return (
-      <PaymentGate
-        invitationId={invitation.id}
-        slug={slug}
-        template={canonicalTemplate}
-        status={period.status}
-      />
+      <DashboardI18nProvider dict={t.dashboard} lang={lang}>
+        <PaymentGate
+          invitationId={invitation.id}
+          slug={slug}
+          template={canonicalTemplate}
+          status={period.status}
+        />
+      </DashboardI18nProvider>
     )
   }
 

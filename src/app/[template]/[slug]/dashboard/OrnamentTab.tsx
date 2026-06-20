@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { TEMPLATE_VIBES, type PaletteVibe } from '@/components/marketing/vibeData'
 
 const TYPES = ['birds', 'butterflies', 'perched'] as const
 type OrnamentType = typeof TYPES[number]
@@ -24,7 +25,67 @@ const PREVIEW: Record<OrnamentType, string> = {
               <path class="wing-front" d="M26 30 C26 26, 32 26, 35 32 C38 38, 32 38, 29 36 Z" fill="currentColor" opacity="0.9" />`,
 }
 
-export default function OrnamentTab({ slug, initial }: { slug: string; initial?: string }) {
+// Scatter layouts for the preview scene (percentages within the panel). The
+// flying motifs drift; the perched pair sits low and still, mirrored to face
+// each other. Each carries a size, opacity and animation delay.
+const FLYING_LAYOUT = [
+  { left: '12%', top: '24%', size: 64, opacity: 0.92, delay: 0, flip: false },
+  { left: '64%', top: '16%', size: 52, opacity: 0.8, delay: 0.6, flip: true },
+  { left: '40%', top: '46%', size: 76, opacity: 1, delay: 1.1, flip: false },
+  { left: '78%', top: '54%', size: 44, opacity: 0.66, delay: 0.3, flip: true },
+  { left: '24%', top: '62%', size: 40, opacity: 0.6, delay: 0.9, flip: true },
+]
+const PERCHED_LAYOUT = [
+  { left: '32%', top: '40%', size: 92, opacity: 0.95, delay: 0, flip: false },
+  { left: '54%', top: '40%', size: 92, opacity: 0.95, delay: 0, flip: true },
+]
+
+const PREVIEW_KEYFRAMES = `
+@keyframes orn-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes orn-bob-flip { 0%,100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-9px); } }
+`
+
+function PreviewScene({ type, accent }: { type: OrnamentType; accent: string }) {
+  const layout = type === 'perched' ? PERCHED_LAYOUT : FLYING_LAYOUT
+  const animate = type !== 'perched'
+  return (
+    <>
+      {layout.map((m, i) => (
+        <svg
+          key={i}
+          viewBox="0 0 64 64"
+          width={m.size}
+          height={m.size}
+          aria-hidden
+          style={{
+            position: 'absolute',
+            left: m.left,
+            top: m.top,
+            fill: accent,
+            color: accent,
+            opacity: m.opacity,
+            transform: m.flip ? 'scaleX(-1)' : undefined,
+            animation: animate
+              ? `${m.flip ? 'orn-bob-flip' : 'orn-bob'} ${3 + i * 0.4}s ease-in-out ${m.delay}s infinite`
+              : undefined,
+            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.14))',
+          }}
+          dangerouslySetInnerHTML={{ __html: PREVIEW[type] }}
+        />
+      ))}
+    </>
+  )
+}
+
+export default function OrnamentTab({
+  slug,
+  initial,
+  palette,
+}: {
+  slug: string
+  initial?: string
+  palette?: string
+}) {
   const t = (useDashboardDict().tabs as any).ornament
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
@@ -33,6 +94,13 @@ export default function OrnamentTab({ slug, initial }: { slug: string; initial?:
   )
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+
+  // Resolve the couple's SAVED palette from the same source the Palette tab and
+  // landing-page explorer use, so the preview's ambient background + ornament
+  // tint match exactly what the published invitation renders.
+  const vibe = TEMPLATE_VIBES.find((v) => v.id === 'lovebirds')!
+  const active: PaletteVibe =
+    vibe.palettes.find((p) => p.key === palette) ?? vibe.palettes[0]
 
   async function save() {
     setSaving(true); setMsg(null)
@@ -53,12 +121,24 @@ export default function OrnamentTab({ slug, initial }: { slug: string; initial?:
 
   return (
     <div style={card}>
+      <style dangerouslySetInnerHTML={{ __html: PREVIEW_KEYFRAMES }} />
       <header><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></header>
+
+      {/* Live preview — the selected motif painted in the saved palette's accent
+          over that palette's ambient background. */}
+      <div style={{ ...previewPanel, background: active.background, borderColor: active.surfaceBorder }}>
+        <PreviewScene type={type} accent={active.accent} />
+        <span style={{ ...paletteChip, color: active.fgMuted, borderColor: active.surfaceBorder }}>
+          <span style={{ width: 11, height: 11, borderRadius: '50%', background: active.accent, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
+          {active.label}
+        </span>
+      </div>
+
       <div style={grid}>
         {TYPES.map((ty) => (
           <button key={ty} type="button" onClick={() => setType(ty)}
             style={{ ...optBtn, borderColor: type === ty ? '#2A2118' : 'rgba(42,33,24,0.15)', outline: type === ty ? '2px solid #2A2118' : 'none' }}>
-            <svg viewBox="0 0 64 64" width="40" height="40" style={{ fill: '#E8553E' }}
+            <svg viewBox="0 0 64 64" width="40" height="40" style={{ fill: active.accent, color: active.accent }}
                  dangerouslySetInnerHTML={{ __html: PREVIEW[ty] }} />
             <span style={{ fontSize: 13 }}>{labels[ty]}</span>
           </button>
@@ -75,6 +155,8 @@ export default function OrnamentTab({ slug, initial }: { slug: string; initial?:
 const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 18, padding: 28, boxShadow: '0 12px 36px rgba(42,33,24,0.06)', display: 'grid', gap: 24 }
 const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'rgba(42,33,24,0.6)' }
+const previewPanel: React.CSSProperties = { position: 'relative', height: 240, borderRadius: 16, border: '1px solid', overflow: 'hidden' }
+const paletteChip: React.CSSProperties = { position: 'absolute', left: 14, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 12px', borderRadius: 999, border: '1px solid', background: 'rgba(255,255,255,0.55)', fontSize: 12, backdropFilter: 'blur(6px)' }
 const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }
 const optBtn: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 14px', borderRadius: 12, border: '1px solid', background: '#fff', cursor: 'pointer', color: '#2A2118' }
 const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid rgba(42,33,24,0.06)', paddingTop: 16 }

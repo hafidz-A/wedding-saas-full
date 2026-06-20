@@ -22,11 +22,14 @@ export const defaultConfig = {
   },
 
   // WhatsApp invite message template — used by the Guests tab to render
-  // `wa.me` links. Placeholders: {{name}}, {{url}}. Each couple can edit
-  // this from the dashboard editor; this is the default for new accounts.
+  // `wa.me` links. Placeholders: {{name}}, {{url}}, and {{kode}} (the guest's
+  // one-time RSVP code — REQUIRED, since the RSVP form won't accept a guest
+  // without it). Each couple can edit this from the dashboard editor; this is
+  // the default for new accounts.
   inviteMessageTemplate:
     'Halo {{name}},\n\nDengan hormat kami mengundang Anda untuk hadir di acara pernikahan kami. ' +
-    'Detail lengkap & RSVP di tautan berikut:\n\n{{url}}\n\nTerima kasih 🙏',
+    'Detail lengkap & RSVP di tautan berikut:\n\n{{url}}' +
+    '\n\nKode RSVP kamu: {{kode}} (sekali pakai)\n\nTerima kasih 🙏',
 
   sections: [
     {

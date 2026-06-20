@@ -1,7 +1,17 @@
 .section {
   position: relative;
-  background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-gold) 100%);
-  color: var(--color-cream);
+  /* Palette-driven: paints with the couple's accent (--button-bg) blended to
+     its soft accent, with the matching contrast colour (--button-fg) for text,
+     so the footer matches whatever palette is saved instead of fixed coral/gold.
+     Fallbacks preserve the original coral→gold look without theme vars. */
+  --ftr-bg: var(--button-bg, var(--color-coral));
+  --ftr-fg: var(--button-fg, var(--color-cream));
+  background: linear-gradient(
+    135deg,
+    var(--ftr-bg) 0%,
+    color-mix(in srgb, var(--ftr-bg) 55%, var(--accent-soft, var(--color-gold))) 100%
+  );
+  color: var(--ftr-fg);
   padding: clamp(80px, 10vw, 140px) var(--container-pad) 48px;
   text-align: center;
   opacity: 0;
@@ -87,7 +97,7 @@
   font-style: italic;
   font-size: clamp(40px, 8vw, 88px);
   font-weight: 500;
-  color: var(--color-cream);
+  color: var(--ftr-fg);
   letter-spacing: -0.01em;
   line-height: 1;
 }
@@ -95,7 +105,7 @@
 .message {
   font-family: var(--font-body);
   font-size: clamp(15px, 1.5vw, 17px);
-  color: rgba(253, 246, 236, 0.92);
+  color: color-mix(in srgb, var(--ftr-fg) 90%, transparent);
   max-width: 38ch;
   line-height: 1.7;
 }
@@ -114,9 +124,9 @@
   gap: 8px;
   padding: 10px 18px;
   border-radius: var(--border-radius-pill);
-  background: rgba(255,255,255,0.18);
-  color: var(--color-cream);
-  border: 1px solid rgba(255,255,255,0.32);
+  background: color-mix(in srgb, var(--ftr-fg) 16%, transparent);
+  color: var(--ftr-fg);
+  border: 1px solid color-mix(in srgb, var(--ftr-fg) 30%, transparent);
   font-family: var(--font-body);
   font-size: 13px;
   letter-spacing: 0.1em;
@@ -127,7 +137,7 @@
 }
 
 .socialLink:hover {
-  background: rgba(255,255,255,0.32);
+  background: color-mix(in srgb, var(--ftr-fg) 30%, transparent);
   transform: translateY(-2px);
 }
 
@@ -140,9 +150,9 @@
 
 .coupleName {
   font-weight: 500;
-  color: #fff;
+  color: var(--ftr-fg);
   text-decoration: underline;
-  text-decoration-color: rgba(253,246,236,0.5);
+  text-decoration-color: color-mix(in srgb, var(--ftr-fg) 50%, transparent);
   text-underline-offset: 4px;
 }
 
@@ -151,6 +161,6 @@
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(253,246,236,0.78);
+  color: color-mix(in srgb, var(--ftr-fg) 76%, transparent);
   margin-top: 24px;
 }

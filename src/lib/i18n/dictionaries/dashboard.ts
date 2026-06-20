@@ -249,6 +249,9 @@ export const dashboard = {
           'Halo {{name}}, dengan tulus kami mengundangmu ke pernikahan kami. ' +
           'Selengkapnya di sini: {{url}}' +
           '\n\nKode RSVP kamu: {{kode}} (sekali pakai)',
+        // Appended to a saved message that's missing the code placeholder, so
+        // legacy invitations still send each guest their one-time RSVP code.
+        codeLineAppend: '\n\nKode RSVP kamu: {{kode}} (sekali pakai)',
       },
       guestbook: {
         title: 'Buku Tamu',
@@ -1446,6 +1449,9 @@ export const dashboard = {
           'Hi {{name}}, we’d truly love for you to celebrate our wedding with us. ' +
           'All the details are here: {{url}}' +
           '\n\nYour RSVP code: {{kode}} (one-time use)',
+        // Appended to a saved message that's missing the code placeholder, so
+        // legacy invitations still send each guest their one-time RSVP code.
+        codeLineAppend: '\n\nYour RSVP code: {{kode}} (one-time use)',
       },
       guestbook: {
         title: 'Guestbook',

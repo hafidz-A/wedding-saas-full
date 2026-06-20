@@ -6,7 +6,9 @@ import { resolveOrnamentTheme } from '../config/ornamentThemes.js'
 import { useTheme } from './ThemeProvider.jsx'
 
 // SVG path sets — copied verbatim from style-guide-lovebirds.html lines 2310-2331.
-const SHAPES = {
+// Exported so other sections (e.g. the gallery frame) can reuse the couple's
+// chosen ornament motif instead of an unrelated decoration.
+export const SHAPES = {
   birds: `<path class="wing-back" d="M28 33 C29 22, 26 12, 18 6 C15 4, 13 7, 15 13 C13 10, 9 14, 12 21 C10 18, 6 22, 9 29 C7 26, 3 30, 7 37 C5 34, 2 38, 6 42 C12 44, 22 41, 28 33 Z" />
               <path class="bird-body" d="M4 32 L4 38 L20 38 C26 42, 34 43, 40 40 C44 38, 48 35, 58 32 C52 30, 49 28, 46 26 C43 24, 40 25, 36 29 C32 32, 27 33, 22 33 L4 32 Z" />
               <path class="wing-front" d="M30 33 C31 22, 28 10, 20 4 C17 2, 15 5, 17 11 C15 8, 11 12, 14 19 C12 16, 8 20, 11 27 C9 24, 5 28, 9 35 C7 32, 4 36, 8 41 C14 43, 24 41, 30 33 Z" />`,

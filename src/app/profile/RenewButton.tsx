@@ -1,7 +1,7 @@
 'use client'
 
-import { useTransition } from 'react'
-import { startCheckout } from '@/app/onboarding/actions'
+import { useState, useTransition } from 'react'
+import { startCheckout, startRenewal } from '@/app/onboarding/actions'
 
 /**
  * Inline "Bayar / Perpanjang" CTA shown next to each invitation in the
@@ -23,19 +23,31 @@ export default function RenewButton({
   processingLabel: string
 }) {
   const [pending, start] = useTransition()
+  const [err, setErr] = useState<string | null>(null)
   const label = status === 'expired' ? renewNowLabel : payNowLabel
 
   function onClick() {
+    setErr(null)
     start(async () => {
-      const res = await startCheckout(invitationId)
+      // An expired invitation was already paid once, so startCheckout (which
+      // refuses paid rows) would silently no-op. Renewals must go through
+      // startRenewal, which extends the active period instead.
+      const res =
+        status === 'expired'
+          ? await startRenewal(invitationId)
+          : await startCheckout(invitationId)
       if (res.ok && res.invoiceUrl) window.location.href = res.invoiceUrl
+      else setErr(res.error ?? 'Gagal memproses. Coba lagi sebentar lagi.')
     })
   }
 
   return (
-    <button type="button" onClick={onClick} disabled={pending} style={btn}>
-      {pending ? processingLabel : label}
-    </button>
+    <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+      <button type="button" onClick={onClick} disabled={pending} style={btn}>
+        {pending ? processingLabel : label}
+      </button>
+      {err && <span style={{ fontSize: 11, color: '#C43F2A', maxWidth: 220, lineHeight: 1.4 }}>{err}</span>}
+    </span>
   )
 }
 
