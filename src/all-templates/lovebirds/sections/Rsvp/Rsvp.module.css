@@ -26,9 +26,12 @@
 .section.visible { opacity: 1; transform: translateY(0); }
 
 .inner {
-  max-width: 680px;
+  /* Narrower than the section so the SceneFrame ornaments breathe at the
+     left/right edges; lifted above the decorative scene + haze. */
+  max-width: 600px;
   margin: 0 auto;
   position: relative;
+  z-index: 2;
 }
 
 .header { text-align: center; margin-bottom: clamp(28px, 5vw, 48px); }

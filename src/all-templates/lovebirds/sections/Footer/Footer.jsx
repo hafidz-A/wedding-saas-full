@@ -1,6 +1,7 @@
 'use client'
 
 import useScrollReveal from '../../hooks/useScrollReveal.js'
+import SceneFrame from '../../components/SceneFrame.jsx'
 import styles from './Footer.module.css'
 import { deriveMonogram } from '../../config/monogram.js'
 import { safeExternalUrl } from '@/lib/safeUrl'
@@ -75,6 +76,7 @@ export default function Footer(props) {
       className={`${styles.section} ${isVisible ? styles.visible : ''}`}
       aria-label="Footer"
     >
+      <SceneFrame />
       <div className={styles.inner}>
         <MonogramSvg text={monogramText} />
 

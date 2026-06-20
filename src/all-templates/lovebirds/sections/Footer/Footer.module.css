@@ -22,8 +22,11 @@
 .section.visible { opacity: 1; transform: translateY(0); }
 
 .inner {
+  /* Lifted above the SceneFrame scene + haze, and narrowed so the side
+     ornaments stay visible at the edges. */
   position: relative;
-  max-width: 720px;
+  z-index: 2;
+  max-width: 620px;
   margin: 0 auto;
   display: grid;
   justify-items: center;

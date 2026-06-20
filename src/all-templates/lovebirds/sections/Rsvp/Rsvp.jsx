@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import ThreeDTilt from '../../components/ThreeDTilt.jsx'
+import SceneFrame from '../../components/SceneFrame.jsx'
 import styles from './Rsvp.module.css'
 
 const DEFAULTS = {
@@ -96,6 +97,7 @@ export default function Rsvp(props) {
       className={`${styles.section} ${isVisible ? styles.visible : ''}`}
       aria-label="RSVP"
     >
+      <SceneFrame />
       <div className={styles.inner}>
         <header className={styles.header}>
           <p className={styles.eyebrow}>Kindly respond</p>

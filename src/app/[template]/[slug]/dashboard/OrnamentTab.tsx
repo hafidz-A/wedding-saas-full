@@ -25,55 +25,100 @@ const PREVIEW: Record<OrnamentType, string> = {
               <path class="wing-front" d="M26 30 C26 26, 32 26, 35 32 C38 38, 32 38, 29 36 Z" fill="currentColor" opacity="0.9" />`,
 }
 
-// Scatter layouts for the preview scene (percentages within the panel). The
-// flying motifs drift; the perched pair sits low and still, mirrored to face
-// each other. Each carries a size, opacity and animation delay.
-const FLYING_LAYOUT = [
-  { left: '12%', top: '24%', size: 64, opacity: 0.92, delay: 0, flip: false },
-  { left: '64%', top: '16%', size: 52, opacity: 0.8, delay: 0.6, flip: true },
-  { left: '40%', top: '46%', size: 76, opacity: 1, delay: 1.1, flip: false },
-  { left: '78%', top: '54%', size: 44, opacity: 0.66, delay: 0.3, flip: true },
-  { left: '24%', top: '62%', size: 40, opacity: 0.6, delay: 0.9, flip: true },
-]
-const PERCHED_LAYOUT = [
-  { left: '32%', top: '40%', size: 92, opacity: 0.95, delay: 0, flip: false },
-  { left: '54%', top: '40%', size: 92, opacity: 0.95, delay: 0, flip: true },
+// Flying flock layout (birds / butterflies): each motif crosses the panel on a
+// left→right or right→left path while its wings flap — the SAME motion the real
+// invitation uses (flap keyframes ported from Ornaments.css; flight re-scoped to
+// the panel via animating `left` instead of the viewport-unit `vw` paths).
+const FLY = [
+  { top: '12%', size: 58, dur: 9, delay: '0s', dir: 'r' as const },
+  { top: '30%', size: 40, dur: 12, delay: '-4s', dir: 'l' as const },
+  { top: '48%', size: 74, dur: 8, delay: '-2s', dir: 'r' as const },
+  { top: '60%', size: 34, dur: 13, delay: '-7s', dir: 'l' as const },
+  { top: '74%', size: 30, dur: 11, delay: '-5s', dir: 'r' as const },
 ]
 
-const PREVIEW_KEYFRAMES = `
-@keyframes orn-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-@keyframes orn-bob-flip { 0%,100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-9px); } }
+const PREVIEW_CSS = `
+.ornp { position: absolute; inset: 0; }
+.ornp-bird { position: absolute; will-change: left, transform; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.14)); }
+.ornp-bird .wing-back { fill: var(--orn-soft); transform-origin: 28px 33px; animation: ornp-flap-back .7s ease-in-out infinite alternate; }
+.ornp-bird .wing-front { transform-origin: 30px 33px; animation: ornp-flap-front .7s ease-in-out infinite alternate; }
+@keyframes ornp-flap-front { 0% { transform: scaleY(-0.7) rotate(-15deg); } 100% { transform: scaleY(1.1) rotate(20deg); } }
+@keyframes ornp-flap-back  { 0% { transform: scaleY(-0.6) rotate(-5deg);  } 100% { transform: scaleY(1.0) rotate(25deg);  } }
+@keyframes ornp-fly-r {
+  0%   { left: -16%; opacity: 0; transform: translateY(0) rotate(8deg); }
+  8%   { opacity: .95; }
+  50%  { transform: translateY(-16px) rotate(-4deg); }
+  92%  { opacity: .95; }
+  100% { left: 112%; opacity: 0; transform: translateY(8px) rotate(6deg); }
+}
+@keyframes ornp-fly-l {
+  0%   { left: 112%; opacity: 0; transform: scaleX(-1) translateY(0) rotate(8deg); }
+  8%   { opacity: .9; }
+  50%  { transform: scaleX(-1) translateY(14px) rotate(-4deg); }
+  92%  { opacity: .9; }
+  100% { left: -16%; opacity: 0; transform: scaleX(-1) translateY(-6px) rotate(6deg); }
+}
+.ornp-bird--r { animation: ornp-fly-r linear infinite; }
+.ornp-bird--l { animation: ornp-fly-l linear infinite; }
+
+/* Perched: two birds rest on the branch, breathing (bob) with a slow wing
+   flutter, while love-hearts drift up between them — the real perched scene. */
+.ornp-perch { position: absolute; inset: 0; }
+.ornp-perch-bird { position: absolute; bottom: 22%; width: 92px; }
+.ornp-perch-bird .wing-front { transform-origin: 30px 33px; animation: ornp-flap-front 1.7s ease-in-out infinite alternate; }
+.ornp-perch-left  { left: 32%; animation: ornp-bob 3.6s ease-in-out infinite; }
+.ornp-perch-right { right: 32%; animation: ornp-bob-flip 3.6s ease-in-out infinite; animation-delay: -1.7s; }
+@keyframes ornp-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes ornp-bob-flip { 0%,100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-6px); } }
+.ornp-heart { position: absolute; bottom: 40%; font-size: 17px; line-height: 1; color: var(--orn-accent); opacity: 0; animation: ornp-heart-rise 3.4s ease-in infinite; }
+@keyframes ornp-heart-rise {
+  0%   { opacity: 0; transform: translateY(0) scale(.6); }
+  20%  { opacity: .85; }
+  100% { opacity: 0; transform: translateY(-72px) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ornp-bird, .ornp-bird .wing-back, .ornp-bird .wing-front,
+  .ornp-perch-left, .ornp-perch-right, .ornp-perch-bird .wing-front, .ornp-heart { animation: none !important; }
+  .ornp-perch-right { transform: scaleX(-1); }
+}
 `
 
-function PreviewScene({ type, accent }: { type: OrnamentType; accent: string }) {
-  const layout = type === 'perched' ? PERCHED_LAYOUT : FLYING_LAYOUT
-  const animate = type !== 'perched'
+function PreviewScene({ type, accent, accentSoft }: { type: OrnamentType; accent: string; accentSoft: string }) {
+  if (type === 'perched') {
+    return (
+      <div className="ornp-perch" style={{ ['--orn-accent' as any]: accent }}>
+        <svg className="ornp-perch-bird ornp-perch-left" viewBox="0 0 64 64" aria-hidden
+             style={{ fill: accent, color: accent }} dangerouslySetInnerHTML={{ __html: PREVIEW.perched }} />
+        <svg className="ornp-perch-bird ornp-perch-right" viewBox="0 0 64 64" aria-hidden
+             style={{ fill: accent, color: accent }} dangerouslySetInnerHTML={{ __html: PREVIEW.perched }} />
+        <span className="ornp-heart" style={{ left: '50%', animationDelay: '0s' }}>♥</span>
+        <span className="ornp-heart" style={{ left: '45%', animationDelay: '1.1s' }}>♥</span>
+        <span className="ornp-heart" style={{ left: '55%', animationDelay: '2.2s' }}>♥</span>
+      </div>
+    )
+  }
   return (
-    <>
-      {layout.map((m, i) => (
+    <div className="ornp">
+      {FLY.map((m, i) => (
         <svg
           key={i}
+          className={`ornp-bird ornp-bird--${m.dir}`}
           viewBox="0 0 64 64"
           width={m.size}
           height={m.size}
           aria-hidden
           style={{
-            position: 'absolute',
-            left: m.left,
             top: m.top,
             fill: accent,
             color: accent,
-            opacity: m.opacity,
-            transform: m.flip ? 'scaleX(-1)' : undefined,
-            animation: animate
-              ? `${m.flip ? 'orn-bob-flip' : 'orn-bob'} ${3 + i * 0.4}s ease-in-out ${m.delay}s infinite`
-              : undefined,
-            filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.14))',
+            ['--orn-soft' as any]: accentSoft,
+            animationDuration: `${m.dur}s`,
+            animationDelay: m.delay,
           }}
           dangerouslySetInnerHTML={{ __html: PREVIEW[type] }}
         />
       ))}
-    </>
+    </div>
   )
 }
 
@@ -101,6 +146,8 @@ export default function OrnamentTab({
   const vibe = TEMPLATE_VIBES.find((v) => v.id === 'lovebirds')!
   const active: PaletteVibe =
     vibe.palettes.find((p) => p.key === palette) ?? vibe.palettes[0]
+  // Softer accent for the back wing (the real ornaments use --accent-soft).
+  const accentSoft = `color-mix(in srgb, ${active.accent} 55%, #ffffff)`
 
   async function save() {
     setSaving(true); setMsg(null)
@@ -121,13 +168,14 @@ export default function OrnamentTab({
 
   return (
     <div style={card}>
-      <style dangerouslySetInnerHTML={{ __html: PREVIEW_KEYFRAMES }} />
+      <style dangerouslySetInnerHTML={{ __html: PREVIEW_CSS }} />
       <header><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></header>
 
       {/* Live preview — the selected motif painted in the saved palette's accent
-          over that palette's ambient background. */}
+          over that palette's ambient background, animated like the real
+          invitation (flying + flapping, or perched + bobbing). */}
       <div style={{ ...previewPanel, background: active.background, borderColor: active.surfaceBorder }}>
-        <PreviewScene type={type} accent={active.accent} />
+        <PreviewScene type={type} accent={active.accent} accentSoft={accentSoft} />
         <span style={{ ...paletteChip, color: active.fgMuted, borderColor: active.surfaceBorder }}>
           <span style={{ width: 11, height: 11, borderRadius: '50%', background: active.accent, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
           {active.label}
