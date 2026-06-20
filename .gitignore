@@ -31,6 +31,9 @@ yarn-error.log*
 *.swp
 *.swo
 
+# Claude Code — personal/local settings (permission allowlist, machine-specific)
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
