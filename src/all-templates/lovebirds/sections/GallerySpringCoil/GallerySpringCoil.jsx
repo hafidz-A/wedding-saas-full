@@ -36,7 +36,10 @@ const buildConfig = (N) => {
     frontScale: 1.12,
     neighborGap: 56,
     depthOpacityMin: 0.12,
-    depthBlurMax: 3.0,
+    // Softer side blur than before (was 3.0): the front card is always
+    // pinned to 0 (see renderFrame), so the only blur left is the gentle
+    // depth falloff on the neighbours — keep it subtle and cheap to paint.
+    depthBlurMax: 2.0,
     depthScaleMin: 0.4,
     sideOpacityMax: 0.3,
   }
@@ -143,7 +146,12 @@ const COMPONENT_STYLES = `
      viewer), and keeping their subtree in the 3D context made Chrome slice
      frame decorations (border/shadow/outline) into stray gold slivers. */
   transform-style: flat;
-  will-change: transform, opacity, filter;
+  /* Only promote transform + opacity. The filter property is deliberately
+     NOT promoted: pre-allocating a blur layer for all 16-30 cards costs a
+     lot of GPU memory even when most cards aren't blurred. The front card
+     is never blurred, and side-card blur is written only when it changes
+     (see renderFrame), so an on-demand filter layer is far cheaper. */
+  will-change: transform, opacity;
 }
 
 .gsc-coilButton {
@@ -472,7 +480,12 @@ function normalizePhotos(photos) {
     // Guard against duplicate/empty ids in stored configs — a repeated React
     // key makes cards vanish or stick when one is removed from the middle.
     id: photo.id ? `${photo.id}-${index}` : index,
+    // `src` is what the small coil card shows (a lightweight thumbnail in
+    // the demo); `full` is the high-res original loaded only in the
+    // lightbox when a guest taps to zoom. Falls back to `src` when no
+    // separate full-res URL was provided (e.g. real uploaded photos).
     src: photo.src || '',
+    full: photo.full || photo.src || '',
     caption: photo.caption || photo.alt || '',
   }))
 }
@@ -799,13 +812,27 @@ export default function GallerySpringCoil({
         const scale = sideScale + (config.frontScale - sideScale) * easedFrontness
         const sideOpacity = Math.max(config.depthOpacityMin, config.sideOpacityMax * (1 - depthT * 0.82))
         const opacity = sideOpacity + (1 - sideOpacity) * easedFrontness
-        const blur = depthT * config.depthBlurMax * (1 - easedFrontness)
+        // The centre/front card is ALWAYS perfectly sharp — never blurred,
+        // mid-scroll or at rest, on any device. Only the neighbours get the
+        // gentle depth blur.
+        const blur = isFront ? 0 : depthT * config.depthBlurMax * (1 - easedFrontness)
 
         card.style.opacity = opacity.toFixed(3)
-        // Skip blur on mobile entirely; on desktop only re-write when it
-        // changes meaningfully (saves the GPU from re-rasterising the
-        // card sub-tree on every single frame).
-        if (useBlur) card.style.filter = `blur(${blur.toFixed(2)}px)`
+        // Skip blur on mobile entirely; on desktop write the filter only
+        // when the value actually changes (the front card and most side
+        // cards hold a steady blur frame-to-frame, so this avoids forcing
+        // the GPU to re-rasterise every card on every single frame).
+        if (useBlur) {
+          const wantFilter = blur < 0.08 ? '' : `blur(${blur.toFixed(2)}px)`
+          if (card.__gscFilter !== wantFilter) {
+            card.style.filter = wantFilter
+            card.__gscFilter = wantFilter
+          }
+        } else if (card.__gscFilter) {
+          // Resized desktop -> mobile: clear any stale blur layer once.
+          card.style.filter = ''
+          card.__gscFilter = ''
+        }
         // Ring position computed in JS: a circle in XZ, leaned back by the
         // ring pitch, riding the carousel yaw. The card itself is a pure
         // translate3d + scale — upright, facing the screen, slice-proof.
@@ -1176,7 +1203,7 @@ export default function GallerySpringCoil({
               {lightboxPhoto.src ? (
                 <img
                   className="gsc-lightboxImage"
-                  src={lightboxPhoto.src}
+                  src={lightboxPhoto.full || lightboxPhoto.src}
                   alt={lightboxPhoto.caption || `Foto ${lightboxIndex + 1}`}
                 />
               ) : (

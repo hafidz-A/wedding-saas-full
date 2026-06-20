@@ -126,7 +126,7 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
         <GuestProvider>
           <JourneyProvider>
             <FloatingNavbar
-              logo={config.meta?.title?.split('—')[0]?.trim() || 'Galactic'}
+              logo={config.meta?.title?.split('—')[0]?.trim() || 'Wedding'}
               allSections={allSections}
             />
             <main>

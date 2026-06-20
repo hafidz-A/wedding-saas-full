@@ -200,7 +200,10 @@
 /* ---------- Gate content (always visible, colour blends) ---------- */
 .gateContent {
   position: absolute;
-  top: 50%;
+  /* GATE: drop the whole content block to the lower third so the couple's
+     faces stay clear; glide back to centre as the card forms (--gate 0→1).
+     `top` mixes 50% + vh (both viewport-relative) so it resolves cleanly. */
+  top: calc(50% + (1 - var(--gate)) * 20vh);
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(720px, 90vw);
@@ -211,18 +214,41 @@
   gap: clamp(12px, 1.8vw, 18px);
 }
 
-/* Glassmorphism welcome card wrapper */
+/* Wide/landscape viewports are short relative to the tall content block, so
+   ease the gate shift to keep the card clear of the scroll hint. Portrait
+   phones keep the larger shift (room to spare → faces fully clear). */
+@media (min-aspect-ratio: 13/10) {
+  .gateContent {
+    top: calc(50% + (1 - var(--gate)) * 13vh);
+  }
+}
+
+/* Readability halo for gate text that floats over the illustration where the
+   veil fades. The glow uses the theme's OWN glass background, so it reads as a
+   light halo on light themes (lifts the dark script + coral label) and a dark
+   halo on dark themes (lifts the light text) — never a hard-coded colour, so it
+   stays correct across all palettes. */
+.welcomeText,
+.gateGreet,
+.coupleName,
+.date,
+.venue {
+  text-shadow:
+    0 0 12px var(--glass-bg, rgba(255, 255, 255, 0.6)),
+    0 0 6px var(--glass-bg, rgba(255, 255, 255, 0.6)),
+    0 1px 2px var(--glass-bg, rgba(255, 255, 255, 0.6));
+}
+
+/* Bottom-anchored "glass veil". The frosted panel now lives BEHIND the text
+   (::before) so its top edge can dissolve into the illustration via a mask
+   WITHOUT ever fading the text. Everything is driven by --gate so at the hero
+   end-state (gate=1) it restores to the full centred frosted card — the
+   gate→hero motion itself (card shrink, photo blast, petals) is untouched. */
 .glassCard {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.45));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
+  position: relative;
+  isolation: isolate;
   border-radius: 28px;
-  padding: clamp(24px, 4.5vw, 48px) clamp(16px, 3.5vw, 32px);
-  box-shadow: 
-    0 24px 60px rgba(42, 33, 24, 0.12),
-    0 8px 18px rgba(42, 33, 24, 0.04),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  padding: clamp(20px, 3.5vw, 36px) clamp(16px, 3.5vw, 32px) clamp(24px, 4.5vw, 44px);
   display: flex;
   flex-direction: column;
   gap: clamp(12px, 1.8vw, 18px);
@@ -230,6 +256,37 @@
   max-width: 580px;
   margin: 0 auto;
   pointer-events: auto;
+}
+
+.glassCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 28px;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.45));
+  backdrop-filter: blur(calc(10px + var(--gate) * 10px));
+  -webkit-backdrop-filter: blur(calc(10px + var(--gate) * 10px));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
+  /* Card shadow only materialises as the hero card forms — at the gate the
+     veil casts no hard rectangular shadow over the illustration. */
+  box-shadow:
+    0 calc(var(--gate) * 24px) calc(var(--gate) * 60px) rgba(42, 33, 24, calc(var(--gate) * 0.12)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  /* Top edge dissolves softly into the image at the gate (gate=0); becomes a
+     solid full card at the hero end-state (gate=1). */
+  -webkit-mask-image: linear-gradient(to top, #000 calc(76% + var(--gate) * 24%), transparent);
+  mask-image: linear-gradient(to top, #000 calc(76% + var(--gate) * 24%), transparent);
+  will-change: backdrop-filter, mask-image, box-shadow;
+}
+
+/* Respect users who reduce transparency: drop the blur, lift the fill. */
+@media (prefers-reduced-transparency: reduce) {
+  .glassCard::before {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.92));
+  }
 }
 
 .welcomeText {
@@ -388,6 +445,10 @@
 }
 
 .monogram {
+  /* Hidden at the gate: redundant with the large "Amara & Rizky" names right
+     above, and dropping it frees the vertical room the lowered card needs to
+     clear the scroll hint. */
+  display: none;
   font-family: var(--font-greatvibes), cursive;
   font-style: normal;
   font-size: clamp(14px, 1.8vw, 20px);
@@ -415,7 +476,7 @@
 /* ---------- Scroll hint ---------- */
 .scrollHint {
   position: absolute;
-  bottom: clamp(20px, 4vw, 40px);
+  bottom: clamp(14px, 3vw, 22px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -436,7 +497,7 @@
 
 .scrollLine {
   width: 1px;
-  height: 38px;
+  height: 22px;
   background: linear-gradient(180deg, transparent 0%, rgba(253, 246, 236, 0.95) 100%);
   animation: scrollPulse 2s ease-in-out infinite;
 }

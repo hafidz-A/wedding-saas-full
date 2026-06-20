@@ -83,7 +83,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "clamp(0.8rem, 2vw, 1.2rem)" }}>
             {accounts.map((a, i) => (
               <div key={i} style={{ position: "relative", padding: "1.25rem", border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)", textAlign: "left", display: "flex", flexDirection: "column", gap: 4 }}>
-                <div className="mono" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 8 }}>{a.bank}</div>
+                <div className="mono" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)", marginBottom: 8 }}>{a.bank}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, letterSpacing: "0.08em" }}>{a.number}</div>
                 <div style={{ color: "var(--color-fg-mute)", marginTop: 4, fontSize: 14 }}>a/n {a.name}</div>
                 <button type="button" onClick={() => copy(a.number, i)} style={{ position: "absolute", top: 12, right: 12, padding: "6px 10px", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", borderRadius: 999, border: "1px solid var(--color-line)", color: "var(--color-fg-mute)", background: "transparent", cursor: "pointer" }}>
@@ -121,7 +121,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
                       <div style={{ padding: "0.9rem 1rem", display: "flex", flexDirection: "column", gap: 6, flex: 1, textAlign: "left" }}>
                         {w.name && (
                           <div style={{ fontWeight: 600, fontSize: 15 }}>
-                            {w.name}{link && <span style={{ color: "var(--color-accent)" }} aria-hidden="true"> →</span>}
+                            {w.name}{link && <span style={{ color: "var(--color-accent-text)" }} aria-hidden="true"> →</span>}
                           </div>
                         )}
                         {w.description && <p className="p-body" style={{ fontSize: 13, color: "var(--color-fg-mute)", margin: 0 }}>{w.description}</p>}
@@ -144,7 +144,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
           <CardChild>
             {sent ? (
               <div className="center-text" style={{ marginTop: "1.5rem", padding: "1.5rem", border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)" }}>
-                <div style={{ fontSize: 28, color: "var(--color-accent)", marginBottom: 8 }}>♥</div>
+                <div style={{ fontSize: 28, color: "var(--color-accent-text)", marginBottom: 8 }}>♥</div>
                 <h3 className="h-3" style={{ marginBottom: 6 }}>Terima kasih</h3>
                 <p className="p-body" style={{ color: "var(--color-fg-mute)", fontSize: 14, marginBottom: 14 }}>
                   Hadiah Anda telah kami catat. Kami akan menghubungi Anda untuk berterima kasih secara langsung.

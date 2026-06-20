@@ -13,7 +13,7 @@ export default function LiveStreamPlanet({ sectionLabel, planetName, heading, pl
         </CardChild>
         <CardChild>
           <div style={{ textAlign: "center" }}>
-            <div className="mono" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 8 }}>
+            <div className="mono" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)", marginBottom: 8 }}>
               {PLATFORM_LABEL[platform] || "Live"}
             </div>
             {scheduledAt && <div style={{ color: "var(--color-fg-mute)", marginBottom: 18, fontSize: 14 }}>{scheduledAt}</div>}

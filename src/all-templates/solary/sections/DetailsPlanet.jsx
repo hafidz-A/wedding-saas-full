@@ -20,7 +20,7 @@ export default function DetailsPlanet({ sectionLabel, planetName, heading, cards
           <div className="detail-grid">
             {cards.map((c, i) => (
               <div key={i} className="detail-card">
-                <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--color-accent)", marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--color-accent-text)", marginBottom: 14 }}>
                   <span style={{ width: 36, height: 36, borderRadius: "50%", display: "grid", placeItems: "center", border: "1px solid var(--color-line)", background: "var(--color-accent-soft)" }}>
                     {ICONS[c.icon] || ICONS.sparkle}
                   </span>
@@ -32,7 +32,7 @@ export default function DetailsPlanet({ sectionLabel, planetName, heading, cards
                   <a
                     href={safeExternalUrl(c.actionHref)}
                     target="_blank" rel="noopener noreferrer"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", borderBottom: "1px solid var(--color-accent)", paddingBottom: 2 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)", borderBottom: "1px solid var(--color-accent)", paddingBottom: 2 }}
                   >
                     {c.actionLabel} <span>↗</span>
                   </a>

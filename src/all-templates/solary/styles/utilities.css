@@ -20,7 +20,7 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   background: var(--color-bg-soft);
   padding: 6px 14px;
   border-radius: 999px;
@@ -36,7 +36,7 @@
 .h-3 { font-weight: 700; font-style: italic; }
 .script {
   font-family: var(--font-script);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-weight: 400;
 }
 .h-display {

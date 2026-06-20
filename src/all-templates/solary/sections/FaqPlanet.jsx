@@ -21,7 +21,7 @@ export default function FaqPlanet({ sectionLabel, planetName, heading, items = [
                     style={{ width: "100%", textAlign: "left", background: "none", border: "none", padding: "14px 0", cursor: "pointer", display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", color: "var(--color-fg)", fontFamily: "var(--font-display)", fontSize: "1.1rem" }}
                   >
                     <span>{it.q}</span>
-                    <span style={{ color: "var(--color-accent)" }}>{isOpen ? "−" : "+"}</span>
+                    <span style={{ color: "var(--color-accent-text)" }}>{isOpen ? "−" : "+"}</span>
                   </button>
                   {isOpen && it.a && (
                     <p style={{ color: "var(--color-fg-mute)", margin: "0 0 16px", fontSize: 14, lineHeight: 1.6 }}>{it.a}</p>

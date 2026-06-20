@@ -139,9 +139,8 @@
   transition: transform 0.5s ease;
 }
 
-.cardInner:hover .cardGlowOverlay {
-  transform: translateX(30%);
-}
+/* Card hover effect removed — the gift cards are intentionally static now;
+   only their buttons react on hover. */
 
 /* Realistic Golden Card Chip */
 .cardChip {
@@ -567,8 +566,11 @@ a.registryCard:hover {
 .submit {
   padding: 14px 26px;
   border-radius: 999px;
-  background: var(--fg, var(--color-charcoal));
-  color: var(--bg, var(--color-cream));
+  /* Use the theme's button token PAIR so the label always contrasts its fill.
+     The old `color: var(--bg)` resolved to `transparent` on light palettes
+     (themes set --bg: transparent) → invisible text on the button. */
+  background: var(--button-bg, var(--fg, var(--color-charcoal)));
+  color: var(--button-fg, var(--color-cream));
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
   font-weight: 500;
@@ -577,7 +579,11 @@ a.registryCard:hover {
   cursor: pointer;
   transition: background 0.25s ease, transform 0.25s ease;
 }
-.submit:hover { background: #000; transform: translateY(-2px); }
+.submit:hover {
+  /* darken the fill toward black while keeping fg/bg contrast on every theme */
+  background: color-mix(in srgb, var(--button-bg, var(--fg, #2A2118)) 82%, #000);
+  transform: translateY(-2px);
+}
 .submit:disabled { opacity: 0.55; cursor: progress; transform: none; }
 
 /* ---------- Success ---------- */

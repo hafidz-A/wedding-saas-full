@@ -103,25 +103,25 @@ export default function PaletteSwitcher() {
             </button>
           </div>
           
-          <div className="theme-group-title">Gelap Kosmik (Glow Vibe)</div>
+          <div className="theme-group-title">Malam (Glow Vibe)</div>
           <div className="theme-buttons">
             <button
               className={`btn-theme-select ${palette === "cosmicDark" ? "active" : ""}`}
               onClick={(e) => handleSelect("cosmicDark", e)}
             >
-              Purple
+              Plum
             </button>
             <button
               className={`btn-theme-select ${palette === "nebulaDark" ? "active" : ""}`}
               onClick={(e) => handleSelect("nebulaDark", e)}
             >
-              Nebula
+              Gold
             </button>
             <button
               className={`btn-theme-select ${palette === "roseDark" ? "active" : ""}`}
               onClick={(e) => handleSelect("roseDark", e)}
             >
-              Rose
+              Rosewood
             </button>
             <button
               className={`btn-theme-select ${palette === "emeraldDark" ? "active" : ""}`}
@@ -131,7 +131,7 @@ export default function PaletteSwitcher() {
             </button>
           </div>
 
-          <div className="theme-group-title" style={{ marginTop: 6 }}>Terang Pastel (Paper Vibe)</div>
+          <div className="theme-group-title" style={{ marginTop: 6 }}>Terang (Paper Vibe)</div>
           <div className="theme-buttons">
             <button
               className={`btn-theme-select ${palette === "lavenderLight" ? "active" : ""}`}
@@ -143,19 +143,19 @@ export default function PaletteSwitcher() {
               className={`btn-theme-select ${palette === "sunburstLight" ? "active" : ""}`}
               onClick={(e) => handleSelect("sunburstLight", e)}
             >
-              Sunburst
+              Champagne
             </button>
             <button
               className={`btn-theme-select ${palette === "roseLight" ? "active" : ""}`}
               onClick={(e) => handleSelect("roseLight", e)}
             >
-              Rose
+              Blush
             </button>
             <button
               className={`btn-theme-select ${palette === "botanicalLight" ? "active" : ""}`}
               onClick={(e) => handleSelect("botanicalLight", e)}
             >
-              Botanical
+              Sage
             </button>
           </div>
         </div>

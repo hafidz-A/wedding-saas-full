@@ -77,7 +77,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
           <h2 className="h-2 center-text" style={{ marginBottom: 12 }}>{heading}</h2>
         </CardChild>
         <CardChild>
-          <div className="mono" style={{ display: "flex", justifyContent: "space-between", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", marginBottom: 14 }}>
+          <div className="mono" style={{ display: "flex", justifyContent: "space-between", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)", marginBottom: 14 }}>
             <span>RSVP Form</span>
             {deadline && <span style={{ color: "var(--color-fg-mute)" }}>Deadline · {deadline}</span>}
           </div>
@@ -85,7 +85,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
         <CardChild>
           {sent ? (
             <div className="center-text" style={{ marginTop: "0.5rem", padding: "1.75rem 1.5rem", border: "1px solid var(--color-line)", borderRadius: "var(--r-3)", background: "var(--color-surface)" }}>
-              <div style={{ fontSize: 30, color: "var(--color-accent)", marginBottom: 10 }}>✦</div>
+              <div style={{ fontSize: 30, color: "var(--color-accent-text)", marginBottom: 10 }}>✦</div>
               <h3 className="h-3" style={{ marginBottom: 6 }}>
                 {name ? `Terima kasih, ${name}` : "Terima kasih sudah mengisi"}
               </h3>
@@ -136,9 +136,9 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                           flex: 1, padding: "10px 12px",
                           fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase",
                           borderRadius: "var(--r-2)", border: "1px solid",
-                          borderColor: attending === v ? "var(--color-accent)" : "var(--color-line)",
+                          borderColor: attending === v ? "var(--color-accent-text)" : "var(--color-line)",
                           background: attending === v ? "var(--color-accent-soft)" : "transparent",
-                          color: attending === v ? "var(--color-accent)" : "var(--color-fg)",
+                          color: attending === v ? "var(--color-accent-text)" : "var(--color-fg)",
                         }}>
                         {v === "yes" ? "Joining ✦" : "Regret"}
                       </button>

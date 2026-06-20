@@ -111,7 +111,6 @@ export default function ThreeDTilt({
 }) {
   const cardRef = useRef(null)
   const touchRef = useRef(false) // hover-less device → gyro owns the transform
-  const [tiltStyle, setTiltStyle] = useState({})
   const [reduceMotion, setReduceMotion] = useState(false)
 
   useEffect(() => {
@@ -146,6 +145,11 @@ export default function ThreeDTilt({
     }
   }, [reduceMotion, max, perspective])
 
+  // Desktop hover: write the transform STRAIGHT to the DOM node (not through
+  // React state). The old code called setState on every mousemove (~60-120Hz),
+  // re-rendering the whole card + all its children each frame — that was the
+  // hover "glitch". Direct style writes keep it buttery, mirroring the gyro
+  // path above. React never owns `transform`, so re-renders never clobber it.
   const handleMouseMove = (e) => {
     if (reduceMotion || touchRef.current) return // taps emulate mousemove — let the gyro own it
     const card = cardRef.current
@@ -162,18 +166,17 @@ export default function ThreeDTilt({
     const angleX = ((yc - y) / yc) * max
     const angleY = ((x - xc) / xc) * max
 
-    setTiltStyle({
-      transform: `perspective(${perspective}px) rotateX(${angleX}deg) rotateY(${angleY}deg) scale(${scale})`,
-      transition: 'transform 0.1s cubic-bezier(0.25, 1, 0.5, 1)',
-    })
+    card.style.transition = 'transform 0.12s cubic-bezier(0.25, 1, 0.5, 1)'
+    card.style.transform =
+      `perspective(${perspective}px) rotateX(${angleX.toFixed(2)}deg) rotateY(${angleY.toFixed(2)}deg) scale(${scale})`
   }
 
   const handleMouseLeave = () => {
     if (reduceMotion || touchRef.current) return
-    setTiltStyle({
-      transform: `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale(1)`,
-      transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
-    })
+    const card = cardRef.current
+    if (!card) return
+    card.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
+    card.style.transform = `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale(1)`
   }
 
   return (
@@ -184,7 +187,6 @@ export default function ThreeDTilt({
       onMouseLeave={handleMouseLeave}
       style={{
         ...style,
-        ...tiltStyle,
         transformStyle: 'preserve-3d',
       }}
     >

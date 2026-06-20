@@ -11,8 +11,8 @@ gsap.registerPlugin(ScrollTrigger)
 /* Our Story — scroll-stacking card deck driven by GSAP ScrollTrigger. */
 
 const DEFAULT_STORIES = [
-  { id: 1, year: '2019', date: 'Januari 2019',  title: 'The First Meeting', description: 'Sebuah pertemuan pertama yang tidak terduga di tepi pantai.', image: demoImg('storyFirstMeet', 1400) },
-  { id: 2, year: '2020', date: 'Februari 2020', title: 'Our First Date',    description: 'Kafe kecil di sudut kota, dua cangkir kopi, percakapan tanpa habis.', image: demoImg('storyFirstDate', 1400) },
+  { id: 1, year: '2019', date: 'Januari 2019',  title: 'The First Meeting', description: 'Pertemuan pertama di sebuah kafe kecil — dua cangkir kopi dan tawa yang langsung terasa seperti rumah.', image: demoImg('storyFirstMeet', 1400) },
+  { id: 2, year: '2020', date: 'Februari 2020', title: 'Our First Date',    description: 'Langkah pelan menyusuri galeri seni — bicara tentang apa saja, tak ingin sore itu berakhir.', image: demoImg('storyFirstDate', 1400) },
   { id: 3, year: '2022', date: 'Desember 2022', title: 'A Trip Together',   description: 'Sebuah perjalanan yang membuat kami yakin bisa melewati apapun bersama.', image: demoImg('storyHoliday', 1400) },
   { id: 4, year: '2024', date: 'Maret 2024',    title: 'The Proposal',      description: 'Pertanyaan tenang di hari Minggu yang biasa, dijawab dengan satu kata: ya.', image: demoImg('storyProposal', 1400) },
   { id: 5, year: '2025', date: 'November 2025', title: 'The Wedding Day',   description: 'Dan inilah kami — siap memulai bab berikutnya dari cerita kami.', image: demoImg('storyWedding', 1400) },

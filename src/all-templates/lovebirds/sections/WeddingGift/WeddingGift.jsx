@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { motion, AnimatePresence } from 'motion/react'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
-import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import { formatThousands } from '../../../../lib/formatThousands.js'
 import { safeExternalUrl } from '@/lib/safeUrl'
 import styles from './WeddingGift.module.css'
@@ -105,12 +104,7 @@ function AccountCard({ account, index, onUseForConfirmation }) {
         delay: Math.min(index * 0.08, 0.4),
       }}
     >
-      <ThreeDTilt
-        className={`${styles.cardInner} ${styles[`accent-${account.accent || 'coral'}`]}`}
-        max={14}
-        scale={1.045}
-        perspective={1000}
-      >
+      <div className={`${styles.cardInner} ${styles[`accent-${account.accent || 'coral'}`]}`}>
         <div className={styles.cardGlowOverlay} aria-hidden="true" />
         
         <header className={styles.cardHeader}>
@@ -158,7 +152,7 @@ function AccountCard({ account, index, onUseForConfirmation }) {
             Confirm Gift Transfer →
           </button>
         )}
-      </ThreeDTilt>
+      </div>
     </motion.article>
   )
 }

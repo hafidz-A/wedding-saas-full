@@ -60,4 +60,13 @@
   --z-modal: 80;
 
   --grain-opacity: 0.05;
+
+  /* Semantic text-on-color tokens (contrast-safe). All palette accents are
+     light pastels, so text/icons sitting ON the accent stay dark ink in every
+     theme. Light palettes override --color-accent-text (a darker accent for the
+     accent-COLORED text role) and keep the dark-red --color-error; dark palettes
+     override --color-error to a salmon in themes.css. */
+  --color-on-accent: #1a1320;
+  --color-error: #b00524;
+  --color-accent-text: var(--color-accent);
 }

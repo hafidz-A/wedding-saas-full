@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { sectionRegistry } from '../registry.js'
 import styles from './FloatingNavbar.module.css'
 
@@ -119,6 +120,12 @@ export default function FloatingNavbar({ sections = [], threshold = 600 }) {
     e.preventDefault()
     const target = document.getElementById(id)
     if (target) {
+      // The page pins the hero + Our Story with GSAP; their pin-spacer heights
+      // aren't final until ScrollTrigger recalculates. Without this, the first
+      // scrollIntoView aimed at a STALE position (a big overshoot, then snap),
+      // so the section looked like it didn't scroll and needed a SECOND click.
+      // Refreshing first makes every position final → one click lands it.
+      try { ScrollTrigger.refresh() } catch { /* GSAP not active — ignore */ }
       target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       setActiveId(id)
     }

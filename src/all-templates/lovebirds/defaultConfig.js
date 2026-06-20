@@ -85,7 +85,7 @@ export const defaultConfig = {
             date: '14 February 2020',
             title: 'The First Meeting',
             description:
-              'A quiet evening by the sea, where laughter became the language we both understood without saying a single word.',
+              'A small corner café, two cups of coffee, and a first laugh that somehow already felt like home.',
             image: demoImg('storyFirstMeet', 1400),
           },
           {
@@ -94,7 +94,7 @@ export const defaultConfig = {
             date: '22 June 2021',
             title: 'Our First Date',
             description:
-              'Bonfires, salty wind, and the sky turning gold — we knew this was the start of something we would never forget.',
+              'Slow steps through quiet galleries — we talked about everything and nothing, and did not want the afternoon to end.',
             image: demoImg('storyFirstDate', 1400),
           },
           {

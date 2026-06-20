@@ -58,7 +58,7 @@ export default function CountdownPlanet({
         <CardChild>
           <div style={{ display: "flex", justifyContent: "center" }}>
             {!validDate ? null : t.done ? (
-              <p className="mono" style={{ fontSize: 14, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)" }}>
+              <p className="mono" style={{ fontSize: 14, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)" }}>
                 The alignment has begun ✦
               </p>
             ) : (

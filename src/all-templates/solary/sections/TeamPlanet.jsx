@@ -34,7 +34,7 @@ export default function TeamPlanet({ sectionLabel, planetName, heading, groups =
                             <div className="avatar-init">{name.split(" ").filter(Boolean).map((s) => s[0]).join("")}</div>
                           </div>
                           <div style={{ fontFamily: "var(--font-display)", fontSize: "1.05rem" }}>{name}</div>
-                          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent)", marginTop: 4 }}>{m?.role}</div>
+                          <div className="mono" style={{ fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)", marginTop: 4 }}>{m?.role}</div>
                         </div>
                       );
                     })}

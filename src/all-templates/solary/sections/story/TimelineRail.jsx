@@ -74,7 +74,7 @@ const TimelineRail = forwardRef(function TimelineRail(
                   fontSize: 11,
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
-                  color: "var(--color-accent)",
+                  color: "var(--color-accent-text)",
                 }}
               >
                 {it.year}
