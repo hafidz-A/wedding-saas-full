@@ -190,7 +190,7 @@ fieldset.field > .label {
   font-weight: 600;
   transition: var(--transition-default);
 }
-.stepBtn:hover { background: var(--accent-soft, var(--color-gold)); }
+.stepBtn:hover { background: color-mix(in srgb, var(--rsvp-fg) 86%, #000); }
 .stepValue {
   min-width: 24px;
   text-align: center;

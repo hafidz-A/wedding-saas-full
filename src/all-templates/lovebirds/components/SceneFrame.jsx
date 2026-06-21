@@ -28,9 +28,9 @@ export default function SceneFrame() {
   // Three motifs staggered down each edge column (160×360 viewBox), largest at
   // the reading band — a calm vertical drift rather than a busy flock.
   const motifs = [
-    { x: 34, y: 54, s: 1.6, o: 0.92, delay: '0s' },
-    { x: 2, y: 150, s: 1.1, o: 0.64, delay: '1.4s' },
-    { x: 66, y: 252, s: 0.82, o: 0.48, delay: '2.4s' },
+    { x: 34, y: 54, s: 1.6, o: 0.46, delay: '0s' },
+    { x: 2, y: 150, s: 1.1, o: 0.32, delay: '1.4s' },
+    { x: 66, y: 252, s: 0.82, o: 0.22, delay: '2.4s' },
   ]
 
   const Side = ({ side }) => (
@@ -69,8 +69,11 @@ const SCENE_CSS = `
 .lb-scene__side--right { right: 0; transform: translateY(-50%) scaleX(-1); }
 .lb-scene__side svg {
   width: 100%; height: 100%; display: block;
-  fill: var(--accent, #E8553E);
-  color: var(--accent, #E8553E);
+  /* Contrast colour vs the section's accent background (--button-bg) so the
+     ornaments read as deliberate silhouettes instead of blending into the
+     same accent (nyaru). */
+  fill: var(--button-fg, #2A2118);
+  color: var(--button-fg, #2A2118);
 }
 .lb-scene__motif {
   transform-box: fill-box;
