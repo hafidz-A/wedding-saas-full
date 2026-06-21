@@ -10,6 +10,7 @@ import { createXenditInvoice, getXenditInvoice, isPaidStatus, expireXenditInvoic
 import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod } from '@/lib/payments/publish'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
+import { siteBaseUrl } from '@/lib/site-url'
 
 /** Max unpaid draft invitations a single account may stack up (anti-abuse). */
 const MAX_UNPAID_DRAFTS = 10
@@ -208,7 +209,7 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     // against (and to prevent a double-charge across two live invoices).
     if (inv.xendit_invoice_id) await expireXenditInvoice(inv.xendit_invoice_id)
 
-    const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const base = siteBaseUrl()
     const externalId = `inv_${inv.id}_${Date.now()}`
     const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
 
@@ -331,7 +332,7 @@ export async function startRenewal(invitationId: string): Promise<CheckoutResult
     // Expire the prior invoice so an old link can't be paid against later.
     if (inv.xendit_invoice_id) await expireXenditInvoice(inv.xendit_invoice_id)
 
-    const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const base = siteBaseUrl()
     const externalId = `ren_${inv.id}_${Date.now()}`
     const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
 
@@ -437,7 +438,7 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
     const resolved = await resolveUpgrade(inv.template_id, inv.plan, UPGRADE_TARGET_PLAN)
     if (!resolved) return { ok: false, error: 'Upgrade tidak tersedia untuk plan ini' }
 
-    const base = (process.env.NEXT_PUBLIC_SITE_URL || '').replace(/\/$/, '')
+    const base = siteBaseUrl()
     const externalId = `upg_${inv.id}_${Date.now()}`
     const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
 

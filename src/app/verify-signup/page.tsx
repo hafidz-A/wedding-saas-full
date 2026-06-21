@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
+import { AuthChrome } from '@/components/site/AuthChrome'
 import { safeNext } from '@/lib/auth/safeNext'
 
 /**
@@ -33,7 +34,8 @@ function VerifySignupInner() {
   const searchParams = useSearchParams()
   const presetEmail = searchParams.get('email') || ''
   const next = safeNext(searchParams.get('next'))
-  const t = getDict(useClientLang()).auth.verify
+  const lang = useClientLang()
+  const t = getDict(lang).auth.verify
 
   const [email, setEmail] = useState(presetEmail)
   const [token, setToken] = useState('')
@@ -99,6 +101,8 @@ function VerifySignupInner() {
   }
 
   return (
+    <>
+    <AuthChrome lang={lang} />
     <main style={page}>
       <form onSubmit={onSubmit} style={card}>
         <header style={{ textAlign: 'center', marginBottom: 4 }}>
@@ -161,6 +165,7 @@ function VerifySignupInner() {
         </div>
       </form>
     </main>
+    </>
   )
 }
 
