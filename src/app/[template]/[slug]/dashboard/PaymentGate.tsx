@@ -37,12 +37,21 @@ export default function PaymentGate({
 
   function onPay() {
     setErr(null)
+    // Open the payment tab synchronously inside the click (so the popup blocker
+    // permits it); navigate it once the invoice URL is ready, or close it on
+    // failure. Falls back to same-tab if the browser blocked the popup.
+    const payTab = window.open('', '_blank')
     start(async () => {
       // Expired = already paid once, just out of active period → renew (extend).
       // startCheckout refuses paid rows, so it would silently do nothing here.
       const res = isExpired ? await startRenewal(invitationId) : await startCheckout(invitationId)
-      if (res.ok && res.invoiceUrl) window.location.href = res.invoiceUrl
-      else setErr(res.error ?? 'Gagal memproses pembayaran. Coba lagi sebentar lagi.')
+      if (res.ok && res.invoiceUrl) {
+        if (payTab && !payTab.closed) payTab.location.href = res.invoiceUrl
+        else window.location.href = res.invoiceUrl
+      } else {
+        if (payTab && !payTab.closed) payTab.close()
+        setErr(res.error ?? 'Gagal memproses pembayaran. Coba lagi sebentar lagi.')
+      }
     })
   }
 

@@ -8,6 +8,7 @@ import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
 import RenewButton from './RenewButton'
+import RecheckPaymentButton from './RecheckPaymentButton'
 import styles from './profile.module.css'
 
 /**
@@ -97,13 +98,21 @@ export default async function ProfilePage() {
                       <Link href={`/${tt}/${inv.slug}`} target="_blank" style={ghostLink}>{p.viewPublic}</Link>
                       <Link href={`/${tt}/${inv.slug}/dashboard`} style={solidLink}>{p.openDashboard}</Link>
                       {needsAction && (
-                        <RenewButton
-                          invitationId={inv.id}
-                          status={periodStatus}
-                          payNowLabel={ap.payNow}
-                          renewNowLabel={ap.renewNow}
-                          processingLabel={ap.processing}
-                        />
+                        <>
+                          <RenewButton
+                            invitationId={inv.id}
+                            status={periodStatus}
+                            payNowLabel={ap.payNow}
+                            renewNowLabel={ap.renewNow}
+                            processingLabel={ap.processing}
+                          />
+                          {/* Manual fallback for a missed webhook — same control
+                              the dashboard PaymentGate offers, here too. */}
+                          <RecheckPaymentButton
+                            invitationId={inv.id}
+                            mode={periodStatus === 'expired' ? 'renewal' : 'payment'}
+                          />
+                        </>
                       )}
                     </span>
                   </li>

@@ -28,6 +28,10 @@ export default function RenewButton({
 
   function onClick() {
     setErr(null)
+    // Open the payment tab synchronously inside the click (so the popup blocker
+    // permits it); navigate it once the invoice URL is ready, or close it on
+    // failure. Falls back to same-tab if the browser blocked the popup.
+    const payTab = window.open('', '_blank')
     start(async () => {
       // An expired invitation was already paid once, so startCheckout (which
       // refuses paid rows) would silently no-op. Renewals must go through
@@ -36,8 +40,13 @@ export default function RenewButton({
         status === 'expired'
           ? await startRenewal(invitationId)
           : await startCheckout(invitationId)
-      if (res.ok && res.invoiceUrl) window.location.href = res.invoiceUrl
-      else setErr(res.error ?? 'Gagal memproses. Coba lagi sebentar lagi.')
+      if (res.ok && res.invoiceUrl) {
+        if (payTab && !payTab.closed) payTab.location.href = res.invoiceUrl
+        else window.location.href = res.invoiceUrl
+      } else {
+        if (payTab && !payTab.closed) payTab.close()
+        setErr(res.error ?? 'Gagal memproses. Coba lagi sebentar lagi.')
+      }
     })
   }
 
