@@ -301,6 +301,27 @@ fieldset.field > .label {
   margin-bottom: 24px;
 }
 
+/* "RSVP for another guest" — neutral outline button that reads on the white
+   success card; brings the empty form back for the next code on a shared link. */
+.another {
+  padding: 11px 24px;
+  border-radius: var(--border-radius-pill);
+  background: transparent;
+  color: var(--color-charcoal);
+  border: 1px solid rgba(42, 33, 24, 0.25);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-default);
+}
+.another:hover {
+  background: rgba(42, 33, 24, 0.06);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 767.98px) {
   .stepper { width: 100%; justify-content: space-between; }
   .stepBtn { width: 44px; height: 44px; font-size: 22px; }

@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
-import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import SceneFrame from '../../components/SceneFrame.jsx'
 import styles from './Rsvp.module.css'
 
@@ -13,28 +12,24 @@ const DEFAULTS = {
   mealOptions: [],
 }
 
-const sentKey = (slug) => `rsvp-sent:${slug}`
-
 export default function Rsvp(props) {
   const { title, subtitle, mealOptions, slug } = { ...DEFAULTS, ...props }
   const { ref, isVisible } = useScrollReveal()
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState(null)
 
-  // One RSVP per device: a real invitation remembers the submission across
-  // reloads. Demo/standalone (no slug) resets on refresh by design.
-  useEffect(() => {
-    if (!slug) return
-    try {
-      if (window.localStorage.getItem(sentKey(slug))) setSubmitted(true)
-    } catch { /* storage blocked — fall back to in-session lock */ }
-  }, [slug])
+  // NOTE: no per-device lock. A personalized link (?to=Name) may be shared by a
+  // whole family/household, so the form stays available for the NEXT guest after
+  // each submit. Single-use enforcement is per-CODE on the server
+  // (consumeGuestTokenForRsvp): an already-used code is rejected (403/409), shown
+  // here as submitError — so a new code can still RSVP, a spent one cannot.
 
   const {
     register,
     handleSubmit,
     control,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
@@ -55,6 +50,14 @@ export default function Rsvp(props) {
   const isPreview =
     typeof window !== 'undefined' &&
     new URLSearchParams(window.location.search).get('preview') === '1'
+
+  // Bring the empty form back so another guest (a different code) can RSVP via
+  // the same shared link without reloading.
+  const rsvpAnother = () => {
+    reset()
+    setSubmitError(null)
+    setSubmitted(false)
+  }
 
   const onSubmit = async (data) => {
     setSubmitError(null)
@@ -82,9 +85,6 @@ export default function Rsvp(props) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || 'Submission failed')
       }
-      try {
-        window.localStorage.setItem(sentKey(slug), new Date().toISOString())
-      } catch { /* storage blocked — in-session lock still applies */ }
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err.message || 'Gagal mengirim. Coba lagi.')
@@ -106,7 +106,7 @@ export default function Rsvp(props) {
         </header>
 
         {!submitted ? (
-          <ThreeDTilt className={styles.formCard} max={6} scale={1.012}>
+          <div className={styles.formCard}>
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
               <div className={styles.row}>
                 <label className={styles.field}>
@@ -252,17 +252,22 @@ export default function Rsvp(props) {
                 <span>{isSubmitting ? 'Sending…' : 'Send my RSVP'}</span>
               </button>
             </form>
-          </ThreeDTilt>
+          </div>
         ) : (
-          <ThreeDTilt className={styles.successCard} max={6} scale={1.012}>
+          <div className={styles.successCard}>
             <div className={styles.successInner} role="status" aria-live="polite">
               <span className={styles.successIcon} aria-hidden="true">♥</span>
               <h3 className={styles.successTitle}>Thank you</h3>
               <p className={styles.successText}>
                 Your RSVP has been recorded. We cannot wait to celebrate with you.
               </p>
+              {/* Same link may be shared with other guests — let the next one
+                  RSVP with their own code without reloading. */}
+              <button type="button" className={styles.another} onClick={rsvpAnother}>
+                RSVP for another guest
+              </button>
             </div>
-          </ThreeDTilt>
+          </div>
         )}
       </div>
     </section>
