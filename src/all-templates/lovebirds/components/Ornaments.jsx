@@ -93,7 +93,7 @@ export default function Ornaments() {
 // `theme` for this paletteKey.
 // Exported so the marketing "Vibe Explorer" can reuse the real perched birds
 // as a palette-driven backdrop (scoped to a section via absolute positioning).
-export function PerchedCanvas({ active, paletteKey }) {
+export function PerchedCanvas({ active, paletteKey, contained = false }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -126,15 +126,23 @@ export function PerchedCanvas({ active, paletteKey }) {
     function resizeCanvas() {
       if (!canvas) return
       const dpr = window.devicePixelRatio || 1
-      W = window.innerWidth
-      H = window.innerHeight
+      if (contained) {
+        // Scoped preview: size the scene to the canvas's OWN box, not the window,
+        // so the exact same perched animation renders inside the dashboard panel.
+        const rect = canvas.getBoundingClientRect()
+        W = Math.max(1, Math.round(rect.width))
+        H = Math.max(1, Math.round(rect.height))
+      } else {
+        W = window.innerWidth
+        H = window.innerHeight
+      }
       canvas.width = W * dpr
       canvas.height = H * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
       // Calculate branchScale based on viewport and clamp it to avoid micro/giant assets
       branchScale = Math.min(W / 500, H / 350) * 0.85
-      branchScale = Math.max(0.65, Math.min(1.4, branchScale))
+      branchScale = Math.max(contained ? 0.78 : 0.65, Math.min(1.4, branchScale))
     }
 
     function getCycleProgress(time) {
@@ -676,13 +684,26 @@ export function PerchedCanvas({ active, paletteKey }) {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resizeCanvas)
     }
-  }, [active, paletteKey])
+  }, [active, paletteKey, contained])
 
   return (
     <canvas
       ref={canvasRef}
       className="lovebirds-bird-canvas"
-      style={{ display: active ? 'block' : 'none' }}
+      style={
+        contained
+          ? {
+              // Override the global fixed/dimmed watermark styling so the canvas
+              // fills (and is clipped to) its preview box at full vibrancy.
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              display: active ? 'block' : 'none',
+              opacity: 1,
+            }
+          : { display: active ? 'block' : 'none' }
+      }
     />
   )
 }

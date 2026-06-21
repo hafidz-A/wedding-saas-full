@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { TEMPLATE_VIBES, type PaletteVibe } from '@/components/marketing/vibeData'
+import { PerchedCanvas } from '@/all-templates/lovebirds/components/Ornaments.jsx'
 
 const TYPES = ['birds', 'butterflies', 'perched'] as const
 type OrnamentType = typeof TYPES[number]
@@ -61,41 +62,17 @@ const PREVIEW_CSS = `
 .ornp-bird--r { animation: ornp-fly-r linear infinite; }
 .ornp-bird--l { animation: ornp-fly-l linear infinite; }
 
-/* Perched: two birds rest on the branch, breathing (bob) with a slow wing
-   flutter, while love-hearts drift up between them — the real perched scene. */
-.ornp-perch { position: absolute; inset: 0; }
-.ornp-perch-bird { position: absolute; bottom: 22%; width: 92px; }
-.ornp-perch-bird .wing-front { transform-origin: 30px 33px; animation: ornp-flap-front 1.7s ease-in-out infinite alternate; }
-.ornp-perch-left  { left: 32%; animation: ornp-bob 3.6s ease-in-out infinite; }
-.ornp-perch-right { right: 32%; animation: ornp-bob-flip 3.6s ease-in-out infinite; animation-delay: -1.7s; }
-@keyframes ornp-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-@keyframes ornp-bob-flip { 0%,100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-6px); } }
-.ornp-heart { position: absolute; bottom: 40%; font-size: 17px; line-height: 1; color: var(--orn-accent); opacity: 0; animation: ornp-heart-rise 3.4s ease-in infinite; }
-@keyframes ornp-heart-rise {
-  0%   { opacity: 0; transform: translateY(0) scale(.6); }
-  20%  { opacity: .85; }
-  100% { opacity: 0; transform: translateY(-72px) scale(1); }
-}
 @media (prefers-reduced-motion: reduce) {
-  .ornp-bird, .ornp-bird .wing-back, .ornp-bird .wing-front,
-  .ornp-perch-left, .ornp-perch-right, .ornp-perch-bird .wing-front, .ornp-heart { animation: none !important; }
-  .ornp-perch-right { transform: scaleX(-1); }
+  .ornp-bird, .ornp-bird .wing-back, .ornp-bird .wing-front { animation: none !important; }
 }
 `
 
-function PreviewScene({ type, accent, accentSoft }: { type: OrnamentType; accent: string; accentSoft: string }) {
+function PreviewScene({ type, accent, accentSoft, paletteKey }: { type: OrnamentType; accent: string; accentSoft: string; paletteKey: string }) {
   if (type === 'perched') {
-    return (
-      <div className="ornp-perch" style={{ ['--orn-accent' as any]: accent }}>
-        <svg className="ornp-perch-bird ornp-perch-left" viewBox="0 0 64 64" aria-hidden
-             style={{ fill: accent, color: accent }} dangerouslySetInnerHTML={{ __html: PREVIEW.perched }} />
-        <svg className="ornp-perch-bird ornp-perch-right" viewBox="0 0 64 64" aria-hidden
-             style={{ fill: accent, color: accent }} dangerouslySetInnerHTML={{ __html: PREVIEW.perched }} />
-        <span className="ornp-heart" style={{ left: '50%', animationDelay: '0s' }}>♥</span>
-        <span className="ornp-heart" style={{ left: '45%', animationDelay: '1.1s' }}>♥</span>
-        <span className="ornp-heart" style={{ left: '55%', animationDelay: '2.2s' }}>♥</span>
-      </div>
-    )
+    // Reuse the REAL perched-bird canvas — the exact component the live
+    // invitation renders — scoped to the preview box. Same animation: one bird
+    // flies off and returns over a shared branch, with hearts.
+    return <PerchedCanvas active paletteKey={paletteKey} contained />
   }
   return (
     <div className="ornp">
@@ -175,7 +152,7 @@ export default function OrnamentTab({
           over that palette's ambient background, animated like the real
           invitation (flying + flapping, or perched + bobbing). */}
       <div style={{ ...previewPanel, background: active.background, borderColor: active.surfaceBorder }}>
-        <PreviewScene type={type} accent={active.accent} accentSoft={accentSoft} />
+        <PreviewScene type={type} accent={active.accent} accentSoft={accentSoft} paletteKey={active.key} />
         <span style={{ ...paletteChip, color: active.fgMuted, borderColor: active.surfaceBorder }}>
           <span style={{ width: 11, height: 11, borderRadius: '50%', background: active.accent, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
           {active.label}

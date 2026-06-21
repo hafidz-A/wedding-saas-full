@@ -6,11 +6,11 @@
      Fallbacks preserve the original coral→gold look without theme vars. */
   --ftr-bg: var(--button-bg, var(--color-coral));
   --ftr-fg: var(--button-fg, var(--color-cream));
-  background: linear-gradient(
-    135deg,
-    var(--ftr-bg) 0%,
-    color-mix(in srgb, var(--ftr-bg) 55%, var(--accent-soft, var(--color-gold))) 100%
-  );
+  /* Identical to the RSVP section background so the two read as one palette:
+     accent base darkened toward the bottom, with the same soft-accent top glow. */
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--accent-soft, #F5C842) 42%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--ftr-bg) 0%, color-mix(in srgb, var(--ftr-bg) 70%, #2A2118) 100%);
   color: var(--ftr-fg);
   padding: clamp(80px, 10vw, 140px) var(--container-pad) 48px;
   text-align: center;

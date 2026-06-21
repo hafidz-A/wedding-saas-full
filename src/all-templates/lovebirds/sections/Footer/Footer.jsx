@@ -16,16 +16,13 @@ const DEFAULTS = {
 }
 
 function MonogramSvg({ text }) {
+  // currentColor inherits the footer's palette contrast colour (--ftr-fg, same
+  // as the hashtag), so the monogram stays legible on EVERY palette instead of a
+  // fixed cream→gold that vanishes on light/gold backgrounds.
   return (
     <svg viewBox="0 0 200 200" className={styles.monogram} aria-hidden="true">
-      <defs>
-        <linearGradient id="monoStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#FDF6EC" />
-          <stop offset="100%" stopColor="#F5C842" />
-        </linearGradient>
-      </defs>
-      <circle cx="100" cy="100" r="86" fill="none" stroke="url(#monoStroke)" strokeWidth="1.2" opacity="0.9" />
-      <circle cx="100" cy="100" r="76" fill="none" stroke="url(#monoStroke)" strokeWidth="0.6" opacity="0.55" />
+      <circle cx="100" cy="100" r="86" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.85" />
+      <circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" strokeWidth="0.6" opacity="0.5" />
       <text
         x="50%" y="54%"
         dominantBaseline="middle"
@@ -33,7 +30,7 @@ function MonogramSvg({ text }) {
         fontFamily="Cormorant Garamond, serif"
         fontStyle="italic"
         fontSize="52"
-        fill="url(#monoStroke)"
+        fill="currentColor"
       >
         {text}
       </text>
