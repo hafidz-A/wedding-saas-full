@@ -49,6 +49,7 @@ function ResetPasswordInner() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const [hasInvitation, setHasInvitation] = useState(false)
   const { pwned, checking } = usePwnedPassword(password)
 
   async function onSubmit(e: React.FormEvent) {
@@ -121,12 +122,16 @@ function ResetPasswordInner() {
       template = (invitation as any)?.template_id || 'lovebirds'
     }
 
+    setHasInvitation(Boolean(slug))
     setDone(true)
     setSubmitting(false)
 
-    if (slug) {
-      setTimeout(() => router.replace(`/${template}/${slug}/dashboard`), 1200)
-    }
+    // Always navigate away so the success screen never dead-ends. Owners go to
+    // their dashboard; a user without an invitation lands on the homepage —
+    // they're already signed in, so the navbar there gives profile + create
+    // access. (Previously a slug-less account got stuck here with no redirect.)
+    const dest = slug ? `/${template}/${slug}/dashboard` : '/'
+    setTimeout(() => router.replace(dest), 1200)
   }
 
   if (done) {
@@ -136,7 +141,7 @@ function ResetPasswordInner() {
           <p style={kicker}>{t.doneKicker}</p>
           <h1 style={title}>{t.doneTitle}</h1>
         </header>
-        <p style={hint}>{t.doneHint}</p>
+        <p style={hint}>{hasInvitation ? t.doneHint : t.doneHintHome}</p>
       </div>
     )
   }

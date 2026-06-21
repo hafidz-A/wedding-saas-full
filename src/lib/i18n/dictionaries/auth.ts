@@ -99,6 +99,7 @@ export const auth = {
       doneKicker: 'Berhasil',
       doneTitle: 'Password sudah diubah',
       doneHint: 'Kamu otomatis login. Mengarahkan ke dashboard…',
+      doneHintHome: 'Kamu otomatis login. Mengarahkan ke beranda…',
       resend: '← Belum dapat token? Kirim ulang',
     },
     passwordRules: {
@@ -211,6 +212,7 @@ export const auth = {
       doneKicker: 'Success',
       doneTitle: 'Password changed',
       doneHint: 'You’re automatically signed in. Redirecting to the dashboard…',
+      doneHintHome: 'You’re automatically signed in. Redirecting home…',
       resend: '← No token yet? Resend',
     },
     passwordRules: {
