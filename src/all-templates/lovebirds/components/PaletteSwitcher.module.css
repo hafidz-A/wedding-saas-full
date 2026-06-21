@@ -26,6 +26,11 @@
   display: grid; gap: 10px;
   max-height: min(70vh, 560px);
   overflow-y: auto;
+  /* Keep the wheel inside the panel: stops the scroll from chaining to the
+     page once the panel hits its top/bottom. Paired with data-lenis-prevent
+     on the element so Lenis (which hijacks window wheel) lets the panel scroll
+     natively instead of scrolling the template behind it. */
+  overscroll-behavior: contain;
 }
 .header {
   display: flex; align-items: center; justify-content: space-between;

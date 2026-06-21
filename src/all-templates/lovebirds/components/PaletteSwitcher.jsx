@@ -65,7 +65,7 @@ export default function PaletteSwitcher() {
       >🎨</button>
 
       {open && (
-        <div ref={panelRef} className={styles.panel} role="radiogroup" aria-label="Pilih tema">
+        <div ref={panelRef} className={styles.panel} role="radiogroup" aria-label="Pilih tema" data-lenis-prevent>
           <div className={styles.header}>
             <span>Pilih Tema</span>
             <button className={styles.close} onClick={() => setOpen(false)} aria-label="Tutup">&times;</button>

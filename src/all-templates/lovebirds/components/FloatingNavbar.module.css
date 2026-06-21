@@ -122,12 +122,15 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  background: var(--glass-bg, rgba(253, 246, 236, 0.92));
-  border: 1px solid rgba(42, 33, 24, 0.10);
+  /* Solid palette button pair (not --glass-bg) so the trigger never blends
+     into the section behind it. On accent-bg / dark palettes --glass-bg is a
+     translucent tint of the SECTION colour (e.g. terracotta on terracotta),
+     which made the hamburger nyaru; --button-bg/--button-fg are guaranteed to
+     contrast each other AND the background on all 10 palettes. */
+  background: var(--button-bg, rgba(253, 246, 236, 0.92));
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.10));
   border-radius: 14px;
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  box-shadow: 0 10px 24px rgba(42, 33, 24, 0.10);
+  box-shadow: 0 10px 24px rgba(42, 33, 24, 0.18);
   cursor: pointer;
   z-index: 2;
 }
@@ -136,7 +139,7 @@
   display: block;
   width: 20px;
   height: 2px;
-  background: var(--color-charcoal);
+  background: var(--button-fg, var(--color-charcoal));
   border-radius: 2px;
   transition: transform 0.22s ease, opacity 0.22s ease;
   transform-origin: center;
@@ -172,6 +175,7 @@
   padding: 8px;
   max-height: calc(100vh - 80px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 

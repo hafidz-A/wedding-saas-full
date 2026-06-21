@@ -13,6 +13,15 @@
   z-index: 0;
 }
 
+/* While the Spring Coil gallery is the full-screen pinned view, hide the GLOBAL
+   flying / perched ornaments — they drift across the centre and cover the focal
+   photo. The gallery keeps its OWN left & right bouquet (gsc-bouquet), so the
+   scene reads as edge-only decoration (matching RSVP / footer) with nothing in
+   front of the photo. Toggled by GallerySpringCoil via body.lb-gallery-active. */
+body.lb-gallery-active .lovebirds-ornament-root {
+  display: none !important;
+}
+
 .lovebirds-fly-zone-bg,
 .lovebirds-fly-zone-fg {
   position: fixed;

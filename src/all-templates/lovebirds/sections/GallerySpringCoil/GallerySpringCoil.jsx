@@ -793,6 +793,10 @@ export default function GallerySpringCoil({
 
     const startLoop = () => {
       inView = true
+      // Hide the global flying/perched ornaments while this full-screen coil is
+      // the active view — they'd otherwise drift over the centre photo. The
+      // gallery's own left/right bouquet stays (it's not part of that layer).
+      document.body.classList.add('lb-gallery-active')
       // Sync render BEFORE the next paint — guarantees the first
       // paint after re-enter shows the correct coil layout, fixing the
       // "stuck at top" / "cards flat" bug where the browser would paint
@@ -802,6 +806,7 @@ export default function GallerySpringCoil({
 
     const stopLoop = () => {
       inView = false
+      document.body.classList.remove('lb-gallery-active')
       if (raf) {
         cancelAnimationFrame(raf)
         raf = 0
@@ -921,6 +926,9 @@ export default function GallerySpringCoil({
     }
 
     return () => {
+      // Drop the gallery flag so the global ornaments aren't left hidden if the
+      // section unmounts while it was the active view (e.g. editor remount).
+      document.body.classList.remove('lb-gallery-active')
       observer.disconnect()
       scene.removeEventListener('pointermove', onPointerMove)
       scene.removeEventListener('pointerleave', onPointerLeave)
