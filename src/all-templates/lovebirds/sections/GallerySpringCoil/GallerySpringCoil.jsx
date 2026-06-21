@@ -5,8 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { BotanicalSketchLayer } from '../../components/BotanicalBorder.tsx'
-import { SHAPES } from '../../components/Ornaments.jsx'
-import { useTheme } from '../../components/ThemeProvider.jsx'
+import SceneFrame from '../../components/SceneFrame.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -80,43 +79,18 @@ const COMPONENT_STYLES = `
   mix-blend-mode: multiply;
 }
 
-/* ── Romantic bouquet silhouettes framing the scene at left & right.
-   mix-blend-mode multiply ties them visually to the cream background
-   without harsh edges. Photos that swing to the edges blend through
-   the silhouette organically. */
-.gsc-bouquet {
-  position: absolute;
-  bottom: -4%;
-  height: clamp(320px, 64vh, 580px);
-  width: auto;
-  aspect-ratio: 200 / 320;
-  /* No 'color' override — children carry their own fill hex so the bouquet
-     reads as colourful flowers rather than a monochrome silhouette. */
-  opacity: 0.55;
-  pointer-events: none;
-  z-index: 35;
-  /* mix-blend-mode removed — multiply was muting the colours into greys */
+/* The ornament motif at the edges comes from the shared SceneFrame (same as
+   RSVP / footer): two columns pinned to the LEFT & RIGHT, centre left clear.
+   SceneFrame fills its motifs with --button-fg (tuned for accent-bg sections);
+   the gallery sits on the normal section bg, so retint to --accent here so the
+   birds/butterflies stay visible on every palette. The gallery already has its
+   own centre vignette, so SceneFrame's faint centre haze is dropped to avoid
+   doubling up. */
+.gsc-scene .lb-scene__side svg {
+  fill: var(--accent, #E8553E);
+  color: var(--accent, #E8553E);
 }
-
-.gsc-bouquet svg { width: 100%; height: 100%; display: block; }
-
-.gsc-bouquetLeft {
-  left: -5%;
-  transform: rotate(-10deg);
-  transform-origin: bottom right;
-}
-
-.gsc-bouquetRight {
-  right: -5%;
-  transform: rotate(10deg) scaleX(-1);
-  transform-origin: bottom left;
-}
-
-@media (max-width: 760px) {
-  .gsc-bouquet { height: clamp(260px, 52vh, 400px); opacity: 0.5; }
-  .gsc-bouquetLeft  { left: -14%; }
-  .gsc-bouquetRight { right: -14%; }
-}
+.gsc-scene .lb-scene__haze { display: none; }
 
 .gsc-coilAnchor {
   position: absolute;
@@ -496,51 +470,6 @@ function clampIndex(index, total) {
   return Math.max(0, Math.min(total - 1, index))
 }
 
-/**
- * Ornament frame — replaces the old flower bouquet. Renders a small cluster of
- * the couple's CHOSEN ornament motif (flying birds / butterflies / perched
- * bird), tinted with the saved palette's accent via the live `--accent` CSS
- * var so it re-themes for free when the palette changes. Each motif drifts up
- * and fades in when the section enters the viewport.
- *
- * `shape` is the inner SVG markup for one motif (from the shared Ornaments
- * SHAPES set); `animate` flips true once the section enters view.
- */
-function OrnamentFrame({ shape, animate }) {
-  // Three motifs staggered up the corner — bottom-large to top-small — so the
-  // frame reads as a few ornaments fluttering up rather than a flat row.
-  const motifs = [
-    { x: 44, y: 196, s: 1.7, o: 0.92, delay: 0.15 },
-    { x: 6, y: 120, s: 1.15, o: 0.7, delay: 0.4 },
-    { x: 96, y: 60, s: 0.85, o: 0.5, delay: 0.62 },
-  ]
-  return (
-    <svg
-      viewBox="0 0 200 320"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMax meet"
-      // Tint every motif with the live palette accent. Birds/butterflies have
-      // no explicit fill (they inherit `fill`); the perched bird uses
-      // currentColor — `color` covers it. Both follow --accent.
-      style={{ fill: 'var(--accent, #E8553E)', color: 'var(--accent, #E8553E)' }}
-    >
-      {motifs.map((m, i) => (
-        <motion.g
-          key={i}
-          initial={{ opacity: 0, y: 24 }}
-          animate={animate ? { opacity: m.o, y: 0 } : { opacity: 0, y: 24 }}
-          transition={{ duration: 0.7, delay: m.delay, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <g
-            transform={`translate(${m.x} ${m.y}) scale(${m.s})`}
-            dangerouslySetInnerHTML={{ __html: shape }}
-          />
-        </motion.g>
-      ))}
-    </svg>
-  )
-}
-
 function CoilPhoto({ photo, index, config, cardRef, hasEntered, onOpen }) {
   const label = photo.caption || `Foto ${index + 1}`
 
@@ -601,10 +530,6 @@ export default function GallerySpringCoil({
   const displayPhotos = useMemo(() => normalizePhotos(photos), [photos])
   const total = displayPhotos.length
   const config = useMemo(() => buildConfig(total), [total])
-  // The couple's saved ornament motif (birds / butterflies / perched) frames
-  // the scene instead of the old flower bouquet, tinted via --accent in CSS.
-  const { ornamentType } = useTheme()
-  const ornamentShape = SHAPES[ornamentType] || SHAPES.birds
   // Deterministic seed (no Date.now) so server and client render identical
   // botanical paths — avoids a React hydration mismatch on the SVG `d` attrs.
   const gallerySketchSeed = useMemo(() => (0x6d2b79f5 ^ total) >>> 0, [total])
@@ -1008,14 +933,12 @@ export default function GallerySpringCoil({
             style={{ position: 'absolute' }}
           />
 
-          {/* The couple's saved ornament motif frames the coil scene at left &
-              right (replaces the old flower bouquet), tinted to the palette. */}
-          <div className="gsc-bouquet gsc-bouquetLeft" aria-hidden="true">
-            <OrnamentFrame shape={ornamentShape} animate={hasEntered} />
-          </div>
-          <div className="gsc-bouquet gsc-bouquetRight" aria-hidden="true">
-            <OrnamentFrame shape={ornamentShape} animate={hasEntered} />
-          </div>
+          {/* Ornament motif locked to the LEFT & RIGHT edges (centre stays clear
+              of the focal photo), via the shared SceneFrame — the SAME edge
+              treatment as RSVP / footer. Retinted to --accent for the gallery
+              by the .gsc-scene override in COMPONENT_STYLES (SceneFrame defaults
+              to --button-fg, meant for accent-bg sections, not the gallery bg). */}
+          <SceneFrame />
 
           <div className="gsc-stage">
             <div className="gsc-coilAnchor">
