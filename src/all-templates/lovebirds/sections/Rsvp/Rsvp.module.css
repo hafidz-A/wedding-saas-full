@@ -78,6 +78,19 @@
 .row {}
 .field { display: grid; gap: 8px; }
 
+/* The "Will you attend?" + "How many of you?" groups are <fieldset>s. Replace
+   the faint default browser border (a grey/blue that clashed with the palette)
+   with a deliberate, palette-matched frame so each group reads as one tidy unit. */
+fieldset.field {
+  border: 1px solid color-mix(in srgb, var(--rsvp-fg) 38%, transparent);
+  border-radius: 14px;
+  padding: 12px 16px 16px;
+}
+fieldset.field > .label {
+  padding: 0 8px;
+  margin-left: -4px;
+}
+
 .label {
   font-family: var(--font-body);
   font-size: 12px;
@@ -181,9 +194,11 @@
 .stepValue {
   min-width: 24px;
   text-align: center;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 22px;
+  /* Plain body type so the count reads as a normal digit — the Great Vibes
+     display font turned "1" into a slash-like squiggle. */
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 20px;
   color: var(--rsvp-fg);
 }
 .stepHint {
