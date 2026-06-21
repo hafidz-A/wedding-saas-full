@@ -22,7 +22,7 @@ const PREVIEW: Record<OrnamentType, string> = {
               <path class="bird-body" d="M22 32 C22 25, 26 20, 32 20 C38 20, 42 25, 42 32 C42 38, 38 40, 32 40 C26 40, 22 38, 22 32 Z" fill="currentColor" />
               <circle class="bird-head" cx="37" cy="16" r="8" fill="currentColor" />
               <circle cx="39" cy="14" r="1.5" fill="#000" />
-              <path class="beak" d="M45 14 L49 16 L45 18 Z" fill="#F5A623" />
+              <path class="beak" d="M45 14 L49 16 L45 18 Z" fill="currentColor" />
               <path class="wing-front" d="M26 30 C26 26, 32 26, 35 32 C38 38, 32 38, 29 36 Z" fill="currentColor" opacity="0.9" />`,
 }
 

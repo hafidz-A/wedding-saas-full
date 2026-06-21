@@ -245,11 +245,10 @@ export default function Rsvp(props) {
 
               <button
                 type="submit"
-                className={`${styles.submit} btn-magnetic-slide`}
-                data-text={isSubmitting ? 'Sending…' : 'Send my RSVP'}
+                className={styles.submit}
                 disabled={isSubmitting}
               >
-                <span>{isSubmitting ? 'Sending…' : 'Send my RSVP'}</span>
+                {isSubmitting ? 'Sending…' : 'Send my RSVP'}
               </button>
             </form>
           </div>
