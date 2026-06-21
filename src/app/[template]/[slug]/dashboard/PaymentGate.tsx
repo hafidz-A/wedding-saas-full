@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { startCheckout, startRenewal } from '@/app/onboarding/actions'
 import RecheckPaymentButton from '@/app/profile/RecheckPaymentButton'
-import { useDashboardDict } from './DashboardI18nProvider'
+import { AuthChrome } from '@/components/site/AuthChrome'
+import { useDashboardDict, useDashboardLang } from './DashboardI18nProvider'
 
 /**
  * Full-screen gate shown in place of the dashboard when payment is required:
@@ -33,6 +34,7 @@ export default function PaymentGate({
   const [pending, start] = useTransition()
   const [err, setErr] = useState<string | null>(null)
   const t = useDashboardDict().paymentGate
+  const lang = useDashboardLang()
   const isExpired = status === 'expired'
 
   function onPay() {
@@ -56,6 +58,8 @@ export default function PaymentGate({
   }
 
   return (
+    <>
+    <AuthChrome lang={lang} />
     <main style={shell}>
       <div style={card}>
         <p style={kicker}>{isExpired ? t.expiredKicker : t.draftKicker}</p>
@@ -91,6 +95,7 @@ export default function PaymentGate({
         </footer>
       </div>
     </main>
+    </>
   )
 }
 

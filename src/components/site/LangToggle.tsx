@@ -2,7 +2,7 @@
 import { useId } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import { LANG_COOKIE, LANG_COOKIE_MAX_AGE, LANGS, type Lang } from '@/lib/i18n/config'
+import { LANG_COOKIE, LANG_COOKIE_MAX_AGE, LANG_CHANGE_EVENT, LANGS, type Lang } from '@/lib/i18n/config'
 import styles from './LangToggle.module.css'
 
 export function LangToggle({ lang, label }: { lang: Lang; label: string }) {
@@ -13,6 +13,9 @@ export function LangToggle({ lang, label }: { lang: Lang; label: string }) {
     if (next === lang) return
     document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=${LANG_COOKIE_MAX_AGE}; samesite=lax`
     document.documentElement.lang = next
+    // Let pure client pages (forgot/reset) that read the cookie via
+    // useClientLang re-render; server pages pick it up from router.refresh().
+    window.dispatchEvent(new Event(LANG_CHANGE_EVENT))
     router.refresh()
   }
 

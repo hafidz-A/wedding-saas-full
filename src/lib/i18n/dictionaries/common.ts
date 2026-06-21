@@ -1,6 +1,6 @@
 export const common = {
   id: {
-    nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan', myTemplate: 'My Template' },
+    nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan', myTemplate: 'My Template', home: 'Beranda' },
     footer: {
       tagline: 'Undangan digital yang terasa seperti film pendek.',
       templates: 'Template',
@@ -57,7 +57,7 @@ export const common = {
     },
   },
   en: {
-    nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template' },
+    nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template', home: 'Home' },
     footer: {
       tagline: 'Digital invitations that feel like short films.',
       templates: 'Templates',

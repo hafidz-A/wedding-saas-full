@@ -6,6 +6,7 @@ import { Suspense, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
+import { AuthChrome } from '@/components/site/AuthChrome'
 
 /**
  * /forgot-password — sends a Supabase Auth password reset email.
@@ -21,7 +22,8 @@ function ForgotPasswordInner() {
   const searchParams = useSearchParams()
   const slug = searchParams.get('slug') || ''
   const template = searchParams.get('template') || 'lovebirds'
-  const t = getDict(useClientLang()).auth.forgot
+  const lang = useClientLang()
+  const t = getDict(lang).auth.forgot
 
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -61,6 +63,8 @@ function ForgotPasswordInner() {
   }
 
   return (
+    <>
+    <AuthChrome lang={lang} />
     <main style={page}>
       <div style={card}>
         <header style={{ textAlign: 'center', marginBottom: 8 }}>
@@ -124,6 +128,7 @@ function ForgotPasswordInner() {
         )}
       </div>
     </main>
+    </>
   )
 }
 

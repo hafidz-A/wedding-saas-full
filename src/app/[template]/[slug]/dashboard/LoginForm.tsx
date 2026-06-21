@@ -5,17 +5,20 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { createBrowserClient } from '@supabase/ssr'
-import type { Dict } from '@/lib/i18n'
+import type { Dict, Lang } from '@/lib/i18n'
+import { AuthChrome } from '@/components/site/AuthChrome'
 import styles from './dashboard.module.css'
 
 export default function LoginForm({
   slug,
   template,
   dict,
+  lang,
 }: {
   slug: string
   template: string
   dict: Dict['dashboard']['login']
+  lang: Lang
 }) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -62,6 +65,8 @@ export default function LoginForm({
   }
 
   return (
+    <>
+    <AuthChrome lang={lang} />
     <main
       style={{
         minHeight: '100vh',
@@ -160,6 +165,7 @@ export default function LoginForm({
         </p>
       </motion.form>
     </main>
+    </>
   )
 }
 

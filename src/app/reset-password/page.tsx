@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
+import { AuthChrome } from '@/components/site/AuthChrome'
 import { isPasswordValid } from '@/lib/auth/passwordPolicy'
 import { pwnedPasswordCount } from '@/lib/auth/pwnedPassword'
 import { usePwnedPassword } from '@/lib/auth/usePwnedPassword'
@@ -231,12 +232,16 @@ function ResetPasswordInner() {
 }
 
 export default function ResetPasswordPage() {
+  const lang = useClientLang()
   return (
-    <main style={page}>
-      <Suspense fallback={<div style={card}><p style={hint}>Loading…</p></div>}>
-        <ResetPasswordInner />
-      </Suspense>
-    </main>
+    <>
+      <AuthChrome lang={lang} />
+      <main style={page}>
+        <Suspense fallback={<div style={card}><p style={hint}>Loading…</p></div>}>
+          <ResetPasswordInner />
+        </Suspense>
+      </main>
+    </>
   )
 }
 

@@ -1,0 +1,63 @@
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 56px;
+  padding: 0 clamp(16px, 4vw, 32px);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 0.5px solid rgba(42, 33, 24, 0.1);
+  font-family: var(--font-body, system-ui);
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.home {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--border-radius-pill, 999px);
+  border: 1px solid rgba(42, 33, 24, 0.18);
+  background: rgba(255, 255, 255, 0.5);
+  color: #2a2118;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background var(--transition-default, 0.2s ease),
+    border-color var(--transition-default, 0.2s ease);
+}
+
+.home:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(42, 33, 24, 0.32);
+}
+
+.homeIcon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+  .homeLabel {
+    /* Icon-only on narrow screens; the Link keeps its aria-label for SR users. */
+    display: none;
+  }
+  .home {
+    padding: 8px;
+  }
+}

@@ -3,13 +3,14 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { isValidTemplate } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
-import { getDict, type Dict } from '@/lib/i18n'
+import { getDict, type Dict, type Lang } from '@/lib/i18n'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { resolveUpgrade } from '@/lib/payments/plans'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
+import { AuthChrome } from '@/components/site/AuthChrome'
 import { fromDbRow } from './guests/types'
 import { fromDbRow as attendanceFromDbRow } from './guestbook/types'
 import { decryptField as appDecrypt } from '@/lib/crypto/app'
@@ -40,7 +41,7 @@ export default async function DashboardPage({ params }: PageProps) {
   const hasSupabase =
     !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!hasSupabase) return <SetupPrompt />
+  if (!hasSupabase) return <SetupPrompt lang={lang} />
 
   // 1. Look up the invitation. We use the admin client because we need
   //    the row even when no user is authenticated (so we can show the
@@ -52,7 +53,7 @@ export default async function DashboardPage({ params }: PageProps) {
     .eq('slug', slug)
     .maybeSingle()) as { data: any | null }
 
-  if (!invitation) return <NoSuchInvitation slug={slug} dict={t.dashboard.page} />
+  if (!invitation) return <NoSuchInvitation slug={slug} dict={t.dashboard.page} lang={lang} />
 
   // 1b. Canonicalise the URL to the invitation's real template_id. The editor
   //     tabs are template-aware (lock rules, palette/meta schema), so a URL with
@@ -75,12 +76,14 @@ export default async function DashboardPage({ params }: PageProps) {
 
   // 3. Owner check.
   if (!user) {
-    return <LoginForm slug={slug} template={template} dict={t.dashboard.login} />
+    return <LoginForm slug={slug} template={template} dict={t.dashboard.login} lang={lang} />
   }
   if (invitation.owner_user_id !== user.id) {
     // Authenticated user is the wrong owner. Sign them out via the form
     // (showing them the error) so they can sign in with the right account.
     return (
+      <>
+      <AuthChrome lang={lang} />
       <main style={panelStyle}>
         <div style={cardStyle}>
           <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: '0 0 12px' }}>
@@ -92,6 +95,7 @@ export default async function DashboardPage({ params }: PageProps) {
           <SignOutButton label={t.dashboard.page.signOut} />
         </div>
       </main>
+      </>
     )
   }
 
@@ -216,8 +220,10 @@ function decryptGiftRow(g: any) {
 
 /* ──────────── small server-rendered placeholders ──────────── */
 
-function SetupPrompt() {
+function SetupPrompt({ lang }: { lang: Lang }) {
   return (
+    <>
+    <AuthChrome lang={lang} />
     <main style={panelStyle}>
       <div style={cardStyle}>
         <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
@@ -230,11 +236,14 @@ function SetupPrompt() {
         </p>
       </div>
     </main>
+    </>
   )
 }
 
-function NoSuchInvitation({ slug, dict }: { slug: string; dict: Dict['dashboard']['page'] }) {
+function NoSuchInvitation({ slug, dict, lang }: { slug: string; dict: Dict['dashboard']['page']; lang: Lang }) {
   return (
+    <>
+    <AuthChrome lang={lang} />
     <main style={panelStyle}>
       <div style={cardStyle}>
         <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
@@ -243,6 +252,7 @@ function NoSuchInvitation({ slug, dict }: { slug: string; dict: Dict['dashboard'
         <p style={{ color: '#5C4A3A', lineHeight: 1.6 }}>{dict.noInvitationBody}</p>
       </div>
     </main>
+    </>
   )
 }
 
