@@ -1,21 +1,34 @@
 import type { Metadata, Viewport } from 'next'
 import { BRAND } from '@/lib/brand'
-import { Cormorant_Garamond, Great_Vibes, Plus_Jakarta_Sans } from 'next/font/google'
+import { Montserrat, Biryani, Tangerine, Great_Vibes } from 'next/font/google'
 import '../styles/global.css'
 
-// Consolidated type system — exactly three families:
-//   Cormorant Garamond → display + body (dapur/marketing)
-//   Great Vibes        → all script accents (names, monograms, classy titles)
-//   Plus Jakarta Sans  → template body (lovebirds/solary)
-// Legacy variables (--font-body, --font-script, --font-display-classy) are
-// aliased to these in src/styles/tokens.css so existing CSS keeps working.
-const cormorant = Cormorant_Garamond({
+// Consolidated type system (design cleanup 2026-06) — four families:
+//   Montserrat   → all headings (Solary, Lovebirds, marketing/dashboard/auth)
+//   Biryani      → body + label/mono (every scope)
+//   Tangerine    → script accent inside the templates (Solary + Lovebirds)
+//   Great Vibes  → ONLY the couple names in the Lovebirds Hero
+// Semantic roles (--font-heading, --font-body, --solary-font-*, --lovebirds-font-*)
+// are defined in src/styles/tokens.css and point at these CSS variables.
+// Plus Jakarta Sans and Cormorant Garamond were retired in this cleanup.
+const montserrat = Montserrat({
   subsets: ['latin'],
-  // 700 included for solary headings (ex-Fraunces 700–800) — real bold,
-  // not synthesized faux-bold.
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-display',
+  // Montserrat is a variable font — next/font streams the full weight axis.
+  variable: '--font-montserrat',
+  display: 'swap',
+})
+
+const biryani = Biryani({
+  subsets: ['latin'],
+  weight: ['300', '400', '600', '700'],
+  variable: '--font-biryani',
+  display: 'swap',
+})
+
+const tangerine = Tangerine({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-tangerine',
   display: 'swap',
 })
 
@@ -23,13 +36,6 @@ const greatVibes = Great_Vibes({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-greatvibes',
-  display: 'swap',
-})
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-jakarta',
   display: 'swap',
 })
 
@@ -78,7 +84,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${cormorant.variable} ${greatVibes.variable} ${jakarta.variable}`}>
+    <html lang="id" className={`${montserrat.variable} ${biryani.variable} ${tangerine.variable} ${greatVibes.variable}`}>
       {/* No hardcoded background here: each template owns its own (Lovebirds
           cream via body.lovebirds-route, Solary dark via body.solary-route),
           and the dapur pages (login/onboarding/marketing/dashboard) each set
