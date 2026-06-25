@@ -107,4 +107,89 @@
   --transition-default: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: all 0.65s cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ═══════════════════════════════════════════════
+     SEMANTIC ALIASES — added during design cleanup (Fase 2)
+     Gunakan token ini di semua komponen baru dan saat
+     mengganti hardcoded values di file non-template.
+     ═══════════════════════════════════════════════ */
+
+  /* ─── TEXT ─── */
+  --text-primary:    var(--color-charcoal);       /* #2A2118 */
+  --text-secondary:  #5C4A3A;                      /* charcoal-light */
+  --text-muted:      rgba(42, 33, 24, 0.55);
+  --text-on-dark:    var(--color-cream);           /* #FDF6EC */
+
+  /* ─── SURFACE ─── */
+  --surface-base:    var(--color-cream);           /* #FDF6EC */
+  --surface-raised:  #fff;
+  --surface-sunken:  var(--color-cream-deep);      /* #F7EBD7 */
+  --surface-warm:    #F5EFE3;
+
+  /* ─── BORDER ─── */
+  --border-subtle:   rgba(42, 33, 24, 0.06);
+  --border-default:  rgba(42, 33, 24, 0.12);
+  --border-strong:   rgba(42, 33, 24, 0.20);
+
+  /* ─── INTERACTIVE ─── */
+  --interactive-primary:       var(--color-coral);  /* #E8553E */
+  --interactive-primary-hover: #C43F2A;
+  --interactive-primary-soft:  rgba(232, 85, 62, 0.10);
+
+  /* ─── SHADOW ─── */
+  --shadow-xs:  0 2px 8px rgba(42, 33, 24, 0.04);
+  --shadow-sm:  0 6px 16px rgba(42, 33, 24, 0.08);
+  --shadow-md:  0 12px 32px rgba(42, 33, 24, 0.12);
+  --shadow-lg:  0 20px 48px rgba(42, 33, 24, 0.16);
+
+  /* ─── RADIUS SCALE (standardised — 3 values only) ─── */
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-pill: 999px;
+
+  /* ─── FONT SIZE SCALE ─── */
+  --font-size-xs:   11px;
+  --font-size-sm:   13px;
+  --font-size-base: 15px;
+  --font-size-md:   16px;
+  --font-size-lg:   18px;
+
+  /* ═══════════════════════════════════════════════
+     FONT ROLE SYSTEM
+     Tiga scope: Solary, Lovebirds, Marketing/Dashboard/Auth (Scope C).
+     Semua scope pakai Montserrat heading + Biryani body.
+     Script (Tangerine) hanya di template & ornamental context.
+     Great Vibes KHUSUS nama pasangan di Hero Lovebirds.
+     Nama variable font aktual (Fase 0): --font-montserrat / --font-biryani /
+     --font-tangerine / --font-greatvibes.
+     ═══════════════════════════════════════════════ */
+
+  /* ── Scope C: Marketing / Dashboard / Auth — tanpa script font ── */
+  --font-heading:  var(--font-montserrat), 'Montserrat', sans-serif;
+  --font-body:     var(--font-biryani), 'Biryani', sans-serif;
+  --font-label:    var(--font-biryani), 'Biryani', sans-serif;
+  --font-mono:     var(--font-biryani), 'Biryani', sans-serif;
+
+  /* ── Solary template overrides (di-wire ulang di Solary palette config) ── */
+  --solary-font-heading: var(--font-montserrat), 'Montserrat', sans-serif;
+  --solary-font-body:    var(--font-biryani), 'Biryani', sans-serif;
+  --solary-font-script:  var(--font-tangerine), 'Tangerine', cursive;
+
+  /* ── Lovebirds template overrides (di-wire ulang di Lovebirds palette config) ── */
+  --lovebirds-font-heading:     var(--font-montserrat), 'Montserrat', sans-serif;
+  --lovebirds-font-body:        var(--font-biryani), 'Biryani', sans-serif;
+  --lovebirds-font-script:      var(--font-tangerine), 'Tangerine', cursive;
+  --lovebirds-font-hero-names:  var(--font-greatvibes), 'Great Vibes', cursive;
+  --font-serif-soft:            var(--font-montserrat), 'Montserrat', sans-serif;
+
+  /* ── Legacy font-alias overrides ──
+     Re-point retired families (Cormorant / Plus Jakarta / Great Vibes) so any
+     un-migrated reference still resolves to the new system instead of a broken
+     fallback. These OVERRIDE the literal definitions higher up in this :root
+     (later declaration wins). Great Vibes survives ONLY via
+     --lovebirds-font-hero-names / --font-greatvibes above. */
+  --font-display:        var(--font-heading);   /* was Cormorant Garamond */
+  --font-body-fun:       var(--font-body);       /* was Plus Jakarta Sans */
+  --font-script:         var(--font-tangerine), 'Tangerine', cursive; /* was Great Vibes */
+  --font-display-classy: var(--font-tangerine), 'Tangerine', cursive; /* was Great Vibes */
 }

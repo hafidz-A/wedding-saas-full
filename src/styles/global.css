@@ -105,10 +105,10 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, figure { margin: 0; padding: 0; }
 ul, ol { list-style: none; }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-display);
-  font-weight: 500;
+  font-family: var(--font-heading); /* Montserrat — global heading (Scope C) */
+  font-weight: 600;
   letter-spacing: -0.01em;
-  line-height: 1.1;
+  line-height: 1.15;
   color: var(--color-charcoal);
 }
 
