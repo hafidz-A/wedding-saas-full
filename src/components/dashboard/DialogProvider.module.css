@@ -18,7 +18,7 @@
 }
 .title {
   margin: 0 0 10px;
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: 26px;
   color: var(--color-charcoal, #2A2118);

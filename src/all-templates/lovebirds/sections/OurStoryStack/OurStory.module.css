@@ -32,7 +32,7 @@
 }
 
 .sectionTitle {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-family: var(--font-display);
   font-style: italic;
   font-weight: 400;
   /* Slightly smaller cap so the header doesn't dominate vertical space */
@@ -128,7 +128,7 @@
 .cardNumber {
   position: relative;
   z-index: 2;
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-family: var(--font-display);
   font-style: italic;
   font-weight: 500;
   font-size: clamp(80px, 14vw, 180px);
@@ -196,7 +196,7 @@
 }
 
 .descTitle {
-  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-family: var(--font-display);
   font-style: italic;
   font-weight: 400;
   font-size: clamp(32px, 4.4vw, 60px);

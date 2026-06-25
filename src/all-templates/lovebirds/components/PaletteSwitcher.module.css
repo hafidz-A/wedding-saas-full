@@ -34,15 +34,14 @@
 }
 .header {
   display: flex; align-items: center; justify-content: space-between;
-  /* In lovebirds scope --font-display resolves to Great Vibes (script), so no
-     italic — slanting an already-cursive face distorts it. */
-  font-family: var(--font-display), 'Cormorant Garamond', serif;
+  /* --font-display now resolves to Montserrat (design cleanup). */
+  font-family: var(--font-display);
   font-style: normal; font-size: 20px;
   color: #2A2118;
 }
 .close { background: none; border: 0; font-size: 20px; cursor: pointer; color: rgba(42, 33, 24, 0.55); line-height: 1; }
 .groupTitle {
-  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
   color: rgba(42, 33, 24, 0.55); font-weight: 600; margin-top: 4px;
 }
@@ -52,7 +51,7 @@
   padding: 9px 10px; border-radius: 10px;
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
-  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: #2A2118;
+  font-family: var(--font-body); font-size: 12px; color: #2A2118;
   text-align: left;
 }
 .swatchBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
@@ -66,7 +65,7 @@
   padding: 8px 4px; border-radius: 10px;
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
-  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif; font-size: 10px; color: #2A2118;
+  font-family: var(--font-body); font-size: 10px; color: #2A2118;
 }
 .ornamentBtn .emoji { font-size: 18px; line-height: 1; }
 .ornamentBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }

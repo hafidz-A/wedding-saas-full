@@ -32,15 +32,16 @@ body.lovebirds-route {
   --shadow-button-3d-active: 0 1px 0 var(--color-charcoal-light), 0 2px 8px rgba(42, 33, 24, 0.1);
 
   /* ---------- Fonts — scoped to the invitation card only ----------
-     These reference next/font loaders defined in src/app/layout.tsx (literal
-     family names do NOT work — next/font exposes fonts only via these vars):
-       --font-greatvibes → Great Vibes (headings + names/monogram — every
-                           script accent now resolves to Great Vibes)
-       --font-jakarta    → Plus Jakarta Sans (body)
-     If a functional heading reads poorly in script, override that section's
-     title to var(--font-display) / serif locally. */
-  --font-display: var(--font-greatvibes), 'Cormorant Garamond', serif;
-  --font-body: var(--font-jakarta), sans-serif;
+     Type — wired to the Fase 2 font-role system (design cleanup):
+       heading non-script → Montserrat (--lovebirds-font-heading)
+       body               → Biryani    (--lovebirds-font-body)
+       script accent      → Tangerine  (--lovebirds-font-script)
+     Great Vibes is reserved for the couple names in the Hero only, applied
+     there via --lovebirds-font-hero-names. */
+  --font-display:    var(--lovebirds-font-heading);
+  --font-body:       var(--lovebirds-font-body);
+  --font-script:     var(--lovebirds-font-script);
+  --font-serif-soft: var(--lovebirds-font-heading);
 }
 
 /* Component variations */

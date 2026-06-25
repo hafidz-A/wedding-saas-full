@@ -54,16 +54,18 @@
   --color-ink: #1a1a1a;
 
   /* ---------- Typography ----------
-     Three-family system (loaded via next/font in src/app/layout.tsx):
-       Cormorant Garamond → display + body
-       Great Vibes        → every script accent
-       Plus Jakarta Sans  → template body (lovebirds/solary override --font-body)
-     The names below are kept as aliases so existing CSS keeps resolving. */
-  --font-display: 'Cormorant Garamond', 'Times New Roman', serif; /* shadowed by next/font var on <html> */
-  --font-body: var(--font-display);
-  --font-script: var(--font-greatvibes), 'Great Vibes', cursive;
-  --font-display-classy: var(--font-greatvibes), 'Great Vibes', cursive;
-  --font-body-fun: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
+     Four-family system (loaded via next/font in src/app/layout.tsx):
+       Montserrat  → all headings (--font-heading, in the cleanup block below)
+       Biryani     → body + label/mono (--font-body)
+       Tangerine   → script accent inside templates (--font-script)
+       Great Vibes → ONLY Lovebirds Hero couple names (--lovebirds-font-hero-names)
+     These legacy aliases are re-pointed at the new families so existing CSS keeps
+     resolving. Cormorant Garamond + Plus Jakarta Sans were retired in the cleanup. */
+  --font-display: var(--font-montserrat), 'Montserrat', serif; /* per-template may shadow */
+  --font-body: var(--font-biryani), 'Biryani', sans-serif;
+  --font-script: var(--font-tangerine), 'Tangerine', cursive;
+  --font-display-classy: var(--font-tangerine), 'Tangerine', cursive;
+  --font-body-fun: var(--font-biryani), 'Biryani', sans-serif;
 
   /* ---------- Spacing ----------
      `--spacing-section` is now FLUID — single value that grows from 64px on
@@ -181,15 +183,4 @@
   --lovebirds-font-script:      var(--font-tangerine), 'Tangerine', cursive;
   --lovebirds-font-hero-names:  var(--font-greatvibes), 'Great Vibes', cursive;
   --font-serif-soft:            var(--font-montserrat), 'Montserrat', sans-serif;
-
-  /* ── Legacy font-alias overrides ──
-     Re-point retired families (Cormorant / Plus Jakarta / Great Vibes) so any
-     un-migrated reference still resolves to the new system instead of a broken
-     fallback. These OVERRIDE the literal definitions higher up in this :root
-     (later declaration wins). Great Vibes survives ONLY via
-     --lovebirds-font-hero-names / --font-greatvibes above. */
-  --font-display:        var(--font-heading);   /* was Cormorant Garamond */
-  --font-body-fun:       var(--font-body);       /* was Plus Jakarta Sans */
-  --font-script:         var(--font-tangerine), 'Tangerine', cursive; /* was Great Vibes */
-  --font-display-classy: var(--font-tangerine), 'Tangerine', cursive; /* was Great Vibes */
 }

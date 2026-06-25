@@ -301,7 +301,7 @@
 
 /* Personalized "Welcome, dear <name>" — warm script line above the label. */
 .gateGreet {
-  font-family: var(--font-greatvibes), cursive;
+  font-family: var(--font-script); /* Tangerine — script accent (not couple name) */
   font-size: clamp(20px, 3.2vw, 30px);
   line-height: 1.1;
   color: var(--glass-text, var(--color-charcoal));
@@ -310,7 +310,8 @@
 }
 
 .coupleName {
-  font-family: var(--font-greatvibes), cursive;
+  /* The ONE place Great Vibes is allowed (design cleanup): the couple names. */
+  font-family: var(--lovebirds-font-hero-names);
   font-style: normal;
   font-weight: 400;
   font-size: clamp(48px, 10vw, 88px);
@@ -449,7 +450,7 @@
      above, and dropping it frees the vertical room the lowered card needs to
      clear the scroll hint. */
   display: none;
-  font-family: var(--font-greatvibes), cursive;
+  font-family: var(--font-script); /* Tangerine — monogram is initials, not the couple name */
   font-style: normal;
   font-size: clamp(14px, 1.8vw, 20px);
   color: var(--color-charcoal-light);

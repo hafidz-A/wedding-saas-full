@@ -27,8 +27,7 @@ function MonogramSvg({ text }) {
         x="50%" y="54%"
         dominantBaseline="middle"
         textAnchor="middle"
-        fontFamily="Cormorant Garamond, serif"
-        fontStyle="italic"
+        style={{ fontFamily: 'var(--font-script)', fontStyle: 'normal' }}
         fontSize="52"
         fill="currentColor"
       >

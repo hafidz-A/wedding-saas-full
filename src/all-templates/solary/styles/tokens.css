@@ -12,11 +12,14 @@
    - Radii bumped, spring easing added
    ============================================================ */
 :root {
-  /* Type — --font-display intentionally NOT redefined: solary headings use
-     the global Cormorant Garamond from layout.tsx. */
-  --font-script:  var(--font-greatvibes), "Great Vibes", cursive;
-  --font-body:    var(--font-jakarta), system-ui, -apple-system, sans-serif;
-  --font-mono:    var(--font-jakarta), system-ui, -apple-system, sans-serif;
+  /* Type — wired to the Fase 2 font-role system (design cleanup):
+       heading  → Montserrat (--solary-font-heading)
+       body+mono→ Biryani    (--solary-font-body)
+       script   → Tangerine  (--solary-font-script) */
+  --font-display: var(--solary-font-heading);
+  --font-script:  var(--solary-font-script);
+  --font-body:    var(--solary-font-body);
+  --font-mono:    var(--solary-font-body);
 
   --fs-display:   clamp(2.4rem, 7vw, 6rem);
   --fs-h1:        clamp(1.9rem, 4.6vw, 3.6rem);
