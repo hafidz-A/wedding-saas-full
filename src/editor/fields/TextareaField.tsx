@@ -24,6 +24,6 @@ export default function TextareaField({ label, value, onChange, rows = 3, help }
 }
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 6 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.6)' }
-const textarea: React.CSSProperties = { padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'vertical', background: '#fff' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
+const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
+const textarea: React.CSSProperties = { padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'vertical', background: 'var(--surface-raised)' }
+const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }

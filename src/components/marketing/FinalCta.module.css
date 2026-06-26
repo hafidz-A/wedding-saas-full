@@ -13,7 +13,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(150deg, #FAF4EB 0%, #EFE5D3 100%);
-  border: 1px solid rgba(42, 33, 24, 0.08);
+  border: 1px solid var(--border-subtle);
   box-shadow: 0 20px 60px rgba(42, 33, 24, 0.06);
   text-align: center;
   opacity: 0;

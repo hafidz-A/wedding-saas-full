@@ -2,7 +2,7 @@
   font-size: 19px;
   font-weight: 700;
   margin: 28px 0 8px;
-  color: #2a2118;
+  color: var(--text-primary);
 }
 
 .prose h2:first-child {
@@ -51,21 +51,21 @@
 }
 
 .prose li::marker {
-  color: #2a2118;
+  color: var(--text-primary);
 }
 
 .prose a {
-  color: #e8553e;
+  color: var(--interactive-primary);
   font-weight: 600;
 }
 
 .prose strong {
-  color: #2a2118;
+  color: var(--text-primary);
 }
 
 .prose code {
-  background: rgba(42, 33, 24, 0.08);
+  background: var(--border-subtle);
   padding: 1px 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
 }

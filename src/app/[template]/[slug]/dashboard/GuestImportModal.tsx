@@ -74,7 +74,7 @@ export default function GuestImportModal({
                 </div>
               ))}
               {preview.length > 5 && (
-                <div style={{ color: '#5C4A3A', marginTop: 4 }}>
+                <div style={{ color: 'var(--text-secondary)', marginTop: 4 }}>
                   {t.andMorePrefix} {preview.length - 5} {t.andMoreSuffix}
                 </div>
               )}
@@ -82,7 +82,7 @@ export default function GuestImportModal({
           )}
         </div>
 
-        {error && <p style={{ color: '#E8553E', fontSize: 13 }}>{error}</p>}
+        {error && <p style={{ color: 'var(--interactive-primary)', fontSize: 13 }}>{error}</p>}
 
         <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
           <button type="button" onClick={onClose} style={ghostBtn}>
@@ -113,8 +113,8 @@ const overlay: React.CSSProperties = {
   padding: 16,
 }
 const dialog: React.CSSProperties = {
-  background: '#fff',
-  borderRadius: 16,
+  background: 'var(--surface-raised)',
+  borderRadius: 'var(--radius-md)',
   padding: 24,
   maxWidth: 560,
   width: '100%',
@@ -137,14 +137,14 @@ const closeBtn: React.CSSProperties = {
   background: 'transparent',
   cursor: 'pointer',
 }
-const hint: React.CSSProperties = { fontSize: 13, color: '#5C4A3A', margin: '8px 0 12px' }
+const hint: React.CSSProperties = { fontSize: 13, color: 'var(--text-secondary)', margin: '8px 0 12px' }
 const textarea: React.CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
   fontFamily: 'ui-monospace, monospace',
   fontSize: 13,
   padding: 12,
-  borderRadius: 10,
+  borderRadius: 'var(--radius-sm)',
   border: '1px solid rgba(42,33,24,0.16)',
   resize: 'vertical',
   minHeight: 200,
@@ -153,24 +153,24 @@ const previewBox: React.CSSProperties = {
   marginTop: 8,
   padding: '10px 12px',
   background: 'rgba(42,33,24,0.04)',
-  borderRadius: 10,
+  borderRadius: 'var(--radius-sm)',
   fontSize: 13,
 }
 const primaryBtn: React.CSSProperties = {
   padding: '10px 18px',
-  background: '#E8553E',
+  background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,
-  borderRadius: 10,
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer',
   fontSize: 14,
 }
 const ghostBtn: React.CSSProperties = {
   padding: '10px 14px',
   background: 'transparent',
-  color: '#2A2118',
-  border: '1px solid rgba(42,33,24,0.2)',
-  borderRadius: 10,
+  color: 'var(--text-primary)',
+  border: '1px solid var(--border-strong)',
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer',
   fontSize: 14,
 }

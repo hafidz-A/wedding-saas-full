@@ -26,10 +26,10 @@ const page: React.CSSProperties = {
   minHeight: '100vh',
   display: 'grid',
   placeItems: 'center',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: '120px 24px 48px',
   fontFamily: 'var(--font-body, system-ui)',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
 }
 const card: React.CSSProperties = { maxWidth: 480, textAlign: 'center' }
 const code: React.CSSProperties = {
@@ -37,7 +37,7 @@ const code: React.CSSProperties = {
   fontStyle: 'italic',
   fontSize: 'clamp(64px, 16vw, 120px)',
   lineHeight: 1,
-  color: '#E8553E',
+  color: 'var(--interactive-primary)',
   margin: 0,
 }
 const h1: React.CSSProperties = {
@@ -46,13 +46,13 @@ const h1: React.CSSProperties = {
   fontSize: 'clamp(28px, 5vw, 40px)',
   margin: '8px 0 12px',
 }
-const body: React.CSSProperties = { fontSize: 16, lineHeight: 1.7, color: '#5C4A3A', margin: '0 0 28px' }
+const body: React.CSSProperties = { fontSize: 16, lineHeight: 1.7, color: 'var(--text-secondary)', margin: '0 0 28px' }
 const cta: React.CSSProperties = {
   display: 'inline-block',
   padding: '14px 28px',
-  borderRadius: 999,
-  background: '#2A2118',
-  color: '#F5EFE3',
+  borderRadius: 'var(--radius-pill)',
+  background: 'var(--color-charcoal)',
+  color: 'var(--surface-warm)',
   fontSize: 13,
   letterSpacing: '0.16em',
   textTransform: 'uppercase',

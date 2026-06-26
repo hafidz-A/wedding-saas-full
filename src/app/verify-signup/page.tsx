@@ -141,7 +141,7 @@ function VerifySignupInner() {
 
         {error && <p style={errorStyle}>{error}</p>}
         {resent && !error && (
-          <p style={{ ...hint, color: '#2D8C4E', margin: 0 }}>
+          <p style={{ ...hint, color: 'var(--color-emerald)', margin: 0 }}>
             {t.resent}
           </p>
         )}
@@ -181,7 +181,7 @@ const page: React.CSSProperties = {
   minHeight: '100vh',
   display: 'grid',
   placeItems: 'center',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: 24,
   fontFamily: 'var(--font-body, system-ui)',
 }
@@ -190,8 +190,8 @@ const card: React.CSSProperties = {
   maxWidth: 440,
   padding: 36,
   background: 'rgba(255,255,255,0.95)',
-  borderRadius: 20,
-  boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+  borderRadius: 'var(--radius-md)',
+  boxShadow: 'var(--shadow-md)',
   display: 'flex',
   flexDirection: 'column',
   gap: 16,
@@ -200,7 +200,7 @@ const kicker: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.32em',
   fontSize: 11,
-  color: '#E8553E',
+  color: 'var(--interactive-primary)',
   margin: '0 0 8px',
 }
 const title: React.CSSProperties = {
@@ -208,21 +208,21 @@ const title: React.CSSProperties = {
   fontStyle: 'italic',
   fontSize: 30,
   margin: 0,
-  color: '#2A2118',
+  color: 'var(--text-primary)',
   lineHeight: 1.15,
 }
-const hint: React.CSSProperties = { color: '#5C4A3A', lineHeight: 1.6, fontSize: 14, margin: '8px 0 0' }
+const hint: React.CSSProperties = { color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: 14, margin: '8px 0 0' }
 const field: React.CSSProperties = { display: 'grid', gap: 6 }
 const label: React.CSSProperties = {
   fontSize: 12,
   textTransform: 'uppercase',
   letterSpacing: '0.16em',
-  color: 'rgba(42,33,24,0.6)',
+  color: 'var(--text-muted)',
 }
 const input: React.CSSProperties = {
   padding: '12px 14px',
-  borderRadius: 12,
-  border: '1px solid rgba(42,33,24,0.18)',
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--border-default)',
   fontSize: 15,
   fontFamily: 'inherit',
   width: '100%',
@@ -231,9 +231,9 @@ const input: React.CSSProperties = {
 const primaryBtn: React.CSSProperties = {
   marginTop: 8,
   padding: '14px 24px',
-  borderRadius: 999,
-  background: '#2A2118',
-  color: '#F5EFE3',
+  borderRadius: 'var(--radius-pill)',
+  background: 'var(--color-charcoal)',
+  color: 'var(--surface-warm)',
   border: 0,
   fontSize: 13,
   fontWeight: 600,
@@ -244,7 +244,7 @@ const primaryBtn: React.CSSProperties = {
 const linkBtn: React.CSSProperties = {
   background: 'none',
   border: 0,
-  color: '#E8553E',
+  color: 'var(--interactive-primary)',
   textDecoration: 'underline',
   cursor: 'pointer',
   padding: 0,
@@ -254,8 +254,8 @@ const linkBtn: React.CSSProperties = {
 const errorStyle: React.CSSProperties = {
   margin: 0,
   padding: '10px 12px',
-  background: 'rgba(232,85,62,0.1)',
-  color: '#E8553E',
-  borderRadius: 10,
+  background: 'var(--interactive-primary-soft)',
+  color: 'var(--interactive-primary)',
+  borderRadius: 'var(--radius-sm)',
   fontSize: 13,
 }

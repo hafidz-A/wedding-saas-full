@@ -142,7 +142,7 @@ export default function MetaTab({ slug, template, initial }: Props) {
           <div style={imageThumb}>
             {ogImage
               ? <img src={ogImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ fontSize: 22, color: '#F5C842' }}>✦</span>}
+              : <span style={{ fontSize: 22, color: 'var(--color-gold)' }}>✦</span>}
           </div>
           <div style={btnsCol}>
             <button type="button" style={btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
@@ -194,26 +194,26 @@ export default function MetaTab({ slug, template, initial }: Props) {
 }
 
 // ── Styles (mirrors PaletteTab / MusicTab) ──
-const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 18, padding: 28, boxShadow: '0 12px 36px rgba(42,33,24,0.06)', display: 'grid', gap: 24 }
+const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
 const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
-const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'rgba(42,33,24,0.6)', maxWidth: 560, lineHeight: 1.5 }
-const section: React.CSSProperties = { display: 'grid', gap: 14, padding: 18, background: '#fff', borderRadius: 12, border: '1px solid rgba(42,33,24,0.08)' }
-const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(42,33,24,0.6)', margin: 0, fontWeight: 600 }
-const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.55)' }
-const input: React.CSSProperties = { padding: '10px 12px', borderRadius: 8, border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: '#fff', color: '#2A2118', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' }
+const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)', maxWidth: 560, lineHeight: 1.5 }
+const section: React.CSSProperties = { display: 'grid', gap: 14, padding: 18, background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }
+const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }
+const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
+const input: React.CSSProperties = { padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' }
 const counter: React.CSSProperties = { fontSize: 10, color: 'rgba(42,33,24,0.4)', justifySelf: 'end' }
 const help: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.5)', margin: 0, lineHeight: 1.5 }
 const imageRow: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'center' }
-const imageThumb: React.CSSProperties = { width: 96, height: 54, borderRadius: 8, overflow: 'hidden', flexShrink: 0, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #2A2118, #5C4A3A)', border: '1px solid rgba(42,33,24,0.12)' }
+const imageThumb: React.CSSProperties = { width: 96, height: 54, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, var(--color-charcoal), var(--color-charcoal-light))', border: '1px solid var(--border-default)' }
 const btnsCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }
-const preview: React.CSSProperties = { display: 'flex', gap: 12, alignItems: 'center', padding: 12, borderRadius: 12, border: '1px solid rgba(42,33,24,0.12)', background: '#F7F3EA' }
-const previewThumb: React.CSSProperties = { width: 54, height: 54, borderRadius: 10, overflow: 'hidden', background: 'linear-gradient(135deg, #2A2118, #5C4A3A)', color: '#F5C842', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }
+const preview: React.CSSProperties = { display: 'flex', gap: 12, alignItems: 'center', padding: 12, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: '#F7F3EA' }
+const previewThumb: React.CSSProperties = { width: 54, height: 54, borderRadius: 'var(--radius-sm)', overflow: 'hidden', background: 'linear-gradient(135deg, var(--color-charcoal), var(--color-charcoal-light))', color: 'var(--color-gold)', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }
 const previewTitleStyle: React.CSSProperties = { fontSize: 14, fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
-const previewDescStyle: React.CSSProperties = { fontSize: 12, color: 'rgba(42,33,24,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+const previewDescStyle: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const previewHost: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.45)', textTransform: 'lowercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
-const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid rgba(42,33,24,0.06)', paddingTop: 16 }
-const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: 'transparent', color: '#2A2118', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid rgba(42,33,24,0.2)', cursor: 'pointer' }
-const btnGhostDanger: React.CSSProperties = { ...btnGhost, color: '#C43F2A', borderColor: 'rgba(196,63,42,0.35)' }
-const msgOk: React.CSSProperties = { fontSize: 12, color: '#2D8C4E', marginRight: 'auto' }
-const msgErr: React.CSSProperties = { fontSize: 12, color: '#E8553E', marginRight: 'auto' }
+const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }
+const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
+const btnGhostDanger: React.CSSProperties = { ...btnGhost, color: 'var(--interactive-primary-hover)', borderColor: 'rgba(196,63,42,0.35)' }
+const msgOk: React.CSSProperties = { fontSize: 12, color: 'var(--color-emerald)', marginRight: 'auto' }
+const msgErr: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)', marginRight: 'auto' }

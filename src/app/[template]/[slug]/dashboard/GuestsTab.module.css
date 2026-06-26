@@ -6,8 +6,8 @@
    reverts to the standard horizontal table.                  */
 
 .shell {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--surface-raised);
+  border-radius: var(--radius-md);
   padding: clamp(16px, 3vw, 24px);
 }
 
@@ -29,7 +29,7 @@
 .headerTitle p {
   margin: 6px 0 0;
   font-size: 13px;
-  color: #5C4A3A;
+  color: var(--text-secondary);
 }
 
 .headerActions {
@@ -43,21 +43,21 @@
   margin-bottom: 18px;
   padding: 16px;
   background: rgba(232, 85, 62, 0.06);
-  border: 1px solid rgba(232, 85, 62, 0.18);
-  border-radius: 12px;
+  border: 1px solid var(--interactive-primary-soft);
+  border-radius: var(--radius-md);
 }
 
 .templateHeading {
   margin: 0 0 4px;
   font-size: 15px;
   font-weight: 600;
-  color: #2A2118;
+  color: var(--text-primary);
 }
 
 .templateHint {
   margin: 0 0 10px;
   font-size: 13px;
-  color: #5C4A3A;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -79,10 +79,10 @@
   font-family: inherit;
   font-size: 13px;
   line-height: 1.55;
-  color: #2A2118;
-  background: #fff;
-  border: 1px solid rgba(42, 33, 24, 0.12);
-  border-radius: 10px;
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
   padding: 10px 12px;
 }
 
@@ -135,7 +135,7 @@
 
 .table thead tr {
   text-align: left;
-  border-bottom: 1px solid rgba(42, 33, 24, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .table th {
@@ -144,7 +144,7 @@
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #5C4A3A;
+  color: var(--text-secondary);
 }
 
 .table td {
@@ -165,7 +165,7 @@
 @media (max-width: 767.98px) {
   .shell {
     padding: 14px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
   }
 
   /* Hide table head — we use inline labels instead */
@@ -184,8 +184,8 @@
   /* Each row becomes a card */
   .table tr {
     background: rgba(42, 33, 24, 0.02);
-    border: 1px solid rgba(42, 33, 24, 0.06);
-    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
     padding: 12px 14px;
     margin-bottom: 10px;
   }
@@ -212,7 +212,7 @@
     text-align: left;
     margin-top: 8px;
     padding-top: 10px !important;
-    border-top: 1px solid rgba(42, 33, 24, 0.06) !important;
+    border-top: 1px solid var(--border-subtle) !important;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -259,10 +259,10 @@
   font-size: .78rem;
   font-weight: 500;
   line-height: 1;
-  color: #C43F2A;
+  color: var(--interactive-primary-hover);
   background: rgba(232, 85, 62, 0.08);
   border: 1px solid rgba(232, 85, 62, 0.4);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }

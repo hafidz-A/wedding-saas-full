@@ -49,7 +49,7 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
   if (doneName) {
     return (
       <div style={card}>
-        <div style={{ fontSize: 44, marginBottom: 6, color: '#2D8C4E' }}>✓</div>
+        <div style={{ fontSize: 44, marginBottom: 6, color: 'var(--color-emerald)' }}>✓</div>
         <h1 style={h1}>Selamat datang, {doneName}!</h1>
         <p style={p}>Kehadiran Anda sudah tercatat. Terima kasih 🤍</p>
       </div>
@@ -81,8 +81,8 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
         </>
       ) : (
         <>
-          <p style={{ ...p, fontSize: 18, color: '#2A2118' }}>Anda <strong>{picked.name}</strong>?</p>
-          {error && <p style={{ ...hint, color: '#E8553E' }}>{error}</p>}
+          <p style={{ ...p, fontSize: 18, color: 'var(--text-primary)' }}>Anda <strong>{picked.name}</strong>?</p>
+          {error && <p style={{ ...hint, color: 'var(--interactive-primary)' }}>{error}</p>}
           <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
             <button type="button" style={ghostBtn} onClick={() => { setPicked(null); setError(null) }} disabled={saving}>Bukan</button>
             <button type="button" style={primaryBtn} onClick={confirm} disabled={saving}>{saving ? 'Menyimpan…' : 'Ya, saya hadir'}</button>
@@ -95,12 +95,12 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
 
 /* Mirrors the dashboard palette (white card on cream, #2A2118 ink, dark pill
    primary button) so the guest-facing check-in feels like the same product. */
-const card: React.CSSProperties = { width: 'min(440px, 100%)', background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(42,33,24,0.08)', borderRadius: 18, padding: 28, textAlign: 'center', boxShadow: '0 20px 60px rgba(42,33,24,0.12)' }
-const h1: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, margin: '0 0 10px', color: '#2A2118' }
-const p: React.CSSProperties = { color: '#5C4A3A', margin: '0 0 8px', lineHeight: 1.5 }
-const input: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 12, border: '1px solid rgba(42,33,24,0.18)', background: '#fff', color: '#2A2118', outline: 'none' }
-const hint: React.CSSProperties = { color: 'rgba(42,33,24,0.55)', fontSize: 14, margin: '4px 0' }
+const card: React.CSSProperties = { width: 'min(440px, 100%)', background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 28, textAlign: 'center', boxShadow: 'var(--shadow-md)' }
+const h1: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, margin: '0 0 10px', color: 'var(--text-primary)' }
+const p: React.CSSProperties = { color: 'var(--text-secondary)', margin: '0 0 8px', lineHeight: 1.5 }
+const input: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--surface-raised)', color: 'var(--text-primary)', outline: 'none' }
+const hint: React.CSSProperties = { color: 'var(--text-muted)', fontSize: 14, margin: '4px 0' }
 const list: React.CSSProperties = { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }
-const rowBtn: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 12, border: '1px solid rgba(42,33,24,0.15)', background: '#fff', color: '#2A2118', cursor: 'pointer', textAlign: 'left' }
-const ghostBtn: React.CSSProperties = { flex: 1, padding: '13px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.25)', background: 'transparent', color: '#2A2118', cursor: 'pointer', fontSize: 15 }
-const primaryBtn: React.CSSProperties = { flex: 2, padding: '13px', borderRadius: 999, border: 'none', background: '#2A2118', color: '#F5EFE3', cursor: 'pointer', fontSize: 15, fontWeight: 600 }
+const rowBtn: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 'var(--radius-md)', border: '1px solid rgba(42,33,24,0.15)', background: 'var(--surface-raised)', color: 'var(--text-primary)', cursor: 'pointer', textAlign: 'left' }
+const ghostBtn: React.CSSProperties = { flex: 1, padding: '13px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 15 }
+const primaryBtn: React.CSSProperties = { flex: 2, padding: '13px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', cursor: 'pointer', fontSize: 15, fontWeight: 600 }

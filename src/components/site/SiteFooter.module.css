@@ -11,7 +11,7 @@
 .rights {
   max-width: var(--container-max); margin: 28px auto 0;
   padding-top: 20px; border-top: 1px solid rgba(42, 33, 24, 0.1);
-  font-family: var(--font-body); font-size: 13px; color: rgba(42, 33, 24, 0.55);
+  font-family: var(--font-body); font-size: 13px; color: var(--text-muted);
 }
 @media (min-width: 768px) {
   .inner { flex-direction: row; justify-content: space-between; align-items: center; }

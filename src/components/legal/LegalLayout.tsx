@@ -49,10 +49,10 @@ export default function LegalLayout({
 
 const page: React.CSSProperties = {
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: 'clamp(96px, 12vw, 128px) clamp(20px, 5vw, 48px) 80px',
   fontFamily: 'var(--font-body, system-ui)',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
 }
 const wrap: React.CSSProperties = { maxWidth: 760, margin: '0 auto', width: '100%' }
 const h1: React.CSSProperties = {
@@ -64,7 +64,7 @@ const h1: React.CSSProperties = {
 const meta: React.CSSProperties = { fontSize: 13, color: '#7A6A57', margin: '0 0 28px' }
 const body: React.CSSProperties = {
   background: 'rgba(255,255,255,0.94)',
-  borderRadius: 18,
+  borderRadius: 'var(--radius-md)',
   padding: 'clamp(20px, 4vw, 40px)',
   boxShadow: '0 20px 60px rgba(42,33,24,0.10)',
   lineHeight: 1.7,
@@ -76,4 +76,4 @@ const footerLinks: React.CSSProperties = {
   color: '#7A6A57',
   textAlign: 'center',
 }
-const link: React.CSSProperties = { color: '#E8553E', textDecoration: 'none', fontWeight: 600 }
+const link: React.CSSProperties = { color: 'var(--interactive-primary)', textDecoration: 'none', fontWeight: 600 }

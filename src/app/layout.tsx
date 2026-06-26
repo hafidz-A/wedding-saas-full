@@ -78,7 +78,8 @@ export const viewport: Viewport = {
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover',
+  // Literal hex (NOT a token): this becomes the <meta name="theme-color"> tag,
+  // which the browser cannot resolve CSS variables for.
   themeColor: '#FDF6EC',
 }
 

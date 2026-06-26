@@ -51,7 +51,7 @@ export default function LedgerTable({
             const cat = attendanceCategory(r)
             return (
               <tr key={r.id}>
-                <td data-label={t.colName}><strong style={{ color: '#2A2118' }}>{r.name}</strong></td>
+                <td data-label={t.colName}><strong style={{ color: 'var(--text-primary)' }}>{r.name}</strong></td>
                 <td data-label={t.colSource}>
                   <span style={cat === 'unlisted' ? badgeUnlisted : cat === 'walkin' ? badgeWalkin : badgeRsvp}>
                     {cat === 'unlisted' ? t.sourceUnlisted : cat === 'walkin' ? t.sourceWalkin : t.sourceRsvp}
@@ -93,7 +93,7 @@ export default function LedgerTable({
                       placeholder={t.tablePlaceholder}
                       maxLength={24}
                       onBlur={(e) => onTableChange(r.id, e.target.value)}
-                      style={{ width: 90, padding: '6px 8px', borderRadius: 8, border: '1px solid rgba(42,33,24,0.16)', fontSize: 13 }}
+                      style={{ width: 90, padding: '6px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 13 }}
                     />
                   </td>
                 )}
@@ -120,10 +120,10 @@ export default function LedgerTable({
 
 function checkBtn(arrived: boolean): React.CSSProperties {
   return {
-    minWidth: 84, minHeight: 36, padding: '6px 12px', borderRadius: 999, cursor: 'pointer',
+    minWidth: 84, minHeight: 36, padding: '6px 12px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
     fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap',
-    border: arrived ? '1px solid #2D8C4E' : '1px solid rgba(42,33,24,0.2)',
-    background: arrived ? 'rgba(45,140,78,0.12)' : '#fff',
-    color: arrived ? '#2D8C4E' : '#2A2118',
+    border: arrived ? '1px solid #2D8C4E' : '1px solid var(--border-strong)',
+    background: arrived ? 'rgba(45,140,78,0.12)' : 'var(--surface-raised)',
+    color: arrived ? '#2D8C4E' : 'var(--text-primary)',
   }
 }

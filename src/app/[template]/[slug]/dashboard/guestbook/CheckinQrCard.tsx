@@ -55,11 +55,11 @@ export default function CheckinQrCard({ slug, template }: { slug: string; templa
   return (
     <div style={{ ...statBox, marginBottom: 16, padding: 18 }}>
       <h3 style={{ margin: '0 0 4px', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 18 }}>{t.checkinQrTitle}</h3>
-      <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(42,33,24,0.6)', lineHeight: 1.5 }}>{t.checkinQrDesc}</p>
+      <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t.checkinQrDesc}</p>
       {dataUrl ? (
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={dataUrl} alt="QR" style={{ width: 140, height: 140, borderRadius: 8, background: '#fff', padding: 6 }} />
+          <img src={dataUrl} alt="QR" style={{ width: 140, height: 140, borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)', padding: 6 }} />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button type="button" style={primaryBtn} onClick={print} disabled={busy}>{t.checkinQrPrint}</button>
             <button type="button" style={ghostBtn} onClick={regen} disabled={busy}>{t.checkinQrRegenerate}</button>

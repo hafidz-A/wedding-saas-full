@@ -8,9 +8,9 @@ export default function DashboardLoading() {
     <main
       style={{
         minHeight: '100vh',
-        background: '#F5EFE3',
+        background: 'var(--surface-warm)',
         fontFamily: 'var(--font-body, system-ui)',
-        color: '#2A2118',
+        color: 'var(--text-primary)',
       }}
     >
       {/* Header skeleton */}
@@ -20,7 +20,7 @@ export default function DashboardLoading() {
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '18px 28px',
-          borderBottom: '1px solid rgba(42,33,24,0.08)',
+          borderBottom: '1px solid var(--border-subtle)',
           background: 'rgba(255,255,255,0.7)',
           gap: 12,
           flexWrap: 'wrap',
@@ -42,7 +42,7 @@ export default function DashboardLoading() {
           display: 'flex',
           gap: 12,
           padding: '0 28px',
-          borderBottom: '1px solid rgba(42,33,24,0.06)',
+          borderBottom: '1px solid var(--border-subtle)',
         }}
       >
         {[60, 50, 50, 50, 50, 50, 80].map((w, i) => (
@@ -55,22 +55,22 @@ export default function DashboardLoading() {
         <div
           style={{
             background: 'rgba(255,255,255,0.85)',
-            borderRadius: 18,
+            borderRadius: 'var(--radius-md)',
             padding: 28,
-            boxShadow: '0 12px 36px rgba(42,33,24,0.06)',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
           <div style={shimmer(220, 28)} />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16, marginTop: 20 }}>
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} style={{ ...shimmer(0, 70), width: '100%', borderRadius: 12 }} />
+              <div key={i} style={{ ...shimmer(0, 70), width: '100%', borderRadius: 'var(--radius-md)' }} />
             ))}
           </div>
           <div style={{ height: 18 }} />
-          <div style={{ ...shimmer(0, 44), width: '100%', borderRadius: 10 }} />
+          <div style={{ ...shimmer(0, 44), width: '100%', borderRadius: 'var(--radius-sm)' }} />
           <div style={{ height: 14 }} />
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} style={{ ...shimmer(0, 52), width: '100%', borderRadius: 8, marginBottom: 8 }} />
+            <div key={i} style={{ ...shimmer(0, 52), width: '100%', borderRadius: 'var(--radius-sm)', marginBottom: 8 }} />
           ))}
         </div>
       </section>

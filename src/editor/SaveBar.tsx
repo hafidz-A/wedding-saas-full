@@ -86,10 +86,10 @@ export function SaveConflictDialog() {
 
 const wrap: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12 }
 const status: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }
-const dirtyTxt: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
-const savedTxt: React.CSSProperties = { fontSize: 12, color: 'rgba(42,33,24,0.55)' }
+const dirtyTxt: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }
+const savedTxt: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)' }
 const savingTxt: React.CSSProperties = { fontSize: 12, color: 'rgba(42,33,24,0.65)' }
-const errTxt:   React.CSSProperties = { fontSize: 11, color: '#E8553E' }
-const pillOn:  React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: '#2D8C4E', color: '#fff', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const pillOff: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: 'rgba(42,33,24,0.15)', color: '#2A2118', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const saveBtn: React.CSSProperties = { padding: '10px 22px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none' }
+const errTxt:   React.CSSProperties = { fontSize: 11, color: 'var(--interactive-primary)' }
+const pillOn:  React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'var(--color-emerald)', color: '#fff', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const pillOff: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'rgba(42,33,24,0.15)', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const saveBtn: React.CSSProperties = { padding: '10px 22px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none' }

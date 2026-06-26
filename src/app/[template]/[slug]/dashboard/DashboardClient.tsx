@@ -98,9 +98,9 @@ export default function DashboardClient({
     <main
       style={{
         minHeight: '100vh',
-        background: '#F5EFE3',
+        background: 'var(--surface-warm)',
         fontFamily: 'var(--font-body, system-ui)',
-        color: '#2A2118',
+        color: 'var(--text-primary)',
       }}
     >
       <header className={styles.header}>
@@ -113,12 +113,12 @@ export default function DashboardClient({
           <span
             style={{
               padding: '6px 12px',
-              borderRadius: 999,
+              borderRadius: 'var(--radius-pill)',
               fontSize: 11,
               letterSpacing: '0.16em',
               textTransform: 'uppercase',
-              background: invitation.is_published ? '#2D8C4E' : 'rgba(42,33,24,0.2)',
-              color: invitation.is_published ? '#fff' : '#2A2118',
+              background: invitation.is_published ? '#2D8C4E' : 'var(--border-strong)',
+              color: invitation.is_published ? '#fff' : 'var(--text-primary)',
             }}
           >
             {invitation.is_published ? dict.chrome.published : dict.chrome.draft}
@@ -126,11 +126,11 @@ export default function DashboardClient({
           <span
             style={{
               padding: '6px 12px',
-              borderRadius: 999,
+              borderRadius: 'var(--radius-pill)',
               fontSize: 11,
               letterSpacing: '0.08em',
-              background: 'rgba(42,33,24,0.06)',
-              color: '#5C4A3A',
+              background: 'var(--border-subtle)',
+              color: 'var(--text-secondary)',
             }}
           >
             {periodLabel}
@@ -139,10 +139,10 @@ export default function DashboardClient({
             href="/"
             style={{
               padding: '8px 18px',
-              borderRadius: 999,
+              borderRadius: 'var(--radius-pill)',
               background: 'transparent',
-              color: 'rgba(42,33,24,0.7)',
-              border: '1px solid rgba(42,33,24,0.18)',
+              color: 'var(--text-muted)',
+              border: '1px solid var(--border-default)',
               fontSize: 12,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
@@ -156,9 +156,9 @@ export default function DashboardClient({
             target="_blank"
             style={{
               padding: '8px 18px',
-              borderRadius: 999,
-              background: '#2A2118',
-              color: '#F5EFE3',
+              borderRadius: 'var(--radius-pill)',
+              background: 'var(--color-charcoal)',
+              color: 'var(--surface-warm)',
               fontSize: 12,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
@@ -172,10 +172,10 @@ export default function DashboardClient({
               type="submit"
               style={{
                 padding: '8px 14px',
-                borderRadius: 999,
+                borderRadius: 'var(--radius-pill)',
                 background: 'transparent',
-                color: 'rgba(42,33,24,0.6)',
-                border: '1px solid rgba(42,33,24,0.18)',
+                color: 'var(--text-muted)',
+                border: '1px solid var(--border-default)',
                 fontSize: 11,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
@@ -199,8 +199,8 @@ export default function DashboardClient({
             gap: 12,
             margin: '0 clamp(16px, 4vw, 40px) 16px',
             padding: '14px 18px',
-            borderRadius: 14,
-            background: 'rgba(232,85,62,0.1)',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--interactive-primary-soft)',
             border: '1px solid rgba(232,85,62,0.3)',
           }}
         >
@@ -211,8 +211,8 @@ export default function DashboardClient({
             disabled={payPending}
             style={{
               padding: '10px 20px',
-              borderRadius: 999,
-              background: '#E8553E',
+              borderRadius: 'var(--radius-pill)',
+              background: 'var(--interactive-primary)',
               color: '#fff',
               border: 0,
               fontSize: 12,
@@ -237,7 +237,7 @@ export default function DashboardClient({
               padding: '12px 16px',
               border: 'none',
               background: 'transparent',
-              color: tab === t ? '#2A2118' : 'rgba(42,33,24,0.55)',
+              color: tab === t ? '#2A2118' : 'var(--text-muted)',
               fontSize: 13,
               fontWeight: tab === t ? 600 : 400,
               letterSpacing: '0.04em',

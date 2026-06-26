@@ -45,8 +45,8 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         style={{
-          width: '100%', padding: '10px 14px', borderRadius: 10,
-          border: '1px dashed rgba(42,33,24,0.25)', background: 'transparent',
+          width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-sm)',
+          border: '1px dashed var(--border-strong)', background: 'transparent',
           color: 'rgba(42,33,24,0.65)', fontSize: 12, letterSpacing: '0.16em',
           textTransform: 'uppercase', cursor: 'pointer',
         }}
@@ -57,8 +57,8 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
         <div
           style={{
             position: 'absolute', bottom: 'calc(100% + 4px)', left: 0, right: 0,
-            maxHeight: 320, overflow: 'auto', background: '#fff',
-            border: '1px solid rgba(42,33,24,0.15)', borderRadius: 10,
+            maxHeight: 320, overflow: 'auto', background: 'var(--surface-raised)',
+            border: '1px solid rgba(42,33,24,0.15)', borderRadius: 'var(--radius-sm)',
             boxShadow: '0 10px 30px rgba(42,33,24,0.10)', zIndex: 20,
           }}
         >
@@ -70,7 +70,7 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
               style={{
                 display: 'block', width: '100%', textAlign: 'left',
                 padding: '10px 14px', border: 'none', background: 'transparent',
-                fontSize: 13, color: '#2A2118', cursor: 'pointer',
+                fontSize: 13, color: 'var(--text-primary)', cursor: 'pointer',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(42,33,24,0.05)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}

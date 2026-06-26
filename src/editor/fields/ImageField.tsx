@@ -68,13 +68,13 @@ export default function ImageField({ label, value, onChange, slug, help }: Props
 }
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 8 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.6)' }
+const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
 const row:  React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 14 }
-const thumb: React.CSSProperties = { width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(42,33,24,0.12)' }
-const placeholder: React.CSSProperties = { width: 80, height: 80, borderRadius: 8, border: '1px dashed rgba(42,33,24,0.25)', display: 'grid', placeItems: 'center', fontSize: 11, color: 'rgba(42,33,24,0.5)' }
+const thumb: React.CSSProperties = { width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }
+const placeholder: React.CSSProperties = { width: 80, height: 80, borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-strong)', display: 'grid', placeItems: 'center', fontSize: 11, color: 'rgba(42,33,24,0.5)' }
 const btns: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 6 }
-const btn:  React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: 'transparent', color: '#2A2118', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid rgba(42,33,24,0.2)', cursor: 'pointer' }
-const errStyle: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
-const hintStyle: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)', fontStyle: 'italic' }
+const btn:  React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
+const errStyle: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }
+const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
+const hintStyle: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }

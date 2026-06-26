@@ -180,7 +180,7 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
                   onClick={() => switchCategory(c.id)}
                   style={{
                     padding: '7px 16px',
-                    borderRadius: 999,
+                    borderRadius: 'var(--radius-pill)',
                     fontSize: 13,
                     fontWeight: 600,
                     letterSpacing: '0.04em',

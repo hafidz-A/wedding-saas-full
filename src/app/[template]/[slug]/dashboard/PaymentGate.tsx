@@ -77,7 +77,7 @@ export default function PaymentGate({
           )}
         </div>
 
-        {err && <p style={{ color: '#C43F2A', fontSize: 13, margin: '0 0 16px', lineHeight: 1.5 }}>{err}</p>}
+        {err && <p style={{ color: 'var(--interactive-primary-hover)', fontSize: 13, margin: '0 0 16px', lineHeight: 1.5 }}>{err}</p>}
 
         <div style={{ marginBottom: 22 }}>
           <RecheckPaymentButton invitationId={invitationId} mode={isExpired ? 'renewal' : 'payment'} />
@@ -103,7 +103,7 @@ const shell: React.CSSProperties = {
   minHeight: '100vh',
   display: 'grid',
   placeItems: 'center',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: 24,
   fontFamily: 'var(--font-body, system-ui)',
 }
@@ -112,14 +112,14 @@ const card: React.CSSProperties = {
   maxWidth: 520,
   padding: 40,
   background: 'rgba(255,255,255,0.95)',
-  borderRadius: 22,
-  boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+  borderRadius: 'var(--radius-md)',
+  boxShadow: 'var(--shadow-md)',
 }
 const kicker: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.32em',
   fontSize: 11,
-  color: '#E8553E',
+  color: 'var(--interactive-primary)',
   margin: '0 0 10px',
 }
 const h1: React.CSSProperties = {
@@ -127,41 +127,41 @@ const h1: React.CSSProperties = {
   fontStyle: 'italic',
   fontSize: 34,
   margin: 0,
-  color: '#2A2118',
+  color: 'var(--text-primary)',
   lineHeight: 1.15,
 }
 const body: React.CSSProperties = {
   margin: '14px 0 22px',
-  color: '#5C4A3A',
+  color: 'var(--text-secondary)',
   lineHeight: 1.65,
   fontSize: 15,
 }
 const btnRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 22 }
 const primaryBtn: React.CSSProperties = {
-  padding: '14px 24px', borderRadius: 999, background: '#E8553E', color: '#fff',
+  padding: '14px 24px', borderRadius: 'var(--radius-pill)', background: 'var(--interactive-primary)', color: '#fff',
   border: 0, fontSize: 13, fontWeight: 600, letterSpacing: '0.14em',
   textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit',
 }
 const ghostBtn: React.CSSProperties = {
-  padding: '14px 22px', borderRadius: 999, background: 'transparent', color: '#2A2118',
-  border: '1px solid rgba(42,33,24,0.2)', fontSize: 12, letterSpacing: '0.14em',
+  padding: '14px 22px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)',
+  border: '1px solid var(--border-strong)', fontSize: 12, letterSpacing: '0.14em',
   textTransform: 'uppercase', textDecoration: 'none', display: 'inline-block',
 }
-const muted: React.CSSProperties = { margin: 0, fontSize: 12, color: 'rgba(42,33,24,0.55)' }
+const muted: React.CSSProperties = { margin: 0, fontSize: 12, color: 'var(--text-muted)' }
 const code: React.CSSProperties = {
-  padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)',
+  padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--border-subtle)',
   fontFamily: 'monospace', fontSize: 12,
 }
 const ftr: React.CSSProperties = {
-  marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(42,33,24,0.08)',
+  marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)',
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
 }
 const ftrLink: React.CSSProperties = {
-  fontSize: 12, color: 'rgba(42,33,24,0.6)', textDecoration: 'underline',
+  fontSize: 12, color: 'var(--text-muted)', textDecoration: 'underline',
 }
 const ftrLogout: React.CSSProperties = {
-  padding: '6px 14px', borderRadius: 999, background: 'transparent',
-  color: 'rgba(42,33,24,0.6)', border: '1px solid rgba(42,33,24,0.18)',
+  padding: '6px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent',
+  color: 'var(--text-muted)', border: '1px solid var(--border-default)',
   fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
   fontFamily: 'inherit',
 }

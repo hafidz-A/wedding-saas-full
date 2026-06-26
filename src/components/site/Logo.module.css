@@ -4,7 +4,7 @@
 .wedding { font-family: var(--font-display); font-style: italic; font-weight: 500; }
 .dot {
   align-self: center;
-  width: 0.34em; height: 0.34em; border-radius: 999px;
+  width: 0.34em; height: 0.34em; border-radius: var(--radius-pill);
   background: var(--color-coral);
   transition: var(--transition-default);
 }

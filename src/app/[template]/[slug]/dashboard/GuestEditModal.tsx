@@ -132,8 +132,8 @@ const overlay: React.CSSProperties = {
   padding: 16,
 }
 const dialog: React.CSSProperties = {
-  background: '#fff',
-  borderRadius: 16,
+  background: 'var(--surface-raised)',
+  borderRadius: 'var(--radius-md)',
   padding: 24,
   maxWidth: 520,
   width: '100%',
@@ -168,12 +168,12 @@ const lbl: React.CSSProperties = {
   fontSize: 12,
   textTransform: 'uppercase',
   letterSpacing: '0.12em',
-  color: 'rgba(42,33,24,0.6)',
+  color: 'var(--text-muted)',
   fontWeight: 500,
 }
 const input: React.CSSProperties = {
   padding: '10px 14px',
-  borderRadius: 10,
+  borderRadius: 'var(--radius-sm)',
   border: '1px solid rgba(42,33,24,0.16)',
   fontSize: 14,
   fontFamily: 'inherit',
@@ -182,32 +182,32 @@ const input: React.CSSProperties = {
 }
 const hint: React.CSSProperties = {
   fontSize: 12,
-  color: '#5C4A3A',
+  color: 'var(--text-secondary)',
   lineHeight: 1.5,
 }
 const primaryBtn: React.CSSProperties = {
   padding: '10px 18px',
-  background: '#E8553E',
+  background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,
-  borderRadius: 10,
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer',
   fontSize: 14,
 }
 const ghostBtn: React.CSSProperties = {
   padding: '10px 14px',
   background: 'transparent',
-  color: '#2A2118',
-  border: '1px solid rgba(42,33,24,0.2)',
-  borderRadius: 10,
+  color: 'var(--text-primary)',
+  border: '1px solid var(--border-strong)',
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer',
   fontSize: 14,
 }
 const errorStyle: React.CSSProperties = {
   margin: 0,
   padding: '10px 12px',
-  background: 'rgba(232,85,62,0.1)',
-  color: '#E8553E',
-  borderRadius: 10,
+  background: 'var(--interactive-primary-soft)',
+  color: 'var(--interactive-primary)',
+  borderRadius: 'var(--radius-sm)',
   fontSize: 13,
 }

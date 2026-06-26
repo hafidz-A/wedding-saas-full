@@ -6,15 +6,15 @@
   gap: 8px;
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(42, 33, 24, 0.12);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .subtab {
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(42, 33, 24, 0.16);
   background: transparent;
-  color: rgba(42, 33, 24, 0.7);
+  color: var(--text-muted);
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
@@ -23,19 +23,19 @@
 .subtab:hover { border-color: rgba(42, 33, 24, 0.4); }
 .subtabActive,
 .subtabActive:hover {
-  background: #2a2118;
-  color: #f5efe3;
-  border-color: #2a2118;
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+  border-color: var(--color-charcoal);
 }
 
 .title {
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 6px;
-  color: #2a2118;
+  color: var(--text-primary);
 }
 .summary {
-  color: #5c4a3a;
+  color: var(--text-secondary);
   margin: 0 0 20px;
   line-height: 1.55;
 }
@@ -52,7 +52,7 @@
   margin: 0;
   padding-left: 26px;
   line-height: 1.7;
-  color: #2a2118;
+  color: var(--text-primary);
   /* override the global `ul, ol { list-style: none }` reset so steps show numbers */
   list-style: decimal outside;
 }
@@ -64,7 +64,7 @@
   padding: 6px 0 6px 26px;
   position: relative;
   line-height: 1.55;
-  color: #2a2118;
+  color: var(--text-primary);
 }
 .always li::before { content: '✅'; position: absolute; left: 0; }
 .never li::before { content: '⛔'; position: absolute; left: 0; }
@@ -73,8 +73,8 @@
 .shot { margin: 14px 0; }
 .shot img {
   width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(42, 33, 24, 0.12);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
   box-shadow: 0 6px 20px rgba(42, 33, 24, 0.1);
   display: block;
 }
@@ -99,27 +99,27 @@
 /* per-section guide cards */
 .guideList { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 4px; }
 .guideCard {
-  border: 1px solid rgba(42, 33, 24, 0.12);
-  border-radius: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   padding: 14px 16px;
   background: #fbf7ee;
 }
-.guideTitle { font-size: 16px; font-weight: 600; margin: 0 0 8px; color: #2a2118; }
-.guideRow { margin: 4px 0; line-height: 1.5; color: #2a2118; }
-.guideLabel { font-weight: 600; color: #5c4a3a; margin-right: 4px; white-space: nowrap; }
+.guideTitle { font-size: 16px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
+.guideRow { margin: 4px 0; line-height: 1.5; color: var(--text-primary); }
+.guideLabel { font-weight: 600; color: var(--text-secondary); margin-right: 4px; white-space: nowrap; }
 
 /* FAQ accordion */
 .faqList { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
 .faqItem {
-  border: 1px solid rgba(42, 33, 24, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
   padding: 10px 14px;
   background: #fbf7ee;
 }
-.faqQ { font-weight: 600; cursor: pointer; color: #2a2118; list-style: none; }
+.faqQ { font-weight: 600; cursor: pointer; color: var(--text-primary); list-style: none; }
 .faqQ::-webkit-details-marker { display: none; }
 .faqItem[open] .faqQ { margin-bottom: 8px; }
-.faqA { margin: 0; line-height: 1.55; color: #5c4a3a; }
+.faqA { margin: 0; line-height: 1.55; color: var(--text-secondary); }
 
 /* solary search box + deep-link button */
 .search {
@@ -127,10 +127,10 @@
   box-sizing: border-box;
   padding: 10px 14px;
   margin-bottom: 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.16);
-  background: #fff;
-  color: #2a2118;
+  background: var(--surface-raised);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: 14px;
 }
@@ -142,10 +142,10 @@
   display: inline-block;
   margin: 0 0 18px;
   padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid #2a2118;
-  background: #2a2118;
-  color: #f5efe3;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-charcoal);
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
   font-family: inherit;
   font-size: 13px;
   cursor: pointer;

@@ -148,20 +148,20 @@ export default function PaletteTab({
   )
 }
 
-const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 18, padding: 28, boxShadow: '0 12px 36px rgba(42,33,24,0.06)', display: 'grid', gap: 24 }
+const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
 const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
-const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'rgba(42,33,24,0.6)' }
-const panel: React.CSSProperties = { borderRadius: 16, padding: 'clamp(20px, 3vw, 36px)', border: '1px solid rgba(42,33,24,0.08)', overflow: 'hidden' }
+const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)' }
+const panel: React.CSSProperties = { borderRadius: 'var(--radius-md)', padding: 'clamp(20px, 3vw, 36px)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }
 const layoutRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 'clamp(20px, 3vw, 40px)', alignItems: 'center', justifyContent: 'center' }
 const menuWrap: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 8, flex: '1 1 190px', minWidth: 0, maxWidth: 240 }
-const menuBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 9, width: '100%', minWidth: 0, padding: '11px 16px', borderRadius: 999, border: '1px solid', fontFamily: 'var(--font-body, system-ui)', fontSize: 14, letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer', transition: 'color 0.3s ease, border-color 0.3s ease, background 0.3s ease' }
+const menuBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 9, width: '100%', minWidth: 0, padding: '11px 16px', borderRadius: 'var(--radius-pill)', border: '1px solid', fontFamily: 'var(--font-body, system-ui)', fontSize: 14, letterSpacing: '0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer', transition: 'color 0.3s ease, border-color 0.3s ease, background 0.3s ease' }
 const bullet: React.CSSProperties = { width: 9, height: 9, borderRadius: '50%', flex: '0 0 auto', transition: 'transform 0.3s ease' }
 const display: React.CSSProperties = { flex: '2 1 320px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(18px, 2.5vw, 28px)' }
 const details: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }
 const paletteName: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(24px, 3.4vw, 34px)', lineHeight: 1.1, margin: 0, textAlign: 'center' }
 const swatches: React.CSSProperties = { display: 'flex', gap: 8 }
 const swatch: React.CSSProperties = { width: 28, height: 28, borderRadius: '50%', border: '1px solid', boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }
-const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid rgba(42,33,24,0.06)', paddingTop: 16 }
-const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const msgOk: React.CSSProperties = { fontSize: 12, color: '#2D8C4E', marginRight: 'auto' }
-const msgErr: React.CSSProperties = { fontSize: 12, color: '#E8553E', marginRight: 'auto' }
+const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }
+const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const msgOk: React.CSSProperties = { fontSize: 12, color: 'var(--color-emerald)', marginRight: 'auto' }
+const msgErr: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)', marginRight: 'auto' }

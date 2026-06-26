@@ -82,18 +82,18 @@ const card: React.CSSProperties = {
   textAlign: 'center',
   padding: 36,
   background: 'rgba(255,255,255,0.6)',
-  border: '1px solid rgba(42,33,24,0.12)',
-  borderRadius: 18,
+  border: '1px solid var(--border-default)',
+  borderRadius: 'var(--radius-md)',
   boxShadow: '0 10px 30px rgba(42,33,24,0.08)',
 }
 const lockIcon: React.CSSProperties = { fontSize: 34, marginBottom: 8 }
-const title: React.CSSProperties = { fontSize: 22, fontWeight: 600, margin: '0 0 8px', color: '#2A2118' }
-const body: React.CSSProperties = { color: '#5C4A3A', lineHeight: 1.6, margin: '0 0 22px', fontSize: 14 }
+const title: React.CSSProperties = { fontSize: 22, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }
+const body: React.CSSProperties = { color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 22px', fontSize: 14 }
 const cta: React.CSSProperties = {
   display: 'inline-block',
   padding: '12px 24px',
-  borderRadius: 999,
-  background: '#E8553E',
+  borderRadius: 'var(--radius-pill)',
+  background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,
   fontSize: 13,
@@ -107,7 +107,7 @@ const recheckBtn: React.CSSProperties = {
   margin: '14px auto 0',
   padding: '6px 10px',
   background: 'transparent',
-  color: 'rgba(42,33,24,0.6)',
+  color: 'var(--text-muted)',
   border: 0,
   fontSize: 12,
   textDecoration: 'underline',

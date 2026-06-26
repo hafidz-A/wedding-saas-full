@@ -89,7 +89,7 @@ export default async function DashboardPage({ params }: PageProps) {
           <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: '0 0 12px' }}>
             {t.dashboard.page.wrongAccountTitle}
           </h1>
-          <p style={{ color: '#5C4A3A', lineHeight: 1.6, margin: '0 0 16px' }}>
+          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 16px' }}>
             {t.dashboard.page.wrongAccountPrefix} <strong>{user.email}</strong> {t.dashboard.page.wrongAccountMid} <code>{slug}</code>{t.dashboard.page.wrongAccountSuffix}
           </p>
           <SignOutButton label={t.dashboard.page.signOut} />
@@ -229,7 +229,7 @@ function SetupPrompt({ lang }: { lang: Lang }) {
         <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
           Setup needed
         </h1>
-        <p style={{ color: '#5C4A3A', lineHeight: 1.6 }}>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           Isi <code>.env.local</code> dengan <code>NEXT_PUBLIC_SUPABASE_URL</code>,
           <code> NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, dan <code>SUPABASE_SERVICE_ROLE_KEY</code>,
           lalu restart dev server.
@@ -249,7 +249,7 @@ function NoSuchInvitation({ slug, dict, lang }: { slug: string; dict: Dict['dash
         <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
           {dict.noInvitationPrefix} <code>{slug}</code> {dict.noInvitationSuffix}
         </h1>
-        <p style={{ color: '#5C4A3A', lineHeight: 1.6 }}>{dict.noInvitationBody}</p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>{dict.noInvitationBody}</p>
       </div>
     </main>
     </>
@@ -265,9 +265,9 @@ function SignOutButton({ label }: { label: string }) {
         type="submit"
         style={{
           padding: '10px 20px',
-          borderRadius: 999,
-          background: '#2A2118',
-          color: '#F5EFE3',
+          borderRadius: 'var(--radius-pill)',
+          background: 'var(--color-charcoal)',
+          color: 'var(--surface-warm)',
           border: 'none',
           fontSize: 12,
           letterSpacing: '0.14em',
@@ -285,7 +285,7 @@ const panelStyle: React.CSSProperties = {
   minHeight: '100vh',
   display: 'grid',
   placeItems: 'center',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: 40,
   fontFamily: 'var(--font-body, system-ui)',
 }
@@ -294,6 +294,6 @@ const cardStyle: React.CSSProperties = {
   maxWidth: 520,
   padding: 40,
   background: 'rgba(255,255,255,0.9)',
-  borderRadius: 20,
-  boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+  borderRadius: 'var(--radius-md)',
+  boxShadow: 'var(--shadow-md)',
 }

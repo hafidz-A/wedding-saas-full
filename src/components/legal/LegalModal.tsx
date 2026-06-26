@@ -62,7 +62,7 @@ export default function LegalModal({
 const overlay: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(42,33,24,0.55)',
+  background: 'var(--text-muted)',
   display: 'grid',
   placeItems: 'center',
   padding: 20,
@@ -75,10 +75,10 @@ const dialog: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   background: '#FFFDF8',
-  borderRadius: 18,
+  borderRadius: 'var(--radius-md)',
   boxShadow: '0 30px 80px rgba(42,33,24,0.30)',
   fontFamily: 'var(--font-body, system-ui)',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
 }
 const header: React.CSSProperties = {
   display: 'flex',
@@ -86,7 +86,7 @@ const header: React.CSSProperties = {
   justifyContent: 'space-between',
   gap: 16,
   padding: '20px 24px',
-  borderBottom: '1px solid rgba(42,33,24,0.12)',
+  borderBottom: '1px solid var(--border-default)',
 }
 const titleStyle: React.CSSProperties = {
   fontFamily: 'var(--font-display, serif)',
@@ -98,13 +98,13 @@ const closeBtn: React.CSSProperties = {
   flexShrink: 0,
   width: 34,
   height: 34,
-  borderRadius: 999,
-  border: '1px solid rgba(42,33,24,0.18)',
+  borderRadius: 'var(--radius-pill)',
+  border: '1px solid var(--border-default)',
   background: 'transparent',
   fontSize: 22,
   lineHeight: 1,
   cursor: 'pointer',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
 }
 const body: React.CSSProperties = {
   overflowY: 'auto',

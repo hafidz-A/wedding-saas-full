@@ -1,6 +1,6 @@
 .toggle {
   display: inline-flex; align-items: center;
-  border: 1px solid rgba(42, 33, 24, 0.18);
+  border: 1px solid var(--border-default);
   border-radius: var(--border-radius-pill);
   padding: 2px; gap: 2px; background: rgba(255, 255, 255, 0.5);
 }
@@ -13,10 +13,10 @@
 }
 .pill {
   position: absolute; inset: 0;
-  /* Deeper coral than the global brand --color-coral (#E8553E) so the white
-     active label clears WCAG AA contrast (≥4.5:1 for 12px bold). #C7402B ≈ 5.0:1
+  /* Deeper coral than the global brand --color-coral (var(--interactive-primary)) so the white
+     active label clears WCAG AA contrast (≥4.5:1 for 12px bold). var(--interactive-primary-hover) ≈ 5.0:1
      vs #fff; brand coral elsewhere is untouched. */
-  background: #C7402B;
+  background: var(--interactive-primary-hover);
   border-radius: var(--border-radius-pill);
   z-index: 0;
 }

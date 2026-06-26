@@ -198,12 +198,12 @@ function ResetPasswordInner() {
           />
           <PasswordChecklist password={password} labels={rules} />
           {checking && (
-            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'rgba(42,33,24,0.55)' }}>
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
               {rules.breachedChecking}
             </p>
           )}
           {pwned && !checking && (
-            <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#E8553E', fontWeight: 600 }}>
+            <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--interactive-primary)', fontWeight: 600 }}>
               {rules.breached}
             </p>
           )}
@@ -254,26 +254,26 @@ const page: React.CSSProperties = {
   minHeight: '100vh',
   display: 'grid',
   placeItems: 'center',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: 24,
   fontFamily: 'var(--font-body, system-ui)',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
 }
 const card: React.CSSProperties = {
   maxWidth: 460,
   width: '100%',
   padding: 'clamp(24px, 6vw, 40px)',
   background: 'rgba(255,255,255,0.94)',
-  borderRadius: 22,
-  boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+  borderRadius: 'var(--radius-md)',
+  boxShadow: 'var(--shadow-md)',
   display: 'grid',
   gap: 16,
 }
-const kicker: React.CSSProperties = { textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: '#E8553E', margin: '0 0 8px' }
+const kicker: React.CSSProperties = { textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: 'var(--interactive-primary)', margin: '0 0 8px' }
 const title: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: 0 }
-const hint: React.CSSProperties = { fontSize: 13, color: 'rgba(42,33,24,0.7)', lineHeight: 1.6, margin: 0 }
-const label: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'rgba(42,33,24,0.7)' }
-const input: React.CSSProperties = { padding: '13px 16px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.16)', fontSize: 15, outline: 'none', background: '#fff' }
-const errorStyle: React.CSSProperties = { color: '#E8553E', fontSize: 13, margin: 0 }
-const primaryBtn: React.CSSProperties = { padding: '14px 24px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const linkStyle: React.CSSProperties = { color: '#E8553E', textDecoration: 'none', fontSize: 13 }
+const hint: React.CSSProperties = { fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }
+const label: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'var(--text-muted)' }
+const input: React.CSSProperties = { padding: '13px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 15, outline: 'none', background: 'var(--surface-raised)' }
+const errorStyle: React.CSSProperties = { color: 'var(--interactive-primary)', fontSize: 13, margin: 0 }
+const primaryBtn: React.CSSProperties = { padding: '14px 24px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const linkStyle: React.CSSProperties = { color: 'var(--interactive-primary)', textDecoration: 'none', fontSize: 13 }

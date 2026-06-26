@@ -12,7 +12,7 @@ export default function DemoImagesPage() {
         {keys.map((key) => (
           <figure key={key} style={{ margin: 0 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={demoImg(key, 400)} alt={key} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', borderRadius: 8 }} />
+            <img src={demoImg(key, 400)} alt={key} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
             <figcaption style={{ color: '#9f9', fontFamily: 'monospace', fontSize: 12, padding: '4px 0' }}>{key}</figcaption>
           </figure>
         ))}

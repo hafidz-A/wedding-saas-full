@@ -267,15 +267,15 @@ function Toggle({
     <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
       <span
         style={{
-          width: 38, height: 22, borderRadius: 999,
-          background: checked ? '#2D8C4E' : 'rgba(42,33,24,0.2)',
+          width: 38, height: 22, borderRadius: 'var(--radius-pill)',
+          background: checked ? '#2D8C4E' : 'var(--border-strong)',
           position: 'relative', transition: 'background 0.2s ease',
         }}
       >
         <span
           style={{
             position: 'absolute', top: 2, left: checked ? 18 : 2,
-            width: 18, height: 18, borderRadius: '50%', background: '#fff',
+            width: 18, height: 18, borderRadius: '50%', background: 'var(--surface-raised)',
             transition: 'left 0.2s ease', boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
           }}
         />
@@ -286,30 +286,30 @@ function Toggle({
         onChange={(e) => onChange(e.target.checked)}
         style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
       />
-      <span style={{ fontSize: 13, color: '#2A2118' }}>{label}</span>
+      <span style={{ fontSize: 13, color: 'var(--text-primary)' }}>{label}</span>
     </label>
   )
 }
 
 // ── Styles ──
-const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 18, padding: 28, boxShadow: '0 12px 36px rgba(42,33,24,0.06)', display: 'grid', gap: 24 }
+const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
 const headerRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }
 const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
-const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'rgba(42,33,24,0.6)', maxWidth: 540, lineHeight: 1.5 }
-const section: React.CSSProperties = { display: 'grid', gap: 12, padding: 18, background: '#fff', borderRadius: 12, border: '1px solid rgba(42,33,24,0.08)' }
-const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(42,33,24,0.6)', margin: 0, fontWeight: 600 }
+const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)', maxWidth: 540, lineHeight: 1.5 }
+const section: React.CSSProperties = { display: 'grid', gap: 12, padding: 18, background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }
+const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }
 const grid2: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }
-const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.55)' }
-const input: React.CSSProperties = { padding: '9px 12px', borderRadius: 8, border: '1px solid rgba(42,33,24,0.16)', fontSize: 13, outline: 'none', background: '#fff', color: '#2A2118' }
+const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
+const input: React.CSSProperties = { padding: '9px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 13, outline: 'none', background: 'var(--surface-raised)', color: 'var(--text-primary)' }
 const audioRow: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'center' }
 const btnsCol: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }
-const fname: React.CSSProperties = { fontSize: 13, color: '#2A2118', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+const fname: React.CSSProperties = { fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const help: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.5)', margin: 0 }
-const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, background: 'transparent', color: '#2A2118', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid rgba(42,33,24,0.2)', cursor: 'pointer' }
-const btnGhostDanger: React.CSSProperties = { ...btnGhost, color: '#C43F2A', borderColor: 'rgba(196,63,42,0.35)' }
-const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', borderTop: '1px solid rgba(42,33,24,0.06)', paddingTop: 16 }
-const badgeOn: React.CSSProperties = { padding: '4px 10px', borderRadius: 999, background: '#E0F2E5', color: '#2D8C4E', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em' }
-const badgeOff: React.CSSProperties = { ...badgeOn, background: 'rgba(42,33,24,0.08)', color: 'rgba(42,33,24,0.6)' }
-const msgOk: React.CSSProperties = { fontSize: 12, color: '#2D8C4E' }
-const msgErr: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
+const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
+const btnGhostDanger: React.CSSProperties = { ...btnGhost, color: 'var(--interactive-primary-hover)', borderColor: 'rgba(196,63,42,0.35)' }
+const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }
+const badgeOn: React.CSSProperties = { padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: '#E0F2E5', color: 'var(--color-emerald)', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em' }
+const badgeOff: React.CSSProperties = { ...badgeOn, background: 'var(--border-subtle)', color: 'var(--text-muted)' }
+const msgOk: React.CSSProperties = { fontSize: 12, color: 'var(--color-emerald)' }
+const msgErr: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }

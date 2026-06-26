@@ -191,7 +191,7 @@
   color: var(--color-charcoal);
   padding: 18px 38px;
   border-radius: var(--border-radius-pill);
-  border: 1px solid rgba(42, 33, 24, 0.25);
+  border: 1px solid var(--border-strong);
   transition: var(--transition-default);
 }
 
@@ -230,7 +230,7 @@
 .phoneCard {
   height: 100%;
   border-radius: 32px;
-  background: linear-gradient(150deg, #FDFDFD 0%, #F5EFE3 100%);
+  background: linear-gradient(150deg, #FDFDFD 0%, var(--surface-warm) 100%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -305,7 +305,7 @@
 }
 
 .cardFooter {
-  border-top: 1px solid rgba(42, 33, 24, 0.08);
+  border-top: 1px solid var(--border-subtle);
   width: 100%;
   padding-top: 16px;
 }
@@ -317,7 +317,7 @@
   letter-spacing: 0.2em;
   color: var(--color-charcoal);
   padding: 8px 16px;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   background: rgba(42, 33, 24, 0.04);
 }
 
@@ -348,7 +348,7 @@
   width: 18px;
   height: 28px;
   border: 1.5px solid rgba(42, 33, 24, 0.4);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   position: relative;
 }
 

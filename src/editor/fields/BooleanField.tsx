@@ -26,5 +26,5 @@ export default function BooleanField({ label, value, onChange, help }: Props) {
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 4 }
 const row:  React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }
-const lbl:  React.CSSProperties = { fontSize: 13, color: '#2A2118' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)', marginLeft: 28 }
+const lbl:  React.CSSProperties = { fontSize: 13, color: 'var(--text-primary)' }
+const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)', marginLeft: 28 }

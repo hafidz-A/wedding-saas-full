@@ -128,10 +128,10 @@ export default async function ProfilePage() {
 
 const page: React.CSSProperties = {
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+  background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
   padding: 'clamp(96px, 12vw, 128px) clamp(20px, 5vw, 48px) 64px',
   fontFamily: 'var(--font-body, system-ui)',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
 }
 const wrap: React.CSSProperties = { maxWidth: 720, margin: '0 auto', width: '100%' }
 const h1: React.CSSProperties = {
@@ -140,56 +140,56 @@ const h1: React.CSSProperties = {
 }
 const h2: React.CSSProperties = { fontSize: 18, fontWeight: 600, margin: '32px 0 12px' }
 const cardBox: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.94)', borderRadius: 16, padding: 24,
+  background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)', padding: 24,
   boxShadow: '0 20px 60px rgba(42,33,24,0.10)',
 }
 const rowLabel: React.CSSProperties = {
   fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em',
-  color: 'rgba(42,33,24,0.6)', margin: 0,
+  color: 'var(--text-muted)', margin: 0,
 }
 const rowValue: React.CSSProperties = { fontSize: 16, margin: '4px 0 16px' }
 const resetLink: React.CSSProperties = {
-  color: '#E8553E', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 4, fontSize: 14,
+  color: 'var(--interactive-primary)', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 4, fontSize: 14,
 }
 const emptyCard: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 14,
   padding: 'clamp(32px, 6vw, 48px) 28px',
-  background: 'rgba(255,255,255,0.94)', borderRadius: 20,
+  background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)',
   border: '1px dashed rgba(232,85,62,0.4)',
   boxShadow: '0 20px 60px rgba(42,33,24,0.08)',
 }
 const emptyIconBadge: React.CSSProperties = {
-  display: 'grid', placeItems: 'center', width: 64, height: 64, borderRadius: 18,
-  background: 'rgba(232,85,62,0.1)', color: '#E8553E', marginBottom: 2,
+  display: 'grid', placeItems: 'center', width: 64, height: 64, borderRadius: 'var(--radius-md)',
+  background: 'var(--interactive-primary-soft)', color: 'var(--interactive-primary)', marginBottom: 2,
 }
 const emptyTitleStyle: React.CSSProperties = {
   fontFamily: 'var(--font-display, serif)', fontStyle: 'italic',
-  fontSize: 'clamp(22px, 4vw, 28px)', margin: 0, color: '#2A2118',
+  fontSize: 'clamp(22px, 4vw, 28px)', margin: 0, color: 'var(--text-primary)',
 }
 const emptyBodyStyle: React.CSSProperties = {
-  fontSize: 15, color: '#5C4A3A', lineHeight: 1.6, margin: '0 0 6px', maxWidth: 380,
+  fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 6px', maxWidth: 380,
 }
 const list: React.CSSProperties = { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }
 const item: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
-  background: 'rgba(255,255,255,0.94)', borderRadius: 14, padding: '16px 20px',
+  background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)', padding: '16px 20px',
   boxShadow: '0 10px 30px rgba(42,33,24,0.08)',
 }
 const itemSlug: React.CSSProperties = { fontWeight: 600, fontSize: 16 }
 const periodChip: React.CSSProperties = {
   fontSize: 12,
-  color: '#5C4A3A',
-  background: 'rgba(42,33,24,0.06)',
+  color: 'var(--text-secondary)',
+  background: 'var(--border-subtle)',
   padding: '3px 10px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   alignSelf: 'flex-start',
 }
 const itemActions: React.CSSProperties = { display: 'flex', gap: 10, flexWrap: 'wrap' }
 const ghostLink: React.CSSProperties = {
-  padding: '8px 16px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.2)',
-  color: '#2A2118', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
+  padding: '8px 16px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)',
+  color: 'var(--text-primary)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
 }
 const solidLink: React.CSSProperties = {
-  padding: '8px 16px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3',
+  padding: '8px 16px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)',
   fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
 }

@@ -9,9 +9,9 @@
 
 .card {
   background: rgba(255, 255, 255, 0.85);
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: clamp(16px, 3vw, 28px);
-  box-shadow: 0 12px 36px rgba(42, 33, 24, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .headerRow {
@@ -58,14 +58,14 @@
 .tableWrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-radius: 10px;
-  border: 1px solid rgba(42, 33, 24, 0.08);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: var(--surface-raised);
   font-size: 13px;
 }
 
@@ -79,13 +79,13 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: rgba(42, 33, 24, 0.6);
+  color: var(--text-muted);
   background: rgba(42, 33, 24, 0.02);
 }
 
 .table td {
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(42, 33, 24, 0.06);
+  border-bottom: 1px solid var(--border-subtle);
   vertical-align: top;
 }
 
@@ -94,8 +94,8 @@
   text-align: center;
   color: rgba(42, 33, 24, 0.5);
   font-size: 13px;
-  border: 1px dashed rgba(42, 33, 24, 0.2);
-  border-radius: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
 }
 
 /* Long-text cell that needs ellipsis on desktop but should wrap on mobile
@@ -129,7 +129,7 @@
 @media (max-width: 767.98px) {
   .card {
     padding: 14px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
   }
 
   .headerRow {
@@ -156,8 +156,8 @@
 
   .table tr {
     background: rgba(42, 33, 24, 0.02);
-    border: 1px solid rgba(42, 33, 24, 0.06);
-    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
     padding: 12px 14px;
     margin-bottom: 10px;
   }

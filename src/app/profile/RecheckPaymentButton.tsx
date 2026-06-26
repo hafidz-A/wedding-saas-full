@@ -56,10 +56,10 @@ export default function RecheckPaymentButton({
 
 const btn: React.CSSProperties = {
   padding: '8px 16px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   background: 'transparent',
-  color: '#E8553E',
-  border: '1px solid #E8553E',
+  color: 'var(--interactive-primary)',
+  border: '1px solid var(--interactive-primary)',
   fontSize: 12,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -70,7 +70,7 @@ const btn: React.CSSProperties = {
 
 const note: React.CSSProperties = {
   fontSize: 12,
-  color: '#5C4A3A',
+  color: 'var(--text-secondary)',
   maxWidth: 280,
   lineHeight: 1.4,
 }

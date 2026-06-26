@@ -253,10 +253,10 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         </div>
         <div className={styles.templateActions}>
           {templateError && (
-            <span style={{ fontSize: 13, color: '#E8553E', marginRight: 'auto' }}>{templateError}</span>
+            <span style={{ fontSize: 13, color: 'var(--interactive-primary)', marginRight: 'auto' }}>{templateError}</span>
           )}
           {templateSaved && !templateError && (
-            <span style={{ fontSize: 13, color: '#2D8C4E', marginRight: 'auto' }}>{t.savedMsg}</span>
+            <span style={{ fontSize: 13, color: 'var(--color-emerald)', marginRight: 'auto' }}>{t.savedMsg}</span>
           )}
           <button
             type="button"
@@ -313,7 +313,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
             style={{
               ...ghostBtn,
               background: filter === f ? '#2A2118' : 'transparent',
-              color: filter === f ? '#fff' : '#2A2118',
+              color: filter === f ? '#fff' : 'var(--text-primary)',
             }}
           >
             {f === 'all' ? t.filterAll : f === 'pending' ? t.filterPending : t.filterSent}
@@ -334,7 +334,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ padding: 24, textAlign: 'center', color: '#5C4A3A' }}>
+                <td colSpan={4} style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>
                   {t.emptyText}
                 </td>
               </tr>
@@ -356,7 +356,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                       style={{
                         ...badge,
                         background: 'rgba(45,140,78,0.15)',
-                        color: '#2D8C4E',
+                        color: 'var(--color-emerald)',
                       }}
                       title={new Date(g.sent_at).toLocaleString('id-ID', {
                         weekday: 'long',
@@ -381,7 +381,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                       style={{
                         ...badge,
                         background: 'rgba(232,85,62,0.12)',
-                        color: '#E8553E',
+                        color: 'var(--interactive-primary)',
                       }}
                     >
                       {t.pendingLabel}
@@ -391,8 +391,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     <span
                       style={{
                         ...badge,
-                        background: 'rgba(232,85,62,0.10)',
-                        color: '#E8553E',
+                        background: 'var(--interactive-primary-soft)',
+                        color: 'var(--interactive-primary)',
                         marginLeft: 6,
                       }}
                       title={`${t.customTitlePrefix} ${g.notes}`}
@@ -479,7 +479,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         }
                       })
                     }}
-                    style={{ ...ghostBtn, marginLeft: 6, color: '#E8553E' }}
+                    style={{ ...ghostBtn, marginLeft: 6, color: 'var(--interactive-primary)' }}
                     title={t.deleteTitle}
                   >
                     ×
@@ -518,24 +518,24 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
 const input: React.CSSProperties = {
   padding: '8px 12px',
   border: '1px solid rgba(42,33,24,0.16)',
-  borderRadius: 8,
+  borderRadius: 'var(--radius-sm)',
   fontSize: 14,
 }
 const primaryBtn: React.CSSProperties = {
   padding: '8px 14px',
-  background: '#E8553E',
+  background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,
-  borderRadius: 8,
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer',
   fontSize: 13,
 }
 const ghostBtn: React.CSSProperties = {
   padding: '8px 12px',
   background: 'transparent',
-  color: '#2A2118',
-  border: '1px solid rgba(42,33,24,0.2)',
-  borderRadius: 8,
+  color: 'var(--text-primary)',
+  border: '1px solid var(--border-strong)',
+  borderRadius: 'var(--radius-sm)',
   cursor: 'pointer',
   fontSize: 13,
 }
@@ -543,7 +543,7 @@ const badge: React.CSSProperties = {
   display: 'inline-block',
   marginLeft: 8,
   padding: '2px 8px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   fontSize: 11,
-  background: 'rgba(42,33,24,0.06)',
+  background: 'var(--border-subtle)',
 }

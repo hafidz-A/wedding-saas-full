@@ -152,14 +152,14 @@ function Stat({ label, value, accent = '#2A2118' }: { label: string; value: stri
   )
 }
 
-const ghostBtn: React.CSSProperties = { padding: '8px 14px', borderRadius: 999, border: '1px solid rgba(42,33,24,0.2)', background: 'transparent', cursor: 'pointer', fontSize: 12, letterSpacing: '0.1em' }
-const primaryBtn: React.CSSProperties = { padding: '8px 16px', borderRadius: 999, border: 'none', background: '#2A2118', color: '#F5EFE3', cursor: 'pointer', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }
-const statBox: React.CSSProperties = { background: '#fff', borderRadius: 12, padding: 14, border: '1px solid rgba(42,33,24,0.06)' }
-const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(42,33,24,0.55)' }
+const ghostBtn: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)', background: 'transparent', cursor: 'pointer', fontSize: 12, letterSpacing: '0.1em' }
+const primaryBtn: React.CSSProperties = { padding: '8px 16px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', cursor: 'pointer', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }
+const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 14, border: '1px solid var(--border-subtle)' }
+const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }
 const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26 }
-const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: '#fff' }
-const filterTabs: React.CSSProperties = { display: 'flex', gap: 4, background: 'rgba(42,33,24,0.06)', borderRadius: 999, padding: 4 }
-const tabBtn: React.CSSProperties = { padding: '6px 14px', borderRadius: 999, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'rgba(42,33,24,0.65)' }
-const tabActive: React.CSSProperties = { ...tabBtn, background: '#fff', color: '#2A2118', fontWeight: 500 }
-const pillYes: React.CSSProperties = { padding: '3px 10px', borderRadius: 999, background: '#E0F2E5', color: '#2D8C4E', fontSize: 11, fontWeight: 500 }
-const pillNo: React.CSSProperties = { padding: '3px 10px', borderRadius: 999, background: 'rgba(42,33,24,0.08)', color: 'rgba(42,33,24,0.6)', fontSize: 11, fontWeight: 500 }
+const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)' }
+const filterTabs: React.CSSProperties = { display: 'flex', gap: 4, background: 'var(--border-subtle)', borderRadius: 'var(--radius-pill)', padding: 4 }
+const tabBtn: React.CSSProperties = { padding: '6px 14px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'rgba(42,33,24,0.65)' }
+const tabActive: React.CSSProperties = { ...tabBtn, background: 'var(--surface-raised)', color: 'var(--text-primary)', fontWeight: 500 }
+const pillYes: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: '#E0F2E5', color: 'var(--color-emerald)', fontSize: 11, fontWeight: 500 }
+const pillNo: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--border-subtle)', color: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }

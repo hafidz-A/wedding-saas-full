@@ -46,7 +46,7 @@ export default function FieldEditor({ slug, template }: Props) {
   if (!schema) {
     return (
       <div style={fallback}>
-        <header style={{ borderBottom: '1px solid rgba(42,33,24,0.08)', paddingBottom: 12, marginBottom: 16 }}>
+        <header style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: 12, marginBottom: 16 }}>
           <p style={kicker}>{t.sectionKicker}</p>
           <h3 style={h3}>{t.unknownSection}</h3>
         </header>
@@ -99,11 +99,11 @@ export default function FieldEditor({ slug, template }: Props) {
         <h3 style={h3}>{localizeLabel(schema.label, lang)}</h3>
         {swapOptions.length > 0 && (
           <label style={{ display: 'block', marginTop: 10 }}>
-            <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(42,33,24,0.55)' }}>{t.changeType}</span>
+            <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--text-muted)' }}>{t.changeType}</span>
             <select
               value={selectedSection.type}
               onChange={(e) => onChangeType(e.target.value)}
-              style={{ display: 'block', marginTop: 6, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(42,33,24,0.2)', fontSize: 13, background: '#fff', color: '#2A2118' }}
+              style={{ display: 'block', marginTop: 6, padding: '8px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', fontSize: 13, background: 'var(--surface-raised)', color: 'var(--text-primary)' }}
             >
               {swapOptions.map((tp) => (
                 <option key={tp} value={tp}>{localizeLabel(registry[tp].label, lang)}</option>
@@ -155,30 +155,30 @@ function renderField(
 }
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 20 }
-const hdr:  React.CSSProperties = { borderBottom: '1px solid rgba(42,33,24,0.08)', paddingBottom: 12 }
-const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: '#E8553E' }
+const hdr:  React.CSSProperties = { borderBottom: '1px solid var(--border-subtle)', paddingBottom: 12 }
+const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: 'var(--interactive-primary)' }
 const h3:   React.CSSProperties = { margin: '4px 0 0', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26 }
 const form: React.CSSProperties = { display: 'grid', gap: 20, paddingBottom: 60 }
-const empty:React.CSSProperties = { padding: 40, color: 'rgba(42,33,24,0.6)', fontSize: 14, textAlign: 'center' }
+const empty:React.CSSProperties = { padding: 40, color: 'var(--text-muted)', fontSize: 14, textAlign: 'center' }
 const fallback: React.CSSProperties = { display: 'grid', gap: 0 }
 const legacyCard: React.CSSProperties = {
   padding: 20,
   background: 'rgba(232,85,62,0.06)',
-  border: '1px solid rgba(232,85,62,0.18)',
-  borderRadius: 14,
+  border: '1px solid var(--interactive-primary-soft)',
+  borderRadius: 'var(--radius-md)',
 }
 const legacyIcon: React.CSSProperties = {
   width: 36, height: 36, borderRadius: '50%',
-  background: 'rgba(232,85,62,0.18)', color: '#C43F2A',
+  background: 'var(--interactive-primary-soft)', color: 'var(--interactive-primary-hover)',
   display: 'grid', placeItems: 'center',
   fontSize: 18, fontWeight: 700, flexShrink: 0,
 }
-const legacyTitle: React.CSSProperties = { margin: 0, fontSize: 15, color: '#2A2118', fontWeight: 500 }
+const legacyTitle: React.CSSProperties = { margin: 0, fontSize: 15, color: 'var(--text-primary)', fontWeight: 500 }
 const legacyDesc: React.CSSProperties = { margin: 0, fontSize: 13, color: 'rgba(42,33,24,0.65)', lineHeight: 1.55 }
 const legacyBtn: React.CSSProperties = {
   justifySelf: 'start', marginTop: 4,
-  padding: '10px 18px', borderRadius: 999,
-  background: '#C43F2A', color: '#fff', border: 'none',
+  padding: '10px 18px', borderRadius: 'var(--radius-pill)',
+  background: 'var(--interactive-primary-hover)', color: '#fff', border: 'none',
   fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase',
   fontWeight: 500, cursor: 'pointer',
 }

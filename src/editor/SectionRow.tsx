@@ -62,7 +62,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
     alignItems: 'center',
     gap: 8,
     padding: '10px 12px',
-    borderRadius: 10,
+    borderRadius: 'var(--radius-sm)',
     background: isSelected ? 'rgba(232,85,62,0.10)' : 'transparent',
     border: isSelected ? '1px solid rgba(232,85,62,0.45)' : '1px solid transparent',
     cursor: 'pointer',
@@ -126,9 +126,9 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
           onClick={(e) => { e.stopPropagation(); onToggleEnabled() }}
           title={section.enabled === false ? t.enableTitle : t.disableTitle}
           style={{
-            width: 12, height: 12, borderRadius: 999,
+            width: 12, height: 12, borderRadius: 'var(--radius-pill)',
             border: 'none', cursor: 'pointer',
-            background: section.enabled === false ? 'rgba(42,33,24,0.18)' : '#2D8C4E',
+            background: section.enabled === false ? 'rgba(42,33,24,0.18)' : 'var(--color-emerald)',
             flexShrink: 0,
           }}
         />
@@ -149,7 +149,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
 
 const nameStyle: React.CSSProperties = {
   fontSize: 13,
-  color: '#2A2118',
+  color: 'var(--text-primary)',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -164,11 +164,11 @@ const typeStyle: React.CSSProperties = {
 const renameInput: React.CSSProperties = {
   width: '100%',
   padding: '4px 8px',
-  borderRadius: 6,
+  borderRadius: 'var(--radius-sm)',
   border: '1px solid rgba(232,85,62,0.4)',
-  background: '#fff',
+  background: 'var(--surface-raised)',
   fontSize: 13,
-  color: '#2A2118',
+  color: 'var(--text-primary)',
   outline: 'none',
 }
 

@@ -177,10 +177,10 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
    so this aside stays responsive. We just need flex column layout. */
 const wrap: React.CSSProperties = { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'transparent' }
 const hdr:  React.CSSProperties = { padding: '18px 16px 8px', display: 'flex', flexDirection: 'column', gap: 8 }
-const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: '#E8553E' }
-const modeToggle: React.CSSProperties = { display: 'inline-flex', alignSelf: 'flex-start', borderRadius: 8, background: 'rgba(42,33,24,0.06)', padding: 2, gap: 2 }
-const modeBtn: React.CSSProperties = { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(42,33,24,0.55)', padding: '4px 8px', borderRadius: 6 }
-const modeBtnActive: React.CSSProperties = { ...modeBtn, background: '#E8553E', color: '#fff' }
+const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: 'var(--interactive-primary)' }
+const modeToggle: React.CSSProperties = { display: 'inline-flex', alignSelf: 'flex-start', borderRadius: 'var(--radius-sm)', background: 'var(--border-subtle)', padding: 2, gap: 2 }
+const modeBtn: React.CSSProperties = { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: 'var(--radius-sm)' }
+const modeBtnActive: React.CSSProperties = { ...modeBtn, background: 'var(--interactive-primary)', color: '#fff' }
 const list: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, padding: '4px 8px', flex: 1, overflow: 'auto' }
-const ftr:  React.CSSProperties = { padding: 12, borderTop: '1px solid rgba(42,33,24,0.08)' }
-const previewLink: React.CSSProperties = { display: 'block', textAlign: 'center', padding: '10px 14px', borderRadius: 10, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', textDecoration: 'none' }
+const ftr:  React.CSSProperties = { padding: 12, borderTop: '1px solid var(--border-subtle)' }
+const previewLink: React.CSSProperties = { display: 'block', textAlign: 'center', padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', textDecoration: 'none' }

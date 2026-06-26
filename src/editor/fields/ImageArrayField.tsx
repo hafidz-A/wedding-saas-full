@@ -134,12 +134,12 @@ function SortableTile({ id, url, onRemove }: { id: string; url: string; onRemove
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 10 }
 const head: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.6)', flex: 1 }
+const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)', flex: 1 }
 const count:React.CSSProperties = { letterSpacing: '0.06em', color: 'rgba(42,33,24,0.45)' }
 const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }
-const tile: React.CSSProperties = { width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 8, border: '1px solid rgba(42,33,24,0.12)', display: 'block' }
-const removeBtn: React.CSSProperties = { position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 999, background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', fontSize: 14, lineHeight: 1, cursor: 'pointer' }
-const btn:  React.CSSProperties = { padding: '6px 12px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const empty:React.CSSProperties = { gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed rgba(42,33,24,0.2)', borderRadius: 10 }
-const errStyle: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
+const tile: React.CSSProperties = { width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', display: 'block' }
+const removeBtn: React.CSSProperties = { position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 'var(--radius-pill)', background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', fontSize: 14, lineHeight: 1, cursor: 'pointer' }
+const btn:  React.CSSProperties = { padding: '6px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const empty:React.CSSProperties = { gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)' }
+const errStyle: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }
+const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }

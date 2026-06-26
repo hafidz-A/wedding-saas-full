@@ -29,9 +29,9 @@
   gap: 7px;
   padding: 7px 14px;
   border-radius: var(--border-radius-pill, 999px);
-  border: 1px solid rgba(42, 33, 24, 0.18);
+  border: 1px solid var(--border-default);
   background: rgba(255, 255, 255, 0.5);
-  color: #2a2118;
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;

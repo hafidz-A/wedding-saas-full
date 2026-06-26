@@ -55,15 +55,15 @@ export default function RenewButton({
       <button type="button" onClick={onClick} disabled={pending} style={btn}>
         {pending ? processingLabel : label}
       </button>
-      {err && <span style={{ fontSize: 11, color: '#C43F2A', maxWidth: 220, lineHeight: 1.4 }}>{err}</span>}
+      {err && <span style={{ fontSize: 11, color: 'var(--interactive-primary-hover)', maxWidth: 220, lineHeight: 1.4 }}>{err}</span>}
     </span>
   )
 }
 
 const btn: React.CSSProperties = {
   padding: '8px 16px',
-  borderRadius: 999,
-  background: '#E8553E',
+  borderRadius: 'var(--radius-pill)',
+  background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,
   fontSize: 12,

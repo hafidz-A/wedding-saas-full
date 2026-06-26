@@ -266,7 +266,7 @@ function NotReadyInvitationView({ slug }: { slug: string }) {
         display: 'grid',
         placeItems: 'center',
         padding: 24,
-        background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+        background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
         fontFamily: 'var(--font-body, system-ui)',
       }}
     >
@@ -275,20 +275,20 @@ function NotReadyInvitationView({ slug }: { slug: string }) {
           maxWidth: 480,
           padding: 40,
           background: 'rgba(255,255,255,0.95)',
-          borderRadius: 22,
-          boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)',
           textAlign: 'center',
         }}
       >
-        <p style={{ textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: '#E8553E', margin: '0 0 10px' }}>
+        <p style={{ textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: 'var(--interactive-primary)', margin: '0 0 10px' }}>
           Undangan
         </p>
-        <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: 0, color: '#2A2118', lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>
           Undangan belum siap
         </h1>
-        <p style={{ color: '#5C4A3A', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
           Undangan{' '}
-          <code style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code>{' '}
+          <code style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--border-subtle)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code>{' '}
           masih disiapkan oleh pemiliknya. Silakan cek kembali nanti.
         </p>
       </div>
@@ -305,7 +305,7 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
         display: 'grid',
         placeItems: 'center',
         padding: 24,
-        background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+        background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
         fontFamily: 'var(--font-body, system-ui)',
       }}
     >
@@ -314,8 +314,8 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
           maxWidth: 480,
           padding: 40,
           background: 'rgba(255,255,255,0.95)',
-          borderRadius: 22,
-          boxShadow: '0 20px 60px rgba(42,33,24,0.12)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)',
           textAlign: 'center',
         }}
       >
@@ -324,7 +324,7 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
             textTransform: 'uppercase',
             letterSpacing: '0.32em',
             fontSize: 11,
-            color: '#E8553E',
+            color: 'var(--interactive-primary)',
             margin: '0 0 10px',
           }}
         >
@@ -336,14 +336,14 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
             fontStyle: 'italic',
             fontSize: 32,
             margin: 0,
-            color: '#2A2118',
+            color: 'var(--text-primary)',
             lineHeight: 1.2,
           }}
         >
           {t.title}
         </h1>
-        <p style={{ color: '#5C4A3A', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
-          {t.bodyPrefix} <code style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(42,33,24,0.08)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code> {t.bodySuffix}
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
+          {t.bodyPrefix} <code style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--border-subtle)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code> {t.bodySuffix}
         </p>
       </div>
     </main>

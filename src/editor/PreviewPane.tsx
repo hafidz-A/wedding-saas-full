@@ -93,15 +93,15 @@ export default function PreviewPane({ slug, template }: Props) {
 }
 
 const wrap: React.CSSProperties = {
-  borderTop: '1px solid rgba(42,33,24,0.08)',
-  background: '#F5EFE3',
+  borderTop: '1px solid var(--border-subtle)',
+  background: 'var(--surface-warm)',
   display: 'flex',
   flexDirection: 'column',
 }
 
 const hdr: React.CSSProperties = {
   padding: '12px 18px',
-  borderBottom: '1px solid rgba(42,33,24,0.08)',
+  borderBottom: '1px solid var(--border-subtle)',
   display: 'flex',
   alignItems: 'center',
   gap: 12,
@@ -116,7 +116,7 @@ const kicker: React.CSSProperties = {
   fontSize: 10,
   letterSpacing: '0.24em',
   textTransform: 'uppercase',
-  color: '#E8553E',
+  color: 'var(--interactive-primary)',
 }
 
 const dirtyHint: React.CSSProperties = {
@@ -128,8 +128,8 @@ const dirtyHint: React.CSSProperties = {
 const deviceToggle: React.CSSProperties = {
   display: 'flex',
   gap: 4,
-  background: 'rgba(42,33,24,0.06)',
-  borderRadius: 999,
+  background: 'var(--border-subtle)',
+  borderRadius: 'var(--radius-pill)',
   padding: 4,
 }
 
@@ -138,19 +138,19 @@ const deviceBtn: React.CSSProperties = {
   alignItems: 'center',
   gap: 5,
   padding: '5px 12px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   border: 'none',
   background: 'transparent',
   cursor: 'pointer',
   fontSize: 12,
-  color: 'rgba(42,33,24,0.6)',
+  color: 'var(--text-muted)',
   letterSpacing: '0.04em',
 }
 
 const deviceBtnActive: React.CSSProperties = {
   ...deviceBtn,
-  background: '#fff',
-  color: '#2A2118',
+  background: 'var(--surface-raised)',
+  color: 'var(--text-primary)',
   fontWeight: 600,
   boxShadow: '0 1px 4px rgba(42,33,24,0.1)',
 }
@@ -158,9 +158,9 @@ const deviceBtnActive: React.CSSProperties = {
 const refreshBtn: React.CSSProperties = {
   width: 32,
   height: 32,
-  borderRadius: 8,
+  borderRadius: 'var(--radius-sm)',
   border: '1px solid rgba(42,33,24,0.15)',
-  background: '#fff',
+  background: 'var(--surface-raised)',
   cursor: 'pointer',
   fontSize: 16,
   lineHeight: 1,
@@ -177,18 +177,18 @@ const stageWrap: React.CSSProperties = {
 }
 
 const deviceFrame: React.CSSProperties = {
-  borderRadius: 12,
+  borderRadius: 'var(--radius-md)',
   overflow: 'hidden',
   boxShadow: '0 8px 32px rgba(42,33,24,0.18), 0 0 0 1px rgba(42,33,24,0.1)',
   display: 'flex',
   flexDirection: 'column',
-  background: '#fff',
+  background: 'var(--surface-raised)',
   flexShrink: 0,
 }
 
 const deviceBar: React.CSSProperties = {
   height: 28,
-  background: 'rgba(42,33,24,0.06)',
+  background: 'var(--border-subtle)',
   display: 'flex',
   alignItems: 'center',
   gap: 6,
@@ -200,7 +200,7 @@ const deviceDot: React.CSSProperties = {
   width: 8,
   height: 8,
   borderRadius: '50%',
-  background: 'rgba(42,33,24,0.2)',
+  background: 'var(--border-strong)',
   flexShrink: 0,
 }
 

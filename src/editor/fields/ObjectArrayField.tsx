@@ -113,7 +113,7 @@ export default function ObjectArrayField({
                       case 'stringArray': return <StringArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemPlaceholder={f.itemPlaceholder} onChange={onChange} help={fHelp} />
                       case 'objectArray': return <ObjectArrayField key={f.key} label={fLabel} value={Array.isArray(v) ? v : []} itemFields={f.itemFields} newItem={f.newItem} itemLabelKey={f.itemLabelKey} slug={slug} lang={lang} onChange={onChange} maxItems={f.maxItems} />
                       default:
-                        return <div key={f.key} style={{ fontSize: 12, color: '#E8553E' }}>{t.unsupportedField} {f.type}</div>
+                        return <div key={f.key} style={{ fontSize: 12, color: 'var(--interactive-primary)' }}>{t.unsupportedField} {f.type}</div>
                     }
                   })}
                 </div>
@@ -141,16 +141,16 @@ function defaultForField(f: FieldDef): unknown {
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 10 }
 const head: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.6)', flex: 1 }
+const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)', flex: 1 }
 const count:React.CSSProperties = { letterSpacing: '0.06em', color: 'rgba(42,33,24,0.45)' }
-const hint: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
-const btn:  React.CSSProperties = { padding: '6px 12px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const hint: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
+const btn:  React.CSSProperties = { padding: '6px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
 const list: React.CSSProperties = { display: 'grid', gap: 8 }
-const card: React.CSSProperties = { border: '1px solid rgba(42,33,24,0.12)', borderRadius: 10, background: '#fff' }
+const card: React.CSSProperties = { border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)' }
 const rowHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', cursor: 'pointer', userSelect: 'none' }
 const chev: React.CSSProperties = { color: 'rgba(42,33,24,0.5)', width: 14 }
-const rowLbl: React.CSSProperties = { flex: 1, fontSize: 13, color: '#2A2118', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+const rowLbl: React.CSSProperties = { flex: 1, fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const rowBtns: React.CSSProperties = { display: 'flex', gap: 4 }
-const iconBtn: React.CSSProperties = { width: 28, height: 28, borderRadius: 6, background: 'transparent', border: '1px solid rgba(42,33,24,0.15)', cursor: 'pointer', fontSize: 13 }
-const body: React.CSSProperties = { display: 'grid', gap: 14, padding: '4px 14px 16px', borderTop: '1px solid rgba(42,33,24,0.08)' }
-const empty:React.CSSProperties = { padding: 18, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed rgba(42,33,24,0.2)', borderRadius: 10 }
+const iconBtn: React.CSSProperties = { width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'transparent', border: '1px solid rgba(42,33,24,0.15)', cursor: 'pointer', fontSize: 13 }
+const body: React.CSSProperties = { display: 'grid', gap: 14, padding: '4px 14px 16px', borderTop: '1px solid var(--border-subtle)' }
+const empty:React.CSSProperties = { padding: 18, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)' }

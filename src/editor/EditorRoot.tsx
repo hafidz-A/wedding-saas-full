@@ -102,10 +102,10 @@ function useIsMobile(): boolean {
 
 const previewToggle: React.CSSProperties = {
   padding: '8px 14px',
-  borderRadius: 999,
-  border: '1px solid rgba(42,33,24,0.2)',
+  borderRadius: 'var(--radius-pill)',
+  border: '1px solid var(--border-strong)',
   background: 'transparent',
-  color: '#2A2118',
+  color: 'var(--text-primary)',
   fontSize: 11,
   letterSpacing: '0.14em',
   textTransform: 'uppercase',

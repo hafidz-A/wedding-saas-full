@@ -102,16 +102,16 @@ const subnav: React.CSSProperties = {
   gap: 6,
   padding: 6,
   background: 'rgba(42,33,24,0.05)',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   width: 'fit-content',
   maxWidth: '100%',
 }
 const subBtn: React.CSSProperties = {
   padding: '8px 18px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   border: 'none',
   background: 'transparent',
-  color: 'rgba(42,33,24,0.6)',
+  color: 'var(--text-muted)',
   fontSize: 13,
   fontWeight: 500,
   letterSpacing: '0.02em',
@@ -121,6 +121,6 @@ const subBtn: React.CSSProperties = {
 }
 const subBtnActive: React.CSSProperties = {
   ...subBtn,
-  background: '#2A2118',
-  color: '#F5EFE3',
+  background: 'var(--color-charcoal)',
+  color: 'var(--surface-warm)',
 }

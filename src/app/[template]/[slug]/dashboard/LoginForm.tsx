@@ -72,7 +72,7 @@ export default function LoginForm({
         minHeight: '100vh',
         display: 'grid',
         placeItems: 'center',
-        background: 'linear-gradient(135deg, #F5EFE3 0%, #E8DCC0 100%)',
+        background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
         padding: 24,
         fontFamily: 'var(--font-body, system-ui)',
       }}
@@ -89,7 +89,7 @@ export default function LoginForm({
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           border: '1px solid rgba(255,255,255,0.4)',
-          borderRadius: 22,
+          borderRadius: 'var(--radius-md)',
           padding: 40,
           display: 'grid',
           gap: 18,
@@ -103,7 +103,7 @@ export default function LoginForm({
               textTransform: 'uppercase',
               letterSpacing: '0.32em',
               fontSize: 11,
-              color: '#E8553E',
+              color: 'var(--interactive-primary)',
               margin: '0 0 8px',
             }}
           >
@@ -115,7 +115,7 @@ export default function LoginForm({
               fontStyle: 'italic',
               fontSize: 32,
               margin: 0,
-              color: '#2A2118',
+              color: 'var(--text-primary)',
             }}
           >
             {dict.titlePrefix} <span style={{ fontStyle: 'normal', fontWeight: 600 }}>{slug}</span>
@@ -158,7 +158,7 @@ export default function LoginForm({
         <p style={{ textAlign: 'center', margin: 0 }}>
           <Link
             href={`/forgot-password?slug=${encodeURIComponent(slug)}&template=${encodeURIComponent(template)}`}
-            style={{ color: '#E8553E', fontSize: 13, textDecoration: 'none' }}
+            style={{ color: 'var(--interactive-primary)', fontSize: 13, textDecoration: 'none' }}
           >
             {dict.forgot}
           </Link>
@@ -173,22 +173,22 @@ const lbl: React.CSSProperties = {
   fontSize: 11,
   textTransform: 'uppercase',
   letterSpacing: '0.22em',
-  color: 'rgba(42,33,24,0.7)',
+  color: 'var(--text-muted)',
 }
 
 const input: React.CSSProperties = {
   padding: '13px 16px',
-  borderRadius: 10,
-  border: '1px solid rgba(42,33,24,0.12)',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--border-default)',
   fontSize: 15,
   outline: 'none',
 }
 
 const submitBtn: React.CSSProperties = {
   padding: '14px 24px',
-  borderRadius: 999,
-  background: '#2A2118',
-  color: '#F5EFE3',
+  borderRadius: 'var(--radius-pill)',
+  background: 'var(--color-charcoal)',
+  color: 'var(--surface-warm)',
   fontSize: 13,
   fontWeight: 500,
   letterSpacing: '0.14em',
@@ -199,7 +199,7 @@ const submitBtn: React.CSSProperties = {
 }
 
 const errorStyle: React.CSSProperties = {
-  color: '#E8553E',
+  color: 'var(--interactive-primary)',
   fontSize: 13,
   margin: 0,
 }

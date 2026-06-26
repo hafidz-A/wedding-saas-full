@@ -148,7 +148,7 @@ export default function WalkInDialog({
           <>
             <div style={pickedCard}>
               <div>
-                <p style={{ margin: 0, fontWeight: 600, color: '#2A2118' }}>{picked.name}</p>
+                <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{picked.name}</p>
                 {picked.group_label && <p style={resultMeta}>{picked.group_label}</p>}
               </div>
               <button type="button" style={ghostBtn} onClick={() => setPicked(null)}>
@@ -161,10 +161,10 @@ export default function WalkInDialog({
                 style={{
                   margin: '10px 0 0',
                   padding: '9px 12px',
-                  borderRadius: 8,
+                  borderRadius: 'var(--radius-sm)',
                   background: 'rgba(232,85,62,0.08)',
                   border: '1px solid rgba(232,85,62,0.25)',
-                  color: '#C43F2A',
+                  color: 'var(--interactive-primary-hover)',
                   fontSize: 12,
                   lineHeight: 1.5,
                 }}
@@ -277,7 +277,7 @@ export default function WalkInDialog({
                   {results.map((g) => (
                     <li key={g.id}>
                       <button type="button" style={resultRow} onClick={() => setPicked(g)}>
-                        <span style={{ fontWeight: 600, color: '#2A2118' }}>{g.name}</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{g.name}</span>
                         <span style={resultMeta}>
                           {[g.group_label, g.phone_masked].filter(Boolean).join(' · ') || ''}
                         </span>

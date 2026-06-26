@@ -76,14 +76,14 @@ export default function AudioField({ label, value, onChange, slug, help }: Props
 }
 
 const wrap: React.CSSProperties = { display: 'grid', gap: 8 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(42,33,24,0.6)' }
+const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
 const row:  React.CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 14 }
-const iconBox: React.CSSProperties = { width: 80, height: 80, borderRadius: 8, border: '1px solid rgba(42,33,24,0.12)', display: 'grid', placeItems: 'center', background: '#fff', flexShrink: 0 }
-const fname: React.CSSProperties = { fontSize: 12, color: '#2A2118', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+const iconBox: React.CSSProperties = { width: 80, height: 80, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', display: 'grid', placeItems: 'center', background: 'var(--surface-raised)', flexShrink: 0 }
+const fname: React.CSSProperties = { fontSize: 12, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const player: React.CSSProperties = { width: '100%', height: 32 }
 const empty: React.CSSProperties = { fontSize: 12, color: 'rgba(42,33,24,0.5)' }
 const btns: React.CSSProperties = { display: 'flex', gap: 6, flexWrap: 'wrap' }
-const btn:  React.CSSProperties = { padding: '7px 13px', borderRadius: 999, background: '#2A2118', color: '#F5EFE3', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const btnGhost: React.CSSProperties = { padding: '7px 13px', borderRadius: 999, background: 'transparent', color: '#2A2118', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid rgba(42,33,24,0.2)', cursor: 'pointer' }
-const errStyle: React.CSSProperties = { fontSize: 12, color: '#E8553E' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.55)' }
+const btn:  React.CSSProperties = { padding: '7px 13px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const btnGhost: React.CSSProperties = { padding: '7px 13px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
+const errStyle: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }
+const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
