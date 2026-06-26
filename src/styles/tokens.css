@@ -183,4 +183,160 @@
   --lovebirds-font-script:      var(--font-tangerine), 'Tangerine', cursive;
   --lovebirds-font-hero-names:  var(--font-greatvibes), 'Great Vibes', cursive;
   --font-serif-soft:            var(--font-montserrat), 'Montserrat', sans-serif;
+
+  /* ═══════════════════════════════════════════════
+     PART 2 TOKENS (Fase 6) — status, spacing, mono, glass, type, tracking, card
+     ═══════════════════════════════════════════════ */
+
+  /* ─── STATUS COLORS ─── */
+  --status-success:          var(--color-emerald);      /* #2D8C4E */
+  --status-success-soft:     rgba(45, 140, 78, 0.12);
+  --status-success-border:   rgba(45, 140, 78, 0.20);
+  --status-success-surface:  #E0F2E5;
+  --status-error:            var(--interactive-primary); /* #E8553E */
+  --status-error-dark:       #B23A28;
+  --status-error-soft:       var(--interactive-primary-soft);
+  --status-neutral:          #8A7F70;
+  --status-neutral-soft:     rgba(42, 33, 24, 0.12);
+  --text-disabled:           rgba(42, 33, 24, 0.40);
+  --overlay-dark:            rgba(20, 16, 12, 0.50);
+  --color-charcoal-hover:    #3A2E22;
+
+  /* ─── SPACING SCALE (8px grid) ─── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+
+  /* ─── MONOSPACE ─── (--font-mono already = Biryani; add a real code mono) */
+  --font-mono-code:  ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
+
+  /* ─── GLASSMORPHISM — Scope C (auth/dashboard/marketing/site chrome) ───
+     Lovebirds template defines its OWN --glass-bg/--glass-border scoped to
+     body.lovebirds-route (higher specificity), so these globals never leak in. */
+  --glass-bg:            rgba(255, 255, 255, 0.92);
+  --glass-bg-light:      rgba(255, 255, 255, 0.70);
+  --glass-bg-ultra:      rgba(255, 255, 255, 0.97);
+  --glass-border:        rgba(42, 33, 24, 0.10);
+  --glass-border-strong: rgba(42, 33, 24, 0.18);
+  --glass-shadow:        var(--shadow-md);
+  --gradient-page-bg:    linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%);
+
+  /* ─── TYPE SCALE — Scope C ─── */
+  --type-label-xs:   11px;
+  --type-label-sm:   12px;
+  --type-body-sm:    13px;
+  --type-body:       15px;
+  --type-body-lg:    16px;
+  --type-subhead:    18px;
+  --type-title-sm:   22px;
+  --type-title-md:   28px;
+  --type-title-lg:   clamp(28px, 4vw, 36px);
+  --type-display:    clamp(32px, 6vw, 52px);
+
+  /* ─── TRACKING ─── */
+  --tracking-tight:   -0.01em;   /* large display headings */
+  --tracking-wide:     0.10em;   /* label, badge */
+  --tracking-widest:   0.32em;   /* eyebrow / kicker ALL-CAPS */
+
+  /* ─── CARD / DIALOG / TOAST TOKENS (Scope C) ─── */
+  --card-bg:           var(--surface-raised);
+  --card-border:       var(--border-subtle);
+  --card-shadow:       var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+  --card-radius:       var(--radius-md);
+  --dialog-bg:         var(--glass-bg-ultra);
+  --dialog-shadow:     0 30px 80px rgba(42, 33, 24, 0.32);
+  --dialog-radius:     20px;
+  --toast-radius:      var(--radius-pill);
+  --toast-shadow:      var(--shadow-sm);
+  --overlay-scrim:     rgba(42, 33, 24, 0.45);
+
+  /* ═══════════════════════════════════════════════
+     PART 3 STRUCTURAL TOKENS (Fase 18, 27)
+     ═══════════════════════════════════════════════ */
+
+  /* ─── RADIUS (extends Part 1 --radius-sm/md/pill) ─── */
+  --radius-xs:      4px;
+  --radius-lg:      20px;
+  --radius-xl:      32px;
+  --radius-device:  36px;   /* phone shell mockup */
+  --radius-screen:  28px;   /* phone screen mockup */
+
+  /* ─── BORDER WIDTH SCALE ─── */
+  --border-width-hairline: 0.5px;
+  --border-width-thin:     1px;
+  --border-width-medium:   1.5px;
+  --border-width-thick:    2px;
+  --border-width-heavy:    3px;
+  --border-width-bold:     4px;
+
+  /* ─── BORDER SHORTHAND TOKENS ─── */
+  --border-subtle-full:  var(--border-width-thin) solid var(--border-subtle);
+  --border-default-full: var(--border-width-thin) solid var(--border-default);
+  --border-strong-full:  var(--border-width-thin) solid var(--border-strong);
+  --border-glass-full:   var(--border-width-thin) solid var(--glass-border);
+  --border-accent-full:  var(--border-width-thin) solid var(--interactive-primary);
+  --border-dashed-full:  var(--border-width-thin) dashed var(--border-default);
+
+  /* ─── SHADOW (extends Part 1 --shadow-xs/sm/md/lg; existing --shadow-card/
+     -soft/-polaroid kept untouched) ─── */
+  --shadow-btn:              0 8px 24px rgba(42, 33, 24, 0.12);
+  --shadow-btn-hover:        0 12px 32px rgba(42, 33, 24, 0.18);
+  --shadow-btn-accent:       0 8px 24px rgba(232, 85, 62, 0.25);
+  --shadow-btn-accent-hover: 0 12px 32px rgba(232, 85, 62, 0.32);
+  --shadow-nav:              0 12px 36px rgba(42, 33, 24, 0.14);
+  --shadow-dialog:           0 30px 80px rgba(42, 33, 24, 0.32);
+  /* Dark context (Solary): */
+  --shadow-dark-sm:  0 8px 28px rgba(0, 0, 0, 0.35);
+  --shadow-dark-md:  0 10px 40px rgba(0, 0, 0, 0.40);
+  --shadow-dark-lg:  0 30px 100px -20px rgba(0, 0, 0, 0.90);
+
+  /* ─── LINE-HEIGHT SCALE ─── */
+  --leading-none:     1;
+  --leading-tight:    1.15;
+  --leading-snug:     1.3;
+  --leading-normal:   1.55;
+  --leading-relaxed:  1.65;
+  --leading-loose:    1.8;
+
+  /* ─── FONT-WEIGHT SCALE ─── */
+  --weight-light:     300;
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+
+  /* ─── TRANSITION SCALE (existing --transition-default/-slow/--ease-out kept) ─── */
+  --duration-fast:    120ms;
+  --duration-base:    200ms;
+  --duration-slow:    320ms;
+  --duration-lazy:    500ms;
+  --ease-in-out:      cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-base:  var(--duration-base) var(--ease-in-out);
+  --transition-fast:  var(--duration-fast) var(--ease-in-out);
+
+  /* ─── Z-INDEX SCALE ─── */
+  --z-base:     0;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-top:      999;
+
+  /* ─── SIZING TOKENS ─── */
+  --size-icon-xs:   16px;
+  --size-icon-sm:   20px;
+  --size-icon-md:   24px;
+  --size-icon-lg:   32px;
+  --size-avatar-sm: 32px;
+  --size-avatar-md: 40px;
+  --size-avatar-lg: 56px;
 }
