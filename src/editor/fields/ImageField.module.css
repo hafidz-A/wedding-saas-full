@@ -1,0 +1,137 @@
+/* Image upload field — adds true drag-and-drop with an active drop state, on
+   top of the existing click-to-upload. Visual language matches the rest of the
+   editor (tokens, dashed empty state, pill buttons). */
+
+.field { display: grid; gap: 8px; }
+
+.label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+/* ── Empty state: a full-width dashed drop zone (click or drag) ── */
+.dropEmpty {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 104px;
+  padding: 18px;
+  text-align: center;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-base) var(--ease-in-out),
+    background var(--duration-base) var(--ease-in-out),
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-in-out);
+}
+.dropEmpty:hover { border-color: var(--interactive-primary); background: var(--interactive-primary-soft); }
+.dropEmpty:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--interactive-primary-soft); border-color: var(--interactive-primary); }
+.dropIcon { color: var(--interactive-primary); transition: transform var(--duration-base) var(--ease-spring); }
+.dropTitle { font-size: var(--font-size-sm); font-weight: var(--weight-medium); color: var(--text-secondary); }
+.dropSub   { font-size: var(--font-size-xs); }
+
+/* ── Filled state: thumbnail (also a drop target to replace) + actions ── */
+.row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.thumbZone {
+  position: relative;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-in-out);
+}
+.thumb {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+}
+.thumbZone:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--interactive-primary-soft); }
+
+/* Drag-over feedback (shared by empty zone + thumb). */
+.dragActive {
+  border-color: var(--interactive-primary) !important;
+  background: var(--interactive-primary-soft);
+  transform: scale(1.02);
+  box-shadow: 0 0 0 4px var(--interactive-primary-soft);
+}
+.dragActive .dropIcon { transform: translateY(-3px) scale(1.08); }
+
+/* Overlay hint shown over the thumbnail while dragging a file over it. */
+.thumbHint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--interactive-primary) 78%, transparent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 6px;
+  pointer-events: none;
+}
+
+/* Uploading shimmer on either zone. */
+.uploading { opacity: 0.7; animation: imgPulse 1.2s var(--ease-in-out) infinite; cursor: progress; }
+
+.btns { display: flex; flex-direction: column; gap: 6px; }
+
+.btn, .btnGhost {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-in-out),
+    border-color var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.btn:not(:disabled):active, .btnGhost:active { transform: translateY(1px); }
+.btn:focus-visible, .btnGhost:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.btn {
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+  border: 1px solid transparent;
+}
+.btn:not(:disabled):hover { background: var(--color-charcoal-hover); box-shadow: var(--shadow-sm); }
+.btn:disabled { opacity: 0.55; cursor: progress; }
+.btnGhost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+}
+.btnGhost:hover { background: rgba(42, 33, 24, 0.04); border-color: var(--interactive-primary); color: var(--interactive-primary); }
+
+.err  { font-size: var(--font-size-sm); color: var(--interactive-primary); }
+.help { font-size: var(--font-size-xs); color: var(--text-muted); }
+.hint { font-size: var(--font-size-xs); color: var(--text-muted); font-style: italic; }
+
+@keyframes imgPulse {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropEmpty, .thumbZone, .dropIcon, .btn, .btnGhost { transition: none; }
+  .dragActive { transform: none; }
+  .uploading { animation: none; }
+}

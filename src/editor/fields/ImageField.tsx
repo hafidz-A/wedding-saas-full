@@ -1,9 +1,10 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useUpload } from '../lib/useUpload'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import styles from './ImageField.module.css'
 
 interface Props {
   label: string
@@ -13,16 +14,22 @@ interface Props {
   help?: string
 }
 
+const ACCEPT = 'image/jpeg,image/png,image/gif,image/webp'
+
 export default function ImageField({ label, value, onChange, slug, help }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
   const { upload, isUploading, error } = useUpload(slug)
   const t = useDashboardDict().editor
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
+  const [dragActive, setDragActive] = useState(false)
 
-  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  async function handleFile(file: File | undefined | null) {
     if (!file) return
+    if (!file.type.startsWith('image/')) {
+      fb.fail(fm.uploadFail)
+      return
+    }
     const url = await upload(file)
     if (url) {
       onChange(url)
@@ -30,51 +37,96 @@ export default function ImageField({ label, value, onChange, slug, help }: Props
     } else {
       fb.fail(fm.uploadFail)
     }
+  }
+
+  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    await handleFile(e.target.files?.[0])
     e.target.value = ''
   }
 
+  // Drag-and-drop — reuses the same upload path as the file picker.
+  function onDragOver(e: React.DragEvent) {
+    e.preventDefault()
+    if (!isUploading) setDragActive(true)
+  }
+  function onDragLeave(e: React.DragEvent) {
+    e.preventDefault()
+    setDragActive(false)
+  }
+  async function onDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragActive(false)
+    if (isUploading) return
+    await handleFile(e.dataTransfer.files?.[0])
+  }
+
+  function openPicker() {
+    if (!isUploading) fileInput.current?.click()
+  }
+  function onKeyOpen(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openPicker()
+    }
+  }
+
   return (
-    <div style={wrap}>
-      <span style={lbl}>{label}</span>
-      <div style={row}>
-        {value ? (
-          <img src={value} alt="" style={thumb} />
-        ) : (
-          <div style={placeholder}>No image</div>
-        )}
-        <div style={btns}>
-          <button type="button" style={btn} disabled={isUploading} onClick={() => fileInput.current?.click()}>
-            {isUploading ? 'Uploading…' : value ? 'Replace' : 'Upload'}
-          </button>
-          {value && (
-            <button type="button" style={btnGhost} onClick={() => onChange('')}>
-              Remove
+    <div className={styles.field}>
+      <span className={styles.label}>{label}</span>
+
+      {value ? (
+        <div className={styles.row}>
+          <div
+            className={`${styles.thumbZone} ${dragActive ? styles.dragActive : ''} ${isUploading ? styles.uploading : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-label={t.imageReplaceAria ?? 'Replace image'}
+            onClick={openPicker}
+            onKeyDown={onKeyOpen}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+          >
+            <img src={value} alt="" className={styles.thumb} />
+            {dragActive && <span className={styles.thumbHint}>{t.imageDropHint ?? 'Drop to replace'}</span>}
+          </div>
+          <div className={styles.btns}>
+            <button type="button" className={styles.btn} disabled={isUploading} onClick={openPicker}>
+              {isUploading ? (t.imageUploading ?? 'Uploading…') : (t.imageReplace ?? 'Replace')}
             </button>
-          )}
+            <button type="button" className={styles.btnGhost} onClick={() => onChange('')}>
+              {t.imageRemove ?? 'Remove'}
+            </button>
+          </div>
         </div>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="image/jpeg,image/png,image/gif,image/webp"
-          hidden
-          onChange={onPick}
-        />
-      </div>
-      {error && <span style={errStyle}>{error}</span>}
-      {help && <span style={hlp}>{help}</span>}
-      {!value && <span style={hintStyle}>{t.imageEmptyHint}</span>}
+      ) : (
+        <div
+          className={`${styles.dropEmpty} ${dragActive ? styles.dragActive : ''} ${isUploading ? styles.uploading : ''}`}
+          role="button"
+          tabIndex={0}
+          aria-label={t.imageUploadAria ?? 'Upload image'}
+          onClick={openPicker}
+          onKeyDown={onKeyOpen}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+        >
+          <svg className={styles.dropIcon} width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 16V4" />
+            <path d="m7 9 5-5 5 5" />
+            <path d="M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" />
+          </svg>
+          <span className={styles.dropTitle}>
+            {isUploading ? (t.imageUploading ?? 'Uploading…') : dragActive ? (t.imageDropNow ?? 'Drop image to upload') : (t.imageDropTitle ?? 'Drag & drop, or click to upload')}
+          </span>
+          <span className={styles.dropSub}>{t.imageEmptyHint}</span>
+        </div>
+      )}
+
+      <input ref={fileInput} type="file" accept={ACCEPT} hidden onChange={onPick} />
+
+      {error && <span className={styles.err}>{error}</span>}
+      {help && <span className={styles.help}>{help}</span>}
     </div>
   )
 }
-
-const wrap: React.CSSProperties = { display: 'grid', gap: 8 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
-const row:  React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 14 }
-const thumb: React.CSSProperties = { width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }
-const placeholder: React.CSSProperties = { width: 80, height: 80, borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-strong)', display: 'grid', placeItems: 'center', fontSize: 11, color: 'rgba(42,33,24,0.5)' }
-const btns: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 6 }
-const btn:  React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
-const errStyle: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
-const hintStyle: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }

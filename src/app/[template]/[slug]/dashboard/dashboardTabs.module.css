@@ -89,6 +89,16 @@
   vertical-align: top;
 }
 
+/* Subtle row hover for scannability (desktop/tablet; mobile rows are cards). */
+.table tbody tr {
+  transition: background var(--duration-base) var(--ease-in-out);
+}
+@media (min-width: 768px) {
+  .table tbody tr:hover {
+    background: rgba(42, 33, 24, 0.025);
+  }
+}
+
 .empty {
   padding: clamp(28px, 4vw, 40px);
   text-align: center;
