@@ -78,6 +78,116 @@
   padding: clamp(16px, 4vw, 32px);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Dashboard control chrome — top tabs + header buttons/links.
+   Visuals preserved from the prior inline styles; this only adds the
+   interaction-state matrix (hover / active / focus-visible) + token motion.
+   ───────────────────────────────────────────────────────────── */
+
+.tab {
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-regular);
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    color var(--duration-base) var(--ease-in-out),
+    border-color var(--duration-base) var(--ease-in-out),
+    background var(--duration-base) var(--ease-in-out);
+}
+.tab:hover { color: var(--text-primary); background: rgba(42, 33, 24, 0.03); }
+.tab:focus-visible {
+  outline: 2px solid var(--interactive-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-xs);
+}
+.tabActive {
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  border-bottom-color: var(--interactive-primary);
+}
+
+/* Shared press + focus for the header pill controls. */
+.ghostBtn,
+.solidBtn,
+.ctaBtn {
+  font-family: inherit;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--duration-base) var(--ease-in-out),
+    color var(--duration-base) var(--ease-in-out),
+    border-color var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.ghostBtn:active,
+.solidBtn:active,
+.ctaBtn:not(:disabled):active { transform: translateY(1px); }
+.ghostBtn:focus-visible,
+.solidBtn:focus-visible,
+.ctaBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+
+/* Outline pill (Home, Logout). */
+.ghostBtn {
+  padding: 8px 18px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--tracking-wide);
+}
+.ghostBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: rgba(42, 33, 24, 0.03);
+}
+.ghostBtnSm { padding: 8px 14px; font-size: var(--font-size-xs); letter-spacing: 0.12em; }
+
+/* Solid dark pill (View live). */
+.solidBtn {
+  padding: 8px 18px;
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--tracking-wide);
+}
+.solidBtn:hover { background: var(--color-charcoal-hover); box-shadow: var(--shadow-sm); }
+
+/* Accent CTA (Pay now). */
+.ctaBtn {
+  padding: 10px 20px;
+  background: var(--interactive-primary);
+  color: #fff;
+  border: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.12em;
+}
+.ctaBtn:not(:disabled):hover { background: var(--interactive-primary-hover); box-shadow: var(--shadow-btn-accent); }
+.ctaBtn:disabled { opacity: 0.6; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tab, .ghostBtn, .solidBtn, .ctaBtn { transition: none; }
+  .ghostBtn:active, .solidBtn:active, .ctaBtn:not(:disabled):active { transform: none; }
+}
+
 /* Login form responsive */
 .loginForm {
   max-width: 420px;

@@ -1,0 +1,52 @@
+/* Editor sub-navigation (Sections / Palette / Music / Title / Ornament).
+   Visuals preserved; adds hover / active / focus-visible states + token motion. */
+
+.subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: rgba(42, 33, 24, 0.05);
+  border-radius: var(--radius-pill);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.subBtn {
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-base) var(--ease-in-out),
+    color var(--duration-base) var(--ease-in-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+
+.subBtn:hover {
+  color: var(--text-primary);
+  background: rgba(42, 33, 24, 0.06);
+}
+.subBtn:active { transform: translateY(1px); }
+.subBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+
+.subBtnActive,
+.subBtnActive:hover {
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subBtn { transition: none; }
+  .subBtn:active { transform: none; }
+}

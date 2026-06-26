@@ -1,0 +1,168 @@
+/* SaveBar + conflict/remote-change chrome.
+   Visuals are unchanged from the previous inline styles — this only adds the
+   missing interaction-state matrix (hover / active / focus-visible / disabled)
+   and standardises motion on the design tokens (--duration-*, --ease-*). */
+
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.dirtyTxt  { font-size: var(--font-size-sm); color: var(--interactive-primary); }
+.savedTxt  { font-size: var(--font-size-sm); color: var(--text-muted); }
+.savingTxt { font-size: var(--font-size-sm); color: rgba(42, 33, 24, 0.65); }
+.errTxt    { font-size: var(--font-size-xs); color: var(--interactive-primary); }
+
+/* ── Shared control base: consistent focus ring + tactile press ── */
+.pill,
+.saveBtn {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-in-out),
+    color var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.pill:focus-visible,
+.saveBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.pill:active,
+.saveBtn:not(:disabled):active { transform: translateY(1px); }
+
+/* ── Publish toggle ── */
+.pill {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+.pillOn  { background: var(--color-emerald); color: #fff; }
+.pillOff { background: var(--border-strong); color: var(--text-primary); }
+.pillOn:hover  { background: color-mix(in srgb, var(--color-emerald) 88%, #000); }
+.pillOff:hover { background: rgba(42, 33, 24, 0.24); }
+.pill:disabled { opacity: 0.55; cursor: default; }
+
+/* ── Save button ── */
+.saveBtn {
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+.saveBtn:not(:disabled):hover {
+  background: var(--color-charcoal-hover);
+  box-shadow: var(--shadow-sm);
+}
+.saveBtn:disabled { opacity: 0.4; cursor: default; }
+
+/* ─────────────────────────────────────────────────────────────
+   Remote-change banner (cross-tab notice) — token-aligned.
+   ───────────────────────────────────────────────────────────── */
+.bannerWrap {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: var(--z-toast);
+  max-width: min(580px, 94vw);
+  width: max-content;
+  animation: bannerIn var(--duration-slow) var(--ease-out);
+}
+.bannerCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 11px 12px 11px 16px;
+  background: var(--surface-raised);
+  border: var(--border-default-full);
+  border-left: var(--border-width-heavy) solid var(--interactive-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+.bannerDot {
+  flex: 0 0 auto;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--interactive-primary);
+  animation: bannerPulse 1.6s var(--ease-in-out) infinite;
+}
+.bannerText {
+  margin: 0;
+  flex: 1;
+  font-size: 12.5px;
+  line-height: var(--leading-snug);
+  color: var(--text-primary);
+}
+.bannerReload {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.bannerReload:hover { background: var(--color-charcoal-hover); box-shadow: var(--shadow-sm); }
+.bannerReload:active { transform: translateY(1px); }
+.bannerReload:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.bannerDismiss {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: var(--leading-none);
+  cursor: pointer;
+  transition: background var(--duration-base) var(--ease-in-out), color var(--duration-base) var(--ease-in-out);
+}
+.bannerDismiss:hover { background: var(--border-subtle); color: var(--text-primary); }
+.bannerDismiss:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft);
+}
+
+@keyframes bannerIn {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes bannerPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill, .saveBtn, .bannerReload, .bannerDismiss { transition: none; }
+  .pill:active, .saveBtn:not(:disabled):active, .bannerReload:active { transform: none; }
+  .bannerWrap { animation: none; }
+  .bannerDot { animation: none; }
+}

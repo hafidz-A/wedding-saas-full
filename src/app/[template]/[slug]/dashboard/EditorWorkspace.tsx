@@ -6,6 +6,7 @@ import MusicTab from './MusicTab'
 import MetaTab from './MetaTab'
 import OrnamentTab from './OrnamentTab'
 import { useDashboardDict } from './DashboardI18nProvider'
+import styles from './EditorWorkspace.module.css'
 
 export type EditorSubTab = 'section' | 'palette' | 'music' | 'meta' | 'ornament'
 
@@ -46,7 +47,7 @@ export default function EditorWorkspace({
 
   return (
     <div>
-      <nav style={subnav} role="tablist" aria-label={labels.editor}>
+      <nav className={styles.subnav} role="tablist" aria-label={labels.editor}>
         {keys.map((k) => (
           <button
             key={k}
@@ -54,7 +55,7 @@ export default function EditorWorkspace({
             role="tab"
             aria-selected={sub === k}
             onClick={() => onSubChange(k)}
-            style={sub === k ? subBtnActive : subBtn}
+            className={`${styles.subBtn} ${sub === k ? styles.subBtnActive : ''}`}
           >
             {labels[k]}
           </button>
@@ -96,31 +97,3 @@ export default function EditorWorkspace({
   )
 }
 
-const subnav: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: 6,
-  padding: 6,
-  background: 'rgba(42,33,24,0.05)',
-  borderRadius: 'var(--radius-pill)',
-  width: 'fit-content',
-  maxWidth: '100%',
-}
-const subBtn: React.CSSProperties = {
-  padding: '8px 18px',
-  borderRadius: 'var(--radius-pill)',
-  border: 'none',
-  background: 'transparent',
-  color: 'var(--text-muted)',
-  fontSize: 13,
-  fontWeight: 500,
-  letterSpacing: '0.02em',
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
-  transition: 'background 0.15s ease, color 0.15s ease',
-}
-const subBtnActive: React.CSSProperties = {
-  ...subBtn,
-  background: 'var(--color-charcoal)',
-  color: 'var(--surface-warm)',
-}

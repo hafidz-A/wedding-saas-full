@@ -135,52 +135,20 @@ export default function DashboardClient({
           >
             {periodLabel}
           </span>
-          <Link
-            href="/"
-            style={{
-              padding: '8px 18px',
-              borderRadius: 'var(--radius-pill)',
-              background: 'transparent',
-              color: 'var(--text-muted)',
-              border: '1px solid var(--border-default)',
-              fontSize: 12,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-            }}
-          >
+          <Link href="/" className={styles.ghostBtn}>
             {dict.chrome.homepage}
           </Link>
           <Link
             href={`/${template}/${slug}`}
             target="_blank"
-            style={{
-              padding: '8px 18px',
-              borderRadius: 'var(--radius-pill)',
-              background: 'var(--color-charcoal)',
-              color: 'var(--surface-warm)',
-              fontSize: 12,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-            }}
+            className={styles.solidBtn}
           >
             {dict.chrome.viewLive}
           </Link>
           <form action="/api/auth/logout" method="post" style={{ display: 'inline' }}>
             <button
               type="submit"
-              style={{
-                padding: '8px 14px',
-                borderRadius: 'var(--radius-pill)',
-                background: 'transparent',
-                color: 'var(--text-muted)',
-                border: '1px solid var(--border-default)',
-                fontSize: 11,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-              }}
+              className={`${styles.ghostBtn} ${styles.ghostBtnSm}`}
               title={dict.chrome.logout}
             >
               {dict.chrome.logout}
@@ -209,19 +177,7 @@ export default function DashboardClient({
             type="button"
             onClick={onPay}
             disabled={payPending}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 'var(--radius-pill)',
-              background: 'var(--interactive-primary)',
-              color: '#fff',
-              border: 0,
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
+            className={styles.ctaBtn}
           >
             {payPending ? activePeriod.processing : activePeriod.payNow}
           </button>
@@ -233,20 +189,8 @@ export default function DashboardClient({
           <button
             key={t}
             onClick={() => setTab(t)}
-            style={{
-              padding: '12px 16px',
-              border: 'none',
-              background: 'transparent',
-              color: tab === t ? 'var(--text-primary)' : 'var(--text-muted)',
-              fontSize: 13,
-              fontWeight: tab === t ? 600 : 400,
-              letterSpacing: '0.04em',
-              textTransform: 'capitalize',
-              borderBottom: tab === t ? '2px solid #E8553E' : '2px solid transparent',
-              cursor: 'pointer',
-              transition: 'color 0.2s ease',
-              whiteSpace: 'nowrap',
-            }}
+            aria-current={tab === t ? 'page' : undefined}
+            className={`${styles.tab} ${tab === t ? styles.tabActive : ''}`}
           >
             {dict.chrome.tabs[t]}
           </button>
