@@ -117,6 +117,35 @@
   background: var(--interactive-primary-soft);
 }
 
+/* Small "+ Add" pill (array-field headers) — compact charcoal pill, coral hover. */
+.btnAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.btnAdd:not(:disabled):hover { background: var(--color-coral); color: #fff; box-shadow: var(--shadow-btn-accent); }
+.btnAdd:not(:disabled):active { transform: translateY(1px); }
+.btnAdd:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.btnAdd:disabled { opacity: 0.45; cursor: default; }
+
 /* Small square icon button (remove ×, reorder ↑↓, etc.). */
 .iconBtn {
   display: inline-flex;
@@ -202,7 +231,7 @@
 .input:focus { border-color: var(--interactive-primary); box-shadow: 0 0 0 3px var(--interactive-primary-soft); }
 
 @media (prefers-reduced-motion: reduce) {
-  .btnPrimary, .btnGhost, .btnPrimarySm, .btnGhostSm, .iconBtn, .segBtn, .input { transition: none; }
+  .btnPrimary, .btnGhost, .btnPrimarySm, .btnGhostSm, .btnAdd, .iconBtn, .segBtn, .input { transition: none; }
   .btnPrimary:active, .btnGhost:active, .btnPrimarySm:active, .btnGhostSm:active,
-  .iconBtn:active, .segBtn:active { transform: none; }
+  .btnAdd:active, .iconBtn:active, .segBtn:active { transform: none; }
 }

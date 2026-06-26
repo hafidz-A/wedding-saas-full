@@ -12,6 +12,7 @@ import ImageArrayField from './ImageArrayField'
 import StringArrayField from './StringArrayField'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
+import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 import type { Lang } from '@/lib/i18n'
 
 interface Props {
@@ -76,7 +77,7 @@ export default function ObjectArrayField({
     <div style={wrap}>
       <div style={head}>
         <span style={lbl}>{label}{maxItems != null && <span style={count}> {items.length}/{maxItems}</span>}</span>
-        <button type="button" style={{ ...btn, opacity: atMax ? 0.45 : 1, cursor: atMax ? 'default' : 'pointer' }} onClick={add} disabled={atMax}>{t.addItem}</button>
+        <button type="button" className={ctrl.btnAdd} onClick={add} disabled={atMax}>{t.addItem}</button>
       </div>
       {atMax && <span style={hint}>{t.maxItemsFull.replace('{max}', String(maxItems))}</span>}
 
@@ -90,9 +91,9 @@ export default function ObjectArrayField({
                 <span style={chev}>{open ? '▾' : '▸'}</span>
                 <span style={rowLbl}>{headerLabel || `${t.itemFallback} ${i + 1}`}</span>
                 <div style={rowBtns} onClick={(e) => e.stopPropagation()}>
-                  <button type="button" style={iconBtn} onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
-                  <button type="button" style={iconBtn} onClick={() => move(i, +1)} disabled={i === items.length - 1}>↓</button>
-                  <button type="button" style={iconBtn} onClick={() => remove(i)}>×</button>
+                  <button type="button" className={ctrl.iconBtn} onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
+                  <button type="button" className={ctrl.iconBtn} onClick={() => move(i, +1)} disabled={i === items.length - 1}>↓</button>
+                  <button type="button" className={ctrl.iconBtn} onClick={() => remove(i)}>×</button>
                 </div>
               </div>
               {open && (
@@ -144,13 +145,11 @@ const head: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 
 const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)', flex: 1 }
 const count:React.CSSProperties = { letterSpacing: '0.06em', color: 'rgba(42,33,24,0.45)' }
 const hint: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
-const btn:  React.CSSProperties = { padding: '6px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
 const list: React.CSSProperties = { display: 'grid', gap: 8 }
 const card: React.CSSProperties = { border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)' }
 const rowHead: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', cursor: 'pointer', userSelect: 'none' }
 const chev: React.CSSProperties = { color: 'rgba(42,33,24,0.5)', width: 14 }
 const rowLbl: React.CSSProperties = { flex: 1, fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const rowBtns: React.CSSProperties = { display: 'flex', gap: 4 }
-const iconBtn: React.CSSProperties = { width: 28, height: 28, borderRadius: 'var(--radius-sm)', background: 'transparent', border: '1px solid rgba(42,33,24,0.15)', cursor: 'pointer', fontSize: 13 }
 const body: React.CSSProperties = { display: 'grid', gap: 14, padding: '4px 14px 16px', borderTop: '1px solid var(--border-subtle)' }
 const empty:React.CSSProperties = { padding: 18, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)' }

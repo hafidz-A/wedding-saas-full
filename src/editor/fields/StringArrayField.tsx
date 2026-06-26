@@ -1,6 +1,7 @@
 'use client'
 
 import styles from './fields.module.css'
+import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
 interface Props {
   label: string
@@ -29,7 +30,7 @@ export default function StringArrayField({ label, value, onChange, help, itemPla
     <div style={wrap}>
       <div style={head}>
         <span style={lbl}>{label}</span>
-        <button type="button" style={btn} onClick={add}>+ Add</button>
+        <button type="button" className={ctrl.btnAdd} onClick={add}>+ Add</button>
       </div>
       <div style={list}>
         {items.map((s, i) => (
@@ -40,7 +41,7 @@ export default function StringArrayField({ label, value, onChange, help, itemPla
               placeholder={itemPlaceholder}
               onChange={(e) => update(i, e.target.value)}
             />
-            <button type="button" style={iconBtn} onClick={() => remove(i)}>×</button>
+            <button type="button" className={ctrl.iconBtn} onClick={() => remove(i)}>×</button>
           </div>
         ))}
         {items.length === 0 && <div style={empty}>No items yet — click + Add.</div>}
@@ -53,9 +54,7 @@ export default function StringArrayField({ label, value, onChange, help, itemPla
 const wrap: React.CSSProperties = { display: 'grid', gap: 10 }
 const head: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
 const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)', flex: 1 }
-const btn: React.CSSProperties = { padding: '6px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
 const list: React.CSSProperties = { display: 'grid', gap: 8 }
 const row: React.CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
-const iconBtn: React.CSSProperties = { width: 30, height: 30, borderRadius: 'var(--radius-sm)', background: 'transparent', border: '1px solid rgba(42,33,24,0.15)', cursor: 'pointer', fontSize: 14 }
 const empty: React.CSSProperties = { padding: 14, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)' }
 const hlp: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
