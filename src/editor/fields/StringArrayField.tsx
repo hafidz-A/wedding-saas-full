@@ -1,5 +1,7 @@
 'use client'
 
+import styles from './fields.module.css'
+
 interface Props {
   label: string
   value: string[]
@@ -33,7 +35,7 @@ export default function StringArrayField({ label, value, onChange, help, itemPla
         {items.map((s, i) => (
           <div key={i} style={row}>
             <input
-              style={input}
+              className={`${styles.control} ${styles.controlFlex}`}
               value={s}
               placeholder={itemPlaceholder}
               onChange={(e) => update(i, e.target.value)}
@@ -54,7 +56,6 @@ const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', let
 const btn: React.CSSProperties = { padding: '6px 12px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
 const list: React.CSSProperties = { display: 'grid', gap: 8 }
 const row: React.CSSProperties = { display: 'flex', gap: 8, alignItems: 'center' }
-const input: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', fontSize: 14, background: 'var(--surface-raised)', color: 'var(--text-primary)' }
 const iconBtn: React.CSSProperties = { width: 30, height: 30, borderRadius: 'var(--radius-sm)', background: 'transparent', border: '1px solid rgba(42,33,24,0.15)', cursor: 'pointer', fontSize: 14 }
 const empty: React.CSSProperties = { padding: 14, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)' }
 const hlp: React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }

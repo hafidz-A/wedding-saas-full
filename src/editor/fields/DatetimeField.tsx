@@ -1,5 +1,7 @@
 'use client'
 
+import styles from './fields.module.css'
+
 interface Props {
   label: string
   value: string
@@ -15,20 +17,15 @@ interface Props {
 export default function DatetimeField({ label, value, onChange, help }: Props) {
   const local = typeof value === 'string' ? value.slice(0, 16) : ''
   return (
-    <label style={wrap}>
-      <span style={lbl}>{label}</span>
+    <label className={styles.field}>
+      <span className={styles.label}>{label}</span>
       <input
         type="datetime-local"
         value={local}
         onChange={(e) => onChange(e.target.value ? `${e.target.value}:00` : '')}
-        style={input}
+        className={styles.control}
       />
-      {help && <span style={hlp}>{help}</span>}
+      {help && <span className={styles.help}>{help}</span>}
     </label>
   )
 }
-
-const wrap: React.CSSProperties = { display: 'grid', gap: 6 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
-const input:React.CSSProperties = { padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }

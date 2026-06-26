@@ -1,5 +1,7 @@
 'use client'
 
+import styles from './fields.module.css'
+
 interface Props {
   label: string
   value: string
@@ -10,20 +12,15 @@ interface Props {
 
 export default function TextareaField({ label, value, onChange, rows = 3, help }: Props) {
   return (
-    <label style={wrap}>
-      <span style={lbl}>{label}</span>
+    <label className={styles.field}>
+      <span className={styles.label}>{label}</span>
       <textarea
         value={value ?? ''}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        style={textarea}
+        className={`${styles.control} ${styles.controlTextarea}`}
       />
-      {help && <span style={hlp}>{help}</span>}
+      {help && <span className={styles.help}>{help}</span>}
     </label>
   )
 }
-
-const wrap: React.CSSProperties = { display: 'grid', gap: 6 }
-const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
-const textarea: React.CSSProperties = { padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'vertical', background: 'var(--surface-raised)' }
-const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }

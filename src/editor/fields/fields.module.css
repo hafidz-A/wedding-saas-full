@@ -1,0 +1,84 @@
+/* Shared field primitives for the section editor.
+   Dedupes the per-field inline styles AND fixes an a11y gap: the inputs used to
+   set `outline: none` with no replacement, leaving focus invisible. The control
+   now shows a clear focus state (accent border + soft ring) on the design tokens.
+   At-rest appearance is preserved (same padding / radius / size / surface). */
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.control {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border-color var(--duration-base) var(--ease-in-out),
+    box-shadow var(--duration-base) var(--ease-in-out);
+}
+.control::placeholder { color: var(--text-muted); }
+.control:hover:not(:focus):not(:disabled) { border-color: var(--border-strong); }
+.control:focus {
+  border-color: var(--interactive-primary);
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft);
+}
+.control:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--surface-sunken);
+}
+
+.controlTextarea {
+  resize: vertical;
+  min-height: 64px;
+  line-height: var(--leading-normal);
+}
+
+/* For inputs that sit in a flex row next to a button (array item rows). */
+.controlFlex {
+  flex: 1;
+  min-width: 0;
+}
+
+.help {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: rgba(42, 33, 24, 0.22);
+  color: #fff;
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control { transition: none; }
+}
