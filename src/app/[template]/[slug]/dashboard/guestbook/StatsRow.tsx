@@ -17,8 +17,8 @@ export default function StatsRow({ rows, labels }: { rows: LedgerStatInput[]; la
   return (
     <div className={tabs.statsRow}>
       <Stat label={labels.statTotal} value={String(s.totalEntries)} />
-      <Stat label={labels.statArrived} value={`${s.arrivedCount} / ${s.totalEntries}`} accent="#2D8C4E" />
-      <Stat label={labels.statAttendeesArrived} value={String(s.attendeesArrived)} accent="#E8553E" />
+      <Stat label={labels.statArrived} value={`${s.arrivedCount} / ${s.totalEntries}`} accent="var(--color-emerald)" />
+      <Stat label={labels.statAttendeesArrived} value={String(s.attendeesArrived)} accent="var(--interactive-primary)" />
       <Stat label={labels.statNotArrived} value={String(s.notArrivedCount)} />
       <Stat label={labels.statWalkins} value={String(s.walkinCount)} />
     </div>

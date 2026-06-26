@@ -283,7 +283,7 @@ function NotReadyInvitationView({ slug }: { slug: string }) {
         <p style={{ textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: 'var(--interactive-primary)', margin: '0 0 10px' }}>
           Undangan
         </p>
-        <h1 style={{ fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 32, margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 32, margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>
           Undangan belum siap
         </h1>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
@@ -332,7 +332,7 @@ function ExpiredInvitationView({ slug }: { slug: string }) {
         </p>
         <h1
           style={{
-            fontFamily: 'var(--font-display, serif)',
+            fontFamily: 'var(--font-heading)',
             fontStyle: 'italic',
             fontSize: 32,
             margin: 0,

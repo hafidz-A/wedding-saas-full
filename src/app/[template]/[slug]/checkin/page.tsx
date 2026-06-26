@@ -41,5 +41,5 @@ export default async function CheckinPage({
    so the guest-facing check-in feels like the same product. */
 const wrap: React.CSSProperties = { minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 20, background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)', color: 'var(--text-primary)', fontFamily: 'var(--font-body, system-ui)' }
 const card: React.CSSProperties = { width: 'min(440px, 100%)', background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 28, textAlign: 'center', boxShadow: 'var(--shadow-md)' }
-const h1: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26, margin: '0 0 8px', color: 'var(--text-primary)' }
+const h1: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 26, margin: '0 0 8px', color: 'var(--text-primary)' }
 const p: React.CSSProperties = { color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }

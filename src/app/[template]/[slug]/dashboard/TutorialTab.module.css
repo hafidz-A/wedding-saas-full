@@ -3,9 +3,9 @@
 .subnav {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--border-default);
 }
 
@@ -18,9 +18,9 @@
   font-size: 13px;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.15s ease;
+  transition: var(--transition-fast);
 }
-.subtab:hover { border-color: rgba(42, 33, 24, 0.4); }
+.subtab:hover { border-color: var(--text-disabled); }
 .subtabActive,
 .subtabActive:hover {
   background: var(--color-charcoal);
@@ -30,14 +30,14 @@
 
 .title {
   font-size: 22px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   margin: 0 0 6px;
   color: var(--text-primary);
 }
 .summary {
   color: var(--text-secondary);
   margin: 0 0 20px;
-  line-height: 1.55;
+  line-height: var(--leading-normal);
 }
 
 .h {
@@ -51,19 +51,19 @@
 .steps {
   margin: 0;
   padding-left: 26px;
-  line-height: 1.7;
+  line-height: var(--leading-relaxed);
   color: var(--text-primary);
   /* override the global `ul, ol { list-style: none }` reset so steps show numbers */
   list-style: decimal outside;
 }
 .steps li { padding: 3px 0; }
-.steps li::marker { color: #8a7866; font-weight: 700; }
+.steps li::marker { color: #8a7866; font-weight: var(--weight-bold); }
 
 .bullets { list-style: none; margin: 0; padding: 0; }
 .bullets li {
   padding: 6px 0 6px 26px;
   position: relative;
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   color: var(--text-primary);
 }
 .always li::before { content: '✅'; position: absolute; left: 0; }
@@ -86,7 +86,7 @@
 }
 
 /* grouped subnav (lovebirds) — each group wraps to its own line */
-.group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.group { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; }
 .group + .group { margin-top: 10px; }
 .groupLabel {
   font-size: 11px;
@@ -94,39 +94,39 @@
   text-transform: uppercase;
   color: #8a7866;
 }
-.groupTabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.groupTabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
 /* per-section guide cards */
-.guideList { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 4px; }
+.guideList { display: flex; flex-direction: column; gap: var(--space-3); margin: 8px 0 4px; }
 .guideCard {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   background: #fbf7ee;
 }
-.guideTitle { font-size: 16px; font-weight: 600; margin: 0 0 8px; color: var(--text-primary); }
-.guideRow { margin: 4px 0; line-height: 1.5; color: var(--text-primary); }
-.guideLabel { font-weight: 600; color: var(--text-secondary); margin-right: 4px; white-space: nowrap; }
+.guideTitle { font-size: 16px; font-weight: var(--weight-semibold); margin: 0 0 8px; color: var(--text-primary); }
+.guideRow { margin: 4px 0; line-height: var(--leading-normal); color: var(--text-primary); }
+.guideLabel { font-weight: var(--weight-semibold); color: var(--text-secondary); margin-right: var(--space-1); white-space: nowrap; }
 
 /* FAQ accordion */
-.faqList { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 4px; }
+.faqList { display: flex; flex-direction: column; gap: var(--space-2); margin: 8px 0 4px; }
 .faqItem {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
   background: #fbf7ee;
 }
-.faqQ { font-weight: 600; cursor: pointer; color: var(--text-primary); list-style: none; }
+.faqQ { font-weight: var(--weight-semibold); cursor: pointer; color: var(--text-primary); list-style: none; }
 .faqQ::-webkit-details-marker { display: none; }
-.faqItem[open] .faqQ { margin-bottom: 8px; }
-.faqA { margin: 0; line-height: 1.55; color: var(--text-secondary); }
+.faqItem[open] .faqQ { margin-bottom: var(--space-2); }
+.faqA { margin: 0; line-height: var(--leading-normal); color: var(--text-secondary); }
 
 /* solary search box + deep-link button */
 .search {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 14px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
   border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.16);
   background: var(--surface-raised);

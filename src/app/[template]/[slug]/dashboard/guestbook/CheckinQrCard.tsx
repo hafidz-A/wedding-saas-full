@@ -54,7 +54,7 @@ export default function CheckinQrCard({ slug, template }: { slug: string; templa
 
   return (
     <div style={{ ...statBox, marginBottom: 16, padding: 18 }}>
-      <h3 style={{ margin: '0 0 4px', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 18 }}>{t.checkinQrTitle}</h3>
+      <h3 style={{ margin: '0 0 4px', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 18 }}>{t.checkinQrTitle}</h3>
       <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t.checkinQrDesc}</p>
       {dataUrl ? (
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>

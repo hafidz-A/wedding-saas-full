@@ -6,7 +6,7 @@
 }
 .btn {
   position: relative;
-  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  font-family: var(--font-body); font-size: 12px; font-weight: var(--weight-semibold);
   letter-spacing: 0.04em; color: var(--color-charcoal-light);
   padding: 5px 10px; border-radius: var(--border-radius-pill);
   transition: color var(--transition-default); min-height: 0;
@@ -18,7 +18,7 @@
      vs #fff; brand coral elsewhere is untouched. */
   background: var(--interactive-primary-hover);
   border-radius: var(--border-radius-pill);
-  z-index: 0;
+  z-index: var(--z-base);
 }
 .btnLabel { position: relative; z-index: 1; }
 .active { color: var(--color-paper); }

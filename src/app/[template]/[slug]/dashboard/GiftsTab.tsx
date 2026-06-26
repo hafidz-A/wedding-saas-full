@@ -80,7 +80,7 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
 
       <div className={tabs.statsRow}>
         <Stat label={t.statConfirmations} value={String(gifts.length)} />
-        <Stat label={t.statTotal} value={fmtAmount(totalAmount || null, 'IDR')} accent="#E8553E" />
+        <Stat label={t.statTotal} value={fmtAmount(totalAmount || null, 'IDR')} accent="var(--interactive-primary)" />
       </div>
 
       <div className={tabs.filterRow}>
@@ -140,5 +140,5 @@ const ghostBtn: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(
 const primaryBtn: React.CSSProperties = { padding: '8px 16px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', cursor: 'pointer', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }
 const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 14, border: '1px solid var(--border-subtle)' }
 const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }
-const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 22 }
+const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 22 }
 const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)' }

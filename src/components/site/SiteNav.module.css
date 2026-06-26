@@ -8,7 +8,7 @@
 .inner {
   max-width: var(--container-max); margin: 0 auto;
   padding: 14px var(--container-pad);
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
   background: rgba(253, 246, 236, 0.55);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border: 1px solid transparent;
@@ -25,15 +25,15 @@
   background: rgba(253, 246, 236, 0.9);
   border-color: rgba(42, 33, 24, 0.1);
   border-radius: var(--border-radius-pill);
-  box-shadow: 0 12px 36px rgba(42, 33, 24, 0.14);
+  box-shadow: var(--shadow-nav);
   padding: 10px clamp(16px, 2vw, 24px);
 }
 
 .desktop { display: none; }
-.link { font-family: var(--font-body); font-size: 14px; font-weight: 500; color: var(--color-charcoal-light); transition: var(--transition-default); }
+.link { font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-medium); color: var(--color-charcoal-light); transition: var(--transition-default); }
 .link:hover { color: var(--color-coral); }
 .cta {
-  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold);
   background: var(--color-charcoal); color: var(--color-cream);
   padding: 10px 20px; border-radius: var(--border-radius-pill);
   transition: var(--transition-default); white-space: nowrap;
@@ -47,7 +47,7 @@
   background: transparent; border: 0;
 }
 .burger span {
-  width: 22px; height: 2px; background: var(--color-charcoal); border-radius: 2px;
+  width: 22px; height: 2px; background: var(--color-charcoal); border-radius: var(--radius-xs);
   transition: transform 0.3s var(--ease-out), opacity 0.2s ease;
 }
 .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -61,14 +61,14 @@
   background: rgba(253, 246, 236, 0.97);
   border: 1px solid rgba(42, 33, 24, 0.1);
   border-radius: var(--radius-md);
-  box-shadow: 0 16px 40px rgba(42, 33, 24, 0.16);
+  box-shadow: var(--shadow-md);
 }
 .mobilePanel .cta { width: 100%; text-align: center; }
 
 .profileWrap { position: relative; display: inline-block; }
 .profileTrigger {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold);
   color: var(--color-charcoal); cursor: pointer;
   padding: 8px 12px; border-radius: var(--border-radius-pill);
   border: 1px solid var(--border-default); background: rgba(255, 255, 255, 0.5);

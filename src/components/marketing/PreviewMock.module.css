@@ -42,7 +42,7 @@
 .mockLeaf {
   position: absolute;
   font-size: 40px;
-  line-height: 1;
+  line-height: var(--leading-none);
   opacity: 0.5;
   pointer-events: none;
 }
@@ -56,28 +56,28 @@
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  padding: 32px;
+  padding: var(--space-6);
   text-align: center;
 }
 
 .mockEyebrow {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.32em;
   text-transform: uppercase;
 }
 
 .mockNames {
-  font-family: var(--font-script), var(--font-display), cursive;
+  font-family: var(--font-script), var(--font-heading), cursive;
   font-size: clamp(40px, 9vw, 58px);
-  line-height: 1.05;
+  line-height: var(--leading-none);
 }
 
 .mockRule {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 60%;
 }
 .mockRule > span:first-child,
@@ -104,7 +104,7 @@
   margin-top: 6px;
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.2em;
   padding: 9px 22px;
   border-radius: var(--radius-pill);

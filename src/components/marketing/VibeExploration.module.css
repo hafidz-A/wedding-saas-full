@@ -19,7 +19,7 @@
 .bgWrap {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-base);
   overflow: hidden;
   --seam: clamp(56px, 11vh, 150px);
   -webkit-mask-image: linear-gradient(
@@ -42,7 +42,7 @@
 .bgLayer {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: var(--z-base);
   will-change: opacity;
 }
 
@@ -69,18 +69,18 @@
 .kicker {
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.34em;
   text-transform: uppercase;
   transition: color 0.6s ease;
 }
 
 .heading {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   font-size: clamp(22px, 2.6vw, 32px);
-  line-height: 1.22;
+  line-height: var(--leading-snug);
   margin: 0;
   transition: color 0.6s ease;
 }
@@ -101,7 +101,7 @@
   width: 48px;
   height: 48px;
   font-size: 26px;
-  line-height: 1;
+  line-height: var(--leading-none);
   border-radius: 50%;
   border: 1px solid;
   background: transparent;
@@ -122,17 +122,17 @@
 .carouselEyebrow {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   transition: color 0.6s ease;
 }
 
 .carouselName {
-  font-family: var(--font-display);
-  font-weight: 600;
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
   font-size: clamp(32px, 5vw, 48px);
-  line-height: 1;
+  line-height: var(--leading-none);
   transition: color 0.6s ease;
 }
 
@@ -140,7 +140,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }
 .dot {
   height: 7px;
@@ -161,14 +161,14 @@
 .menuWrap {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 0;
 }
 
 .menuLabel {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.24em;
   text-transform: uppercase;
   transition: color 0.6s ease;
@@ -190,7 +190,7 @@
   gap: 9px;
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   letter-spacing: 0.01em;
   padding: 11px 16px;
   min-height: var(--tap-target);
@@ -203,7 +203,7 @@
   transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, transform 0.2s var(--ease-out);
 }
 .menuBtn:hover { transform: translateY(-1px); }
-.menuBtnSelected { font-weight: 600; }
+.menuBtnSelected { font-weight: var(--weight-semibold); }
 
 .bullet {
   width: 9px;
@@ -236,18 +236,18 @@
 .tagline {
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   transition: color 0.6s ease;
 }
 
 .paletteName {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   font-size: clamp(28px, 4.4vw, 44px);
-  line-height: 1.1;
+  line-height: var(--leading-tight);
   margin: 0;
   transition: color 0.6s ease;
 }
@@ -255,8 +255,8 @@
 .blurb {
   font-family: var(--font-body);
   font-size: clamp(15px, 1.6vw, 17px);
-  font-weight: 400;
-  line-height: 1.7;
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
   margin: 0;
   max-width: 46ch;
   transition: color 0.6s ease;
@@ -271,11 +271,11 @@
 .ambienceLabel {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
-.swatches { display: flex; gap: 8px; }
+.swatches { display: flex; gap: var(--space-2); }
 .swatch {
   width: 30px;
   height: 30px;
@@ -289,8 +289,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
   min-width: 0;
 }
 
@@ -300,10 +300,10 @@
   justify-content: center;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   font-family: var(--font-body);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 13px 20px;
@@ -322,7 +322,7 @@
 .btnCaret {
   display: inline-block;
   font-size: 1.05em;
-  line-height: 1;
+  line-height: var(--leading-none);
   transition: transform 0.3s var(--ease-out);
 }
 .btnCaretOpen {
@@ -334,12 +334,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .plansTitle {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-top: 6px;
@@ -347,12 +347,12 @@
 .planGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: var(--space-3);
 }
 .planCard {
   border: 1px solid;
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -365,8 +365,8 @@
   justify-content: space-between;
   gap: 10px;
 }
-.planName { font-family: var(--font-body); font-size: 15px; font-weight: 600; }
-.planPrice { font-family: var(--font-body); font-size: 16px; font-weight: 700; }
+.planName { font-family: var(--font-body); font-size: 15px; font-weight: var(--weight-semibold); }
+.planPrice { font-family: var(--font-body); font-size: 16px; font-weight: var(--weight-bold); }
 .planFeatures {
   list-style: none;
   margin: 0;
@@ -376,7 +376,7 @@
   gap: 4px 14px;
   font-family: var(--font-body);
   font-size: 12.5px;
-  line-height: 1.5;
+  line-height: var(--leading-normal);
 }
 .planFeatures li { position: relative; padding-left: 14px; }
 .planFeatures li::before {
@@ -386,11 +386,11 @@
   opacity: 0.6;
 }
 .planBtn {
-  margin-top: 4px;
+  margin-top: var(--space-1);
   text-align: center;
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 12px 16px;
@@ -409,7 +409,7 @@
 
 @media (min-width: 1024px) {
   .layout { grid-template-columns: 264px 1fr; gap: clamp(36px, 4vw, 56px); }
-  .menu { grid-template-columns: 1fr; gap: 8px; }
+  .menu { grid-template-columns: 1fr; gap: var(--space-2); }
   .menuBtn { justify-content: flex-start; }
   .displayInner { grid-template-columns: 0.82fr 1.18fr; gap: clamp(32px, 3.5vw, 52px); }
 }

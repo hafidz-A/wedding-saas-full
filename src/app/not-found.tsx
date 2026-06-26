@@ -33,7 +33,7 @@ const page: React.CSSProperties = {
 }
 const card: React.CSSProperties = { maxWidth: 480, textAlign: 'center' }
 const code: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
+  fontFamily: 'var(--font-heading)',
   fontStyle: 'italic',
   fontSize: 'clamp(64px, 16vw, 120px)',
   lineHeight: 1,
@@ -41,7 +41,7 @@ const code: React.CSSProperties = {
   margin: 0,
 }
 const h1: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
+  fontFamily: 'var(--font-heading)',
   fontStyle: 'italic',
   fontSize: 'clamp(28px, 5vw, 40px)',
   margin: '8px 0 12px',

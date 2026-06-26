@@ -17,40 +17,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .kicker {
   font-family: var(--font-body);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.35em;
   color: var(--color-coral);
   text-transform: uppercase;
 }
 
 .heading {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   font-size: clamp(32px, 5vw, 48px);
   color: var(--color-charcoal);
-  line-height: 1.2;
+  line-height: var(--leading-snug);
   margin: 0;
 }
 
 .subheading {
   font-family: var(--font-body);
   font-size: clamp(15px, 1.8vw, 17px);
-  line-height: 1.7;
+  line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
   margin: 4px 0 0;
-  font-weight: 300;
+  font-weight: var(--weight-light);
 }
 
 .layout {
   display: grid;
-  gap: 48px;
+  gap: var(--space-7);
   grid-template-columns: 1fr;
   align-items: center;
 }
@@ -67,7 +67,7 @@
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: var(--space-5);
   display: flex;
   gap: 20px;
   cursor: pointer;
@@ -75,7 +75,7 @@
 }
 
 .tabBtn:hover {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--glass-bg);
   transform: translateX(4px);
 }
 
@@ -86,12 +86,12 @@
 }
 
 .tabNum {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 28px;
   font-style: italic;
   color: var(--border-strong);
-  font-weight: 500;
-  line-height: 1;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-none);
   /* Flex shrink let the span collapse to one digit wide on phones, stacking
      "0" above "1". Keep "01" on a single horizontal line at every width. */
   flex-shrink: 0;
@@ -109,20 +109,20 @@
 }
 
 .tabTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 20px;
   color: var(--color-charcoal);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   margin: 0;
 }
 
 .tabBody {
   font-family: var(--font-body);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: var(--leading-normal);
   color: var(--color-charcoal-light);
   margin: 0;
-  font-weight: 300;
+  font-weight: var(--weight-light);
 }
 
 /* Preview phone shell */
@@ -136,7 +136,7 @@
 .iphoneShell {
   width: 250px;
   aspect-ratio: 9 / 18.5;
-  border-radius: 36px;
+  border-radius: var(--radius-device);
   background: var(--color-charcoal);
   padding: 10px;
   border: 1.5px solid rgba(255, 255, 255, 0.15);
@@ -155,13 +155,13 @@
   background: var(--color-charcoal);
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
-  z-index: 10;
+  z-index: var(--z-raised);
 }
 
 .screen {
   width: 100%;
   height: 100%;
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(150deg, #FDF8F2 0%, var(--surface-warm) 100%);
   overflow: hidden;
   position: relative;
@@ -192,14 +192,14 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 16px;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
 }
 
 .rsvpHeader {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.18em;
   color: var(--color-coral);
   text-align: center;
@@ -208,14 +208,14 @@
 .rsvpField {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .mockLabel {
   font-size: 8px;
   letter-spacing: 0.15em;
   color: rgba(42, 33, 24, 0.5);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .mockInput {
@@ -231,28 +231,28 @@
 .rsvpButtons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .mockBtnAttending {
   background: var(--color-charcoal);
   color: white;
   border-radius: var(--radius-sm);
-  padding: 8px;
+  padding: var(--space-2);
   font-size: 9px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.1em;
   text-align: center;
 }
 
 .mockBtnDeclining {
   background: transparent;
-  color: rgba(42, 33, 24, 0.4);
+  color: var(--text-disabled);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  padding: 8px;
+  padding: var(--space-2);
   font-size: 9px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.1em;
   text-align: center;
 }
@@ -319,13 +319,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .trackTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   color: var(--color-charcoal);
 }
 
@@ -358,7 +358,7 @@
   background: var(--surface-raised);
   padding: 6px 6px 14px;
   box-shadow: var(--shadow-polaroid);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -369,11 +369,11 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .polaroid span {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: 9px;
   color: var(--color-charcoal-light);

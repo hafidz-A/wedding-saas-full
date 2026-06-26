@@ -136,7 +136,7 @@ export default function WalkInDialog({
     <div style={overlay} role="dialog" aria-modal="true" onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
         <header style={modalHeader}>
-          <h3 style={{ margin: 0, fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 22 }}>
+          <h3 style={{ margin: 0, fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 22 }}>
             {t.dialogTitle}
           </h3>
           <button type="button" onClick={onClose} style={modalClose} aria-label={t.dialogCancel}>

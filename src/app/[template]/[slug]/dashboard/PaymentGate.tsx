@@ -123,7 +123,7 @@ const kicker: React.CSSProperties = {
   margin: '0 0 10px',
 }
 const h1: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
+  fontFamily: 'var(--font-heading)',
   fontStyle: 'italic',
   fontSize: 34,
   margin: 0,

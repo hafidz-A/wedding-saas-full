@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: var(--space-5);
 }
 
 .ornament {
@@ -48,20 +48,20 @@
 }
 
 .title {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   font-size: clamp(28px, 4.5vw, 48px);
   color: var(--color-charcoal);
-  line-height: 1.25;
+  line-height: var(--leading-snug);
   margin: 0;
 }
 
 .body {
   font-family: var(--font-body);
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   font-size: clamp(16px, 2vw, 21px);
-  line-height: 1.8;
+  line-height: var(--leading-loose);
   color: var(--color-charcoal);
   max-width: 58ch;
   margin: 0;

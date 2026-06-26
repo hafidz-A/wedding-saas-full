@@ -18,7 +18,7 @@
   align-items: flex-start;
   margin-bottom: 18px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .headerTitle h2 {
@@ -34,14 +34,14 @@
 
 .headerActions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 /* ── Template editor panel ── */
 .templatePanel {
   margin-bottom: 18px;
-  padding: 16px;
+  padding: var(--space-4);
   background: rgba(232, 85, 62, 0.06);
   border: 1px solid var(--interactive-primary-soft);
   border-radius: var(--radius-md);
@@ -50,7 +50,7 @@
 .templateHeading {
   margin: 0 0 4px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   color: var(--text-primary);
 }
 
@@ -58,7 +58,7 @@
   margin: 0 0 10px;
   font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--leading-normal);
 }
 
 .templatePreview {
@@ -69,7 +69,7 @@
   display: block;
   font-size: 12px;
   color: #8A7F70;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .templatePreviewBody {
@@ -78,7 +78,7 @@
   word-break: break-word;
   font-family: inherit;
   font-size: 13px;
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   color: var(--text-primary);
   background: var(--surface-raised);
   border: 1px solid var(--border-default);
@@ -98,7 +98,7 @@
 /* ── Add-guest form ── */
 .addForm {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin-bottom: 18px;
   flex-wrap: wrap;
 }
@@ -111,7 +111,7 @@
 /* ── Filter row (search + filter pills) ── */
 .filterRow {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin-bottom: 14px;
   flex-wrap: wrap;
 }
@@ -140,7 +140,7 @@
 
 .table th {
   padding: 10px 8px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -204,13 +204,13 @@
     letter-spacing: 0.12em;
     color: rgba(42, 33, 24, 0.5);
     margin-bottom: 2px;
-    font-weight: 500;
+    font-weight: var(--weight-medium);
   }
 
   /* Actions wrap to full width row, buttons grow to fit */
   .actionsCell {
     text-align: left;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     padding-top: 10px !important;
     border-top: 1px solid var(--border-subtle) !important;
     display: flex;
@@ -246,7 +246,7 @@
 
 /* ── RSVP token display + regenerate button ── */
 .token { font-size: .85rem; opacity: .85; }
-.token code { letter-spacing: .12em; font-weight: 600; }
+.token code { letter-spacing: .12em; font-weight: var(--weight-semibold); }
 .tokenUsed { color: #b45309; font-style: normal; }
 
 /* Make "Buat ulang kode" obviously a button, not stray text. */
@@ -257,8 +257,8 @@
   margin-left: 6px;
   padding: 6px 12px;
   font-size: .78rem;
-  font-weight: 500;
-  line-height: 1;
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-none);
   color: var(--interactive-primary-hover);
   background: rgba(232, 85, 62, 0.08);
   border: 1px solid rgba(232, 85, 62, 0.4);

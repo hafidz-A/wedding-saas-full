@@ -16,25 +16,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .kicker {
   font-family: var(--font-body);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.35em;
   color: var(--color-coral);
   text-transform: uppercase;
 }
 
 .heading {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   font-size: clamp(32px, 5vw, 48px);
   color: var(--color-charcoal);
-  line-height: 1.2;
+  line-height: var(--leading-snug);
   margin: 0;
 }
 
@@ -75,7 +75,7 @@
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 24px;
+  gap: var(--space-5);
 }
 
 /* Node circle */
@@ -95,12 +95,12 @@
 }
 
 .num {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: 18px;
-  font-weight: 600;
-  color: rgba(42, 33, 24, 0.4);
-  line-height: 1;
+  font-weight: var(--weight-semibold);
+  color: var(--text-disabled);
+  line-height: var(--leading-none);
   transition: color 0.5s ease;
 }
 
@@ -144,24 +144,24 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .stepTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 22px;
   color: var(--color-charcoal);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   margin: 0;
 }
 
 .stepBody {
   font-family: var(--font-body);
   font-size: clamp(14px, 1.6vw, 15px);
-  line-height: 1.65;
+  line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
   margin: 0;
-  font-weight: 300;
+  font-weight: var(--weight-light);
 }
 
 /* Tablet adjustments */
@@ -181,7 +181,7 @@
 
   .step:nth-child(odd) {
     align-self: flex-start;
-    padding-right: 48px;
+    padding-right: var(--space-7);
     text-align: right;
   }
 
@@ -192,7 +192,7 @@
 
   .step:nth-child(even) {
     align-self: flex-end;
-    padding-left: 48px;
+    padding-left: var(--space-7);
   }
 
   .step:nth-child(even) .node {

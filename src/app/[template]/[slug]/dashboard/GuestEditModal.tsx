@@ -124,7 +124,7 @@ export default function GuestEditModal({
 const overlay: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(20,16,12,0.5)',
+  background: 'var(--overlay-dark)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

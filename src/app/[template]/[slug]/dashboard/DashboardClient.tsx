@@ -117,7 +117,7 @@ export default function DashboardClient({
               fontSize: 11,
               letterSpacing: '0.16em',
               textTransform: 'uppercase',
-              background: invitation.is_published ? '#2D8C4E' : 'var(--border-strong)',
+              background: invitation.is_published ? 'var(--color-emerald)' : 'var(--border-strong)',
               color: invitation.is_published ? '#fff' : 'var(--text-primary)',
             }}
           >
@@ -204,7 +204,7 @@ export default function DashboardClient({
             border: '1px solid rgba(232,85,62,0.3)',
           }}
         >
-          <span style={{ color: '#B23A28', fontSize: 14 }}>{activePeriod.unpaidBanner}</span>
+          <span style={{ color: 'var(--status-error-dark)', fontSize: 14 }}>{activePeriod.unpaidBanner}</span>
           <button
             type="button"
             onClick={onPay}

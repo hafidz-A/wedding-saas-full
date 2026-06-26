@@ -293,7 +293,7 @@ const kicker: React.CSSProperties = {
   margin: '0 0 8px',
 }
 const h1: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
+  fontFamily: 'var(--font-heading)',
   fontStyle: 'italic',
   fontSize: 32,
   margin: 0,

@@ -22,7 +22,7 @@ export default function NotFound() {
         </p>
         <h1
           style={{
-            fontFamily: 'var(--font-display, serif)',
+            fontFamily: 'var(--font-heading)',
             fontStyle: 'italic',
             fontSize: 'clamp(40px, 6vw, 64px)',
             color: 'var(--text-primary)',

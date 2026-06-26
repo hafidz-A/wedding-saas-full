@@ -178,7 +178,7 @@ export default function OrnamentTab({
 }
 
 const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
-const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
+const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)' }
 const previewPanel: React.CSSProperties = { position: 'relative', height: 240, borderRadius: 'var(--radius-md)', border: '1px solid', overflow: 'hidden' }
 const paletteChip: React.CSSProperties = { position: 'absolute', left: 14, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid', background: 'rgba(255,255,255,0.55)', fontSize: 12, backdropFilter: 'blur(6px)' }

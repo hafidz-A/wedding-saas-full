@@ -7,10 +7,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3);
   height: 56px;
   padding: 0 clamp(16px, 4vw, 32px);
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--glass-bg-light);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 0.5px solid rgba(42, 33, 24, 0.1);
@@ -33,7 +33,7 @@
   background: rgba(255, 255, 255, 0.5);
   color: var(--text-primary);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.04em;
   text-decoration: none;
   transition: background var(--transition-default, 0.2s ease),
@@ -41,7 +41,7 @@
 }
 
 .home:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--glass-bg);
   border-color: rgba(42, 33, 24, 0.32);
 }
 
@@ -58,6 +58,6 @@
     display: none;
   }
   .home {
-    padding: 8px;
+    padding: var(--space-2);
   }
 }

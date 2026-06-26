@@ -76,9 +76,9 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
 
       <div className={tabs.statsRow}>
         <Stat label={t.statResponses} value={String(rsvps.length)} />
-        <Stat label={t.statAttending} value={String(yesCount)} accent="#2D8C4E" />
+        <Stat label={t.statAttending} value={String(yesCount)} accent="var(--color-emerald)" />
         <Stat label={t.statDeclined} value={String(noCount)} accent="#999" />
-        <Stat label={t.statGuests} value={String(totalGuests)} accent="#E8553E" />
+        <Stat label={t.statGuests} value={String(totalGuests)} accent="var(--interactive-primary)" />
       </div>
 
       <div className={tabs.filterRow}>
@@ -156,10 +156,10 @@ const ghostBtn: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(
 const primaryBtn: React.CSSProperties = { padding: '8px 16px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', cursor: 'pointer', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }
 const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 14, border: '1px solid var(--border-subtle)' }
 const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }
-const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 26 }
+const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 26 }
 const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)' }
 const filterTabs: React.CSSProperties = { display: 'flex', gap: 4, background: 'var(--border-subtle)', borderRadius: 'var(--radius-pill)', padding: 4 }
 const tabBtn: React.CSSProperties = { padding: '6px 14px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'rgba(42,33,24,0.65)' }
 const tabActive: React.CSSProperties = { ...tabBtn, background: 'var(--surface-raised)', color: 'var(--text-primary)', fontWeight: 500 }
-const pillYes: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: '#E0F2E5', color: 'var(--color-emerald)', fontSize: 11, fontWeight: 500 }
+const pillYes: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--status-success-surface)', color: 'var(--color-emerald)', fontSize: 11, fontWeight: 500 }
 const pillNo: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--border-subtle)', color: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }

@@ -74,7 +74,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         {...(draggable ? attributes : {})}
         {...(draggable ? listeners : {})}
         onClick={(e) => e.stopPropagation()}
-        style={{ cursor: draggable ? 'grab' : 'not-allowed', color: 'rgba(42,33,24,0.4)', fontSize: 14, padding: '0 4px', opacity: draggable ? 1 : 0.5 }}
+        style={{ cursor: draggable ? 'grab' : 'not-allowed', color: 'var(--text-disabled)', fontSize: 14, padding: '0 4px', opacity: draggable ? 1 : 0.5 }}
         aria-label={draggable ? t.dragReorder : t.lockedHint}
         title={draggable ? t.dragReorder : t.lockedHint}
       >
@@ -137,7 +137,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         <button
           type="button"
           onClick={async (e) => { e.stopPropagation(); if (await confirmDialog({ message: `${t.removeConfirmPrefix}"${displayLabel}"${t.removeConfirmSuffix}`, tone: 'danger' })) onRemove() }}
-          style={{ border: 'none', background: 'transparent', color: 'rgba(42,33,24,0.4)', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
+          style={{ border: 'none', background: 'transparent', color: 'var(--text-disabled)', cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
           aria-label={t.removeAria}
         >
           ×

@@ -111,7 +111,7 @@ export default function LoginForm({
           </p>
           <h1
             style={{
-              fontFamily: 'var(--font-display, serif)',
+              fontFamily: 'var(--font-heading)',
               fontStyle: 'italic',
               fontSize: 32,
               margin: 0,

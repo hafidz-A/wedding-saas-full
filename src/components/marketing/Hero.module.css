@@ -79,7 +79,7 @@
   margin: 0 auto;
   width: 100%;
   display: grid;
-  gap: 64px;
+  gap: var(--space-8);
 }
 
 .copy {
@@ -91,7 +91,7 @@
 .kicker {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   letter-spacing: 0.35em;
   color: var(--color-coral);
   margin-bottom: 20px;
@@ -99,11 +99,11 @@
 }
 
 .title {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: normal;
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   font-size: clamp(44px, 6.5vw, 84px);
-  line-height: 1.16;
+  line-height: var(--leading-tight);
   letter-spacing: 0.01em;
   color: var(--color-charcoal);
   margin: 0;
@@ -123,9 +123,9 @@
 }
 
 .scriptWord {
-  font-family: var(--font-script), var(--font-display), cursive;
+  font-family: var(--font-script), var(--font-heading), cursive;
   font-style: normal;
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   font-size: 1.25em;
   color: var(--color-coral);
   display: inline-block;
@@ -140,31 +140,31 @@
   color: var(--color-charcoal-light);
   max-width: 48ch;
   margin: 24px 0 0;
-  font-weight: 300;
+  font-weight: var(--weight-light);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--space-4);
   margin-top: 40px;
 }
 
 .primary {
   font-family: var(--font-body);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   background: var(--color-charcoal);
   color: var(--color-cream);
   padding: 18px 38px;
   border-radius: var(--border-radius-pill);
-  box-shadow: 0 10px 30px rgba(42, 33, 24, 0.15);
+  box-shadow: var(--shadow-sm);
   transition: var(--transition-default);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .primary:hover {
@@ -185,7 +185,7 @@
 .secondary {
   font-family: var(--font-body);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--color-charcoal);
@@ -219,17 +219,17 @@
 .phone {
   width: clamp(240px, 50vw, 300px);
   aspect-ratio: 9 / 18.5;
-  border-radius: 40px;
+  border-radius: var(--radius-device);
   background: var(--color-charcoal);
   padding: 10px;
-  box-shadow: 0 24px 72px rgba(42, 33, 24, 0.25);
+  box-shadow: var(--shadow-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
   animation: floating-phone 6s ease-in-out infinite;
 }
 
 .phoneCard {
   height: 100%;
-  border-radius: 32px;
+  border-radius: var(--radius-xl);
   background: linear-gradient(150deg, #FDFDFD 0%, var(--surface-warm) 100%);
   display: flex;
   flex-direction: column;
@@ -244,20 +244,20 @@
 .cardHeader {
   font-size: 8px;
   letter-spacing: 0.35em;
-  color: rgba(42, 33, 24, 0.4);
-  font-weight: 600;
+  color: var(--text-disabled);
+  font-weight: var(--weight-semibold);
 }
 
 .cardBody {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   margin: auto 0;
 }
 
 .phoneScript {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: 15px;
   color: var(--color-charcoal-light);
@@ -265,17 +265,17 @@
 }
 
 .phoneNames {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: clamp(26px, 3.5vw, 34px);
   color: var(--color-charcoal);
-  line-height: 1.15;
+  line-height: var(--leading-tight);
 }
 
 .divider {
   display: flex;
   align-items: center;
   width: 80px;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .line {
@@ -294,7 +294,7 @@
   font-size: 12px;
   letter-spacing: 0.18em;
   color: var(--color-coral);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .phoneVenue {
@@ -307,13 +307,13 @@
 .cardFooter {
   border-top: 1px solid var(--border-subtle);
   width: 100%;
-  padding-top: 16px;
+  padding-top: var(--space-4);
 }
 
 .openCta {
   font-family: var(--font-body);
   font-size: 9px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.2em;
   color: var(--color-charcoal);
   padding: 8px 16px;
@@ -330,7 +330,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   z-index: 3;
   pointer-events: none;
 }
@@ -347,7 +347,7 @@
 .mouse {
   width: 18px;
   height: 28px;
-  border: 1.5px solid rgba(42, 33, 24, 0.4);
+  border: 1.5px solid var(--text-disabled);
   border-radius: var(--radius-md);
   position: relative;
 }
@@ -356,7 +356,7 @@
   width: 3px;
   height: 6px;
   background: var(--color-coral);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   position: absolute;
   top: 5px;
   left: 50%;

@@ -31,35 +31,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .kicker {
   font-family: var(--font-body);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.35em;
   color: var(--color-coral);
   text-transform: uppercase;
 }
 
 .heading {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
-  font-weight: 500;
+  font-weight: var(--weight-medium);
   font-size: clamp(32px, 5vw, 48px);
   color: var(--color-charcoal);
-  line-height: 1.2;
+  line-height: var(--leading-snug);
   margin: 0;
 }
 
 .subheading {
   font-family: var(--font-body);
   font-size: clamp(15px, 1.8vw, 17px);
-  line-height: 1.7;
+  line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
   margin: 4px 0 0;
-  font-weight: 300;
+  font-weight: var(--weight-light);
 }
 
 /* Grid */
@@ -70,15 +70,15 @@
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass-bg-light);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-md);
-  padding: 32px;
+  padding: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
   box-shadow: 0 10px 30px rgba(42, 33, 24, 0.03);
   position: relative;
   transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
@@ -86,13 +86,13 @@
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(42, 33, 24, 0.07);
+  box-shadow: var(--shadow-sm);
 }
 
 .quoteMark {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 80px;
-  line-height: 1;
+  line-height: var(--leading-none);
   color: var(--color-gold);
   opacity: 0.35;
   height: 35px;
@@ -103,13 +103,13 @@
 }
 
 .quote {
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-style: italic;
   font-size: clamp(16px, 1.8vw, 18px);
-  line-height: 1.65;
+  line-height: var(--leading-relaxed);
   color: var(--color-charcoal);
   margin: 0;
-  font-weight: 400;
+  font-weight: var(--weight-regular);
   flex: 1;
 }
 
@@ -122,7 +122,7 @@
 .authorGroup {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .monogram {
@@ -133,9 +133,9 @@
   color: var(--color-charcoal-light);
   display: grid;
   place-items: center;
-  font-family: var(--font-display);
+  font-family: var(--font-heading);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.05em;
   border: 1px solid var(--border-subtle);
 }
@@ -149,7 +149,7 @@
 .author {
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   color: var(--color-charcoal);
   font-style: normal;
 }
@@ -173,6 +173,6 @@
 @media (min-width: 1024px) {
   .grid {
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 32px;
+    gap: var(--space-6);
   }
 }

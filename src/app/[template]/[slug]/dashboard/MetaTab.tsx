@@ -195,13 +195,13 @@ export default function MetaTab({ slug, template, initial }: Props) {
 
 // ── Styles (mirrors PaletteTab / MusicTab) ──
 const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
-const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
+const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)', maxWidth: 560, lineHeight: 1.5 }
 const section: React.CSSProperties = { display: 'grid', gap: 14, padding: 18, background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }
 const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }
 const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
 const input: React.CSSProperties = { padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' }
-const counter: React.CSSProperties = { fontSize: 10, color: 'rgba(42,33,24,0.4)', justifySelf: 'end' }
+const counter: React.CSSProperties = { fontSize: 10, color: 'var(--text-disabled)', justifySelf: 'end' }
 const help: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.5)', margin: 0, lineHeight: 1.5 }
 const imageRow: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'center' }
 const imageThumb: React.CSSProperties = { width: 96, height: 54, borderRadius: 'var(--radius-sm)', overflow: 'hidden', flexShrink: 0, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, var(--color-charcoal), var(--color-charcoal-light))', border: '1px solid var(--border-default)' }

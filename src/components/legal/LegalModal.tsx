@@ -89,7 +89,7 @@ const header: React.CSSProperties = {
   borderBottom: '1px solid var(--border-default)',
 }
 const titleStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
+  fontFamily: 'var(--font-heading)',
   fontStyle: 'italic',
   fontSize: 24,
   margin: 0,

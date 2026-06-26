@@ -149,7 +149,7 @@ export default function PaletteTab({
 }
 
 const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
-const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
+const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)' }
 const panel: React.CSSProperties = { borderRadius: 'var(--radius-md)', padding: 'clamp(20px, 3vw, 36px)', border: '1px solid var(--border-subtle)', overflow: 'hidden' }
 const layoutRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 'clamp(20px, 3vw, 40px)', alignItems: 'center', justifyContent: 'center' }
@@ -158,7 +158,7 @@ const menuBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'cent
 const bullet: React.CSSProperties = { width: 9, height: 9, borderRadius: '50%', flex: '0 0 auto', transition: 'transform 0.3s ease' }
 const display: React.CSSProperties = { flex: '2 1 320px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(18px, 2.5vw, 28px)' }
 const details: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }
-const paletteName: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(24px, 3.4vw, 34px)', lineHeight: 1.1, margin: 0, textAlign: 'center' }
+const paletteName: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(24px, 3.4vw, 34px)', lineHeight: 1.1, margin: 0, textAlign: 'center' }
 const swatches: React.CSSProperties = { display: 'flex', gap: 8 }
 const swatch: React.CSSProperties = { width: 28, height: 28, borderRadius: '50%', border: '1px solid', boxShadow: '0 4px 12px rgba(0,0,0,0.18)' }
 const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }

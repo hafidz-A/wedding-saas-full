@@ -13,7 +13,7 @@
   background: var(--color-cream, var(--surface-base));
   border-radius: var(--radius-md);
   padding: 28px 26px 22px;
-  box-shadow: 0 30px 80px rgba(42, 33, 24, 0.32);
+  box-shadow: var(--shadow-dialog);
   animation: pop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .title {
@@ -27,7 +27,7 @@
   margin: 0 0 22px;
   font-family: var(--font-body, sans-serif);
   font-size: 15px;
-  line-height: 1.55;
+  line-height: var(--leading-normal);
   color: rgba(42, 33, 24, 0.75);
 }
 .actions {
@@ -38,7 +38,7 @@
 .actions button {
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   padding: 11px 22px;
   border-radius: var(--radius-pill);
   cursor: pointer;

@@ -294,7 +294,7 @@ function Toggle({
 // ── Styles ──
 const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
 const headerRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }
-const h2: React.CSSProperties = { fontFamily: 'var(--font-display, serif)', fontStyle: 'italic', fontSize: 28, margin: 0 }
+const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)', maxWidth: 540, lineHeight: 1.5 }
 const section: React.CSSProperties = { display: 'grid', gap: 12, padding: 18, background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }
 const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }
@@ -309,7 +309,7 @@ const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 'v
 const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
 const btnGhostDanger: React.CSSProperties = { ...btnGhost, color: 'var(--interactive-primary-hover)', borderColor: 'rgba(196,63,42,0.35)' }
 const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }
-const badgeOn: React.CSSProperties = { padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: '#E0F2E5', color: 'var(--color-emerald)', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em' }
+const badgeOn: React.CSSProperties = { padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--status-success-surface)', color: 'var(--color-emerald)', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em' }
 const badgeOff: React.CSSProperties = { ...badgeOn, background: 'var(--border-subtle)', color: 'var(--text-muted)' }
 const msgOk: React.CSSProperties = { fontSize: 12, color: 'var(--color-emerald)' }
 const msgErr: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }

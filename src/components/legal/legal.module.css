@@ -1,6 +1,6 @@
 .prose h2 {
   font-size: 19px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   margin: 28px 0 8px;
   color: var(--text-primary);
 }
@@ -11,7 +11,7 @@
 
 .prose h3 {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   margin: 18px 0 6px;
 }
 
@@ -47,7 +47,7 @@
 
 .prose li {
   margin: 0 0 6px;
-  padding-left: 4px;
+  padding-left: var(--space-1);
 }
 
 .prose li::marker {
@@ -56,7 +56,7 @@
 
 .prose a {
   color: var(--interactive-primary);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .prose strong {

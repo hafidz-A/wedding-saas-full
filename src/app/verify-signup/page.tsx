@@ -204,7 +204,7 @@ const kicker: React.CSSProperties = {
   margin: '0 0 8px',
 }
 const title: React.CSSProperties = {
-  fontFamily: 'var(--font-display, serif)',
+  fontFamily: 'var(--font-heading)',
   fontStyle: 'italic',
   fontSize: 30,
   margin: 0,

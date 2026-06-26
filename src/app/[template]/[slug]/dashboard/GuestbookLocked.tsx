@@ -114,4 +114,4 @@ const recheckBtn: React.CSSProperties = {
   cursor: 'pointer',
   fontFamily: 'inherit',
 }
-const errStyle: React.CSSProperties = { color: '#B23A28', fontSize: 13, marginTop: 14 }
+const errStyle: React.CSSProperties = { color: 'var(--status-error-dark)', fontSize: 13, marginTop: 14 }
