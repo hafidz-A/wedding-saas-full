@@ -459,7 +459,22 @@ export default function Hero(props) {
             ) : (
               isPreview && <p className={styles.gateGreet}>Welcome, dear [Guest name]</p>
             )}
-            <p className={styles.welcomeText}>{cfg.welcomeText}</p>
+            <p className={styles.welcomeLine}>
+              {/* Hand-drawn marker swipe behind the eyebrow label. Filled with
+                  the palette's --button-bg and the text painted in --button-fg
+                  (the guaranteed-contrast pair), so the label and its scribble
+                  never blend on any of the 10 palettes. preserveAspectRatio
+                  "none" lets the band stretch cleanly to the label width. */}
+              <span className={styles.welcomeMark} aria-hidden="true">
+                <svg viewBox="0 0 200 24" preserveAspectRatio="none">
+                  <path
+                    d="M3 9 C45 4 95 5 140 5 C168 5 188 6 197 9 C198 13 198 14 197 16 C188 20 150 20 110 20 C70 20 30 21 3 17 C2 13 2 12 3 9 Z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+              <span className={styles.welcomeText}>{cfg.welcomeText}</span>
+            </p>
             <h1 className={styles.coupleName}>
               <span className={styles.namePart}>{cfg.brideName}</span>
               <span className={styles.amp}>&amp;</span>

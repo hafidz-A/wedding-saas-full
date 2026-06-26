@@ -131,6 +131,9 @@
   font-weight: 400;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  /* Keep the time (e.g. "15:30") on a single line at every viewport — the
+     80px grid column was clipping wide digits into "15:3" + "0". */
+  white-space: nowrap;
   /* Push digits inward from the right edge of the 80px column so they
      don't visually touch the coloured timeline dot (positioned at
      left: -34px from the card, so its halo lands near the column edge).

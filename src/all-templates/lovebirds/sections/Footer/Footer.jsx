@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import SceneFrame from '../../components/SceneFrame.jsx'
 import styles from './Footer.module.css'
@@ -66,6 +67,34 @@ export default function Footer(props) {
   const monogramText = deriveMonogram(coupleName, undefined, monogram)
   const couplePhotos = (Array.isArray(photos) ? photos : []).filter((p) => p && p.src).slice(0, 2)
 
+  // Keep the hashtag on a single line at any length / device: the CSS sets the
+  // ideal (clamped) size with white-space: nowrap; here we shrink the font only
+  // when that single line would overflow its container, so long hashtags scale
+  // down instead of wrapping to two lines.
+  const hashtagRef = useRef(null)
+  useEffect(() => {
+    const el = hashtagRef.current
+    const parent = el?.parentElement
+    if (!el || !parent) return undefined
+    const fit = () => {
+      el.style.fontSize = '' // reset to the CSS clamp() base before measuring
+      const cs = getComputedStyle(parent)
+      const avail =
+        parent.clientWidth - parseFloat(cs.paddingLeft || '0') - parseFloat(cs.paddingRight || '0')
+      const natural = el.scrollWidth
+      if (avail > 0 && natural > avail) {
+        const base = parseFloat(getComputedStyle(el).fontSize)
+        el.style.fontSize = `${Math.max((base * avail) / natural * 0.99, 12)}px`
+      }
+    }
+    fit()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(fit) : null
+    ro?.observe(parent)
+    // The display font loads after first paint and changes the metrics, so refit.
+    document.fonts?.ready?.then(fit).catch(() => {})
+    return () => ro?.disconnect()
+  }, [hashtag])
+
   return (
     <footer
       ref={ref}
@@ -99,7 +128,7 @@ export default function Footer(props) {
           </div>
         )}
 
-        <h2 className={styles.hashtag}>{hashtag}</h2>
+        <h2 ref={hashtagRef} className={styles.hashtag}>{hashtag}</h2>
         <p className={styles.message}>{message}</p>
 
         {socials?.length > 0 && (

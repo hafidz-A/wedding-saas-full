@@ -228,7 +228,6 @@
    light halo on light themes (lifts the dark script + coral label) and a dark
    halo on dark themes (lifts the light text) — never a hard-coded colour, so it
    stays correct across all palettes. */
-.welcomeText,
 .gateGreet,
 .coupleName,
 .date,
@@ -289,14 +288,46 @@
   }
 }
 
-.welcomeText {
+/* Eyebrow label sits on a hand-drawn marker swipe. The label font lives on the
+   line wrapper so the mark's em-based sizing tracks the label size exactly. */
+.welcomeLine {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto;
+  padding: 0.3em 0.85em;
   font-family: var(--font-body);
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.28em;
   font-size: clamp(12px, 1.3vw, 15px);
-  color: var(--accent, var(--color-coral));
-  margin: 0;
+  line-height: 1;
+  isolation: isolate;
+}
+
+.welcomeMark {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  color: var(--button-bg, var(--color-coral));
+  opacity: 0.95;
+  transform: rotate(-0.8deg);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(42, 33, 24, 0.18));
+}
+
+.welcomeMark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.welcomeText {
+  position: relative;
+  z-index: 1;
+  /* Half a tracking unit of indent re-centres the glyphs inside the mark
+     (trailing letter-spacing otherwise biases them left). */
+  text-indent: 0.14em;
+  color: var(--button-fg, #fff);
 }
 
 /* Personalized "Welcome, dear <name>" — warm script line above the label. */
@@ -548,7 +579,7 @@
 }
 
 @media (max-width: 480px) {
-  .welcomeText { letter-spacing: 0.26em; }
+  .welcomeLine { letter-spacing: 0.26em; }
   .coupleName  { font-size: clamp(30px, 12vw, 54px); gap: 4px; }
   .date        { letter-spacing: 0.18em; }
   .countdown   { grid-template-columns: repeat(4, 1fr); gap: 4px; max-width: 92vw; }
