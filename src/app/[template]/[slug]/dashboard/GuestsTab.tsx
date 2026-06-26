@@ -20,6 +20,7 @@ import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import styles from './GuestsTab.module.css'
+import ctrl from './dashboardControls.module.css'
 
 interface Props {
   slug: string
@@ -223,7 +224,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           </p>
         </div>
         <div className={styles.headerActions}>
-          <button type="button" onClick={() => setShowImport(true)} style={ghostBtn}>
+          <button type="button" onClick={() => setShowImport(true)} className={ctrl.btnGhostSm}>
             {t.importBtn}
           </button>
         </div>
@@ -238,14 +239,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           value={template}
           onChange={(e) => setTemplate(e.target.value)}
           rows={5}
-          style={{
-            ...input,
-            width: '100%',
-            boxSizing: 'border-box',
-            fontFamily: 'inherit',
-            resize: 'vertical',
-            minHeight: 90,
-          }}
+          className={ctrl.input}
+          style={{ boxSizing: 'border-box', resize: 'vertical', minHeight: 90 }}
         />
         <div className={styles.templatePreview}>
           <span className={styles.templatePreviewLabel}>{t.templatePreviewLabel}</span>
@@ -261,7 +256,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           <button
             type="button"
             onClick={() => setTemplate(initialTemplate)}
-            style={ghostBtn}
+            className={ctrl.btnGhostSm}
             disabled={templateSaving || !templateDirty}
           >
             {t.reset}
@@ -270,7 +265,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
             type="button"
             onClick={saveTemplate}
             disabled={templateSaving || !templateDirty}
-            style={primaryBtn}
+            className={ctrl.btnPrimarySm}
           >
             {templateSaving ? t.saving : t.confirmChange}
           </button>
@@ -291,9 +286,9 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         }}
         className={styles.addForm}
       >
-        <input name="name" placeholder={t.namePlaceholder} required style={input} />
-        <input name="phone" placeholder={t.phonePlaceholder} style={input} />
-        <button type="submit" disabled={pending} style={primaryBtn}>
+        <input name="name" placeholder={t.namePlaceholder} required className={ctrl.input} />
+        <input name="phone" placeholder={t.phonePlaceholder} className={ctrl.input} />
+        <button type="submit" disabled={pending} className={ctrl.btnPrimarySm}>
           {t.addBtn}
         </button>
       </form>
@@ -303,22 +298,20 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.searchPlaceholder}
-          style={input}
+          className={ctrl.input}
         />
-        {(['all', 'pending', 'sent'] as const).map((f) => (
-          <button
-            key={f}
-            type="button"
-            onClick={() => setFilter(f)}
-            style={{
-              ...ghostBtn,
-              background: filter === f ? 'var(--color-charcoal)' : 'transparent',
-              color: filter === f ? '#fff' : 'var(--text-primary)',
-            }}
-          >
-            {f === 'all' ? t.filterAll : f === 'pending' ? t.filterPending : t.filterSent}
-          </button>
-        ))}
+        <div className={ctrl.seg}>
+          {(['all', 'pending', 'sent'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setFilter(f)}
+              className={`${ctrl.segBtn} ${filter === f ? ctrl.segBtnActive : ''}`}
+            >
+              {f === 'all' ? t.filterAll : f === 'pending' ? t.filterPending : t.filterSent}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className={styles.tableWrap}>
@@ -406,14 +399,15 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     type="button"
                     onClick={() => handleSend(g)}
                     disabled={pending}
-                    style={primaryBtn}
+                    className={ctrl.btnPrimarySm}
                   >
                     {g.phone_e164 ? t.sendWa : t.pickContact}
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingGuest(g)}
-                    style={{ ...ghostBtn, marginLeft: 6 }}
+                    className={ctrl.btnGhostSm}
+                    style={{ marginLeft: 6 }}
                     title={t.editTitle}
                   >
                     ✎
@@ -456,7 +450,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                           }
                         })
                       }}
-                      style={{ ...ghostBtn, marginLeft: 6 }}
+                      className={ctrl.btnGhostSm}
+                      style={{ marginLeft: 6 }}
                       title={t.unmarkTitle}
                     >
                       ↶
@@ -479,7 +474,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                         }
                       })
                     }}
-                    style={{ ...ghostBtn, marginLeft: 6, color: 'var(--interactive-primary)' }}
+                    className={ctrl.btnGhostSm}
+                    style={{ marginLeft: 6, color: 'var(--interactive-primary)' }}
                     title={t.deleteTitle}
                   >
                     ×
@@ -515,30 +511,6 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
   )
 }
 
-const input: React.CSSProperties = {
-  padding: '8px 12px',
-  border: '1px solid rgba(42,33,24,0.16)',
-  borderRadius: 'var(--radius-sm)',
-  fontSize: 14,
-}
-const primaryBtn: React.CSSProperties = {
-  padding: '8px 14px',
-  background: 'var(--interactive-primary)',
-  color: '#fff',
-  border: 0,
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  fontSize: 13,
-}
-const ghostBtn: React.CSSProperties = {
-  padding: '8px 12px',
-  background: 'transparent',
-  color: 'var(--text-primary)',
-  border: '1px solid var(--border-strong)',
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  fontSize: 13,
-}
 const badge: React.CSSProperties = {
   display: 'inline-block',
   marginLeft: 8,

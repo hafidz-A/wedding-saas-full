@@ -7,6 +7,7 @@ import { useDashboardDict } from './DashboardI18nProvider'
 import { useAlert } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import tabs from './dashboardTabs.module.css'
+import ctrl from './dashboardControls.module.css'
 
 export interface RsvpRow {
   id: string
@@ -59,7 +60,7 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
             type="button"
             onClick={() => startTransition(() => router.refresh())}
             disabled={refreshing}
-            style={ghostBtn}
+            className={ctrl.btnGhost}
             title="Refetch from Supabase"
           >
             {refreshing ? '…' : tc.refresh}
@@ -67,7 +68,7 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
           <button
             type="button"
             onClick={async () => { if (downloadCsv(`rsvps-${new Date().toISOString().slice(0, 10)}.csv`, omitColumns(rsvps as unknown as Record<string, unknown>[], ['id', 'created_at']))) fb.ok(fm.csvDownloaded); else await showAlert({ message: tc.nothingToExport }) }}
-            style={primaryBtn}
+            className={ctrl.btnPrimary}
           >
             {tc.downloadCsv}
           </button>
@@ -87,15 +88,15 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
           placeholder={t.searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={searchInput}
+          className={ctrl.input}
         />
-        <div style={filterTabs}>
+        <div className={ctrl.seg}>
           {(['all', 'yes', 'no'] as const).map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFilter(f)}
-              style={filter === f ? tabActive : tabBtn}
+              className={`${ctrl.segBtn} ${filter === f ? ctrl.segBtnActive : ''}`}
             >
               {f === 'all' ? t.filterAll : f === 'yes' ? t.filterYes : t.filterNo}
             </button>
@@ -152,14 +153,8 @@ function Stat({ label, value, accent = 'var(--text-primary)' }: { label: string;
   )
 }
 
-const ghostBtn: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)', background: 'transparent', cursor: 'pointer', fontSize: 12, letterSpacing: '0.1em' }
-const primaryBtn: React.CSSProperties = { padding: '8px 16px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', cursor: 'pointer', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase' }
 const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 14, border: '1px solid var(--border-subtle)' }
 const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }
 const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 26 }
-const searchInput: React.CSSProperties = { padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)' }
-const filterTabs: React.CSSProperties = { display: 'flex', gap: 4, background: 'var(--border-subtle)', borderRadius: 'var(--radius-pill)', padding: 4 }
-const tabBtn: React.CSSProperties = { padding: '6px 14px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, color: 'rgba(42,33,24,0.65)' }
-const tabActive: React.CSSProperties = { ...tabBtn, background: 'var(--surface-raised)', color: 'var(--text-primary)', fontWeight: 500 }
 const pillYes: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--status-success-surface)', color: 'var(--color-emerald)', fontSize: 11, fontWeight: 500 }
 const pillNo: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--border-subtle)', color: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }

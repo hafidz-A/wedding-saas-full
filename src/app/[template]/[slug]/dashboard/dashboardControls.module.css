@@ -1,0 +1,208 @@
+/* Shared dashboard control primitives (buttons + search inputs) used across the
+   tab contents — RSVP, Gifts, Guests, Guestbook, Tutorial, and the editor inner
+   buttons. Replaces the per-file inline `ghostBtn`/`primaryBtn` consts so every
+   button gets the SAME interaction-state matrix and the coral hover accent that
+   matches the marketing landing — with contrast guaranteed (no "nyaru").
+
+   At-rest visuals are unchanged from the prior inline styles. */
+
+.btnPrimary,
+.btnGhost {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.btnPrimary:not(:disabled):active,
+.btnGhost:not(:disabled):active { transform: translateY(1px); }
+.btnPrimary:focus-visible,
+.btnGhost:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.btnPrimary:disabled,
+.btnGhost:disabled { opacity: 0.5; cursor: default; }
+
+/* Solid action button: charcoal at rest → coral on hover (cream text both ways,
+   exactly like the landing's primary CTA — guaranteed contrast). */
+.btnPrimary {
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+}
+.btnPrimary:not(:disabled):hover {
+  background: var(--color-coral);
+  color: #fff;
+  box-shadow: var(--shadow-btn-accent);
+}
+
+/* Secondary/outline button: hover lifts to the coral accent. Uses the DARKER
+   coral (--interactive-primary-hover, #C43F2A) for text/border so it clears
+   contrast on the light surface — accent without blending. */
+.btnGhost {
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+  letter-spacing: 0.1em;
+}
+.btnGhost:not(:disabled):hover {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+  background: var(--interactive-primary-soft);
+}
+
+/* ── Compact variants (radius-sm, fontSize 13, no uppercase) — for dense areas
+   like the Guests table-row actions, where the large pill would bloat the cell.
+   Same interaction states + coral accent; base look preserved per surface. ── */
+.btnPrimarySm,
+.btnGhostSm {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.btnPrimarySm:not(:disabled):active,
+.btnGhostSm:not(:disabled):active { transform: translateY(1px); }
+.btnPrimarySm:focus-visible,
+.btnGhostSm:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.btnPrimarySm:disabled,
+.btnGhostSm:disabled { opacity: 0.5; cursor: default; }
+
+/* Coral solid (this surface's primary is already coral — keep it, darken on hover). */
+.btnPrimarySm {
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  background: var(--interactive-primary);
+  color: #fff;
+}
+.btnPrimarySm:not(:disabled):hover { background: var(--interactive-primary-hover); box-shadow: var(--shadow-btn-accent); }
+
+.btnGhostSm {
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+}
+.btnGhostSm:not(:disabled):hover {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+  background: var(--interactive-primary-soft);
+}
+
+/* Small square icon button (remove ×, reorder ↑↓, etc.). */
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.iconBtn:not(:disabled):hover {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+  background: var(--interactive-primary-soft);
+}
+.iconBtn:not(:disabled):active { transform: translateY(1px); }
+.iconBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.iconBtn:disabled { opacity: 0.4; cursor: default; }
+
+/* Segmented filter group (e.g. All / Attending / Declined). */
+.seg {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+}
+.segBtn {
+  font-family: inherit;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.segBtn:not(.segBtnActive):hover { color: var(--interactive-primary-hover); }
+.segBtn:not(:disabled):active { transform: translateY(1px); }
+.segBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.segBtnActive {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Search / filter input — proper focus state (was outline:none with no replacement). */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+}
+.input::placeholder { color: var(--text-muted); }
+.input:hover:not(:focus) { border-color: var(--border-strong); }
+.input:focus { border-color: var(--interactive-primary); box-shadow: 0 0 0 3px var(--interactive-primary-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btnPrimary, .btnGhost, .btnPrimarySm, .btnGhostSm, .iconBtn, .segBtn, .input { transition: none; }
+  .btnPrimary:active, .btnGhost:active, .btnPrimarySm:active, .btnGhostSm:active,
+  .iconBtn:active, .segBtn:active { transform: none; }
+}
