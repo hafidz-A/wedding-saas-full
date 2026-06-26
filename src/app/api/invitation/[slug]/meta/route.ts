@@ -52,10 +52,14 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (hasDesc) cfg.meta.description = description
   if (hasImage) cfg.meta.ogImage = rawImage
 
-  const savedAt = new Date().toISOString()
-  const { error } = await (supabase.from('invitations') as any)
-    .update({ config: cfg, updated_at: savedAt }).eq('id', owner.id)
+  const localNow = new Date().toISOString()
+  // Echo the REAL stored updated_at back (the set_updated_at() trigger overwrites
+  // it with the DB clock), so an open section editor can rebase its concurrency
+  // baseline to the correct value instead of this route's slightly-earlier clock.
+  const { data: updatedRow, error } = await (supabase.from('invitations') as any)
+    .update({ config: cfg, updated_at: localNow }).eq('id', owner.id)
+    .select('updated_at').single()
   if (error) return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
 
-  return NextResponse.json({ ok: true, savedAt, title, description, ogImage: rawImage })
+  return NextResponse.json({ ok: true, savedAt: updatedRow?.updated_at ?? localNow, title, description, ogImage: rawImage })
 }

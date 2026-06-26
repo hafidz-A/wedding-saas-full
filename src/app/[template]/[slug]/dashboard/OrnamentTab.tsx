@@ -104,10 +104,12 @@ export default function OrnamentTab({
   slug,
   initial,
   palette,
+  onSaved,
 }: {
   slug: string
   initial?: string
   palette?: string
+  onSaved?: (savedAt: string) => void
 }) {
   const t = (useDashboardDict().tabs as any).ornament
   const fm = useDashboardDict().feedback
@@ -139,6 +141,7 @@ export default function OrnamentTab({
       const data = await res.json().catch(() => ({}))
       setMsg({ kind: 'ok', text: t.savedOk })
       fb.ok(fm.ornamentSaved)
+      if (data?.savedAt) onSaved?.(data.savedAt)
       broadcastEditorSave(slug, 'ornament', data?.savedAt)
     } catch (e: any) { setMsg({ kind: 'err', text: e?.message || t.networkError }); fb.fail(fm.saveFail) }
     finally { setSaving(false) }

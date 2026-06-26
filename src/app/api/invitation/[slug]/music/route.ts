@@ -58,17 +58,22 @@ export async function PUT(req: Request, { params }: Ctx) {
     nextConfig.music = sanitized
   }
 
-  const savedAt = new Date().toISOString()
-  const { error } = await (supabase.from('invitations') as any)
-    .update({ config: nextConfig, updated_at: savedAt })
+  const localNow = new Date().toISOString()
+  // Echo the REAL stored updated_at back (the set_updated_at() trigger overwrites
+  // it with the DB clock), so an open section editor can rebase its concurrency
+  // baseline to the correct value instead of this route's slightly-earlier clock.
+  const { data: updatedRow, error } = await (supabase.from('invitations') as any)
+    .update({ config: nextConfig, updated_at: localNow })
     .eq('id', owner.id)
+    .select('updated_at')
+    .single()
 
   if (error) {
     console.error('[music update write]', error)
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true, savedAt, music: sanitized })
+  return NextResponse.json({ ok: true, savedAt: updatedRow?.updated_at ?? localNow, music: sanitized })
 }
 
 function sanitizeMusic(input: any) {

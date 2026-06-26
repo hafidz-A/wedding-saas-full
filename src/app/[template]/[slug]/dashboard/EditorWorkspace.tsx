@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import EditorRoot from '@/editor/EditorRoot'
 import PaletteTab from './PaletteTab'
 import MusicTab from './MusicTab'
@@ -45,6 +46,13 @@ export default function EditorWorkspace({
   const coupleName: string | undefined = hero?.coupleName
   const weddingDate: string | undefined = hero?.weddingDate
 
+  // Single shared concurrency baseline for THIS tab. Every editing surface (the
+  // section editor + the sub-tabs) writes the same invitation row and bumps its
+  // updated_at; tracking the latest here — and feeding it to the always-mounted
+  // section editor — keeps that editor from going stale when a sub-tab saves,
+  // which previously caused a false 409 on the next section save.
+  const [liveUpdatedAt, setLiveUpdatedAt] = useState<string | null>(invitation.updated_at ?? null)
+
   return (
     <div>
       <nav className={styles.subnav} role="tablist" aria-label={labels.editor}>
@@ -63,15 +71,20 @@ export default function EditorWorkspace({
       </nav>
 
       <div style={{ marginTop: 18 }}>
-        {sub === 'section' && (
+        {/* The section editor stays mounted across sub-tab switches (only hidden)
+            so its in-progress edits AND concurrency baseline survive — switching
+            to Palette and back no longer reverts content or trips a false 409. */}
+        <div hidden={sub !== 'section'}>
           <EditorRoot
             slug={slug}
             template={template}
             initialConfig={invitation.config ?? { sections: [] }}
             initialIsPublished={!!invitation.is_published}
             initialUpdatedAt={invitation.updated_at ?? null}
+            liveUpdatedAt={liveUpdatedAt}
+            onSaved={setLiveUpdatedAt}
           />
-        )}
+        </div>
         {sub === 'palette' && (
           <PaletteTab
             slug={slug}
@@ -79,17 +92,19 @@ export default function EditorWorkspace({
             initial={invitation.config?.theme?.defaultPalette}
             coupleName={coupleName}
             weddingDate={weddingDate}
+            onSaved={setLiveUpdatedAt}
           />
         )}
-        {sub === 'music' && <MusicTab slug={slug} initial={invitation.config?.music ?? null} />}
+        {sub === 'music' && <MusicTab slug={slug} initial={invitation.config?.music ?? null} onSaved={setLiveUpdatedAt} />}
         {sub === 'meta' && (
-          <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} />
+          <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} onSaved={setLiveUpdatedAt} />
         )}
         {sub === 'ornament' && (
           <OrnamentTab
             slug={slug}
             initial={invitation.config?.theme?.ornamentType}
             palette={invitation.config?.theme?.defaultPalette}
+            onSaved={setLiveUpdatedAt}
           />
         )}
       </div>

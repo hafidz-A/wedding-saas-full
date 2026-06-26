@@ -48,14 +48,18 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (hasPalette) cfg.theme.defaultPalette = palette
   if (hasOrnament) cfg.theme.ornamentType = ornamentType
 
-  const savedAt = new Date().toISOString()
-  const { error } = await (supabase.from('invitations') as any)
-    .update({ config: cfg, updated_at: savedAt }).eq('id', owner.id)
+  const localNow = new Date().toISOString()
+  // Echo the REAL stored updated_at back (the set_updated_at() trigger overwrites
+  // it with the DB clock), so an open section editor can rebase its concurrency
+  // baseline to the correct value instead of this route's slightly-earlier clock.
+  const { data: updatedRow, error } = await (supabase.from('invitations') as any)
+    .update({ config: cfg, updated_at: localNow }).eq('id', owner.id)
+    .select('updated_at').single()
   if (error) return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
 
   return NextResponse.json({
     ok: true,
-    savedAt,
+    savedAt: updatedRow?.updated_at ?? localNow,
     ...(hasPalette ? { defaultPalette: palette } : {}),
     ...(hasOrnament ? { ornamentType } : {}),
   })

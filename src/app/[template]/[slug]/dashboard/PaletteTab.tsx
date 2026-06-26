@@ -26,12 +26,14 @@ export default function PaletteTab({
   initial,
   coupleName,
   weddingDate,
+  onSaved,
 }: {
   slug: string
   template?: string
   initial?: string
   coupleName?: string
   weddingDate?: string
+  onSaved?: (savedAt: string) => void
 }) {
   const t = useDashboardDict().tabs.palette
   const fm = useDashboardDict().feedback
@@ -72,7 +74,9 @@ export default function PaletteTab({
       const data = await res.json().catch(() => ({}))
       setMsg({ kind: 'ok', text: t.savedOk })
       fb.ok(fm.paletteSaved)
-      // Let an open section editor of this invitation rebase its save baseline.
+      // Let an open section editor of this invitation rebase its save baseline —
+      // same-tab via onSaved, other browser tabs via the broadcast.
+      if (data?.savedAt) onSaved?.(data.savedAt)
       broadcastEditorSave(slug, 'palette', data?.savedAt)
     } catch (e: any) {
       setMsg({ kind: 'err', text: e?.message || t.networkError })

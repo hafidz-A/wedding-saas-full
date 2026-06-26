@@ -15,12 +15,13 @@ interface Props {
   slug: string
   template?: string
   initial?: MetaSettings | null
+  onSaved?: (savedAt: string) => void
 }
 
 const TITLE_MAX = 120
 const DESC_MAX = 200
 
-export default function MetaTab({ slug, template, initial }: Props) {
+export default function MetaTab({ slug, template, initial, onSaved }: Props) {
   const t = useDashboardDict().tabs.meta
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
@@ -87,6 +88,7 @@ export default function MetaTab({ slug, template, initial }: Props) {
       const data = await res.json().catch(() => ({}))
       setMsg({ kind: 'ok', text: t.savedOk })
       fb.ok(fm.detailsSaved)
+      if (data?.savedAt) onSaved?.(data.savedAt)
       broadcastEditorSave(slug, 'meta', data?.savedAt)
     } catch (e: any) {
       setMsg({ kind: 'err', text: e?.message || t.networkError })

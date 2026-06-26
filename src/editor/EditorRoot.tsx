@@ -18,9 +18,13 @@ interface Props {
   initialIsPublished: boolean
   /** invitation.updated_at at page load — used for optimistic-concurrency on save. */
   initialUpdatedAt?: string | null
+  /** Live shared baseline from EditorWorkspace (bumped by sibling sub-tab saves). */
+  liveUpdatedAt?: string | null
+  /** Notifies EditorWorkspace of the real stored updated_at after a section save. */
+  onSaved?: (savedAt: string) => void
 }
 
-export default function EditorRoot({ slug, template, initialConfig, initialIsPublished, initialUpdatedAt }: Props) {
+export default function EditorRoot({ slug, template, initialConfig, initialIsPublished, initialUpdatedAt, liveUpdatedAt, onSaved }: Props) {
   // Lovebirds: fold registry→weddingGift + strip guestbook/countdown on load.
   const migrated =
     template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig
@@ -35,7 +39,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   const t = useDashboardDict().editor
 
   return (
-    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialIsPublished={initialIsPublished}>
+    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialIsPublished={initialIsPublished} liveUpdatedAt={liveUpdatedAt} onSaved={onSaved}>
       <SaveConflictDialog />
       <RemoteChangeBanner />
       <div className={styles.wrap}>

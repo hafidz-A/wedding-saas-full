@@ -22,6 +22,7 @@ interface MusicSettings {
 interface Props {
   slug: string
   initial?: MusicSettings | null
+  onSaved?: (savedAt: string) => void
 }
 
 const DEFAULTS: Required<Omit<MusicSettings, 'url' | 'youtubeId'>> & { url: string } = {
@@ -35,7 +36,7 @@ const DEFAULTS: Required<Omit<MusicSettings, 'url' | 'youtubeId'>> & { url: stri
   loop: true,
 }
 
-export default function MusicTab({ slug, initial }: Props) {
+export default function MusicTab({ slug, initial, onSaved }: Props) {
   const t = useDashboardDict().tabs.music
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
@@ -108,6 +109,7 @@ export default function MusicTab({ slug, initial }: Props) {
       const data = await res.json().catch(() => ({}))
       setSaveMsg({ kind: 'ok', text: t.savedMsg })
       fb.ok(fm.musicSaved)
+      if (data?.savedAt) onSaved?.(data.savedAt)
       broadcastEditorSave(slug, 'music', data?.savedAt)
     } catch (err: any) {
       setSaveMsg({ kind: 'err', text: err?.message || t.networkError })
@@ -132,6 +134,7 @@ export default function MusicTab({ slug, initial }: Props) {
         const data = await res.json().catch(() => ({}))
         setSaveMsg({ kind: 'ok', text: t.cleared })
         fb.ok(fm.musicRemoved)
+        if (data?.savedAt) onSaved?.(data.savedAt)
         broadcastEditorSave(slug, 'music', data?.savedAt)
       } else {
         setSaveMsg({ kind: 'err', text: `${t.clearFailed} (${res.status})` })

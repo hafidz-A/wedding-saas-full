@@ -333,6 +333,18 @@ interface ProviderProps {
   initialUpdatedAt?: string | null
   /** Published state at load — owned here so every SaveBar instance agrees. */
   initialIsPublished?: boolean
+  /**
+   * Live row timestamp owned by EditorWorkspace and bumped whenever a SIBLING
+   * sub-tab (palette/music/meta/ornament) saves in THIS tab. The section editor
+   * stays mounted across sub-tab switches, so without this its baseline would go
+   * stale the moment a sibling saved — and the next section save would false-409.
+   * Those saves only touch keys the section save preserves, so advancing the
+   * baseline to them is safe (no clobber).
+   */
+  liveUpdatedAt?: string | null
+  /** Called with the real stored updated_at after a successful section save, so
+   *  EditorWorkspace can keep the shared baseline in sync for the other sub-tabs. */
+  onSaved?: (savedAt: string) => void
 }
 
 // Section types that used to exist but were removed/moved. Stripped on
@@ -349,7 +361,7 @@ function cleanConfig(input: PageConfig): PageConfig {
   }
 }
 
-export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt, initialIsPublished }: ProviderProps) {
+export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt, initialIsPublished, liveUpdatedAt, onSaved }: ProviderProps) {
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
   const cleaned = cleanConfig(initialConfig)
@@ -377,7 +389,7 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
   const [remoteChange, setRemoteChange] = useState(false)
   const dismissRemoteChange = useCallback(() => setRemoteChange(false), [])
 
-  // Listen for saves from sibling tabs of the same invitation.
+  // Listen for saves from OTHER browser tabs of the same invitation.
   useEffect(() => {
     return subscribeEditorSaves(slug, (sig) => {
       if (sig.surface === 'section') {
@@ -391,6 +403,14 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       }
     })
   }, [slug])
+
+  // SAME-tab sibling saves: EditorWorkspace bumps `liveUpdatedAt` when the
+  // palette/music/meta/ornament sub-tab saves. The section editor stays mounted
+  // across sub-tab switches, so rebase its baseline forward to match — those
+  // saves touch only preserved keys, so this can't clobber section content.
+  useEffect(() => {
+    if (liveUpdatedAt) dispatch({ type: 'REBASE', savedAt: liveUpdatedAt })
+  }, [liveUpdatedAt])
 
   const togglePublish = useCallback(async () => {
     const next = !isPublished
@@ -455,6 +475,8 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       const data = await res.json()
       const savedAt = data.savedAt || new Date().toISOString()
       dispatch({ type: 'SAVE_SUCCESS', savedAt })
+      // Keep EditorWorkspace's shared baseline in sync for the sibling sub-tabs.
+      onSaved?.(savedAt)
       // Tell other tabs of this invitation a SECTION write just landed, so a
       // stale content editor elsewhere can prompt a reload.
       broadcastEditorSave(slug, 'section', savedAt)
@@ -463,7 +485,7 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       dispatch({ type: 'SAVE_ERROR', message: e?.message || 'Network error' })
       fb.fail(fm.saveFail)
     }
-  }, [slug, state.config, fb, fm])
+  }, [slug, state.config, fb, fm, onSaved])
 
   const value: EditorContextValue = {
     ...state,
