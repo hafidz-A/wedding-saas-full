@@ -312,7 +312,7 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
             onClick={() => setFilter(f)}
             style={{
               ...ghostBtn,
-              background: filter === f ? '#2A2118' : 'transparent',
+              background: filter === f ? 'var(--color-charcoal)' : 'transparent',
               color: filter === f ? '#fff' : 'var(--text-primary)',
             }}
           >

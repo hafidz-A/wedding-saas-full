@@ -149,7 +149,7 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
                     padding: '12px 14px',
                     borderRadius: 'var(--radius-md)',
                     border: active
-                      ? `2px solid ${t.accent || '#2A2118'}`
+                      ? `2px solid ${t.accent || 'var(--color-charcoal)'}`
                       : '1px solid var(--border-default)',
                     background: active ? 'rgba(42,33,24,0.04)' : 'transparent',
                     cursor: 'pointer',
@@ -240,11 +240,11 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
               fontSize: 12,
               color:
                 slugStatus.checking
-                  ? '#5C4A3A'
+                  ? 'var(--text-secondary)'
                   : slugStatus.available
-                  ? '#2D8C4E'
+                  ? 'var(--color-emerald)'
                   : slugStatus.reason
-                  ? '#E8553E'
+                  ? 'var(--interactive-primary)'
                   : 'var(--color-charcoal-light)',
               marginTop: 4,
             }}

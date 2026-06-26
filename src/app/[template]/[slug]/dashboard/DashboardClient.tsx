@@ -237,7 +237,7 @@ export default function DashboardClient({
               padding: '12px 16px',
               border: 'none',
               background: 'transparent',
-              color: tab === t ? '#2A2118' : 'var(--text-muted)',
+              color: tab === t ? 'var(--text-primary)' : 'var(--text-muted)',
               fontSize: 13,
               fontWeight: tab === t ? 600 : 400,
               letterSpacing: '0.04em',

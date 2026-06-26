@@ -25,7 +25,7 @@ export default function StatsRow({ rows, labels }: { rows: LedgerStatInput[]; la
   )
 }
 
-function Stat({ label, value, accent = '#2A2118' }: { label: string; value: string; accent?: string }) {
+function Stat({ label, value, accent = 'var(--text-primary)' }: { label: string; value: string; accent?: string }) {
   return (
     <div style={statBox}>
       <p style={statLabel}>{label}</p>

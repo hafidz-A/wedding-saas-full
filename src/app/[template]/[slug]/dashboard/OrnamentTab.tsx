@@ -162,7 +162,7 @@ export default function OrnamentTab({
       <div style={grid}>
         {TYPES.map((ty) => (
           <button key={ty} type="button" onClick={() => setType(ty)}
-            style={{ ...optBtn, borderColor: type === ty ? '#2A2118' : 'rgba(42,33,24,0.15)', outline: type === ty ? '2px solid #2A2118' : 'none' }}>
+            style={{ ...optBtn, borderColor: type === ty ? 'var(--color-charcoal)' : 'rgba(42,33,24,0.15)', outline: type === ty ? '2px solid var(--color-charcoal)' : 'none' }}>
             <svg viewBox="0 0 64 64" width="40" height="40" style={{ fill: active.accent, color: active.accent }}
                  dangerouslySetInnerHTML={{ __html: PREVIEW[ty] }} />
             <span style={{ fontSize: 13 }}>{labels[ty]}</span>
