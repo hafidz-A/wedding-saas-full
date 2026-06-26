@@ -6,7 +6,8 @@ import { useDashboardDict } from '../DashboardI18nProvider'
 import { useConfirm, useAlert } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { ensureCheckinToken, regenerateCheckinToken } from './actions'
-import { ghostBtn, primaryBtn, statBox } from './styles'
+import { statBox } from './styles'
+import ctrl from '../dashboardControls.module.css'
 
 export default function CheckinQrCard({ slug, template }: { slug: string; template: string }) {
   const t = useDashboardDict().tabs.guestbook
@@ -61,12 +62,12 @@ export default function CheckinQrCard({ slug, template }: { slug: string; templa
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={dataUrl} alt="QR" style={{ width: 140, height: 140, borderRadius: 'var(--radius-sm)', background: 'var(--surface-raised)', padding: 6 }} />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button type="button" style={primaryBtn} onClick={print} disabled={busy}>{t.checkinQrPrint}</button>
-            <button type="button" style={ghostBtn} onClick={regen} disabled={busy}>{t.checkinQrRegenerate}</button>
+            <button type="button" className={ctrl.btnPrimary} onClick={print} disabled={busy}>{t.checkinQrPrint}</button>
+            <button type="button" className={ctrl.btnGhost} onClick={regen} disabled={busy}>{t.checkinQrRegenerate}</button>
           </div>
         </div>
       ) : (
-        <button type="button" style={primaryBtn} onClick={show} disabled={busy}>{busy ? t.checkinQrLoading : t.checkinQrShow}</button>
+        <button type="button" className={ctrl.btnPrimary} onClick={show} disabled={busy}>{busy ? t.checkinQrLoading : t.checkinQrShow}</button>
       )}
     </div>
   )

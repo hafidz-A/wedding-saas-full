@@ -178,6 +178,34 @@
 }
 .iconBtn:disabled { opacity: 0.4; cursor: default; }
 
+/* Round destructive icon (delete a ledger row, etc.) — coral at rest, fills soft
+   on hover. Stays clearly contrasty (darker coral on a pale tint). */
+.btnDelete {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 63, 42, 0.25);
+  background: transparent;
+  color: var(--interactive-primary-hover);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
+}
+.btnDelete:not(:disabled):hover { background: var(--interactive-primary-soft); border-color: var(--interactive-primary); }
+.btnDelete:not(:disabled):active { transform: translateY(1px); }
+.btnDelete:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+.btnDelete:disabled { opacity: 0.4; cursor: default; }
+
 /* Segmented filter group (e.g. All / Attending / Declined). */
 .seg {
   display: inline-flex;
@@ -231,7 +259,7 @@
 .input:focus { border-color: var(--interactive-primary); box-shadow: 0 0 0 3px var(--interactive-primary-soft); }
 
 @media (prefers-reduced-motion: reduce) {
-  .btnPrimary, .btnGhost, .btnPrimarySm, .btnGhostSm, .btnAdd, .iconBtn, .segBtn, .input { transition: none; }
+  .btnPrimary, .btnGhost, .btnPrimarySm, .btnGhostSm, .btnAdd, .btnDelete, .iconBtn, .segBtn, .input { transition: none; }
   .btnPrimary:active, .btnGhost:active, .btnPrimarySm:active, .btnGhostSm:active,
-  .btnAdd:active, .iconBtn:active, .segBtn:active { transform: none; }
+  .btnAdd:active, .btnDelete:active, .iconBtn:active, .segBtn:active { transform: none; }
 }

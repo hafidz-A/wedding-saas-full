@@ -2,7 +2,8 @@
 
 import type React from 'react'
 import { type AttendanceRow } from './types'
-import { badgeRsvp, badgeWalkin, badgeUnlisted, deleteBtn } from './styles'
+import { badgeRsvp, badgeWalkin, badgeUnlisted } from './styles'
+import ctrl from '../dashboardControls.module.css'
 import { attendanceCategory } from '@/lib/guestbook/category'
 import tabs from '../dashboardTabs.module.css'
 
@@ -102,7 +103,7 @@ export default function LedgerTable({
                     type="button"
                     onClick={() => onDelete(r.id)}
                     disabled={deletingId === r.id}
-                    style={deleteBtn}
+                    className={ctrl.btnDelete}
                     aria-label={t.deleteAria}
                     title={t.deleteAria}
                   >

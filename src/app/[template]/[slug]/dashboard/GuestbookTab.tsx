@@ -21,9 +21,10 @@ import { toCsvRows, type CsvLabels } from '@/lib/guestbook/csvRows'
 import { attendanceCategory } from '@/lib/guestbook/category'
 import { buildPrintHtml } from '@/lib/guestbook/printHtml'
 import {
-  sub, ghostBtn, primaryBtn, filterBtn, filterBtnActive, searchInput,
+  sub,
 } from './guestbook/styles'
 import tabs from './dashboardTabs.module.css'
+import ctrl from './dashboardControls.module.css'
 
 interface Props {
   slug: string
@@ -201,7 +202,7 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
             type="button"
             onClick={() => startRefresh(() => router.refresh())}
             disabled={refreshing}
-            style={ghostBtn}
+            className={ctrl.btnGhost}
           >
             {refreshing ? '…' : tc.refresh}
           </button>
@@ -209,9 +210,9 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
             <input type="checkbox" checked={souvenirOn} onChange={onToggleSouvenirTracking} />
             {t.souvenirToggle}
           </label>
-          <button type="button" onClick={onExportCsv} style={ghostBtn}>{tc.downloadCsv}</button>
-          <button type="button" onClick={onPrint} style={ghostBtn}>{t.printBtn}</button>
-          <button type="button" onClick={() => setShowDialog(true)} style={primaryBtn}>
+          <button type="button" onClick={onExportCsv} className={ctrl.btnGhost}>{tc.downloadCsv}</button>
+          <button type="button" onClick={onPrint} className={ctrl.btnGhost}>{t.printBtn}</button>
+          <button type="button" onClick={() => setShowDialog(true)} className={ctrl.btnPrimary}>
             {t.addBtn}
           </button>
         </div>
@@ -230,23 +231,23 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
           placeholder={t.searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={searchInput}
+          className={ctrl.input}
         />
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className={ctrl.seg}>
           {(['all', 'rsvp', 'walkin', 'unlisted'] as const).map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setFilter(f)}
-              style={filter === f ? filterBtnActive : filterBtn}
+              className={`${ctrl.segBtn} ${filter === f ? ctrl.segBtnActive : ''}`}
             >
               {f === 'all' ? t.filterAll : f === 'rsvp' ? t.filterRsvp : f === 'walkin' ? t.filterWalkin : t.filterUnlisted}
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className={ctrl.seg}>
           {(['all', 'arrived', 'not'] as const).map((f) => (
-            <button key={f} type="button" onClick={() => setStatusFilter(f)} style={statusFilter === f ? filterBtnActive : filterBtn}>
+            <button key={f} type="button" onClick={() => setStatusFilter(f)} className={`${ctrl.segBtn} ${statusFilter === f ? ctrl.segBtnActive : ''}`}>
               {f === 'all' ? t.filterAll : f === 'arrived' ? t.filterArrived : t.filterNotArrived}
             </button>
           ))}

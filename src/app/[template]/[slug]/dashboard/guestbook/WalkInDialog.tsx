@@ -7,9 +7,10 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { addWalkInAttendance, addUnlistedAttendance, searchWalkInGuests, type WalkInGuestHit } from './actions'
 import { type AttendanceRow } from './types'
 import {
-  overlay, modal, modalHeader, modalClose, searchInput, dialogHint, resultList,
-  resultRow, resultMeta, pickedCard, ghostBtn, fieldLabel, errorText, primaryBtn,
+  overlay, modal, modalHeader, modalClose, dialogHint, resultList,
+  resultRow, resultMeta, pickedCard, fieldLabel, errorText,
 } from './styles'
+import ctrl from '../dashboardControls.module.css'
 
 export default function WalkInDialog({
   slug,
@@ -151,7 +152,7 @@ export default function WalkInDialog({
                 <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{picked.name}</p>
                 {picked.group_label && <p style={resultMeta}>{picked.group_label}</p>}
               </div>
-              <button type="button" style={ghostBtn} onClick={() => setPicked(null)}>
+              <button type="button" className={ctrl.btnGhost}onClick={() => setPicked(null)}>
                 {t.dialogChange}
               </button>
             </div>
@@ -186,7 +187,8 @@ export default function WalkInDialog({
                 const n = Math.floor(Number(v))
                 if (!Number.isNaN(n)) setCount(Math.min(20, Math.max(1, n)))
               }}
-              style={{ ...searchInput, width: 120 }}
+              className={ctrl.input}
+              style={{ width: 120 }}
             />
 
             <label style={fieldLabel}>{t.dialogNoteLabel}</label>
@@ -195,16 +197,17 @@ export default function WalkInDialog({
               onChange={(e) => setNote(e.target.value)}
               placeholder={t.dialogNotePlaceholder}
               rows={2}
-              style={{ ...searchInput, width: '100%', resize: 'vertical', fontFamily: 'inherit' }}
+              className={ctrl.input}
+              style={{ resize: 'vertical' }}
             />
 
             {error && <p style={errorText}>{error}</p>}
 
             <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'flex-end' }}>
-              <button type="button" style={ghostBtn} onClick={onClose} disabled={saving}>
+              <button type="button" className={ctrl.btnGhost}onClick={onClose} disabled={saving}>
                 {t.dialogCancel}
               </button>
-              <button type="button" style={primaryBtn} onClick={onSave} disabled={saving}>
+              <button type="button" className={ctrl.btnPrimary}onClick={onSave} disabled={saving}>
                 {saving ? t.dialogSaving : t.dialogSave}
               </button>
             </div>
@@ -218,7 +221,7 @@ export default function WalkInDialog({
               value={manualName}
               onChange={(e) => setManualName(e.target.value)}
               maxLength={120}
-              style={{ ...searchInput, width: '100%' }}
+              className={ctrl.input}
             />
 
             <label style={fieldLabel}>{t.dialogCountLabel}</label>
@@ -234,7 +237,8 @@ export default function WalkInDialog({
                 const n = Math.floor(Number(v))
                 if (!Number.isNaN(n)) setCount(Math.min(20, Math.max(1, n)))
               }}
-              style={{ ...searchInput, width: 120 }}
+              className={ctrl.input}
+              style={{ width: 120 }}
             />
 
             <label style={fieldLabel}>{t.dialogNoteLabel}</label>
@@ -243,16 +247,17 @@ export default function WalkInDialog({
               onChange={(e) => setNote(e.target.value)}
               placeholder={t.dialogNotePlaceholder}
               rows={2}
-              style={{ ...searchInput, width: '100%', resize: 'vertical', fontFamily: 'inherit' }}
+              className={ctrl.input}
+              style={{ resize: 'vertical' }}
             />
 
             {error && <p style={errorText}>{error}</p>}
 
             <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'flex-end' }}>
-              <button type="button" style={ghostBtn} onClick={() => { setManualMode(false); setError(null) }} disabled={saving}>
+              <button type="button" className={ctrl.btnGhost}onClick={() => { setManualMode(false); setError(null) }} disabled={saving}>
                 {t.dialogCancel}
               </button>
-              <button type="button" style={primaryBtn} onClick={onSaveUnlisted} disabled={saving}>
+              <button type="button" className={ctrl.btnPrimary}onClick={onSaveUnlisted} disabled={saving}>
                 {saving ? t.dialogSaving : t.dialogSave}
               </button>
             </div>
@@ -265,7 +270,7 @@ export default function WalkInDialog({
               placeholder={t.dialogSearchPlaceholder}
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              style={{ ...searchInput, width: '100%' }}
+              className={ctrl.input}
             />
             <div style={{ marginTop: 10 }}>
               {searching ? (
@@ -290,7 +295,8 @@ export default function WalkInDialog({
             {q.trim() !== '' && !searching && (
               <button
                 type="button"
-                style={{ ...ghostBtn, width: '100%', marginTop: 10 }}
+                className={ctrl.btnGhost}
+                style={{ width: '100%', marginTop: 10 }}
                 onClick={startManual}
               >
                 {t.addUnlistedBtn.replace('{q}', q.trim())}

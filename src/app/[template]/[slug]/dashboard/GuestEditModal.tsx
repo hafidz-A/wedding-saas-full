@@ -6,6 +6,7 @@ import { type GuestRow } from './guests/types'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import ctrl from './dashboardControls.module.css'
 
 /**
  * Per-guest edit modal — opened from the GuestsTab "✎" button on each row.
@@ -111,8 +112,8 @@ export default function GuestEditModal({
         {error && <p style={errorStyle}>{error}</p>}
 
         <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
-          <button type="button" onClick={onClose} style={ghostBtn}>{t.cancel}</button>
-          <button type="button" onClick={onSave} disabled={pending} style={primaryBtn}>
+          <button type="button" onClick={onClose} className={ctrl.btnGhostSm}>{t.cancel}</button>
+          <button type="button" onClick={onSave} disabled={pending} className={ctrl.btnPrimarySm}>
             {pending ? t.saving : t.save}
           </button>
         </footer>
@@ -184,24 +185,6 @@ const hint: React.CSSProperties = {
   fontSize: 12,
   color: 'var(--text-secondary)',
   lineHeight: 1.5,
-}
-const primaryBtn: React.CSSProperties = {
-  padding: '10px 18px',
-  background: 'var(--interactive-primary)',
-  color: '#fff',
-  border: 0,
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  fontSize: 14,
-}
-const ghostBtn: React.CSSProperties = {
-  padding: '10px 14px',
-  background: 'transparent',
-  color: 'var(--text-primary)',
-  border: '1px solid var(--border-strong)',
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  fontSize: 14,
 }
 const errorStyle: React.CSSProperties = {
   margin: 0,

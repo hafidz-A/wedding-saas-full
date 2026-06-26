@@ -6,6 +6,7 @@ import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { importGuests } from './guests/actions'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import ctrl from './dashboardControls.module.css'
 
 export default function GuestImportModal({
   slug,
@@ -85,14 +86,14 @@ export default function GuestImportModal({
         {error && <p style={{ color: 'var(--interactive-primary)', fontSize: 13 }}>{error}</p>}
 
         <footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
-          <button type="button" onClick={onClose} style={ghostBtn}>
+          <button type="button" onClick={onClose} className={ctrl.btnGhostSm}>
             {t.cancel}
           </button>
           <button
             type="button"
             onClick={handleImport}
             disabled={pending || preview.length === 0}
-            style={primaryBtn}
+            className={ctrl.btnPrimarySm}
           >
             {pending ? t.importing : `${t.importPrefix} ${preview.length} ${t.importSuffix}`}
           </button>
@@ -155,22 +156,4 @@ const previewBox: React.CSSProperties = {
   background: 'rgba(42,33,24,0.04)',
   borderRadius: 'var(--radius-sm)',
   fontSize: 13,
-}
-const primaryBtn: React.CSSProperties = {
-  padding: '10px 18px',
-  background: 'var(--interactive-primary)',
-  color: '#fff',
-  border: 0,
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  fontSize: 14,
-}
-const ghostBtn: React.CSSProperties = {
-  padding: '10px 14px',
-  background: 'transparent',
-  color: 'var(--text-primary)',
-  border: '1px solid var(--border-strong)',
-  borderRadius: 'var(--radius-sm)',
-  cursor: 'pointer',
-  fontSize: 14,
 }
