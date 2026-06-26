@@ -460,17 +460,43 @@ export default function Hero(props) {
               isPreview && <p className={styles.gateGreet}>Welcome, dear [Guest name]</p>
             )}
             <p className={styles.welcomeLine}>
-              {/* Hand-drawn marker swipe behind the eyebrow label. Filled with
-                  the palette's --button-bg and the text painted in --button-fg
-                  (the guaranteed-contrast pair), so the label and its scribble
-                  never blend on any of the 10 palettes. preserveAspectRatio
-                  "none" lets the band stretch cleanly to the label width. */}
+              {/* Dry-brush stroke behind the eyebrow label. The band is filled
+                  with the palette's --button-bg and frayed by an feTurbulence +
+                  feDisplacementMap filter so it reads as a real painted stroke
+                  (ragged bristle edges, tapered ends) rather than a clean bar.
+                  The solid core stays opaque under the text, and the label is
+                  painted in --button-fg — the guaranteed-contrast pair — so the
+                  words sit INSIDE the stroke and stay readable on all palettes.
+                  preserveAspectRatio "none" lets it stretch to the label width. */}
               <span className={styles.welcomeMark} aria-hidden="true">
-                <svg viewBox="0 0 200 24" preserveAspectRatio="none">
-                  <path
-                    d="M3 9 C45 4 95 5 140 5 C168 5 188 6 197 9 C198 13 198 14 197 16 C188 20 150 20 110 20 C70 20 30 21 3 17 C2 13 2 12 3 9 Z"
-                    fill="currentColor"
-                  />
+                <svg viewBox="0 0 320 80" preserveAspectRatio="none">
+                  <defs>
+                    <filter id="lb-welcome-brush" x="-10%" y="-40%" width="120%" height="180%">
+                      <feTurbulence
+                        type="fractalNoise"
+                        baseFrequency="0.016 0.11"
+                        numOctaves="2"
+                        seed="8"
+                        result="noise"
+                      />
+                      <feDisplacementMap
+                        in="SourceGraphic"
+                        in2="noise"
+                        scale="18"
+                        xChannelSelector="R"
+                        yChannelSelector="G"
+                      />
+                    </filter>
+                  </defs>
+                  <g filter="url(#lb-welcome-brush)" fill="currentColor">
+                    {/* faint stray-bristle halo (taller, fades around the core) */}
+                    <path
+                      d="M12 40 C24 24 42 16 64 14 C134 10 210 12 270 16 C296 18 309 26 314 40 C309 54 296 62 270 64 C210 68 134 70 64 66 C42 64 24 56 12 40 Z"
+                      opacity="0.4"
+                    />
+                    {/* solid core that fully carries the text */}
+                    <path d="M14 40 C26 28 42 22 64 21 C134 18 208 19 268 22 C292 24 307 30 312 40 C307 50 292 56 268 58 C208 61 134 62 64 59 C42 58 26 52 14 40 Z" />
+                  </g>
                 </svg>
               </span>
               <span className={styles.welcomeText}>{cfg.welcomeText}</span>
