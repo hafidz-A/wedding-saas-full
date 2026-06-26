@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { type MusicSourceKind } from '@/lib/music/source'
 
 interface MusicSettings {
@@ -104,8 +105,10 @@ export default function MusicTab({ slug, initial }: Props) {
         fb.fail(fm.saveFail)
         return
       }
+      const data = await res.json().catch(() => ({}))
       setSaveMsg({ kind: 'ok', text: t.savedMsg })
       fb.ok(fm.musicSaved)
+      broadcastEditorSave(slug, 'music', data?.savedAt)
     } catch (err: any) {
       setSaveMsg({ kind: 'err', text: err?.message || t.networkError })
       fb.fail(fm.saveFail)
@@ -126,8 +129,10 @@ export default function MusicTab({ slug, initial }: Props) {
         body: JSON.stringify({ music: null }),
       })
       if (res.ok) {
+        const data = await res.json().catch(() => ({}))
         setSaveMsg({ kind: 'ok', text: t.cleared })
         fb.ok(fm.musicRemoved)
+        broadcastEditorSave(slug, 'music', data?.savedAt)
       } else {
         setSaveMsg({ kind: 'err', text: `${t.clearFailed} (${res.status})` })
         fb.fail(fm.saveFail)

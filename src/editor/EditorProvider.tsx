@@ -13,6 +13,7 @@ import {
 import { deepEqual } from './lib/deepEqual'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { broadcastEditorSave, subscribeEditorSaves } from './lib/editorSync'
 
 export interface SectionEntry {
   id: string
@@ -70,6 +71,7 @@ export type Action =
   | { type: 'SAVE_START' }
   | { type: 'SAVE_SUCCESS';           savedAt: string }
   | { type: 'SAVE_ERROR';             message: string }
+  | { type: 'REBASE';                 savedAt: string }
   | { type: 'CHANGE_SECTION_TYPE'; sectionId: string; newType: string; defaults?: Record<string, unknown> }
   | { type: 'REORDER_SECTIONS_BY_ID'; order: string[] }
 
@@ -268,6 +270,18 @@ export function reducer(state: State, action: Action): State {
     case 'SAVE_ERROR':
       return { ...state, isSaving: false, saveError: action.message }
 
+    // Advance the concurrency baseline to a newer save made by a SIBLING tab
+    // (palette/music/meta/ornament) of the same invitation. Those touch only
+    // keys this save preserves, so adopting their timestamp lets the next save
+    // through instead of false-tripping the 409 guard. Never moves backward,
+    // and leaves config/initialConfig (i.e. the dirty state) untouched.
+    case 'REBASE': {
+      const cur = state.lastSavedAt ? Date.parse(state.lastSavedAt) : NaN
+      const next = Date.parse(action.savedAt)
+      if (!Number.isNaN(cur) && !Number.isNaN(next) && next <= cur) return state
+      return { ...state, lastSavedAt: action.savedAt }
+    }
+
     default:
       return state
   }
@@ -298,6 +312,9 @@ interface EditorContextValue extends State {
   /** True once a save was rejected with 409 (another tab/device wrote first). */
   saveConflict: boolean
   clearSaveConflict: () => void
+  /** True when another tab/device saved newer SECTION content (live, pre-save). */
+  remoteChange: boolean
+  dismissRemoteChange: () => void
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null)
@@ -352,6 +369,28 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
   const [publishError, setPublishError] = useState<string | null>(null)
   const [saveConflict, setSaveConflict] = useState(false)
   const clearSaveConflict = useCallback(() => setSaveConflict(false), [])
+
+  // A newer SECTION-editor save landed in another tab/device of this same
+  // invitation (learned live via BroadcastChannel). Surfaces a gentle "reload
+  // for the latest" banner — proactive, non-blocking, before the user keeps
+  // editing a version that can no longer be saved.
+  const [remoteChange, setRemoteChange] = useState(false)
+  const dismissRemoteChange = useCallback(() => setRemoteChange(false), [])
+
+  // Listen for saves from sibling tabs of the same invitation.
+  useEffect(() => {
+    return subscribeEditorSaves(slug, (sig) => {
+      if (sig.surface === 'section') {
+        // Another content editor wrote — real conflict; warn this tab.
+        setRemoteChange(true)
+      } else {
+        // A sub-tab (palette/music/meta/ornament) wrote keys this editor
+        // preserves on save — just move our baseline forward so the next save
+        // isn't falsely rejected.
+        dispatch({ type: 'REBASE', savedAt: sig.savedAt })
+      }
+    })
+  }, [slug])
 
   const togglePublish = useCallback(async () => {
     const next = !isPublished
@@ -414,7 +453,11 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
         return
       }
       const data = await res.json()
-      dispatch({ type: 'SAVE_SUCCESS', savedAt: data.savedAt || new Date().toISOString() })
+      const savedAt = data.savedAt || new Date().toISOString()
+      dispatch({ type: 'SAVE_SUCCESS', savedAt })
+      // Tell other tabs of this invitation a SECTION write just landed, so a
+      // stale content editor elsewhere can prompt a reload.
+      broadcastEditorSave(slug, 'section', savedAt)
       fb.ok(fm.changesSaved)
     } catch (e: any) {
       dispatch({ type: 'SAVE_ERROR', message: e?.message || 'Network error' })
@@ -455,6 +498,8 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
     togglePublish,
     saveConflict,
     clearSaveConflict,
+    remoteChange,
+    dismissRemoteChange,
   }
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>

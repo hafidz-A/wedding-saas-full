@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { TEMPLATE_VIBES, type PaletteVibe } from '@/components/marketing/vibeData'
 import { PreviewMock } from '@/components/marketing/PreviewMock'
 
@@ -68,8 +69,11 @@ export default function PaletteTab({
         fb.fail(fm.saveFail)
         return
       }
+      const data = await res.json().catch(() => ({}))
       setMsg({ kind: 'ok', text: t.savedOk })
       fb.ok(fm.paletteSaved)
+      // Let an open section editor of this invitation rebase its save baseline.
+      broadcastEditorSave(slug, 'palette', data?.savedAt)
     } catch (e: any) {
       setMsg({ kind: 'err', text: e?.message || t.networkError })
       fb.fail(fm.saveFail)

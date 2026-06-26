@@ -5,7 +5,7 @@ import { EditorProvider, type PageConfig } from './EditorProvider'
 import SectionList from './SectionList'
 import FieldEditor from './FieldEditor'
 import FieldEditorSheet from './FieldEditorSheet'
-import SaveBar, { SaveConflictDialog } from './SaveBar'
+import SaveBar, { SaveConflictDialog, RemoteChangeBanner } from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
@@ -37,6 +37,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   return (
     <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialIsPublished={initialIsPublished}>
       <SaveConflictDialog />
+      <RemoteChangeBanner />
       <div className={styles.wrap}>
         <div className={styles.topBar}>
           <button

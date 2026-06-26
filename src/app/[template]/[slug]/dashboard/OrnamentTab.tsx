@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { TEMPLATE_VIBES, type PaletteVibe } from '@/components/marketing/vibeData'
 import { PerchedCanvas } from '@/all-templates/lovebirds/components/Ornaments.jsx'
 
@@ -135,8 +136,10 @@ export default function OrnamentTab({
         body: JSON.stringify({ ornamentType: type }),
       })
       if (!res.ok) { const e = await res.json().catch(() => ({})); setMsg({ kind: 'err', text: e.error || t.saveFailed }); fb.fail(fm.saveFail); return }
+      const data = await res.json().catch(() => ({}))
       setMsg({ kind: 'ok', text: t.savedOk })
       fb.ok(fm.ornamentSaved)
+      broadcastEditorSave(slug, 'ornament', data?.savedAt)
     } catch (e: any) { setMsg({ kind: 'err', text: e?.message || t.networkError }); fb.fail(fm.saveFail) }
     finally { setSaving(false) }
   }

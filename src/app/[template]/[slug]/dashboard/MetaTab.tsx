@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { broadcastEditorSave } from '@/editor/lib/editorSync'
 
 interface MetaSettings {
   title?: string
@@ -83,8 +84,10 @@ export default function MetaTab({ slug, template, initial }: Props) {
         fb.fail(fm.saveFail)
         return
       }
+      const data = await res.json().catch(() => ({}))
       setMsg({ kind: 'ok', text: t.savedOk })
       fb.ok(fm.detailsSaved)
+      broadcastEditorSave(slug, 'meta', data?.savedAt)
     } catch (e: any) {
       setMsg({ kind: 'err', text: e?.message || t.networkError })
       fb.fail(fm.saveFail)

@@ -9,6 +9,27 @@ interface Ctx {
 }
 
 /**
+ * True only when the DB row is a STRICTLY NEWER write than the baseline the
+ * editor loaded — i.e. a real concurrent edit to clobber.
+ *
+ * Compares INSTANTS, not raw strings. The client echoes its baseline back as a
+ * `new Date().toISOString()` value (`…Z`, ms precision), while Postgres/PostgREST
+ * returns `updated_at` as a different serialization of the same instant
+ * (`…+00:00`, µs precision). A raw `!==` treated those as a conflict and falsely
+ * blocked every save after the first. Parsing to epoch ms makes equal instants
+ * compare equal regardless of zone notation or sub-ms padding.
+ *
+ * Falls back to exact string compare when either value isn't a parseable date
+ * (defensive — keeps deterministic behaviour for non-ISO tokens).
+ */
+function isStaleWrite(base: string, current: string): boolean {
+  const b = Date.parse(base)
+  const c = Date.parse(current)
+  if (Number.isNaN(b) || Number.isNaN(c)) return base !== current
+  return c > b
+}
+
+/**
  * PUT /api/invitation/[slug]/config
  * Body: { config: PageConfig }
  *
@@ -59,7 +80,7 @@ export async function PUT(req: Request, { params }: Ctx) {
   // silently clobber the newer sections. The client surfaces this as a "reload"
   // prompt. A missing baseUpdatedAt (older client) skips the check — no regression.
   const baseUpdatedAt = typeof body?.baseUpdatedAt === 'string' ? body.baseUpdatedAt : null
-  if (baseUpdatedAt && existing?.updated_at && existing.updated_at !== baseUpdatedAt) {
+  if (baseUpdatedAt && existing?.updated_at && isStaleWrite(baseUpdatedAt, existing.updated_at)) {
     return NextResponse.json(
       { error: 'Undangan ini sudah diubah dari tab atau perangkat lain. Muat ulang halaman dulu sebelum menyimpan.' },
       { status: 409 },
@@ -89,16 +110,24 @@ export async function PUT(req: Request, { params }: Ctx) {
   // as plaintext; encryptConfig wraps them as { enc } (idempotent).
   const encryptedConfig = encryptConfig(mergedConfig)
 
-  const savedAt = new Date().toISOString()
-  // Cast to any at from() to avoid Supabase 'never' inference on untyped schema
-  const { error } = await (supabase.from('invitations') as any)
-    .update({ config: encryptedConfig as any, updated_at: savedAt })
+  const localNow = new Date().toISOString()
+  // Cast to any at from() to avoid Supabase 'never' inference on untyped schema.
+  // Read the row BACK after the write: a `set_updated_at()` BEFORE-UPDATE trigger
+  // overwrites updated_at with the DB's now(), so the value we wrote is NOT what
+  // ends up stored. We must echo the REAL stored timestamp as the client's next
+  // baseline — otherwise its baseline is permanently a few ms behind the row and
+  // the very next save trips the optimistic-concurrency guard (a false 409).
+  const { data: updatedRow, error } = await (supabase.from('invitations') as any)
+    .update({ config: encryptedConfig as any, updated_at: localNow })
     .eq('id', owner.id)
+    .select('updated_at')
+    .single()
 
   if (error) {
     console.error('[config update]', error)
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 })
   }
 
+  const savedAt = updatedRow?.updated_at ?? localNow
   return NextResponse.json({ ok: true, savedAt })
 }

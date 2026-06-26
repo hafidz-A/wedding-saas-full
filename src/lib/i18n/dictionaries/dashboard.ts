@@ -1147,6 +1147,9 @@ export const dashboard = {
         'Undangan ini sudah diubah dari tab atau perangkat lain. Muat ulang halaman ini dulu (perubahan terbaru akan dimuat), atau tutup tab dashboard lain yang masih terbuka, sebelum menyimpan lagi.',
       conflictReload: 'Muat ulang halaman',
       conflictDismiss: 'Nanti dulu',
+      remoteBannerText: 'Versi terbaru undangan ini baru saja disimpan dari tab atau perangkat lain.',
+      remoteBannerTextDirty:
+        'Ada versi lebih baru dari tab atau perangkat lain. Perubahan yang belum kamu simpan di sini tidak akan bisa menimpanya — muat ulang untuk menyelaraskan.',
       editSectionTitle: 'Edit bagian',
       sheetCloseAria: 'Tutup',
       sectionsHeader: 'Bagian',
@@ -2347,6 +2350,9 @@ export const dashboard = {
         'This invitation was changed from another tab or device. Reload this page first (the latest version will load), or close the other open dashboard tab, before saving again.',
       conflictReload: 'Reload page',
       conflictDismiss: 'Not now',
+      remoteBannerText: 'A newer version of this invitation was just saved from another tab or device.',
+      remoteBannerTextDirty:
+        'A newer version exists in another tab or device. Your unsaved changes here can’t be saved over it — reload to sync.',
       editSectionTitle: 'Edit section',
       sheetCloseAria: 'Close',
       sectionsHeader: 'Sections',

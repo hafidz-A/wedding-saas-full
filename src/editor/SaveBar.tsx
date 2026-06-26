@@ -84,6 +84,111 @@ export function SaveConflictDialog() {
   return null
 }
 
+/**
+ * Proactive, non-blocking notice that another tab/device just saved newer
+ * SECTION content (learned live via BroadcastChannel — see editorSync). Lets a
+ * stale tab reload BEFORE the user keeps editing a version that can no longer be
+ * saved, instead of only hitting the hard 409 dialog at save time. Mounted once.
+ */
+export function RemoteChangeBanner() {
+  const { remoteChange, dismissRemoteChange, isDirty } = useEditor()
+  const t = useDashboardDict().editor
+  if (!remoteChange) return null
+  return (
+    <div style={bannerWrap} role="status" aria-live="polite">
+      <style>{BANNER_KEYFRAMES}</style>
+      <div style={bannerCard}>
+        <span style={bannerDot} aria-hidden="true" />
+        <p style={bannerText}>{isDirty ? t.remoteBannerTextDirty : t.remoteBannerText}</p>
+        <button type="button" style={bannerReload} onClick={() => window.location.reload()}>
+          {t.conflictReload}
+        </button>
+        <button
+          type="button"
+          style={bannerDismiss}
+          onClick={dismissRemoteChange}
+          aria-label={t.conflictDismiss}
+          title={t.conflictDismiss}
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  )
+}
+
+const BANNER_KEYFRAMES = `
+@keyframes lb-remote-banner-in {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes lb-remote-dot {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.5; }
+}`
+
+const bannerWrap: React.CSSProperties = {
+  position: 'fixed',
+  top: 14,
+  left: '50%',
+  transform: 'translate(-50%, 0)',
+  zIndex: 1000,
+  animation: 'lb-remote-banner-in 320ms cubic-bezier(0.16, 1, 0.3, 1)',
+  maxWidth: 'min(580px, 94vw)',
+  width: 'max-content',
+}
+const bannerCard: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  padding: '11px 12px 11px 16px',
+  background: 'var(--surface-warm, #fff)',
+  border: '1px solid var(--border-strong, rgba(42,33,24,0.18))',
+  borderLeft: '3px solid var(--interactive-primary, #b8553e)',
+  borderRadius: 14,
+  boxShadow: '0 12px 34px rgba(42,33,24,0.20)',
+}
+const bannerDot: React.CSSProperties = {
+  flex: '0 0 auto',
+  width: 8,
+  height: 8,
+  borderRadius: '50%',
+  background: 'var(--interactive-primary, #b8553e)',
+  animation: 'lb-remote-dot 1.6s ease-in-out infinite',
+}
+const bannerText: React.CSSProperties = {
+  margin: 0,
+  flex: 1,
+  fontSize: 12.5,
+  lineHeight: 1.4,
+  color: 'var(--text-primary, #2a2118)',
+}
+const bannerReload: React.CSSProperties = {
+  flex: '0 0 auto',
+  padding: '8px 14px',
+  borderRadius: 'var(--radius-pill)',
+  background: 'var(--color-charcoal)',
+  color: 'var(--surface-warm)',
+  fontSize: 11,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  border: 'none',
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+}
+const bannerDismiss: React.CSSProperties = {
+  flex: '0 0 auto',
+  width: 26,
+  height: 26,
+  borderRadius: '50%',
+  background: 'transparent',
+  border: 'none',
+  color: 'var(--text-muted)',
+  fontSize: 18,
+  lineHeight: 1,
+  cursor: 'pointer',
+}
+
 const wrap: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12 }
 const status: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }
 const dirtyTxt: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }

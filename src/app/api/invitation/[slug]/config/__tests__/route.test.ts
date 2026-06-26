@@ -62,6 +62,43 @@ describe('PUT /api/invitation/[slug]/config', () => {
     expect(res.status).toBe(409)
   })
 
+  // Regression: the client echoes back `savedAt` (a `new Date().toISOString()`
+  // string, e.g. `…Z`, ms precision) as its baseline, but Postgres/PostgREST
+  // returns `updated_at` in a different serialization of the SAME instant
+  // (`…+00:00`, µs precision). A raw `!==` falsely flagged every save after the
+  // first as a conflict. The check must compare INSTANTS, not strings.
+  it('does NOT 409 when base and DB timestamps are the same instant in different serializations', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({
+        tables: {
+          invitations: {
+            select: { data: { config: {}, updated_at: '2026-06-26T10:00:00.123456+00:00' } },
+            update: {},
+          },
+        },
+      }) as any,
+    )
+    const res = await PUT(put({ config: validConfig, baseUpdatedAt: '2026-06-26T10:00:00.123Z' }), ctx)
+    expect(res.status).toBe(200)
+  })
+
+  it('409 only when the DB instant is strictly newer than the loaded baseline', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({
+        tables: {
+          invitations: {
+            select: { data: { config: {}, updated_at: '2026-06-26T10:05:00.000+00:00' } },
+            update: {},
+          },
+        },
+      }) as any,
+    )
+    const res = await PUT(put({ config: validConfig, baseUpdatedAt: '2026-06-26T10:00:00.000Z' }), ctx)
+    expect(res.status).toBe(409)
+  })
+
   it('happy path: saves, and preserves other-tab keys (music) from the DB row', async () => {
     mockOwner.mockResolvedValue(OWNER)
     const fake = createFakeSupabase({
@@ -79,6 +116,29 @@ describe('PUT /api/invitation/[slug]/config', () => {
     expect((await res.json()).ok).toBe(true)
     const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
     expect(upd.value.config.music.url).toBe('real.mp3') // preserved from DB, not the editor payload
+  })
+
+  // The set_updated_at() trigger overwrites updated_at with the DB clock on every
+  // write, so the value the route SET is not what gets stored. The route must
+  // echo back the row's REAL post-write timestamp as the client's next baseline —
+  // otherwise the baseline lags the row and the next save false-409s.
+  it('returns the DB-stored updated_at (post-trigger) as savedAt, not its own clock', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    const dbStored = '2026-06-26T10:00:00.654321+00:00'
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({
+        tables: {
+          invitations: {
+            select: { data: { config: {}, updated_at: '2026-06-26T09:00:00.000+00:00' } },
+            // .update(...).select('updated_at').single() resolves the 'update' result.
+            update: { data: { updated_at: dbStored } },
+          },
+        },
+      }) as any,
+    )
+    const res = await PUT(put({ config: validConfig, baseUpdatedAt: '2026-06-26T09:00:00.000+00:00' }), ctx)
+    expect(res.status).toBe(200)
+    expect((await res.json()).savedAt).toBe(dbStored)
   })
 
   it('500 when the update fails', async () => {
