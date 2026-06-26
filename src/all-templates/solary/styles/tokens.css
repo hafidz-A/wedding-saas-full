@@ -72,4 +72,17 @@
   --color-on-accent: #1a1320;
   --color-error: #b00524;
   --color-accent-text: var(--color-accent);
+
+  /* ─── Ornament opacity standard — Solary (design cleanup Fase 5) ───
+     Standard opacities for STATIC decorative ornaments in this template, so new
+     ornaments share one scale. NOTE: the existing Solary ornaments (photo-stars,
+     nebula, rings) are ANIMATION-DRIVEN — their opacity lives inside @keyframes
+     fades that are intentional motion tuning, so they were deliberately NOT
+     rewired here (doing so would alter the choreography). Apply these to a
+     specific ornament only after a visual review. */
+  --ornament-ring-opacity:      0.18;
+  --ornament-star-opacity:      0.22;
+  --ornament-nebula-opacity:    0.12;
+  --ornament-botanical-opacity: 0.15;
+  --ornament-noise-opacity:     0.08;
 }

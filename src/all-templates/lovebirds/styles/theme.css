@@ -42,6 +42,20 @@ body.lovebirds-route {
   --font-body:       var(--lovebirds-font-body);
   --font-script:     var(--lovebirds-font-script);
   --font-serif-soft: var(--lovebirds-font-heading);
+
+  /* ─── Ornament opacity standard — Lovebirds (design cleanup Fase 5) ───
+     Standard opacities for STATIC decorative ornaments. NOTE: the existing
+     Lovebirds ornaments (petals, lovebirds, sparkles, botanical border) are
+     ANIMATION-DRIVEN — their opacity lives in @keyframes fades (and a few
+     prefers-reduced-motion fallbacks) that are intentional motion/storytelling
+     tuning, so they were deliberately NOT rewired here. Apply these to a
+     specific ornament only after a visual review. */
+  --ornament-ring-opacity:      0.14;
+  --ornament-star-opacity:      0.20;
+  --ornament-petal-opacity:     0.16;
+  --ornament-botanical-opacity: 0.12;
+  --ornament-sparkle-opacity:   0.18;
+  --ornament-glow-opacity:      0.10;
 }
 
 /* Component variations */
