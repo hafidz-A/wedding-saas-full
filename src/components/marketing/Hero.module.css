@@ -161,7 +161,10 @@
   padding: 18px 38px;
   border-radius: var(--border-radius-pill);
   box-shadow: var(--shadow-sm);
-  transition: var(--transition-default);
+  transition:
+    background var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -170,8 +173,9 @@
 .primary:hover {
   transform: translateY(-2px);
   background: var(--color-coral);
-  box-shadow: 0 12px 30px rgba(232, 85, 62, 0.25);
+  box-shadow: var(--shadow-btn-accent-hover);
 }
+.primary:active { transform: translateY(0); }
 
 .btnArrow {
   font-size: 16px;
@@ -192,12 +196,17 @@
   padding: 18px 38px;
   border-radius: var(--border-radius-pill);
   border: 1px solid var(--border-strong);
-  transition: var(--transition-default);
+  transition:
+    background var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
 }
 
 .secondary:hover {
   background: rgba(42, 33, 24, 0.05);
+  border-color: var(--color-charcoal);
 }
+.secondary:active { transform: translateY(1px); }
 
 /* Luxury Phone Mockup */
 .visual {

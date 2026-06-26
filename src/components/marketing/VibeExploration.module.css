@@ -203,6 +203,7 @@
   transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease, transform 0.2s var(--ease-out);
 }
 .menuBtn:hover { transform: translateY(-1px); }
+.menuBtn:active { transform: translateY(0); }
 .menuBtnSelected { font-weight: var(--weight-semibold); }
 
 .bullet {
@@ -318,6 +319,8 @@
 .btnGhost:hover,
 .btnPrimary:hover { transform: translateY(-2px); }
 .btnPrimary:hover { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24); }
+.btnGhost:active,
+.btnPrimary:active { transform: translateY(0); }
 
 .btnCaret {
   display: inline-block;

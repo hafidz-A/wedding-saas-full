@@ -36,9 +36,14 @@
   font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold);
   background: var(--color-charcoal); color: var(--color-cream);
   padding: 10px 20px; border-radius: var(--border-radius-pill);
-  transition: var(--transition-default); white-space: nowrap;
+  white-space: nowrap;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
 }
-.cta:hover { background: var(--color-coral); }
+.cta:hover { background: var(--color-coral); box-shadow: var(--shadow-btn-accent); }
+.cta:active { transform: translateY(1px); }
 
 /* Animated hamburger → X */
 .burger {
@@ -72,9 +77,13 @@
   color: var(--color-charcoal); cursor: pointer;
   padding: 8px 12px; border-radius: var(--border-radius-pill);
   border: 1px solid var(--border-default); background: rgba(255, 255, 255, 0.5);
-  transition: var(--transition-default);
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-in-out);
 }
 .profileTrigger:hover { border-color: var(--color-coral); color: var(--color-coral); }
+.profileTrigger:active { transform: translateY(1px); }
 .caret { font-size: 10px; }
 .menu {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
