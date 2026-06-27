@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useEditor } from './EditorProvider'
-import ctrl from './dashboardControls.module.css'
+import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
 interface Props {
   slug: string
