@@ -101,7 +101,7 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
   return (
     <div style={card}>
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <div>
+        <div style={{ borderLeft: '4px solid var(--interactive-primary)', paddingLeft: 14 }}>
           <h2 style={h2}>{t.title}</h2>
           <p style={sub}>{t.subtitle}</p>
         </div>
@@ -199,13 +199,13 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
 }
 
 // ── Styles (mirrors PaletteTab / MusicTab) ──
-const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
-const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 28, margin: 0 }
+const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 'clamp(16px, 3vw, 28px)', boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
+const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)', maxWidth: 560, lineHeight: 1.5 }
-const section: React.CSSProperties = { display: 'grid', gap: 14, padding: 18, background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }
+const section: React.CSSProperties = { display: 'grid', gap: 14, padding: 16, background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }
 const h3: React.CSSProperties = { fontSize: 13, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', margin: 0, fontWeight: 600 }
 const lbl: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-muted)' }
-const input: React.CSSProperties = { padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' }
+const input: React.CSSProperties = { height: 38, padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', fontSize: 14, outline: 'none', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontFamily: 'inherit', width: '100%', boxSizing: 'border-box' }
 const counter: React.CSSProperties = { fontSize: 10, color: 'var(--text-disabled)', justifySelf: 'end' }
 const help: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.5)', margin: 0, lineHeight: 1.5 }
 const imageRow: React.CSSProperties = { display: 'flex', gap: 14, alignItems: 'center' }
@@ -217,8 +217,8 @@ const previewTitleStyle: React.CSSProperties = { fontSize: 14, fontWeight: 600, 
 const previewDescStyle: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const previewHost: React.CSSProperties = { fontSize: 11, color: 'rgba(42,33,24,0.45)', textTransform: 'lowercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
 const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }
-const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
-const btnGhost: React.CSSProperties = { padding: '8px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer' }
+const btnPrimary: React.CSSProperties = { height: 36, padding: '1px 20px 0 20px', borderRadius: '999px', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }
+const btnGhost: React.CSSProperties = { height: 36, padding: '1px 16px 0 16px', borderRadius: '999px', background: 'transparent', color: 'var(--text-primary)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid var(--border-strong)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }
 const btnGhostDanger: React.CSSProperties = { ...btnGhost, color: 'var(--interactive-primary-hover)', borderColor: 'rgba(196,63,42,0.35)' }
 const msgOk: React.CSSProperties = { fontSize: 12, color: 'var(--color-emerald)', marginRight: 'auto' }
 const msgErr: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)', marginRight: 'auto' }

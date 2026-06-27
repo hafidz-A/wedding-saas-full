@@ -18,16 +18,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: clamp(14px, 2vw, 20px);
+  margin-bottom: 24px;
   gap: var(--space-3);
   flex-wrap: wrap;
+}
+
+.headerTitleBox {
+  border-left: 4px solid var(--interactive-primary);
+  padding-left: 14px;
 }
 
 .headerRow h2 {
   margin: 0;
   font-family: var(--font-heading);
-  font-style: italic;
+  font-style: normal;
   font-size: clamp(22px, 3.2vw, 28px);
+  line-height: 1.2;
 }
 
 .headerActions {
@@ -39,14 +45,14 @@
 .statsRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--space-3);
-  margin-bottom: clamp(14px, 2vw, 20px);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .filterRow {
   display: flex;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
@@ -138,7 +144,7 @@
 /* ── Mobile (<768px): collapse table to stacked cards ── */
 @media (max-width: 767.98px) {
   .card {
-    padding: 14px;
+    padding: 16px;
     border-radius: var(--radius-md);
   }
 

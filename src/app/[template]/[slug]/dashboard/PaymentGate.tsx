@@ -124,7 +124,7 @@ const kicker: React.CSSProperties = {
 }
 const h1: React.CSSProperties = {
   fontFamily: 'var(--font-heading)',
-  fontStyle: 'italic',
+  fontStyle: 'normal',
   fontSize: 34,
   margin: 0,
   color: 'var(--text-primary)',
@@ -138,14 +138,15 @@ const body: React.CSSProperties = {
 }
 const btnRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 22 }
 const primaryBtn: React.CSSProperties = {
-  padding: '14px 24px', borderRadius: 'var(--radius-pill)', background: 'var(--interactive-primary)', color: '#fff',
+  height: 44, padding: '0 24px', borderRadius: '999px', background: 'var(--interactive-primary)', color: '#fff',
   border: 0, fontSize: 13, fontWeight: 600, letterSpacing: '0.14em',
   textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit',
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }
 const ghostBtn: React.CSSProperties = {
-  padding: '14px 22px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)',
+  height: 36, padding: '0 22px', borderRadius: '999px', background: 'transparent', color: 'var(--text-primary)',
   border: '1px solid var(--border-strong)', fontSize: 12, letterSpacing: '0.14em',
-  textTransform: 'uppercase', textDecoration: 'none', display: 'inline-block',
+  textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }
 const muted: React.CSSProperties = { margin: 0, fontSize: 12, color: 'var(--text-muted)' }
 const code: React.CSSProperties = {
@@ -160,8 +161,8 @@ const ftrLink: React.CSSProperties = {
   fontSize: 12, color: 'var(--text-muted)', textDecoration: 'underline',
 }
 const ftrLogout: React.CSSProperties = {
-  padding: '6px 14px', borderRadius: 'var(--radius-pill)', background: 'transparent',
+  height: 36, padding: '0 14px', borderRadius: '999px', background: 'transparent',
   color: 'var(--text-muted)', border: '1px solid var(--border-default)',
   fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-  fontFamily: 'inherit',
+  fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }

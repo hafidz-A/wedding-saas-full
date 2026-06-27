@@ -90,9 +90,13 @@ const lockIcon: React.CSSProperties = { fontSize: 34, marginBottom: 8 }
 const title: React.CSSProperties = { fontSize: 22, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)' }
 const body: React.CSSProperties = { color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 22px', fontSize: 14 }
 const cta: React.CSSProperties = {
-  display: 'inline-block',
-  padding: '12px 24px',
-  borderRadius: 'var(--radius-pill)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: 36,
+  padding: '1px 20px 0 20px',
+  lineHeight: 1,
+  borderRadius: '999px',
   background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,

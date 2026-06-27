@@ -59,7 +59,9 @@ export default function GiftsTab({ gifts }: { gifts: GiftRow[] }) {
   return (
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
-        <h2>{t.title}</h2>
+        <div className={tabs.headerTitleBox}>
+          <h2>{t.title}</h2>
+        </div>
         <div className={tabs.headerActions}>
           <button
             type="button"
@@ -137,6 +139,6 @@ function Stat({ label, value, accent = 'var(--text-primary)' }: { label: string;
   )
 }
 
-const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 14, border: '1px solid var(--border-subtle)' }
+const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 16, border: '1px solid var(--border-subtle)' }
 const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }
-const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 22 }
+const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 22 }

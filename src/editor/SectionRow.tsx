@@ -74,7 +74,19 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         {...(draggable ? attributes : {})}
         {...(draggable ? listeners : {})}
         onClick={(e) => e.stopPropagation()}
-        style={{ cursor: draggable ? 'grab' : 'not-allowed', color: 'var(--text-disabled)', fontSize: 14, padding: '0 4px', opacity: draggable ? 1 : 0.5 }}
+        style={{
+          cursor: draggable ? 'grab' : 'not-allowed',
+          color: draggable ? 'var(--text-primary)' : 'var(--text-disabled)',
+          fontSize: 16,
+          padding: '8px 10px',
+          margin: '-4px 0 -4px -4px',
+          opacity: draggable ? 0.8 : 0.4,
+          touchAction: draggable ? 'none' : 'auto',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          userSelect: 'none',
+        }}
         aria-label={draggable ? t.dragReorder : t.lockedHint}
         title={draggable ? t.dragReorder : t.lockedHint}
       >

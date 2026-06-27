@@ -319,7 +319,8 @@ const input: React.CSSProperties = {
 }
 const submitBtn: React.CSSProperties = {
   marginTop: 8,
-  padding: '14px 24px',
+  height: 44,
+  padding: '0 24px',
   borderRadius: 'var(--radius-pill)',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
@@ -329,6 +330,10 @@ const submitBtn: React.CSSProperties = {
   letterSpacing: '0.16em',
   textTransform: 'uppercase',
   cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
 }
 const errorStyle: React.CSSProperties = {
   margin: 0,
@@ -339,8 +344,11 @@ const errorStyle: React.CSSProperties = {
   fontSize: 13,
 }
 const primaryLink: React.CSSProperties = {
-  display: 'inline-block',
-  padding: '14px 24px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: 44,
+  padding: '0 24px',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
   borderRadius: 'var(--radius-pill)',
@@ -349,15 +357,21 @@ const primaryLink: React.CSSProperties = {
   letterSpacing: '0.16em',
   textTransform: 'uppercase',
   textAlign: 'center',
+  lineHeight: 1,
 }
 const ghostBtn: React.CSSProperties = {
-  padding: '14px 24px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: 36,
+  padding: '0 20px',
   background: 'transparent',
   color: 'var(--text-primary)',
   border: '1px solid rgba(42,33,24,0.3)',
   borderRadius: 'var(--radius-pill)',
   cursor: 'pointer',
-  fontSize: 13,
-  letterSpacing: '0.16em',
+  fontSize: 12,
+  letterSpacing: '0.14em',
   textTransform: 'uppercase',
+  lineHeight: 1,
 }

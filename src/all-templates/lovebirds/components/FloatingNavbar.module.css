@@ -79,18 +79,18 @@
   font-family: var(--font-body);
   font-size: clamp(11px, 1vw, 12px);
   letter-spacing: 0.12em;
-  line-height: 1.15;
+  line-height: 1;
   text-transform: uppercase;
-  padding: 7px 14px;
-  border-radius: 18px;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
   color: var(--fg, var(--color-charcoal));
   text-decoration: none;
-  white-space: pre-line;
+  white-space: nowrap;
   scroll-snap-align: center;
   transition: background 0.28s ease, color 0.28s ease, transform 0.28s ease;
   font-weight: 500;
   min-width: max-content;
-  min-height: 0;                /* opt out of global 44px floor — pills already meet target via padding */
 }
 
 .link:hover,

@@ -121,10 +121,11 @@ export default function LedgerTable({
 
 function checkBtn(arrived: boolean): React.CSSProperties {
   return {
-    minWidth: 84, minHeight: 36, padding: '6px 12px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+    minWidth: 84, height: 36, padding: '1px 16px 0 16px', borderRadius: '999px', cursor: 'pointer',
     fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap',
     border: arrived ? '1px solid #2D8C4E' : '1px solid var(--border-strong)',
     background: arrived ? 'rgba(45,140,78,0.12)' : 'var(--surface-raised)',
     color: arrived ? '#2D8C4E' : 'var(--text-primary)',
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
   }
 }

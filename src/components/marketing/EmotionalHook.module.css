@@ -51,7 +51,7 @@
   font-family: var(--font-heading);
   font-style: italic;
   font-weight: var(--weight-semibold);
-  font-size: clamp(28px, 4.5vw, 48px);
+  font-size: clamp(28px, 4vw, 44px);
   color: var(--color-charcoal);
   line-height: var(--leading-snug);
   margin: 0;

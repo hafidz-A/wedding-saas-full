@@ -152,7 +152,7 @@ export default function OrnamentTab({
   return (
     <div style={card}>
       <style dangerouslySetInnerHTML={{ __html: PREVIEW_CSS }} />
-      <header><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></header>
+      <header><div style={{ borderLeft: '4px solid var(--interactive-primary)', paddingLeft: 14 }}><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></div></header>
 
       {/* Live preview — the selected motif painted in the saved palette's accent
           over that palette's ambient background, animated like the real
@@ -183,14 +183,14 @@ export default function OrnamentTab({
   )
 }
 
-const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 28, boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
-const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 28, margin: 0 }
+const card: React.CSSProperties = { background: 'rgba(255,255,255,0.85)', borderRadius: 'var(--radius-md)', padding: 'clamp(16px, 3vw, 28px)', boxShadow: 'var(--shadow-sm)', display: 'grid', gap: 24 }
+const h2: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 28, margin: 0 }
 const sub: React.CSSProperties = { margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)' }
 const previewPanel: React.CSSProperties = { position: 'relative', height: 240, borderRadius: 'var(--radius-md)', border: '1px solid', overflow: 'hidden' }
 const paletteChip: React.CSSProperties = { position: 'absolute', left: 14, bottom: 12, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 12px', borderRadius: 'var(--radius-pill)', border: '1px solid', background: 'rgba(255,255,255,0.55)', fontSize: 12, backdropFilter: 'blur(6px)' }
 const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }
 const optBtn: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 14px', borderRadius: 'var(--radius-md)', border: '1px solid', background: 'var(--surface-raised)', cursor: 'pointer', color: 'var(--text-primary)' }
 const footer: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }
-const btnPrimary: React.CSSProperties = { padding: '10px 18px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer' }
+const btnPrimary: React.CSSProperties = { height: 36, padding: '1px 20px 0 20px', borderRadius: '999px', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 12, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }
 const msgOk: React.CSSProperties = { fontSize: 12, color: 'var(--color-emerald)', marginRight: 'auto' }
 const msgErr: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)', marginRight: 'auto' }

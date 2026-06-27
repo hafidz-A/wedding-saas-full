@@ -13,7 +13,10 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  border-radius: var(--radius-pill);
+  height: 36px;
+  padding: 1px 20px 0 20px;
+  line-height: 1;
+  border-radius: 999px;
   font-size: var(--font-size-sm);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -39,7 +42,6 @@
 /* Solid action button: charcoal at rest → coral on hover (cream text both ways,
    exactly like the landing's primary CTA — guaranteed contrast). */
 .btnPrimary {
-  padding: 8px 16px;
   border: 1px solid transparent;
   background: var(--color-charcoal);
   color: var(--surface-warm);
@@ -54,7 +56,6 @@
    coral (--interactive-primary-hover, #C43F2A) for text/border so it clears
    contrast on the light surface — accent without blending. */
 .btnGhost {
-  padding: 8px 14px;
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--text-primary);
@@ -66,9 +67,7 @@
   background: var(--interactive-primary-soft);
 }
 
-/* ── Compact variants (radius-sm, fontSize 13, no uppercase) — for dense areas
-   like the Guests table-row actions, where the large pill would bloat the cell.
-   Same interaction states + coral accent; base look preserved per surface. ── */
+/* ── Compact variants — 36px height, 999px pill ── */
 .btnPrimarySm,
 .btnGhostSm {
   font-family: inherit;
@@ -76,7 +75,10 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border-radius: var(--radius-sm);
+  height: 36px;
+  padding: 1px 16px 0 16px;
+  line-height: 1;
+  border-radius: 999px;
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition:
@@ -98,7 +100,6 @@
 
 /* Coral solid (this surface's primary is already coral — keep it, darken on hover). */
 .btnPrimarySm {
-  padding: 8px 14px;
   border: 1px solid transparent;
   background: var(--interactive-primary);
   color: #fff;
@@ -106,7 +107,6 @@
 .btnPrimarySm:not(:disabled):hover { background: var(--interactive-primary-hover); box-shadow: var(--shadow-btn-accent); }
 
 .btnGhostSm {
-  padding: 8px 12px;
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--text-primary);
@@ -121,9 +121,12 @@
 .btnAdd {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: var(--radius-pill);
+  height: 36px;
+  padding: 1px 16px 0 16px;
+  line-height: 1;
+  border-radius: 999px;
   border: 1px solid transparent;
   background: var(--color-charcoal);
   color: var(--surface-warm);
@@ -209,15 +212,21 @@
 /* Segmented filter group (e.g. All / Attending / Declined). */
 .seg {
   display: inline-flex;
+  align-items: center;
   gap: 4px;
   background: var(--border-subtle);
-  border-radius: var(--radius-pill);
+  border-radius: 999px;
   padding: 4px;
 }
 .segBtn {
   font-family: inherit;
-  padding: 6px 14px;
-  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 1px 14px 0 14px;
+  line-height: 1;
+  border-radius: 999px;
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -241,10 +250,11 @@
   box-shadow: var(--shadow-xs);
 }
 
-/* Search / filter input — proper focus state (was outline:none with no replacement). */
+/* Search / filter input — proper focus state. */
 .input {
   width: 100%;
-  padding: 10px 14px;
+  height: 36px;
+  padding: 8px 14px 7px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
   background: var(--surface-raised);
@@ -252,6 +262,7 @@
   font-family: inherit;
   font-size: 14px;
   outline: none;
+  box-sizing: border-box;
   transition: border-color var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
 }
 .input::placeholder { color: var(--text-muted); }

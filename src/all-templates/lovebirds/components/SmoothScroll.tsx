@@ -70,9 +70,19 @@ export default function SmoothScroll() {
     gsap.ticker.add(rafCallback)
     gsap.ticker.lagSmoothing(0)
 
+    // Expose the instance globally (same convention as Solary's
+    // startSmoothScroll). The OpeningGate's "Get Started" handler looks for
+    // window.__lenis to run its premium eased scroll-to-next-section — without
+    // this it silently falls back to the rougher native scrollIntoView. Also
+    // lets tooling (e.g. the frame-by-frame walkthrough capture) drive scroll
+    // deterministically via lenis.scrollTo(y, { immediate: true }).
+    ;(window as unknown as { __lenis?: unknown }).__lenis = lenis
+
     return () => {
       window.removeEventListener('scroll', ScrollTrigger.update)
       gsap.ticker.remove(rafCallback)
+      const w = window as unknown as { __lenis?: unknown }
+      if (w.__lenis === lenis) delete w.__lenis
       lenis.destroy()
     }
   }, [])

@@ -249,9 +249,12 @@
 .copyBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--border-radius-pill);
+  height: 36px;
+  padding: 0 14px;
+  line-height: 1;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -281,13 +284,18 @@
 
 .useBtn {
   margin-top: auto; /* pin to the bottom so equal-height cards line up */
-  padding: 11px 16px;
-  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  line-height: 1;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   font-family: var(--font-body, sans-serif);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   text-align: center;
   cursor: pointer;
@@ -434,18 +442,27 @@ a.registryCard:hover {
   max-width: 680px;
   margin: 0 auto;
   scroll-margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
 .openFormBtn {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto;
-  padding: 16px 32px;
+  height: 44px;
+  padding: 0 32px;
+  line-height: 1;
   border-radius: 999px;
   background: var(--button-bg, var(--fg, var(--color-charcoal)));
   color: var(--button-fg, var(--color-cream));
   font-family: var(--font-body, sans-serif);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
@@ -459,6 +476,8 @@ a.registryCard:hover {
 }
 
 .form {
+  width: 100%;
+  text-align: left;
   background: var(--glass-bg, rgba(255, 255, 255, 0.82));
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.08));
   border-radius: clamp(16px, 1.8vw, 22px);
@@ -543,19 +562,25 @@ a.registryCard:hover {
 
 .actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 6px;
 }
 
 .cancelBtn {
-  padding: 14px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 24px;
+  line-height: 1;
   border-radius: 999px;
   background: transparent;
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.2));
   color: var(--fg, var(--color-charcoal));
   font-family: var(--font-body, sans-serif);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
@@ -564,7 +589,12 @@ a.registryCard:hover {
 .cancelBtn:hover { background: rgba(42, 33, 24, 0.06); }
 
 .submit {
-  padding: 14px 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 26px;
+  line-height: 1;
   border-radius: 999px;
   /* Use the theme's button token PAIR so the label always contrasts its fill.
      The old `color: var(--bg)` resolved to `transparent` on light palettes
@@ -573,7 +603,7 @@ a.registryCard:hover {
   color: var(--button-fg, var(--color-cream));
   font-family: var(--font-body, sans-serif);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
@@ -631,13 +661,18 @@ a.registryCard:hover {
 }
 
 .resetBtn {
-  padding: 12px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 22px;
+  line-height: 1;
   border-radius: 999px;
   border: 1px solid var(--fg, var(--color-charcoal));
   background: transparent;
   color: var(--fg, var(--color-charcoal));
   font-family: var(--font-body, sans-serif);
-  font-size: 12.5px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;

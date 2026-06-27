@@ -199,7 +199,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
         zIndex: "var(--z-nav)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
         height: "var(--navbar-h)", padding: "0 18px",
-        borderRadius: "var(--r-pill)",
+        borderRadius: "999px",
         border: "var(--nav-border)",
         background: "var(--nav-bg)",
         backdropFilter: "blur(12px) saturate(140%)",

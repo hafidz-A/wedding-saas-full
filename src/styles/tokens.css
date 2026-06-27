@@ -96,6 +96,7 @@
 
   /* ---------- Radii ---------- */
   --border-radius-card: 16px;
+  --border-radius-input: 10px;
   --border-radius-pill: 999px;
   --border-radius-sm: 8px;
 

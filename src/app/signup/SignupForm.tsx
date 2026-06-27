@@ -310,15 +310,18 @@ const lbl: React.CSSProperties = {
   color: 'var(--text-muted)',
 }
 const input: React.CSSProperties = {
-  padding: '12px 14px',
+  height: 44,
+  padding: '12px 16px 10px 16px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--border-default)',
   fontSize: 15,
   fontFamily: 'inherit',
+  boxSizing: 'border-box',
 }
 const submitBtn: React.CSSProperties = {
   marginTop: 8,
-  padding: '14px 24px',
+  height: 44,
+  padding: '1px 24px 0 24px',
   borderRadius: 'var(--radius-pill)',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
@@ -328,6 +331,10 @@ const submitBtn: React.CSSProperties = {
   letterSpacing: '0.16em',
   textTransform: 'uppercase',
   cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
 }
 const submitBtnDisabled: React.CSSProperties = {
   opacity: 0.45,

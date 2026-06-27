@@ -54,7 +54,9 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
   return (
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
-        <h2>{t.title}</h2>
+        <div className={tabs.headerTitleBox}>
+          <h2>{t.title}</h2>
+        </div>
         <div className={tabs.headerActions}>
           <button
             type="button"
@@ -153,8 +155,8 @@ function Stat({ label, value, accent = 'var(--text-primary)' }: { label: string;
   )
 }
 
-const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 14, border: '1px solid var(--border-subtle)' }
+const statBox: React.CSSProperties = { background: 'var(--surface-raised)', borderRadius: 'var(--radius-md)', padding: 16, border: '1px solid var(--border-subtle)' }
 const statLabel: React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)' }
-const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 26 }
+const statValue: React.CSSProperties = { margin: '6px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 26 }
 const pillYes: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--status-success-surface)', color: 'var(--color-emerald)', fontSize: 11, fontWeight: 500 }
 const pillNo: React.CSSProperties = { padding: '3px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--border-subtle)', color: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }

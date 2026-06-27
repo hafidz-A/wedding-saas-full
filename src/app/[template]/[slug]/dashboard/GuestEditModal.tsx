@@ -175,7 +175,7 @@ const lbl: React.CSSProperties = {
 const input: React.CSSProperties = {
   padding: '10px 14px',
   borderRadius: 'var(--radius-sm)',
-  border: '1px solid rgba(42,33,24,0.16)',
+  border: '1px solid var(--border-default)',
   fontSize: 14,
   fontFamily: 'inherit',
   width: '100%',

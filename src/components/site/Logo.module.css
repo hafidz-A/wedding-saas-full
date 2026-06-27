@@ -1,13 +1,16 @@
-.link { display: inline-flex; text-decoration: none; }
-.logo { display: inline-flex; align-items: baseline; gap: 0.28em; color: var(--color-charcoal); white-space: nowrap; }
-.fin { font-family: var(--font-body); font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
-.wedding { font-family: var(--font-heading); font-style: italic; font-weight: var(--weight-medium); }
+.link { display: inline-flex; align-items: center; text-decoration: none; }
+.logo { display: inline-flex; align-items: center; justify-content: center; gap: 0.28em; color: var(--color-charcoal); white-space: nowrap; line-height: 1; }
+.fin { font-family: var(--font-heading); font-weight: var(--weight-medium); font-style: normal; letter-spacing: -0.01em; display: inline-flex; align-items: center; line-height: 1; }
+.wedding { font-family: var(--font-heading); font-weight: var(--weight-medium); font-style: italic; letter-spacing: -0.01em; display: inline-flex; align-items: center; line-height: 1; }
 .dot {
-  align-self: center;
-  width: 0.34em; height: 0.34em; border-radius: var(--radius-pill);
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.32em; height: 0.32em; border-radius: var(--radius-pill);
   background: var(--color-coral);
+  transform: translateY(0.06em);
   transition: var(--transition-default);
 }
 .md { font-size: clamp(22px, 2.4vw, 28px); }
 .sm { font-size: 20px; }
 .link:hover .dot { box-shadow: 0 0 0 4px rgba(232, 85, 62, 0.18); }
+

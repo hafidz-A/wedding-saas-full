@@ -61,7 +61,8 @@ export default function RenewButton({
 }
 
 const btn: React.CSSProperties = {
-  padding: '8px 16px',
+  height: 36,
+  padding: '0 16px',
   borderRadius: 'var(--radius-pill)',
   background: 'var(--interactive-primary)',
   color: '#fff',
@@ -72,4 +73,8 @@ const btn: React.CSSProperties = {
   cursor: 'pointer',
   fontFamily: 'inherit',
   fontWeight: 600,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
 }

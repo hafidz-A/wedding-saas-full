@@ -151,7 +151,7 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
       </DndContext>
 
       {canAddSections(policy) && (
-        <div style={{ padding: 12 }}>
+        <div style={{ padding: '12px 16px' }}>
           <AddSectionMenu
             template={template}
             onAdd={(type, label, defaults) => { addSection(type, label, defaults); fb.ok(fm.sectionAdded) }}
@@ -175,12 +175,12 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
 
 /* Width + border come from the parent (.sectionList in EditorRoot.module.css)
    so this aside stays responsive. We just need flex column layout. */
-const wrap: React.CSSProperties = { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'transparent' }
-const hdr:  React.CSSProperties = { padding: '18px 16px 8px', display: 'flex', flexDirection: 'column', gap: 8 }
+const wrap: React.CSSProperties = { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'transparent', overflow: 'hidden', minHeight: 0 }
+const hdr:  React.CSSProperties = { padding: '14px 16px 8px', display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }
 const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: 'var(--interactive-primary)' }
-const modeToggle: React.CSSProperties = { display: 'inline-flex', alignSelf: 'flex-start', borderRadius: 'var(--radius-sm)', background: 'var(--border-subtle)', padding: 2, gap: 2 }
-const modeBtn: React.CSSProperties = { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: 'var(--radius-sm)' }
+const modeToggle: React.CSSProperties = { display: 'inline-flex', alignSelf: 'flex-start', borderRadius: '999px', background: 'var(--border-subtle)', padding: 3, gap: 3, height: 36, alignItems: 'center', boxSizing: 'border-box' }
+const modeBtn: React.CSSProperties = { border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', height: 30, padding: '1px 14px 0 14px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }
 const modeBtnActive: React.CSSProperties = { ...modeBtn, background: 'var(--interactive-primary)', color: '#fff' }
-const list: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, padding: '4px 8px', flex: 1, overflow: 'auto' }
-const ftr:  React.CSSProperties = { padding: 12, borderTop: '1px solid var(--border-subtle)' }
-const previewLink: React.CSSProperties = { display: 'block', textAlign: 'center', padding: '10px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', textDecoration: 'none' }
+const list: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, padding: '4px 16px', flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', minHeight: 0 }
+const ftr:  React.CSSProperties = { padding: '12px 16px', borderTop: '1px solid var(--border-subtle)' }
+const previewLink: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: 36, padding: '1px 14px 0 14px', borderRadius: '999px', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', textDecoration: 'none', lineHeight: 1, boxSizing: 'border-box' }

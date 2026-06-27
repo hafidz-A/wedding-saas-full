@@ -48,13 +48,18 @@ const h1: React.CSSProperties = {
 }
 const body: React.CSSProperties = { fontSize: 16, lineHeight: 1.7, color: 'var(--text-secondary)', margin: '0 0 28px' }
 const cta: React.CSSProperties = {
-  display: 'inline-block',
-  padding: '14px 28px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: 36,
+  padding: '0 24px',
+  lineHeight: 1,
   borderRadius: 'var(--radius-pill)',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
-  fontSize: 13,
-  letterSpacing: '0.16em',
+  fontSize: 12,
+  fontWeight: 600,
+  letterSpacing: '0.14em',
   textTransform: 'uppercase',
   textDecoration: 'none',
 }

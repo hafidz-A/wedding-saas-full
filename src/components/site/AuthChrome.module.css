@@ -26,8 +26,11 @@
 .home {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
-  padding: 7px 14px;
+  height: 36px;
+  padding: 0 16px;
+  line-height: 1;
   border-radius: var(--border-radius-pill, 999px);
   border: 1px solid var(--border-default);
   background: rgba(255, 255, 255, 0.5);

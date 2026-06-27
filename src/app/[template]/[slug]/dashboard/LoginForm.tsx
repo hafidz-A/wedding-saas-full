@@ -112,7 +112,7 @@ export default function LoginForm({
           <h1
             style={{
               fontFamily: 'var(--font-heading)',
-              fontStyle: 'italic',
+              fontStyle: 'normal',
               fontSize: 32,
               margin: 0,
               color: 'var(--text-primary)',
@@ -185,17 +185,22 @@ const input: React.CSSProperties = {
 }
 
 const submitBtn: React.CSSProperties = {
-  padding: '14px 24px',
+  height: 44,
+  padding: '0 24px',
   borderRadius: 'var(--radius-pill)',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
   fontSize: 13,
-  fontWeight: 500,
+  fontWeight: 600,
   letterSpacing: '0.14em',
   textTransform: 'uppercase',
   border: 'none',
   cursor: 'pointer',
   marginTop: 4,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
 }
 
 const errorStyle: React.CSSProperties = {

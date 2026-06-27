@@ -8,7 +8,7 @@
 .shell {
   background: var(--surface-raised);
   border-radius: var(--radius-md);
-  padding: clamp(16px, 3vw, 24px);
+  padding: clamp(16px, 3vw, 28px);
 }
 
 /* ── Header (counts + actions row) ── */
@@ -16,18 +16,24 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+.headerTitle {
+  border-left: 4px solid var(--interactive-primary);
+  padding-left: 14px;
 }
 
 .headerTitle h2 {
   margin: 0;
   font-size: clamp(18px, 2.4vw, 20px);
+  line-height: 1.2;
 }
 
 .headerTitle p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-size: 13px;
   color: var(--text-secondary);
 }
@@ -40,10 +46,11 @@
 
 /* ── Template editor panel ── */
 .templatePanel {
-  margin-bottom: 18px;
-  padding: var(--space-4);
+  margin-bottom: 24px;
+  padding: 16px;
   background: rgba(232, 85, 62, 0.06);
-  border: 1px solid var(--interactive-primary-soft);
+  border: 2px solid var(--interactive-primary);
+  box-shadow: 0 4px 14px rgba(232, 85, 62, 0.12);
   border-radius: var(--radius-md);
 }
 
@@ -98,8 +105,8 @@
 /* ── Add-guest form ── */
 .addForm {
   display: flex;
-  gap: var(--space-2);
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
@@ -111,8 +118,8 @@
 /* ── Filter row (search + filter pills) ── */
 .filterRow {
   display: flex;
-  gap: var(--space-2);
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
@@ -164,7 +171,7 @@
 /* ── Mobile (<768px): collapse table to stacked cards ── */
 @media (max-width: 767.98px) {
   .shell {
-    padding: 14px;
+    padding: 16px;
     border-radius: var(--radius-md);
   }
 
@@ -234,9 +241,6 @@
 
 /* ── Tablet portrait (768-1023): keep table but tighten padding ── */
 @media (min-width: 768px) and (max-width: 1023.98px) {
-  .shell {
-    padding: 18px;
-  }
   .table th,
   .table td {
     padding: 10px 6px;

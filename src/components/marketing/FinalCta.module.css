@@ -101,7 +101,7 @@
   font-family: var(--font-heading);
   font-style: italic;
   font-weight: var(--weight-medium);
-  font-size: clamp(32px, 5vw, 56px);
+  font-size: clamp(32px, 4.8vw, 52px);
   color: var(--color-charcoal);
   line-height: var(--leading-tight);
   margin: 0;
@@ -119,13 +119,14 @@
 
 .cta {
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: var(--weight-medium);
-  letter-spacing: 0.15em;
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   background: var(--color-charcoal);
   color: var(--color-cream);
-  padding: 16px 36px;
+  height: 36px;
+  padding: 0 24px;
   border-radius: var(--border-radius-pill);
   box-shadow: var(--shadow-btn);
   transition:
@@ -134,6 +135,8 @@
     transform var(--duration-base) var(--ease-out);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  line-height: 1;
   gap: var(--space-2);
 }
 

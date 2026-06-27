@@ -46,7 +46,7 @@ export default function FieldEditor({ slug, template }: Props) {
   if (!schema) {
     return (
       <div style={fallback}>
-        <header style={{ borderBottom: '1px solid var(--border-subtle)', paddingBottom: 12, marginBottom: 16 }}>
+        <header style={{ borderLeft: '4px solid var(--interactive-primary)', paddingLeft: 14, marginBottom: 24 }}>
           <p style={kicker}>{t.sectionKicker}</p>
           <h3 style={h3}>{t.unknownSection}</h3>
         </header>
@@ -154,10 +154,10 @@ function renderField(
   }
 }
 
-const wrap: React.CSSProperties = { display: 'grid', gap: 20 }
-const hdr:  React.CSSProperties = { borderBottom: '1px solid var(--border-subtle)', paddingBottom: 12 }
+const wrap: React.CSSProperties = { display: 'grid', gap: 24 }
+const hdr:  React.CSSProperties = { borderLeft: '4px solid var(--interactive-primary)', paddingLeft: 14 }
 const kicker:React.CSSProperties = { margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.24em', color: 'var(--interactive-primary)' }
-const h3:   React.CSSProperties = { margin: '4px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 26 }
+const h3:   React.CSSProperties = { margin: '4px 0 0', fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 26 }
 const form: React.CSSProperties = { display: 'grid', gap: 20, paddingBottom: 60 }
 const empty:React.CSSProperties = { padding: 40, color: 'var(--text-muted)', fontSize: 14, textAlign: 'center' }
 const fallback: React.CSSProperties = { display: 'grid', gap: 0 }

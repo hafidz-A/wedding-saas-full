@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import EditorRoot from '@/editor/EditorRoot'
 import PaletteTab from './PaletteTab'
 import MusicTab from './MusicTab'
@@ -17,6 +18,29 @@ export function editorSubTabs(template: string): EditorSubTab[] {
   const keys: EditorSubTab[] = ['section', 'palette', 'music', 'meta']
   if (template !== 'solary') keys.push('ornament')
   return keys
+}
+
+const containerVariants = {
+  hidden: { opacity: 0, height: 0 },
+  show: {
+    opacity: 1,
+    height: 'auto',
+    transition: {
+      duration: 0.25,
+      staggerChildren: 0.06,
+      delayChildren: 0.03,
+    },
+  },
+  exit: {
+    opacity: 0,
+    height: 0,
+    transition: { duration: 0.2 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: -8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
 }
 
 /**
@@ -52,10 +76,22 @@ export default function EditorWorkspace({
   // section editor — keeps that editor from going stale when a sub-tab saves,
   // which previously caused a false 409 on the next section save.
   const [liveUpdatedAt, setLiveUpdatedAt] = useState<string | null>(invitation.updated_at ?? null)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   return (
     <div>
-      <nav className={styles.subnav} role="tablist" aria-label={labels.editor}>
+      <button
+        type="button"
+        className={styles.mobileAccordionToggle}
+        onClick={() => setMobileNavOpen((o) => !o)}
+        aria-expanded={mobileNavOpen}
+      >
+        <span style={{ flex: 1, textAlign: 'center' }}>Modul Editor: <strong>{labels[sub]}</strong></span>
+        <span style={{ fontSize: 12, opacity: 0.7 }}>{mobileNavOpen ? '▲' : '▼'}</span>
+      </button>
+
+      {/* Desktop nav view */}
+      <nav className={`${styles.subnav} ${styles.desktopSubnavOnly}`} role="tablist" aria-label={labels.editor}>
         {keys.map((k) => (
           <button
             key={k}
@@ -69,6 +105,38 @@ export default function EditorWorkspace({
           </button>
         ))}
       </nav>
+
+      {/* Mobile animated accordion view (kipas lipat vertikal perlahan 1 per 1) */}
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <motion.nav
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            style={{ transformOrigin: 'top center', overflow: 'hidden' }}
+            className={`${styles.subnav} ${styles.subnavOpen}`}
+            role="tablist"
+          >
+            {keys.map((k) => (
+              <motion.button
+                key={k}
+                variants={itemVariants}
+                type="button"
+                role="tab"
+                aria-selected={sub === k}
+                onClick={() => {
+                  onSubChange(k)
+                  setMobileNavOpen(false)
+                }}
+                className={`${styles.subBtn} ${sub === k ? styles.subBtnActive : ''}`}
+              >
+                {labels[k]}
+              </motion.button>
+            ))}
+          </motion.nav>
+        )}
+      </AnimatePresence>
 
       <div style={{ marginTop: 18 }}>
         {/* The section editor stays mounted across sub-tab switches (only hidden)

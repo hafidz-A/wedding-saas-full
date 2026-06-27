@@ -193,7 +193,7 @@ export default function GuestbookTab({ slug, template, attendances, souvenirEnab
   return (
     <div className={tabs.card}>
       <header className={tabs.headerRow}>
-        <div>
+        <div className={tabs.headerTitleBox}>
           <h2>{t.title}</h2>
           <p style={sub}>{t.subtitle}</p>
         </div>

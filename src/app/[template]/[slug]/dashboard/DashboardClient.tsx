@@ -72,6 +72,7 @@ export default function DashboardClient({
 
   const [tab, setTab] = useState<TabKey>('rsvps')
   const [editorSub, setEditorSub] = useState<EditorSubTab>('section')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Tutorial deep-links can target an editor sub-tab (e.g. 'palette') — route
   // those to the Editor top-tab with the right sub-tab selected.
@@ -91,6 +92,70 @@ export default function DashboardClient({
 
   const tabKeys: TabKey[] = ['rsvps', 'gifts', 'guests', 'guestbook', 'editor', 'tutorial']
 
+  const actionItems = (
+    <>
+      <LangToggle lang={lang} label={dict.chrome.language} />
+      <span
+        style={{
+          height: 36,
+          padding: '0 16px',
+          borderRadius: 'var(--radius-pill)',
+          fontSize: 11,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          background: invitation.is_published ? 'var(--color-emerald)' : 'var(--border-strong)',
+          color: invitation.is_published ? '#fff' : 'var(--text-primary)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
+          lineHeight: 1,
+        }}
+      >
+        {invitation.is_published ? dict.chrome.published : dict.chrome.draft}
+      </span>
+      <span
+        style={{
+          height: 36,
+          padding: '0 16px',
+          borderRadius: 'var(--radius-pill)',
+          fontSize: 11,
+          letterSpacing: '0.08em',
+          background: 'var(--border-subtle)',
+          color: 'var(--text-secondary)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
+          lineHeight: 1,
+        }}
+      >
+        {periodLabel}
+      </span>
+      <Link href="/" className={styles.ghostBtn} onClick={() => setMobileMenuOpen(false)}>
+        {dict.chrome.homepage}
+      </Link>
+      <Link
+        href={`/${template}/${slug}`}
+        target="_blank"
+        className={styles.solidBtn}
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        {dict.chrome.viewLive}
+      </Link>
+      <form action="/api/auth/logout" method="post" style={{ display: 'inline' }}>
+        <button
+          type="submit"
+          className={`${styles.ghostBtn} ${styles.ghostBtnSm}`}
+          title={dict.chrome.logout}
+          style={{ width: '100%' }}
+        >
+          {dict.chrome.logout}
+        </button>
+      </form>
+    </>
+  )
+
   return (
     <DashboardI18nProvider dict={dict} lang={lang}>
     <DialogProvider labels={dict.chrome.dialog}>
@@ -109,52 +174,40 @@ export default function DashboardClient({
           <h1>{slug}</h1>
         </div>
         <div className={styles.headerActions}>
-          <LangToggle lang={lang} label={dict.chrome.language} />
-          <span
-            style={{
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-pill)',
-              fontSize: 11,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              background: invitation.is_published ? 'var(--color-emerald)' : 'var(--border-strong)',
-              color: invitation.is_published ? '#fff' : 'var(--text-primary)',
-            }}
-          >
-            {invitation.is_published ? dict.chrome.published : dict.chrome.draft}
-          </span>
-          <span
-            style={{
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-pill)',
-              fontSize: 11,
-              letterSpacing: '0.08em',
-              background: 'var(--border-subtle)',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            {periodLabel}
-          </span>
-          <Link href="/" className={styles.ghostBtn}>
-            {dict.chrome.homepage}
-          </Link>
-          <Link
-            href={`/${template}/${slug}`}
-            target="_blank"
-            className={styles.solidBtn}
-          >
-            {dict.chrome.viewLive}
-          </Link>
-          <form action="/api/auth/logout" method="post" style={{ display: 'inline' }}>
-            <button
-              type="submit"
-              className={`${styles.ghostBtn} ${styles.ghostBtnSm}`}
-              title={dict.chrome.logout}
-            >
-              {dict.chrome.logout}
-            </button>
-          </form>
+          {actionItems}
         </div>
+        <button
+          type="button"
+          className={styles.mobileMenuBtn}
+          onClick={() => setMobileMenuOpen((o) => !o)}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        {/* Landing page style top dropdown menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.div
+                className={styles.mobileDropdownOverlay}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <motion.div
+                className={styles.mobileDropdownContent}
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {actionItems}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </header>
 
       {!invitation.is_paid && (

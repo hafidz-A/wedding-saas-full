@@ -33,9 +33,11 @@
 .link { font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-medium); color: var(--color-charcoal-light); transition: var(--transition-default); }
 .link:hover { color: var(--color-coral); }
 .cta {
-  font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold);
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 44px; padding: 1px 22px 0 22px;
+  font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold); line-height: 1;
   background: var(--color-charcoal); color: var(--color-cream);
-  padding: 10px 20px; border-radius: var(--border-radius-pill);
+  border-radius: var(--border-radius-pill);
   white-space: nowrap;
   transition:
     background var(--duration-base) var(--ease-out),
@@ -60,22 +62,32 @@
 .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 .mobilePanel {
-  display: flex; flex-direction: column; gap: 14px; align-items: flex-start;
+  display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
   margin: 10px clamp(12px, 3vw, 28px) 0;
-  padding: 18px 22px 22px;
+  padding: 20px 22px 22px;
   background: rgba(253, 246, 236, 0.97);
-  border: 1px solid rgba(42, 33, 24, 0.1);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(42, 33, 24, 0.12);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
 }
-.mobilePanel .cta { width: 100%; text-align: center; }
+.mobilePanel .link {
+  display: flex; align-items: center;
+  width: 100%;
+  padding: 6px 0;
+  font-size: 15px;
+  font-weight: var(--weight-medium);
+  color: var(--color-charcoal);
+}
+.mobilePanel .cta { width: 100%; text-align: center; margin-top: 4px; }
 
 .profileWrap { position: relative; display: inline-block; }
 .profileTrigger {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 44px; padding: 0 18px;
+  font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold); line-height: 1;
   color: var(--color-charcoal); cursor: pointer;
-  padding: 8px 12px; border-radius: var(--border-radius-pill);
+  border-radius: var(--border-radius-pill);
   border: 1px solid var(--border-default); background: rgba(255, 255, 255, 0.5);
   transition:
     border-color var(--duration-base) var(--ease-out),

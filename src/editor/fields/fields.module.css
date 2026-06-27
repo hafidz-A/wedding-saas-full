@@ -76,7 +76,7 @@
   color: #fff;
   font-size: 9px;
   font-weight: var(--weight-bold);
-  font-style: italic;
+  font-style: normal;
 }
 
 @media (prefers-reduced-motion: reduce) {

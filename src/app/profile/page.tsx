@@ -183,13 +183,16 @@ const periodChip: React.CSSProperties = {
   padding: '3px 10px',
   borderRadius: 'var(--radius-pill)',
   alignSelf: 'flex-start',
+  marginLeft: -10,
 }
 const itemActions: React.CSSProperties = { display: 'flex', gap: 10, flexWrap: 'wrap' }
 const ghostLink: React.CSSProperties = {
-  padding: '8px 16px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)',
+  height: 36, padding: '0 16px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)',
   color: 'var(--text-primary)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }
 const solidLink: React.CSSProperties = {
-  padding: '8px 16px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)',
+  height: 36, padding: '0 16px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)',
   fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }

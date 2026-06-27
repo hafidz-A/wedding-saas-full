@@ -230,8 +230,9 @@ const input: React.CSSProperties = {
 }
 const primaryBtn: React.CSSProperties = {
   marginTop: 8,
-  padding: '14px 24px',
-  borderRadius: 'var(--radius-pill)',
+  height: 44,
+  padding: '1px 24px 0 24px',
+  borderRadius: '999px',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
   border: 0,
@@ -240,6 +241,10 @@ const primaryBtn: React.CSSProperties = {
   letterSpacing: '0.16em',
   textTransform: 'uppercase',
   cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 1,
 }
 const linkBtn: React.CSSProperties = {
   background: 'none',

@@ -182,7 +182,7 @@ export default function SectionWrapper({ section, index, total, children }) {
             gap: 10,
             padding: "6px 12px",
             border: "1px solid var(--color-line)",
-            borderRadius: "var(--r-pill)",
+            borderRadius: "999px",
             background: "color-mix(in oklab, var(--color-bg) 70%, transparent)",
             backdropFilter: "blur(8px)",
             fontSize: 11,

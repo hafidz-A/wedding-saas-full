@@ -9,12 +9,12 @@ export const landing = {
       ctaSecondary: 'Lihat Template',
     },
     emotionalHook: {
-      title: 'Undangan adalah kesan pertama acara kalian.',
-      body: 'Sebelum tamu melihat dekorasi atau mendengar lagu pertama, mereka membuka link ini. Jadi kami membuat momen itu terasa: foto kalian, lagu kalian, cerita kalian — terbuka pelan-pelan di layar tamu.',
+      title: 'Kesan pertama momen bahagiamu.',
+      body: 'Link undangan ini adalah pembuka momen spesial kalian. Begitu dibuka, foto, lagu latar, hingga garis cerita pernikahan kalian akan terbuka secara interaktif di layar setiap tamu.',
     },
     vibeExploration: {
       heading: 'Coba Vibe-nya Langsung di Halaman Ini',
-      subheading: 'Pilih kategori, geser antar template, lalu pilih palette-nya. Latar halaman ini ikut berubah persis seperti undanganmu nanti.',
+      subheading: 'Eksplorasi gaya dan warna pilihanmu langsung di sini.',
       templateEyebrow: 'Template',
       paletteLabel: 'Pilih Palette',
       ambienceLabel: 'Ambience',
@@ -41,20 +41,20 @@ export const landing = {
       },
     },
     features: {
-      heading: 'Cantik di depan, rapi di belakang',
-      subheading: 'RSVP terkumpul sendiri, amplop digital langsung ke rekening kalian, musik main otomatis. Kalian tinggal fokus ke acaranya.',
+      heading: 'Tampilan Anggun, Pengelolaan Sempurna',
+      subheading: 'Data RSVP terorganisir secara otomatis, konfirmasi hadiah tercatat rapi, dan musik mengalun indah. Anda dapat fokus sepenuhnya pada hari bahagia.',
       items: [
         {
           title: 'RSVP & Manajemen Tamu',
-          body: 'Siapa hadir, bawa berapa orang, pesan mereka apa — masuk sendiri ke dashboard. Nggak ada lagi rekap manual di notes HP.',
+          body: 'Konfirmasi kehadiran, jumlah tamu, hingga pesan ucapan tercatat secara otomatis di dashboard. Bebas dari rekapitulasi manual yang menyita waktu.',
         },
         {
           title: 'Musik Latar',
-          body: 'Upload lagu kalian, dan musiknya mulai begitu tamu membuka undangan. Detail kecil yang paling sering bikin terharu.',
+          body: 'Unggah lagu pilihan Anda untuk alunan musik yang otomatis berputar saat undangan dibuka. Sentuhan personal yang menghadirkan suasana hangat.',
         },
         {
-          title: 'Galeri, Cerita & Amplop Digital',
-          body: 'Kisah kalian dalam timeline, foto-foto terbaik, dan amplop digital yang transfernya langsung masuk ke rekening kalian.',
+          title: 'Galeri, Cerita & Hadiah Digital',
+          body: 'Rangkaian perjalanan kasih dalam timeline interaktif, galeri foto berkualitas tinggi, serta konfirmasi transfer hadiah yang tercatat rapi sesuai rekening pilihan Anda.',
         },
       ],
     },
@@ -121,12 +121,12 @@ export const landing = {
       ctaSecondary: 'Browse Templates',
     },
     emotionalHook: {
-      title: 'The invitation is your event’s first impression.',
-      body: 'Before anyone sees the venue or hears the first song, they open this link. So we make that moment count: your photos, your song, your story — unfolding slowly on every guest’s screen.',
+      title: 'The first impression of your happiest moment.',
+      body: 'This invitation link is the opening to your special occasion. Once opened, your photos, background music, and wedding storyline unfold interactively on every guest’s screen.',
     },
     vibeExploration: {
       heading: 'Try the Vibe, Right on This Page',
-      subheading: 'Pick a category, swipe between templates, then pick a palette. This page repaints itself to look exactly like your future invitation.',
+      subheading: 'Explore your choice of styles and colors right here.',
       templateEyebrow: 'Template',
       paletteLabel: 'Choose a palette',
       ambienceLabel: 'Ambience',
@@ -153,20 +153,20 @@ export const landing = {
       },
     },
     features: {
-      heading: 'Pretty up front, organized backstage',
-      subheading: 'RSVPs collect themselves, the digital envelope goes straight to your account, the music plays itself. You focus on the day.',
+      heading: 'Stunning Elegance, Flawless Management',
+      subheading: 'RSVPs organize automatically, gift confirmations log neatly, and music plays seamlessly. Focus entirely on your special day.',
       items: [
         {
           title: 'RSVP & Guest Management',
-          body: 'Who’s coming, how many they’re bringing, what they wrote — it all lands in your dashboard on its own. No more tallying in your phone notes.',
+          body: 'Attendance confirmations, guest counts, and personal wishes are logged automatically in your dashboard. No more manual tracking.',
         },
         {
           title: 'Background Music',
-          body: 'Upload your song, and it starts the moment a guest opens the invitation. The small detail that moves people most.',
+          body: 'Upload your chosen track to play automatically when guests open the invitation. A personal touch that creates a memorable atmosphere.',
         },
         {
           title: 'Gallery, Story & Digital Gift',
-          body: 'Your story on a timeline, your best photos, and a digital envelope where transfers go straight to your own account.',
+          body: 'Your love story on an interactive timeline, high-quality photo galleries, and gift transfer confirmations logged neatly for your designated accounts.',
         },
       ],
     },

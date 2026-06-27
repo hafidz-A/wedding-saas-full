@@ -52,3 +52,6 @@ Thumbs.db
 
 # Scratch dir for demo-image curation
 .tmp/
+
+# Template capture artefacts (screenshots / frames / walkthrough videos)
+/captures/

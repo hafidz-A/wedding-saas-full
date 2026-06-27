@@ -156,10 +156,15 @@ fieldset.field > .label {
   border-radius: var(--border-radius-pill);
 }
 .toggleBtn {
-  padding: 12px 16px;
-  border-radius: var(--border-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 16px;
+  line-height: 1;
+  border-radius: 999px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   color: var(--rsvp-fg-soft);
   transition: var(--transition-default);
 }
@@ -177,7 +182,7 @@ fieldset.field > .label {
   gap: 16px;
   background: var(--rsvp-surface);
   padding: 6px;
-  border-radius: var(--border-radius-pill);
+  border-radius: 999px;
   width: max-content;
 }
 .stepBtn {
@@ -212,15 +217,20 @@ fieldset.field > .label {
 
 /* ---------- Submit ---------- */
 .submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 12px;
-  padding: 16px 28px;
-  border-radius: var(--border-radius-pill);
+  height: 44px;
+  padding: 0 28px;
+  line-height: 1;
+  border-radius: 999px;
   /* Inverts the section pair so the CTA stays high-contrast on every palette:
      a chip in the contrast colour with accent-coloured label. */
   background: var(--rsvp-fg);
   color: var(--rsvp-bg);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -304,8 +314,13 @@ fieldset.field > .label {
 /* "RSVP for another guest" — neutral outline button that reads on the white
    success card; brings the empty form back for the next code on a shared link. */
 .another {
-  padding: 11px 24px;
-  border-radius: var(--border-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 24px;
+  line-height: 1;
+  border-radius: 999px;
   background: transparent;
   color: var(--color-charcoal);
   border: 1px solid rgba(42, 33, 24, 0.25);

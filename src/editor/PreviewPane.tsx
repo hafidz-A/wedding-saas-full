@@ -64,13 +64,14 @@ export default function PreviewPane({ slug, template }: Props) {
         >↻</button>
       </header>
 
-      <div style={stageWrap}>
+      <div style={{ ...stageWrap, padding: 'clamp(10px, 2vw, 24px)' }}>
         <div
           style={{
             ...deviceFrame,
-            width: cfg.width === '100%' ? '100%' : cfg.width,
+            width: cfg.width === '100%' ? '100%' : 'min(100%, ' + cfg.width + 'px)',
             maxWidth: '100%',
-            height: cfg.height,
+            height: 'min(' + cfg.height + 'px, 70vh)',
+            boxSizing: 'border-box',
           }}
         >
           {cfg.width !== '100%' && (
@@ -83,7 +84,7 @@ export default function PreviewPane({ slug, template }: Props) {
           <iframe
             key={v}
             src={`/${template}/${slug}?preview=1&v=${encodeURIComponent(v)}`}
-            style={{ ...frame, height: cfg.width !== '100%' ? cfg.height - 28 : cfg.height }}
+            style={{ ...frame, height: '100%' }}
             title={`Invitation preview — ${cfg.label}`}
           />
         </div>

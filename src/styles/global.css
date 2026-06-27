@@ -97,6 +97,14 @@ input, textarea, select {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
+  box-sizing: border-box;
+}
+
+/* Systemic Optical Alignment: compensations for button labels and pills */
+button > span,
+a > span {
+  display: inline-block;
+  transform: translateY(0.75px);
 }
 
 a { color: inherit; text-decoration: none; }

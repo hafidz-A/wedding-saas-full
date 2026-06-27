@@ -86,7 +86,7 @@ export default async function DashboardPage({ params }: PageProps) {
       <AuthChrome lang={lang} />
       <main style={panelStyle}>
         <div style={cardStyle}>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 32, margin: '0 0 12px' }}>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 32, margin: '0 0 12px' }}>
             {t.dashboard.page.wrongAccountTitle}
           </h1>
           <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 16px' }}>
@@ -226,7 +226,7 @@ function SetupPrompt({ lang }: { lang: Lang }) {
     <AuthChrome lang={lang} />
     <main style={panelStyle}>
       <div style={cardStyle}>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 40, margin: '0 0 16px' }}>
           Setup needed
         </h1>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
@@ -246,7 +246,7 @@ function NoSuchInvitation({ slug, dict, lang }: { slug: string; dict: Dict['dash
     <AuthChrome lang={lang} />
     <main style={panelStyle}>
       <div style={cardStyle}>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 40, margin: '0 0 16px' }}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 40, margin: '0 0 16px' }}>
           {dict.noInvitationPrefix} <code>{slug}</code> {dict.noInvitationSuffix}
         </h1>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>{dict.noInvitationBody}</p>

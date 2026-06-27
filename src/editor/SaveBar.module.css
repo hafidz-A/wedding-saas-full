@@ -42,11 +42,16 @@
 
 /* ── Publish toggle ── */
 .pill {
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
+  height: 36px;
+  padding: 1px 16px 0 16px;
+  border-radius: 999px;
   font-size: var(--font-size-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 .pillOn  { background: var(--color-emerald); color: #fff; }
 .pillOff { background: var(--border-strong); color: var(--text-primary); }
@@ -56,13 +61,18 @@
 
 /* ── Save button ── */
 .saveBtn {
-  padding: 10px 22px;
-  border-radius: var(--radius-pill);
+  height: 36px;
+  padding: 1px 20px 0 20px;
+  border-radius: 999px;
   background: var(--color-charcoal);
   color: var(--surface-warm);
   font-size: var(--font-size-sm);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 .saveBtn:not(:disabled):hover {
   background: var(--color-charcoal-hover);
@@ -111,8 +121,9 @@
 }
 .bannerReload {
   flex: 0 0 auto;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
+  height: 36px;
+  padding: 1px 16px 0 16px;
+  border-radius: 999px;
   background: var(--color-charcoal);
   color: var(--surface-warm);
   font-size: var(--font-size-xs);
@@ -121,6 +132,10 @@
   border: none;
   cursor: pointer;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   transition:
     background var(--duration-base) var(--ease-in-out),
     box-shadow var(--duration-base) var(--ease-in-out),
