@@ -415,14 +415,15 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                   </div>
 
                   <div className={styles.actionRowSub}>
-                    <span className={styles.token}>
-                      {t.tokenLabel}: <code>{g.rsvpToken || '—'}</code>
+                    <div className={styles.tokenBadge}>
+                      <span>{t.tokenLabel}:</span>
+                      <code>{g.rsvpToken || '—'}</code>
                       {g.rsvpSubmittedAt ? (
                         <em className={styles.tokenUsed}> {t.tokenRsvpedBadge}</em>
                       ) : (
                         g.tokenUsedAt && <em className={styles.tokenUsed}> {t.tokenUsedBadge}</em>
                       )}
-                    </span>
+                    </div>
                     <div className={styles.actionRowBtns}>
                       <button
                         type="button"
