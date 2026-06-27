@@ -205,7 +205,6 @@ const kicker: React.CSSProperties = {
 }
 const title: React.CSSProperties = {
   fontFamily: 'var(--font-heading)',
-  fontStyle: 'italic',
   fontSize: 30,
   margin: 0,
   color: 'var(--text-primary)',

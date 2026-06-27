@@ -9,7 +9,7 @@ export function Logo({ size = 'md', withLink = true }: LogoProps) {
     <span className={`${styles.logo} ${size === 'sm' ? styles.sm : styles.md}`}>
       <span className={styles.fin}>{BRAND_PARTS.lead}</span>
       <span className={styles.dot} aria-hidden="true" />
-      <span className={styles.wedding}>{BRAND_PARTS.tail}</span>
+      <span className={styles.cards}>{BRAND_PARTS.tail}</span>
     </span>
   )
   if (!withLink) return mark

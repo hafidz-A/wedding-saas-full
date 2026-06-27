@@ -149,7 +149,6 @@ const kicker: React.CSSProperties = {
 }
 const h1: React.CSSProperties = {
   fontFamily: 'var(--font-heading)',
-  fontStyle: 'italic',
   fontSize: 36,
   margin: 0,
   color: 'var(--text-primary)',

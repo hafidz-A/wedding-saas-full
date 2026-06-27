@@ -172,7 +172,7 @@ const card: React.CSSProperties = {
   boxShadow: 'var(--shadow-md)',
 }
 const kicker: React.CSSProperties = { textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: 'var(--interactive-primary)', margin: '0 0 8px' }
-const title: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 32, margin: 0 }
+const title: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontSize: 32, margin: 0 }
 const hint: React.CSSProperties = { fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }
 const label: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'var(--text-muted)' }
 const input: React.CSSProperties = { height: 44, padding: '12px 16px 10px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(42,33,24,0.16)', fontSize: 15, outline: 'none', background: 'var(--surface-raised)', boxSizing: 'border-box' }

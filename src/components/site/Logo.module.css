@@ -1,7 +1,7 @@
 .link { display: inline-flex; align-items: center; text-decoration: none; }
 .logo { display: inline-flex; align-items: center; justify-content: center; gap: 0.28em; color: var(--color-charcoal); white-space: nowrap; line-height: 1; }
 .fin { font-family: var(--font-heading); font-weight: var(--weight-medium); font-style: normal; letter-spacing: -0.01em; display: inline-flex; align-items: center; line-height: 1; }
-.wedding { font-family: var(--font-heading); font-weight: var(--weight-medium); font-style: italic; letter-spacing: -0.01em; display: inline-flex; align-items: center; line-height: 1; }
+.cards { font-family: var(--font-heading); font-weight: var(--weight-medium); font-style: normal; letter-spacing: -0.01em; display: inline-flex; align-items: center; line-height: 1; }
 .dot {
   display: inline-block;
   flex-shrink: 0;
