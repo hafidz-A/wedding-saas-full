@@ -67,13 +67,12 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
   // music.enabled === false means the couple turned music OFF — do not fall
   // back to the legacy default track. The legacy fallback only applies to
   // configs that predate the music object (enabled undefined).
-  const resolvedMusic =
+  const audioSrc =
     music.enabled === false
       ? null
-      : resolveMusicSource(music) ||
-        (config.audio?.src ? { kind: 'audio', url: config.audio.src } : null)
-  const audioSrc = resolvedMusic?.kind === 'audio' ? resolvedMusic.url : null
-  const youtubeId = resolvedMusic?.kind === 'youtube' ? resolvedMusic.youtubeId : null
+      : (resolveMusicSource(music)?.kind === 'audio' ? resolveMusicSource(music).url : null) ||
+        config.audio?.src ||
+        null
 
   const effSlug = slug || config.meta?.slug || 'demo'
   // Gate photos double as the floating "photo-stars" scattered behind every
@@ -122,7 +121,7 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
       options={config.theme?.paletteOptions}
       allowGuestSwitch={isDemo}
     >
-      <AudioProvider src={audioSrc} youtubeId={youtubeId} defaultVolume={config.audio?.volume ?? 0.5}>
+      <AudioProvider src={audioSrc} defaultVolume={config.audio?.volume ?? 0.5}>
         <GuestProvider>
           <JourneyProvider>
             <FloatingNavbar

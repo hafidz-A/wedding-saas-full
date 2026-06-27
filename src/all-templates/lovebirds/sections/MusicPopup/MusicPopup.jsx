@@ -1,23 +1,23 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useYouTubePlayer } from '@/lib/music/useYouTubePlayer'
 import styles from './MusicPopup.module.css'
 
 /**
  * MusicPopup — themed accept/reject overlay for background music.
  *
  *  • Appears bottom-center after `delayMs` (default 1500ms)
- *  • Plays a plain audio URL (upload / direct url / library) via <audio>, OR a
- *    YouTube video via a hidden IFrame player when `youtubeId` is set.
+ *  • Plays an uploaded MP3 via <audio>.
  *  • On accept: starts looping audio + replaces popup with a small floating
- *    toggle button (mute/unmute) at bottom-right.
+ *    toggle button (pause/play) at bottom-right.
  *  • On dismiss: hides forever (within this session).
- *  • Respects browser autoplay policy — playback is invoked from a user click.
+ *  • CRITICAL: audio.play() MUST be called in the DIRECT click handler call
+ *    stack — iOS/Android browsers reject play() from useEffect / setTimeout
+ *    because they require a synchronous user-gesture context.
  */
 export default function MusicPopup({
   audioUrl = '',
-  youtubeId = '',
+  youtubeId: _youtubeId = '',
   title = 'Putar musik latar?',
   subtitle = 'Nikmati pengalaman undangan lebih lengkap',
   acceptLabel = 'Putar',
@@ -30,9 +30,7 @@ export default function MusicPopup({
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef(null)
 
-  const isYouTube = !!youtubeId
-  const active = isYouTube ? !!youtubeId : !!audioUrl
-  const yt = useYouTubePlayer({ youtubeId: isYouTube ? youtubeId : null, loop })
+  const active = !!audioUrl
 
   // Show popup after delay (only if a source is set)
   useEffect(() => {
@@ -41,34 +39,27 @@ export default function MusicPopup({
     return () => window.clearTimeout(t)
   }, [active, delayMs])
 
-  // Try to play when accepted
-  useEffect(() => {
-    if (phase !== 'accepted') return
-    if (isYouTube) {
-      yt.unmute()
-      yt.play()
-      setIsPlaying(true)
-      return
-    }
+  if (!active) return null
+  if (phase === 'hidden' || phase === 'dismissed') return null
+
+  const wrapperStyle = accentColor ? { '--mp-accent': accentColor } : undefined
+
+  /**
+   * Accept music — called DIRECTLY from onClick (user gesture).
+   * audio.play() stays in the synchronous call stack of the tap/click so
+   * mobile browsers allow it.
+   */
+  const acceptAndPlay = () => {
+    setPhase('accepted')
     const audio = audioRef.current
     if (!audio) return
     audio.volume = 0.6
     audio.play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false))
-  }, [phase, isYouTube, yt])
-
-  if (!active) return null
-  if (phase === 'hidden' || phase === 'dismissed') return null
-
-  const wrapperStyle = accentColor ? { '--mp-accent': accentColor } : undefined
+  }
 
   const togglePlay = () => {
-    if (isYouTube) {
-      if (isPlaying) { yt.pause(); setIsPlaying(false) }
-      else { yt.unmute(); yt.play(); setIsPlaying(true) }
-      return
-    }
     const audio = audioRef.current
     if (!audio) return
     if (audio.paused) {
@@ -81,7 +72,7 @@ export default function MusicPopup({
 
   return (
     <>
-      {!isYouTube && <audio ref={audioRef} src={audioUrl} loop={loop} preload="auto" />}
+      <audio ref={audioRef} src={audioUrl} loop={loop} preload="auto" />
 
       {phase === 'shown' && (
         <div className={styles.popup} style={wrapperStyle} role="dialog" aria-label="Music permission">
@@ -101,7 +92,7 @@ export default function MusicPopup({
             <button
               type="button"
               className={styles.btnAccept}
-              onClick={() => setPhase('accepted')}
+              onClick={acceptAndPlay}
             >
               {acceptLabel}
             </button>
