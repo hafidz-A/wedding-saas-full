@@ -107,7 +107,12 @@ export default function LedgerTable({
                     aria-label={t.deleteAria}
                     title={t.deleteAria}
                   >
-                    {deletingId === r.id ? '…' : '×'}
+                    {deletingId === r.id ? '…' : (
+                      <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'block' }}>
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    )}
                   </button>
                 </td>
               </tr>

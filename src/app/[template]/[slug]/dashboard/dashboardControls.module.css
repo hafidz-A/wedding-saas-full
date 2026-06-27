@@ -129,10 +129,10 @@
     transform var(--duration-fast) var(--ease-in-out);
 }
 .btnGhostDanger:not(:disabled):hover {
-  background: #DC2626;
-  border-color: #B91C1C;
+  background: #B91C1C;
+  border-color: #991B1B;
   color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 4px 16px rgba(185, 28, 28, 0.4);
   transform: translateY(-1.5px);
 }
 .btnGhostDanger:not(:disabled):active { transform: translateY(1px); }
@@ -255,17 +255,18 @@
 /* Round destructive icon (delete a ledger row, etc.) — coral at rest, fills soft
    on hover. Stays clearly contrasty (darker coral on a pale tint). */
 .btnDelete {
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
+  padding: 0;
   flex: 0 0 auto;
   border-radius: 50%;
   border: 1.5px solid #EF4444;
   background: rgba(239, 68, 68, 0.08);
   color: #DC2626;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
   line-height: 1;
   cursor: pointer;
   transition:
@@ -276,10 +277,10 @@
     transform var(--duration-fast) var(--ease-in-out);
 }
 .btnDelete:not(:disabled):hover {
-  background: #DC2626;
-  border-color: #B91C1C;
+  background: #B91C1C;
+  border-color: #991B1B;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 4px 14px rgba(185, 28, 28, 0.45);
   transform: scale(1.1);
 }
 .btnDelete:not(:disabled):active { transform: scale(0.95); }
