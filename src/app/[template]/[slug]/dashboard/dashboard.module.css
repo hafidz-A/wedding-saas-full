@@ -172,9 +172,9 @@
   letter-spacing: var(--tracking-wide);
 }
 .ghostBtn:hover {
-  color: var(--text-primary);
-  border-color: var(--border-strong);
-  background: rgba(42, 33, 24, 0.03);
+  color: var(--interactive-primary-hover);
+  border-color: var(--interactive-primary);
+  background: var(--interactive-primary-soft);
 }
 .ghostBtnSm { padding: 0 16px; font-size: var(--font-size-xs); letter-spacing: 0.12em; height: 36px; }
 

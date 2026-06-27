@@ -47,7 +47,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
           <button
             type="button"
             onClick={() => setPreviewOpen((p) => !p)}
-            style={previewToggle}
+            className={styles.previewToggle}
             title={previewOpen ? t.hidePreviewTitle : t.showPreviewTitle}
           >
             {previewOpen ? t.hidePreview : t.showPreview}

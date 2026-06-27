@@ -7,6 +7,7 @@ import type { SectionEntry } from './EditorProvider'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
+import styles from './EditorRoot.module.css'
 
 interface Props {
   section: SectionEntry
@@ -69,7 +70,7 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
   }
 
   return (
-    <div ref={setNodeRef} style={style} onClick={onSelect}>
+    <div ref={setNodeRef} style={style} className={styles.rowItem} onClick={onSelect}>
       <span
         {...(draggable ? attributes : {})}
         {...(draggable ? listeners : {})}

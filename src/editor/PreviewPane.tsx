@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useEditor } from './EditorProvider'
+import ctrl from './dashboardControls.module.css'
 
 interface Props {
   slug: string
@@ -59,7 +60,7 @@ export default function PreviewPane({ slug, template }: Props) {
         <button
           type="button"
           onClick={refreshPreview}
-          style={refreshBtn}
+          className={ctrl.iconBtn}
           title="Refresh preview"
         >↻</button>
       </header>

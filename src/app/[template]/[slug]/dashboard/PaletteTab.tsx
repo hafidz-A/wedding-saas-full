@@ -112,8 +112,8 @@ export default function PaletteTab({
                   aria-checked={selected}
                   aria-label={p.label}
                   onClick={() => setPalette(p.key)}
+                  className={ctrl.paletteMenuBtn}
                   style={{
-                    ...menuBtn,
                     fontWeight: selected ? 600 : 500,
                     color: selected ? p.accent : active.fgMuted,
                     borderColor: selected ? p.accent : active.surfaceBorder,

@@ -214,8 +214,10 @@
 }
 
 .secondary:hover {
-  background: rgba(42, 33, 24, 0.05);
-  border-color: var(--color-charcoal);
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+  background: var(--interactive-primary-soft);
+  transform: translateY(-1.5px);
 }
 .secondary:active { transform: translateY(1px); }
 
