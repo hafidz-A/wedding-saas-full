@@ -167,6 +167,11 @@
   text-align: right;
   white-space: nowrap;
 }
+.actionRowMain, .actionRowSub, .actionRowBtns {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 /* ── Mobile (<768px): collapse table to stacked cards ── */
 @media (max-width: 767.98px) {
@@ -214,28 +219,47 @@
     font-weight: var(--weight-medium);
   }
 
-  /* Actions wrap to full width row, buttons grow to fit */
+  /* Actions wrap cleanly into 2 structured rows */
   .actionsCell {
     text-align: left;
+    white-space: normal;
     margin-top: var(--space-2);
     padding-top: 10px !important;
     border-top: 1px solid var(--border-subtle) !important;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
   }
 
   .actionsCell::before {
     display: none !important;
   }
 
-  .actionsCell > button {
-    margin-left: 0 !important;
+  .actionRowMain {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .actionRowMain > button:first-child {
+    flex: 1;
   }
 
-  /* Primary action gets remaining space; secondary stay compact */
-  .actionsCell > button:first-child {
-    flex: 1;
+  .actionRowSub {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .actionRowBtns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    width: 100%;
   }
 }
 

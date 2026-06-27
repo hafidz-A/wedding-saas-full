@@ -194,3 +194,11 @@
     font-weight: var(--weight-medium);
   }
 }
+
+.desktopOnly { display: block; }
+.mobileOnly { display: none; }
+
+@media (max-width: 767.98px) {
+  .desktopOnly { display: none !important; }
+  .mobileOnly { display: flex !important; flex-direction: column; gap: 10px; }
+}

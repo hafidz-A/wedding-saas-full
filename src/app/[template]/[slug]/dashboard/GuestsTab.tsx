@@ -395,95 +395,99 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                   )}
                 </td>
                 <td className={styles.actionsCell}>
-                  <button
-                    type="button"
-                    onClick={() => handleSend(g)}
-                    disabled={pending}
-                    className={ctrl.btnPrimarySm}
-                  >
-                    {g.phone_e164 ? t.sendWa : t.pickContact}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditingGuest(g)}
-                    className={ctrl.btnGhostSm}
-                    style={{ marginLeft: 6 }}
-                    title={t.editTitle}
-                  >
-                    ✎
-                  </button>
-                  <span className={styles.token}>
-                    {t.tokenLabel}: <code>{g.rsvpToken || '—'}</code>
-                    {g.rsvpSubmittedAt ? (
-                      <em className={styles.tokenUsed}> {t.tokenRsvpedBadge}</em>
-                    ) : (
-                      g.tokenUsedAt && <em className={styles.tokenUsed}> {t.tokenUsedBadge}</em>
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    className={ctrl.btnGhostDanger}
-                    style={{ height: 32, padding: '0 12px', fontSize: '0.78rem', marginLeft: 6 }}
-                    onClick={() => handleRegenerate(g)}
-                    disabled={pending}
-                    aria-label={t.regenerateAria.replace('{name}', g.name)}
-                    title={t.regenerateTitle}
-                  >
-                    <span aria-hidden>↻</span> {t.regenerateBtn}
-                  </button>
-                  {g.sent_at && (
+                  <div className={styles.actionRowMain}>
                     <button
                       type="button"
-                      onClick={() => {
-                        setLocalGuests((prev) =>
-                          prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)),
-                        )
-                        startTransition(async () => {
-                          try {
-                            await unmarkGuestSent(slug, g.id)
-                            fb.ok(fm.markUndone)
-                          } catch (e) {
-                            // restore on failure
-                            setLocalGuests((prev) =>
-                              prev.map((x) => (x.id === g.id ? { ...x, sent_at: g.sent_at } : x)),
-                            )
-                            fb.fail(fm.updateFail)
-                          }
-                        })
-                      }}
-                      className={ctrl.btnGhostSm}
-                      style={{ marginLeft: 6 }}
-                      title={t.unmarkTitle}
+                      onClick={() => handleSend(g)}
+                      disabled={pending}
+                      className={ctrl.btnPrimarySm}
                     >
-                      ↶
+                      {g.phone_e164 ? t.sendWa : t.pickContact}
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!(await confirmDialog({ message: `${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`, tone: 'danger' }))) return
-                      // Optimistic remove
-                      setLocalGuests((prev) => prev.filter((x) => x.id !== g.id))
-                      startTransition(async () => {
-                        try {
-                          await deleteGuest(slug, g.id)
-                          fb.ok(fm.guestDeleted)
-                        } catch (e) {
-                          // restore on failure
-                          setLocalGuests((prev) => [...prev, g])
-                          fb.fail(fm.guestDeleteFail)
-                        }
-                      })
-                    }}
-                    className={ctrl.btnDelete}
-                    style={{ marginLeft: 6 }}
-                    title={t.deleteTitle}
-                  >
-                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'block' }}>
-                      <line x1="18" y1="6" x2="6" y2="18"/>
-                      <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingGuest(g)}
+                      className={ctrl.btnGhostSm}
+                      title={t.editTitle}
+                    >
+                      ✎
+                    </button>
+                  </div>
+
+                  <div className={styles.actionRowSub}>
+                    <span className={styles.token}>
+                      {t.tokenLabel}: <code>{g.rsvpToken || '—'}</code>
+                      {g.rsvpSubmittedAt ? (
+                        <em className={styles.tokenUsed}> {t.tokenRsvpedBadge}</em>
+                      ) : (
+                        g.tokenUsedAt && <em className={styles.tokenUsed}> {t.tokenUsedBadge}</em>
+                      )}
+                    </span>
+                    <div className={styles.actionRowBtns}>
+                      <button
+                        type="button"
+                        className={ctrl.btnGhostDanger}
+                        style={{ height: 32, padding: '0 12px', fontSize: '0.78rem' }}
+                        onClick={() => handleRegenerate(g)}
+                        disabled={pending}
+                        aria-label={t.regenerateAria.replace('{name}', g.name)}
+                        title={t.regenerateTitle}
+                      >
+                        <span aria-hidden>↻</span> {t.regenerateBtn}
+                      </button>
+                      {g.sent_at && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLocalGuests((prev) =>
+                              prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)),
+                            )
+                            startTransition(async () => {
+                              try {
+                                await unmarkGuestSent(slug, g.id)
+                                fb.ok(fm.markUndone)
+                              } catch (e) {
+                                // restore on failure
+                                setLocalGuests((prev) =>
+                                  prev.map((x) => (x.id === g.id ? { ...x, sent_at: g.sent_at } : x)),
+                                )
+                                fb.fail(fm.updateFail)
+                              }
+                            })
+                          }}
+                          className={ctrl.btnGhostSm}
+                          title={t.unmarkTitle}
+                        >
+                          ↶
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!(await confirmDialog({ message: `${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`, tone: 'danger' }))) return
+                          // Optimistic remove
+                          setLocalGuests((prev) => prev.filter((x) => x.id !== g.id))
+                          startTransition(async () => {
+                            try {
+                              await deleteGuest(slug, g.id)
+                              fb.ok(fm.guestDeleted)
+                            } catch (e) {
+                              // restore on failure
+                              setLocalGuests((prev) => [...prev, g])
+                              fb.fail(fm.guestDeleteFail)
+                            }
+                          })
+                        }}
+                        className={ctrl.btnDelete}
+                        title={t.deleteTitle}
+                      >
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'block' }}>
+                          <line x1="18" y1="6" x2="6" y2="18"/>
+                          <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             ))}
