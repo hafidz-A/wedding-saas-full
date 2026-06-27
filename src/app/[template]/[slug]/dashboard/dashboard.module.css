@@ -187,7 +187,13 @@
   font-size: var(--font-size-sm);
   letter-spacing: var(--tracking-wide);
 }
-.solidBtn:hover { background: var(--color-charcoal-hover); box-shadow: var(--shadow-sm); }
+.solidBtn:hover {
+  background: var(--interactive-primary);
+  color: #FFFFFF;
+  border-color: var(--interactive-primary);
+  box-shadow: 0 4px 14px rgba(232, 85, 62, 0.35);
+  transform: translateY(-1px);
+}
 
 /* Accent CTA (Pay now). */
 .ctaBtn {
