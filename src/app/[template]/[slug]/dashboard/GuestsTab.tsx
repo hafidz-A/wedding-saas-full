@@ -414,80 +414,76 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
                     </button>
                   </div>
 
-                  <div className={styles.actionRowSub}>
-                    <div className={styles.tokenBadge}>
-                      <span>{t.tokenLabel}:</span>
-                      <code>{g.rsvpToken || '—'}</code>
-                      {g.rsvpSubmittedAt ? (
-                        <em className={styles.tokenUsed}> {t.tokenRsvpedBadge}</em>
-                      ) : (
-                        g.tokenUsedAt && <em className={styles.tokenUsed}> {t.tokenUsedBadge}</em>
-                      )}
+                  <div className={styles.tokenBlock}>
+                    <div className={styles.tokenHeader}>
+                      {t.tokenLabel} {g.rsvpSubmittedAt ? `(${t.tokenRsvpedBadge})` : g.tokenUsedAt ? `(${t.tokenUsedBadge})` : ''}:
                     </div>
-                    <div className={styles.actionRowBtns}>
+                    <code className={styles.tokenValue}>{g.rsvpToken || '—'}</code>
+                  </div>
+
+                  <div className={styles.actionRowBtns}>
+                    <button
+                      type="button"
+                      className={ctrl.btnGhostDanger}
+                      style={{ padding: '0 12px', fontSize: '0.78rem' }}
+                      onClick={() => handleRegenerate(g)}
+                      disabled={pending}
+                      aria-label={t.regenerateAria.replace('{name}', g.name)}
+                      title={t.regenerateTitle}
+                    >
+                      <span aria-hidden>↻</span> {t.regenerateBtn}
+                    </button>
+                    {g.sent_at && (
                       <button
                         type="button"
-                        className={ctrl.btnGhostDanger}
-                        style={{ height: 32, padding: '0 12px', fontSize: '0.78rem' }}
-                        onClick={() => handleRegenerate(g)}
-                        disabled={pending}
-                        aria-label={t.regenerateAria.replace('{name}', g.name)}
-                        title={t.regenerateTitle}
-                      >
-                        <span aria-hidden>↻</span> {t.regenerateBtn}
-                      </button>
-                      {g.sent_at && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLocalGuests((prev) =>
-                              prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)),
-                            )
-                            startTransition(async () => {
-                              try {
-                                await unmarkGuestSent(slug, g.id)
-                                fb.ok(fm.markUndone)
-                              } catch (e) {
-                                // restore on failure
-                                setLocalGuests((prev) =>
-                                  prev.map((x) => (x.id === g.id ? { ...x, sent_at: g.sent_at } : x)),
-                                )
-                                fb.fail(fm.updateFail)
-                              }
-                            })
-                          }}
-                          className={ctrl.btnGhostSm}
-                          title={t.unmarkTitle}
-                        >
-                          ↶
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!(await confirmDialog({ message: `${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`, tone: 'danger' }))) return
-                          // Optimistic remove
-                          setLocalGuests((prev) => prev.filter((x) => x.id !== g.id))
+                        onClick={() => {
+                          setLocalGuests((prev) =>
+                            prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)),
+                          )
                           startTransition(async () => {
                             try {
-                              await deleteGuest(slug, g.id)
-                              fb.ok(fm.guestDeleted)
+                              await unmarkGuestSent(slug, g.id)
+                              fb.ok(fm.markUndone)
                             } catch (e) {
                               // restore on failure
-                              setLocalGuests((prev) => [...prev, g])
-                              fb.fail(fm.guestDeleteFail)
+                              setLocalGuests((prev) =>
+                                prev.map((x) => (x.id === g.id ? { ...x, sent_at: g.sent_at } : x)),
+                              )
+                              fb.fail(fm.updateFail)
                             }
                           })
                         }}
-                        className={ctrl.btnDelete}
-                        title={t.deleteTitle}
+                        className={ctrl.btnGhostSm}
+                        title={t.unmarkTitle}
                       >
-                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'block' }}>
-                          <line x1="18" y1="6" x2="6" y2="18"/>
-                          <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
+                        ↶
                       </button>
-                    </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!(await confirmDialog({ message: `${t.deleteConfirmPrefix} ${g.name}${t.deleteConfirmSuffix}`, tone: 'danger' }))) return
+                        // Optimistic remove
+                        setLocalGuests((prev) => prev.filter((x) => x.id !== g.id))
+                        startTransition(async () => {
+                          try {
+                            await deleteGuest(slug, g.id)
+                            fb.ok(fm.guestDeleted)
+                          } catch (e) {
+                            // restore on failure
+                            setLocalGuests((prev) => [...prev, g])
+                            fb.fail(fm.guestDeleteFail)
+                          }
+                        })
+                      }}
+                      className={ctrl.btnDelete}
+                      title={t.deleteTitle}
+                    >
+                      <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: 'block' }}>
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
                   </div>
                 </td>
               </tr>

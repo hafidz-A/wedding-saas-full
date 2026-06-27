@@ -167,18 +167,13 @@
   text-align: right;
   white-space: nowrap;
 }
-.actionRowMain, .actionRowSub, .actionRowBtns {
+.actionRowMain, .tokenBlock, .actionRowBtns {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
-.tokenBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.85rem;
-  opacity: 0.85;
-}
+.tokenHeader { font-size: 0.85rem; opacity: 0.85; }
+.tokenValue { letter-spacing: 0.12em; font-weight: var(--weight-semibold); }
 
 /* ── Mobile (<768px): collapse table to stacked cards ── */
 @media (max-width: 767.98px) {
@@ -205,12 +200,12 @@
     background: rgba(42, 33, 24, 0.02);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
   }
 
   .table td {
-    padding: 4px 0;
+    padding: 5px 0;
     border: none;
   }
 
@@ -226,16 +221,16 @@
     font-weight: var(--weight-medium);
   }
 
-  /* Actions wrap cleanly into 2 perfectly symmetrical rows */
+  /* Actions wrap cleanly into spacious, beautifully spaced vertical sections */
   .actionsCell {
     text-align: left;
     white-space: normal;
-    margin-top: var(--space-2);
-    padding-top: 10px !important;
+    margin-top: 12px;
+    padding-top: 12px !important;
     border-top: 1px solid var(--border-subtle) !important;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
     align-items: stretch;
   }
 
@@ -251,36 +246,63 @@
   }
   .actionRowMain > button:first-child {
     flex: 1;
+    height: 40px;
   }
 
-  .actionRowSub {
+  .tokenBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 14px;
+    background: rgba(42, 33, 24, 0.035);
+    border: 1px solid rgba(42, 33, 24, 0.08);
+    border-radius: var(--radius-sm, 10px);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tokenHeader {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(42, 33, 24, 0.6);
+    font-weight: var(--weight-medium);
+  }
+
+  .tokenValue {
+    font-size: 14px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.14em;
+    color: var(--text-primary);
+  }
+
+  .actionRowBtns {
     display: flex;
     align-items: center;
     gap: 8px;
     width: 100%;
   }
 
-  .tokenBadge {
+  .actionRowBtns > button:first-child {
     flex: 1;
-    min-width: 0;
     height: 36px;
-    padding: 0 12px;
-    background: rgba(42, 33, 24, 0.04);
-    border: 1px solid rgba(42, 33, 24, 0.08);
-    border-radius: var(--radius-pill);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-    font-size: 12px;
-    box-sizing: border-box;
   }
 
-  .actionRowBtns {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+  /* Force icon buttons on mobile to be 100% PERFECT CIRCLES (never squished/oval) */
+  .actionsCell button[class*="btnDelete"],
+  .actionsCell button[class*="btnGhostSm"] {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    aspect-ratio: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
 
