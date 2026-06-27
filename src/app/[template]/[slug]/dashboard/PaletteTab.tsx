@@ -6,6 +6,7 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { TEMPLATE_VIBES, type PaletteVibe } from '@/components/marketing/vibeData'
 import { PreviewMock } from '@/components/marketing/PreviewMock'
+import ctrl from './dashboardControls.module.css'
 
 /** Format an ISO datetime into an Indonesian long date (e.g. "12 Desember 2026").
  *  Returns '' for missing/unparseable input so the preview just omits the line. */
@@ -90,7 +91,7 @@ export default function PaletteTab({
     <div style={card}>
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ borderLeft: '4px solid var(--interactive-primary)', paddingLeft: 14 }}><h2 style={h2}>{t.title}</h2><p style={sub}>{t.subtitle}</p></div>
-        <button type="button" style={btnPrimary} onClick={save} disabled={saving}>
+        <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving}>
           {saving ? t.saving : t.save}
         </button>
       </header>
@@ -148,7 +149,7 @@ export default function PaletteTab({
 
       <footer style={footer}>
         {msg && <span style={msg.kind === 'ok' ? msgOk : msgErr}>{msg.text}</span>}
-        <button type="button" style={btnPrimary} onClick={save} disabled={saving}>
+        <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving}>
           {saving ? t.saving : t.save}
         </button>
       </footer>

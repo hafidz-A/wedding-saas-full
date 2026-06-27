@@ -64,3 +64,77 @@
     padding: var(--space-2);
   }
 }
+
+/* Unified Auth Buttons with Smooth Hover Matrix */
+.authPrimaryBtn {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 1px 24px 0 24px;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--color-charcoal, #2A2118);
+  color: var(--surface-warm, #FDF6EC);
+  border: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 1;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition:
+    background var(--duration-base, 0.2s) var(--ease-out, ease-out),
+    color var(--duration-base, 0.2s) var(--ease-out, ease-out),
+    box-shadow var(--duration-base, 0.2s) var(--ease-out, ease-out),
+    transform var(--duration-fast, 0.15s) var(--ease-in-out, ease-in-out);
+}
+.authPrimaryBtn:not(:disabled):hover {
+  background: var(--color-coral, #E8553E);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(232, 85, 62, 0.28);
+  transform: translateY(-1.5px);
+}
+.authPrimaryBtn:not(:disabled):active {
+  transform: translateY(1px);
+}
+.authPrimaryBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.authGhostBtn {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 1px 16px 0 16px;
+  border-radius: var(--radius-pill, 999px);
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong, rgba(42, 33, 24, 0.2));
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 1;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition:
+    background var(--duration-base, 0.2s) var(--ease-out, ease-out),
+    color var(--duration-base, 0.2s) var(--ease-out, ease-out),
+    border-color var(--duration-base, 0.2s) var(--ease-out, ease-out),
+    transform var(--duration-fast, 0.15s) var(--ease-in-out, ease-in-out);
+}
+.authGhostBtn:not(:disabled):hover {
+  border-color: var(--interactive-primary, #E8553E);
+  color: var(--interactive-primary-hover, #C43F2A);
+  background: var(--interactive-primary-soft, rgba(232, 85, 62, 0.08));
+}
+.authGhostBtn:not(:disabled):active {
+  transform: translateY(1px);
+}
+

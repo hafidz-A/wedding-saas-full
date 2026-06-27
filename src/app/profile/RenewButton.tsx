@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { startCheckout, startRenewal } from '@/app/onboarding/actions'
+import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
 /**
  * Inline "Bayar / Perpanjang" CTA shown next to each invitation in the
@@ -52,7 +53,7 @@ export default function RenewButton({
 
   return (
     <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
-      <button type="button" onClick={onClick} disabled={pending} style={btn}>
+      <button type="button" onClick={onClick} disabled={pending} className={ctrl.btnPrimarySm}>
         {pending ? processingLabel : label}
       </button>
       {err && <span style={{ fontSize: 11, color: 'var(--interactive-primary-hover)', maxWidth: 220, lineHeight: 1.4 }}>{err}</span>}

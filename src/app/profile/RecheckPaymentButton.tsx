@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { recheckPayment, recheckRenewal } from '@/app/onboarding/actions'
+import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
 /**
  * "Saya sudah bayar — cek ulang" CTA. Fallback for when the Xendit webhook was
@@ -46,7 +47,7 @@ export default function RecheckPaymentButton({
 
   return (
     <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-      <button type="button" onClick={onClick} disabled={pending} style={btn}>
+      <button type="button" onClick={onClick} disabled={pending} className={ctrl.btnGhostSm}>
         {pending ? checkingLabel : label}
       </button>
       {msg && <span style={note}>{msg}</span>}

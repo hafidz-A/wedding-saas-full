@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
+import ctrl from './dashboardControls.module.css'
 
 interface MetaSettings {
   title?: string
@@ -105,7 +106,7 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
           <h2 style={h2}>{t.title}</h2>
           <p style={sub}>{t.subtitle}</p>
         </div>
-        <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
+        <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving || uploading}>
           {saving ? t.saving : t.save}
         </button>
       </header>
@@ -150,11 +151,11 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
               : <span style={{ fontSize: 22, color: 'var(--color-gold)' }}>✦</span>}
           </div>
           <div style={btnsCol}>
-            <button type="button" style={btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
+            <button type="button" className={ctrl.btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
               {uploading ? t.uploading : (ogImage ? t.imageReplace : t.imageUpload)}
             </button>
             {ogImage && (
-              <button type="button" style={btnGhostDanger} onClick={() => { setOgImage(''); setMsg(null) }}>
+              <button type="button" className={ctrl.btnGhostDanger} onClick={() => { setOgImage(''); setMsg(null) }}>
                 {t.imageRemove}
               </button>
             )}
@@ -190,7 +191,7 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
       {/* ── Actions ── */}
       <footer style={footer}>
         {msg && <span style={msg.kind === 'ok' ? msgOk : msgErr}>{msg.text}</span>}
-        <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
+        <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving || uploading}>
           {saving ? t.saving : t.save}
         </button>
       </footer>

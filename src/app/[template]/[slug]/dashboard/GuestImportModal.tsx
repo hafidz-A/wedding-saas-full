@@ -44,7 +44,7 @@ export default function GuestImportModal({
       <div style={dialog} onClick={(e) => e.stopPropagation()}>
         <header style={header}>
           <h3 style={{ margin: 0 }}>{t.title}</h3>
-          <button type="button" onClick={onClose} style={closeBtn} aria-label={t.close}>
+          <button type="button" onClick={onClose} className={ctrl.iconBtn} aria-label={t.close}>
             ×
           </button>
         </header>

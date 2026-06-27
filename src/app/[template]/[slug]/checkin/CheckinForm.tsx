@@ -2,6 +2,7 @@
 
 import type React from 'react'
 import { useEffect, useState } from 'react'
+import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
 interface Match { kind: 'guest' | 'rsvp'; id: string; name: string }
 
@@ -84,8 +85,8 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
           <p style={{ ...p, fontSize: 18, color: 'var(--text-primary)' }}>Anda <strong>{picked.name}</strong>?</p>
           {error && <p style={{ ...hint, color: 'var(--interactive-primary)' }}>{error}</p>}
           <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-            <button type="button" style={ghostBtn} onClick={() => { setPicked(null); setError(null) }} disabled={saving}>Bukan</button>
-            <button type="button" style={primaryBtn} onClick={confirm} disabled={saving}>{saving ? 'Menyimpan…' : 'Ya, saya hadir'}</button>
+            <button type="button" className={ctrl.btnGhost} style={{ flex: 1, height: 44 }} onClick={() => { setPicked(null); setError(null) }} disabled={saving}>Bukan</button>
+            <button type="button" className={ctrl.btnPrimary} style={{ flex: 2, height: 44 }} onClick={confirm} disabled={saving}>{saving ? 'Menyimpan…' : 'Ya, saya hadir'}</button>
           </div>
         </>
       )}
@@ -96,7 +97,7 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
 /* Mirrors the dashboard palette (white card on cream, #2A2118 ink, dark pill
    primary button) so the guest-facing check-in feels like the same product. */
 const card: React.CSSProperties = { width: 'min(440px, 100%)', background: 'rgba(255,255,255,0.9)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 28, textAlign: 'center', boxShadow: 'var(--shadow-md)' }
-const h1: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 26, margin: '0 0 10px', color: 'var(--text-primary)' }
+const h1: React.CSSProperties = { fontFamily: 'var(--font-heading)', fontSize: 26, margin: '0 0 10px', color: 'var(--text-primary)' }
 const p: React.CSSProperties = { color: 'var(--text-secondary)', margin: '0 0 8px', lineHeight: 1.5 }
 const input: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)', background: 'var(--surface-raised)', color: 'var(--text-primary)', outline: 'none' }
 const hint: React.CSSProperties = { color: 'var(--text-muted)', fontSize: 14, margin: '4px 0' }

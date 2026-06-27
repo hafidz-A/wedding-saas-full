@@ -6,6 +6,7 @@ import { completeOnboarding, checkSlugAvailable, startCheckout } from './actions
 import { templateCatalog } from '@/config/templateCatalog'
 import type { Dict, Lang } from '@/lib/i18n'
 import { LangToggle } from '@/components/site/LangToggle'
+import authStyles from '@/components/site/AuthChrome.module.css'
 
 function firstWord(s: string): string {
   return s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
@@ -258,7 +259,7 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
 
         {error && <p style={errorStyle}>{error}</p>}
 
-        <button type="submit" disabled={pending || !slugOk} style={submitBtn}>
+        <button type="submit" disabled={pending || !slugOk} className={authStyles.authPrimaryBtn} style={{ marginTop: 8 }}>
           {pending ? dict.form.submitting : dict.form.submit}
         </button>
       </form>

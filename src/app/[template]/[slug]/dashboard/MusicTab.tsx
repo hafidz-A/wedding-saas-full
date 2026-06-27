@@ -6,6 +6,7 @@ import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { type MusicSourceKind } from '@/lib/music/source'
+import ctrl from './dashboardControls.module.css'
 
 interface MusicSettings {
   source?: MusicSourceKind
@@ -164,7 +165,7 @@ export default function MusicTab({ slug, initial, onSaved }: Props) {
               {music.enabled ? t.on : t.off}
             </span>
           )}
-          <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
+          <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving || uploading}>
             {saving ? t.saving : t.save}
           </button>
         </div>
@@ -180,16 +181,16 @@ export default function MusicTab({ slug, initial, onSaved }: Props) {
               <audio src={music.url} controls preload="metadata" style={{ width: '100%', height: 36 }} />
             </div>
             <div style={btnsCol}>
-              <button type="button" style={btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
+              <button type="button" className={ctrl.btnGhost} onClick={() => fileInput.current?.click()} disabled={uploading}>
                 {uploading ? t.uploading : t.replace}
               </button>
-              <button type="button" style={btnGhostDanger} onClick={() => update('url', '')}>
+              <button type="button" className={ctrl.btnGhostDanger} onClick={() => update('url', '')}>
                 {t.remove}
               </button>
             </div>
           </div>
         ) : (
-          <button type="button" style={btnPrimary} onClick={() => fileInput.current?.click()} disabled={uploading}>
+          <button type="button" className={ctrl.btnPrimary} onClick={() => fileInput.current?.click()} disabled={uploading}>
             {uploading ? t.uploading : t.upload}
           </button>
         )}
@@ -238,11 +239,11 @@ export default function MusicTab({ slug, initial, onSaved }: Props) {
         )}
         <div style={{ display: 'flex', gap: 8 }}>
           {hasTrack && (
-            <button type="button" style={btnGhostDanger} onClick={clearMusic} disabled={saving}>
+            <button type="button" className={ctrl.btnGhostDanger} onClick={clearMusic} disabled={saving}>
               {t.clearAll}
             </button>
           )}
-          <button type="button" style={btnPrimary} onClick={save} disabled={saving || uploading}>
+          <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving || uploading}>
             {saving ? t.saving : t.save}
           </button>
         </div>

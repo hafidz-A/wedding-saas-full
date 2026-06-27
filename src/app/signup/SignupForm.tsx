@@ -15,6 +15,7 @@ import { isPasswordValid } from '@/lib/auth/passwordPolicy'
 import { pwnedPasswordCount } from '@/lib/auth/pwnedPassword'
 import { usePwnedPassword } from '@/lib/auth/usePwnedPassword'
 import PasswordChecklist from '@/components/auth/PasswordChecklist'
+import authStyles from '@/components/site/AuthChrome.module.css'
 
 /**
  * /signup — email + password + repeat. Supabase Auth signUp() sends an
@@ -235,7 +236,8 @@ export default function SignupForm({
         <button
           type="submit"
           disabled={submitting || consentMissing}
-          style={{ ...submitBtn, ...(submitting || consentMissing ? submitBtnDisabled : null) }}
+          className={authStyles.authPrimaryBtn}
+          style={{ marginTop: 8 }}
         >
           {submitting ? dict.submitting : dict.submit}
         </button>

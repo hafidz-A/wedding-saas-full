@@ -6,6 +6,7 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { TEMPLATE_VIBES, type PaletteVibe } from '@/components/marketing/vibeData'
 import { PerchedCanvas } from '@/all-templates/lovebirds/components/Ornaments.jsx'
+import ctrl from './dashboardControls.module.css'
 
 const TYPES = ['birds', 'butterflies', 'perched'] as const
 type OrnamentType = typeof TYPES[number]
@@ -177,7 +178,7 @@ export default function OrnamentTab({
       </div>
       <footer style={footer}>
         {msg && <span style={msg.kind === 'ok' ? msgOk : msgErr}>{msg.text}</span>}
-        <button type="button" style={btnPrimary} onClick={save} disabled={saving}>{saving ? t.saving : t.save}</button>
+        <button type="button" className={ctrl.btnPrimary} onClick={save} disabled={saving}>{saving ? t.saving : t.save}</button>
       </footer>
     </div>
   )

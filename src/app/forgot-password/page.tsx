@@ -7,6 +7,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
 import { AuthChrome } from '@/components/site/AuthChrome'
+import authStyles from '@/components/site/AuthChrome.module.css'
 
 /**
  * /forgot-password — sends a Supabase Auth password reset email.
@@ -79,23 +80,26 @@ function ForgotPasswordInner() {
             </p>
             <Link
               href={`/reset-password?email=${encodeURIComponent(email)}${slug ? `&slug=${encodeURIComponent(slug)}&template=${encodeURIComponent(template)}` : ''}`}
-              style={{ ...primaryBtn, textAlign: 'center', textDecoration: 'none', display: 'block' }}
+              className={authStyles.authPrimaryBtn}
+              style={{ textAlign: 'center', textDecoration: 'none', display: 'flex' }}
             >
               {t.continueToken}
             </Link>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
               {slug && (
-                <Link href={`/${template}/${slug}/dashboard`} style={ghostBtn}>
+                <Link href={`/${template}/${slug}/dashboard`} className={authStyles.authGhostBtn}>
                   {t.backLogin}
                 </Link>
               )}
-              <button type="button" onClick={() => { setSent(false); setEmail('') }} style={ghostBtn}>
+              <button type="button" onClick={() => { setSent(false); setEmail('') }} className={authStyles.authGhostBtn}>
                 {t.resendOther}
               </button>
             </div>
           </div>
         ) : (
-          <form onSubmit={onSubmit} style={{ display: 'grid', gap: 18 }}>
+          <form onSubmit={onSubmit} style={{ display: 'grid', gap: 16 }}>
+            <p style={kicker}>{t.kicker}</p>
+            <h1 style={title}>{t.title}</h1>
             <p style={hint}>{t.hintForm}</p>
 
             <label style={{ display: 'grid', gap: 6 }}>
@@ -113,7 +117,7 @@ function ForgotPasswordInner() {
 
             {error && <p style={errorStyle}>{error}</p>}
 
-            <button type="submit" disabled={submitting} style={primaryBtn}>
+            <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn}>
               {submitting ? t.submitting : t.submit}
             </button>
 
