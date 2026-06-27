@@ -261,7 +261,7 @@ export const BotanicalSketchLayer = React.memo(({
   seed,
   fixed = false,
   hiddenBelow = 0,
-  color = '#6b5c4a',
+  color = 'var(--accent, #6b5c4a)',
   desktopOpacity = 0.6,
   tabletOpacity = 0.5,
   mobileOpacity = 0.35,

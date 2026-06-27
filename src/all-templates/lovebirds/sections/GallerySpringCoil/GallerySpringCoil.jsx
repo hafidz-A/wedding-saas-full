@@ -919,7 +919,7 @@ export default function GallerySpringCoil({
             seed={gallerySketchSeed}
             fixed={false}
             hiddenBelow={520}
-            color="var(--color-text, #6b5c4a)"
+            color="var(--accent, #6b5c4a)"
             desktopOpacity={0.22}
             tabletOpacity={0.16}
             desktopWidth="clamp(120px, 14vw, 220px)"
