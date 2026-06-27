@@ -135,7 +135,7 @@ const page: React.CSSProperties = {
 }
 const wrap: React.CSSProperties = { maxWidth: 720, margin: '0 auto', width: '100%' }
 const h1: React.CSSProperties = {
-  fontFamily: 'var(--font-heading)', fontStyle: 'italic',
+  fontFamily: 'var(--font-heading)',
   fontSize: 'clamp(32px, 6vw, 52px)', margin: '0 0 24px',
 }
 const h2: React.CSSProperties = { fontSize: 18, fontWeight: 600, margin: '32px 0 12px' }
@@ -163,7 +163,7 @@ const emptyIconBadge: React.CSSProperties = {
   background: 'var(--interactive-primary-soft)', color: 'var(--interactive-primary)', marginBottom: 2,
 }
 const emptyTitleStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-heading)', fontStyle: 'italic',
+  fontFamily: 'var(--font-heading)',
   fontSize: 'clamp(22px, 4vw, 28px)', margin: 0, color: 'var(--text-primary)',
 }
 const emptyBodyStyle: React.CSSProperties = {
