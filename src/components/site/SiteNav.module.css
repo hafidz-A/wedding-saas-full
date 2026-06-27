@@ -62,24 +62,48 @@
 .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 .mobilePanel {
-  display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+  display: flex; flex-direction: column; gap: 8px; align-items: stretch;
   margin: 10px clamp(12px, 3vw, 28px) 0;
-  padding: 20px 22px 22px;
-  background: rgba(253, 246, 236, 0.97);
+  padding: 16px;
+  background: rgba(253, 246, 236, 0.98);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(42, 33, 24, 0.12);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
 }
-.mobilePanel .link {
-  display: flex; align-items: center;
+.mobilePanel .link,
+.mobilePanel .menuItemButton {
+  display: flex; align-items: center; justify-content: flex-start;
   width: 100%;
-  padding: 6px 0;
-  font-size: 15px;
+  height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
   font-weight: var(--weight-medium);
   color: var(--color-charcoal);
+  background: rgba(42, 33, 24, 0.04);
+  border: 1px solid rgba(42, 33, 24, 0.08);
+  border-radius: 10px;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
 }
-.mobilePanel .cta { width: 100%; text-align: center; margin-top: 4px; }
+.mobilePanel .link:hover,
+.mobilePanel .link:active,
+.mobilePanel .menuItemButton:hover,
+.mobilePanel .menuItemButton:active {
+  background: rgba(232, 85, 62, 0.08);
+  border-color: rgba(232, 85, 62, 0.35);
+  color: #C43F2A;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(232, 85, 62, 0.12);
+}
+.mobilePanel form { width: 100%; margin: 0; }
+.mobilePanel .cta { width: 100%; text-align: center; margin-top: 4px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
 
 .profileWrap { position: relative; display: inline-block; }
 .profileTrigger {
