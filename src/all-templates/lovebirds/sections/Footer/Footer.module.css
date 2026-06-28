@@ -131,7 +131,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 18px;
   line-height: 1;
   border-radius: var(--radius-pill);

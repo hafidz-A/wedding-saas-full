@@ -125,7 +125,7 @@
   text-transform: uppercase;
   background: var(--color-charcoal);
   color: var(--color-cream);
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 24px;
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-btn);

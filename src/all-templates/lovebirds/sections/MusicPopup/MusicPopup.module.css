@@ -123,8 +123,8 @@
   z-index: 200;
   bottom: clamp(20px, 4vw, 32px);
   right: clamp(20px, 4vw, 32px);
-  width: 48px;
-  height: 48px;
+  width: var(--ctl-h);
+  height: var(--ctl-h);
   border-radius: 50%;
   background: var(--mp-bg, var(--glass-bg, rgba(253, 246, 236, 0.96)));
   border: 1px solid var(--mp-border, var(--glass-border, rgba(42, 33, 24, 0.12)));
@@ -165,5 +165,5 @@
   .subtitle { font-size: 10px; }
   .btnAccept, .btnDismiss { padding: 7px 12px; font-size: 10px; }
   .icon { width: 32px; height: 32px; font-size: 15px; }
-  .toggle { width: 44px; height: 44px; font-size: 18px; }
+  .toggle { width: var(--ctl-h); height: var(--ctl-h); font-size: 18px; }
 }

@@ -142,7 +142,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: var(--ctl-h-sm);
   box-sizing: border-box;
   line-height: 1;
   transition:
@@ -176,7 +176,7 @@
   border-color: var(--interactive-primary);
   background: var(--interactive-primary-soft);
 }
-.ghostBtnSm { padding: 0 16px; font-size: var(--font-size-xs); letter-spacing: 0.12em; height: 36px; }
+.ghostBtnSm { padding: 0 16px; font-size: var(--font-size-xs); letter-spacing: 0.12em; height: var(--ctl-h-sm); }
 
 /* Solid dark pill (View live). */
 .solidBtn {
@@ -228,8 +228,8 @@
 /* Mobile Hamburger & Landing-page Style Dropdown Menu */
 .mobileMenuBtn {
   display: none;
-  width: 38px;
-  height: 38px;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
   background: var(--surface-raised);
@@ -268,7 +268,7 @@
 .mobileDropdownContent .ghostBtn,
 .mobileDropdownContent .solidBtn {
   width: 100%;
-  height: 44px;
+  height: var(--ctl-h);
   display: inline-flex;
   align-items: center;
   justify-content: center;

@@ -28,7 +28,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -71,7 +71,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+  height: var(--ctl-h);
   padding: 1px 24px 0 24px;
   border-radius: var(--radius-pill);
   background: var(--color-charcoal, #2A2118);
@@ -110,7 +110,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 1px 16px 0 16px;
   border-radius: var(--radius-pill);
   background: transparent;

@@ -276,7 +276,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
                       padding: "10px 14px",
                       background: active ? "rgba(255,255,255,0.08)" : "transparent",
                       border: "none",
-                      borderRadius: 10,
+                      borderRadius: 8,
                       color: active ? "var(--color-accent)" : "var(--color-fg)",
                       fontFamily: "var(--font-mono)",
                       fontSize: 11,

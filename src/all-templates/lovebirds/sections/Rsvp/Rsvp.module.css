@@ -159,7 +159,7 @@ fieldset.field > .label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -186,8 +186,8 @@ fieldset.field > .label {
   width: max-content;
 }
 .stepBtn {
-  width: 38px;
-  height: 38px;
+  width: var(--ctl-h);
+  height: var(--ctl-h);
   border-radius: 50%;
   background: var(--rsvp-fg);
   color: var(--rsvp-bg);
@@ -221,7 +221,7 @@ fieldset.field > .label {
   align-items: center;
   justify-content: center;
   margin-top: 12px;
-  height: 44px;
+  height: var(--ctl-h);
   padding: 0 28px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -317,7 +317,7 @@ fieldset.field > .label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 24px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -339,7 +339,7 @@ fieldset.field > .label {
 
 @media (max-width: 767.98px) {
   .stepper { width: 100%; justify-content: space-between; }
-  .stepBtn { width: 44px; height: 44px; font-size: 22px; }
+  .stepBtn { width: var(--ctl-h); height: var(--ctl-h); font-size: 22px; }
   .toggle { gap: 6px; }
   .submit { width: 100%; text-align: center; }
 }

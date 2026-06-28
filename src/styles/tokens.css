@@ -94,6 +94,19 @@
      and respected directly on buttons/links in section CSS where applicable. */
   --tap-target: 44px;
 
+  /* ═══ CONTROL HEIGHT SCALE — SINGLE SOURCE OF TRUTH ═══
+     Tight 3-step scale (8px rhythm). 44 is THE default control height for the
+     whole product (mobile-first, meets the 44px tap-target with no hacks).
+       sm 36 → dense desktop-only controls (dashboard tables, segmented, icon
+               buttons in toolbars) — the density EXCEPTION, used sparingly
+       md 44 → DEFAULT for every button / CTA / input (public + admin primary)
+       lg 52 → the one big moment: hero / gate CTA
+     Icon buttons are square at the same heights (36×36 or 44×44). Snap every
+     control to one of these — no off-scale button heights anywhere. */
+  --ctl-h-sm: 36px;
+  --ctl-h:    44px;
+  --ctl-h-lg: 52px;
+
   /* Radii live in the canonical "RADIUS SCALE — SINGLE SOURCE OF TRUTH" block
      below (--radius-*). The old --border-radius-* aliases were fully migrated
      out and removed. */

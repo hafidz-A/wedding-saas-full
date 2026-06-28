@@ -1,6 +1,6 @@
 .toggle {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 36px; box-sizing: border-box;
+  height: var(--ctl-h); box-sizing: border-box;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-pill);
   padding: 2px; gap: 2px; background: rgba(255, 255, 255, 0.5);
@@ -8,7 +8,7 @@
 .btn {
   position: relative;
   display: inline-flex; align-items: center; justify-content: center;
-  height: 30px; box-sizing: border-box;
+  height: var(--ctl-h-sm); box-sizing: border-box;
   font-family: var(--font-body); font-size: 12px; font-weight: var(--weight-semibold);
   letter-spacing: 0.04em; color: var(--color-charcoal-light);
   padding: 0 12px; border-radius: var(--radius-pill);

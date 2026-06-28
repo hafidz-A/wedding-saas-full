@@ -215,8 +215,8 @@ body {
   left: 24px;
   bottom: 24px;
   z-index: var(--z-overlay);
-  width: 44px;
-  height: 44px;
+  width: var(--ctl-h);
+  height: var(--ctl-h);
   display: grid;
   place-items: center;
   border-radius: var(--r-pill);

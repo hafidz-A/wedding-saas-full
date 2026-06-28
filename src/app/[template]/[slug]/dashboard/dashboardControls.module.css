@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 20px 0 20px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -73,7 +73,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  height: 40px;
+  height: var(--ctl-h-sm);
   padding: 1px 20px 0 20px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -108,7 +108,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 16px 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -146,7 +146,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 16px 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -194,7 +194,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 16px 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -225,8 +225,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
   flex: 0 0 auto;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
@@ -258,8 +258,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
   padding: 0;
   flex: 0 0 auto;
   border-radius: 50%;
@@ -304,7 +304,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: var(--ctl-h-sm);
   padding: 1px 14px 0 14px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -334,7 +334,7 @@
 /* Search / filter input — proper focus state. */
 .input {
   width: 100%;
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 8px 14px 7px 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
@@ -389,7 +389,7 @@
   gap: 9px;
   width: 100%;
   min-width: 0;
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 16px 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);

@@ -42,7 +42,7 @@
 
 /* ── Publish toggle ── */
 .pill {
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 16px 0 16px;
   border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);
@@ -61,7 +61,7 @@
 
 /* ── Save button ── */
 .saveBtn {
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 20px 0 20px;
   border-radius: var(--radius-pill);
   background: var(--color-charcoal);
@@ -121,7 +121,7 @@
 }
 .bannerReload {
   flex: 0 0 auto;
-  height: 36px;
+  height: var(--ctl-h-sm);
   padding: 1px 16px 0 16px;
   border-radius: var(--radius-pill);
   background: var(--color-charcoal);
@@ -149,8 +149,8 @@
 }
 .bannerDismiss {
   flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
   border-radius: var(--radius-pill);
   background: transparent;
   border: none;

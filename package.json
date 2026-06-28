@@ -15,7 +15,7 @@
     "test:all": "npm run typecheck && npm run test:unit && npm run test:e2e",
     "capture:tutorial": "node -e \"require('child_process').execSync('npx playwright test e2e/capture-tutorial.spec.ts --project=desktop',{stdio:'inherit',env:{...process.env,CAPTURE:'1'}})\"",
     "verify:security": "node scripts/verify-encryption-at-rest.mjs",
-    "check:radius": "node scripts/check-radius-tokens.mjs"
+    "check:tokens": "node scripts/check-design-tokens.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

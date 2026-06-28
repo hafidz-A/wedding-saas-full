@@ -246,7 +246,7 @@
   }
   .actionRowMain > button:first-child {
     flex: 1;
-    height: 40px;
+    height: var(--ctl-h-sm);
   }
 
   .tokenBlock {
@@ -285,16 +285,16 @@
 
   .actionRowBtns > button:first-child {
     flex: 1;
-    height: 36px;
+    height: var(--ctl-h-sm);
   }
 
   /* Force icon buttons on mobile to be 100% PERFECT CIRCLES (never squished/oval) */
   .actionsCell button[class*="btnDelete"],
   .actionsCell button[class*="btnGhostSm"] {
     width: 36px !important;
-    height: 36px !important;
+    height: var(--ctl-h-sm) !important;
     min-width: 36px !important;
-    min-height: 36px !important;
+    min-height: var(--ctl-h-sm) !important;
     flex-shrink: 0 !important;
     border-radius: 50% !important;
     display: inline-flex !important;

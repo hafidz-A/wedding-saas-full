@@ -251,7 +251,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 14px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -287,7 +287,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 16px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -454,7 +454,7 @@ a.registryCard:hover {
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  height: 44px;
+  height: var(--ctl-h);
   padding: 0 32px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -572,7 +572,7 @@ a.registryCard:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+  height: var(--ctl-h);
   padding: 0 24px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -592,7 +592,7 @@ a.registryCard:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+  height: var(--ctl-h);
   padding: 0 26px;
   line-height: 1;
   border-radius: var(--radius-pill);
@@ -664,7 +664,7 @@ a.registryCard:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  height: var(--ctl-h);
   padding: 0 22px;
   line-height: 1;
   border-radius: var(--radius-pill);

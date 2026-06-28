@@ -34,7 +34,7 @@
 .link:hover { color: var(--color-coral); }
 .cta {
   display: inline-flex; align-items: center; justify-content: center;
-  height: 44px; padding: 1px 22px 0 22px;
+  height: var(--ctl-h); padding: 1px 22px 0 22px;
   font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold); line-height: 1;
   background: var(--color-charcoal); color: var(--color-cream);
   border-radius: var(--radius-pill);
@@ -50,7 +50,7 @@
 /* Animated hamburger → X */
 .burger {
   display: inline-flex; flex-direction: column; justify-content: center;
-  gap: 5px; padding: 10px; width: 44px; height: 44px; cursor: pointer;
+  gap: 5px; padding: 10px; width: var(--ctl-h); height: var(--ctl-h); cursor: pointer;
   background: transparent; border: 0;
 }
 .burger span {
@@ -75,7 +75,7 @@
 .mobilePanel .menuItemButton {
   display: flex; align-items: center; justify-content: flex-start;
   width: 100%;
-  height: 44px;
+  height: var(--ctl-h);
   padding: 0 16px;
   font-size: 14px;
   font-weight: var(--weight-medium);
@@ -103,12 +103,12 @@
   box-shadow: 0 4px 12px rgba(232, 85, 62, 0.12);
 }
 .mobilePanel form { width: 100%; margin: 0; }
-.mobilePanel .cta { width: 100%; text-align: center; margin-top: 4px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.mobilePanel .cta { width: 100%; text-align: center; margin-top: 4px; height: var(--ctl-h); display: inline-flex; align-items: center; justify-content: center; }
 
 .profileWrap { position: relative; display: inline-block; }
 .profileTrigger {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  height: 44px; padding: 0 18px;
+  height: var(--ctl-h); padding: 0 18px;
   font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold); line-height: 1;
   color: var(--color-charcoal); cursor: pointer;
   border-radius: var(--radius-pill);
