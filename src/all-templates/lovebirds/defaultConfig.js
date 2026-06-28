@@ -16,6 +16,7 @@ const demoWeddingDateFullText = `Saturday, 15 November ${targetYear}`
 const demoRsvpDateText = `Kindly respond by 1 November ${targetYear}`
 
 export const defaultConfig = {
+  couple: { name1: 'Amara', name2: 'Rizky' },
   meta: {
     title: 'Amara & Rizky — Our Wedding',
     description: 'Cinematic wedding invitation experience',

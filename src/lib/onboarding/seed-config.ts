@@ -126,8 +126,9 @@ export function buildSeedConfig(input: CoupleSeedInput): Record<string, any> {
     section.enabled = true
   }
 
+  config.couple = { name1: bride, name2: groom }
   config.meta = {
-    title: `${coupleName} — Our Wedding`,
+    titleSuffix: 'Our Wedding',
     description: 'Cinematic wedding invitation experience',
   }
 

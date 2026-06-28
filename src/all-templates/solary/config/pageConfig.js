@@ -20,6 +20,7 @@
 import { solaryImg as demoImg } from "../demoImages.js";
 
 export const pageConfig = {
+  couple: { name1: "Aruna", name2: "Daksa" },
   meta: {
     title: "Aruna & Daksa — A Wedding Celebration",          // [CONTOH]
     description: "A wedding invitation. 02 · 14 · 2027.",     // [CONTOH]

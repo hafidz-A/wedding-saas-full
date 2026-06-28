@@ -59,7 +59,8 @@ describe('buildSeedConfig', () => {
 
   it('sets meta title and enables every section (full template)', () => {
     const cfg = buildSeedConfig(input)
-    expect(cfg.meta.title).toBe('Amara & Rizky — Our Wedding')
+    expect(cfg.couple).toEqual({ name1: 'Amara', name2: 'Rizky' })
+    expect(cfg.meta.titleSuffix).toBe('Our Wedding')
     expect(cfg.sections.every((s: any) => s.enabled === true)).toBe(true)
   })
 
