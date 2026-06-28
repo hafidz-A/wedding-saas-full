@@ -414,7 +414,7 @@
 
 @media (max-width: 380px) {
   .stage { perspective: 600px; gap: 40px; }
-  .cardFront { border-radius: 14px; }
+  .cardFront { border-radius: var(--radius-md); }
 }
 
 @media (prefers-reduced-motion: reduce) {

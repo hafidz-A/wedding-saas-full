@@ -62,7 +62,7 @@ body.lovebirds-route {
 
 /* 1. Iridescent Champagne Glass Card */
 .glass-iridescent {
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-md);
   border: 1.5px solid rgba(255, 255, 255, 0.6);
   background: linear-gradient(135deg, rgba(255, 245, 230, 0.6) 0%, rgba(250, 220, 235, 0.5) 100%);
   backdrop-filter: blur(16px) saturate(140%);
@@ -121,7 +121,7 @@ body.lovebirds-route {
 
 /* 3. Stamp / Ticket Frame */
 .polaroid-stamp {
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: #fff;
   padding: 12px;
   padding-bottom: 32px;
@@ -140,7 +140,7 @@ body.lovebirds-route {
   position: absolute;
   inset: -4px;
   border: 4px dotted #fff;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   pointer-events: none;
 }
 .polaroid-stamp .photo-inner {

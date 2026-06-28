@@ -251,7 +251,7 @@
 .glassCard {
   position: relative;
   isolation: isolate;
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   padding: clamp(20px, 3.5vw, 36px) clamp(16px, 3.5vw, 32px) clamp(24px, 4.5vw, 44px);
   display: flex;
   flex-direction: column;
@@ -267,7 +267,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background: var(--glass-bg, rgba(255, 255, 255, 0.45));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -619,7 +619,7 @@
     width: clamp(80px, 28vw, 130px);
     height: clamp(100px, 36vw, 165px);
     border-width: 3px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     box-shadow:
       0 6px 16px rgba(42, 33, 24, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.45);
@@ -636,7 +636,7 @@
     width: clamp(68px, 26vw, 110px);
     height: clamp(88px, 34vw, 140px);
     border-width: 2.5px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
   }
   .coupleName { font-size: clamp(26px, 11vw, 44px); }
 }

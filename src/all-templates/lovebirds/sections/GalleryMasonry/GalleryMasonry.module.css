@@ -111,7 +111,7 @@
 */
 .cell {
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   /* Soft placeholder shown when a photo URL is broken (img is hidden on error)
      so the masonry rhythm holds instead of leaving a blank gap. */

@@ -20,7 +20,7 @@
   align-items: stretch;
   background: var(--glass-bg, rgba(253, 246, 236, 0.82));
   border: 1px solid rgba(42, 33, 24, 0.08);
-  border-radius: 26px;
+  border-radius: var(--radius-lg);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   box-shadow:
@@ -129,7 +129,7 @@
      contrast each other AND the background on all 10 palettes. */
   background: var(--button-bg, rgba(253, 246, 236, 0.92));
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.10));
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   box-shadow: 0 10px 24px rgba(42, 33, 24, 0.18);
   cursor: pointer;
   z-index: 2;
@@ -140,7 +140,7 @@
   width: 20px;
   height: 2px;
   background: var(--button-fg, var(--color-charcoal));
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   transition: transform 0.22s ease, opacity 0.22s ease;
   transform-origin: center;
 }
@@ -170,7 +170,7 @@
   z-index: 3;
   background: var(--glass-bg, rgba(253, 246, 236, 0.98));
   border: 1px solid rgba(42, 33, 24, 0.08);
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   box-shadow: 0 18px 40px rgba(42, 33, 24, 0.18);
   padding: 8px;
   max-height: calc(100vh - 80px);

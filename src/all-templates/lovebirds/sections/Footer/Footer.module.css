@@ -53,7 +53,7 @@
   width: clamp(116px, 30vw, 188px);
   padding: 6px 6px 14px;            /* white polaroid frame, deeper bottom lip */
   background: #fff;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   box-shadow: 0 16px 36px rgba(60, 30, 10, 0.30), 0 2px 6px rgba(0, 0, 0, 0.12);
   transform-origin: bottom center;
   /* Pre-reveal state: lifted, shrunk, flat (no tilt yet). */
@@ -68,7 +68,7 @@
   aspect-ratio: 4 / 5;
   object-fit: cover;
   display: block;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 /* Slight overlap so the pair reads as one stacked memento. */

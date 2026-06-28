@@ -11,7 +11,7 @@
   width: clamp(64px, 9vw, 132px);
   aspect-ratio: 3 / 4;
   transform: translate(-50%, -50%) rotate(var(--rot)) scale(0.7);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   border: 1px solid var(--color-line);
   background: var(--color-surface);

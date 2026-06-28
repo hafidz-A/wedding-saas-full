@@ -49,7 +49,7 @@
   .glass-card {
     width: 100%;
     padding: 1.25rem 1.1rem;
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
   }
 }
 
@@ -385,7 +385,7 @@
 .lightbox-img {
   max-width: min(92vw, 1100px);
   max-height: 84vh;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   box-shadow: 0 30px 100px -20px rgba(0,0,0,0.9);
 }
 .lightbox-close {
@@ -545,7 +545,7 @@
 .btn-jelly {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 14px 28px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   border: 3px solid var(--color-accent);
   font-family: var(--font-body);
   font-weight: 700;
@@ -678,7 +678,7 @@
   margin: 0;
   background: #f3eee4;
   padding: 8px 8px 22px;
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.5);
   transform: rotate(-1.5deg);
   will-change: transform, opacity;
@@ -689,7 +689,7 @@
   width: 260px;
   max-width: 70vw;
   aspect-ratio: 4 / 5;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
   background: var(--color-bg-soft);
 }

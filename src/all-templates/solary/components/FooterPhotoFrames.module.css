@@ -20,7 +20,7 @@
   padding: 6px;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   box-shadow: var(--shadow-card);
   opacity: 0.6;
   overflow: hidden;
@@ -31,14 +31,14 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
 }
 /* Theme-tinted veil so the photo settles into a calm backdrop on any palette. */
 .frame::after {
   content: "";
   position: absolute;
   inset: 6px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: linear-gradient(180deg, transparent 35%, var(--color-surface));
   opacity: 0.55;
 }
@@ -86,7 +86,7 @@
 
 /* ---- Phone ---- */
 @media (max-width: 480px) {
-  .frame { width: clamp(74px, 27vw, 108px); opacity: 0.42; border-radius: 10px; }
+  .frame { width: clamp(74px, 27vw, 108px); opacity: 0.42; border-radius: var(--radius-sm); }
   .a { top: 2%; left: -2%; }
   .b { bottom: 2%; right: -2%; }
   @keyframes footerFrameInA { from { opacity: 0; } to { opacity: 0.42; } }

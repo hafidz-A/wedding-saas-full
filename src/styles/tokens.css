@@ -143,20 +143,20 @@
   --shadow-md:  0 12px 32px rgba(42, 33, 24, 0.12);
   --shadow-lg:  0 20px 48px rgba(42, 33, 24, 0.16);
 
-  /* ═══ RADIUS SCALE — SINGLE SOURCE OF TRUTH ═══
-     Use these `--radius-*` tokens for all app chrome (dashboard, marketing,
-     auth, site). Full scale: xs 4 · sm 8 · md 14 · card 16 · lg 20 · xl 32 ·
-     pill 999 (xs/lg/xl live in the Part-3 block below).
-     Pick by element role/size: inputs & small controls → sm; standard
-     cards/panels/buttons → md; soft "premium" cards → card; big feature cards
-     /modals → lg; hero containers / device mockups → xl; capsules/avatars → pill.
-     • The old `--border-radius-*` namespace was fully migrated to these and
-       removed — `--radius-*` is now the only global radius scale.
-     • Templates keep their own scoped scale: Solary `--r-1/2/3`
-       (12/20/32, see all-templates/solary/styles/tokens.css). */
+  /* ═══ RADIUS SCALE — SINGLE SOURCE OF TRUTH (ONE unified scale, all surfaces) ═══
+     Tight 4-step ramp + pill + round. Snap everything to it — no off-scale literals.
+       xs 4   → chips, focus ring, nested thumbnails, micro/hairline details
+       sm 8   → inputs, small controls, small media
+       md 16  → THE standard card / panel
+       lg 24  → large cards, modals, popups, hero glass    (in the Part-3 block)
+       pill 999 → capsules / buttons        round 50% → circles / avatars
+     (xl 32 / device 36 / screen 28 exist ONLY for the phone-mockup bezels — not a
+      content rung.)
+     • The old `--border-radius-*` namespace was migrated here and removed.
+     • Templates DO NOT keep a separate radius identity: Solary's `--r-1/2/3/4`
+       are now thin aliases of this scale (see all-templates/solary/styles/tokens.css). */
   --radius-sm:   8px;
-  --radius-md:   14px;
-  --radius-card: 16px;
+  --radius-md:   16px;  /* the ONE card/panel radius */
   --radius-pill: 999px;
 
   /* ─── FONT SIZE SCALE ─── */
@@ -272,8 +272,9 @@
 
   /* ─── RADIUS (extends Part 1 --radius-sm/md/pill) ─── */
   --radius-xs:      4px;
-  --radius-lg:      20px;
-  --radius-xl:      32px;
+  --radius-lg:      24px;   /* large cards / modals / popups / hero glass */
+  --radius-round:   50%;    /* circles / avatars */
+  --radius-xl:      32px;   /* phone-mockup bezel only — NOT a content rung */
   --radius-device:  36px;   /* phone shell mockup */
   --radius-screen:  28px;   /* phone screen mockup */
 

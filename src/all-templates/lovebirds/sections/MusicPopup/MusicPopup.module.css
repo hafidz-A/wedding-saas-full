@@ -108,7 +108,7 @@
 @media (max-width: 480px) {
   .popup {
     flex-wrap: wrap;
-    border-radius: 22px;
+    border-radius: var(--radius-lg);
     width: calc(100vw - 24px);
     padding: 16px 18px;
     row-gap: 12px;

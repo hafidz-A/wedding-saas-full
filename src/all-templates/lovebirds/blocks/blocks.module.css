@@ -46,7 +46,7 @@
 .image {
   position: relative;
   display: block;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 .imageImg { width: 100%; height: 100%; display: block; object-fit: cover; }
@@ -62,10 +62,10 @@
 .image-floatingFrame {
   box-shadow: 0 24px 60px rgba(42, 33, 24, 0.18);
   border: 8px solid #fff;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 .image-round   { border-radius: 50%; aspect-ratio: 1; }
-.image-rounded { border-radius: var(--radius-card); }
+.image-rounded { border-radius: var(--radius-md); }
 .image-bare    { border-radius: 0; }
 
 /* ---------- QuoteBlock ---------- */
@@ -107,7 +107,7 @@
 /* ---------- VideoBlock ---------- */
 .video {
   width: 100%;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-card);
   background: #000;
@@ -126,7 +126,7 @@
 .masonryItem {
   break-inside: avoid;
   margin: 0 0 16px;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }

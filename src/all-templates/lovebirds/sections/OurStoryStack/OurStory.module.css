@@ -78,7 +78,7 @@
 .card {
   position: absolute;
   inset: 0;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background-clip: padding-box !important;
   border: clamp(10px, 1.4vw, 14px) solid #fff;
   border-bottom: clamp(48px, 6vw, 64px) solid #fff;
