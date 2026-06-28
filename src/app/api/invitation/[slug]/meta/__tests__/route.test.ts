@@ -69,4 +69,14 @@ describe('PUT /api/invitation/[slug]/meta', () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: null } } } }) as any)
     expect((await PUT(put({ title: 'Hi' }), ctx)).status).toBe(404)
   })
+
+  it('stores titleSuffix (normalized) and no longer requires a title', async () => {
+    mockOwner.mockResolvedValue(OWNER)
+    const fake = rowFake()
+    mockAdmin.mockReturnValue(fake as any)
+    const res = await PUT(put({ titleSuffix: '  Our   Wedding ' }), ctx)
+    expect(res.status).toBe(200)
+    const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
+    expect(upd.value.config.meta.titleSuffix).toBe('Our Wedding')
+  })
 })

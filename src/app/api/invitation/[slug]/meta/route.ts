@@ -10,12 +10,15 @@ const IMAGE_MAX = 600
 
 /**
  * PUT /api/invitation/[slug]/meta
- * Body: { title?: string, description?: string, ogImage?: string }
- * Owner-only. Updates config.meta.{title,description,ogImage} — the text and
- * thumbnail shown in the browser tab and the WhatsApp / social share preview
- * (og:title / og:description / og:image). Empty string clears a field (the
- * public page then falls back to the couple's name / a photo from the config).
- * At least one field must be present.
+ * Body: { title?: string, titleSuffix?: string, description?: string, ogImage?: string }
+ * Owner-only. Updates config.meta.{title,titleSuffix,description,ogImage} — the
+ * text and thumbnail shown in the browser tab and the WhatsApp / social share
+ * preview (og:title / og:description / og:image). `titleSuffix` is the current
+ * editor field (e.g. "Wedding Invitation"); the SEO title is composed at render
+ * from `config.couple` + this suffix. `title` is kept for backward-compat with
+ * older stored configs. Empty string clears a field (the public page then falls
+ * back to the couple's name / a photo from the config). At least one field must
+ * be present.
  */
 export async function PUT(req: Request, { params }: Ctx) {
   const { slug } = params
@@ -28,11 +31,13 @@ export async function PUT(req: Request, { params }: Ctx) {
   const hasTitle = typeof body?.title === 'string'
   const hasDesc = typeof body?.description === 'string'
   const hasImage = typeof body?.ogImage === 'string'
-  if (!hasTitle && !hasDesc && !hasImage) {
+  const hasSuffix = typeof body?.titleSuffix === 'string'
+  if (!hasTitle && !hasDesc && !hasImage && !hasSuffix) {
     return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
   }
 
   const title = hasTitle ? (body.title as string).replace(/\s+/g, ' ').trim().slice(0, TITLE_MAX) : undefined
+  const titleSuffix = hasSuffix ? (body.titleSuffix as string).replace(/\s+/g, ' ').trim().slice(0, TITLE_MAX) : undefined
   const description = hasDesc ? (body.description as string).replace(/\s+/g, ' ').trim().slice(0, DESC_MAX) : undefined
   const rawImage = hasImage ? (body.ogImage as string).trim().slice(0, IMAGE_MAX) : undefined
   // Only accept an http(s) URL (our upload endpoint returns a public one) or an
@@ -49,6 +54,7 @@ export async function PUT(req: Request, { params }: Ctx) {
   const cfg = { ...(row.config || {}) }
   cfg.meta = { ...(cfg.meta || {}) }
   if (hasTitle) cfg.meta.title = title
+  if (hasSuffix) cfg.meta.titleSuffix = titleSuffix
   if (hasDesc) cfg.meta.description = description
   if (hasImage) cfg.meta.ogImage = rawImage
 

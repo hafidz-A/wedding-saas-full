@@ -166,7 +166,7 @@ export default function EditorWorkspace({
         )}
         {sub === 'music' && <MusicTab slug={slug} initial={invitation.config?.music ?? null} onSaved={setLiveUpdatedAt} />}
         {sub === 'meta' && (
-          <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} onSaved={setLiveUpdatedAt} />
+          <MetaTab slug={slug} template={template} initial={invitation.config?.meta ?? null} couple={invitation.config?.couple ?? null} onSaved={setLiveUpdatedAt} />
         )}
         {sub === 'ornament' && (
           <OrnamentTab

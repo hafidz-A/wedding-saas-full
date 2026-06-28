@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
+import { composeTitle, parseCoupleFromTitle } from '@/lib/meta/couple'
 import ctrl from './dashboardControls.module.css'
 
 interface MetaSettings {
   title?: string
+  titleSuffix?: string
   description?: string
   ogImage?: string
 }
@@ -16,17 +18,19 @@ interface Props {
   slug: string
   template?: string
   initial?: MetaSettings | null
+  couple?: { name1?: string; name2?: string } | null
   onSaved?: (savedAt: string) => void
 }
 
-const TITLE_MAX = 120
 const DESC_MAX = 200
 
-export default function MetaTab({ slug, template, initial, onSaved }: Props) {
+export default function MetaTab({ slug, template, initial, couple, onSaved }: Props) {
   const t = useDashboardDict().tabs.meta
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
-  const [title, setTitle] = useState(initial?.title ?? '')
+  const [titleSuffix, setTitleSuffix] = useState(
+    initial?.titleSuffix ?? parseCoupleFromTitle(initial?.title).titleSuffix,
+  )
   const [description, setDescription] = useState(initial?.description ?? '')
   const [ogImage, setOgImage] = useState(initial?.ogImage ?? '')
   const [uploading, setUploading] = useState(false)
@@ -40,7 +44,8 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
     setHost(`${window.location.host}/${template ?? ''}/${slug}`.replace(/\/+$/, ''))
   }, [template, slug])
 
-  const previewTitle = title.trim() || t.previewTitleFallback
+  const derivedTitle = composeTitle(couple, titleSuffix)
+  const previewTitle = derivedTitle.trim() || t.previewTitleFallback
   const previewDesc = description.trim() || t.previewDescFallback
 
   async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -78,7 +83,7 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
       const res = await fetch(`/api/invitation/${slug}/meta`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, ogImage }),
+        body: JSON.stringify({ titleSuffix, description, ogImage }),
       })
       if (!res.ok) {
         const e = await res.json().catch(() => ({}))
@@ -114,17 +119,16 @@ export default function MetaTab({ slug, template, initial, onSaved }: Props) {
       {/* ── Text fields ── */}
       <section style={section}>
         <label style={{ display: 'grid', gap: 6 }}>
-          <span style={lbl}>{t.fTitle}</span>
+          <span style={lbl}>{t.fSuffix}</span>
           <input
             type="text"
-            value={title}
-            onChange={(e) => { setTitle(e.target.value); setMsg(null) }}
-            maxLength={TITLE_MAX}
-            placeholder={t.fTitlePlaceholder}
+            value={titleSuffix}
+            onChange={(e) => { setTitleSuffix(e.target.value); setMsg(null) }}
+            placeholder={t.fSuffixPlaceholder}
             style={input}
           />
-          <span style={counter}>{title.length}/{TITLE_MAX}</span>
         </label>
+        <p style={help}>{t.titlePreviewLabel}: <strong style={{ color: 'var(--text-primary)' }}>{derivedTitle || '—'}</strong></p>
 
         <label style={{ display: 'grid', gap: 6 }}>
           <span style={lbl}>{t.fDesc}</span>
