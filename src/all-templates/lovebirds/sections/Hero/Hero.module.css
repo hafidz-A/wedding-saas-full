@@ -605,7 +605,7 @@
   .coupleName  { font-size: clamp(30px, 12vw, 54px); gap: 4px; }
   .date        { letter-spacing: 0.18em; }
   .countdown   { grid-template-columns: repeat(4, 1fr); gap: 4px; max-width: 92vw; }
-  .countCell   { padding: 8px 2px; border-radius: 10px; }
+  .countCell   { padding: 8px 2px; border-radius: var(--radius-sm); }
   .countLabel  { font-size: 8px; letter-spacing: 0.14em; }
   .petalAnchor { width: clamp(46px, 14vw, 90px); }
   .decorTopLeft,

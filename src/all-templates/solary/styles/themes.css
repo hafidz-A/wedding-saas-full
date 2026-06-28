@@ -219,7 +219,7 @@ body {
   height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--nav-arrow-bg);
   border: var(--nav-arrow-border);
   color: var(--nav-arrow-color);

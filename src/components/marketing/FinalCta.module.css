@@ -127,7 +127,7 @@
   color: var(--color-cream);
   height: 36px;
   padding: 0 24px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-btn);
   transition:
     background var(--duration-base) var(--ease-out),

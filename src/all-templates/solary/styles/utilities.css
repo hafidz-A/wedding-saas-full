@@ -23,7 +23,7 @@
   color: var(--color-accent-text);
   background: var(--color-bg-soft);
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   border: 2px solid var(--color-line);
   box-shadow: 2px 2px 0 var(--color-line);
   margin: 0;

@@ -349,7 +349,7 @@
 .handle {
   display: inline-block; font-family: var(--font-body); font-size: clamp(10px, 2.6cqw, 14px);
   letter-spacing: 0.10em; padding: clamp(7px, 2cqw, 10px) clamp(14px, 4cqw, 22px); margin-top: clamp(10px, 3.4cqw, 18px);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.55); color: #fff;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);

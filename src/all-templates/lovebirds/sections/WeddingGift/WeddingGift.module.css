@@ -254,7 +254,7 @@
   height: 36px;
   padding: 0 14px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -290,7 +290,7 @@
   height: 36px;
   padding: 0 16px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
@@ -415,7 +415,7 @@ a.registryCard:hover {
   width: 100%;
   height: clamp(120px, 16vw, 160px);
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   margin-bottom: 8px;
   display: block;
 }
@@ -457,7 +457,7 @@ a.registryCard:hover {
   height: 44px;
   padding: 0 32px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--button-bg, var(--fg, var(--color-charcoal)));
   color: var(--button-fg, var(--color-cream));
   font-family: var(--font-body, sans-serif);
@@ -520,7 +520,7 @@ a.registryCard:hover {
   background: rgba(255, 255, 255, 0.95);
   color: var(--color-charcoal, #2A2118);
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.12));
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 13px 16px;
   font-family: var(--font-body, sans-serif);
   font-size: 15px;
@@ -575,7 +575,7 @@ a.registryCard:hover {
   height: 44px;
   padding: 0 24px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.2));
   color: var(--fg, var(--color-charcoal));
@@ -595,7 +595,7 @@ a.registryCard:hover {
   height: 44px;
   padding: 0 26px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   /* Use the theme's button token PAIR so the label always contrasts its fill.
      The old `color: var(--bg)` resolved to `transparent` on light palettes
      (themes set --bg: transparent) → invisible text on the button. */
@@ -667,7 +667,7 @@ a.registryCard:hover {
   height: 36px;
   padding: 0 22px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--fg, var(--color-charcoal));
   background: transparent;
   color: var(--fg, var(--color-charcoal));

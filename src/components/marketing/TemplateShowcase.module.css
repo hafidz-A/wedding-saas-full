@@ -212,7 +212,7 @@
   color: var(--color-cream);
   height: 36px;
   padding: 0 20px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   display: inline-flex;
   align-items: center;
   justify-content: center;

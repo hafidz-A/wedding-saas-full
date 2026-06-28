@@ -134,7 +134,7 @@
   height: 36px;
   padding: 0 18px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--ftr-fg) 16%, transparent);
   color: var(--ftr-fg);
   border: 1px solid color-mix(in srgb, var(--ftr-fg) 30%, transparent);

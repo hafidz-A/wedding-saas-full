@@ -160,7 +160,7 @@
   color: var(--color-cream);
   height: 36px;
   padding: 0 24px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-sm);
   transition:
     background var(--duration-base) var(--ease-out),
@@ -201,7 +201,7 @@
   color: var(--color-charcoal);
   height: 36px;
   padding: 0 24px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   display: inline-flex;
   align-items: center;

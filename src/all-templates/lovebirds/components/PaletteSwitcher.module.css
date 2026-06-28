@@ -48,7 +48,7 @@
 .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .swatchBtn {
   display: flex; align-items: center; gap: 8px;
-  padding: 9px 10px; border-radius: 10px;
+  padding: 9px 10px; border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
   font-family: var(--font-body); font-size: 12px; color: #2A2118;
@@ -62,7 +62,7 @@
 .ornamentRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .ornamentBtn {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 8px 4px; border-radius: 10px;
+  padding: 8px 4px; border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
   font-family: var(--font-body); font-size: 10px; color: #2A2118;

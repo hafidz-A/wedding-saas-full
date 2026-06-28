@@ -67,7 +67,7 @@ main { position: relative; z-index: 1; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, rgba(var(--color-glow)/0.55), rgba(var(--color-glow)/0.85));
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   box-shadow: 0 0 8px rgba(var(--color-glow)/0.5);
   border: 2px solid transparent;
   background-clip: padding-box;

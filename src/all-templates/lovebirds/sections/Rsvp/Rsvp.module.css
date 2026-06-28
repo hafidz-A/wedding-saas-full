@@ -65,7 +65,7 @@
   border: 1px solid var(--rsvp-surface-border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   padding: clamp(24px, 4vw, 40px);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform-style: preserve-3d;
@@ -103,7 +103,7 @@ fieldset.field > .label {
   background: rgba(255,255,255,0.92);
   color: var(--color-charcoal);
   border: 0;
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--radius-sm);
   padding: 14px 16px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -153,7 +153,7 @@ fieldset.field > .label {
   gap: 8px;
   background: var(--rsvp-surface);
   padding: 6px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
 }
 .toggleBtn {
   display: inline-flex;
@@ -162,7 +162,7 @@ fieldset.field > .label {
   height: 36px;
   padding: 0 16px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--rsvp-fg-soft);
@@ -182,7 +182,7 @@ fieldset.field > .label {
   gap: 16px;
   background: var(--rsvp-surface);
   padding: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   width: max-content;
 }
 .stepBtn {
@@ -224,7 +224,7 @@ fieldset.field > .label {
   height: 44px;
   padding: 0 28px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   /* Inverts the section pair so the CTA stays high-contrast on every palette:
      a chip in the contrast colour with accent-coloured label. */
   background: var(--rsvp-fg);
@@ -260,7 +260,7 @@ fieldset.field > .label {
 .successCard {
   background: rgba(255, 255, 255, 0.95);
   color: var(--color-charcoal);
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   padding: clamp(32px, 5vw, 56px);
   text-align: center;
   border: 1px solid var(--glass-border);
@@ -320,7 +320,7 @@ fieldset.field > .label {
   height: 36px;
   padding: 0 24px;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-charcoal);
   border: 1px solid rgba(42, 33, 24, 0.25);

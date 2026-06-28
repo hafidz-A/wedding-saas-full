@@ -256,7 +256,7 @@
     padding: 10px 14px;
     background: rgba(42, 33, 24, 0.035);
     border: 1px solid rgba(42, 33, 24, 0.08);
-    border-radius: var(--radius-sm, 10px);
+    border-radius: var(--radius-sm);
     width: 100%;
     box-sizing: border-box;
   }

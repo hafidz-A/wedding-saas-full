@@ -38,7 +38,7 @@
 
 .item {
   background: #fff;
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   border: 1px solid rgba(42,33,24,0.08);
   overflow: hidden;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;

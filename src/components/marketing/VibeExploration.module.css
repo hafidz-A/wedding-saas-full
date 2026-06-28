@@ -196,7 +196,7 @@
   height: 36px;
   padding: 0 16px;
   line-height: 1;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   border: 1px solid;
   white-space: nowrap;
   overflow: hidden;
@@ -312,7 +312,7 @@
   height: 36px;
   padding: 0 20px;
   line-height: 1;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   white-space: nowrap;
   transition: transform 0.2s var(--ease-out), box-shadow 0.25s ease;

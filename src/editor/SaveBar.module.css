@@ -44,7 +44,7 @@
 .pill {
   height: 36px;
   padding: 1px 16px 0 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -63,7 +63,7 @@
 .saveBtn {
   height: 36px;
   padding: 1px 20px 0 20px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-charcoal);
   color: var(--surface-warm);
   font-size: var(--font-size-sm);
@@ -123,7 +123,7 @@
   flex: 0 0 auto;
   height: 36px;
   padding: 1px 16px 0 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-charcoal);
   color: var(--surface-warm);
   font-size: var(--font-size-xs);

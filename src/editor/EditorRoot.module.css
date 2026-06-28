@@ -172,7 +172,7 @@
 
 .previewToggle {
   padding: 8px 14px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--text-primary);

@@ -24,7 +24,7 @@
 .scrolled .inner {
   background: rgba(253, 246, 236, 0.9);
   border-color: rgba(42, 33, 24, 0.1);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-nav);
   padding: 10px clamp(16px, 2vw, 24px);
 }
@@ -37,7 +37,7 @@
   height: 44px; padding: 1px 22px 0 22px;
   font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold); line-height: 1;
   background: var(--color-charcoal); color: var(--color-cream);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   white-space: nowrap;
   transition:
     background var(--duration-base) var(--ease-out),
@@ -82,7 +82,7 @@
   color: var(--color-charcoal);
   background: rgba(42, 33, 24, 0.04);
   border: 1px solid rgba(42, 33, 24, 0.08);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   box-sizing: border-box;
   transition:
@@ -111,7 +111,7 @@
   height: 44px; padding: 0 18px;
   font-family: var(--font-body); font-size: 14px; font-weight: var(--weight-semibold); line-height: 1;
   color: var(--color-charcoal); cursor: pointer;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-default); background: rgba(255, 255, 255, 0.5);
   transition:
     border-color var(--duration-base) var(--ease-out),

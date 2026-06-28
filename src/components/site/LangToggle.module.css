@@ -2,7 +2,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   height: 36px; box-sizing: border-box;
   border: 1px solid var(--border-default);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   padding: 2px; gap: 2px; background: rgba(255, 255, 255, 0.5);
 }
 .btn {
@@ -11,13 +11,13 @@
   height: 30px; box-sizing: border-box;
   font-family: var(--font-body); font-size: 12px; font-weight: var(--weight-semibold);
   letter-spacing: 0.04em; color: var(--color-charcoal-light);
-  padding: 0 12px; border-radius: var(--border-radius-pill);
+  padding: 0 12px; border-radius: var(--radius-pill);
   transition: color var(--transition-default); min-height: 0; line-height: 1;
 }
 .pill {
   position: absolute; inset: 0;
   background: var(--interactive-primary-hover);
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   z-index: var(--z-base);
 }
 .btnLabel { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; line-height: 1; transform: translateY(0.75px); }

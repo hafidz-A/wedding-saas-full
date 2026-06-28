@@ -62,7 +62,7 @@ body.lovebirds-route {
 
 /* 1. Iridescent Champagne Glass Card */
 .glass-iridescent {
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   border: 1.5px solid rgba(255, 255, 255, 0.6);
   background: linear-gradient(135deg, rgba(255, 245, 230, 0.6) 0%, rgba(250, 220, 235, 0.5) 100%);
   backdrop-filter: blur(16px) saturate(140%);
@@ -162,7 +162,7 @@ body.lovebirds-route {
   align-items: center;
   justify-content: center;
   padding: 14px 28px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   background: var(--accent, var(--color-coral));
   color: #fff !important;
   font-family: var(--font-body-fun, var(--font-body));
@@ -179,7 +179,7 @@ body.lovebirds-route {
   content: '';
   position: absolute;
   inset: -4px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   border: 1.5px solid var(--accent, var(--color-coral));
   opacity: 0.8;
   transition: transform 0.25s var(--ease-out), opacity 0.25s var(--ease-out);
@@ -208,7 +208,7 @@ body.lovebirds-route {
   align-items: center;
   justify-content: center;
   padding: 13px 26px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   background: var(--button-bg, var(--color-coral));
   color: var(--button-fg, #fff) !important;
   font-family: var(--font-body);
@@ -254,7 +254,7 @@ body.lovebirds-route {
   align-items: center;
   justify-content: center;
   padding: 12px 24px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
   border: 1.5px solid rgba(255, 255, 255, 0.45);
   color: var(--fg) !important;
@@ -371,7 +371,7 @@ body.lovebirds-route {
   left: 50%;
   transform: translateX(-50%);
   padding: 6px 16px;
-  border-radius: var(--border-radius-pill);
+  border-radius: var(--radius-pill);
   background: #fff;
   font-family: var(--font-body-fun, var(--font-body));
   font-size: 10px;

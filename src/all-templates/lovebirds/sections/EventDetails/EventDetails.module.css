@@ -106,7 +106,7 @@
 }
 
 .eventCardInner {
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   padding: clamp(18px, 2.2vw, 26px);
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
@@ -209,7 +209,7 @@
 }
 
 .mapCardInner {
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   padding: clamp(18px, 2.2vw, 26px);
   border: 1px solid var(--glass-border);
   background: linear-gradient(180deg, color-mix(in srgb, var(--color-gold-soft) 24%, rgba(255,255,255,0.75)) 0%, rgba(255,255,255,0.6) 100%);
@@ -236,7 +236,7 @@
 
 .mapWrap {
   position: relative;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   aspect-ratio: 4 / 5;
   background: #ddd;

@@ -50,7 +50,7 @@
 .hotelCard {
   background: var(--glass-bg, #ffffff);
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.08));
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   padding: clamp(20px, 2.5vw, 28px);
   box-shadow: var(--shadow-glass);
   transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, transform 0.3s ease;
@@ -90,7 +90,7 @@
   background: color-mix(in srgb, var(--accent, var(--color-sky)) 12%, transparent);
   color: var(--accent, var(--color-sky));
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-weight: 500;
 }
 
@@ -141,7 +141,7 @@
 .tipsCard {
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft, var(--color-sky-soft)) 24%, var(--glass-bg, #ffffff)) 0%, var(--glass-bg, #ffffff) 100%);
   border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.08));
-  border-radius: var(--border-radius-card);
+  border-radius: var(--radius-card);
   padding: clamp(24px, 3vw, 36px);
   box-shadow: var(--shadow-glass);
   position: sticky;
