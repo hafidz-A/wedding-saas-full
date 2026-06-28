@@ -1,6 +1,7 @@
 import React from "react";
 import { sectionRegistry } from "../config/sectionRegistry.js";
 import SectionPhotoStars from "../components/SectionPhotoStars.jsx";
+import { injectCoupleProps } from "@/lib/meta/couple";
 
 /* Section types that already show their own photos — these do NOT get the
    floating gate photo-stars. Every other type (including the optional sections
@@ -20,7 +21,7 @@ const PHOTO_BACKED_TYPES = new Set([
        </section>
    Hidden sections (`enabled === false`) render nothing.
    Unknown types log a warning and render a tiny placeholder. */
-export default function SectionRenderer({ section, slug = "demo", gatePhotos = [] }) {
+export default function SectionRenderer({ section, slug = "demo", gatePhotos = [], couple = null }) {
   if (!section || section.enabled === false) return null;
   const Component = sectionRegistry[section.type];
   if (!Component) {
@@ -54,7 +55,7 @@ export default function SectionRenderer({ section, slug = "demo", gatePhotos = [
     >
       {showPhotoStars && <SectionPhotoStars photos={gatePhotos} reducedMotion={reducedMotion} />}
       <div style={{ position: "relative", zIndex: 1 }}>
-        <Component {...(section.props || {})} slug={slug} {...extraProps} />
+        <Component {...injectCoupleProps(section, couple)} slug={slug} {...extraProps} />
       </div>
     </section>
   );

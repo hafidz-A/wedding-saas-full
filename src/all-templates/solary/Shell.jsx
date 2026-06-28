@@ -24,6 +24,8 @@ import { AudioProvider } from './contexts/AudioContext.jsx'
 import { GuestProvider } from './contexts/GuestContext.jsx'
 import { JourneyProvider } from './contexts/JourneyContext.jsx'
 
+import { navName } from '@/lib/meta/couple'
+
 import { startSmoothScroll, stopSmoothScroll } from './utils/smoothScroll.js'
 import { mountGalacticScene } from './three/galacticScene.js'
 import { installRhythm } from './utils/rhythm.js'
@@ -125,12 +127,12 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
         <GuestProvider>
           <JourneyProvider>
             <FloatingNavbar
-              logo={config.meta?.title?.split('—')[0]?.trim() || 'Wedding'}
+              logo={navName(config, 'Wedding')}
               allSections={allSections}
             />
             <main>
               {visible.map((s) => (
-                <SectionRenderer key={s.id} section={s} slug={effSlug} gatePhotos={gatePhotos} />
+                <SectionRenderer key={s.id} section={s} slug={effSlug} gatePhotos={gatePhotos} couple={config.couple} />
               ))}
             </main>
             <TravellingOverlay />

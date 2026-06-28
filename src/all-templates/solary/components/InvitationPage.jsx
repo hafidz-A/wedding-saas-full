@@ -11,6 +11,8 @@ import { AudioProvider } from "../contexts/AudioContext.jsx";
 import { GuestProvider } from "../contexts/GuestContext.jsx";
 import { JourneyProvider } from "../contexts/JourneyContext.jsx";
 
+import { navName } from "@/lib/meta/couple";
+
 export default function InvitationPage({ config }) {
   const visible = useMemo(
     () => config.sections.filter((s) => s.enabled !== false),
@@ -45,12 +47,12 @@ export default function InvitationPage({ config }) {
         <GuestProvider>
           <JourneyProvider>
             <FloatingNavbar
-              logo={config.meta?.title?.split("—")[0]?.trim() || "Galactic"}
+              logo={navName(config, "Galactic")}
               allSections={allSections}
             />
             <main>
               {visible.map((s) => (
-                <SectionRenderer key={s.id} section={s} slug={slug} gatePhotos={gatePhotos} />
+                <SectionRenderer key={s.id} section={s} slug={slug} gatePhotos={gatePhotos} couple={config.couple} />
               ))}
             </main>
             <TravellingOverlay />

@@ -4,6 +4,7 @@ import { Suspense, useMemo } from 'react'
 import { sectionRegistry as lovebirdsRegistry } from '../registry.js'
 import { resolveBackground } from '../config/themes.js'
 import SectionSkeleton from '../components/SectionSkeleton.jsx'
+import { injectCoupleProps } from '@/lib/meta/couple'
 
 /**
  * Render the page from config.sections, using the supplied `registry`
@@ -47,7 +48,7 @@ export default function SectionRenderer({ config, slug, registry = lovebirdsRegi
           >
             <Suspense fallback={<SectionSkeleton label={section.id} />}>
               <Component
-                {...(section.props || {})}
+                {...injectCoupleProps(section, config?.couple)}
                 id={section.id}
                 slug={slug}
                 blocks={section.blocks}
