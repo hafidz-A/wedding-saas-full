@@ -587,7 +587,8 @@ export const BotanicalBorder = React.memo(() => {
     }, {
       root: null,
       rootMargin: '-22% 0px -22% 0px',
-      threshold: Array.from({ length: 51 }, (_, index) => index / 50),
+      // Reduce threshold from 51 points to 5 points to save CPU on scroll
+      threshold: [0, 0.25, 0.5, 0.75, 1.0],
     })
 
     sections.forEach((section) => observer.observe(section))

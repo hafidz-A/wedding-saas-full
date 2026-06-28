@@ -126,10 +126,8 @@
   border-radius: clamp(8px, 1.2vw, 14px);
   border: clamp(4px, 0.5vw, 7px) solid #fff;
   box-shadow:
-    0 12px 36px rgba(42, 33, 24, 0.25),
-    0 4px 12px rgba(42, 33, 24, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.6),
-    inset 0 0 20px rgba(255, 255, 255, 0.08);
+    0 8px 24px rgba(42, 33, 24, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.6);
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
@@ -151,7 +149,6 @@
     0 0 0 1px rgba(42, 33, 24, calc(var(--gate) * 0.1)),
     0 0 calc((1 - var(--gate)) * 60px) rgba(245, 200, 66, calc((1 - var(--gate)) * 0.25));
   z-index: 4;
-  will-change: width, height, border-radius;
 }
 
 /* Inner vignette for the gate photo */
@@ -170,8 +167,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: blur(calc((1 - var(--gate)) * 5px));
-  will-change: transform, filter;
+  will-change: transform;
 }
 
 .gateGlow {
@@ -264,8 +260,8 @@
   z-index: -1;
   border-radius: 28px;
   background: var(--glass-bg, rgba(255, 255, 255, 0.45));
-  backdrop-filter: blur(calc(10px + var(--gate) * 10px));
-  -webkit-backdrop-filter: blur(calc(10px + var(--gate) * 10px));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
   /* Card shadow only materialises as the hero card forms — at the gate the
      veil casts no hard rectangular shadow over the illustration. */
@@ -276,7 +272,7 @@
      solid full card at the hero end-state (gate=1). */
   -webkit-mask-image: linear-gradient(to top, #000 calc(76% + var(--gate) * 24%), transparent);
   mask-image: linear-gradient(to top, #000 calc(76% + var(--gate) * 24%), transparent);
-  will-change: backdrop-filter, mask-image, box-shadow;
+  will-change: mask-image, box-shadow;
 }
 
 /* Respect users who reduce transparency: drop the blur, lift the fill. */
@@ -572,8 +568,7 @@
     border-width: clamp(3px, 0.8vw, 5px);
     border-radius: clamp(6px, 1.6vw, 12px);
     box-shadow:
-      0 10px 30px rgba(42, 33, 24, 0.28),
-      0 3px 10px rgba(42, 33, 24, 0.14),
+      0 8px 24px rgba(42, 33, 24, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.5);
   }
   .coupleName { font-size: clamp(34px, 9vw, 70px); }
@@ -604,8 +599,7 @@
     border-width: 3px;
     border-radius: 8px;
     box-shadow:
-      0 8px 24px rgba(42, 33, 24, 0.30),
-      0 2px 8px rgba(42, 33, 24, 0.15),
+      0 6px 16px rgba(42, 33, 24, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.45);
   }
 }

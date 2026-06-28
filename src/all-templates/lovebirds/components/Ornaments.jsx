@@ -674,9 +674,24 @@ export function PerchedCanvas({ active, paletteKey, contained = false }) {
       hearts.forEach(h => drawHeart(h.x, h.y, h.size, h.life))
     }
 
+    let lastRenderTime = 0
     function loop(time) {
+      if (reduce) return
+      
+      raf = requestAnimationFrame(loop)
+      
+      // Pause completely if tab is hidden or if gallery is active (CSS hides it anyway)
+      if (document.hidden || document.body.classList.contains('lb-gallery-active')) {
+        return
+      }
+      
+      // Throttle to ~30fps on mobile to save CPU/GPU (30ms = ~33 FPS)
+      if (W <= 768 && time - lastRenderTime < 30) {
+        return
+      }
+
+      lastRenderTime = time
       renderCanvas(time)
-      if (!reduce) raf = requestAnimationFrame(loop)
     }
 
     resizeCanvas()
