@@ -14,6 +14,7 @@ import { deepEqual } from './lib/deepEqual'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave, subscribeEditorSaves } from './lib/editorSync'
+import { hashSections } from './lib/sectionsHash'
 
 export interface SectionEntry {
   id: string
@@ -54,6 +55,11 @@ export interface State {
   isSaving: boolean
   saveError: string | null
   lastSavedAt: string | null
+  /** Fingerprint of the SECTIONS this editor last loaded/saved — the
+   *  optimistic-concurrency baseline sent on save. Only bumps when sections are
+   *  saved here, so sibling sub-tab saves (palette/music/meta) never invalidate
+   *  it. See lib/sectionsHash. */
+  baseSectionsHash: string
 }
 
 export type Action =
@@ -69,8 +75,8 @@ export type Action =
   | { type: 'REMOVE_SECTION';         sectionId: string }
   | { type: 'SELECT_SECTION';         sectionId: string }
   | { type: 'SAVE_START' }
-  | { type: 'SAVE_SUCCESS';           savedAt: string }
-  | { type: 'SAVE_ERROR';             message: string }
+  | { type: 'SAVE_SUCCESS';           savedAt: string; sectionsHash: string }
+  | { type: 'SAVE_ERROR';             message: string | null }
   | { type: 'REBASE';                 savedAt: string }
   | { type: 'CHANGE_SECTION_TYPE'; sectionId: string; newType: string; defaults?: Record<string, unknown> }
   | { type: 'REORDER_SECTIONS_BY_ID'; order: string[] }
@@ -265,6 +271,8 @@ export function reducer(state: State, action: Action): State {
         saveError: null,
         initialConfig: state.config,
         lastSavedAt: action.savedAt,
+        // Sections we just stored are the new concurrency baseline.
+        baseSectionsHash: action.sectionsHash,
       }
 
     case 'SAVE_ERROR':
@@ -309,10 +317,12 @@ interface EditorContextValue extends State {
   publishBusy: boolean
   publishError: string | null
   togglePublish: () => Promise<void>
-  /** True once a save was rejected with 409 (another tab/device wrote first). */
-  saveConflict: boolean
-  clearSaveConflict: () => void
-  /** True when another tab/device saved newer SECTION content (live, pre-save). */
+  /**
+   * True when another tab/device has newer SECTION content than this tab — either
+   * learned live via BroadcastChannel, or discovered when a save came back 409.
+   * Surfaces the gentle, non-blocking "reload for the latest" banner (no blocking
+   * modal, no "close your other tabs" scolding). Reload is the only resolution.
+   */
   remoteChange: boolean
   dismissRemoteChange: () => void
 }
@@ -329,8 +339,14 @@ interface ProviderProps {
   slug: string
   initialConfig: PageConfig
   children: ReactNode
-  /** invitation.updated_at at load — sent back on save for conflict detection. */
+  /** invitation.updated_at at load — kept for the "Saved HH:MM" display only. */
   initialUpdatedAt?: string | null
+  /**
+   * Fingerprint of the sections as STORED when the page loaded (hashed from the
+   * raw, pre-migration config so it matches what the server will compute). The
+   * optimistic-concurrency baseline; computed in EditorRoot.
+   */
+  initialSectionsHash?: string
   /** Published state at load — owned here so every SaveBar instance agrees. */
   initialIsPublished?: boolean
   /**
@@ -361,7 +377,7 @@ function cleanConfig(input: PageConfig): PageConfig {
   }
 }
 
-export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt, initialIsPublished, liveUpdatedAt, onSaved }: ProviderProps) {
+export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt, initialSectionsHash, initialIsPublished, liveUpdatedAt, onSaved }: ProviderProps) {
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
   const cleaned = cleanConfig(initialConfig)
@@ -372,6 +388,9 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
     isSaving: false,
     saveError: null,
     lastSavedAt: initialUpdatedAt ?? null,
+    // Prefer the baseline EditorRoot hashed from the raw (pre-migration) config
+    // so it matches the server's stored sections; fall back to the cleaned ones.
+    baseSectionsHash: initialSectionsHash ?? hashSections(cleaned.sections),
   })
 
   // Publish toggle + save-conflict flag live in the provider (not SaveBar) so a
@@ -379,13 +398,10 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
   const [isPublished, setIsPublished] = useState(!!initialIsPublished)
   const [publishBusy, setPublishBusy] = useState(false)
   const [publishError, setPublishError] = useState<string | null>(null)
-  const [saveConflict, setSaveConflict] = useState(false)
-  const clearSaveConflict = useCallback(() => setSaveConflict(false), [])
 
-  // A newer SECTION-editor save landed in another tab/device of this same
-  // invitation (learned live via BroadcastChannel). Surfaces a gentle "reload
-  // for the latest" banner — proactive, non-blocking, before the user keeps
-  // editing a version that can no longer be saved.
+  // A newer SECTION version exists in another tab/device of this same invitation
+  // — learned live via BroadcastChannel, or discovered when our own save came
+  // back 409. Surfaces the gentle, non-blocking "reload for the latest" banner.
   const [remoteChange, setRemoteChange] = useState(false)
   const dismissRemoteChange = useCallback(() => setRemoteChange(false), [])
 
@@ -459,22 +475,33 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       const res = await fetch(`/api/invitation/${slug}/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        // baseUpdatedAt lets the server reject a save that would clobber a newer
-        // version written from another tab/device since this one loaded.
-        body: JSON.stringify({ config: state.config, baseUpdatedAt: state.lastSavedAt }),
+        // baseSectionsHash lets the server reject a save that would clobber newer
+        // SECTION content written from another tab/device since this one loaded.
+        // (Sibling sub-tab saves don't touch sections, so they never trip it.)
+        body: JSON.stringify({ config: state.config, baseSectionsHash: state.baseSectionsHash }),
       })
       if (!res.ok) {
+        if (res.status === 409) {
+          // Another tab/device saved newer SECTION content. Don't scold with a
+          // blocking modal — raise the same gentle reload banner the live notice
+          // uses, and keep the user's unsaved edits in place. No fail toast.
+          dispatch({ type: 'SAVE_ERROR', message: null })
+          setRemoteChange(true)
+          return
+        }
         const err = await res.json().catch(() => ({}))
         dispatch({ type: 'SAVE_ERROR', message: err.error || `HTTP ${res.status}` })
-        // 409 = another tab/device saved since this one loaded. Raise a flag the
-        // SaveBar turns into a "muat ulang halaman" dialog (vs the generic toast).
-        if (res.status === 409) setSaveConflict(true)
-        else fb.fail(fm.saveFail)
+        fb.fail(fm.saveFail)
         return
       }
       const data = await res.json()
       const savedAt = data.savedAt || new Date().toISOString()
-      dispatch({ type: 'SAVE_SUCCESS', savedAt })
+      // Adopt the server's authoritative sections fingerprint as the next
+      // baseline; recompute locally if an older server didn't echo one.
+      const sectionsHash = typeof data.sectionsHash === 'string'
+        ? data.sectionsHash
+        : hashSections(state.config.sections)
+      dispatch({ type: 'SAVE_SUCCESS', savedAt, sectionsHash })
       // Keep EditorWorkspace's shared baseline in sync for the sibling sub-tabs.
       onSaved?.(savedAt)
       // Tell other tabs of this invitation a SECTION write just landed, so a
@@ -485,7 +512,7 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
       dispatch({ type: 'SAVE_ERROR', message: e?.message || 'Network error' })
       fb.fail(fm.saveFail)
     }
-  }, [slug, state.config, fb, fm, onSaved])
+  }, [slug, state.config, state.baseSectionsHash, fb, fm, onSaved])
 
   const value: EditorContextValue = {
     ...state,
@@ -518,8 +545,6 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
     publishBusy,
     publishError,
     togglePublish,
-    saveConflict,
-    clearSaveConflict,
     remoteChange,
     dismissRemoteChange,
   }

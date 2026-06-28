@@ -1,32 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
-import { encryptConfig } from '@/lib/crypto/config'
+import { encryptConfig, decryptConfig } from '@/lib/crypto/config'
 import { validateSectionsAgainstPolicy } from '@/editor/templatePolicy'
+import { hashSections } from '@/editor/lib/sectionsHash'
 
 interface Ctx {
   params: { slug: string }
-}
-
-/**
- * True only when the DB row is a STRICTLY NEWER write than the baseline the
- * editor loaded — i.e. a real concurrent edit to clobber.
- *
- * Compares INSTANTS, not raw strings. The client echoes its baseline back as a
- * `new Date().toISOString()` value (`…Z`, ms precision), while Postgres/PostgREST
- * returns `updated_at` as a different serialization of the same instant
- * (`…+00:00`, µs precision). A raw `!==` treated those as a conflict and falsely
- * blocked every save after the first. Parsing to epoch ms makes equal instants
- * compare equal regardless of zone notation or sub-ms padding.
- *
- * Falls back to exact string compare when either value isn't a parseable date
- * (defensive — keeps deterministic behaviour for non-ISO tokens).
- */
-function isStaleWrite(base: string, current: string): boolean {
-  const b = Date.parse(base)
-  const c = Date.parse(current)
-  if (Number.isNaN(b) || Number.isNaN(c)) return base !== current
-  return c > b
 }
 
 /**
@@ -75,12 +55,22 @@ export async function PUT(req: Request, { params }: Ctx) {
     .eq('id', owner.id)
     .single()
 
-  // Optimistic concurrency: if the editor sent the updated_at it loaded with,
-  // and the row has been written since (another tab/device), reject rather than
-  // silently clobber the newer sections. The client surfaces this as a "reload"
-  // prompt. A missing baseUpdatedAt (older client) skips the check — no regression.
-  const baseUpdatedAt = typeof body?.baseUpdatedAt === 'string' ? body.baseUpdatedAt : null
-  if (baseUpdatedAt && existing?.updated_at && isStaleWrite(baseUpdatedAt, existing.updated_at)) {
+  // Optimistic concurrency — CONTENT-AWARE, not timestamp-based. The section
+  // editor only owns `config.sections`, but four sibling sub-tabs (Palette /
+  // Music / Meta / Ornament) write the SAME row and bump its `updated_at`. A
+  // timestamp guard therefore fired a FALSE "another tab is open" 409 whenever a
+  // sub-tab had saved — even with a single open tab, and even though those saves
+  // can't touch sections. Instead, compare a fingerprint of the SECTIONS the
+  // editor loaded against the sections stored now: reject only when the sections
+  // themselves changed under us (a real conflict to clobber). Sub-tab saves never
+  // change sections, so they're invisible here — no false conflict, cross-device
+  // included, with no fragile cross-tab timestamp bookkeeping.
+  //
+  // Both sides hash DECRYPTED sections, so encrypted-at-rest leaves don't skew
+  // the comparison. A missing baseSectionsHash (older client) skips the check.
+  const baseSectionsHash = typeof body?.baseSectionsHash === 'string' ? body.baseSectionsHash : null
+  const storedSections = existing?.config ? decryptConfig(existing.config)?.sections : null
+  if (baseSectionsHash && hashSections(storedSections) !== baseSectionsHash) {
     return NextResponse.json(
       { error: 'Undangan ini sudah diubah dari tab atau perangkat lain. Muat ulang halaman dulu sebelum menyimpan.' },
       { status: 409 },
@@ -129,5 +119,8 @@ export async function PUT(req: Request, { params }: Ctx) {
   }
 
   const savedAt = updatedRow?.updated_at ?? localNow
-  return NextResponse.json({ ok: true, savedAt })
+  // Echo the fingerprint of the sections we just stored so the editor adopts it
+  // as its next concurrency baseline (mergedConfig is plaintext — sections are
+  // never in PRESERVE_KEYS, so this equals what the client sent).
+  return NextResponse.json({ ok: true, savedAt, sectionsHash: hashSections(mergedConfig.sections) })
 }

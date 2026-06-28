@@ -1,9 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
-import { useConfirm } from '@/components/dashboard/DialogProvider'
 import styles from './SaveBar.module.css'
 
 /**
@@ -53,36 +51,6 @@ export default function SaveBar() {
       </button>
     </div>
   )
-}
-
-/**
- * Watches for a 409 save conflict and shows ONE reload dialog. Mounted once
- * (in EditorRoot), separate from SaveBar which may render multiple times.
- */
-export function SaveConflictDialog() {
-  const { saveConflict, clearSaveConflict } = useEditor()
-  const t = useDashboardDict().editor
-  const confirmDialog = useConfirm()
-  const firing = useRef(false)
-
-  useEffect(() => {
-    if (!saveConflict || firing.current) return
-    firing.current = true
-    void (async () => {
-      const reload = await confirmDialog({
-        title: t.conflictTitle,
-        message: t.conflictBody,
-        confirmLabel: t.conflictReload,
-        cancelLabel: t.conflictDismiss,
-        tone: 'danger',
-      })
-      clearSaveConflict()
-      firing.current = false
-      if (reload) window.location.reload()
-    })()
-  }, [saveConflict, confirmDialog, clearSaveConflict, t])
-
-  return null
 }
 
 /**

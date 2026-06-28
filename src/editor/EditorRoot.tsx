@@ -5,10 +5,11 @@ import { EditorProvider, type PageConfig } from './EditorProvider'
 import SectionList from './SectionList'
 import FieldEditor from './FieldEditor'
 import FieldEditorSheet from './FieldEditorSheet'
-import SaveBar, { SaveConflictDialog, RemoteChangeBanner } from './SaveBar'
+import SaveBar, { RemoteChangeBanner } from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
+import { hashSections } from './lib/sectionsHash'
 import styles from './EditorRoot.module.css'
 
 interface Props {
@@ -25,6 +26,13 @@ interface Props {
 }
 
 export default function EditorRoot({ slug, template, initialConfig, initialIsPublished, initialUpdatedAt, liveUpdatedAt, onSaved }: Props) {
+  // Concurrency baseline must match the sections AS STORED in the row, so hash
+  // the RAW config BEFORE the lovebirds client-side migration rewrites it — the
+  // server hashes the un-migrated stored sections, and they must agree on the
+  // first save. (After that save the migrated form is what's stored, and the
+  // server echoes the new fingerprint.)
+  const initialSectionsHash = hashSections(initialConfig?.sections)
+
   // Lovebirds: fold registry→weddingGift + strip guestbook/countdown on load.
   const migrated =
     template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig
@@ -39,8 +47,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   const t = useDashboardDict().editor
 
   return (
-    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialIsPublished={initialIsPublished} liveUpdatedAt={liveUpdatedAt} onSaved={onSaved}>
-      <SaveConflictDialog />
+    <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialSectionsHash={initialSectionsHash} initialIsPublished={initialIsPublished} liveUpdatedAt={liveUpdatedAt} onSaved={onSaved}>
       <RemoteChangeBanner />
       <div className={styles.wrap}>
         <div className={styles.topBar}>
