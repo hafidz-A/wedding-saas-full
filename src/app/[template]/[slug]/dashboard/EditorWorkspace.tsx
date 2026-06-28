@@ -7,6 +7,7 @@ import PaletteTab from './PaletteTab'
 import MusicTab from './MusicTab'
 import MetaTab from './MetaTab'
 import OrnamentTab from './OrnamentTab'
+import { coupleDisplay } from '@/lib/meta/couple'
 import { useDashboardDict } from './DashboardI18nProvider'
 import styles from './EditorWorkspace.module.css'
 
@@ -67,7 +68,7 @@ export default function EditorWorkspace({
   // Couple's real names + date (from the hero section) so the Palette preview
   // shows their actual card instead of placeholder copy.
   const hero = invitation.config?.sections?.find((s: any) => s.type === 'hero')?.props
-  const coupleName: string | undefined = hero?.coupleName
+  const coupleName: string | undefined = coupleDisplay(invitation.config?.couple) || hero?.coupleName
   const weddingDate: string | undefined = hero?.weddingDate
 
   // Single shared concurrency baseline for THIS tab. Every editing surface (the

@@ -9,6 +9,7 @@ import { decryptConfig } from '@/lib/crypto/config'
 import { decryptField } from '@/lib/crypto/app'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 import { fillEmptyImages } from '@/lib/config/fillEmptyImages'
+import { composeTitle } from '@/lib/meta/couple'
 
 interface PageProps {
   params: { template: string; slug: string }
@@ -454,6 +455,7 @@ export async function generateMetadata({ params }: PageProps) {
 
     const meta = (config && config.meta) || {}
     const title =
+      composeTitle(config?.couple, meta?.titleSuffix).trim() ||
       (typeof meta.title === 'string' && meta.title.trim()) ||
       deriveCoupleName(config) ||
       fallbackTitle
