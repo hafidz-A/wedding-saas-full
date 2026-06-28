@@ -41,6 +41,7 @@ export interface MusicSettings {
 
 export interface PageConfig {
   meta?: { title?: string; description?: string }
+  couple?: { name1?: string; name2?: string }
   music?: MusicSettings
   /** URL untuk GIF background (mis. burung) — diatur lewat dashboard tab
    *  Background. Kosong string ('') berarti user sengaja menghapus GIF. */
@@ -80,6 +81,7 @@ export type Action =
   | { type: 'REBASE';                 savedAt: string }
   | { type: 'CHANGE_SECTION_TYPE'; sectionId: string; newType: string; defaults?: Record<string, unknown> }
   | { type: 'REORDER_SECTIONS_BY_ID'; order: string[] }
+  | { type: 'UPDATE_COUPLE'; key: 'name1' | 'name2'; value: string }
 
 function moveItem<T>(arr: T[], from: number, to: number): T[] {
   const next = arr.slice()
@@ -108,6 +110,12 @@ export function reducer(state: State, action: Action): State {
           ...s,
           props: { ...(s.props || {}), [action.key]: action.value },
         })),
+      }
+
+    case 'UPDATE_COUPLE':
+      return {
+        ...state,
+        config: { ...state.config, couple: { ...(state.config.couple || {}), [action.key]: action.value } },
       }
 
     case 'UPDATE_ARRAY_ITEM':
@@ -299,6 +307,7 @@ interface EditorContextValue extends State {
   isDirty: boolean
   selectedSection: SectionEntry | null
   updateField: (sectionId: string, key: string, value: unknown) => void
+  updateCouple: (key: 'name1' | 'name2', value: string) => void
   updateArrayItem: (sectionId: string, key: string, index: number, subKey: string, value: unknown) => void
   addArrayItem: (sectionId: string, key: string, item: unknown) => void
   removeArrayItem: (sectionId: string, key: string, index: number) => void
@@ -520,6 +529,7 @@ export function EditorProvider({ slug, initialConfig, children, initialUpdatedAt
     selectedSection,
     updateField: (sectionId, key, value) =>
       dispatch({ type: 'UPDATE_FIELD', sectionId, key, value }),
+    updateCouple: (key, value) => dispatch({ type: 'UPDATE_COUPLE', key, value }),
     updateArrayItem: (sectionId, key, index, subKey, value) =>
       dispatch({ type: 'UPDATE_ARRAY_ITEM', sectionId, key, index, subKey, value }),
     addArrayItem: (sectionId, key, item) =>

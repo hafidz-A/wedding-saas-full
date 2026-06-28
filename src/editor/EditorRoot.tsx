@@ -9,6 +9,7 @@ import SaveBar, { RemoteChangeBanner } from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
+import { deriveCoupleFromConfig } from '@/lib/meta/couple'
 import { hashSections } from './lib/sectionsHash'
 import styles from './EditorRoot.module.css'
 
@@ -38,6 +39,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
     template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig
   const safeConfig: PageConfig = {
     meta: migrated?.meta ?? {},
+    couple: deriveCoupleFromConfig(migrated),
     sections: Array.isArray(migrated?.sections) ? migrated.sections : [],
   }
 

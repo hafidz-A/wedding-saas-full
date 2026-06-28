@@ -66,3 +66,24 @@ describe('REORDER_SECTIONS_BY_ID', () => {
     expect(next.config.sections.map((s: any) => s.id)).toEqual(['venus', 'mars'])
   })
 })
+
+describe('UPDATE_COUPLE', () => {
+  const base = {
+    config: { sections: [], couple: { name1: 'A', name2: 'B' } },
+    initialConfig: { sections: [] },
+    selectedSectionId: null,
+    isSaving: false,
+    saveError: null,
+    lastSavedAt: null,
+    baseSectionsHash: 'x',
+  } as any
+
+  it('sets a single couple name without dropping the other', () => {
+    const next = reducer(base, { type: 'UPDATE_COUPLE', key: 'name1', value: 'Amara' } as any)
+    expect(next.config.couple).toEqual({ name1: 'Amara', name2: 'B' })
+  })
+  it('initializes couple when absent', () => {
+    const next = reducer({ ...base, config: { sections: [] } }, { type: 'UPDATE_COUPLE', key: 'name2', value: 'Rizky' } as any)
+    expect(next.config.couple).toEqual({ name2: 'Rizky' })
+  })
+})
