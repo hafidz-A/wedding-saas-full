@@ -96,8 +96,8 @@ const titleStyle: React.CSSProperties = {
 }
 const closeBtn: React.CSSProperties = {
   flexShrink: 0,
-  width: 34,
-  height: 34,
+  width: 36,
+  height: 36,
   borderRadius: 'var(--radius-pill)',
   border: '1px solid var(--border-default)',
   background: 'transparent',

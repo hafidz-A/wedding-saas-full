@@ -39,7 +39,7 @@ charcoal-light `#5C4A3A`, paper `#ffffff`, ink `#1a1a1a`.
 `--font-serif-soft` Kameron. CDN import (note: Kameron must be ADDED to the CDN URL since
 fonts.css only loads Cormorant + DM Sans + Great Vibes).
 
-**Radii** (`tokens.css:57-59`): card 16px, pill 999px, sm 8px.
+**Radii** *(updated 2026-06-28 — unified scale; `--border-radius-*` removed)*: `--radius-xs` 4, `--radius-sm` 8, `--radius-md` 16 (card/panel), `--radius-lg` 24, `--radius-pill` 999, `--radius-round` 50%. Control heights: `--ctl-h-sm` 36 / `--ctl-h` 44 / `--ctl-h-lg` 52. Guard: `npm run check:tokens`.
 **Shadows** (`tokens.css:62-65`): card `0 8px 32px rgba(42,33,24,0.10)`;
 card-hover `0 16px 48px rgba(42,33,24,0.16)`; soft `0 4px 14px rgba(42,33,24,0.06)`;
 polaroid `5px 5px 16px rgba(0,0,0,0.28)`.

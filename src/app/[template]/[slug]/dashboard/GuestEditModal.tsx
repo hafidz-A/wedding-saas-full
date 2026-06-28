@@ -156,8 +156,8 @@ const header: React.CSSProperties = {
   marginBottom: 4,
 }
 const closeBtn: React.CSSProperties = {
-  width: 32,
-  height: 32,
+  width: 36,
+  height: 36,
   fontSize: 22,
   lineHeight: 1,
   border: 0,

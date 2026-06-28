@@ -204,7 +204,7 @@ function LedgerMobileCard({
             disabled={busyId === r.id}
             onClick={(e) => { e.stopPropagation(); onToggleArrived(r) }}
             title={arrived ? t.undoCheckIn : t.checkInBtn}
-            style={{ ...checkBtn(arrived), height: 32, padding: '0 12px', fontSize: 12 }}
+            style={{ ...checkBtn(arrived), height: 36, padding: '0 12px', fontSize: 12 }}
           >
             {arrived
               ? `✓ ${new Date(r.arrived_at as string).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`

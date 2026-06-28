@@ -87,8 +87,11 @@ Mirrors the Galactic guide's skeleton. Each `<section>` separated by a divider.
   font/role metadata.
 
 ### 03 · Design Tokens
-- **Radii:** `--border-radius-card` 16px, `--border-radius-pill` 999px,
-  `--border-radius-sm` 8px.
+- **Radii** *(updated 2026-06-28 — unified scale; old `--border-radius-*` removed):*
+  `--radius-xs` 4 · `--radius-sm` 8 · `--radius-md` 16 (card/panel) · `--radius-lg` 24 ·
+  `--radius-pill` 999 · `--radius-round` 50%. One scale across all templates + chrome.
+- **Control heights** *(added 2026-06-28):* `--ctl-h-sm` 36 (dense/admin), `--ctl-h` 44
+  (default; = `--tap-target`), `--ctl-h-lg` 52 (hero/gate CTA). Guard: `npm run check:tokens`.
 - **Shadows:** `--shadow-card`, `--shadow-card-hover`, `--shadow-soft`,
   `--shadow-polaroid`, plus lovebirds glass/3D-button shadows from `theme.css`
   (`--shadow-glass`, `--shadow-button-3d` + hover/active).

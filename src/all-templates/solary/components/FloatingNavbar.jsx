@@ -179,7 +179,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
   };
 
   const iconBtnStyle = {
-    width: 32, height: 32,
+    width: 44, height: 44,
     display: "grid", placeItems: "center",
     borderRadius: "50%",
     background: "var(--nav-arrow-bg)",
