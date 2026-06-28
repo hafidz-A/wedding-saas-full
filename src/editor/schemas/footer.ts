@@ -6,7 +6,7 @@ export const footerSchema: SectionSchema = {
   fields: [
     { key: 'hashtag',    label: { id: 'Tagar', en: 'Hashtag' },         type: 'text' },
     { key: 'message',    label: { id: 'Pesan', en: 'Message' },         type: 'textarea', rows: 2 },
-    { key: 'coupleName', label: { id: 'Nama pasangan', en: 'Couple name' }, type: 'text' },
+    { key: 'coupleName', label: { id: 'Nama pasangan', en: 'Couple name' }, type: 'text', linkedGroup: 'couple' },
     {
       key: 'socials',
       label: { id: 'Media sosial', en: 'Socials' },

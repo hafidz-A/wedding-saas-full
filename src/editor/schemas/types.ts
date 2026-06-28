@@ -33,6 +33,10 @@ export interface BaseField {
   key: string
   label: LabelText
   help?: LabelText
+  /** Marks a field as bound to a centrally-managed group (currently only the
+   *  couple's names). The editor renders these LOCKED unless the section opts
+   *  out via props.coupleOverride. */
+  linkedGroup?: 'couple'
 }
 
 export interface TextField extends BaseField {
