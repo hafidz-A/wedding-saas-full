@@ -246,6 +246,46 @@ function DecorCorners() {
   )
 }
 
+/**
+ * Live countdown, isolated in its own component so its 1 Hz setState ticks
+ * re-render ONLY this small subtree — not the whole heavy Hero gate (8 petals,
+ * up to 12 blast photos, SVG filters). Previously the tick re-rendered all of
+ * Hero every second, compounding the scroll-time jank.
+ */
+function Countdown({ weddingDate }) {
+  const [parts, setParts] = useState(() => diffParts(weddingDate))
+  useEffect(() => {
+    const tick = () => setParts(diffParts(weddingDate))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [weddingDate])
+
+  if (!parts) return null
+  if (parts.ended) return <p className={styles.ended}>Today is the day — welcome.</p>
+  return (
+    <ul className={styles.countdown} aria-label="Countdown to the wedding day">
+      {[
+        { label: 'Days', value: parts.days },
+        { label: 'Hours', value: parts.hours },
+        { label: 'Min', value: parts.minutes },
+        { label: 'Sec', value: parts.seconds },
+      ].map((c) => (
+        <li key={c.label} className={styles.countCell}>
+          {/* The live value (esp. seconds) is computed from Date.now(), so the
+              server-rendered number and the value at client hydration differ by
+              ~1s. suppressHydrationWarning tells React this text mismatch is
+              expected — without it the mismatch throws and forces a re-render. */}
+          <span className={styles.countValue} suppressHydrationWarning>
+            {String(c.value).padStart(2, '0')}
+          </span>
+          <span className={styles.countLabel}>{c.label}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export default function Hero(props) {
   const cfg = { ...DEFAULTS, ...props }
 
@@ -258,12 +298,17 @@ export default function Hero(props) {
     setGuestName(readGuestName())
     setIsPreview(readPreviewMode())
   }, [])
-    const containerRef = useRef(null)
-  const [progress, setProgress] = useState(0)
+  const containerRef = useRef(null)
+  // The gate animation is driven imperatively (see applyProgress) instead of via
+  // React state, so a scroll frame mutates the DOM directly and NEVER triggers a
+  // React re-render of this heavy tree — the chief mobile-jank source.
+  const gateImgRef = useRef(null)
+  const gateContentRef = useRef(null)
+  const petalRefs = useRef([])
+  const blastRefs = useRef([])
   const [reduceMotion, setReduceMotion] = useState(false)
-  const [parts, setParts] = useState(() => diffParts(cfg.weddingDate))
   const viewportScale = useViewportScale()
- 
+
   const blastLayout = useMemo(() => {
     // Cap matches the editor (hero schema blastPhotos maxItems: 12) — each
     // blast photo animates independently, more turns the scatter to clutter.
@@ -286,7 +331,60 @@ export default function Hero(props) {
       }
     })
   }, [cfg.blastPhotos, viewportScale])
- 
+
+  // Per-petal constants (slot + scroll-rotation speed) computed once.
+  const petalData = useMemo(
+    () =>
+      (cfg.petals || []).map((name, i) => ({
+        name,
+        slot: PETAL_SLOTS[i % PETAL_SLOTS.length],
+        speed: PETAL_SCROLL_SPEEDS[i % PETAL_SCROLL_SPEEDS.length],
+      })),
+    [cfg.petals],
+  )
+
+  // Single source of truth for the gate frame. Writes CSS vars + transforms
+  // straight to the DOM — the easing math is byte-identical to the old
+  // state-driven version, only the React re-render per frame is gone.
+  const applyProgress = useCallback(
+    (p) => {
+      const gatePhase = easeOutCubic(clamp01(p / 0.5))
+
+      const root = containerRef.current
+      if (root) {
+        root.style.setProperty('--gate', gatePhase)
+        root.style.setProperty('--hint', clamp01(1 - p / 0.08))
+        // Overlay stays moderate even at gate=1 so cream-haloed text stays
+        // readable where it overlaps the now-small gate image.
+        root.style.setProperty('--overlay', 0.55 - gatePhase * 0.15)
+      }
+      if (gateImgRef.current) {
+        gateImgRef.current.style.transform = `scale(${1.16 - gatePhase * 0.16}) translateY(${-25 + gatePhase * 25}px)`
+      }
+      if (gateContentRef.current) {
+        gateContentRef.current.style.transform = `translate(-50%, calc(-50% + ${(1 - gatePhase) * -16}px))`
+      }
+      for (let i = 0; i < petalData.length; i++) {
+        const node = petalRefs.current[i]
+        if (!node) continue
+        const slot = petalData[i].slot
+        const eased = easeOutCubic(clamp01((p - 0.55 - slot.delay) / 0.4))
+        const totalRot = slot.rot * eased + p * 540 * petalData[i].speed
+        node.style.transform = `rotate(${totalRot}deg) scale(${eased * slot.scale})`
+        node.style.opacity = eased
+      }
+      for (let i = 0; i < blastLayout.length; i++) {
+        const node = blastRefs.current[i]
+        if (!node) continue
+        const b = blastLayout[i]
+        const eased = easeOutCubic(clamp01((p - 0.32 - b.delay) / 0.42))
+        node.style.transform = `translate(calc(-50% + ${b.x * eased}px), calc(-50% + ${b.y * eased}px)) rotate(${b.rotate * eased}deg) scale(${0.25 + b.scale * eased})`
+        node.style.opacity = eased
+      }
+    },
+    [blastLayout, petalData],
+  )
+
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return undefined
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -298,57 +396,47 @@ export default function Hero(props) {
 
   useEffect(() => {
     if (reduceMotion) {
-      setProgress(1)
+      applyProgress(1)
       return undefined
     }
     let raf = 0
+    // Cache the scrollable distance; only re-measure on resize (offsetHeight is
+    // a layout read we don't want every scroll frame).
+    let total = 0
+    const measure = () => {
+      const el = containerRef.current
+      if (el) total = el.offsetHeight - window.innerHeight
+    }
     const update = () => {
       raf = 0
       const el = containerRef.current
       if (!el) return
-      const rect = el.getBoundingClientRect()
-      const total = el.offsetHeight - window.innerHeight
-      const scrolled = Math.max(0, -rect.top)
-      setProgress(total > 0 ? clamp01(scrolled / total) : 0)
+      const scrolled = Math.max(0, -el.getBoundingClientRect().top)
+      applyProgress(total > 0 ? clamp01(scrolled / total) : 0)
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update)
     }
+    measure()
     update()
     window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
+    const onResize = () => {
+      measure()
+      onScroll()
+    }
+    window.addEventListener('resize', onResize)
     return () => {
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
+      window.removeEventListener('resize', onResize)
       if (raf) cancelAnimationFrame(raf)
     }
-  }, [reduceMotion])
-
-  useEffect(() => {
-    if (!cfg.countdownEnabled || !cfg.weddingDate) return undefined
-    const tick = () => setParts(diffParts(cfg.weddingDate))
-    tick()
-    const id = setInterval(tick, 1000)
-    return () => clearInterval(id)
-  }, [cfg.countdownEnabled, cfg.weddingDate])
-
-  // Phase math
-  const gatePhase      = easeOutCubic(clamp01(progress / 0.5))
-  const hintOpacity    = clamp01(1 - progress / 0.08)
-  // Overlay stays moderate even at gate=1 so cream-haloed text remains
-  // readable where it overlaps the now-small gate image.
-  const overlayOpacity = 0.55 - gatePhase * 0.15
+  }, [reduceMotion, applyProgress])
 
   return (
     <section
       ref={containerRef}
       className={styles.gate}
       aria-label="Welcome gate"
-      style={{
-        '--gate': gatePhase,
-        '--hint': hintOpacity,
-        '--overlay': overlayOpacity,
-      }}
     >
       <div className={styles.sticky}>
         <div className={styles.revealBg} aria-hidden="true" />
@@ -374,16 +462,14 @@ export default function Hero(props) {
         <div className={styles.petalLayer} aria-hidden="true">
           {(cfg.petals || []).map((name, i) => {
             const slot = PETAL_SLOTS[i % PETAL_SLOTS.length]
-            const localT = clamp01((progress - 0.55 - slot.delay) / 0.4)
-            const eased = easeOutCubic(localT)
-            const scrollRot = progress * 540 * PETAL_SCROLL_SPEEDS[i % PETAL_SCROLL_SPEEDS.length]
-            const totalRot = slot.rot * eased + scrollRot
             const positionStyle = {
               top: slot.top,
               left: slot.left,
               right: slot.right,
               bottom: slot.bottom,
             }
+            // transform + opacity are set imperatively in applyProgress (see
+            // above); base rest-state lives in CSS (.petalReveal opacity:0).
             return (
               <div key={i} className={styles.petalAnchor} style={positionStyle}>
                 <div
@@ -392,10 +478,7 @@ export default function Hero(props) {
                 >
                   <div
                     className={styles.petalReveal}
-                    style={{
-                      transform: `rotate(${totalRot}deg) scale(${eased * slot.scale})`,
-                      opacity: eased,
-                    }}
+                    ref={(el) => { petalRefs.current[i] = el }}
                   >
                     <PetalShape name={name} />
                   </div>
@@ -407,36 +490,31 @@ export default function Hero(props) {
 
         {/* Photo blast — behind the card, NO text shown during this phase */}
         <div className={styles.blastLayer} aria-hidden="true">
-          {blastLayout.map((p, i) => {
-            const localT = clamp01((progress - 0.32 - p.delay) / 0.42)
-            const eased = easeOutCubic(localT)
-            return (
-              <img
-                key={i}
-                src={p.src}
-                alt=""
-                className={styles.blastPhoto}
-                loading="lazy"
-                style={{
-                  transform: `translate(calc(-50% + ${p.x * eased}px), calc(-50% + ${p.y * eased}px)) rotate(${p.rotate * eased}deg) scale(${0.25 + p.scale * eased})`,
-                  opacity: eased,
-                }}
-              />
-            )
-          })}
+          {blastLayout.map((p, i) => (
+            // transform + opacity are set imperatively in applyProgress; base
+            // rest-state lives in CSS (.blastPhoto opacity:0). decoding="async"
+            // keeps image decode off the main thread so it can't jank the blast.
+            <img
+              key={i}
+              src={p.src}
+              alt=""
+              className={styles.blastPhoto}
+              loading="lazy"
+              decoding="async"
+              ref={(el) => { blastRefs.current[i] = el }}
+            />
+          ))}
         </div>
 
         {/* Main image — never disappears, only shrinks into a rounded card */}
         <div className={styles.gateCard}>
           {cfg.gateImage && (
+            // transform set imperatively in applyProgress; base + transition in CSS.
             <img
               src={cfg.gateImage}
               alt=""
               className={styles.gateImg}
-              style={{
-                transform: `scale(${1.16 - gatePhase * 0.16}) translateY(${-25 + gatePhase * 25}px)`,
-                transition: 'transform 0.1s ease-out',
-              }}
+              ref={gateImgRef}
             />
           )}
           <div className={styles.gateOverlay} aria-hidden="true" />
@@ -445,14 +523,9 @@ export default function Hero(props) {
         {/* Glow vignette behind/around the card */}
         <div className={styles.gateGlow} aria-hidden="true" />
 
-        {/* All gate text overlaid on the main image — fades out on scroll */}
-        <div
-          className={styles.gateContent}
-          style={{
-            transform: `translate(-50%, calc(-50% + ${(1 - gatePhase) * -16}px))`,
-            transition: 'transform 0.1s ease-out',
-          }}
-        >
+        {/* All gate text overlaid on the main image — fades out on scroll.
+            transform set imperatively in applyProgress; base + transition in CSS. */}
+        <div className={styles.gateContent} ref={gateContentRef}>
           <div className={styles.glassCard}>
             {guestName ? (
               <p className={styles.gateGreet}>Welcome, dear {guestName}</p>
@@ -514,33 +587,10 @@ export default function Hero(props) {
               </p>
             )}
             {cfg.venue && <p className={styles.venue}>{cfg.venue}</p>}
-            {cfg.countdownEnabled && parts && !parts.ended && (
-              <ul className={styles.countdown} aria-label="Countdown to the wedding day">
-                {[
-                  { label: 'Days', value: parts.days },
-                  { label: 'Hours', value: parts.hours },
-                  { label: 'Min', value: parts.minutes },
-                  { label: 'Sec', value: parts.seconds },
-                ].map((c) => (
-                  <li key={c.label} className={styles.countCell}>
-                    {/* The live value (esp. seconds) is computed from Date.now(),
-                        so the server-rendered number and the value at client
-                        hydration differ by ~1s. suppressHydrationWarning tells
-                        React this text mismatch is expected — without it the
-                        mismatch throws and forces the whole Suspense boundary to
-                        re-render on the client (the dev "2 errors" toast). */}
-                    <span className={styles.countValue} suppressHydrationWarning>
-                      {String(c.value).padStart(2, '0')}
-                    </span>
-                    <span className={styles.countLabel}>{c.label}</span>
-                  </li>
-                ))}
-              </ul>
+            {cfg.countdownEnabled && cfg.weddingDate && (
+              <Countdown weddingDate={cfg.weddingDate} />
             )}
-            {cfg.countdownEnabled && parts && parts.ended && (
-              <p className={styles.ended}>Today is the day — welcome.</p>
-            )}
-            
+
             {/* Subtle initials monogram — same source (deriveMonogram) as the
                 Couple cards and the Footer, so the order always matches the
                 couple name instead of being hardcoded groom-first. */}
