@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { EditorProvider, type PageConfig } from './EditorProvider'
+import CouplePanel from './CouplePanel'
 import SectionList from './SectionList'
 import FieldEditor from './FieldEditor'
 import FieldEditorSheet from './FieldEditorSheet'
@@ -52,6 +53,7 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
     <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialSectionsHash={initialSectionsHash} initialIsPublished={initialIsPublished} liveUpdatedAt={liveUpdatedAt} onSaved={onSaved}>
       <RemoteChangeBanner />
       <div className={styles.wrap}>
+        <CouplePanel />
         <div className={styles.topBar}>
           <button
             type="button"
