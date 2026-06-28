@@ -35,7 +35,9 @@
 
   --measure: 60ch;
 
-  /* Radii — bumped for chunkier playful feel */
+  /* Radii — Solary's OWN scoped scale (intentional identity, chunkier/playful;
+     tighter than app chrome's --radius-* in src/styles/tokens.css). Use --r-*
+     inside Solary; use --radius-* elsewhere. */
   --r-1: 12px;
   --r-2: 20px;
   --r-3: 32px;

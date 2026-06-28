@@ -94,11 +94,15 @@
      and respected directly on buttons/links in section CSS where applicable. */
   --tap-target: 44px;
 
-  /* ---------- Radii ---------- */
-  --border-radius-card: 16px;
-  --border-radius-input: 10px;
-  --border-radius-pill: 999px;
-  --border-radius-sm: 8px;
+  /* ---------- Radii (LEGACY ALIASES) ----------
+     Deprecated namespace, kept so existing call-sites keep working. Each now
+     derives from the canonical --radius-* scale (see "RADIUS SCALE — SINGLE
+     SOURCE OF TRUTH" below) so the two can never silently drift apart. Prefer
+     the canonical --radius-* tokens in new CSS; migrate these opportunistically. */
+  --border-radius-card:  var(--radius-card);  /* 16px */
+  --border-radius-input: 10px;                /* off-scale legacy; canonical inputs use --radius-sm (8) */
+  --border-radius-pill:  var(--radius-pill);  /* 999px */
+  --border-radius-sm:    var(--radius-sm);     /* 8px */
 
   /* ---------- Shadows ---------- */
   --shadow-card: 0 8px 32px rgba(42, 33, 24, 0.10);
@@ -145,9 +149,20 @@
   --shadow-md:  0 12px 32px rgba(42, 33, 24, 0.12);
   --shadow-lg:  0 20px 48px rgba(42, 33, 24, 0.16);
 
-  /* ─── RADIUS SCALE (standardised — 3 values only) ─── */
+  /* ═══ RADIUS SCALE — SINGLE SOURCE OF TRUTH ═══
+     Use these `--radius-*` tokens for all app chrome (dashboard, marketing,
+     auth, site). Full scale: xs 4 · sm 8 · md 14 · card 16 · lg 20 · xl 32 ·
+     pill 999 (xs/lg/xl live in the Part-3 block below).
+     Pick by element role/size: inputs & small controls → sm; standard
+     cards/panels/buttons → md; soft "premium" cards → card; big feature cards
+     /modals → lg; hero containers / device mockups → xl; capsules/avatars → pill.
+     • The legacy `--border-radius-*` names (above) are now thin ALIASES of these
+       — kept only so old call-sites keep working; prefer `--radius-*` in new CSS.
+     • Templates keep their own scoped scale: Solary `--r-1/2/3`
+       (12/20/32, see all-templates/solary/styles/tokens.css). */
   --radius-sm:   8px;
   --radius-md:   14px;
+  --radius-card: 16px;
   --radius-pill: 999px;
 
   /* ─── FONT SIZE SCALE ─── */
