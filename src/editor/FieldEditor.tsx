@@ -14,6 +14,8 @@ import { localizeLabel, type FieldDef } from './schemas/types'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import type { Lang } from '@/lib/i18n'
+import { injectCoupleProps, hasCouple } from '@/lib/meta/couple'
+import LockedCoupleField from './fields/LockedCoupleField'
 import TextField from './fields/TextField'
 import TextareaField from './fields/TextareaField'
 import DatetimeField from './fields/DatetimeField'
@@ -74,6 +76,33 @@ export default function FieldEditor({ slug, template }: Props) {
     )
   }
 
+  const coupleLock = (useDashboardDict().editor as any).coupleLock
+  const coupleOverride = !!props.coupleOverride
+  const coupleActive = hasCouple(config.couple)
+  const inheritedProps = injectCoupleProps({ type: selectedSection.type, props }, config.couple)
+  const hasCoupleFields = (schema?.fields || []).some((f) => (f as any).linkedGroup === 'couple')
+
+  async function unlockCouple() {
+    const ok = await confirmDialog({
+      title: coupleLock.dialogTitle,
+      message: coupleLock.dialogMessage,
+      confirmLabel: coupleLock.proceed,
+      cancelLabel: coupleLock.cancel,
+    })
+    if (!ok) return
+    // Seed each couple field with its current inherited value so editing starts
+    // from what's on screen, then flip the override flag on.
+    ;(schema.fields as FieldDef[]).forEach((f) => {
+      if ((f as any).linkedGroup === 'couple') {
+        updateField(selectedSection!.id, f.key, inheritedProps[f.key] ?? '')
+      }
+    })
+    updateField(selectedSection!.id, 'coupleOverride', true)
+  }
+  function relinkCouple() {
+    updateField(selectedSection!.id, 'coupleOverride', false)
+  }
+
   const policy = getTemplatePolicy(template)
   const registry = getSchemaRegistry(template)
   const anchored = policy ? isTypeAnchored(selectedSection.type, policy) : false
@@ -114,7 +143,24 @@ export default function FieldEditor({ slug, template }: Props) {
         {typeLocked && policy && <p style={{ marginTop: 8, fontSize: 11, color: 'rgba(42,33,24,0.45)' }}>🔒 {t.lockedHint}</p>}
       </header>
       <div style={form}>
-        {schema.fields.map((f) => renderField(f, props[f.key], (v) => updateField(selectedSection.id, f.key, v), slug, lang))}
+        {schema.fields.map((f) => {
+          const isCouple = (f as any).linkedGroup === 'couple'
+          if (isCouple && coupleActive && !coupleOverride) {
+            return (
+              <LockedCoupleField
+                key={f.key}
+                label={localizeLabel(f.label, lang)}
+                value={String(inheritedProps[f.key] ?? '')}
+                hint={coupleLock.unlockHint}
+                onUnlock={unlockCouple}
+              />
+            )
+          }
+          return renderField(f, props[f.key], (v) => updateField(selectedSection!.id, f.key, v), slug, lang)
+        })}
+        {hasCoupleFields && coupleActive && coupleOverride && (
+          <button type="button" onClick={relinkCouple} style={relinkBtn}>{coupleLock.relink}</button>
+        )}
       </div>
     </div>
   )
@@ -181,4 +227,15 @@ const legacyBtn: React.CSSProperties = {
   background: 'var(--interactive-primary-hover)', color: '#fff', border: 'none',
   fontSize: 12, letterSpacing: '0.14em', textTransform: 'uppercase',
   fontWeight: 500, cursor: 'pointer',
+}
+const relinkBtn: React.CSSProperties = {
+  justifySelf: 'start',
+  padding: '8px 14px',
+  borderRadius: 'var(--radius-pill)',
+  border: '1px solid var(--border-strong)',
+  background: 'transparent',
+  color: 'var(--text-primary)',
+  fontSize: 11,
+  letterSpacing: '0.08em',
+  cursor: 'pointer',
 }

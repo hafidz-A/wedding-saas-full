@@ -1,0 +1,46 @@
+.wrap {
+  display: grid;
+  gap: 6px;
+}
+.lockedBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+}
+.value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.badge {
+  flex-shrink: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+.hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+/* Desktop (hover-capable): reveal the hint only on hover/focus. */
+@media (hover: hover) {
+  .hint { opacity: 0; transition: opacity 150ms ease; }
+  .lockedBox:hover ~ .hint,
+  .lockedBox:focus-visible ~ .hint { opacity: 1; }
+  .lockedBox:hover { border-color: var(--interactive-primary); }
+}
+/* Touch (no hover): keep the same hint label permanently visible. */
+@media (hover: none) {
+  .hint { opacity: 1; }
+}
