@@ -1,20 +1,18 @@
 .footer { background: var(--color-cream-deep); padding: var(--spacing-section) var(--container-pad) 40px; }
 .inner {
   max-width: var(--container-max); margin: 0 auto;
-  display: flex; flex-direction: column; gap: var(--space-5); align-items: flex-start;
+  display: flex; flex-direction: column; gap: var(--space-5); align-items: center; text-align: center;
 }
-.brand { display: flex; flex-direction: column; gap: 10px; }
+.brand { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 .tagline { font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light); max-width: 30ch; }
 /* gap ≥24px gives footer links the WCAG 2.5.8 (AA) spacing exemption so each
    short text link is a comfortable, well-separated tap target on mobile. */
-.links { display: flex; flex-wrap: wrap; gap: var(--space-5); }
+.links { display: flex; flex-wrap: wrap; gap: var(--space-5); justify-content: center; }
 .link { font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light); transition: var(--transition-default); }
 .link:hover { color: var(--color-coral); }
 .rights {
   max-width: var(--container-max); margin: 28px auto 0;
   padding-top: 20px; border-top: 1px solid rgba(42, 33, 24, 0.1);
   font-family: var(--font-body); font-size: 13px; color: var(--text-muted);
-}
-@media (min-width: 768px) {
-  .inner { flex-direction: row; justify-content: space-between; align-items: center; }
+  text-align: center;
 }

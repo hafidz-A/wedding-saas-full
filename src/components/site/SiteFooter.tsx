@@ -16,8 +16,9 @@ export function SiteFooter({ lang, t }: { lang: Lang; t: Dict['common'] }) {
           <Link href="/#vibe" className={styles.link}>{t.footer.templates}</Link>
           <Link href="/login" className={styles.link}>{t.footer.login}</Link>
           <Link href="/#vibe" className={styles.link}>{t.footer.signup}</Link>
-          <Link href="/privacy" className={styles.link}>Privasi</Link>
-          <Link href="/refund" className={styles.link}>Refund</Link>
+          <Link href="/terms" className={styles.link}>{t.footer.terms}</Link>
+          <Link href="/privacy" className={styles.link}>{t.footer.privacy}</Link>
+          <Link href="/refund" className={styles.link}>{t.footer.refund}</Link>
         </nav>
         <LangToggle lang={lang} label={t.langToggle.label} />
       </div>

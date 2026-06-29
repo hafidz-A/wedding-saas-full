@@ -12,10 +12,37 @@ import { TEMPLATE_VIBES } from './vibeData'
 import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories'
 import { VibeBackdrop } from './VibeBackdrop'
 import { PreviewMock } from './PreviewMock'
+import { DeviceFrame, DEVICE_PRESETS, type DeviceKind } from './DeviceFrame'
 import { readableOn } from '@/lib/color'
 import styles from './VibeExploration.module.css'
 
 type VibeDict = Dict['landing']['vibeExploration']
+
+/** Tiny outline glyph for the device chips (desktop / tablet / phone). */
+function DeviceGlyph({ kind }: { kind: DeviceKind }) {
+  const common = { width: 13, height: 13, viewBox: '0 0 24 24', 'aria-hidden': true, style: { flexShrink: 0 } } as const
+  if (kind === 'desktop') {
+    return (
+      <svg {...common}>
+        <rect x="2" y="4" width="20" height="13" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M9 21h6M12 17v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    )
+  }
+  if (kind === 'tablet') {
+    return (
+      <svg {...common}>
+        <rect x="5" y="2" width="14" height="20" rx="2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      </svg>
+    )
+  }
+  return (
+    <svg {...common}>
+      <rect x="7" y="2" width="10" height="20" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M10.5 18.5h3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
 
 export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict }) {
   const { ref } = useReveal<HTMLDivElement>()
@@ -25,6 +52,7 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
   const [templateIndex, setTemplateIndex] = useState(0)
   const [paletteIndex, setPaletteIndex] = useState(0)
   const [plansOpen, setPlansOpen] = useState(false)
+  const [deviceId, setDeviceId] = useState('iphone14')
 
   // Pin the section and scrub its content: the user scrolls through ALL of the
   // content (however tall) while the cosmic/botanical backdrop stays put, and
@@ -89,7 +117,7 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
     if (typeof window === 'undefined') return
     const id = window.setTimeout(() => ScrollTrigger.refresh(), 60)
     return () => window.clearTimeout(id)
-  }, [templateIndex, paletteIndex, plansOpen, category])
+  }, [templateIndex, paletteIndex, plansOpen, category, deviceId])
 
   // Categories that actually have at least one template (others = "coming soon").
   const activeCategories = useMemo(() => new Set(TEMPLATE_VIBES.map((tpl) => tpl.category)), [])
@@ -102,6 +130,8 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
   const catalog = getCatalogEntry(template.id)
   const copy = t.byTemplate[template.id]
   const isDark = palette.mode === 'dark'
+  const device = DEVICE_PRESETS.find((d) => d.id === deviceId) ?? DEVICE_PRESETS[0]
+  const bezel = isDark ? '#3a352d' : '#1b1916'
 
   const switchTemplate = (next: number) => {
     const len = filtered.length
@@ -289,8 +319,34 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
             </div>
           </div>
 
-          {/* Display: preview mockup + details */}
+          {/* Display: device switcher + preview mockup + details */}
           <div className={styles.display}>
+            {/* Inspect-style device bar — kept OUTSIDE AnimatePresence so changing
+                device resizes the frame in place instead of replaying the fade. */}
+            <div className={styles.deviceBar} role="tablist" aria-label="Preview device">
+              {DEVICE_PRESETS.map((d) => {
+                const sel = d.id === deviceId
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={sel}
+                    className={styles.deviceChip}
+                    onClick={() => setDeviceId(d.id)}
+                    style={{
+                      color: sel ? palette.accent : palette.fgMuted,
+                      borderColor: sel ? palette.accent : palette.surfaceBorder,
+                      background: sel ? `${palette.accent}1a` : 'transparent',
+                    }}
+                  >
+                    <DeviceGlyph kind={d.kind} />
+                    {d.label}
+                  </button>
+                )
+              })}
+            </div>
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${template.id}-${palette.key}`}
@@ -300,13 +356,21 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               >
-                <PreviewMock
-                  templateId={template.id}
-                  palette={palette}
-                  eyebrow={t.previewEyebrow}
-                  names={t.previewNames}
-                  date={t.previewDate}
-                />
+                <div className={styles.previewCol}>
+                  <DeviceFrame device={device} bezel={bezel}>
+                    <PreviewMock
+                      templateId={template.id}
+                      palette={palette}
+                      eyebrow={t.previewEyebrow}
+                      names={t.previewNames}
+                      date={t.previewDate}
+                      fill
+                    />
+                  </DeviceFrame>
+                  <span className={styles.deviceDims} style={{ color: palette.fgMuted }}>
+                    {device.label} · {device.w} × {device.h}
+                  </span>
+                </div>
 
                 <div className={styles.details}>
                   <span className={styles.tagline} style={{ color: palette.accent }}>

@@ -12,8 +12,8 @@ import type { Lang } from '@/lib/i18n/config'
  * Pure presentational JSX — safe to render from both Server (page) and
  * Client (modal) components.
  *
- * The [email] and contact-row placeholders are intentional — fill them
- * before publishing.
+ * Email (fincardsland@gmail.com) and contact rows are filled with launch
+ * placeholders — swap for the final business line when ready.
  */
 export default function RefundContent({ lang = 'id' }: { lang?: Lang }) {
   return lang === 'en' ? <RefundEn /> : <RefundId />
@@ -54,7 +54,7 @@ function RefundId() {
       </ul>
 
       <h2>4. Cara Pengajuan Pengembalian Dana</h2>
-      <p>Pengajuan pengembalian dana dapat dilakukan melalui email [email] dan Pengguna wajib menyertakan informasi berikut:</p>
+      <p>Pengajuan pengembalian dana dapat dilakukan melalui email fincardsland@gmail.com dan Pengguna wajib menyertakan informasi berikut:</p>
       <ul>
         <li>nama akun;</li>
         <li>alamat email yang terdaftar;</li>
@@ -89,9 +89,9 @@ function RefundId() {
       <h2>9. Hubungi {BRAND}</h2>
       <p>Untuk informasi lebih lanjut, Pengguna dapat menghubungi {BRAND} melalui:</p>
       <ul>
-        <li>WhatsApp: <code>[…]</code></li>
-        <li>Telepon: <code>[…]</code></li>
-        <li>Email: <code>[…]</code></li>
+        <li>WhatsApp: <code>0812345678</code></li>
+        <li>Telepon: <code>0812345678</code></li>
+        <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
     </>
   )
@@ -132,7 +132,7 @@ function RefundEn() {
       </ul>
 
       <h2>4. How to Request a Refund</h2>
-      <p>Refund requests may be submitted by email to [email] and must include the following information:</p>
+      <p>Refund requests may be submitted by email to fincardsland@gmail.com and must include the following information:</p>
       <ul>
         <li>account name;</li>
         <li>registered email address;</li>
@@ -167,9 +167,9 @@ function RefundEn() {
       <h2>9. Contact {BRAND}</h2>
       <p>For further information, the User may contact {BRAND} via:</p>
       <ul>
-        <li>WhatsApp: <code>[…]</code></li>
-        <li>Phone: <code>[…]</code></li>
-        <li>Email: <code>[…]</code></li>
+        <li>WhatsApp: <code>0812345678</code></li>
+        <li>Phone: <code>0812345678</code></li>
+        <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
     </>
   )

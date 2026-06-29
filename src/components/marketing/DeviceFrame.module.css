@@ -1,0 +1,80 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.device {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--bezel, #1b1916);
+  padding: 9px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  transition: max-width 0.45s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  /* Let the filled PreviewMock scale its type to the (small) screen width. */
+  container-type: inline-size;
+}
+
+/* ---- Phone ---- */
+.phone { border-radius: var(--radius-device); padding: 8px; }
+.phone .screen { border-radius: var(--radius-screen); }
+
+/* ---- Tablet ---- */
+.tablet { border-radius: var(--radius-lg); padding: 14px; }
+.tablet .screen { border-radius: var(--radius-sm); }
+
+/* ---- Desktop (browser chrome) ---- */
+.desktop {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.desktop .screen { border-radius: 0; flex: 1; height: auto; }
+.browserBar {
+  flex: 0 0 auto;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.32); }
+.urlBar {
+  flex: 1;
+  height: 12px;
+  max-width: 58%;
+  margin-left: 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---- Notches / cutouts (cosmetic, sit over the screen) ---- */
+.island,
+.notch,
+.punch {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000;
+}
+.island { top: 14px; width: 30%; height: 15px; border-radius: var(--radius-pill); }
+.notch { top: 8px; width: 46%; height: 18px; border-radius: 0 0 14px 14px; }
+.punch { top: 16px; width: 8px; height: 8px; border-radius: 50%; }

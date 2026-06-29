@@ -11,8 +11,8 @@ import type { Lang } from '@/lib/i18n/config'
  * Pure presentational JSX — safe to render from both Server (page) and
  * Client (modal) components.
  *
- * Placeholders such as [domain] and the contact rows are intentional — fill
- * them before publishing.
+ * Domain (www.fincards.land) and contact rows are filled with launch
+ * placeholders — swap for the final business line when ready.
  */
 export default function PrivacyContent({ lang = 'id' }: { lang?: Lang }) {
   return lang === 'en' ? <PrivacyEn /> : <PrivacyId />
@@ -22,7 +22,7 @@ function PrivacyId() {
   return (
     <>
       <p>{BRAND} berkomitmen untuk melindungi Data Pribadi setiap pengguna layanan Kami sesuai dengan ketentuan peraturan perundang-undangan yang berlaku di Republik Indonesia, termasuk Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.</p>
-      <p>Kebijakan Privasi ini menjelaskan bagaimana Kami memperoleh, mengumpulkan, menggunakan, menyimpan, mengungkapkan, mentransfer, memperbaiki, memperbarui, menghapus, dan melindungi Data Pribadi yang diperoleh melalui situs web dan/atau aplikasi Kami yang beralamat di [domain].</p>
+      <p>Kebijakan Privasi ini menjelaskan bagaimana Kami memperoleh, mengumpulkan, menggunakan, menyimpan, mengungkapkan, mentransfer, memperbaiki, memperbarui, menghapus, dan melindungi Data Pribadi yang diperoleh melalui situs web dan/atau aplikasi Kami yang beralamat di www.fincards.land.</p>
       <p>Dengan mengakses, mendaftar, menggunakan layanan, atau melakukan transaksi pada {BRAND}, Anda menyatakan telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.</p>
 
       <h2>1. Informasi Pribadi yang Kami Kumpulkan</h2>
@@ -105,9 +105,9 @@ function PrivacyId() {
       <h2>15. Hubungi {BRAND}</h2>
       <p>Untuk informasi lebih lanjut, Pengguna dapat menghubungi {BRAND} melalui:</p>
       <ul>
-        <li>WhatsApp: <code>[…]</code></li>
-        <li>Telepon: <code>[…]</code></li>
-        <li>Email: <code>[…]</code></li>
+        <li>WhatsApp: <code>0812345678</code></li>
+        <li>Telepon: <code>0812345678</code></li>
+        <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
     </>
   )
@@ -117,7 +117,7 @@ function PrivacyEn() {
   return (
     <>
       <p>{BRAND} is committed to protecting the Personal Data of every user of our services in accordance with the laws and regulations in force in the Republic of Indonesia, including Law Number 27 of 2022 on Personal Data Protection.</p>
-      <p>This Privacy Policy explains how we obtain, collect, use, store, disclose, transfer, correct, update, erase, and protect Personal Data acquired through our website and/or application at [domain].</p>
+      <p>This Privacy Policy explains how we obtain, collect, use, store, disclose, transfer, correct, update, erase, and protect Personal Data acquired through our website and/or application at www.fincards.land.</p>
       <p>By accessing, registering with, using, or transacting on {BRAND}, you acknowledge that you have read, understood, and agreed to this Privacy Policy.</p>
 
       <h2>1. Personal Information We Collect</h2>
@@ -200,9 +200,9 @@ function PrivacyEn() {
       <h2>15. Contact {BRAND}</h2>
       <p>For further information, the User may contact {BRAND} via:</p>
       <ul>
-        <li>WhatsApp: <code>[…]</code></li>
-        <li>Phone: <code>[…]</code></li>
-        <li>Email: <code>[…]</code></li>
+        <li>WhatsApp: <code>0812345678</code></li>
+        <li>Phone: <code>0812345678</code></li>
+        <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
     </>
   )

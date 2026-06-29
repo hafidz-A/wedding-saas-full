@@ -9,11 +9,15 @@ import styles from './Rsvp.module.css'
 const DEFAULTS = {
   title: 'Will You Join Us?',
   subtitle: '',
+  // Opt-in: the meal picker only renders when the couple turns it on in the
+  // editor (default OFF so the RSVP form stays lean unless they want it).
+  mealEnabled: false,
   mealOptions: [],
 }
 
 export default function Rsvp(props) {
-  const { title, subtitle, mealOptions, slug } = { ...DEFAULTS, ...props }
+  const { title, subtitle, mealEnabled, mealOptions, slug } = { ...DEFAULTS, ...props }
+  const showMeal = mealEnabled && mealOptions.length > 0
   const { ref, isVisible } = useScrollReveal()
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState(null)
@@ -80,7 +84,7 @@ export default function Rsvp(props) {
           guest_name: data.name,
           attending: data.attending === 'yes',
           guest_count: data.guestCount,
-          meal_choice: data.meal || null,
+          meal_choice: showMeal ? data.meal || null : null,
           message: data.message || null,
           token: data.token,
         }),
@@ -210,19 +214,21 @@ export default function Rsvp(props) {
                     </fieldset>
                   </div>
 
-                  <div className={styles.row}>
-                    <label className={styles.field}>
-                      <span className={styles.label}>Meal preference</span>
-                      <div className={styles.selectWrap}>
-                        <select className={styles.select} {...register('meal')}>
-                          {mealOptions.map((m) => (
-                            <option key={m.value} value={m.value}>{m.label}</option>
-                          ))}
-                        </select>
-                        <span className={styles.selectChevron} aria-hidden="true">▾</span>
-                      </div>
-                    </label>
-                  </div>
+                  {showMeal && (
+                    <div className={styles.row}>
+                      <label className={styles.field}>
+                        <span className={styles.label}>Meal preference</span>
+                        <div className={styles.selectWrap}>
+                          <select className={styles.select} {...register('meal')}>
+                            {mealOptions.map((m) => (
+                              <option key={m.value} value={m.value}>{m.label}</option>
+                            ))}
+                          </select>
+                          <span className={styles.selectChevron} aria-hidden="true">▾</span>
+                        </div>
+                      </label>
+                    </div>
+                  )}
                 </>
               )}
 
