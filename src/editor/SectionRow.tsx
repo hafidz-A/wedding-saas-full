@@ -138,13 +138,25 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
           type="button"
           onClick={(e) => { e.stopPropagation(); onToggleEnabled() }}
           title={section.enabled === false ? t.enableTitle : t.disableTitle}
+          aria-label={section.enabled === false ? t.enableTitle : t.disableTitle}
+          // The visible status is a 12px dot, but the tap area is a 24px-wide
+          // box stretched to the row height so it clears the WCAG 2.5.8 (AA)
+          // 24px minimum — a 12px dot alone was too small to tap on mobile.
           style={{
-            width: 12, height: 12, borderRadius: 'var(--radius-pill)',
-            border: 'none', cursor: 'pointer',
-            background: section.enabled === false ? 'rgba(42,33,24,0.18)' : 'var(--color-emerald)',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: 24, minWidth: 24, alignSelf: 'stretch', padding: 0,
+            border: 'none', background: 'transparent', cursor: 'pointer',
             flexShrink: 0,
           }}
-        />
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: 12, height: 12, borderRadius: 'var(--radius-pill)',
+              background: section.enabled === false ? 'rgba(42,33,24,0.18)' : 'var(--color-emerald)',
+            }}
+          />
+        </button>
       )}
       {canRemove && (
         <button
