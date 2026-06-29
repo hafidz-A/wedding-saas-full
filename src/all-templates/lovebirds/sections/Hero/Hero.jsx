@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './Hero.module.css'
 import { deriveMonogram } from '../../config/monogram.js'
-import { readGuestName, readPreviewMode } from '../../utils/guestName.js'
+import { readGuestName } from '../../utils/guestName.js'
 
 const DEFAULTS = {
   coupleName: '',
@@ -293,10 +293,8 @@ export default function Hero(props) {
   // (not during render) so SSR and the first client render match — avoids a
   // hydration mismatch on this gate.
   const [guestName, setGuestName] = useState(null)
-  const [isPreview, setIsPreview] = useState(false)
   useEffect(() => {
     setGuestName(readGuestName())
-    setIsPreview(readPreviewMode())
   }, [])
   const containerRef = useRef(null)
   // The gate animation is driven imperatively (see applyProgress) instead of via
@@ -527,11 +525,6 @@ export default function Hero(props) {
             transform set imperatively in applyProgress; base + transition in CSS. */}
         <div className={styles.gateContent} ref={gateContentRef}>
           <div className={styles.glassCard}>
-            {guestName ? (
-              <p className={styles.gateGreet}>Welcome, dear {guestName}</p>
-            ) : (
-              isPreview && <p className={styles.gateGreet}>Welcome, dear [Guest name]</p>
-            )}
             <p className={styles.welcomeLine}>
               {/* Dry-brush stroke behind the eyebrow label. The band is filled
                   with the palette's --button-bg and frayed by an feTurbulence +
@@ -572,7 +565,13 @@ export default function Hero(props) {
                   </g>
                 </svg>
               </span>
-              <span className={styles.welcomeText}>{cfg.welcomeText}</span>
+              {/* The single welcome line: the personalized guest name when the
+                  owner sent a ?to= link, otherwise the generic welcomeText.
+                  Both render inside the same dry-brush stroke (uppercased by
+                  .welcomeLine) — never two stacked "welcome" lines. */}
+              <span className={styles.welcomeText}>
+                {guestName ? `Welcome, dear ${guestName}` : cfg.welcomeText}
+              </span>
             </p>
             <h1 className={styles.coupleName}>
               <span className={styles.namePart}>{cfg.brideName}</span>

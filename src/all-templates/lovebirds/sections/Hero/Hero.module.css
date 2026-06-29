@@ -233,7 +233,6 @@
    light halo on light themes (lifts the dark script + coral label) and a dark
    halo on dark themes (lifts the light text) — never a hard-coded colour, so it
    stays correct across all palettes. */
-.gateGreet,
 .coupleName,
 .date,
 .venue {
@@ -337,16 +336,6 @@
      (trailing letter-spacing otherwise biases them left). */
   text-indent: 0.14em;
   color: var(--button-fg, #fff);
-}
-
-/* Personalized "Welcome, dear <name>" — warm script line above the label. */
-.gateGreet {
-  font-family: var(--font-script); /* Tangerine — script accent (not couple name) */
-  font-size: clamp(20px, 3.2vw, 30px);
-  line-height: 1.1;
-  color: var(--glass-text, var(--color-charcoal));
-  margin: 0 0 6px;
-  opacity: 0.92;
 }
 
 .coupleName {
