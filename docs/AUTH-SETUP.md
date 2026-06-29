@@ -179,6 +179,50 @@ Done.
 
 ---
 
+## D. Custom domain (`www.fincards.land`)
+
+Domain sudah nempel di Vercel dan production live di `https://www.fincards.land`.
+Setelah domain aktif, **semua URL canonical harus pakai `www`** — jangan campur apex
+(`fincards.land`) dan `www`, nanti cookie/redirect bisa mismatch. Set apex →
+redirect 308 ke `www` di Vercel → Settings → Domains.
+
+Checklist yang HARUS diselaraskan ke domain baru:
+
+### D.1 Vercel env
+- `NEXT_PUBLIC_SITE_URL` = `https://www.fincards.land` (Production).
+  NEXT_PUBLIC_* di-inline saat build → **Redeploy** setelah diubah.
+
+### D.2 Supabase → Authentication → URL Configuration
+| Field | Value |
+|---|---|
+| Site URL | `https://www.fincards.land` |
+| Redirect URLs | `https://www.fincards.land/**` + `http://localhost:3000/**` (dev) |
+
+Tanpa ini, link konfirmasi/reset di email ditolak Supabase.
+
+### D.3 Xendit (mode LIVE)
+- Webhook callback → `https://www.fincards.land/api/payment/xendit/webhook`
+- `XENDIT_SECRET_KEY` = live key (`xnd_production_...`), `XENDIT_CALLBACK_TOKEN`
+  = token dari dashboard live (harus sama persis dengan env Vercel).
+- Success/failure redirect otomatis ikut `NEXT_PUBLIC_SITE_URL` lewat
+  `src/lib/site-url.ts` — tidak perlu hardcode.
+
+### D.4 Resend (email branded)
+- Domains → Add Domain `fincards.land` → pasang DNS (SPF/DKIM/DMARC).
+- Setelah verified: `RESEND_FROM` → `noreply@fincards.land`, dan update Sender
+  email di Supabase Custom SMTP (B.1) ke alamat yang sama.
+
+### D.5 Verifikasi
+- `https://www.fincards.land/robots.txt` & `/sitemap.xml` → host = www.fincards.land.
+- Signup akun baru → link email mengarah ke www.fincards.land (bukan localhost/.vercel.app).
+- Checkout Xendit kecil → webhook menandai paid.
+
+> Catatan kode: tidak ada localhost yang di-hardcode di jalur produksi. Fallback
+> `'http://localhost:3000'` di `layout.tsx`, `sitemap.ts`, `robots.ts` hanya
+> aktif kalau `NEXT_PUBLIC_SITE_URL` kosong — di Vercel var ini selalu di-set.
+
+---
+
 ## Troubleshooting "Error sending confirmation email" (HTTP 500)
 
 Kalau error ini muncul saat klik "Daftar":
