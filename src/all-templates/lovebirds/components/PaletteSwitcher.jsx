@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTheme } from './ThemeProvider.jsx'
 import { THEME_META, THEME_GROUPS } from '../config/applyTheme.js'
+import { DEVICE_PRESETS } from '@/lib/preview/devicePresets'
 import styles from './PaletteSwitcher.module.css'
 
 /**
@@ -17,7 +18,7 @@ const ORNAMENTS = [
 ]
 
 export default function PaletteSwitcher() {
-  const { theme, setTheme, ornamentType, setOrnamentType } = useTheme()
+  const { theme, setTheme, ornamentType, setOrnamentType, device, setDevice } = useTheme()
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
   const toggleRef = useRef(null)
@@ -86,6 +87,22 @@ export default function PaletteSwitcher() {
               >
                 <span className={styles.emoji}>{o.emoji}</span>
                 {o.label}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.divider} />
+          <div className={styles.groupTitle}>Tampilan</div>
+          <div className={styles.deviceRow}>
+            {DEVICE_PRESETS.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                className={`${styles.deviceBtn} ${device === d.id ? styles.active : ''}`}
+                onClick={() => setDevice(d.id)}
+                aria-pressed={device === d.id}
+              >
+                {d.label}
               </button>
             ))}
           </div>

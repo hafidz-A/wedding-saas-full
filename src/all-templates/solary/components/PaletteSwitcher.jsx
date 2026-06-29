@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { PALETTES } from "../config/themeTokens.js";
+import { DEVICE_PRESETS } from "@/lib/preview/devicePresets";
 
 export default function PaletteSwitcher() {
-  const { palette, setPalette } = useTheme();
+  const { palette, setPalette, device, setDevice } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef(null);
   const toggleRef = useRef(null);
@@ -157,6 +158,19 @@ export default function PaletteSwitcher() {
             >
               Sage
             </button>
+          </div>
+
+          <div className="theme-group-title" style={{ marginTop: 6 }}>Tampilan</div>
+          <div className="theme-buttons">
+            {DEVICE_PRESETS.map((d) => (
+              <button
+                key={d.id}
+                className={`btn-theme-select ${device === d.id ? "active" : ""}`}
+                onClick={() => setDevice(d.id)}
+              >
+                {d.label}
+              </button>
+            ))}
           </div>
         </div>
       )}

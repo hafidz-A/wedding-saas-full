@@ -18,15 +18,16 @@ const SolaryShell = dynamic(() => import('@/all-templates/solary/Shell.jsx'), {
 })
 
 export default function InvitationView({
-  config, slug, templateId, isDemo = false,
+  config, slug, templateId, isDemo = false, embed = false,
 }: {
   config: any
   slug: string | null
   templateId: string
   isDemo?: boolean
+  embed?: boolean
 }) {
   if (templateId === 'solary') {
-    return <SolaryShell config={config} slug={slug} isDemo={isDemo} />
+    return <SolaryShell config={config} slug={slug} isDemo={isDemo} embed={embed} />
   }
-  return <LovebirdsShell config={config} slug={slug} isDemo={isDemo} />
+  return <LovebirdsShell config={config} slug={slug} isDemo={isDemo} embed={embed} />
 }

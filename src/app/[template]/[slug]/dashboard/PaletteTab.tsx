@@ -134,7 +134,6 @@ export default function PaletteTab({
               eyebrow={t.previewEyebrow}
               names={names}
               date={date}
-              glass
             />
             <div style={details}>
               <h3 style={{ ...paletteName, color: active.fg }}>{active.label}</h3>

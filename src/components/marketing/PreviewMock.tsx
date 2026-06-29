@@ -17,25 +17,17 @@ export function PreviewMock({
   eyebrow,
   names,
   date,
-  glass = false,
-  fill = false,
 }: {
   templateId: TemplateId | string
   palette: PaletteVibe
   eyebrow: string
   names: string
   date: string
-  /** Apply the frosted backdrop-filter. Off on the animated marketing card
-   *  (a backdrop-filter under an animating-opacity ancestor snaps at the end of
-   *  the fade); on for the static dashboard card. */
-  glass?: boolean
-  /** Stretch to fill a parent device screen instead of the standalone 4:5 card. */
-  fill?: boolean
 }) {
   const isSolary = templateId === 'solary'
   return (
     <div
-      className={`${styles.mock} ${glass ? styles.glass : ''} ${fill ? styles.fill : ''}`}
+      className={styles.mock}
       style={{
         background: palette.surface,
         borderColor: palette.surfaceBorder,

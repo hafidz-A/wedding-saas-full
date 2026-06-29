@@ -2,10 +2,12 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { applyTheme, clearTheme, isThemeName, DEFAULT_THEME_NAME, THEME_ORDER } from '../config/applyTheme.js'
+import { DEFAULT_DEVICE, isDeviceId } from '@/lib/preview/devicePresets'
 
 const ThemeContext = createContext(null)
 const STORAGE_KEY = 'lovebirds:theme'
 const ORNAMENT_STORAGE_KEY = 'lovebirds:ornament'
+const DEVICE_STORAGE_KEY = 'lovebirds:device'
 
 const ORNAMENT_TYPES = ['birds', 'butterflies', 'perched']
 const DEFAULT_ORNAMENT = 'birds'
@@ -53,6 +55,25 @@ export default function ThemeProvider({
     return initialOrnament
   })
 
+  // Live-preview device frame (demo only). Starts 'desktop' on BOTH server and
+  // first client render (it changes the rendered tree, so reading sessionStorage
+  // in the initializer would cause a hydration mismatch); the saved choice is
+  // restored in an effect after mount.
+  const [device, setDeviceState] = useState(DEFAULT_DEVICE)
+  useEffect(() => {
+    if (!allowGuestSwitch || typeof window === 'undefined') return
+    try {
+      const saved = sessionStorage.getItem(DEVICE_STORAGE_KEY)
+      if (isDeviceId(saved)) setDeviceState(saved)
+    } catch {}
+  }, [allowGuestSwitch])
+  useEffect(() => {
+    if (allowGuestSwitch) {
+      try { sessionStorage.setItem(DEVICE_STORAGE_KEY, device) } catch {}
+    }
+  }, [device, allowGuestSwitch])
+  const setDevice = useCallback((d) => { if (isDeviceId(d)) setDeviceState(d) }, [])
+
   // Apply palette to the DOM whenever the theme changes.
   useEffect(() => {
     applyTheme(theme)
@@ -88,7 +109,7 @@ export default function ThemeProvider({
     if (isOrnamentType(type)) setOrnamentState(type)
   }, [])
 
-  const value = { theme, setTheme, ornamentType, setOrnamentType, options: THEME_ORDER }
+  const value = { theme, setTheme, ornamentType, setOrnamentType, device, setDevice, options: THEME_ORDER }
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
@@ -99,6 +120,8 @@ export function useTheme() {
       setTheme: () => {},
       ornamentType: DEFAULT_ORNAMENT,
       setOrnamentType: () => {},
+      device: DEFAULT_DEVICE,
+      setDevice: () => {},
       options: THEME_ORDER,
     }
   )

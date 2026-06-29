@@ -19,7 +19,7 @@ import MuteButton from './components/MuteButton.jsx'
 import MusicPopup from './components/MusicPopup.jsx'
 import SectionArrows from './components/SectionArrows.jsx'
 
-import { ThemeProvider } from './contexts/ThemeContext.jsx'
+import { ThemeProvider, useTheme } from './contexts/ThemeContext.jsx'
 import { AudioProvider } from './contexts/AudioContext.jsx'
 import { GuestProvider } from './contexts/GuestContext.jsx'
 import { JourneyProvider } from './contexts/JourneyContext.jsx'
@@ -31,24 +31,67 @@ import { mountGalacticScene } from './three/galacticScene.js'
 import { installRhythm } from './utils/rhythm.js'
 import { defaultConfig } from './defaultConfig.js'
 import { normalizeSolaryConfig } from './config/normalizeConfig.js'
-import { clearPaletteFromDOM } from './config/themeTokens.js'
 import { resolveMusicSource } from '@/lib/music/source'
+
+import { DeviceStage } from '@/components/preview/DeviceStage'
+import { getDevice } from '@/lib/preview/devicePresets'
 
 /**
  * Solary render shell — port of the standalone galactic-wedding
  * InvitationPage + main.jsx boot sequence.
  *
  * The 3D scene, Lenis smooth scroll, and section "rhythm" all run
- * outside React (in this client effect) for performance. This module
- * is dynamic-imported with `ssr: false`, so Three.js / window access
- * never runs on the server.
+ * outside React (in <SolaryScene>) for performance. This module is
+ * dynamic-imported with `ssr: false`, so Three.js / window access never
+ * runs on the server.
+ *
+ * `embed` = rendered inside the device-preview iframe (demo 🎨 "Tampilan"):
+ * plain invitation, no device frame / 🎨, listens for theme messages.
  */
-export default function Shell({ config: incoming, slug, isDemo = false }) {
+export default function Shell({ config: incoming, slug, isDemo = false, embed = false }) {
   const raw = incoming && incoming.sections ? incoming : defaultConfig
-  // Normalize so the scene is adaptive to ANY arrangement: self-heal stale
-  // sectionLabels left over from type swaps and guarantee every section has a
-  // planet for the camera to frame (added sections otherwise have none).
   const config = useMemo(() => normalizeSolaryConfig(raw), [raw])
+
+  // Tag <body> so Solary's dark cosmic background overrides the app's shared
+  // cream body background for this route only. Removed on unmount.
+  useEffect(() => {
+    document.body.classList.add('solary-route')
+    return () => document.body.classList.remove('solary-route')
+  }, [])
+
+  return (
+    <ThemeProvider
+      defaultPalette={config.theme?.defaultPalette}
+      options={config.theme?.paletteOptions}
+      allowGuestSwitch={isDemo}
+    >
+      <AudioProvider src={resolveAudioSrc(config)} defaultVolume={config.audio?.volume ?? 0.5}>
+        <GuestProvider>
+          <JourneyProvider>
+            <SolaryBody config={config} slug={slug} isDemo={isDemo} embed={embed} />
+          </JourneyProvider>
+        </GuestProvider>
+      </AudioProvider>
+    </ThemeProvider>
+  )
+}
+
+function resolveAudioSrc(config) {
+  const music = config.music || {}
+  return music.enabled === false
+    ? null
+    : (resolveMusicSource(music)?.kind === 'audio' ? resolveMusicSource(music).url : null) ||
+        config.audio?.src ||
+        null
+}
+
+/**
+ * Inside the providers: reads the live palette/device. Renders the full
+ * cinematic invitation, OR — when a non-desktop device is chosen — the
+ * invitation framed in a device bezel (iframe) over a static cosmic backdrop.
+ */
+function SolaryBody({ config, slug, isDemo, embed }) {
+  const { palette, device } = useTheme()
 
   const visible = useMemo(
     () => (config.sections || []).filter((s) => s.enabled !== false),
@@ -66,33 +109,68 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
     [visible],
   )
   const music = config.music || {}
-  // music.enabled === false means the couple turned music OFF — do not fall
-  // back to the legacy default track. The legacy fallback only applies to
-  // configs that predate the music object (enabled undefined).
-  const audioSrc =
-    music.enabled === false
-      ? null
-      : (resolveMusicSource(music)?.kind === 'audio' ? resolveMusicSource(music).url : null) ||
-        config.audio?.src ||
-        null
-
   const effSlug = slug || config.meta?.slug || 'demo'
-  // Gate photos double as the floating "photo-stars" scattered behind every
-  // non-photo section (see SectionRenderer's PHOTO_BACKED_TYPES).
   const gatePhotos = useMemo(() => {
     const gate = (config.sections || []).find((s) => s.type === 'openingGate')
     const photos = gate?.props?.gatePhotos
     return Array.isArray(photos) ? photos.filter(Boolean) : []
   }, [config])
 
-  // Tag <body> so Solary's dark cosmic background overrides the app's shared
-  // cream body background (root layout + global.css) for this route only.
-  // Removed on unmount so other templates keep their own background.
-  useEffect(() => {
-    document.body.classList.add('solary-route')
-    return () => document.body.classList.remove('solary-route')
-  }, [])
+  const body = (
+    <>
+      <SolaryScene config={config} />
+      <FloatingNavbar logo={navName(config, 'Wedding')} allSections={allSections} />
+      <main>
+        {visible.map((s) => (
+          <SectionRenderer key={s.id} section={s} slug={effSlug} gatePhotos={gatePhotos} couple={config.couple} />
+        ))}
+      </main>
+      <TravellingOverlay />
+      <MuteButton />
+      <MusicPopup
+        title={music.title}
+        subtitle={music.subtitle}
+        acceptLabel={music.acceptLabel}
+        dismissLabel={music.dismissLabel}
+      />
+      <SectionArrows allSections={allSections} />
+    </>
+  )
 
+  if (embed) {
+    return (
+      <>
+        {body}
+        <SolaryEmbedBridge />
+      </>
+    )
+  }
+
+  const preset = getDevice(device)
+  const framed = preset.kind !== 'desktop'
+
+  return (
+    <>
+      {framed ? (
+        <>
+          <SolaryStaticBackdrop />
+          <DeviceStage device={preset} payload={{ palette }} />
+        </>
+      ) : (
+        body
+      )}
+      {isDemo && <PaletteSwitcher />}
+    </>
+  )
+}
+
+/**
+ * Boots the Three.js scene + Lenis smooth scroll + section rhythm. Lives in its
+ * own component so toggling to a device frame unmounts it (scene destroyed),
+ * and toggling back remounts it (scene re-booted) — keeping the outer device
+ * preview lightweight.
+ */
+function SolaryScene({ config }) {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
 
@@ -113,41 +191,51 @@ export default function Shell({ config: incoming, slug, isDemo = false }) {
       try { lenis?.off?.('scroll', ScrollTrigger.update) } catch {}
       try { stopSmoothScroll() } catch {}
       try { window.galacticScene?.destroy?.() } catch {}
-      try { clearPaletteFromDOM() } catch {}
     }
   }, [config])
+  return null
+}
 
+/** Static themed backdrop behind the device frame (palette colour + stars). */
+function SolaryStaticBackdrop() {
   return (
-    <ThemeProvider
-      defaultPalette={config.theme?.defaultPalette}
-      options={config.theme?.paletteOptions}
-      allowGuestSwitch={isDemo}
-    >
-      <AudioProvider src={audioSrc} defaultVolume={config.audio?.volume ?? 0.5}>
-        <GuestProvider>
-          <JourneyProvider>
-            <FloatingNavbar
-              logo={navName(config, 'Wedding')}
-              allSections={allSections}
-            />
-            <main>
-              {visible.map((s) => (
-                <SectionRenderer key={s.id} section={s} slug={effSlug} gatePhotos={gatePhotos} couple={config.couple} />
-              ))}
-            </main>
-            <TravellingOverlay />
-            {isDemo && <PaletteSwitcher />}
-            <MuteButton />
-            <MusicPopup
-              title={music.title}
-              subtitle={music.subtitle}
-              acceptLabel={music.acceptLabel}
-              dismissLabel={music.dismissLabel}
-            />
-            <SectionArrows allSections={allSections} />
-          </JourneyProvider>
-        </GuestProvider>
-      </AudioProvider>
-    </ThemeProvider>
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        background:
+          'radial-gradient(2px 2px at 18% 24%, rgba(255,255,255,0.55), transparent),' +
+          'radial-gradient(1.5px 1.5px at 72% 62%, rgba(255,255,255,0.4), transparent),' +
+          'radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,0.35), transparent),' +
+          'radial-gradient(2px 2px at 85% 30%, rgba(255,255,255,0.45), transparent),' +
+          'radial-gradient(circle at 50% 28%, var(--color-bg-soft, #1a1330), var(--color-bg, #0b0a12) 72%)',
+      }}
+    />
   )
+}
+
+/**
+ * In the preview iframe, apply the palette pushed from the parent 🎨 panel.
+ * Announces "ready" on mount so the parent sends the current palette.
+ */
+function SolaryEmbedBridge() {
+  const { setPalette } = useTheme()
+  useEffect(() => {
+    const onMsg = (e) => {
+      if (e.origin !== window.location.origin) return
+      const d = e.data
+      if (d?.source === 'fincards-preview' && d?.kind === 'theme' && d.payload?.palette) {
+        setPalette(d.payload.palette)
+      }
+    }
+    window.addEventListener('message', onMsg)
+    try {
+      window.parent?.postMessage({ source: 'fincards-preview', kind: 'ready' }, window.location.origin)
+    } catch {}
+    return () => window.removeEventListener('message', onMsg)
+  }, [setPalette])
+  return null
 }

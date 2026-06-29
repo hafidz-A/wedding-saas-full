@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { PALETTES, DEFAULT_PALETTE, themeBus } from "../config/themeTokens.js";
+import { PALETTES, DEFAULT_PALETTE, themeBus, clearPaletteFromDOM } from "../config/themeTokens.js";
+import { DEFAULT_DEVICE, isDeviceId } from "@/lib/preview/devicePresets";
 
 const Ctx = createContext(null);
 const STORAGE_KEY = "galactic:palette";
+const DEVICE_STORAGE_KEY = "galactic:device";
 
 export function ThemeProvider({ defaultPalette = DEFAULT_PALETTE, options, allowGuestSwitch = true, children }) {
   const [palette, setPaletteState] = useState(() => {
@@ -14,6 +16,23 @@ export function ThemeProvider({ defaultPalette = DEFAULT_PALETTE, options, allow
     }
     return PALETTES[defaultPalette] ? defaultPalette : DEFAULT_PALETTE;
   });
+
+  // Live-preview device frame (demo 🎨 "Tampilan"). Default desktop; saved
+  // choice restored after mount.
+  const [device, setDeviceState] = useState(DEFAULT_DEVICE);
+  useEffect(() => {
+    if (!allowGuestSwitch || typeof window === "undefined") return;
+    try {
+      const saved = sessionStorage.getItem(DEVICE_STORAGE_KEY);
+      if (isDeviceId(saved)) setDeviceState(saved);
+    } catch {}
+  }, [allowGuestSwitch]);
+  useEffect(() => {
+    if (allowGuestSwitch) {
+      try { sessionStorage.setItem(DEVICE_STORAGE_KEY, device); } catch {}
+    }
+  }, [device, allowGuestSwitch]);
+  const setDevice = useCallback((d) => { if (isDeviceId(d)) setDeviceState(d); }, []);
 
   /* Sync to :root CSS vars AND themeBus (read by Three.js). */
   useEffect(() => {
@@ -28,6 +47,11 @@ export function ThemeProvider({ defaultPalette = DEFAULT_PALETTE, options, allow
     if (!allowGuestSwitch && PALETTES[defaultPalette]) setPaletteState(defaultPalette);
   }, [allowGuestSwitch, defaultPalette]);
 
+  /* Scrub palette CSS vars on real SPA nav away (NOT on device-frame toggles —
+     the scene used to clear these on its own unmount, which broke the static
+     backdrop when switching to a device). Owned by the provider now. */
+  useEffect(() => () => { try { clearPaletteFromDOM(); } catch {} }, []);
+
   const setPalette = useCallback((name) => {
     if (!PALETTES[name]) return;
     setPaletteState(name);
@@ -36,6 +60,8 @@ export function ThemeProvider({ defaultPalette = DEFAULT_PALETTE, options, allow
   const value = {
     palette,
     setPalette,
+    device,
+    setDevice,
     tokens: PALETTES[palette] || PALETTES[DEFAULT_PALETTE],
     options: options || Object.keys(PALETTES),
   };

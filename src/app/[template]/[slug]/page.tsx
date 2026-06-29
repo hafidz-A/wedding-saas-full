@@ -13,6 +13,7 @@ import { composeTitle } from '@/lib/meta/couple'
 
 interface PageProps {
   params: { template: string; slug: string }
+  searchParams?: { embed?: string; preview?: string }
 }
 
 /**
@@ -28,8 +29,11 @@ interface PageProps {
  * Demo slugs (`demo-*`, or the legacy `rizky-amara`) fall back to the
  * template's bundled defaultConfig so previews work without a DB row.
  */
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params, searchParams }: PageProps) {
   const { template, slug } = params
+  // Rendered inside the device-preview iframe (demo 🎨 "Tampilan"): the Shell
+  // drops the device frame + 🎨 and just listens for theme messages.
+  const embed = searchParams?.embed === '1'
 
   if (!isValidTemplate(template)) {
     notFound()
@@ -159,7 +163,7 @@ export default async function Page({ params }: PageProps) {
   // instead of POSTing a slug the API will 404 ("Invitation not found").
   const submitSlug = invitationId ? slug : null
 
-  return <InvitationView config={config} slug={submitSlug} templateId={templateId} isDemo={isDemoSlug} />
+  return <InvitationView config={config} slug={submitSlug} templateId={templateId} isDemo={isDemoSlug} embed={embed} />
 }
 
 /**

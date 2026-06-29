@@ -69,3 +69,14 @@
 }
 .ornamentBtn .emoji { font-size: 18px; line-height: 1; }
 .ornamentBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
+
+/* Display / device chooser (Desktop / iPhone / iPad / Galaxy …) */
+.deviceRow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.deviceBtn {
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  background: #fff; cursor: pointer;
+  font-family: var(--font-body); font-size: 11px; color: #2A2118;
+  text-align: center;
+}
+.deviceBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
