@@ -14,7 +14,8 @@ import { localizeLabel, type FieldDef } from './schemas/types'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import type { Lang } from '@/lib/i18n'
-import { injectCoupleProps, hasCouple } from '@/lib/meta/couple'
+import { injectCoupleProps } from '@/lib/meta/couple'
+import { isCoupleFieldLocked, shouldShowRelink, coupleSeedValues } from './lib/coupleLock'
 import LockedCoupleField from './fields/LockedCoupleField'
 import TextField from './fields/TextField'
 import TextareaField from './fields/TextareaField'
@@ -77,10 +78,7 @@ export default function FieldEditor({ slug, template }: Props) {
   }
 
   const coupleLock = t.coupleLock
-  const coupleOverride = !!props.coupleOverride
-  const coupleActive = hasCouple(config.couple)
   const inheritedProps = injectCoupleProps({ type: selectedSection.type, props }, config.couple)
-  const hasCoupleFields = (schema?.fields || []).some((f) => f.linkedGroup === 'couple')
 
   async function unlockCouple() {
     const ok = await confirmDialog({
@@ -92,11 +90,8 @@ export default function FieldEditor({ slug, template }: Props) {
     if (!ok) return
     // Seed each couple field with its current inherited value so editing starts
     // from what's on screen, then flip the override flag on.
-    ;(schema.fields as FieldDef[]).forEach((f) => {
-      if (f.linkedGroup === 'couple') {
-        updateField(selectedSection!.id, f.key, inheritedProps[f.key] ?? '')
-      }
-    })
+    const seed = coupleSeedValues({ type: selectedSection!.type, props }, schema.fields, config.couple)
+    Object.entries(seed).forEach(([key, value]) => updateField(selectedSection!.id, key, value))
     updateField(selectedSection!.id, 'coupleOverride', true)
   }
   function relinkCouple() {
@@ -144,8 +139,7 @@ export default function FieldEditor({ slug, template }: Props) {
       </header>
       <div style={form}>
         {schema.fields.map((f) => {
-          const isCouple = f.linkedGroup === 'couple'
-          if (isCouple && coupleActive && !coupleOverride) {
+          if (isCoupleFieldLocked(f, props, config.couple)) {
             return (
               <LockedCoupleField
                 key={f.key}
@@ -158,7 +152,7 @@ export default function FieldEditor({ slug, template }: Props) {
           }
           return renderField(f, props[f.key], (v) => updateField(selectedSection!.id, f.key, v), slug, lang)
         })}
-        {hasCoupleFields && coupleActive && coupleOverride && (
+        {shouldShowRelink(schema.fields, props, config.couple) && (
           <button type="button" onClick={relinkCouple} style={relinkBtn}>{coupleLock.relink}</button>
         )}
       </div>
