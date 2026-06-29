@@ -19,6 +19,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Card stays mounted across palette switches (no opacity fade → its
+     backdrop-filter never snaps); it re-colours smoothly instead. */
+  transition: background-color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Smooth re-colour for the inline-styled text/marks when the palette changes. */
+.mockEyebrow,
+.mockNames,
+.mockDate,
+.mockPill,
+.mockRuleDot {
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 .mockGlow {

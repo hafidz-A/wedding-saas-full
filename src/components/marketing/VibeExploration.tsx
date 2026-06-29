@@ -289,26 +289,28 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
             </div>
           </div>
 
-          {/* Display: preview mockup + details */}
+          {/* Display: preview mockup + details. The card is PERSISTENT — it
+              re-colours via CSS transitions so its backdrop-filter blur never
+              snaps; only the detail text cross-fades on palette switch. */}
           <div className={styles.display}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${template.id}-${palette.key}`}
-                className={styles.displayInner}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <PreviewMock
-                  templateId={template.id}
-                  palette={palette}
-                  eyebrow={t.previewEyebrow}
-                  names={t.previewNames}
-                  date={t.previewDate}
-                />
+            <div className={styles.displayInner}>
+              <PreviewMock
+                templateId={template.id}
+                palette={palette}
+                eyebrow={t.previewEyebrow}
+                names={t.previewNames}
+                date={t.previewDate}
+              />
 
-                <div className={styles.details}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${template.id}-${palette.key}`}
+                  className={styles.details}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                >
                   <span className={styles.tagline} style={{ color: palette.accent }}>
                     {copy.tagline}
                   </span>
@@ -421,9 +423,9 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>
