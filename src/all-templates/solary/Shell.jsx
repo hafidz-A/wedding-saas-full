@@ -34,6 +34,7 @@ import { normalizeSolaryConfig } from './config/normalizeConfig.js'
 import { resolveMusicSource } from '@/lib/music/source'
 
 import { DeviceStage } from '@/components/preview/DeviceStage'
+import { AndromedaBackdrop } from '@/components/preview/AndromedaBackdrop'
 import { getDevice } from '@/lib/preview/devicePresets'
 
 /**
@@ -91,7 +92,7 @@ function resolveAudioSrc(config) {
  * invitation framed in a device bezel (iframe) over a static cosmic backdrop.
  */
 function SolaryBody({ config, slug, isDemo, embed }) {
-  const { palette, device } = useTheme()
+  const { palette, device, tokens } = useTheme()
 
   const visible = useMemo(
     () => (config.sections || []).filter((s) => s.enabled !== false),
@@ -153,7 +154,7 @@ function SolaryBody({ config, slug, isDemo, embed }) {
     <>
       {framed ? (
         <>
-          <SolaryStaticBackdrop />
+          <SolaryStaticBackdrop tokens={tokens} />
           <DeviceStage device={preset} payload={{ palette }} />
         </>
       ) : (
@@ -196,8 +197,12 @@ function SolaryScene({ config }) {
   return null
 }
 
-/** Static themed backdrop behind the device frame (palette colour + stars). */
-function SolaryStaticBackdrop() {
+/**
+ * Static themed backdrop behind the device frame: the palette base colour with
+ * Solary's Andromeda galaxy + starfield (so it's never an empty void), tinted
+ * to the active palette.
+ */
+function SolaryStaticBackdrop({ tokens }) {
   return (
     <div
       aria-hidden="true"
@@ -207,13 +212,16 @@ function SolaryStaticBackdrop() {
         zIndex: 0,
         pointerEvents: 'none',
         background:
-          'radial-gradient(2px 2px at 18% 24%, rgba(255,255,255,0.55), transparent),' +
-          'radial-gradient(1.5px 1.5px at 72% 62%, rgba(255,255,255,0.4), transparent),' +
-          'radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,0.35), transparent),' +
-          'radial-gradient(2px 2px at 85% 30%, rgba(255,255,255,0.45), transparent),' +
-          'radial-gradient(circle at 50% 28%, var(--color-bg-soft, #1a1330), var(--color-bg, #0b0a12) 72%)',
+          'radial-gradient(circle at 50% 30%, var(--color-bg-soft, #1a1330), var(--color-bg, #0b0a12) 75%)',
       }}
-    />
+    >
+      <AndromedaBackdrop
+        accent={tokens?.accent || '#c19bff'}
+        sun={tokens?.sun || tokens?.glow || '#f5c518'}
+        fg={tokens?.fg || '#ece5f6'}
+        dark={tokens?.mode !== 'light'}
+      />
+    </div>
   )
 }
 
