@@ -76,11 +76,11 @@ export default function FieldEditor({ slug, template }: Props) {
     )
   }
 
-  const coupleLock = (useDashboardDict().editor as any).coupleLock
+  const coupleLock = t.coupleLock
   const coupleOverride = !!props.coupleOverride
   const coupleActive = hasCouple(config.couple)
   const inheritedProps = injectCoupleProps({ type: selectedSection.type, props }, config.couple)
-  const hasCoupleFields = (schema?.fields || []).some((f) => (f as any).linkedGroup === 'couple')
+  const hasCoupleFields = (schema?.fields || []).some((f) => f.linkedGroup === 'couple')
 
   async function unlockCouple() {
     const ok = await confirmDialog({
@@ -93,7 +93,7 @@ export default function FieldEditor({ slug, template }: Props) {
     // Seed each couple field with its current inherited value so editing starts
     // from what's on screen, then flip the override flag on.
     ;(schema.fields as FieldDef[]).forEach((f) => {
-      if ((f as any).linkedGroup === 'couple') {
+      if (f.linkedGroup === 'couple') {
         updateField(selectedSection!.id, f.key, inheritedProps[f.key] ?? '')
       }
     })
@@ -144,7 +144,7 @@ export default function FieldEditor({ slug, template }: Props) {
       </header>
       <div style={form}>
         {schema.fields.map((f) => {
-          const isCouple = (f as any).linkedGroup === 'couple'
+          const isCouple = f.linkedGroup === 'couple'
           if (isCouple && coupleActive && !coupleOverride) {
             return (
               <LockedCoupleField

@@ -92,7 +92,7 @@ export function deriveCoupleFromConfig(
   } | null | undefined,
 ): CoupleData {
   const cfg = config ?? {}
-  if (hasCouple(cfg.couple)) return cfg.couple as CoupleData
+  if (hasCouple(cfg.couple)) return cfg.couple
   const hero = cfg.sections?.find((s) => s.type === 'hero')?.props || undefined
   if (hero?.brideName || hero?.groomName) {
     return { name1: clean(hero.brideName), name2: clean(hero.groomName) }

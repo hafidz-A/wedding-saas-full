@@ -176,8 +176,6 @@ export const dashboard = {
       meta: {
         title: 'Judul & Deskripsi',
         subtitle: 'Teks yang muncul saat link undangan dibagikan ke WhatsApp/Instagram dan di tab browser — bukan teks di dalam undangan.',
-        fTitle: 'Judul',
-        fTitlePlaceholder: 'mis. Budi & Sinta — Undangan Pernikahan',
         fSuffix: 'Akhiran judul',
         fSuffixPlaceholder: 'mis. Undangan Pernikahan',
         titlePreviewLabel: 'Judul jadi',
@@ -1407,8 +1405,6 @@ export const dashboard = {
       meta: {
         title: 'Title & Description',
         subtitle: 'The text shown when your invitation link is shared on WhatsApp/Instagram and in the browser tab — not the text inside the invitation.',
-        fTitle: 'Title',
-        fTitlePlaceholder: 'e.g. Budi & Sinta — Wedding Invitation',
         fSuffix: 'Title suffix',
         fSuffixPlaceholder: 'e.g. Wedding Invitation',
         titlePreviewLabel: 'Title becomes',

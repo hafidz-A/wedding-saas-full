@@ -44,6 +44,10 @@ export default function MetaTab({ slug, template, initial, couple, onSaved }: Pr
     setHost(`${window.location.host}/${template ?? ''}/${slug}`.replace(/\/+$/, ''))
   }, [template, slug])
 
+  // For a legacy invitation with a stored meta.title but no saved config.couple yet,
+  // `couple` here comes from the editor's prefill (deriveCoupleFromConfig), so this
+  // preview can transiently differ from the live public-page title until the first
+  // save — expected, and it self-heals once config.couple is persisted.
   const derivedTitle = composeTitle(couple, titleSuffix)
   const previewTitle = derivedTitle.trim() || t.previewTitleFallback
   const previewDesc = description.trim() || t.previewDescFallback
