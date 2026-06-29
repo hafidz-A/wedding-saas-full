@@ -69,7 +69,11 @@ describe('replaceSections', () => {
   it('replaces first gift account holder', () => assert.equal(config.sections[5].props.accounts[0].accountHolder, 'Nanda Putri'))
   it('replaces footer hashtag', () => assert.equal(config.sections[6].props.hashtag, '#NandaAndMade'))
   it('does not crash on schedule (no special handling)', () => assert.ok(config.sections[7]))
-  it('updates meta title', () => assert.equal(config.meta.title, 'Nanda & Made — Our Wedding'))
+  it('sets canonical couple from first names', () => assert.deepEqual(config.couple, { name1: 'Nanda', name2: 'Made' }))
+  it('sets meta titleSuffix and no denormalized title', () => {
+    assert.equal(config.meta.titleSuffix, 'Our Wedding')
+    assert.equal(config.meta.title, undefined)
+  })
 })
 
 describe('enableAll', () => {

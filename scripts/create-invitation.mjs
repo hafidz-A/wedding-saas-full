@@ -184,6 +184,11 @@ if (createErr) {
 
 const coupleName = `${brideName} & ${groomName}`
 const monogram = `${brideName.trim()[0]} & ${groomName.trim()[0]}`
+// Canonical couple (single source of truth) uses FIRST names, matching the
+// browser onboarding (seed-config.ts) and config-transform.mjs. The renderer
+// injects these into Hero/Footer/OpeningGate + navbar + SEO title.
+const firstNameOf = (s) => s.trim().split(/\s+/)[0]
+const couple = { name1: firstNameOf(brideName), name2: firstNameOf(groomName) }
 
 let config
 
@@ -193,7 +198,11 @@ if (template === 'solary') {
     const cfgPath = resolve(__dirname, '../src/all-templates/solary/config/pageConfig.js')
     const mod = await import(pathToFileURL(cfgPath).href)
     config = JSON.parse(JSON.stringify(mod.pageConfig || mod.default))
-    config.meta = { ...(config.meta || {}), title: `${coupleName} — Our Wedding`, slug }
+    // Override the template's demo couple with this couple; SEO title derives
+    // from couple + titleSuffix (no denormalized meta.title).
+    config.couple = couple
+    config.meta = { ...(config.meta || {}), titleSuffix: 'Our Wedding', slug }
+    delete config.meta.title
     console.log(`  loaded ${config.sections.length} planet sections`)
   } catch (e) {
     console.error('Failed to load Solary config:', e.message)
@@ -220,8 +229,9 @@ if (!config && seedFull) {
 }
 
 if (!config) config = {
+  couple,
   meta: {
-    title: `${coupleName} — Our Wedding`,
+    titleSuffix: 'Our Wedding',
     description: 'Cinematic wedding invitation',
   },
   sections: [

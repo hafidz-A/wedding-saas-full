@@ -100,9 +100,13 @@ export function replaceSections(config, { brideName, groomName, weddingDate, ven
     }
   }
 
-  // Update top-level meta
+  // Canonical couple = the single source of truth for the couple's names
+  // (drives navbar/hero/footer/SEO title via render-time injection). Mirror
+  // src/lib/onboarding/seed-config.ts: store the names + a title suffix and let
+  // the SEO title derive from them — no denormalized meta.title.
+  config.couple = { name1: bride, name2: groom }
   config.meta = {
-    title:       `${coupleName} — Our Wedding`,
+    titleSuffix: 'Our Wedding',
     description: 'Cinematic wedding invitation experience',
   }
 
