@@ -180,10 +180,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  /* Rest-state (gate=0); JS updates transform imperatively each frame. The 0.1s
-     transition smooths between rAF samples (same feel as the old inline style). */
+  /* Rest-state (gate=0); JS updates transform imperatively EVERY animation frame
+     (continuous rAF sampling, see applyProgress). No CSS transition: a transition
+     here lagged the image behind the scroll and made it shimmer against the
+     petals/blast, which track scroll exactly. */
   transform: scale(1.16) translateY(-25px);
-  transition: transform 0.1s ease-out;
   will-change: transform;
 }
 
@@ -223,9 +224,10 @@
   left: 50%;
   /* Rest-state (gate=0) carries the full vertical drop so the FIRST paint (before
      JS runs) already sits dropped — no load-time jump. JS then overwrites this
-     inline transform each frame (px-based, aspect-aware) via applyProgress. */
+     inline transform every animation frame (px-based, aspect-aware) via
+     applyProgress. No CSS transition — per-frame sampling tracks scroll exactly;
+     a transition only lagged the content and made it judder. */
   transform: translate(-50%, calc(-50% + (1 - var(--gate)) * (20vh - 16px)));
-  transition: transform 0.1s ease-out;
   width: min(720px, 90vw);
   text-align: center;
   z-index: 5;

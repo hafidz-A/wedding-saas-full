@@ -419,39 +419,80 @@ export default function Hero(props) {
       applyProgress(1)
       return undefined
     }
+    // The gate is driven by a CONTINUOUS rAF loop (gated to when the section is
+    // on screen) that samples scroll position every animation frame — NOT by the
+    // scroll event. Scroll events fire at an irregular cadence (especially during
+    // iOS/Android momentum scroll, where they batch), so a scroll→rAF design
+    // updated the transforms unevenly; the gate image/content used a CSS
+    // `transition` to paper over the gaps, which left them lagging — "chasing" —
+    // the scroll while the petals/blast (no transition) snapped to it exactly.
+    // The result read as the whole composition vibrating against itself. Sampling
+    // every frame means transforms land in lockstep with the real scroll position
+    // every frame, so the transitions could be dropped and the jitter with them.
     let raf = 0
-    // Cache the scrollable distance; only re-measure on resize (offsetHeight is
-    // a layout read we don't want every scroll frame).
+    let visible = true
+    let lastP = -1
+    // Cached on resize: total scrollable distance + the gate's absolute document
+    // offset (so a frame reads window.scrollY — which never forces layout —
+    // instead of getBoundingClientRect, which can).
     let total = 0
+    let sectionTop = 0
     const measure = () => {
       const el = containerRef.current
-      if (el) total = el.offsetHeight - window.innerHeight
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      sectionTop = rect.top + window.scrollY
+      total = el.offsetHeight - window.innerHeight
       // Cache viewport height for the gate-content drop (see applyProgress) so
       // no scroll frame reads window.innerHeight.
       vhRef.current = window.innerHeight
     }
-    const update = () => {
-      raf = 0
-      const el = containerRef.current
-      if (!el) return
-      const scrolled = Math.max(0, -el.getBoundingClientRect().top)
-      applyProgress(total > 0 ? clamp01(scrolled / total) : 0)
+    const sample = () => {
+      const scrolled = Math.max(0, window.scrollY - sectionTop)
+      const p = total > 0 ? clamp01(scrolled / total) : 0
+      if (p !== lastP) {
+        lastP = p
+        applyProgress(p)
+      }
     }
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update)
+    const frame = () => {
+      raf = visible ? requestAnimationFrame(frame) : 0
+      sample()
     }
+    const start = () => { if (!raf && visible) raf = requestAnimationFrame(frame) }
+    const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0 } }
+
     measure()
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
+    sample()
+
+    // Only spin the rAF loop while the gate is actually near the viewport — once
+    // it scrolls away the loop idles, so it costs nothing on the rest of the page.
+    let io = null
+    const el = containerRef.current
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          visible = entry.isIntersecting
+          if (visible) start()
+          else stop()
+        },
+        { rootMargin: '120px' },
+      )
+      io.observe(el)
+    } else {
+      start() // no IO support → just keep the loop running
+    }
+
     const onResize = () => {
       measure()
-      onScroll()
+      lastP = -1 // force a re-apply at the new geometry
+      sample()
     }
     window.addEventListener('resize', onResize)
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      stop()
+      if (io) io.disconnect()
       window.removeEventListener('resize', onResize)
-      if (raf) cancelAnimationFrame(raf)
     }
   }, [reduceMotion, applyProgress])
 

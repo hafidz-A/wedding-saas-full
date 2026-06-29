@@ -2,103 +2,17 @@
 
 import { useState, useRef, useEffect } from 'react'
 
-/* ---------------------------------------------------------------------------
-   Shared device-orientation source (touch devices).
-
-   One window listener feeds every mounted ThreeDTilt. The neutral pose is a
-   slowly-drifting baseline of how the phone is currently held, so tilting the
-   device nudges the cards gently and they re-center on their own within a
-   couple of seconds — deliberately subtle, never seasickness-inducing.
-
-   iOS 13+ gates deviceorientation behind a permission that MUST be requested
-   from a user gesture, so we ask once on the first touch. Android (and older
-   iOS) just works without a prompt.
---------------------------------------------------------------------------- */
-const GYRO_RANGE_DEG = 18 // device tilt (deg from baseline) that maps to full card tilt
-
-const gyroSubs = new Set()
-let gyroListening = false
-let gyroRequested = false
-let gyroBase = null
-let gyroRaf = 0
-let gyroTilt = { x: 0, y: 0 } // normalized -1..1
-
-function onDeviceOrientation(e) {
-  if (e.beta == null || e.gamma == null) return
-  if (!gyroBase) gyroBase = { beta: e.beta, gamma: e.gamma }
-  // Low-pass the baseline toward the current pose: a new holding angle
-  // becomes the new neutral, so the offset is always a gentle delta.
-  gyroBase.beta += (e.beta - gyroBase.beta) * 0.04
-  gyroBase.gamma += (e.gamma - gyroBase.gamma) * 0.04
-  const clamp = (v) => Math.max(-GYRO_RANGE_DEG, Math.min(GYRO_RANGE_DEG, v))
-  gyroTilt = {
-    x: clamp(e.beta - gyroBase.beta) / GYRO_RANGE_DEG,
-    y: clamp(e.gamma - gyroBase.gamma) / GYRO_RANGE_DEG,
-  }
-  if (!gyroRaf) {
-    gyroRaf = requestAnimationFrame(() => {
-      gyroRaf = 0
-      gyroSubs.forEach((fn) => fn(gyroTilt))
-    })
-  }
-}
-
-function startGyro() {
-  if (gyroListening) return
-  gyroListening = true
-  window.addEventListener('deviceorientation', onDeviceOrientation)
-}
-
-function stopGyro() {
-  if (!gyroListening) return
-  gyroListening = false
-  window.removeEventListener('deviceorientation', onDeviceOrientation)
-  if (gyroRaf) {
-    cancelAnimationFrame(gyroRaf)
-    gyroRaf = 0
-  }
-  gyroBase = null
-  // gyroRequested intentionally stays true — the iOS permission was already
-  // granted/denied once; re-asking on the next mount would be noise.
-}
-
-function requestGyro() {
-  if (gyroRequested) {
-    // Permission flow already ran once this session — just (re)attach the
-    // listener (no-op while it's still active). On iOS without permission
-    // the listener simply receives no events.
-    startGyro()
-    return
-  }
-  gyroRequested = true
-  const DOE = typeof DeviceOrientationEvent !== 'undefined' ? DeviceOrientationEvent : null
-  if (DOE && typeof DOE.requestPermission === 'function') {
-    const ask = () => {
-      DOE.requestPermission()
-        .then((state) => { if (state === 'granted') startGyro() })
-        .catch(() => {})
-    }
-    window.addEventListener('touchend', ask, { once: true, passive: true })
-  } else {
-    startGyro()
-  }
-}
-
-function subscribeGyro(fn) {
-  gyroSubs.add(fn)
-  requestGyro()
-  return () => {
-    gyroSubs.delete(fn)
-    // Last card gone (e.g. SPA nav off the invitation) → release the global
-    // listener instead of leaking it for the rest of the session.
-    if (gyroSubs.size === 0) stopGyro()
-  }
-}
-
 /**
- * ThreeDTilt — Reusable component to apply dynamic 3D tilt effect.
- * Desktop: card follows the cursor on hover. Touch devices: card leans
- * gently with the device orientation (capped well below the hover max).
+ * ThreeDTilt — Reusable component to apply a dynamic 3D tilt effect.
+ *
+ * Desktop (hover-capable): the card follows the cursor on hover.
+ * Touch devices: NO tilt — the card stays flat.
+ *
+ * The previous device-orientation ("follows the phone's movement") tilt was
+ * removed on request: it was unused across the templates and the raw gyroscope
+ * stream made the cards jitter. Touch devices now simply render the cards
+ * static; only the desktop cursor-hover tilt remains.
+ *
  * Automatically disables itself if prefers-reduced-motion is active.
  */
 export default function ThreeDTilt({
@@ -110,7 +24,7 @@ export default function ThreeDTilt({
   style = {},
 }) {
   const cardRef = useRef(null)
-  const touchRef = useRef(false) // hover-less device → gyro owns the transform
+  const touchRef = useRef(false) // hover-less device → leave the card flat
   const [reduceMotion, setReduceMotion] = useState(false)
 
   useEffect(() => {
@@ -122,36 +36,24 @@ export default function ThreeDTilt({
     return () => mql.removeEventListener?.('change', onChange)
   }, [])
 
-  // Gyro tilt on hover-less (touch) devices. Writes transform straight to the
-  // DOM node — orientation fires ~60Hz and going through setState would
-  // re-render every card on every reading.
+  // Detect hover-less (touch) devices so the cursor path stays disabled there —
+  // taps emulate a mousemove, and without this a tap would briefly tilt the card.
   useEffect(() => {
-    if (reduceMotion) return
     if (typeof window === 'undefined' || !window.matchMedia) return
-    if (!window.matchMedia('(hover: none)').matches) return
-    touchRef.current = true
-    const el = cardRef.current
-    if (!el) return
-    const gyroMax = Math.min(max, 6) // keep it gentle regardless of hover max
-    el.style.transition = 'transform 0.3s ease-out'
-    const unsub = subscribeGyro(({ x, y }) => {
-      el.style.transform =
-        `perspective(${perspective}px) rotateX(${(-x * gyroMax).toFixed(2)}deg) rotateY(${(y * gyroMax).toFixed(2)}deg)`
-    })
-    return () => {
-      unsub()
-      el.style.transform = ''
-      el.style.transition = ''
-    }
-  }, [reduceMotion, max, perspective])
+    const mql = window.matchMedia('(hover: none)')
+    touchRef.current = mql.matches
+    const onChange = (e) => { touchRef.current = e.matches }
+    mql.addEventListener?.('change', onChange)
+    return () => mql.removeEventListener?.('change', onChange)
+  }, [])
 
   // Desktop hover: write the transform STRAIGHT to the DOM node (not through
   // React state). The old code called setState on every mousemove (~60-120Hz),
   // re-rendering the whole card + all its children each frame — that was the
-  // hover "glitch". Direct style writes keep it buttery, mirroring the gyro
-  // path above. React never owns `transform`, so re-renders never clobber it.
+  // hover "glitch". Direct style writes keep it buttery. React never owns
+  // `transform`, so re-renders never clobber it.
   const handleMouseMove = (e) => {
-    if (reduceMotion || touchRef.current) return // taps emulate mousemove — let the gyro own it
+    if (reduceMotion || touchRef.current) return // taps emulate mousemove — ignore on touch
     const card = cardRef.current
     if (!card) return
 
