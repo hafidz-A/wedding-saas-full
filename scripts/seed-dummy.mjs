@@ -284,11 +284,11 @@ if (seedData) {
 
   // ── rsvps (first 4 attending, last 1 not) ──
   const rsvpPlan = [
-    { name: 'Budi Santoso', attending: true, count: 2, meal: 'Nusantara', msg: 'Selamat menempuh hidup baru!' },
-    { name: 'Siti Rahayu', attending: true, count: 1, meal: 'Vegetarian', msg: 'Bahagia selalu ya 🤍' },
-    { name: 'Agus Wijaya', attending: true, count: 3, meal: 'Mediterranean', msg: null },
-    { name: 'Dewi Lestari', attending: true, count: 1, meal: 'Nusantara', msg: 'Sampai ketemu di hari H!' },
-    { name: 'Eko Prasetyo', attending: false, count: 1, meal: null, msg: 'Maaf belum bisa hadir 🙏' },
+    { name: 'Budi Santoso', attending: true, count: 2, msg: 'Selamat menempuh hidup baru!' },
+    { name: 'Siti Rahayu', attending: true, count: 1, msg: 'Bahagia selalu ya 🤍' },
+    { name: 'Agus Wijaya', attending: true, count: 3, msg: null },
+    { name: 'Dewi Lestari', attending: true, count: 1, msg: 'Sampai ketemu di hari H!' },
+    { name: 'Eko Prasetyo', attending: false, count: 1, msg: 'Maaf belum bisa hadir 🙏' },
   ]
   const rsvpIdByName = {}
   const rsvpRows = rsvpPlan.map((r) =>
@@ -298,7 +298,6 @@ if (seedData) {
           guest_name_enc: encApp(r.name),
           attending: r.attending,
           guest_count: r.count,
-          meal_choice: r.meal,
           message_enc: encApp(r.msg),
         }
       : {
@@ -306,7 +305,6 @@ if (seedData) {
           guest_name: r.name,
           attending: r.attending,
           guest_count: r.count,
-          meal_choice: r.meal,
           message: r.msg,
         },
   )

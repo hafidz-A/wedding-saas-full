@@ -14,7 +14,6 @@ export interface RsvpRow {
   guest_name: string
   attending: boolean
   guest_count: number | null
-  meal_choice: string | null
   message: string | null
   created_at: string
 }
@@ -39,7 +38,6 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
       if (!q) return true
       return (
         r.guest_name.toLowerCase().includes(q) ||
-        (r.meal_choice || '').toLowerCase().includes(q) ||
         (r.message || '').toLowerCase().includes(q)
       )
     })
@@ -118,7 +116,6 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
                 <th>{t.colName}</th>
                 <th>{t.colAttending}</th>
                 <th>{t.colGuests}</th>
-                <th>{t.colMeal}</th>
                 <th>{t.colMessage}</th>
                 <th>{t.colReceived}</th>
               </tr>
@@ -133,7 +130,6 @@ export default function RsvpsTab({ rsvps }: { rsvps: RsvpRow[] }) {
                     </span>
                   </td>
                   <td data-label={t.colGuests}>{r.attending ? r.guest_count ?? 1 : '—'}</td>
-                  <td data-label={t.colMeal}>{r.meal_choice || '—'}</td>
                   <td data-label={t.colMessage} className={tabs.tdEllipsis} title={r.message || ''}>{r.message || '—'}</td>
                   <td data-label={t.colReceived}>{new Date(r.created_at).toLocaleString('id-ID')}</td>
                 </tr>

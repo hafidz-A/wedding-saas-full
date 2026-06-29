@@ -65,7 +65,6 @@ create table if not exists public.rsvps (
   guest_name      text not null,
   attending       boolean not null,                          -- yes/no
   guest_count     int not null default 1 check (guest_count between 1 and 20),
-  meal_choice     text,
   message         text,
   created_at      timestamptz not null default now()
 );

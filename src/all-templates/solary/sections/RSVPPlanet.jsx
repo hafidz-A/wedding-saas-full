@@ -15,11 +15,10 @@ const schema = z.object({
     .int("Masukkan angka bulat")
     .min(1, "Minimal 1 tamu")
     .max(999, "Maksimal 999 tamu"),
-  meal_choice: z.string().optional(),
   message: z.string().max(600).optional(),
 });
 
-export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, menuOptions = [], slug = "demo" }) {
+export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline, slug = "demo" }) {
   const { name } = useGuest();
 
   // Preview iframe loads /<template>/<slug>?preview=1 — simulate so the owner
@@ -33,7 +32,7 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { guest_name: name || "", token: "", attending: "yes", guest_count: 1, meal_choice: menuOptions[0] || "", message: "" },
+    defaultValues: { guest_name: name || "", token: "", attending: "yes", guest_count: 1, message: "" },
   });
   useEffect(() => { if (name) setValue("guest_name", name); }, [name, setValue]);
   const attending = watch("attending");
@@ -62,7 +61,6 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
         guest_name: data.guest_name,
         attending: data.attending === "yes",
         guest_count: data.guest_count,
-        meal_choice: data.meal_choice,
         message: data.message,
         token: data.token,
       });
@@ -154,14 +152,6 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
                   {errors.guest_count && <span className="form-error">{errors.guest_count.message}</span>}
                 </div>
               </div>
-              {menuOptions.length > 0 && (
-                <div className="form-row">
-                  <label className="form-label" htmlFor="rsvp-menu">Menu preference</label>
-                  <select id="rsvp-menu" className="form-input" {...register("meal_choice")}>
-                    {menuOptions.map((m) => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                </div>
-              )}
               <div className="form-row">
                 <label className="form-label" htmlFor="rsvp-note">A note for the couple (optional)</label>
                 <textarea id="rsvp-note" rows={3} className="form-input" style={{ resize: "vertical", minHeight: 80 }} placeholder="Wishes, allergies, song requests…" {...register("message")} />

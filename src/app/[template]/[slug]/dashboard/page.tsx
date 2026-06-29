@@ -199,7 +199,6 @@ function decryptRsvpRow(r: any) {
     guest_name: r.guest_name_enc != null ? appDecrypt(r.guest_name_enc) ?? '' : r.guest_name ?? '',
     attending: r.attending,
     guest_count: r.guest_count,
-    meal_choice: r.meal_choice,
     message: r.message_enc != null ? appDecrypt(r.message_enc) : r.message ?? null,
     created_at: r.created_at,
   }

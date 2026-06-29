@@ -15,13 +15,11 @@ export const rsvpPlanetSchema: SectionSchema = {
         en: 'This number becomes a "Confirm via WhatsApp" button in the RSVP section — guests can confirm manually with you after submitting. Leave empty to hide it.',
       },
     },
-    { key: 'menuOptions',    label: { id: 'Pilihan menu', en: 'Menu options' }, type: 'stringArray', itemPlaceholder: 'e.g. Nusantara' },
   ],
   defaults: {
     sectionLabel: 'RSVP',
     heading: 'Please confirm your orbit by 31 January.',
     deadline: '2027-01-31',
     whatsappNumber: '+62 812-1234-5678',
-    menuOptions: ['Nusantara', 'Mediterranean', 'Vegetarian'],
   },
 }

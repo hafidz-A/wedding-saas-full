@@ -328,11 +328,6 @@ if (!config) config = {
       props: {
         title: 'Will You Join Us?',
         subtitle: 'Kindly respond by 1 month before the date',
-        mealOptions: [
-          { value: 'beef', label: 'Beef Tenderloin' },
-          { value: 'fish', label: 'Pan-Seared Fish' },
-          { value: 'vegetarian', label: 'Garden Vegetarian' },
-        ],
         maxGuests: 5,
       },
     },

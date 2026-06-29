@@ -263,13 +263,6 @@ export const defaultConfig = {
       props: {
         title: 'Will You Join Us?',
         subtitle: demoRsvpDateText,
-        mealOptions: [
-          { value: 'beef',       label: 'Beef Tenderloin'     },
-          { value: 'fish',       label: 'Pan-Seared Fish'     },
-          { value: 'vegetarian', label: 'Garden Vegetarian'   },
-          { value: 'vegan',      label: 'Vegan Option'        },
-          { value: 'kids',       label: 'Kids Plate'          },
-        ],
       },
     },
 

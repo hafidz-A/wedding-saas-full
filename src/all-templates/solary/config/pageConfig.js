@@ -284,13 +284,11 @@ export const pageConfig = {
         heading: "Please confirm your attendance by 31 January.", // [CONTOH]
         deadline: "2027-01-31",                              // [CONTOH]
         whatsappNumber: "+62 812-1234-5678",                 // [CONTOH]
-        menuOptions: ["Nusantara", "Mediterranean", "Vegetarian"], // [CONTOH]
       },
       schema: {
         heading:        { kind: "text" },
         deadline:       { kind: "datetime" },
         whatsappNumber: { kind: "text" },
-        menuOptions:    { kind: "objectArray", fields: { value:"text" } },
       },
     },
 

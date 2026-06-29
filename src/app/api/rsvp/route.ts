@@ -6,7 +6,7 @@ import { consumeGuestTokenForRsvp, markGuestRsvpSubmitted } from '@/lib/guests/t
 
 /**
  * POST /api/rsvp
- * Body: { slug, guest_name, attending, guest_count, meal_choice?, message? }
+ * Body: { slug, guest_name, attending, guest_count, message? }
  *
  * Uses the admin (service_role) client so RLS bypass is intentional —
  * we want guests to submit RSVPs without auth, but ONLY for their own
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { slug, guest_name, attending, guest_count, meal_choice, message, token } = body || {}
+  const { slug, guest_name, attending, guest_count, message, token } = body || {}
 
   if (!slug || !guest_name || typeof attending !== 'boolean') {
     return NextResponse.json(
@@ -85,7 +85,6 @@ export async function POST(req: Request) {
       guest_name_enc: encryptField(cleanName),
       attending,
       guest_count: cleanCount,
-      meal_choice: meal_choice ? String(meal_choice).slice(0, 80) : null,
       message_enc: encryptField(cleanMessage),
     })
     .select('id')
