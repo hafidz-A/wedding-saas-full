@@ -33,7 +33,22 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
   const [activeId, setActiveId] = useState(null);
   const [revealed, setRevealed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  /* Compact = phone-class width. Below it we drop the prev/next chevrons and
+     keep only the hamburger (its menu already lists every section), so a long
+     couple-name brand never gets squeezed and the pill never overflows.
+     matchMedia reads the iframe's OWN viewport in preview (DeviceStage /
+     PreviewPane embed the invite in an <iframe>), so this is accurate there too. */
+  const [compact, setCompact] = useState(false);
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(max-width: 600px)");
+    const update = () => setCompact(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   /* Links = navigable sections (filter out hidden ones like #intro). */
   const links = useMemo(
@@ -179,7 +194,9 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
   };
 
   const iconBtnStyle = {
-    width: 44, height: 44,
+    // Fluid: shrinks 44 → 36 on narrow screens (36 stays ≥ --tap-target/--ctl-h-sm).
+    width: "clamp(36px, 10vw, 44px)", height: "clamp(36px, 10vw, 44px)",
+    flex: "0 0 auto",
     display: "grid", placeItems: "center",
     borderRadius: "50%",
     background: "var(--nav-arrow-bg)",
@@ -198,7 +215,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
         position: "fixed", top: 16, left: 16, right: 16,
         zIndex: "var(--z-nav)",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        height: "var(--navbar-h)", padding: "0 18px",
+        height: "var(--navbar-h)", padding: "0 clamp(10px, 4vw, 18px)",
         borderRadius: "999px",
         border: "var(--nav-border)",
         background: "var(--nav-bg)",
@@ -210,30 +227,39 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
         transform: revealed ? "translateY(0)" : "translateY(-12px)",
         pointerEvents: revealed ? "auto" : "none",
         transition: "opacity 700ms var(--ease-glide), transform 700ms var(--ease-glide)",
-        gap: 12, overflow: "visible",
+        gap: "clamp(6px, 2vw, 12px)", overflow: "visible",
       }}
     >
       <a href={`#${allSections[0]?.id || "intro"}`} style={{
         // Couple-name brand in Great Vibes — script needs a larger size to
         // read at navbar scale, and zero tracking (it breaks cursive joins).
-        fontFamily: "var(--font-script)", fontSize: 24, fontWeight: 400, letterSpacing: "normal",
-        display: "inline-flex", alignItems: "center", gap: 10, flex: "0 0 auto",
+        // Fluid size + flex-shrink so a long name truncates with "…" on narrow
+        // screens instead of pushing the buttons out of the pill.
+        fontFamily: "var(--font-script)", fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 400, letterSpacing: "normal",
+        display: "inline-flex", alignItems: "center", gap: 10,
+        flex: "1 1 auto", minWidth: 0, overflow: "hidden",
       }}>
         <span aria-hidden="true" style={{
           width: 8, height: 8, borderRadius: "50%",
-          background: "var(--color-accent)",
+          background: "var(--color-accent)", flex: "0 0 auto",
           boxShadow: "0 0 12px rgba(var(--color-glow)/0.8)",
         }} />
-        <span style={{ whiteSpace: "nowrap" }}>{logo}</span>
+        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{logo}</span>
       </a>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }} ref={menuRef}>
-        <button onClick={() => jump(-1)} aria-label="Previous section" title="Previous section" style={iconBtnStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 15l6-6 6 6" /></svg>
-        </button>
-        <button onClick={() => jump(1)} aria-label="Next section" title="Next section" style={iconBtnStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
-        </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "clamp(6px, 2vw, 8px)", position: "relative", flex: "0 0 auto" }} ref={menuRef}>
+        {/* Prev/next chevrons hide on phone-class widths — the hamburger menu
+            below already provides full section navigation there. */}
+        {!compact && (
+          <>
+            <button onClick={() => jump(-1)} aria-label="Previous section" title="Previous section" style={iconBtnStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 15l6-6 6 6" /></svg>
+            </button>
+            <button onClick={() => jump(1)} aria-label="Next section" title="Next section" style={iconBtnStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+          </>
+        )}
         <button
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="Toggle section menu"
