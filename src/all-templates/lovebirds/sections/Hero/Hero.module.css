@@ -147,20 +147,30 @@
   border-radius: calc(var(--gate) * 28px);
   overflow: hidden;
   background: #1e1711;
+  /* Shadow blur radii kept modest: box-shadow is paint-bound and the card
+     resizes EVERY scroll frame, so every extra blur pixel is repainted over a
+     high-DPR viewport ~60x/s. 46px reads as the same soft premium shadow as the
+     old 90px but paints far cheaper — a chief gate-scroll jank source on
+     mobile/tablet. */
   box-shadow:
-    0 calc(var(--gate) * 35px) calc(var(--gate) * 90px)
+    0 calc(var(--gate) * 18px) calc(var(--gate) * 46px)
       rgba(42, 33, 24, calc(var(--gate) * 0.40)),
     0 0 0 1px rgba(42, 33, 24, calc(var(--gate) * 0.1)),
-    0 0 calc((1 - var(--gate)) * 60px) rgba(245, 200, 66, calc((1 - var(--gate)) * 0.25));
+    0 0 calc((1 - var(--gate)) * 34px) rgba(245, 200, 66, calc((1 - var(--gate)) * 0.22));
   z-index: 4;
 }
 
-/* Inner vignette for the gate photo */
+/* Inner vignette for the gate photo. A radial-gradient paints an order of
+   magnitude cheaper than the previous 100–200px inset box-shadow blur, which
+   re-ran a full-card gaussian blur every scroll frame as the card resized — the
+   single most expensive per-frame paint of the gate transition. Edge darkness
+   is now modulated by opacity (composited) rather than an animated blur radius. */
 .gateCard::after {
   content: '';
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 calc(100px + (1 - var(--gate)) * 100px) rgba(0, 0, 0, 0.7);
+  background: radial-gradient(120% 120% at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
+  opacity: calc(1 - var(--gate) * 0.45);
   pointer-events: none;
   z-index: 2;
 }
@@ -205,11 +215,16 @@
   position: absolute;
   /* GATE: drop the whole content block to the lower third so the couple's
      faces stay clear; glide back to centre as the card forms (--gate 0→1).
-     `top` mixes 50% + vh (both viewport-relative) so it resolves cleanly. */
-  top: calc(50% + (1 - var(--gate)) * 20vh);
+     The vertical drop USED to live on `top` (layout-bound — reflowed every
+     scroll frame). It's now folded entirely into the imperative translateY in
+     applyProgress(), so `top` is static and the whole motion is composited. The
+     wide-aspect (13vh) vs portrait (20vh) split is handled in JS via matchMedia. */
+  top: 50%;
   left: 50%;
-  /* Rest-state (gate=0 → translateY -16px); JS updates transform imperatively. */
-  transform: translate(-50%, calc(-50% - 16px));
+  /* Rest-state (gate=0) carries the full vertical drop so the FIRST paint (before
+     JS runs) already sits dropped — no load-time jump. JS then overwrites this
+     inline transform each frame (px-based, aspect-aware) via applyProgress. */
+  transform: translate(-50%, calc(-50% + (1 - var(--gate)) * (20vh - 16px)));
   transition: transform 0.1s ease-out;
   width: min(720px, 90vw);
   text-align: center;
@@ -217,15 +232,6 @@
   pointer-events: none;
   display: grid;
   gap: clamp(12px, 1.8vw, 18px);
-}
-
-/* Wide/landscape viewports are short relative to the tall content block, so
-   ease the gate shift to keep the card clear of the scroll hint. Portrait
-   phones keep the larger shift (room to spare → faces fully clear). */
-@media (min-aspect-ratio: 13/10) {
-  .gateContent {
-    top: calc(50% + (1 - var(--gate)) * 13vh);
-  }
 }
 
 /* Readability halo for gate text that floats over the illustration where the

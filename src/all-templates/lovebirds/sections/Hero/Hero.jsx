@@ -304,6 +304,12 @@ export default function Hero(props) {
   const gateContentRef = useRef(null)
   const petalRefs = useRef([])
   const blastRefs = useRef([])
+  // Cached viewport height + the gate content's vertical-drop amount in vh
+  // (20vh portrait / 13vh wide-aspect). Both feed the imperative translateY in
+  // applyProgress so the content drop is composited, not a per-frame `top`
+  // reflow. Refreshed on resize / aspect-ratio change, never read per frame.
+  const vhRef = useRef(0)
+  const contentShiftVhRef = useRef(20)
   const [reduceMotion, setReduceMotion] = useState(false)
   const viewportScale = useViewportScale()
 
@@ -360,7 +366,11 @@ export default function Hero(props) {
         gateImgRef.current.style.transform = `scale(${1.16 - gatePhase * 0.16}) translateY(${-25 + gatePhase * 25}px)`
       }
       if (gateContentRef.current) {
-        gateContentRef.current.style.transform = `translate(-50%, calc(-50% + ${(1 - gatePhase) * -16}px))`
+        // Vertical drop (was CSS `top: 50% + (1-gate)*Nvh`, a per-frame reflow)
+        // folded into the composited transform. The -16px settle keeps the old
+        // feel; the Nvh drop uses the cached viewport height + aspect-ratio shift.
+        const drop = (1 - gatePhase) * ((contentShiftVhRef.current * vhRef.current) / 100 - 16)
+        gateContentRef.current.style.transform = `translate(-50%, calc(-50% + ${drop}px))`
       }
       for (let i = 0; i < petalData.length; i++) {
         const node = petalRefs.current[i]
@@ -392,6 +402,18 @@ export default function Hero(props) {
     return () => mql.removeEventListener?.('change', onChange)
   }, [])
 
+  // Wide/landscape viewports use a smaller content drop (13vh) than portrait
+  // phones (20vh) — formerly a CSS `@media (min-aspect-ratio: 13/10)` override
+  // on `top`. Mirrored here so applyProgress can fold it into the transform.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined
+    const mql = window.matchMedia('(min-aspect-ratio: 13/10)')
+    const apply = () => { contentShiftVhRef.current = mql.matches ? 13 : 20 }
+    apply()
+    mql.addEventListener?.('change', apply)
+    return () => mql.removeEventListener?.('change', apply)
+  }, [])
+
   useEffect(() => {
     if (reduceMotion) {
       applyProgress(1)
@@ -404,6 +426,9 @@ export default function Hero(props) {
     const measure = () => {
       const el = containerRef.current
       if (el) total = el.offsetHeight - window.innerHeight
+      // Cache viewport height for the gate-content drop (see applyProgress) so
+      // no scroll frame reads window.innerHeight.
+      vhRef.current = window.innerHeight
     }
     const update = () => {
       raf = 0
