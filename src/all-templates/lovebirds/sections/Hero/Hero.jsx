@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Hero.module.css'
+
+// Same plugin SmoothScroll registers + drives from Lenis ('scroll' → ScrollTrigger
+// .update). Registering twice is a no-op; doing it here means the gate works even
+// if its mount order ever changes relative to SmoothScroll.
+gsap.registerPlugin(ScrollTrigger)
 import { deriveMonogram } from '../../config/monogram.js'
 import { readGuestName } from '../../utils/guestName.js'
 
@@ -298,6 +304,7 @@ export default function Hero(props) {
     setGuestName(readGuestName())
   }, [])
   const containerRef = useRef(null)
+  const stageRef = useRef(null)
   // The gate animation is driven imperatively (see applyProgress) instead of via
   // React state, so a scroll frame mutates the DOM directly and NEVER triggers a
   // React re-render of this heavy tree — the chief mobile-jank source.
@@ -415,72 +422,58 @@ export default function Hero(props) {
     return () => mql.removeEventListener?.('change', apply)
   }, [])
 
+  // ---------------------------------------------------------------------------
+  // Gate drive — GSAP ScrollTrigger pin + scrub.
+  //
+  // This is a from-scratch rewrite of the gate→photoblast drive after three
+  // hand-rolled attempts (paint cuts, continuous rAF, gsap.ticker) failed to
+  // kill the "bergetar"/vibration. The fundamentals were wrong, not the tuning:
+  //
+  //   1. CSS `position: sticky` + Lenis: Lenis scrolls to SUB-PIXEL offsets, and
+  //      the browser re-rounds a sticky element's position every frame. The
+  //      pinned stage jittered up/down by a pixel and every transform riding on
+  //      it inherited the shake — a high-frequency vibration while the scrollbar
+  //      stayed stable. ScrollTrigger pins with `position: fixed`, which does NOT
+  //      ride the scroll, so there is nothing to re-round → no jitter.
+  //   2. A bespoke scroll loop (rAF or gsap.ticker) is a SECOND clock racing
+  //      Lenis. ScrollTrigger is already the ONE clock here: SmoothScroll feeds
+  //      it via `lenis.on('scroll', ScrollTrigger.update)`, so progress is
+  //      computed from the exact scroll value Lenis applied, same tick. No race.
+  //
+  // `applyProgress` (the visual math) is reused byte-for-byte; only what DRIVES
+  // it changed. `pinSpacing: false` because the 250vh section already reserves
+  // the scroll distance (matches the old sticky layout 1:1: 250vh − 100vh stage
+  // = 150vh of travel from progress 0→1).
   useEffect(() => {
-    if (reduceMotion) {
-      applyProgress(1)
-      return undefined
-    }
-    // The gate's scroll-linked transforms are driven by gsap.ticker — the SAME
-    // frame loop SmoothScroll uses to advance Lenis. This is the crux of the
-    // "bergetar"/vibration fix: a SECOND, independent requestAnimationFrame (the
-    // gate's own loop) RACES Lenis's ticker for ordering each frame. When that
-    // order flips frame-to-frame, the sticky-pinned stage (positioned by the
-    // browser from Lenis's just-applied scrollTop) and the gate content
-    // (positioned by our transform, read a frame too early/late) drift in and out
-    // of phase — a high-frequency up/down shimmer while the scrollbar stays
-    // perfectly stable. One shared ticker = one deterministic order per frame:
-    // SmoothScroll mounts first, so Lenis writes scroll, THEN we read it and
-    // transform — locked together. gsap.ticker also runs continuously, so touch
-    // momentum (where native scroll events batch) stays smooth, and Lenis doesn't
-    // smooth touch anyway. (This supersedes the earlier private-rAF approach,
-    // which on a real Lenis page made the vibration worse, not better.)
-    let lastP = -1
-    // Cached on resize: total scrollable distance + the gate's absolute document
-    // offset (so a frame reads window.scrollY — which never forces layout —
-    // instead of getBoundingClientRect, which can).
-    let total = 0
-    let sectionTop = 0
-    const measure = () => {
-      const el = containerRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      sectionTop = rect.top + window.scrollY
-      total = el.offsetHeight - window.innerHeight
-      // Cache viewport height for the gate-content drop (see applyProgress) so
-      // no scroll frame reads window.innerHeight.
-      vhRef.current = window.innerHeight
-    }
-    const sample = () => {
-      const scrolled = Math.max(0, window.scrollY - sectionTop)
-      const p = total > 0 ? clamp01(scrolled / total) : 0
-      if (p !== lastP) {
-        lastP = p
-        applyProgress(p)
-      }
-    }
+    const section = containerRef.current
+    const stage = stageRef.current
+    if (!section || !stage) return undefined
 
-    measure()
-    sample()
+    // applyProgress reads the cached viewport height + aspect shift; refresh them
+    // whenever ScrollTrigger recomputes (initial layout, resize, font/img load).
+    const refreshCache = () => { vhRef.current = window.innerHeight }
+    refreshCache()
 
-    // Prefer the shared gsap.ticker; fall back to a private rAF only if it's
-    // somehow unavailable (gsap is a hard dep, so this is just belt-and-braces).
-    const ticker = gsap?.ticker
-    let raf = 0
-    const rafLoop = () => { raf = requestAnimationFrame(rafLoop); sample() }
-    if (ticker) ticker.add(sample)
-    else raf = requestAnimationFrame(rafLoop)
+    // Pin in BOTH cases so the 250vh section behaves identically to the old
+    // CSS-sticky stage (held pinned for the whole scroll). For reduced motion we
+    // simply freeze the gate at its final state (progress 1) instead of scrubbing.
+    const st = ScrollTrigger.create({
+      trigger: section,
+      start: 'top top',
+      end: 'bottom bottom',
+      pin: stage,
+      pinSpacing: false,
+      // anticipatePin smooths the moment of pinning; scrub ties progress to the
+      // (Lenis-driven) scroll position rather than a tween clock.
+      anticipatePin: 1,
+      scrub: true,
+      invalidateOnRefresh: true,
+      onRefresh: refreshCache,
+      onUpdate: (self) => applyProgress(reduceMotion ? 1 : self.progress),
+    })
 
-    const onResize = () => {
-      measure()
-      lastP = -1 // force a re-apply at the new geometry
-      sample()
-    }
-    window.addEventListener('resize', onResize)
-    return () => {
-      if (ticker) ticker.remove(sample)
-      if (raf) cancelAnimationFrame(raf)
-      window.removeEventListener('resize', onResize)
-    }
+    applyProgress(reduceMotion ? 1 : 0)
+    return () => st.kill()
   }, [reduceMotion, applyProgress])
 
   return (
@@ -489,7 +482,7 @@ export default function Hero(props) {
       className={styles.gate}
       aria-label="Welcome gate"
     >
-      <div className={styles.sticky}>
+      <div className={styles.sticky} ref={stageRef}>
         <div className={styles.revealBg} aria-hidden="true" />
 
         <DecorCorners />

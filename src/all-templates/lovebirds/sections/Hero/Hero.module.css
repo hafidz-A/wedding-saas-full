@@ -13,8 +13,10 @@
   background: var(--color-cream);
   /* Horizontal clip: blast photos / petals / gateGlow (110vw) fly past the
      viewport edge and would otherwise widen the document on phones, letting
-     the whole template pan right. `clip` (not `hidden`) so the inner
-     position:sticky stage keeps pinning. Vertical stays visible. */
+     the whole template pan right. `clip` (not `hidden`) keeps vertical visible.
+     The clip is ALSO repeated on .sticky below: ScrollTrigger pins that stage
+     with position:fixed, which escapes this ancestor clip, so the stage must
+     clip its own overflowing children too. */
   overflow: visible;
   overflow-x: clip;
   z-index: 2;
@@ -23,12 +25,19 @@
   --overlay: 0.55;
 }
 
+/* The pinned stage. ScrollTrigger (see Hero.jsx) pins this for the gate's scroll
+   duration via position:fixed — NOT CSS `position: sticky`, which jittered
+   sub-pixel under Lenis smooth-scroll and was the root of the gate vibration.
+   Base position is relative; ScrollTrigger applies the fixed pin inline. */
 .sticky {
-  position: sticky;
-  top: 0;
+  position: relative;
   width: 100%;
   height: 100vh;
-  overflow: visible;
+  /* Clip horizontally here too (see .gate note) so the 110vw blast/glow can't
+     widen the document while the stage is position:fixed. Vertical stays visible
+     so petals/photos may spill above/below within the viewport. */
+  overflow-x: clip;
+  overflow-y: visible;
   isolation: isolate;
 }
 
