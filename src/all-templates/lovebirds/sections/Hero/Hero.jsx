@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { gsap } from 'gsap'
 import styles from './Hero.module.css'
 import { deriveMonogram } from '../../config/monogram.js'
 import { readGuestName } from '../../utils/guestName.js'
@@ -419,18 +420,20 @@ export default function Hero(props) {
       applyProgress(1)
       return undefined
     }
-    // The gate is driven by a CONTINUOUS rAF loop (gated to when the section is
-    // on screen) that samples scroll position every animation frame — NOT by the
-    // scroll event. Scroll events fire at an irregular cadence (especially during
-    // iOS/Android momentum scroll, where they batch), so a scroll→rAF design
-    // updated the transforms unevenly; the gate image/content used a CSS
-    // `transition` to paper over the gaps, which left them lagging — "chasing" —
-    // the scroll while the petals/blast (no transition) snapped to it exactly.
-    // The result read as the whole composition vibrating against itself. Sampling
-    // every frame means transforms land in lockstep with the real scroll position
-    // every frame, so the transitions could be dropped and the jitter with them.
-    let raf = 0
-    let visible = true
+    // The gate's scroll-linked transforms are driven by gsap.ticker — the SAME
+    // frame loop SmoothScroll uses to advance Lenis. This is the crux of the
+    // "bergetar"/vibration fix: a SECOND, independent requestAnimationFrame (the
+    // gate's own loop) RACES Lenis's ticker for ordering each frame. When that
+    // order flips frame-to-frame, the sticky-pinned stage (positioned by the
+    // browser from Lenis's just-applied scrollTop) and the gate content
+    // (positioned by our transform, read a frame too early/late) drift in and out
+    // of phase — a high-frequency up/down shimmer while the scrollbar stays
+    // perfectly stable. One shared ticker = one deterministic order per frame:
+    // SmoothScroll mounts first, so Lenis writes scroll, THEN we read it and
+    // transform — locked together. gsap.ticker also runs continuously, so touch
+    // momentum (where native scroll events batch) stays smooth, and Lenis doesn't
+    // smooth touch anyway. (This supersedes the earlier private-rAF approach,
+    // which on a real Lenis page made the vibration worse, not better.)
     let lastP = -1
     // Cached on resize: total scrollable distance + the gate's absolute document
     // offset (so a frame reads window.scrollY — which never forces layout —
@@ -455,33 +458,17 @@ export default function Hero(props) {
         applyProgress(p)
       }
     }
-    const frame = () => {
-      raf = visible ? requestAnimationFrame(frame) : 0
-      sample()
-    }
-    const start = () => { if (!raf && visible) raf = requestAnimationFrame(frame) }
-    const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0 } }
 
     measure()
     sample()
 
-    // Only spin the rAF loop while the gate is actually near the viewport — once
-    // it scrolls away the loop idles, so it costs nothing on the rest of the page.
-    let io = null
-    const el = containerRef.current
-    if (el && typeof IntersectionObserver !== 'undefined') {
-      io = new IntersectionObserver(
-        ([entry]) => {
-          visible = entry.isIntersecting
-          if (visible) start()
-          else stop()
-        },
-        { rootMargin: '120px' },
-      )
-      io.observe(el)
-    } else {
-      start() // no IO support → just keep the loop running
-    }
+    // Prefer the shared gsap.ticker; fall back to a private rAF only if it's
+    // somehow unavailable (gsap is a hard dep, so this is just belt-and-braces).
+    const ticker = gsap?.ticker
+    let raf = 0
+    const rafLoop = () => { raf = requestAnimationFrame(rafLoop); sample() }
+    if (ticker) ticker.add(sample)
+    else raf = requestAnimationFrame(rafLoop)
 
     const onResize = () => {
       measure()
@@ -490,8 +477,8 @@ export default function Hero(props) {
     }
     window.addEventListener('resize', onResize)
     return () => {
-      stop()
-      if (io) io.disconnect()
+      if (ticker) ticker.remove(sample)
+      if (raf) cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
     }
   }, [reduceMotion, applyProgress])
