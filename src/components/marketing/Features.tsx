@@ -23,18 +23,19 @@ export function Features({ t }: { t: Dict['landing']['features'] }) {
       id: 'rsvp',
       title: t.items[0].title, // RSVP & Guest List
       body: t.items[0].body,
+      // Decorative preview — aria-hidden + tabIndex=-1 keep its mock controls out of AT and the tab order.
       preview: (
-        <div className={styles.mockupRsvp}>
+        <div className={styles.mockupRsvp} aria-hidden="true">
           <div className={styles.rsvpHeader}>
             <span>WILL YOU ATTEND?</span>
           </div>
           <div className={styles.rsvpField}>
             <label className={styles.mockLabel}>GUEST NAME</label>
-            <input type="text" readOnly value="Adinda Rahma" className={styles.mockInput} />
+            <input type="text" readOnly tabIndex={-1} value="Adinda Rahma" className={styles.mockInput} />
           </div>
           <div className={styles.rsvpButtons}>
-            <button type="button" className={styles.mockBtnAttending}>ATTENDING</button>
-            <button type="button" className={styles.mockBtnDeclining}>DECLINE</button>
+            <button type="button" tabIndex={-1} className={styles.mockBtnAttending}>ATTENDING</button>
+            <button type="button" tabIndex={-1} className={styles.mockBtnDeclining}>DECLINE</button>
           </div>
           <div className={styles.rsvpField}>
             <label className={styles.mockLabel}>MEAL OPTION</label>

@@ -347,7 +347,12 @@
 }
 
 .handle {
-  display: inline-block; font-family: var(--font-body); font-size: clamp(10px, 2.6cqw, 14px);
+  /* inline-flex + min-height floors the tap target at 44px (WCAG 2.5.5) even when
+     the cqw-driven font/padding bottom out in a narrow card; padding still sets the
+     visual size, min-height only guarantees the vertical hit area. */
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--tap-target);
+  font-family: var(--font-body); font-size: clamp(10px, 2.6cqw, 14px);
   letter-spacing: 0.10em; padding: clamp(7px, 2cqw, 10px) clamp(14px, 4cqw, 22px); margin-top: clamp(10px, 3.4cqw, 18px);
   border-radius: var(--radius-pill);
   border: 1px solid rgba(255, 255, 255, 0.55); color: #fff;

@@ -5,7 +5,9 @@
 }
 .brand { display: flex; flex-direction: column; gap: 10px; }
 .tagline { font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light); max-width: 30ch; }
-.links { display: flex; flex-wrap: wrap; gap: 18px; }
+/* gap ≥24px gives footer links the WCAG 2.5.8 (AA) spacing exemption so each
+   short text link is a comfortable, well-separated tap target on mobile. */
+.links { display: flex; flex-wrap: wrap; gap: var(--space-5); }
 .link { font-family: var(--font-body); font-size: 14px; color: var(--color-charcoal-light); transition: var(--transition-default); }
 .link:hover { color: var(--color-coral); }
 .rights {
