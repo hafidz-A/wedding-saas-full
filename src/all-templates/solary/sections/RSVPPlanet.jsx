@@ -23,10 +23,13 @@ export default function RSVPPlanet({ sectionLabel, planetName, heading, deadline
   const { name } = useGuest();
 
   // Preview iframe loads /<template>/<slug>?preview=1 — simulate so the owner
-  // can test the form without consuming a real token.
-  const isPreview =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).get("preview") === "1";
+  // can test the form without consuming a real token. Read in an effect (NOT
+  // during render) so SSR and the first client render agree (both false);
+  // reading window.location during render causes a hydration mismatch.
+  const [isPreview, setIsPreview] = useState(false);
+  useEffect(() => {
+    setIsPreview(new URLSearchParams(window.location.search).get("preview") === "1");
+  }, []);
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, watch, setValue } = useForm({
     resolver: zodResolver(schema),

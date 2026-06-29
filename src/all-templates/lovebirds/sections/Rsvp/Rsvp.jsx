@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import SceneFrame from '../../components/SceneFrame.jsx'
@@ -47,9 +47,13 @@ export default function Rsvp(props) {
   // Preview iframe loads /<template>/<slug>?preview=1 — in preview we never hit
   // the live API; we simulate so the owner can test the form. 123456 is the
   // demo code (cosmetic only; the live endpoint has no 123456 backdoor).
-  const isPreview =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('preview') === '1'
+  // Read in an effect (NOT during render) so SSR and the first client render
+  // agree (both false) — otherwise `window.location` makes them diverge and
+  // React throws a hydration mismatch on the placeholder.
+  const [isPreview, setIsPreview] = useState(false)
+  useEffect(() => {
+    setIsPreview(new URLSearchParams(window.location.search).get('preview') === '1')
+  }, [])
 
   // Bring the empty form back so another guest (a different code) can RSVP via
   // the same shared link without reloading.
