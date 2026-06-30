@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { resolvePlanFrom, computeUpgradeAmount } from '../plans'
+import { resolvePlanFrom, computeUpgradeAmount, planBaseQuota } from '../plans'
 import type { TemplatePlanRow } from '../template-plans'
 
 const rows: TemplatePlanRow[] = [
-  { template_id: 'lovebirds', plan_code: 'basic',   display_name: 'Basic',   price_idr: 149000, duration_days: 365,  features: [], sort_order: 1 },
-  { template_id: 'lovebirds', plan_code: 'premium', display_name: 'Premium', price_idr: 299000, duration_days: null, features: [], sort_order: 2 },
+  { template_id: 'lovebirds', plan_code: 'basic',   display_name: 'Basic',   price_idr: 149000, duration_days: 365,  features: [], sort_order: 1, base_guest_quota: 200 },
+  { template_id: 'lovebirds', plan_code: 'premium', display_name: 'Premium', price_idr: 299000, duration_days: null, features: [], sort_order: 2, base_guest_quota: 300 },
 ]
 
 describe('resolvePlanFrom', () => {
@@ -46,5 +46,16 @@ describe('computeUpgradeAmount', () => {
 
   it('returns null when the target plan is not sellable', () => {
     expect(computeUpgradeAmount(rows, 'basic', 'nope')).toBeNull()
+  })
+})
+
+describe('planBaseQuota', () => {
+  it('reads base from the matching plan row', () => {
+    expect(planBaseQuota(rows, 'basic')).toBe(200)
+    expect(planBaseQuota(rows, 'premium')).toBe(300)
+  })
+  it('falls back to DEFAULT_BASE_QUOTA then 200 for unknown plans', () => {
+    expect(planBaseQuota([], 'premium')).toBe(300)
+    expect(planBaseQuota([], 'free')).toBe(200)
   })
 })

@@ -10,6 +10,8 @@ export interface TemplatePlanRow {
   duration_days: number | null
   features: string[]
   sort_order: number
+  /** Guests included in the plan price. effective_quota = this + guest_quota_extra. */
+  base_guest_quota: number
 }
 
 /**
@@ -30,6 +32,7 @@ function mapRow(r: any): TemplatePlanRow {
     duration_days: r.duration_days == null ? null : Number(r.duration_days),
     features: Array.isArray(r.features) ? (r.features as string[]) : [],
     sort_order: Number(r.sort_order),
+    base_guest_quota: r.base_guest_quota == null ? 200 : Number(r.base_guest_quota),
   }
 }
 
@@ -44,7 +47,7 @@ export const getTemplatePlans = unstable_cache(
   async (templateId: string): Promise<TemplatePlanRow[]> => {
     const supabase = createSupabaseAdminClient()
     const { data, error } = await (supabase.from('template_plans') as any)
-      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order')
+      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order, base_guest_quota')
       .eq('template_id', templateId)
       .order('sort_order', { ascending: true })
     if (error) {
@@ -62,7 +65,7 @@ export const getAllTemplatePlans = unstable_cache(
   async (): Promise<Record<string, TemplatePlanRow[]>> => {
     const supabase = createSupabaseAdminClient()
     const { data, error } = await (supabase.from('template_plans') as any)
-      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order')
+      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order, base_guest_quota')
       .order('template_id', { ascending: true })
       .order('sort_order', { ascending: true })
     if (error) {
@@ -81,7 +84,6 @@ export const getAllTemplatePlans = unstable_cache(
   { revalidate: REVALIDATE_SECONDS, tags: [TEMPLATE_PLANS_TAG] },
 )
 
-/** Format an IDR amount as "Rp 149.000". */
-export function formatIDR(amount: number): string {
-  return `Rp ${amount.toLocaleString('id-ID')}`
-}
+/** Format an IDR amount as "Rp 149.000". Defined in the client-safe quota
+ *  module; re-exported here so existing server callers keep their import path. */
+export { formatIDR } from './quota'

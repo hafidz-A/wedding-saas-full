@@ -1,5 +1,6 @@
 import 'server-only'
 import { getTemplatePlans, type TemplatePlanRow } from './template-plans'
+import { DEFAULT_BASE_QUOTA } from './quota'
 
 export interface ResolvedPlan {
   planId: string
@@ -48,6 +49,13 @@ export async function resolvePlan(
 /** Whether the plan unlocks the guestbook ("buku tamu") attendance ledger. */
 export function planHasGuestbook(planCode: string): boolean {
   return planCode === 'premium'
+}
+
+/** Base guest quota included in a plan, from template_plans (fallback 200). */
+export function planBaseQuota(plans: TemplatePlanRow[], planCode: string): number {
+  const row = plans.find((p) => p.plan_code === planCode)
+  if (row && typeof row.base_guest_quota === 'number') return row.base_guest_quota
+  return DEFAULT_BASE_QUOTA[planCode] ?? 200
 }
 
 /**
