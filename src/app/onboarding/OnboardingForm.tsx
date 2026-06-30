@@ -6,6 +6,8 @@ import { completeOnboarding, checkSlugAvailable, startCheckout } from './actions
 import { templateCatalog } from '@/config/templateCatalog'
 import type { Dict, Lang } from '@/lib/i18n'
 import { LangToggle } from '@/components/site/LangToggle'
+import QuotaStepper from '@/components/dashboard/QuotaStepper'
+import { DEFAULT_BASE_QUOTA, quotaAddonAmount, QUOTA_CAP, formatIDR } from '@/lib/payments/quota'
 import authStyles from '@/components/site/AuthChrome.module.css'
 
 function firstWord(s: string): string {
@@ -20,8 +22,11 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
   const queryTemplate = searchParams.get('template') || ''
   const initialTemplate = TEMPLATE_IDS.includes(queryTemplate) ? queryTemplate : templateCatalog[0].id
   const plan = searchParams.get('plan') || 'basic'
+  const baseQuota = DEFAULT_BASE_QUOTA[plan] ?? 200
 
   const [pending, startTransition] = useTransition()
+  const [guestTotal, setGuestTotal] = useState(baseQuota) // effective quota (base..cap)
+  const guestExtra = Math.max(0, guestTotal - baseQuota)
   const [template, setTemplate] = useState(initialTemplate)
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
@@ -71,6 +76,7 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
         groomName: groom,
         weddingDate: date,
         venue,
+        guestQuotaExtra: guestExtra,
       })
       if (!result.ok) {
         setError(result.error || dict.form.errFail)
@@ -256,6 +262,22 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
             {!slug && dict.form.urlHelp}
           </span>
         </label>
+
+        <div style={field}>
+          <span style={lbl}>{dict.quota.label}</span>
+          <QuotaStepper
+            value={guestTotal}
+            min={baseQuota}
+            max={QUOTA_CAP}
+            onChange={setGuestTotal}
+            typableHint={dict.quota.typableHint}
+          />
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+            {dict.quota.includedPrefix} {baseQuota}
+            {guestExtra > 0 &&
+              ` · ${dict.quota.addonHintPrefix} ${guestExtra} · +${formatIDR(quotaAddonAmount(guestExtra))}`}
+          </span>
+        </div>
 
         {error && <p style={errorStyle}>{error}</p>}
 
