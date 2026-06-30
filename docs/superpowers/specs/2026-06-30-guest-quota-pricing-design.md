@@ -69,6 +69,12 @@ Base (200/300) and cap (5000) are themselves multiples of 50, so every reachable
 value is a valid block. Server independently re-validates (multiple of 50 +
 within `[base, cap]`) — the snap is UX, never the only guard.
 
+**Affordance:** a hint line under the control tells the user the number is
+typable, e.g. *"Bisa ketik jumlah tamu langsung — otomatis dibulatkan ke
+kelipatan 50."* The input also gets `inputMode="numeric"` + an editable look (not
+a plain readonly label) so it's obviously a field. Snap examples for sanity:
+1043→1050, 1111→1100, 2139→2150, 12456→5000 (cap).
+
 ## Data model
 
 1. `template_plans` + column `base_guest_quota int` (backfill Basic=200, Premium=300).
@@ -144,8 +150,8 @@ alter table public.quota_addons enable row level security;  -- service-role only
      live total = base price + blocks×10k. Both surfaces share one
      `<QuotaStepper>` component backed by `snapQuotaToBlock`.
 8. **i18n** — `dashboard.tabs.guests.quota.*` (meter, full warning, add button,
-   modal copy, price) + `onboarding.quota.*` (stepper label, included, +Rp10k/50
-   hint). id/en parity kept (covered by dict-parity test).
+   modal copy, price, **typable hint**) + `onboarding.quota.*` (stepper label,
+   included, +Rp10k/50 hint, **typable hint**). id/en parity kept (dict-parity test).
 
 ## Testing
 
