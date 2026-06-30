@@ -39,6 +39,12 @@ export const onboarding = {
       toDashboard: 'Masuk ke dashboard',
       tip: 'Tip: di dashboard kamu bisa edit semua section (foto, jadwal, RSVP, gift, dll).',
     },
+    quota: {
+      label: 'Jumlah tamu',
+      includedPrefix: 'Termasuk',
+      addonHintPrefix: 'Tambahan',
+      typableHint: 'Bisa ketik angka — dibulatkan ke atas ke kelipatan 50.',
+    },
   },
   en: {
     noSession: {
@@ -79,6 +85,12 @@ export const onboarding = {
       openPreview: 'Open invitation preview →',
       toDashboard: 'Go to dashboard',
       tip: 'Tip: in the dashboard you can edit every section (photos, schedule, RSVP, gift, etc.).',
+    },
+    quota: {
+      label: 'Number of guests',
+      includedPrefix: 'Includes',
+      addonHintPrefix: 'Extra',
+      typableHint: 'Type a number — it rounds up to the nearest 50.',
     },
   },
 }

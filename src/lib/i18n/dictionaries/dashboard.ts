@@ -252,6 +252,19 @@ export const dashboard = {
         // Appended to a saved message that's missing the code placeholder, so
         // legacy invitations still send each guest their one-time RSVP code.
         codeLineAppend: '\n\nKode RSVP kamu: {{kode}} (sekali pakai)',
+        quota: {
+          meterPrefix: 'Kuota tamu',
+          full: 'Kuota tamu penuh — tambah kuota untuk menambah tamu.',
+          addBtn: 'Tambah kuota',
+          modalTitle: 'Tambah kuota tamu',
+          modalHint: 'Tambahan dijual per 50 tamu (Rp 10.000 / 50).',
+          typableHint: 'Bisa ketik jumlah langsung — dibulatkan ke atas ke kelipatan 50.',
+          perBlock: 'Rp 10.000 / 50 tamu',
+          totalPrefix: 'Total',
+          confirm: 'Bayar & tambah kuota',
+          processing: 'Memproses…',
+          cancel: 'Batal',
+        },
       },
       guestbook: {
         title: 'Buku Tamu',
@@ -1480,6 +1493,19 @@ export const dashboard = {
         // Appended to a saved message that's missing the code placeholder, so
         // legacy invitations still send each guest their one-time RSVP code.
         codeLineAppend: '\n\nYour RSVP code: {{kode}} (one-time use)',
+        quota: {
+          meterPrefix: 'Guest quota',
+          full: 'Guest quota is full — add quota to add more guests.',
+          addBtn: 'Add quota',
+          modalTitle: 'Add guest quota',
+          modalHint: 'Sold in blocks of 50 guests (Rp 10,000 / 50).',
+          typableHint: 'Type the number directly — it rounds up to the nearest 50.',
+          perBlock: 'Rp 10,000 / 50 guests',
+          totalPrefix: 'Total',
+          confirm: 'Pay & add quota',
+          processing: 'Processing…',
+          cancel: 'Cancel',
+        },
       },
       guestbook: {
         title: 'Guestbook',
