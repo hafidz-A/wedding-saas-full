@@ -8,6 +8,9 @@ import { parseGuestImport } from '@/lib/guests/parse-import'
 import { normalizePhone } from '@/lib/guests/phone'
 import { encryptField } from '@/lib/guests/crypto'
 import { generateToken, hashToken, encryptToken } from '@/lib/guests/token'
+import { getTemplatePlans } from '@/lib/payments/template-plans'
+import { planBaseQuota } from '@/lib/payments/plans'
+import { effectiveQuota } from '@/lib/payments/quota'
 import { fromDbRow, type GuestRow, type GuestRowDb } from './types'
 
 /**
@@ -21,6 +24,27 @@ async function authorizeOwnership(slug: string): Promise<string> {
   return owner.id
 }
 
+/**
+ * Current guest count + the invitation's effective quota (plan base + purchased
+ * add-on). Used to hard-block adding/importing beyond what the couple paid for.
+ */
+async function quotaState(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  invitation_id: string,
+): Promise<{ used: number; effective: number }> {
+  const { data: inv } = (await admin
+    .from('invitations')
+    .select('plan, template_id, guest_quota_extra')
+    .eq('id', invitation_id)
+    .maybeSingle()) as { data: { plan: string; template_id: string; guest_quota_extra: number | null } | null }
+  const plans = await getTemplatePlans(inv?.template_id ?? '')
+  const base = planBaseQuota(plans, inv?.plan ?? 'basic')
+  const { count } = await (admin.from('guests') as any)
+    .select('id', { count: 'exact', head: true })
+    .eq('invitation_id', invitation_id)
+  return { used: count ?? 0, effective: effectiveQuota(base, Number(inv?.guest_quota_extra ?? 0)) }
+}
+
 export async function addGuest(
   slug: string,
   input: { name: string; phoneRaw?: string; groupLabel?: string },
@@ -30,6 +54,11 @@ export async function addGuest(
   if (!name) throw new Error('Name is required')
   const phoneE164 = input.phoneRaw ? normalizePhone(input.phoneRaw) : null
   const admin = createSupabaseAdminClient()
+  // Hard block: never exceed the paid quota.
+  const { used, effective } = await quotaState(admin, invitation_id)
+  if (used >= effective) {
+    throw new Error(`Kuota tamu penuh (${used}/${effective}). Tambah kuota dulu untuk menambah tamu.`)
+  }
   const token = generateToken()
   const { data, error } = (await admin
     .from('guests')
@@ -105,6 +134,13 @@ export async function importGuests(
     throw new Error('Maksimal 5000 tamu per impor. Bagi daftar menjadi beberapa bagian.')
   }
   const admin = createSupabaseAdminClient()
+  // Hard block: refuse the whole import (no truncation) if it would exceed quota.
+  const { used, effective } = await quotaState(admin, invitation_id)
+  if (used + rows.length > effective) {
+    throw new Error(
+      `Melebihi kuota tamu. Sisa kuota: ${Math.max(0, effective - used)} dari ${rows.length} yang diimpor. Tambah kuota atau kurangi daftar.`,
+    )
+  }
   // Existing hashes for this invitation → guarantee the batch never collides
   // with codes already issued (the unique index would otherwise reject the
   // whole insert).

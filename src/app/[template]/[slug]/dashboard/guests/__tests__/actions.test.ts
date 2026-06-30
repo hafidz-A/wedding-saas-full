@@ -7,6 +7,11 @@ vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
 vi.mock('@/lib/supabase/server', () => ({ createSupabaseServerClient: () => ({ auth: { getUser } }) }))
 vi.mock('@/editor/lib/auth', () => ({ verifyOwnership: vi.fn() }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/payments/template-plans', () => ({
+  getTemplatePlans: vi.fn(async () => [
+    { template_id: 'lovebirds', plan_code: 'basic', display_name: 'B', price_idr: 149000, duration_days: 365, features: [], sort_order: 1, base_guest_quota: 200 },
+  ]),
+}))
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { encryptField as encGuest } from '@/lib/guests/crypto'
@@ -163,5 +168,56 @@ describe('importGuests token', () => {
       expect(r.rsvp_token_hash).toMatch(/^[0-9a-f]{64}$/)
     })
     expect(rows[0].rsvp_token_hash).not.toBe(rows[1].rsvp_token_hash)
+  })
+})
+
+describe('addGuest — quota enforcement (hard block)', () => {
+  it('throws when the guest list is already at the effective quota', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'basic', template_id: 'lovebirds', guest_quota_extra: 0 } } },
+        guests: { select: { data: null, count: 200 }, insert: { data: guestRow() } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    await expect(addGuest('slug', { name: 'Budi' })).rejects.toThrow(/kuota/i)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'guests')).toBe(false)
+  })
+
+  it('allows adding when under quota', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'basic', template_id: 'lovebirds', guest_quota_extra: 0 } } },
+        guests: { select: { data: null, count: 199 }, insert: { data: guestRow() } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    await expect(addGuest('slug', { name: 'Budi' })).resolves.toBeTruthy()
+  })
+
+  it('counts the purchased add-on into the effective quota', async () => {
+    // base 200 + extra 50 = 250; at 200 used, still room.
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'basic', template_id: 'lovebirds', guest_quota_extra: 50 } } },
+        guests: { select: { data: null, count: 200 }, insert: { data: guestRow() } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    await expect(addGuest('slug', { name: 'Budi' })).resolves.toBeTruthy()
+  })
+})
+
+describe('importGuests — quota enforcement (no truncation)', () => {
+  it('rejects an import that would exceed the effective quota', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'basic', template_id: 'lovebirds', guest_quota_extra: 0 } } },
+        guests: { select: { data: [], count: 199 }, insert: { data: null, count: 2 } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    await expect(importGuests('slug', 'Budi\nSari')).rejects.toThrow(/kuota/i) // 199 + 2 > 200
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'guests')).toBe(false)
   })
 })
