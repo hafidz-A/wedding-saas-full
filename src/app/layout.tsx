@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { BRAND } from '@/lib/brand'
 import { Montserrat, Biryani, Tangerine, Great_Vibes } from 'next/font/google'
+import NoOverscroll from '@/components/NoOverscroll'
 import '../styles/global.css'
 
 // Consolidated type system (design cleanup 2026-06) — four families:
@@ -96,6 +97,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           (the browser/Lenis normalises it to a different string than React's),
           which surfaced as the dev "errors" overlay. CSS handles it cleanly. */}
       <body>
+        {/* Global rubber-band/overscroll killer — runs on every page so iOS
+            Safari (which ignores CSS overscroll-behavior on the root) never
+            bounces. CSS handles Android/desktop; this handles the rest. */}
+        <NoOverscroll />
         {children}
       </body>
     </html>

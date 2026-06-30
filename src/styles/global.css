@@ -29,6 +29,18 @@ html {
      because <body> grows from html naturally. */
   overflow-x: hidden;
   overflow-x: clip;
+  /* ---- Overscroll / rubber-band gap kill (every template + every page) ----
+     `overscroll-behavior: none` removes the bounce entirely on Chrome/Android
+     and desktop. iOS Safari ignores it for the root document (that bounce is
+     unavoidable in WebKit), so we ALSO paint the root canvas with the app's
+     base colour: the bounce then reveals a sliver of *matching* colour instead
+     of a jarring white gap. Each template repaints this canvas at runtime to
+     match its own theme — Lovebirds via applyTheme(), Solary via
+     applyPaletteToDOM() (both set documentElement.style.backgroundColor, which
+     overrides the line below; cleared on unmount so dapur pages fall back to
+     this cream base, the same colour as <meta name="theme-color">). */
+  overscroll-behavior: none;
+  background-color: var(--color-cream, #FDF6EC);
 }
 
 body {
@@ -40,6 +52,9 @@ body {
      "template can be dragged right on the phone" bug. Old browsers without
      `clip` support simply ignore this line and keep the html fallback. */
   overflow-x: clip;
+  /* Mirror the root-level overscroll lock (some engines read it off <body>
+     for the document scroller). Harmless duplicate where html already wins. */
+  overscroll-behavior: none;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

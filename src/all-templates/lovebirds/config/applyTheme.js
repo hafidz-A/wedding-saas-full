@@ -44,6 +44,15 @@ export function applyTheme(name) {
   // palette exactly — no more single shared cream ambient.
   body.style.setProperty('--page-bg', vars['--bg-image'])
 
+  // Paint the root canvas (<html>) with the theme base so iOS overscroll /
+  // rubber-band reveals a sliver of matching colour instead of a white gap.
+  // The body's ambient uses background-attachment:fixed, which never paints
+  // the bounce area — only the html canvas does. Dark presets carry a solid
+  // `--bg`; light presets use `transparent`, so fall back to the cream base
+  // (the top stop of every light preset's gradient). Cleared by clearTheme().
+  const canvasBg = vars['--bg'] && vars['--bg'] !== 'transparent' ? vars['--bg'] : '#FDF6EC'
+  document.documentElement.style.backgroundColor = canvasBg
+
   body.classList.forEach((c) => { if (c.startsWith('theme-')) body.classList.remove(c) })
   body.classList.add(`theme-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`)
   return key
@@ -60,5 +69,7 @@ export function clearTheme() {
     body.style.removeProperty(k)
   }
   body.style.removeProperty('--page-bg')
+  // Revert the overscroll canvas colour to the global cream base (global.css).
+  document.documentElement.style.removeProperty('background-color')
   body.classList.forEach((c) => { if (c.startsWith('theme-')) body.classList.remove(c) })
 }

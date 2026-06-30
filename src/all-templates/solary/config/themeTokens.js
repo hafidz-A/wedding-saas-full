@@ -193,6 +193,12 @@ export function applyPaletteToDOM(name) {
   r.setProperty("--color-star",      p.starColor);
   r.setProperty("--theme-mode",      p.mode);
 
+  // Paint the root canvas (<html>) with the palette base so iOS overscroll /
+  // rubber-band reveals a sliver of matching dark instead of a white gap.
+  // Solary's body uses background-attachment:fixed, which never paints the
+  // bounce area — only the html canvas does. Cleared by clearPaletteFromDOM().
+  r.backgroundColor = p.bg;
+
   // Sync class on body (convert camelCase key to kebab-case)
   const body = document.body;
   if (body) {
@@ -221,6 +227,8 @@ export function clearPaletteFromDOM() {
   if (typeof document === "undefined") return;
   const r = document.documentElement.style;
   PALETTE_VARS.forEach((v) => r.removeProperty(v));
+  // Revert the overscroll canvas colour to the global cream base (global.css).
+  r.removeProperty("background-color");
   if (document.body) {
     Array.from(document.body.classList)
       .filter((cls) => cls.startsWith("theme-"))
