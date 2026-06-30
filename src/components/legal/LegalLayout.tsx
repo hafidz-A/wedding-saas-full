@@ -57,7 +57,7 @@ const page: React.CSSProperties = {
 const wrap: React.CSSProperties = { maxWidth: 760, margin: '0 auto', width: '100%' }
 const h1: React.CSSProperties = {
   fontFamily: 'var(--font-heading)',
-  fontStyle: 'italic',
+  fontStyle: 'normal',
   fontSize: 'clamp(32px, 6vw, 52px)',
   margin: '0 0 8px',
 }

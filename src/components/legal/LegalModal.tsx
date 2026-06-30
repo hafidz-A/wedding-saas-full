@@ -90,7 +90,7 @@ const header: React.CSSProperties = {
 }
 const titleStyle: React.CSSProperties = {
   fontFamily: 'var(--font-heading)',
-  fontStyle: 'italic',
+  fontStyle: 'normal',
   fontSize: 24,
   margin: 0,
 }
