@@ -45,7 +45,7 @@ incentive of +100 guests). Purchased add-on stays stacked on top. An absolute
 ## Pricing math (one formula, reused by onboarding + webhook)
 
 ```
-BLOCK_SIZE = 50, BLOCK_PRICE_IDR = 10_000
+BLOCK_SIZE = 50, BLOCK_PRICE_IDR = 10_000, QUOTA_CAP = 5000
 blocks(extra)              = extra / 50
 initialPurchaseAmount      = plan.price_idr + blocks(guest_quota_extra) * 10_000
 quotaAddonAmount(qtyGuests) = blocks(qtyGuests) * 10_000
@@ -53,6 +53,21 @@ quotaAddonAmount(qtyGuests) = blocks(qtyGuests) * 10_000
 
 All quantities are validated multiples of 50; server rejects any qty that would
 push `effective_quota` over 5.000.
+
+## Stepper control (`−  [editable number]  +`)
+
+The +/− buttons and a free-typing number input both drive the same value:
+
+- **−/+** step by `BLOCK_SIZE` (50), clamped to `[base, QUOTA_CAP]`.
+- The number is **typed freely**, then **snapped to the nearest valid block on
+  commit** (blur / Enter), so mid-typing "237" isn't snapped keystroke-by-keystroke.
+- Snap rule (pure, unit-tested): `snapQuotaToBlock(value, base, cap)` =
+  `clamp(round(value / 50) * 50, base, cap)`. Half rounds up (225 → 250).
+  Examples: 237 → 250, 222 → 200, below-base → base, above-cap → cap.
+
+Base (200/300) and cap (5000) are themselves multiples of 50, so every reachable
+value is a valid block. Server independently re-validates (multiple of 50 +
+within `[base, cap]`) — the snap is UX, never the only guard.
 
 ## Data model
 
@@ -85,9 +100,13 @@ alter table public.quota_addons enable row level security;  -- service-role only
 
 1. **`lib/payments/template-plans.ts`** — add `base_guest_quota` to `TemplatePlanRow`
    + the select; `mapRow` coerces (fallback 200).
-2. **`lib/payments/plans.ts`** — pure helpers: `planBaseQuota(plans, planCode)`,
-   `effectiveQuota(base, extra)`, `quotaAddonAmount(qtyGuests)`,
-   `initialPurchaseAmount(planPrice, extra)`, `clampQuotaExtra(base, extra)` (≤ 5000−base).
+2. **`lib/payments/quota.ts`** (NEW, pure, **client-safe** — no `server-only`) —
+   constants `BLOCK_SIZE`, `BLOCK_PRICE_IDR`, `QUOTA_CAP` + pure helpers:
+   `blocks(n)`, `effectiveQuota(base, extra)`, `quotaAddonAmount(qty)`,
+   `initialPurchaseAmount(planPrice, extra)`, `clampQuotaExtra(base, extra)` (≤ 5000−base),
+   `snapQuotaToBlock(value, base, cap)`. Imported by both the client stepper and
+   the server (`plans.ts` / actions / webhook). `plans.ts` stays server-only and
+   re-exports the DB-backed `planBaseQuota(plans, planCode)` (fallback 200).
 3. **`lib/payments/publish.ts`** — `applyPaidQuotaAddon(admin, addonRow)`: call the
    increment RPC, mark the addon row `paid`. Never touches plan/is_paid/expires_at.
    `applyPaidUpgrade` + `extendActivePeriod` stay untouched (must not reset extra).
@@ -116,11 +135,14 @@ alter table public.quota_addons enable row level security;  -- service-role only
 7. **Dashboard UI**
    - `page.tsx`: pass `effectiveQuota` + current guest `count` to `GuestsTab`.
    - `GuestsTab.tsx`: header meter "X / {effective} terpakai"; "Tambah kuota"
-     button → stepper modal (qty ×50, max = 5000 − effective) →
-     `startQuotaAddonCheckout` → redirect to invoiceUrl; on return `?quota=1`
-     run `recheckQuotaAddon`. Add-form/import surface the full-quota error.
-   - `OnboardingForm.tsx`: +/− stepper on the buy card, floor = selected plan's
-     base (200/300), step 50, max = 5000−base; live total = base price + blocks×10k.
+     button → modal with the `− [editable number] +` control (step 50,
+     snap-on-blur, max = 5000 − effective) → `startQuotaAddonCheckout` → redirect
+     to invoiceUrl; on return `?quota=1` run `recheckQuotaAddon`. Add-form/import
+     surface the full-quota error.
+   - `OnboardingForm.tsx`: the `− [editable number] +` control on the buy card,
+     floor = selected plan's base (200/300), step 50, snap-on-blur, max = 5000−base;
+     live total = base price + blocks×10k. Both surfaces share one
+     `<QuotaStepper>` component backed by `snapQuotaToBlock`.
 8. **i18n** — `dashboard.tabs.guests.quota.*` (meter, full warning, add button,
    modal copy, price) + `onboarding.quota.*` (stepper label, included, +Rp10k/50
    hint). id/en parity kept (covered by dict-parity test).
@@ -128,8 +150,10 @@ alter table public.quota_addons enable row level security;  -- service-role only
 ## Testing
 
 - Unit: price helpers (`quotaAddonAmount`, `initialPurchaseAmount`,
-  `effectiveQuota`, `clampQuotaExtra` cap), enforcement boundary (count == quota
-  blocks add; import of remaining+1 rejected; import of exactly-remaining passes).
+  `effectiveQuota`, `clampQuotaExtra` cap), `snapQuotaToBlock` (237→250, 222→200,
+  225→250 half-up, below-base→base, above-cap→cap), enforcement boundary
+  (count == quota blocks add; import of remaining+1 rejected; import of
+  exactly-remaining passes).
 - `dict-parity` covers the new i18n keys.
 - Manual/browser: build a basic + a premium invitation, confirm meter + hard
   block + stepper math; full Xendit round-trip for the `qta_` invoice.
