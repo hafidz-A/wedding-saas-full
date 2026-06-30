@@ -38,6 +38,34 @@ export async function applyPaidUpgrade(
     .eq('id', upgrade.id)
 }
 
+export interface PaidQuotaAddon {
+  id: string            // quota_addons row id
+  invitation_id: string
+  qty_guests: number    // multiple of 50
+}
+
+/**
+ * Apply a verified, PAID quota add-on: atomically bump the invitation's
+ * guest_quota_extra by qty_guests (via the increment RPC, so concurrent paid
+ * callbacks can't lose an update), then mark the addon row paid. Crucially this
+ * does NOT touch plan / is_paid / is_published / expires_at — a quota top-up
+ * never changes the plan or the live state. The CALLER must verify the payment
+ * (PAID + correct amount) first.
+ */
+export async function applyPaidQuotaAddon(
+  admin: any,
+  addon: PaidQuotaAddon,
+  nowMs: number = Date.now(),
+): Promise<void> {
+  await admin.rpc('increment_guest_quota_extra', {
+    p_invitation_id: addon.invitation_id,
+    p_qty: addon.qty_guests,
+  })
+  await (admin.from('quota_addons') as any)
+    .update({ status: 'paid', paid_at: new Date(nowMs).toISOString() })
+    .eq('id', addon.id)
+}
+
 /**
  * Apply a verified, PAID renewal: recompute the active period from the CURRENT
  * plan's duration (Premium = lifetime = no expiry) and re-publish. Does NOT

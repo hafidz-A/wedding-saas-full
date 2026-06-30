@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../plans', () => ({ resolvePlan: vi.fn() }))
 import { resolvePlan } from '../plans'
-import { extendActivePeriod } from '../publish'
+import { extendActivePeriod, applyPaidQuotaAddon } from '../publish'
+import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
 
 function fakeAdmin() {
   const calls: { value: any; col: string; val: unknown }[] = []
@@ -47,5 +48,22 @@ describe('extendActivePeriod', () => {
     await extendActivePeriod(admin as any, { id: 'inv-2', plan: 'premium', template_id: 'solary' })
     expect(admin._calls[0].value.expires_at).toBeNull()
     expect(admin._calls[0].value.is_published).toBe(true)
+  })
+})
+
+describe('applyPaidQuotaAddon', () => {
+  it('calls the atomic increment RPC and marks the addon paid, untouching the invitation', async () => {
+    const fake = createFakeSupabase({ tables: { quota_addons: { update: {} } } })
+    await applyPaidQuotaAddon(fake as any, { id: 'a1', invitation_id: 'inv-1', qty_guests: 100 })
+
+    const rpc = fake._calls.find((c) => c.kind === 'rpc')
+    expect(rpc?.name).toBe('increment_guest_quota_extra')
+    expect(rpc?.args).toEqual({ p_invitation_id: 'inv-1', p_qty: 100 })
+
+    const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'quota_addons')!
+    expect(upd.value.status).toBe('paid')
+    expect(upd.value.paid_at).toBeTruthy()
+    // The invitation's plan / publish state must NOT be touched here.
+    expect(fake._calls.some((c) => c.kind === 'update' && c.table === 'invitations')).toBe(false)
   })
 })
