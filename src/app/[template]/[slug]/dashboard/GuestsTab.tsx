@@ -19,17 +19,21 @@ import GuestEditModal from './GuestEditModal'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import QuotaStepper from '@/components/dashboard/QuotaStepper'
+import { startQuotaAddonCheckout, recheckQuotaAddon } from '@/app/onboarding/actions'
+import { quotaAddonAmount, QUOTA_CAP, formatIDR } from '@/lib/payments/quota'
 import styles from './GuestsTab.module.css'
 import ctrl from './dashboardControls.module.css'
 
 interface Props {
   slug: string
   guests: GuestRow[]
+  quota: { used: number; effective: number; invitationId: string }
   publicUrl: string
   messageTemplate?: string
 }
 
-export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: Props) {
+export default function GuestsTab({ slug, guests, quota, publicUrl, messageTemplate }: Props) {
   const t = useDashboardDict().tabs.guests
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
@@ -47,6 +51,39 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
   // below catches external refreshes (e.g. router.refresh() from import).
   const [localGuests, setLocalGuests] = useState<GuestRow[]>(guests)
   useEffect(() => { setLocalGuests(guests) }, [guests])
+
+  // Guest-quota state. The meter tracks the LIVE local list so optimistic
+  // adds/deletes move it immediately; effective is the paid ceiling.
+  const usedLive = localGuests.length
+  const isFull = usedLive >= quota.effective
+  const roomLeft = Math.max(0, QUOTA_CAP - quota.effective) // how much more quota is buyable
+  const [showQuota, setShowQuota] = useState(false)
+  const [quotaQty, setQuotaQty] = useState(50)
+  const [quotaPending, setQuotaPending] = useState(false)
+
+  // On return from a quota-add-on Xendit checkout (?quota=1), reconcile the
+  // payment (in case the webhook was late) then refresh so the meter updates.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const sp = new URLSearchParams(window.location.search)
+    if (sp.get('quota') !== '1') return
+    recheckQuotaAddon(quota.invitationId).finally(() => {
+      window.history.replaceState({}, '', window.location.pathname)
+      router.refresh()
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function buyQuota() {
+    setQuotaPending(true)
+    const res = await startQuotaAddonCheckout(quota.invitationId, quotaQty)
+    if (res.ok && res.invoiceUrl) {
+      window.location.href = res.invoiceUrl
+      return
+    }
+    setQuotaPending(false)
+    fb.fail(res.error || fm.saveFail)
+  }
 
   // The guest message MUST carry the one-time RSVP code placeholder, or guests
   // can't RSVP (the form requires the 6-digit code). Legacy lovebirds configs
@@ -173,6 +210,11 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
     const rawPhone = String(form.get('phone') || '')
     const name = rawName.trim()
     if (!name) return false
+    // Hard quota stop (the server also enforces this — this is just instant UX).
+    if (localGuests.length >= quota.effective) {
+      fb.fail(t.quota.full)
+      return false
+    }
     // Duplicate guard: same name (case-insensitive) AND same number already on
     // the list → ask first, with an assertive (red) confirm.
     const newPhone = normalizePhone(rawPhone)
@@ -208,7 +250,8 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
         console.error(e)
         // Roll back the temp row on failure
         setLocalGuests((prev) => prev.filter((x) => x.id !== tempId))
-        fb.fail(fm.guestAddFail)
+        // Surface the server message (e.g. "Kuota tamu penuh") when present.
+        fb.fail(e instanceof Error && e.message ? e.message : fm.guestAddFail)
       }
     })
     return true
@@ -222,8 +265,21 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
           <p>
             {localGuests.length} {t.countGuests} · {sentCount} {t.countSent} · {pendingCount} {t.countPending}
           </p>
+          <p style={{ marginTop: 2, color: isFull ? 'var(--interactive-primary)' : 'var(--text-secondary)' }}>
+            {t.quota.meterPrefix} {usedLive} / {quota.effective}
+            {isFull && ` — ${t.quota.full}`}
+          </p>
         </div>
         <div className={styles.headerActions}>
+          <button
+            type="button"
+            onClick={() => { setQuotaQty(Math.min(50, roomLeft)); setShowQuota(true) }}
+            className={ctrl.btnPrimarySm}
+            disabled={roomLeft <= 0}
+            title={roomLeft <= 0 ? `Maksimal ${QUOTA_CAP}` : undefined}
+          >
+            {t.quota.addBtn}
+          </button>
           <button type="button" onClick={() => setShowImport(true)} className={ctrl.btnGhostSm}>
             {t.importBtn}
           </button>
@@ -511,6 +567,42 @@ export default function GuestsTab({ slug, guests, publicUrl, messageTemplate }: 
             router.refresh()
           }}
         />
+      )}
+
+      {showQuota && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !quotaPending && setShowQuota(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.4)', display: 'grid', placeItems: 'center', padding: 20 }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 420, background: 'var(--surface-warm)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', padding: 24, display: 'flex', flexDirection: 'column', gap: 14 }}
+          >
+            <h3 style={{ margin: 0, fontSize: 18 }}>{t.quota.modalTitle}</h3>
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>{t.quota.modalHint}</p>
+            <QuotaStepper
+              value={quotaQty}
+              min={50}
+              max={Math.max(50, roomLeft)}
+              onChange={setQuotaQty}
+              typableHint={t.quota.typableHint}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15 }}>
+              <span>{t.quota.totalPrefix}</span>
+              <strong>{formatIDR(quotaAddonAmount(quotaQty))}</strong>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button type="button" className={ctrl.btnGhostSm} onClick={() => setShowQuota(false)} disabled={quotaPending}>
+                {t.quota.cancel}
+              </button>
+              <button type="button" className={ctrl.btnPrimarySm} onClick={buyQuota} disabled={quotaPending || roomLeft <= 0}>
+                {quotaPending ? t.quota.processing : t.quota.confirm}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -5,7 +5,9 @@ import { isValidTemplate } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict, type Dict, type Lang } from '@/lib/i18n'
 import { activePeriodStatus } from '@/lib/payments/active-period'
-import { resolveUpgrade } from '@/lib/payments/plans'
+import { resolveUpgrade, planBaseQuota } from '@/lib/payments/plans'
+import { getTemplatePlans } from '@/lib/payments/template-plans'
+import { effectiveQuota } from '@/lib/payments/quota'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
@@ -174,6 +176,14 @@ export default async function DashboardPage({ params }: PageProps) {
     if (u) upgrade = { amountIDR: u.amountIDR }
   }
 
+  // Guest quota meter: used count vs effective (plan base + purchased add-on).
+  const quotaPlans = await getTemplatePlans(invitation.template_id ?? template)
+  const quota = {
+    used: guests.length,
+    effective: effectiveQuota(planBaseQuota(quotaPlans, invitation.plan), Number(invitation.guest_quota_extra ?? 0)),
+    invitationId: invitation.id,
+  }
+
   return (
     <DashboardClient
       slug={slug}
@@ -187,6 +197,7 @@ export default async function DashboardPage({ params }: PageProps) {
       activePeriod={t.common.activePeriod}
       lang={lang}
       upgrade={upgrade}
+      quota={quota}
     />
   )
 }

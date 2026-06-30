@@ -34,6 +34,7 @@ export default function DashboardClient({
   activePeriod,
   lang,
   upgrade = null,
+  quota,
 }: {
   slug: string
   template: string
@@ -46,6 +47,7 @@ export default function DashboardClient({
   activePeriod: Dict['common']['activePeriod']
   lang: Lang
   upgrade?: { amountIDR: number } | null
+  quota: { used: number; effective: number; invitationId: string }
 }) {
   const [payPending, startPay] = useTransition()
   const period = activePeriodStatus(invitation, Date.now())
@@ -277,6 +279,7 @@ export default function DashboardClient({
               <GuestsTab
                 slug={slug}
                 guests={guests}
+                quota={quota}
                 publicUrl={
                   typeof window !== 'undefined'
                     ? `${window.location.origin}/${template}/${slug}`
