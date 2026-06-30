@@ -5,9 +5,14 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
 import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
-import { resolvePlan, resolveUpgrade } from '@/lib/payments/plans'
+import { resolvePlan, resolveUpgrade, planBaseQuota } from '@/lib/payments/plans'
+import { getTemplatePlans } from '@/lib/payments/template-plans'
+import {
+  initialPurchaseAmount, clampQuotaExtra, quotaAddonAmount, effectiveQuota,
+  QUOTA_CAP, DEFAULT_BASE_QUOTA,
+} from '@/lib/payments/quota'
 import { createXenditInvoice, getXenditInvoice, isPaidStatus, expireXenditInvoice } from '@/lib/payments/xendit'
-import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod } from '@/lib/payments/publish'
+import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
 import { siteBaseUrl } from '@/lib/site-url'
@@ -23,6 +28,8 @@ export interface OnboardingInput {
   groomName: string
   weddingDate: string // ISO datetime e.g. "2026-11-15T16:00:00"
   venue: string
+  /** Extra guest quota (beyond the plan base) bought at checkout, multiple of 50. */
+  guestQuotaExtra?: number
 }
 
 export interface OnboardingResult {
@@ -76,6 +83,12 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
     //    (defaults to 'basic' when missing/invalid).
     const plan = (await resolvePlan(template, input.plan)) ? input.plan : 'basic'
 
+    // 3b. Sanitize the chosen guest-quota add-on: snap UP to a clean 50-block and
+    //     cap so base + extra never exceeds QUOTA_CAP. (Base from the client-safe
+    //     constant; enforcement reads the DB base — they match by design.)
+    const baseForPlan = DEFAULT_BASE_QUOTA[plan] ?? 200
+    const guestQuotaExtra = clampQuotaExtra(baseForPlan, Number(input.guestQuotaExtra ?? 0))
+
     const admin = createSupabaseAdminClient()
 
     // 4. Slug availability check. (One account may own many invitations, so
@@ -126,6 +139,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
         template_id: template,
         is_paid: false,
         is_published: false,
+        guest_quota_extra: guestQuotaExtra,
         config,
       })
       .select('id')
@@ -193,16 +207,20 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, xendit_invoice_id')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, xendit_invoice_id, guest_quota_extra')
       .eq('id', invitationId)
       .maybeSingle()) as {
-      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; xendit_invoice_id: string | null } | null
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; xendit_invoice_id: string | null; guest_quota_extra: number | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
     if (inv.is_paid) return { ok: false, error: 'Undangan ini sudah dibayar' }
 
     const resolved = await resolvePlan(inv.template_id, inv.plan)
     if (!resolved) return { ok: false, error: 'Plan tidak valid' }
+
+    // Charge the plan price PLUS the guest-quota add-on the owner chose. The
+    // webhook computes the same expected amount from guest_quota_extra.
+    const amountIDR = initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
 
     // Expire any prior outstanding invoice so a customer who re-opens checkout
     // can't accidentally pay an old link the webhook would no longer publish
@@ -215,7 +233,7 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
 
     const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
       externalId,
-      amountIDR: resolved.amountIDR,
+      amountIDR,
       payerEmail: inv.email ?? user.email ?? undefined,
       description: `Undangan ${inv.slug} — plan ${inv.plan}`,
       successUrl: `${dash}?paid=1`,
@@ -523,5 +541,122 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
   } catch (e) {
     console.error('recheckUpgrade error:', e)
     return { ok: false, error: 'Gagal mengecek upgrade. Coba lagi sebentar lagi.' }
+  }
+}
+
+/**
+ * Start a "buy extra guest quota" checkout for an already-paid invitation the
+ * caller owns. Snaps the requested qty UP to a clean 50-block, refuses anything
+ * that would push the effective quota over QUOTA_CAP, creates a Xendit invoice
+ * for the add-on (keyed by a `qta_` external id), records a pending quota_addons
+ * row, and returns the hosted invoice URL. The webhook / recheckQuotaAddon bumps
+ * guest_quota_extra only after the add-on is paid.
+ */
+export async function startQuotaAddonCheckout(invitationId: string, qtyGuests: number): Promise<CheckoutResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`checkout:${user.id}`, { windowMs: 60_000, max: 6 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak percobaan. Coba lagi sebentar lagi.' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, guest_quota_extra')
+      .eq('id', invitationId)
+      .maybeSingle()) as {
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; guest_quota_extra: number | null } | null
+    }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    if (!inv.is_paid) return { ok: false, error: 'Selesaikan pembayaran awal undangan dulu' }
+
+    // Snap UP to a clean block; 0 base means "treat the raw qty as the add-on".
+    const qty = clampQuotaExtra(0, Number(qtyGuests))
+    if (qty <= 0) return { ok: false, error: 'Jumlah tambahan minimal 50 tamu' }
+
+    const plans = await getTemplatePlans(inv.template_id)
+    const base = planBaseQuota(plans, inv.plan)
+    const current = effectiveQuota(base, Number(inv.guest_quota_extra ?? 0))
+    if (current + qty > QUOTA_CAP) {
+      return { ok: false, error: `Maksimal ${QUOTA_CAP} tamu. Sisa kuota yang bisa ditambah: ${Math.max(0, QUOTA_CAP - current)}.` }
+    }
+
+    const amountIDR = quotaAddonAmount(qty)
+    const baseUrl = siteBaseUrl()
+    const externalId = `qta_${inv.id}_${Date.now()}`
+    const dash = `${baseUrl}/${inv.template_id}/${inv.slug}/dashboard`
+
+    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
+      externalId,
+      amountIDR,
+      payerEmail: inv.email ?? user.email ?? undefined,
+      description: `Tambah ${qty} kuota tamu — ${inv.slug}`,
+      successUrl: `${dash}?quota=1`,
+      failureUrl: `${dash}?quota=failed`,
+    })
+
+    await (admin.from('quota_addons') as any).insert({
+      invitation_id: inv.id,
+      qty_guests: qty,
+      amount_idr: amountIDR,
+      xendit_invoice_id: invoiceId,
+      xendit_external_id: externalId,
+      status: 'pending',
+    })
+
+    return { ok: true, invoiceUrl }
+  } catch (e) {
+    console.error('startQuotaAddonCheckout error:', e)
+    return { ok: false, error: 'Gagal memulai pembelian kuota. Coba lagi sebentar lagi.' }
+  }
+}
+
+/**
+ * Manual fallback for a missed `qta_` webhook: re-fetch the latest pending
+ * quota_addons invoice from Xendit and, if genuinely paid for the recorded
+ * amount, apply the extra. Safe to call repeatedly.
+ */
+export async function recheckQuotaAddon(invitationId: string): Promise<RecheckResult> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`recheck:${user.id}`, { windowMs: 60_000, max: 12 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak permintaan. Coba lagi sebentar lagi.' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin
+      .from('invitations')
+      .select('id, owner_user_id')
+      .eq('id', invitationId)
+      .maybeSingle()) as { data: { id: string; owner_user_id: string } | null }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+
+    const { data: addon } = (await admin
+      .from('quota_addons')
+      .select('id, invitation_id, qty_guests, amount_idr, xendit_invoice_id, status')
+      .eq('invitation_id', inv.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()) as {
+      data: { id: string; invitation_id: string; qty_guests: number; amount_idr: number; xendit_invoice_id: string | null; status: string } | null
+    }
+    if (!addon || !addon.xendit_invoice_id) return { ok: false, error: 'Tidak ada pembelian kuota yang menunggu pembayaran' }
+
+    const snap = await getXenditInvoice(addon.xendit_invoice_id)
+    if (!isPaidStatus(snap.status) || snap.amountIDR !== Number(addon.amount_idr)) {
+      return { ok: true, published: false, status: snap.status }
+    }
+
+    await applyPaidQuotaAddon(admin, { id: addon.id, invitation_id: addon.invitation_id, qty_guests: Number(addon.qty_guests) })
+    revalidatePath('/[template]/[slug]/dashboard', 'page')
+    return { ok: true, published: true, status: snap.status }
+  } catch (e) {
+    console.error('recheckQuotaAddon error:', e)
+    return { ok: false, error: 'Gagal mengecek pembelian kuota. Coba lagi sebentar lagi.' }
   }
 }
