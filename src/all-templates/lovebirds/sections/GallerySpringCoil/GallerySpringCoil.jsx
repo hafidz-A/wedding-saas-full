@@ -2,12 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { BotanicalSketchLayer } from '../../components/BotanicalBorder.tsx'
 import SceneFrame from '../../components/SceneFrame.jsx'
-
-gsap.registerPlugin(ScrollTrigger)
 
 /* Carousel-style ring: upright cards facing the screen (no coil tilt — the
    per-card counter-rotation in renderFrame keeps every photo flat to the
@@ -466,10 +462,6 @@ function normalizePhotos(photos) {
   }))
 }
 
-function clampIndex(index, total) {
-  return Math.max(0, Math.min(total - 1, index))
-}
-
 function CoilPhoto({ photo, index, config, cardRef, hasEntered, onOpen }) {
   const label = photo.caption || `Foto ${index + 1}`
 
@@ -541,6 +533,8 @@ export default function GallerySpringCoil({
   const scrollProgress = useRef(0)
   const mouse = useRef({ x: 0.5, y: 0.5 })
   const lastActiveRef = useRef(-1)
+  // The auto-spin loop reads this to pause itself while the lightbox is open.
+  const lightboxOpenRef = useRef(false)
 
   const [hasEntered, setHasEntered] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -559,7 +553,13 @@ export default function GallerySpringCoil({
     setSectionElement(element)
   }, [])
 
-  // ScrollTrigger pins the section; rAF moves the actual coil cards.
+  // Mirror lightbox-open into a ref the auto-spin loop reads (so it can pause
+  // without the rAF closure depending on React state).
+  useEffect(() => {
+    lightboxOpenRef.current = lightboxIndex !== null
+  }, [lightboxIndex])
+
+  // Auto-spin driver: a time-driven rAF turns the ring on its own (no scroll).
   useEffect(() => {
     const section = sectionRef.current
     const scene = sceneRef.current
@@ -607,11 +607,15 @@ export default function GallerySpringCoil({
       // full-size radius pushed the side photos off a 390px screen.
       const radius = config.radius * (isMobile ? 0.85 : 1)
       const progress = scrollProgress.current
-      const activeRaw = progress * (total - 1)
-      const nextActive = clampIndex(Math.round(activeRaw), total)
-      const rotY = -(activeRaw * config.rotationPerPhoto)
-      const activeBaseY = (activeRaw - (total - 1) / 2) * config.pitchY
-      const riseY = -activeBaseY
+      // Looping phase: `progress` wraps 0→1; `turn` is photo-units over one full
+      // revolution. activeRaw/nextActive are cyclic so the loop has no seam, and
+      // the per-photo vertical pitch + rise compensation (which can't loop
+      // without a vertical jump) are dropped — the ring already reads as a flat
+      // tilted circle, so the look is unchanged.
+      const turn = progress * total
+      const activeRaw = ((turn % total) + total) % total
+      const nextActive = Math.round(activeRaw) % total
+      const rotY = -(turn * config.rotationPerPhoto)
       // Mouse parallax kept deliberately small — a soft drift, never dizzying.
       const tiltX = (mouse.current.y - 0.5) * 3
       const tiltY = (mouse.current.x - 0.5) * 5
@@ -630,7 +634,7 @@ export default function GallerySpringCoil({
       const ringLift =
         radius * Math.sin((config.ringTiltX * Math.PI) / 180) + 16
 
-      coil.style.transform = `translateY(${riseY}px)`
+      coil.style.transform = 'translateY(0px)'
 
       for (let index = 0; index < total; index += 1) {
         const card = cardsRef.current[index]
@@ -641,12 +645,15 @@ export default function GallerySpringCoil({
         const effective = ((staticAngle + rotY) % 360 + 360) % 360
         const depthNorm = effective > 180 ? 360 - effective : effective
         const depthT = depthNorm / 180
-        const indexDelta = index - activeRaw
+        // Cyclic distance to the front card (shortest way round the ring) so
+        // frontness + neighbour gap stay correct across the loop seam.
+        let indexDelta = index - activeRaw
+        indexDelta = ((indexDelta + total / 2) % total + total) % total - total / 2
         const frontness = Math.max(0, 1 - Math.abs(indexDelta))
         const easedFrontness = frontness * frontness * (3 - 2 * frontness)
         const nearNeighbor = Math.max(0, 1 - Math.abs(Math.abs(indexDelta) - 1))
         const yGap = Math.sign(indexDelta) * config.neighborGap * nearNeighbor
-        const yOffset = (index - (total - 1) / 2) * config.pitchY + yGap
+        const yOffset = yGap
         const isFront = index === nextActive
         const sideScale = Math.max(config.depthScaleMin, config.sideOpacityMax + (1 - depthT) * 0.18)
         const scale = sideScale + (config.frontScale - sideScale) * easedFrontness
@@ -702,167 +709,103 @@ export default function GallerySpringCoil({
       }
     }
 
-    // Event-driven rendering: the coil's output depends ONLY on the scroll
-    // progress and the mouse position, so there is nothing to animate while
-    // both are still. The old free-running rAF loop re-wrote 16–30 cards'
-    // styles every frame even when idle (measured ~90% main-thread busy on
-    // a throttled phone); now a frame is rendered only when ScrollTrigger's
-    // onUpdate or a pointermove actually changes the inputs.
-    const requestRender = () => {
-      if (!inView || raf) return
-      raf = requestAnimationFrame(() => {
-        raf = 0
-        renderFrame()
-      })
-    }
+    // Continuous slow drift + a soft per-photo detent ("snap"). `phase` wraps
+    // 0→1; the snap eases the rotation as each photo crosses centre and speeds
+    // up between, so it reads as a gentle "click into place" without ever fully
+    // stopping. ~3s per photo.
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const PHOTOS_PER_SEC = 1 / 3
+    const SNAP = 0.6
+    let phase = 0
+    let lastTs = 0
 
-    const startLoop = () => {
-      inView = true
-      // Hide the global flying/perched ornaments while this full-screen coil is
-      // the active view — they'd otherwise drift over the centre photo. The
-      // gallery's own left/right bouquet stays (it's not part of that layer).
-      document.body.classList.add('lb-gallery-active')
-      // Sync render BEFORE the next paint — guarantees the first
-      // paint after re-enter shows the correct coil layout, fixing the
-      // "stuck at top" / "cards flat" bug where the browser would paint
-      // a stale transform before the next rAF tick.
+    const advance = (ts) => {
+      raf = requestAnimationFrame(advance)
+      // Pause (but keep the rAF alive) while off-screen, tab hidden, or the
+      // lightbox is open — costs nothing then.
+      if (!inView || document.hidden || lightboxOpenRef.current) {
+        lastTs = ts
+        return
+      }
+      // Throttle to ~30fps on phones — same trade as the perched-bird canvas;
+      // the drift is slow so 30fps is indistinguishable and halves GPU work.
+      if (mobileMQL.matches && ts - lastTs < 33) return
+      const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0
+      lastTs = ts
+      phase = (phase + (dt * PHOTOS_PER_SEC) / total) % 1
+      const p = phase * total
+      const n = Math.floor(p)
+      const f = p - n
+      const fEased = f - (SNAP / (2 * Math.PI)) * Math.sin(2 * Math.PI * f)
+      scrollProgress.current = ((n + fEased) / total) % 1
       renderFrame()
     }
 
-    const stopLoop = () => {
-      inView = false
-      document.body.classList.remove('lb-gallery-active')
-      if (raf) {
-        cancelAnimationFrame(raf)
-        raf = 0
-      }
+    const startSpin = () => {
+      if (raf || reduce) return
+      lastTs = 0
+      raf = requestAnimationFrame(advance)
+    }
+    const stopSpin = () => {
+      if (raf) cancelAnimationFrame(raf)
+      raf = 0
     }
 
+    const enter = () => {
+      inView = true
+      setHasEntered(true)
+      setGallerySketchVisible(true)
+      // Hide the global flying/perched ornaments while the coil fills the view.
+      document.body.classList.add('lb-gallery-active')
+      // Paint the correct frame immediately (covers reduced-motion, which never
+      // starts the loop), then spin.
+      renderFrame()
+      startSpin()
+    }
+    const leave = () => {
+      inView = false
+      stopSpin()
+      document.body.classList.remove('lb-gallery-active')
+      setGallerySketchVisible(false)
+    }
+
+    // Run only while the gallery is actually on screen.
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setHasEntered(true)
-          setGallerySketchVisible(true)
-          startLoop()
-        }
-      },
-      { threshold: 0.05 },
+      ([entry]) => { if (entry.isIntersecting) enter(); else leave() },
+      { threshold: 0.4 },
     )
+    observer.observe(scene)
 
-    observer.observe(section)
-
+    // Desktop hover parallax — just update the mouse ref; the running loop reads
+    // it each tick. No-op on touch (pointermove only fires mid-swipe there).
+    const hoverCapable = !window.matchMedia('(hover: none)').matches
     const onPointerMove = (event) => {
       const rect = scene.getBoundingClientRect()
       mouse.current = {
         x: (event.clientX - rect.left) / rect.width,
         y: (event.clientY - rect.top) / rect.height,
       }
-      requestRender()
     }
-
-    const onPointerLeave = () => {
-      mouse.current = { x: 0.5, y: 0.5 }
-      requestRender()
-    }
-
-    // Mouse parallax is a hover affordance — on touch devices pointermove
-    // only fires mid-swipe and just burned getBoundingClientRect reads.
-    const hoverCapable = !window.matchMedia('(hover: none)').matches
+    const onPointerLeave = () => { mouse.current = { x: 0.5, y: 0.5 } }
     if (hoverCapable) {
       scene.addEventListener('pointermove', onPointerMove)
       scene.addEventListener('pointerleave', onPointerLeave)
     }
 
-    // iPad orientation flip (landscape⇄portrait) is the classic breaker here:
-    // iPadOS reports the new innerWidth/innerHeight a beat AFTER the
-    // orientationchange event, so GSAP's own resize-refresh recomputes the
-    // pinned spacer + start/end against the stale (pre-rotation) viewport.
-    // The pin range ends up wrong and the coil appears frozen. We refresh
-    // again once the dimensions have actually settled. A double-rAF + short
-    // timeout covers both the immediate resize and the late iPad report.
-    let refreshTimer = 0
-    const refreshNow = () => {
-      // Re-evaluate the active range and kick the loop if we're pinned, so
-      // the coil never sits frozen after the layout recalculates.
-      ScrollTrigger.refresh()
-    }
-    const handleViewportChange = () => {
-      window.clearTimeout(refreshTimer)
-      refreshTimer = window.setTimeout(refreshNow, 320)
-    }
-    window.addEventListener('orientationchange', handleViewportChange)
-    window.addEventListener('resize', handleViewportChange)
-    // visualViewport fires on the iPad URL-bar/keyboard resize too, which is
-    // exactly when the pin height drifts — listen if available.
-    window.visualViewport?.addEventListener('resize', handleViewportChange)
-
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: () => `+=${total * config.scrollPerPhoto}`,
-        pin: true,
-        scrub: 1.2,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onEnter: () => {
-          setGallerySketchVisible(true)
-          startLoop()
-        },
-        onEnterBack: () => {
-          setGallerySketchVisible(true)
-          startLoop()
-        },
-        onLeave: () => {
-          stopLoop()
-          setGallerySketchVisible(false)
-          // Don't reset — cards keep their last computed state. When the
-          // section re-enters, startLoop()'s sync renderFrame() will
-          // immediately update them to the correct progress=0 state on
-          // the first paint, so there's no "stuck at top" flash.
-        },
-        onLeaveBack: () => {
-          stopLoop()
-          setGallerySketchVisible(false)
-        },
-        onUpdate: (self) => {
-          scrollProgress.current = self.progress
-          inView = true
-          requestRender()
-        },
-        onRefresh: (self) => {
-          // After GSAP recalculates on viewport resize/orientation flip,
-          // re-sync progress to the corrected pin range and restart the loop
-          // if the section is currently in its active range — otherwise the
-          // coil would paint a stale frame (or none) and look frozen.
-          scrollProgress.current = self.progress
-          if (self.isActive) {
-            inView = true
-            startLoop()
-          }
-        },
-      })
-    }, section)
-
+    // If the gallery is already on screen at mount, kick it off.
     const rect = section.getBoundingClientRect()
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      setHasEntered(true)
-      startLoop()
-    }
+    if (rect.top < window.innerHeight && rect.bottom > 0) enter()
 
     return () => {
-      // Drop the gallery flag so the global ornaments aren't left hidden if the
-      // section unmounts while it was the active view (e.g. editor remount).
       document.body.classList.remove('lb-gallery-active')
       observer.disconnect()
-      scene.removeEventListener('pointermove', onPointerMove)
-      scene.removeEventListener('pointerleave', onPointerLeave)
-      window.clearTimeout(refreshTimer)
-      window.removeEventListener('orientationchange', handleViewportChange)
-      window.removeEventListener('resize', handleViewportChange)
-      window.visualViewport?.removeEventListener('resize', handleViewportChange)
-      if (raf) cancelAnimationFrame(raf)
-      ctx.revert()
+      if (hoverCapable) {
+        scene.removeEventListener('pointermove', onPointerMove)
+        scene.removeEventListener('pointerleave', onPointerLeave)
+      }
+      stopSpin()
     }
   }, [config, total])
 
