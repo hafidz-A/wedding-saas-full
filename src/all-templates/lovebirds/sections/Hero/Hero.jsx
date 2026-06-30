@@ -312,6 +312,15 @@ export default function Hero(props) {
   const gateContentRef = useRef(null)
   const petalRefs = useRef([])
   const blastRefs = useRef([])
+  // Last `eased` written per petal/blast. Profiling (mobile, 4× CPU) showed
+  // applyProgress was ~207ms over the gate scroll — partly from writing a
+  // transform string + opacity to all 16 petals/blasts EVERY frame even while
+  // they're still fully hidden (blasts until progress >0.32, petals until >0.55).
+  // We skip the write while an element stays invisible (eased stays 0), which
+  // removes up to 16 style writes/frame during the early scroll. Purely drops
+  // wasted work — the visible motion is byte-identical.
+  const petalLastEased = useRef([])
+  const blastLastEased = useRef([])
   // Cached viewport height + the gate content's vertical-drop amount in vh
   // (20vh portrait / 13vh wide-aspect). Both feed the imperative translateY in
   // applyProgress so the content drop is composited, not a per-frame `top`
@@ -385,6 +394,9 @@ export default function Hero(props) {
         if (!node) continue
         const slot = petalData[i].slot
         const eased = easeOutCubic(clamp01((p - 0.55 - slot.delay) / 0.4))
+        // Skip the write while the petal stays fully hidden (was and is invisible).
+        if (eased === 0 && petalLastEased.current[i] === 0) continue
+        petalLastEased.current[i] = eased
         const totalRot = slot.rot * eased + p * 540 * petalData[i].speed
         node.style.transform = `rotate(${totalRot}deg) scale(${eased * slot.scale})`
         node.style.opacity = eased
@@ -394,6 +406,9 @@ export default function Hero(props) {
         if (!node) continue
         const b = blastLayout[i]
         const eased = easeOutCubic(clamp01((p - 0.32 - b.delay) / 0.42))
+        // Skip the write while the blast photo stays fully hidden.
+        if (eased === 0 && blastLastEased.current[i] === 0) continue
+        blastLastEased.current[i] = eased
         node.style.transform = `translate(calc(-50% + ${b.x * eased}px), calc(-50% + ${b.y * eased}px)) rotate(${b.rotate * eased}deg) scale(${0.25 + b.scale * eased})`
         node.style.opacity = eased
       }
