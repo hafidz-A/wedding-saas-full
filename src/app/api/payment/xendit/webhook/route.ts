@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidCallbackToken, getXenditInvoice, isPaidStatus, invitationIdFromExternalId, renewalIdFromExternalId } from '@/lib/payments/xendit'
 import { resolvePlan } from '@/lib/payments/plans'
-import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod } from '@/lib/payments/publish'
+import { initialPurchaseAmount } from '@/lib/payments/quota'
+import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
 
 /**
  * Xendit invoice webhook. Authenticated by the `x-callback-token` header
@@ -46,6 +47,13 @@ export async function POST(req: Request) {
     return handleRenewal(admin, body)
   }
 
+  // Quota add-on (top-up guest quota) callbacks are keyed by a `qta_` external
+  // id and recorded in quota_addons, separate from plan + publish state. Handle
+  // here: verify + bump guest_quota_extra WITHOUT touching plan/is_paid.
+  if (body.external_id.startsWith('qta_')) {
+    return handleQuotaAddon(admin, body)
+  }
+
   // Correlate by the invitation id embedded in OUR external id, NOT by the
   // invitation's currently-stored xendit_external_id. If the owner opened
   // checkout twice, the row stores only the latest invoice; paying an earlier
@@ -57,7 +65,7 @@ export async function POST(req: Request) {
   }
   const { data: inv } = (await admin
     .from('invitations')
-    .select('id, plan, template_id, is_paid, xendit_invoice_id')
+    .select('id, plan, template_id, is_paid, xendit_invoice_id, guest_quota_extra')
     .eq('id', invIdFromExt)
     .maybeSingle()) as {
     data: {
@@ -66,6 +74,7 @@ export async function POST(req: Request) {
       template_id: string
       is_paid: boolean
       xendit_invoice_id: string | null
+      guest_quota_extra: number | null
     } | null
   }
   if (!inv || inv.is_paid) return NextResponse.json({ ok: true }) // unknown or already processed
@@ -75,6 +84,11 @@ export async function POST(req: Request) {
     console.error('[xendit webhook] unknown plan', inv.template_id, inv.plan)
     return NextResponse.json({ ok: true })
   }
+
+  // The amount we expect is the plan price PLUS the guest-quota add-on the owner
+  // chose at checkout (stored on the draft). Verifying against the plan price
+  // alone would reject every purchase that bought extra quota.
+  const expectedAmount = initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
 
   // Authoritative verification: re-fetch THE INVOICE THAT FIRED THIS WEBHOOK
   // (body.id) rather than the row's stored invoice — they can differ if the
@@ -87,13 +101,13 @@ export async function POST(req: Request) {
     verified =
       snap.externalId === body.external_id &&
       isPaidStatus(snap.status) &&
-      snap.amountIDR === resolved.amountIDR
+      snap.amountIDR === expectedAmount
     if (!verified) {
       console.error('[xendit webhook] verification failed', {
         external_id: body.external_id,
         snapStatus: snap.status,
         snapAmount: snap.amountIDR,
-        expected: resolved.amountIDR,
+        expected: expectedAmount,
       })
     }
   } catch (e) {
@@ -102,7 +116,7 @@ export async function POST(req: Request) {
     // paying customer. The body is trusted only because the callback token
     // already authenticated this request.
     const reported = body.paid_amount ?? body.amount
-    verified = reported === resolved.amountIDR
+    verified = reported === expectedAmount
     console.error('[xendit webhook] re-fetch failed, used body amount', e)
   }
 
@@ -235,5 +249,65 @@ async function handleRenewal(
   if (!verified) return NextResponse.json({ ok: true })
 
   await extendActivePeriod(admin, inv)
+  return NextResponse.json({ ok: true })
+}
+
+/**
+ * Apply a verified PAID quota add-on callback. Looks up the pending quota_addons
+ * row by external id, re-verifies the payment against Xendit (paid + amount
+ * equals the recorded amount_idr), then bumps the invitation's guest_quota_extra
+ * via applyPaidQuotaAddon. Idempotent (rows already `paid` are skipped). Always
+ * ACKs 200 so genuine-but-unappliable callbacks aren't retried forever; the
+ * owner can self-serve via recheckQuotaAddon.
+ */
+async function handleQuotaAddon(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  body: { id?: string; external_id?: string; amount?: number; paid_amount?: number },
+) {
+  const { data: addon } = (await admin
+    .from('quota_addons')
+    .select('id, invitation_id, qty_guests, amount_idr, xendit_invoice_id, status')
+    .eq('xendit_external_id', body.external_id as string)
+    .maybeSingle()) as {
+    data: {
+      id: string
+      invitation_id: string
+      qty_guests: number
+      amount_idr: number
+      xendit_invoice_id: string | null
+      status: string
+    } | null
+  }
+  if (!addon || addon.status === 'paid') return NextResponse.json({ ok: true })
+
+  const expected = Number(addon.amount_idr)
+  let verified = false
+  try {
+    const snap = await getXenditInvoice(addon.xendit_invoice_id ?? body.id ?? '')
+    verified =
+      snap.externalId === body.external_id &&
+      isPaidStatus(snap.status) &&
+      snap.amountIDR === expected
+    if (!verified) {
+      console.error('[xendit webhook] quota addon verification failed', {
+        external_id: body.external_id,
+        snapStatus: snap.status,
+        snapAmount: snap.amountIDR,
+        expected,
+      })
+    }
+  } catch (e) {
+    const reported = body.paid_amount ?? body.amount
+    verified = reported === expected
+    console.error('[xendit webhook] quota addon re-fetch failed, used body amount', e)
+  }
+
+  if (!verified) return NextResponse.json({ ok: true })
+
+  await applyPaidQuotaAddon(admin, {
+    id: addon.id,
+    invitation_id: addon.invitation_id,
+    qty_guests: Number(addon.qty_guests),
+  })
   return NextResponse.json({ ok: true })
 }
