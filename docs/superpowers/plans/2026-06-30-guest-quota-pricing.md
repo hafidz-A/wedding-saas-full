@@ -86,12 +86,12 @@ describe('clampQuotaExtra', () => {
 })
 
 describe('snapQuotaToBlock', () => {
-  it('rounds to nearest 50, half-up, clamped to [min,max]', () => {
+  it('rounds UP to the next 50, clamped to [min,max]', () => {
     expect(snapQuotaToBlock(237, 200, 5000)).toBe(250)
-    expect(snapQuotaToBlock(222, 200, 5000)).toBe(200)
-    expect(snapQuotaToBlock(225, 200, 5000)).toBe(250) // half rounds up
+    expect(snapQuotaToBlock(222, 200, 5000)).toBe(250)  // ceil, not 200
+    expect(snapQuotaToBlock(250, 200, 5000)).toBe(250)  // exact multiple stays
     expect(snapQuotaToBlock(1043, 200, 5000)).toBe(1050)
-    expect(snapQuotaToBlock(1111, 200, 5000)).toBe(1100)
+    expect(snapQuotaToBlock(1111, 200, 5000)).toBe(1150) // ceil, not 1100
     expect(snapQuotaToBlock(2139, 200, 5000)).toBe(2150)
     expect(snapQuotaToBlock(12456, 200, 5000)).toBe(5000) // cap
     expect(snapQuotaToBlock(10, 200, 5000)).toBe(200)     // below min
@@ -120,10 +120,11 @@ export const QUOTA_CAP = 5000
  *  the real source of truth; this is the client-safe fallback. */
 export const DEFAULT_BASE_QUOTA: Record<string, number> = { basic: 200, premium: 300 }
 
-/** Number of 50-guest blocks in a guest count (rounded, never negative). */
+/** Number of 50-guest blocks in a guest count (rounded UP, never negative —
+ *  a partial block is a whole paid block). */
 export function blocks(n: number): number {
   if (!Number.isFinite(n) || n <= 0) return 0
-  return Math.round(n / BLOCK_SIZE)
+  return Math.ceil(n / BLOCK_SIZE)
 }
 
 /** Rupiah for buying `qtyGuests` extra (blocks × Rp10k). */
@@ -140,17 +141,17 @@ export function initialPurchaseAmount(planPrice: number, extra: number): number 
   return planPrice + quotaAddonAmount(Math.max(0, extra))
 }
 
-/** Clamp a chosen `extra` to a clean block within [0, QUOTA_CAP - base]. */
+/** Clamp a chosen `extra` to a clean block within [0, QUOTA_CAP - base] (round UP). */
 export function clampQuotaExtra(base: number, extra: number): number {
   const maxExtra = Math.max(0, QUOTA_CAP - base)
-  const snapped = Math.round((Number.isFinite(extra) ? extra : 0) / BLOCK_SIZE) * BLOCK_SIZE
+  const snapped = Math.ceil((Number.isFinite(extra) && extra > 0 ? extra : 0) / BLOCK_SIZE) * BLOCK_SIZE
   return Math.min(Math.max(0, snapped), maxExtra)
 }
 
-/** Snap a typed value to the nearest 50 (half-up), clamped to [min, max]. */
+/** Snap a typed value UP to the next 50, clamped to [min, max]. */
 export function snapQuotaToBlock(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min
-  const snapped = Math.round(value / BLOCK_SIZE) * BLOCK_SIZE
+  const snapped = Math.ceil(value / BLOCK_SIZE) * BLOCK_SIZE
   return Math.min(Math.max(snapped, min), max)
 }
 

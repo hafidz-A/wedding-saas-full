@@ -59,11 +59,12 @@ push `effective_quota` over 5.000.
 The +/− buttons and a free-typing number input both drive the same value:
 
 - **−/+** step by `BLOCK_SIZE` (50), clamped to `[base, QUOTA_CAP]`.
-- The number is **typed freely**, then **snapped to the nearest valid block on
+- The number is **typed freely**, then **snapped to the next valid block on
   commit** (blur / Enter), so mid-typing "237" isn't snapped keystroke-by-keystroke.
-- Snap rule (pure, unit-tested): `snapQuotaToBlock(value, base, cap)` =
-  `clamp(round(value / 50) * 50, base, cap)`. Half rounds up (225 → 250).
-  Examples: 237 → 250, 222 → 200, below-base → base, above-cap → cap.
+- Snap rule (pure, unit-tested): `snapQuotaToBlock(value, min, max)` =
+  `clamp(ceil(value / 50) * 50, min, max)` — always rounds **UP** to the next 50
+  (couples want headroom; never give fewer than typed). An exact multiple stays
+  put (250 → 250). Examples: 237 → 250, 222 → 250, below-min → min, above-max → max.
 
 Base (200/300) and cap (5000) are themselves multiples of 50, so every reachable
 value is a valid block. Server independently re-validates (multiple of 50 +
@@ -72,8 +73,8 @@ within `[base, cap]`) — the snap is UX, never the only guard.
 **Affordance:** a hint line under the control tells the user the number is
 typable, e.g. *"Bisa ketik jumlah tamu langsung — otomatis dibulatkan ke
 kelipatan 50."* The input also gets `inputMode="numeric"` + an editable look (not
-a plain readonly label) so it's obviously a field. Snap examples for sanity:
-1043→1050, 1111→1100, 2139→2150, 12456→5000 (cap).
+a plain readonly label) so it's obviously a field. Snap examples for sanity
+(round UP): 1043→1050, 1111→1150, 2139→2150, 12456→5000 (cap).
 
 ## Data model
 
