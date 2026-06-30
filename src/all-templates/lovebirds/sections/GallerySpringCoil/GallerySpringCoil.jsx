@@ -645,6 +645,22 @@ export default function GallerySpringCoil({
         const effective = ((staticAngle + rotY) % 360 + 360) % 360
         const depthNorm = effective > 180 ? 360 - effective : effective
         const depthT = depthNorm / 180
+        // Cull the far-back cards: they sit directly behind the front ones
+        // (occluded), so hiding them is invisible yet drops the continuously
+        // composited 3D layer count — a mobile/Safari win. Tracked so visibility
+        // is only touched when it flips; unhiding falls through and writes a
+        // fresh transform the same frame (no stale flash).
+        if (depthT > 0.82) {
+          if (card.__gscHidden !== true) {
+            card.style.visibility = 'hidden'
+            card.__gscHidden = true
+          }
+          continue
+        }
+        if (card.__gscHidden) {
+          card.style.visibility = ''
+          card.__gscHidden = false
+        }
         // Cyclic distance to the front card (shortest way round the ring) so
         // frontness + neighbour gap stay correct across the loop seam.
         let indexDelta = index - activeRaw
@@ -720,12 +736,23 @@ export default function GallerySpringCoil({
     const SNAP = 0.6
     let phase = 0
     let lastTs = 0
+    // The spin is ambient, so PAUSE it while the user is actively scrolling —
+    // that keeps scrolling-past the (visible) section light, and the pause is
+    // imperceptible because the viewport is moving. Resumes once scroll settles.
+    let scrolling = false
+    let scrollIdle = 0
+    const onScroll = () => {
+      scrolling = true
+      window.clearTimeout(scrollIdle)
+      scrollIdle = window.setTimeout(() => { scrolling = false; lastTs = 0 }, 180)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
 
     const advance = (ts) => {
       raf = requestAnimationFrame(advance)
-      // Pause (but keep the rAF alive) while off-screen, tab hidden, or the
-      // lightbox is open — costs nothing then.
-      if (!inView || document.hidden || lightboxOpenRef.current) {
+      // Pause (but keep the rAF alive) while off-screen, tab hidden, scrolling,
+      // or the lightbox is open — costs nothing then.
+      if (!inView || document.hidden || scrolling || lightboxOpenRef.current) {
         lastTs = ts
         return
       }
@@ -801,6 +828,8 @@ export default function GallerySpringCoil({
     return () => {
       document.body.classList.remove('lb-gallery-active')
       observer.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      window.clearTimeout(scrollIdle)
       if (hoverCapable) {
         scene.removeEventListener('pointermove', onPointerMove)
         scene.removeEventListener('pointerleave', onPointerLeave)
