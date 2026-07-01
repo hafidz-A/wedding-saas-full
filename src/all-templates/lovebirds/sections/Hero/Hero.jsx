@@ -312,15 +312,6 @@ export default function Hero(props) {
   const gateContentRef = useRef(null)
   const petalRefs = useRef([])
   const blastRefs = useRef([])
-  // Last `eased` written per petal/blast. Profiling (mobile, 4× CPU) showed
-  // applyProgress was ~207ms over the gate scroll — partly from writing a
-  // transform string + opacity to all 16 petals/blasts EVERY frame even while
-  // they're still fully hidden (blasts until progress >0.32, petals until >0.55).
-  // We skip the write while an element stays invisible (eased stays 0), which
-  // removes up to 16 style writes/frame during the early scroll. Purely drops
-  // wasted work — the visible motion is byte-identical.
-  const petalLastEased = useRef([])
-  const blastLastEased = useRef([])
   // Cached viewport height + the gate content's vertical-drop amount in vh
   // (20vh portrait / 13vh wide-aspect). Both feed the imperative translateY in
   // applyProgress so the content drop is composited, not a per-frame `top`
@@ -394,9 +385,6 @@ export default function Hero(props) {
         if (!node) continue
         const slot = petalData[i].slot
         const eased = easeOutCubic(clamp01((p - 0.55 - slot.delay) / 0.4))
-        // Skip the write while the petal stays fully hidden (was and is invisible).
-        if (eased === 0 && petalLastEased.current[i] === 0) continue
-        petalLastEased.current[i] = eased
         const totalRot = slot.rot * eased + p * 540 * petalData[i].speed
         node.style.transform = `rotate(${totalRot}deg) scale(${eased * slot.scale})`
         node.style.opacity = eased
@@ -406,9 +394,6 @@ export default function Hero(props) {
         if (!node) continue
         const b = blastLayout[i]
         const eased = easeOutCubic(clamp01((p - 0.32 - b.delay) / 0.42))
-        // Skip the write while the blast photo stays fully hidden.
-        if (eased === 0 && blastLastEased.current[i] === 0) continue
-        blastLastEased.current[i] = eased
         node.style.transform = `translate(calc(-50% + ${b.x * eased}px), calc(-50% + ${b.y * eased}px)) rotate(${b.rotate * eased}deg) scale(${0.25 + b.scale * eased})`
         node.style.opacity = eased
       }
@@ -454,16 +439,6 @@ export default function Hero(props) {
   //      Lenis. ScrollTrigger is already the ONE clock here: SmoothScroll feeds
   //      it via `lenis.on('scroll', ScrollTrigger.update)`, so progress is
   //      computed from the exact scroll value Lenis applied, same tick. No race.
-  //   3. MOBILE: Lenis sets syncTouch:false, so on phones it does NOT smooth (or
-  //      tick) touch scrolling — the only signal is the native `scroll` event,
-  //      which the browser BATCHES during momentum flings. Reading self.progress
-  //      on each sparse event stepped the gate in chunks ("patah-patah"). The fix
-  //      is a numeric `scrub`: ScrollTrigger still computes the TARGET progress
-  //      from scroll (one clock, no race — exactly as #2), but eases a proxy
-  //      tween toward it on gsap.ticker's rAF, which runs EVERY frame regardless
-  //      of how sparsely scroll events arrive. That interpolation fills the gaps
-  //      so the photoblast stays smooth on mobile. This is NOT a bespoke progress
-  //      loop — ScrollTrigger owns the proxy; we only read its eased value.
   //
   // `applyProgress` (the visual math) is reused byte-for-byte; only what DRIVES
   // it changed. `pinSpacing: false` because the 250vh section already reserves
@@ -479,53 +454,26 @@ export default function Hero(props) {
     const refreshCache = () => { vhRef.current = window.innerHeight }
     refreshCache()
 
-    // Reduced motion: don't scrub at all — just pin the 250vh section (so layout
-    // matches the animated path) and freeze the gate at its final state.
-    if (reduceMotion) {
-      applyProgress(1)
-      const st = ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: 'bottom bottom',
-        pin: stage,
-        pinSpacing: false,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onRefresh: refreshCache,
-      })
-      return () => st.kill()
-    }
-
-    // Drive the gate through a proxy tween instead of reading self.progress in
-    // onUpdate (see header note #3). ScrollTrigger eases `proxy.p` toward the
-    // scroll position on gsap.ticker's rAF, so applyProgress runs every frame
-    // even when mobile fires scroll events sparsely → no "patah-patah".
-    const proxy = { p: 0 }
-    const drive = gsap.to(proxy, {
-      p: 1,
-      ease: 'none',
-      paused: true,
-      onUpdate: () => applyProgress(proxy.p),
-    })
-
+    // Pin in BOTH cases so the 250vh section behaves identically to the old
+    // CSS-sticky stage (held pinned for the whole scroll). For reduced motion we
+    // simply freeze the gate at its final state (progress 1) instead of scrubbing.
     const st = ScrollTrigger.create({
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
       pin: stage,
       pinSpacing: false,
-      // anticipatePin smooths the moment of pinning; numeric scrub (vs `true`)
-      // adds the rAF-interpolated catch-up that keeps native-scroll mobile frames
-      // full. 0.3 ≈ light smoothing — buttery on phones, barely any lag on desktop.
+      // anticipatePin smooths the moment of pinning; scrub ties progress to the
+      // (Lenis-driven) scroll position rather than a tween clock.
       anticipatePin: 1,
-      animation: drive,
-      scrub: 0.3,
+      scrub: true,
       invalidateOnRefresh: true,
       onRefresh: refreshCache,
+      onUpdate: (self) => applyProgress(reduceMotion ? 1 : self.progress),
     })
 
-    applyProgress(0)
-    return () => { st.kill(); drive.kill() }
+    applyProgress(reduceMotion ? 1 : 0)
+    return () => st.kill()
   }, [reduceMotion, applyProgress])
 
   return (
