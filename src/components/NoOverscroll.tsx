@@ -30,6 +30,19 @@ import { useEffect } from 'react'
  */
 export default function NoOverscroll() {
   useEffect(() => {
+    // iOS/iPadOS ONLY. Everything else (Android Chrome/Firefox/Samsung, desktop)
+    // honours the CSS `overscroll-behavior: none` in global.css, so the JS guard
+    // is pure overhead there — and expensive overhead: a NON-PASSIVE document
+    // touchmove listener disables compositor-threaded scrolling for the whole
+    // page, forcing every touch frame to wait on the main thread. During heavy
+    // scroll-driven sections (Lovebirds gate→photoblast) that wait is the
+    // "scroll tertahan" jank on Android. iPadOS ≥13 masquerades as macOS, hence
+    // the maxTouchPoints check.
+    const isIOS =
+      /iP(hone|od|ad)/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    if (!isIOS) return undefined
+
     // Does `target` (or any ancestor up to <body>) have a scroll container that
     // can still move in the gesture's vertical direction? If yes, the gesture
     // belongs to that inner scroller — leave it alone.

@@ -7,6 +7,14 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Mobile browsers resize the viewport every time the address bar collapses or
+// reappears mid-scroll. By default that fires a full ScrollTrigger.refresh(),
+// which recomputes the Hero gate's pin start/end WHILE the user is inside the
+// pinned section — the visible "snap / jumps back and forth" on phones. This
+// flag makes ScrollTrigger ignore those bar-driven resizes (real orientation /
+// window resizes still refresh normally).
+ScrollTrigger.config({ ignoreMobileResize: true })
+
 /**
  * Smooth-scroll wrapper using Lenis.
  *
