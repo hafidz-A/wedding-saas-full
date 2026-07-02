@@ -21,7 +21,7 @@ export const DEVICE_PRESETS: DevicePreset[] = [
   { id: 'iphone14', label: 'iPhone 14 Pro', kind: 'phone',   w: 393,  h: 852, notch: 'island' },
   { id: 'iphonese', label: 'iPhone SE',     kind: 'phone',   w: 375,  h: 667 },
   { id: 'iphonex',  label: 'iPhone X',      kind: 'phone',   w: 375,  h: 812, notch: 'notch' },
-  { id: 'galaxy',   label: 'Galaxy Note',   kind: 'phone',   w: 412,  h: 883, notch: 'punch' },
+  { id: 'galaxy',   label: 'Galaxy Note',   kind: 'phone',   w: 412,  h: 915, notch: 'punch' },
 ]
 
 export const DEFAULT_DEVICE = 'desktop'
