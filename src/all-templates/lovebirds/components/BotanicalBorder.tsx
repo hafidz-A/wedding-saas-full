@@ -331,30 +331,45 @@ export const BotanicalSketchLayer = React.memo(({
 
     const content = contentRef.current
     const paths = Array.from(container.querySelectorAll<SVGPathElement>('path[data-draw="true"]'))
-    const pathsTopToBottom = [...paths].sort((a, b) => {
-      const aBox = a.getBBox?.()
-      const bBox = b.getBBox?.()
-      return (aBox?.y ?? 0) - (bBox?.y ?? 0)
-    })
-    const animations: gsap.core.Tween[] = []
-    const getPathLength = (path: SVGPathElement) => path.getTotalLength?.() ?? 100
 
+    // READ phase — measure every path ONCE, before any style write below.
+    // Interleaving getTotalLength()/getBBox() with gsap.set() forced a full-
+    // page reflow per path (profiled at ~9.5s total under 6× CPU throttle):
+    // every layer swap at a section boundary froze Lenis mid-fling — the
+    // "scroll ketahan antara section" jank. Path geometry never changes after
+    // mount, so lengths are safe to cache for the effect's whole lifetime
+    // (including the function-valued tween lookups further down).
+    const pathLengths = new Map<SVGPathElement, number>()
+    const pathTops = new Map<SVGPathElement, number>()
+    paths.forEach((path) => {
+      pathLengths.set(path, path.getTotalLength?.() ?? 100)
+      pathTops.set(path, path.getBBox?.()?.y ?? 0)
+    })
+    const pathsTopToBottom = [...paths].sort(
+      (a, b) => (pathTops.get(a) ?? 0) - (pathTops.get(b) ?? 0),
+    )
+    const animations: gsap.core.Tween[] = []
+    const getPathLength = (path: SVGPathElement) => pathLengths.get(path) ?? 100
+
+    // WRITE phase — everything from here on only writes styles. Static path
+    // styles are written DIRECTLY (path.style.*), not via gsap.set: GSAP's
+    // CSSPlugin reads the current computed value before writing, which
+    // re-created the same read-write thrash inside the loop (profiled as
+    // ~8.8s of _getComputedProperty forced reflow under 6× throttle). The
+    // inline values also make the later gsap.to() tween inits read cheap
+    // inline styles instead of forcing computed-style flushes.
     gsap.killTweensOf([content, ...paths])
 
     paths.forEach((path) => {
-      gsap.set(path, {
-        strokeDasharray: getPathLength(path),
-      })
+      path.style.strokeDasharray = String(getPathLength(path))
     })
 
     if (!visible) {
       if (!hasEnteredRef.current) {
         gsap.set(content, { opacity: 0, y: 18 })
         paths.forEach((path) => {
-          gsap.set(path, {
-            strokeDashoffset: getPathLength(path),
-            opacity: 0,
-          })
+          path.style.strokeDashoffset = String(getPathLength(path))
+          path.style.opacity = '0'
         })
 
         return undefined
@@ -391,10 +406,8 @@ export const BotanicalSketchLayer = React.memo(({
 
     if (animateOnScroll) {
       paths.forEach((path, i) => {
-        gsap.set(path, {
-          strokeDashoffset: getPathLength(path),
-          opacity: 1,
-        })
+        path.style.strokeDashoffset = String(getPathLength(path))
+        path.style.opacity = '1'
 
         animations.push(
           gsap.to(path, {
@@ -425,10 +438,8 @@ export const BotanicalSketchLayer = React.memo(({
     } else {
       gsap.set(content, { opacity: 0, y: -14 })
       paths.forEach((path) => {
-        gsap.set(path, {
-          strokeDashoffset: getPathLength(path),
-          opacity: 0,
-        })
+        path.style.strokeDashoffset = String(getPathLength(path))
+        path.style.opacity = '0'
       })
 
       animations.push(
