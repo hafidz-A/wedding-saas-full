@@ -37,6 +37,15 @@ export default function Shell({ config, slug, isDemo = false, embed = false, emb
     return () => document.body.classList.remove('lovebirds-route')
   }, [])
 
+  // Embeds (🎨 device bezels + the phone frame) hide the classic desktop
+  // scrollbar so the framed page renders exactly like a real phone
+  // (see html.embed-scroll in global.css).
+  useEffect(() => {
+    if (!embed) return undefined
+    document.documentElement.classList.add('embed-scroll')
+    return () => document.documentElement.classList.remove('embed-scroll')
+  }, [embed])
+
   return (
     <ThemeProvider
       defaultPalette={config?.theme?.defaultPalette}

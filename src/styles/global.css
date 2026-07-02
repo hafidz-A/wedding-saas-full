@@ -43,6 +43,22 @@ html {
   background-color: var(--color-cream, #FDF6EC);
 }
 
+/* Inside preview/phone-frame embeds (?embed=1 — the 🎨 device bezels AND the
+   fullscreen phone frame): hide the classic desktop scrollbar so the framed
+   page renders exactly like a real phone. A Windows scrollbar inside the
+   bezel (a) steals ~17px of the device width, (b) makes 100vw-sized elements
+   wider than the visible area (content appears to "escape" its cards), and
+   (c) looks wrong inside a phone screen. Real phones use zero-width overlay
+   scrollbars, so this matches them. Set by the template Shells when `embed`. */
+html.embed-scroll {
+  scrollbar-width: none;
+}
+html.embed-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 body {
   font-family: var(--font-body);
   color: var(--color-charcoal);
