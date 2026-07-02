@@ -20,22 +20,25 @@ could not make it smooth on phones. The user chose to replace the concept.
    larger than the others and closest to center, so it stays the focal point.
    No data/schema/editor changes: `gateImage` + `blastPhotos` fields are reused
    as-is.
-2. **Play-once, not scroll-scrubbed.** The entrance is a fixed-duration
-   animation (~1.2–1.5 s) that runs by itself. Choreography and ordering match
-   the current scroll version: glass card (text + countdown) fades in from low
-   opacity; blast photos burst from center with the SAME scatter math
-   (`blastLayout`: angle/distance/rotate/scale/delay — keep byte-identical);
-   petals appear and spin WHILE the entrance plays, then rest at their final
-   pose (no infinite spin); corner decor + revealBg gradient fade in and stay.
-3. **Section is 100vh** (was 250vh). No ScrollTrigger, no pin, no scrub in Hero.
-4. **Replay on viewport exit/enter, event-triggered.** When Hero leaves the
-   viewport (scrolling down) → play the timeline in REVERSE (photos retract to
-   center, card dims). When Hero re-enters from below → play the entrance
-   again. Triggered ONCE per enter/leave via IntersectionObserver — never tied
-   to scroll position per-pixel.
-5. **Scroll lock only on first load.** On initial page load the entrance plays
-   with scrolling locked until it finishes, gate-style. Re-entries never lock;
-   the animation plays in the background while the user keeps scrolling.
+2. **Play-once, not scroll-scrubbed.** (Revised same day after user testing.)
+   The entrance is a fixed-duration (~4.2 s), deliberately slow, clearly
+   SEQUENTIAL animation: featured center photo grows first (0–1.2 s) → ambient
+   decor washes in (0.4–1.6 s) → glass card with text + countdown fades in
+   (1.4–2.5 s) → photo blast bursts + petals spin in (2.5–3.7 s) → scroll hint
+   (3.6–4.2 s). Blast scatter math (`blastLayout`) stays byte-identical.
+   Petals rest at their final pose after the entrance (no infinite spin).
+3. **Section is 100svh** (was 250vh). No ScrollTrigger, no pin, no scrub in Hero.
+4. **Replay on viewport exit/enter, event-triggered.** Reverse (photos retract
+   to center, card dims) starts when ~7/8 of the hero has scrolled past —
+   `useScrollReveal` in continuous mode compares `intersectionRatio` against
+   threshold 0.125 (isIntersecting alone only flips at 100% off-screen, far too
+   late). The reverse runs at 1.6× timeScale (~2.6 s) so leaving feels like a
+   snappy gather-back. Re-entering from below replays the entrance at 1×.
+   Triggered once per crossing — never tied to scroll position per-pixel.
+5. **No scroll locking, ever.** (Revised: the original first-load lock made
+   scrolling feel "held back" on both desktop and mobile and was removed.)
+   The entrance always plays in the background; the user can scroll freely at
+   any moment, including during the first load.
 6. **Reduced motion:** skip the animation entirely, render the final state,
    never lock scroll.
 
@@ -45,16 +48,15 @@ could not make it smooth on phones. The user chose to replace the concept.
   choreography (card fade, staggered blast, petal spin-in, decor fades). The
   existing `applyProgress` math is ported into timeline tweens; the scatter
   targets come from the same `blastLayout` memo.
-- `useScrollReveal({ once: false, threshold: ~0.35 })` (existing hook, already
-  used by 6 sections) reports Hero visibility. `isVisible: true` →
-  `tl.play()`; `false` → `tl.reverse()`. GSAP handles mid-flight direction
-  changes gracefully (no snap) if the user flicks back quickly.
-- First-load lock: on mount (Hero is at page top so it is always visible
-  first), lock scroll, `tl.play()`, unlock in `onComplete`. Lock mechanism:
-  `window.__lenis?.stop()/start()` for wheel/trackpad plus a temporary
-  non-passive `touchmove` preventDefault on `document` for touch — active ONLY
-  during the ~1.5 s lock window, then removed. A safety timeout (~3 s) force-
-  unlocks if `onComplete` never fires (e.g. tab backgrounded throttles rAF).
+- `useScrollReveal({ once: false, threshold: 0.125 })` (existing hook, already
+  used by 6 sections with `once: true` — that path is untouched) reports Hero
+  visibility as `intersectionRatio >= threshold`. `isVisible: true` →
+  `tl.timeScale(1).play()`; `false` → `tl.timeScale(1.6).reverse()`. GSAP
+  handles mid-flight direction changes gracefully (no snap) if the user
+  flicks back quickly.
+- No lock mechanism exists (see decision 5). The `isVisible` effect guards
+  reverse with `tl.progress() > 0` so a mount-time `false` never reverses an
+  unplayed timeline.
 - ScrollTrigger import, pin, scrub, `applyProgress`-on-scroll, `--gate` CSS var
   plumbing, vh caches, and the 250vh layout are all removed from Hero. Other
   sections (GallerySpringCoil, Schedule) keep their ScrollTriggers untouched.

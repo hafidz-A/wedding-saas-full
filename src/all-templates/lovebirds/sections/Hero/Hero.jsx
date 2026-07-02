@@ -301,10 +301,12 @@ export default function Hero(props) {
   }, [])
 
   // Visibility drives play/reverse: enter viewport → play the entrance, leave
-  // → reverse (blast retracts to center). once:false keeps observing forever.
-  // The hook pins isVisible=true under prefers-reduced-motion (no observer),
-  // so reduced-motion users never trigger a reverse.
-  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.35, once: false })
+  // → reverse (blast retracts to center). once:false keeps observing forever,
+  // with isVisible tracking the visible FRACTION: 0.125 = the retract starts
+  // once ~7/8 of the hero has scrolled past (a sliver still showing), and the
+  // replay starts as soon as that sliver returns. The hook pins isVisible=true
+  // under prefers-reduced-motion (no observer), so those users never reverse.
+  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.125, once: false })
 
   const contentRef = useRef(null)
   const revealBgRef = useRef(null)
@@ -313,9 +315,7 @@ export default function Hero(props) {
   const petalRefs = useRef([])
   const blastRefs = useRef([])
   const tlRef = useRef(null)
-  const playedRef = useRef(false)
   const isVisibleRef = useRef(false)
-  const unlockRef = useRef(null)
   const viewportScale = useViewportScale()
 
   const blastLayout = useMemo(() => {
@@ -362,62 +362,23 @@ export default function Hero(props) {
     [cfg.petals],
   )
 
-  // First-load gate: hold the page still while the entrance plays, ONCE.
-  // Wheel/trackpad go through Lenis (stop/start); touch needs a temporary
-  // non-passive preventDefault since Lenis runs syncTouch:false. Re-entries
-  // never lock — this effect runs only on mount. A safety timeout force-
-  // unlocks if the timeline's onComplete never fires (backgrounded tab
-  // throttles rAF, mid-entrance resize rebuilds the timeline, etc.).
-  useEffect(() => {
-    if (typeof window === 'undefined') return undefined
-    if (reducedMotion()) return undefined
-    // Browser-restored scroll (reload mid-page): the hero isn't on screen, so
-    // there is no entrance to guard — never hold the page hostage.
-    if (window.scrollY > 8) return undefined
-
-    const lenis = window.__lenis
-    lenis?.stop?.()
-    const prevent = (e) => { if (e.cancelable) e.preventDefault() }
-    document.addEventListener('touchmove', prevent, { passive: false })
-    document.addEventListener('wheel', prevent, { passive: false })
-
-    let done = false
-    const unlock = () => {
-      if (done) return
-      done = true
-      lenis?.start?.()
-      document.removeEventListener('touchmove', prevent)
-      document.removeEventListener('wheel', prevent)
-    }
-    unlockRef.current = unlock
-    const safety = setTimeout(unlock, 3500)
-    return () => {
-      clearTimeout(safety)
-      unlock()
-    }
-  }, [])
-
-  // Build the (paused) entrance timeline. Rebuilds when the layout inputs
-  // change (viewport resize → new scatter distances); after a rebuild the
-  // finished/none state is restored instead of replaying.
+  // Build the (paused) entrance timeline. Scroll is NEVER locked — the
+  // sequence plays in the background while the user is free to scroll.
+  // Deliberately slow, clearly sequential phases (user-tuned 2026-07-02):
+  //   1. featured photo grows at center        0.0 → 1.2s
+  //   2. ambient decor washes in               0.4 → 1.6s
+  //   3. glass card (text + countdown) fades   1.4 → 2.5s
+  //   4. photo blast + petals spin in          2.5 → 3.7s
+  //   5. scroll hint                           3.6 → 4.2s
+  // Rebuilds when the layout inputs change (viewport resize → new scatter
+  // distances); after a rebuild the current shown/hidden state is restored
+  // instead of replaying.
   useEffect(() => {
     const rm = reducedMotion()
     const fades = [revealBgRef.current, ...decorRefs.current].filter(Boolean)
 
-    const tl = gsap.timeline({
-      paused: true,
-      onComplete: () => {
-        playedRef.current = true
-        unlockRef.current?.()
-      },
-    })
+    const tl = gsap.timeline({ paused: true })
 
-    if (contentRef.current) {
-      tl.fromTo(contentRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.0, ease: 'power2.out' }, 0)
-    }
-    if (fades.length) {
-      tl.fromTo(fades, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.9, ease: 'power1.out' }, 0.25)
-    }
     blastItems.forEach((b, i) => {
       const node = blastRefs.current[i]
       if (!node) return
@@ -425,31 +386,35 @@ export default function Hero(props) {
       tl.fromTo(
         node,
         { x: 0, y: 0, rotation: 0, scale: 0.25, autoAlpha: 0 },
-        { x: b.x, y: b.y, rotation: b.rotate, scale: b.scale, autoAlpha: 1, duration: b.featured ? 0.8 : 0.7, ease: 'power3.out' },
-        b.featured ? 0.15 : 0.45 + b.delay * 2,
+        { x: b.x, y: b.y, rotation: b.rotate, scale: b.scale, autoAlpha: 1, duration: b.featured ? 1.2 : 0.9, ease: b.featured ? 'power2.out' : 'power3.out' },
+        b.featured ? 0 : 2.5 + b.delay * 2.5,
       )
     })
+    if (fades.length) {
+      tl.fromTo(fades, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.2, ease: 'power1.out' }, 0.4)
+    }
+    if (contentRef.current) {
+      tl.fromTo(contentRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.1, ease: 'power2.out' }, 1.4)
+    }
     petalData.forEach((p, i) => {
       const node = petalRefs.current[i]
       if (!node) return
       tl.fromTo(
         node,
         { rotation: p.slot.rot - 540 * p.speed, scale: 0, autoAlpha: 0 },
-        { rotation: p.slot.rot, scale: p.slot.scale, autoAlpha: 1, duration: 1.0, ease: 'power2.out' },
-        0.5 + p.slot.delay,
+        { rotation: p.slot.rot, scale: p.slot.scale, autoAlpha: 1, duration: 1.1, ease: 'power2.out' },
+        2.5 + p.slot.delay,
       )
     })
     if (hintRef.current) {
-      tl.fromTo(hintRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'power1.out' }, 1.15)
+      tl.fromTo(hintRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6, ease: 'power1.out' }, 3.6)
     }
 
     if (rm) {
-      // Reduced motion: jump straight to the final state, never lock.
+      // Reduced motion: jump straight to the final state.
       tl.progress(1)
-      playedRef.current = true
-      unlockRef.current?.()
-    } else if (playedRef.current) {
-      tl.progress(isVisibleRef.current ? 1 : 0)
+    } else if (isVisibleRef.current) {
+      tl.progress(1)
     }
 
     tlRef.current = tl
@@ -459,15 +424,21 @@ export default function Hero(props) {
     }
   }, [blastItems, petalData])
 
-  // Play on enter, reverse on leave. GSAP resolves mid-flight direction
-  // changes smoothly (a quick flick back mid-entrance just rewinds from
-  // wherever it is — no snap).
+  // Play on enter, reverse on leave. The retract runs faster (1.6×) so
+  // leaving the hero feels like a snappy gather-back rather than a full
+  // 4-second rewind. GSAP resolves mid-flight direction changes smoothly
+  // (a quick flick back mid-entrance just rewinds from wherever it is).
   useEffect(() => {
     isVisibleRef.current = isVisible
     const tl = tlRef.current
     if (!tl || reducedMotion()) return
-    if (isVisible) tl.play()
-    else if (playedRef.current) tl.reverse()
+    if (isVisible) {
+      tl.timeScale(1)
+      tl.play()
+    } else if (tl.progress() > 0) {
+      tl.timeScale(1.6)
+      tl.reverse()
+    }
   }, [isVisible, blastItems, petalData])
 
   return (
