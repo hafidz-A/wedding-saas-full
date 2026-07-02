@@ -2,15 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Hero.module.css'
-
-// Same plugin SmoothScroll registers + drives from Lenis ('scroll' → ScrollTrigger
-// .update). Registering twice is a no-op; doing it here means the gate works even
-// if its mount order ever changes relative to SmoothScroll.
-gsap.registerPlugin(ScrollTrigger)
 import { deriveMonogram } from '../../config/monogram.js'
 import { readGuestName } from '../../utils/guestName.js'
+import useScrollReveal from '../../hooks/useScrollReveal.js'
 
 const DEFAULTS = {
   coupleName: '',
@@ -25,9 +20,6 @@ const DEFAULTS = {
   blastPhotos: [],
   petals: [],
 }
-
-const clamp01 = (v) => Math.max(0, Math.min(1, v))
-const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3)
 
 function diffParts(target) {
   if (!target) return null
@@ -79,9 +71,9 @@ function CuteFlower({ size = 48, color = '#E8553E', centerColor = '#F5C842', cla
   )
 }
 
-function BotanicalLineArt({ className, style }) {
+function BotanicalLineArt({ className, style, innerRef }) {
   return (
-    <svg className={className} style={style} viewBox="0 0 120 180" fill="none" stroke="currentColor" aria-hidden="true">
+    <svg ref={innerRef} className={className} style={style} viewBox="0 0 120 180" fill="none" stroke="currentColor" aria-hidden="true">
       <path d="M10,170 Q30,130 50,70 T80,10" stroke="#4A3B32" strokeWidth="1.2" strokeLinecap="round" />
       <path d="M32,126 C20,122 15,110 22,102 C28,96 34,106 32,126" stroke="#4A3B32" strokeWidth="1" fill="none" />
       <path d="M40,110 C52,106 58,95 50,88 C44,82 38,92 40,110" stroke="#4A3B32" strokeWidth="1" fill="none" />
@@ -94,7 +86,7 @@ function BotanicalLineArt({ className, style }) {
 }
 
 // Eight edge slots that intentionally avoid the centre band (30–70%)
-// where the gate card sits.
+// where the featured photo + glass card sit.
 const PETAL_SLOTS = [
   { top: '4%',     left: '3%',  rot: -22, scale: 1.10, delay: 0.00 },
   { top: '7%',     right: '4%', rot:  18, scale: 0.90, delay: 0.07 },
@@ -106,9 +98,9 @@ const PETAL_SLOTS = [
   { bottom: '34%', right: '4%', rot: -10, scale: 0.85, delay: 0.16 },
 ]
 
-// Per-slot scroll rotation speed (mix of CW/CCW, varied magnitudes).
-// Multiplied by `progress * 540` so each petal does roughly 1–2 turns
-// across the full gate-scroll. Smoothly tied to scroll position.
+// Per-slot spin speed (mix of CW/CCW, varied magnitudes). Each petal spins
+// through `540° × speed` during its entrance tween, landing on the slot's
+// resting rotation — spin only lives while the timeline plays.
 const PETAL_SCROLL_SPEEDS = [0.9, -1.1, 1.3, -0.8, 0.7, -1.2, 1.0, -0.95]
 
 function PetalShape({ name }) {
@@ -228,9 +220,9 @@ function PetalShape({ name }) {
   }
 }
 
-function DecorCorners() {
+function DecorCorners({ innerRef }) {
   return (
-    <div className={styles.decorLayer} aria-hidden="true">
+    <div ref={innerRef} className={styles.decorLayer} aria-hidden="true">
       <svg className={styles.decorTopLeft} viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
         <path d="M 12 100 Q 60 100 100 60 T 188 12" stroke="#C89A1F" strokeWidth="0.9" fill="none" opacity="0.55" />
         <path d="M 12 130 Q 70 130 120 80 T 188 40" stroke="#E8553E" strokeWidth="0.7" fill="none" opacity="0.35" />
@@ -255,9 +247,8 @@ function DecorCorners() {
 
 /**
  * Live countdown, isolated in its own component so its 1 Hz setState ticks
- * re-render ONLY this small subtree — not the whole heavy Hero gate (8 petals,
- * up to 12 blast photos, SVG filters). Previously the tick re-rendered all of
- * Hero every second, compounding the scroll-time jank.
+ * re-render ONLY this small subtree — not the whole Hero (8 petals, up to 13
+ * blast photos, SVG filters).
  */
 function Countdown({ weddingDate }) {
   const [parts, setParts] = useState(() => diffParts(weddingDate))
@@ -293,6 +284,11 @@ function Countdown({ weddingDate }) {
   )
 }
 
+const reducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 export default function Hero(props) {
   const cfg = { ...DEFAULTS, ...props }
 
@@ -303,22 +299,23 @@ export default function Hero(props) {
   useEffect(() => {
     setGuestName(readGuestName())
   }, [])
-  const containerRef = useRef(null)
-  const stageRef = useRef(null)
-  // The gate animation is driven imperatively (see applyProgress) instead of via
-  // React state, so a scroll frame mutates the DOM directly and NEVER triggers a
-  // React re-render of this heavy tree — the chief mobile-jank source.
-  const gateImgRef = useRef(null)
-  const gateContentRef = useRef(null)
+
+  // Visibility drives play/reverse: enter viewport → play the entrance, leave
+  // → reverse (blast retracts to center). once:false keeps observing forever.
+  // The hook pins isVisible=true under prefers-reduced-motion (no observer),
+  // so reduced-motion users never trigger a reverse.
+  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.35, once: false })
+
+  const contentRef = useRef(null)
+  const revealBgRef = useRef(null)
+  const decorRefs = useRef([])
+  const hintRef = useRef(null)
   const petalRefs = useRef([])
   const blastRefs = useRef([])
-  // Cached viewport height + the gate content's vertical-drop amount in vh
-  // (20vh portrait / 13vh wide-aspect). Both feed the imperative translateY in
-  // applyProgress so the content drop is composited, not a per-frame `top`
-  // reflow. Refreshed on resize / aspect-ratio change, never read per frame.
-  const vhRef = useRef(0)
-  const contentShiftVhRef = useRef(20)
-  const [reduceMotion, setReduceMotion] = useState(false)
+  const tlRef = useRef(null)
+  const playedRef = useRef(false)
+  const isVisibleRef = useRef(false)
+  const unlockRef = useRef(null)
   const viewportScale = useViewportScale()
 
   const blastLayout = useMemo(() => {
@@ -344,7 +341,17 @@ export default function Hero(props) {
     })
   }, [cfg.blastPhotos, viewportScale])
 
-  // Per-petal constants (slot + scroll-rotation speed) computed once.
+  // The old fullscreen gate photo is now the hero of the blast itself:
+  // biggest card, dead-center, barely tilted, first to appear.
+  const blastItems = useMemo(() => {
+    const items = blastLayout.map((b) => ({ ...b, featured: false }))
+    if (cfg.gateImage) {
+      items.unshift({ src: cfg.gateImage, x: 0, y: 0, rotate: -2, scale: 1, delay: 0, featured: true })
+    }
+    return items
+  }, [blastLayout, cfg.gateImage])
+
+  // Per-petal constants (slot + spin speed) computed once.
   const petalData = useMemo(
     () =>
       (cfg.petals || []).map((name, i) => ({
@@ -355,154 +362,141 @@ export default function Hero(props) {
     [cfg.petals],
   )
 
-  // Single source of truth for the gate frame. Writes CSS vars + transforms
-  // straight to the DOM — the easing math is byte-identical to the old
-  // state-driven version, only the React re-render per frame is gone.
-  const applyProgress = useCallback(
-    (p) => {
-      const gatePhase = easeOutCubic(clamp01(p / 0.5))
-
-      const root = containerRef.current
-      if (root) {
-        root.style.setProperty('--gate', gatePhase)
-        root.style.setProperty('--hint', clamp01(1 - p / 0.08))
-        // Overlay stays moderate even at gate=1 so cream-haloed text stays
-        // readable where it overlaps the now-small gate image.
-        root.style.setProperty('--overlay', 0.55 - gatePhase * 0.15)
-      }
-      if (gateImgRef.current) {
-        gateImgRef.current.style.transform = `scale(${1.16 - gatePhase * 0.16}) translateY(${-25 + gatePhase * 25}px)`
-      }
-      if (gateContentRef.current) {
-        // Vertical drop (was CSS `top: 50% + (1-gate)*Nvh`, a per-frame reflow)
-        // folded into the composited transform. The -16px settle keeps the old
-        // feel; the Nvh drop uses the cached viewport height + aspect-ratio shift.
-        const drop = (1 - gatePhase) * ((contentShiftVhRef.current * vhRef.current) / 100 - 16)
-        gateContentRef.current.style.transform = `translate(-50%, calc(-50% + ${drop}px))`
-      }
-      for (let i = 0; i < petalData.length; i++) {
-        const node = petalRefs.current[i]
-        if (!node) continue
-        const slot = petalData[i].slot
-        const eased = easeOutCubic(clamp01((p - 0.55 - slot.delay) / 0.4))
-        const totalRot = slot.rot * eased + p * 540 * petalData[i].speed
-        node.style.transform = `rotate(${totalRot}deg) scale(${eased * slot.scale})`
-        node.style.opacity = eased
-      }
-      for (let i = 0; i < blastLayout.length; i++) {
-        const node = blastRefs.current[i]
-        if (!node) continue
-        const b = blastLayout[i]
-        const eased = easeOutCubic(clamp01((p - 0.32 - b.delay) / 0.42))
-        node.style.transform = `translate(calc(-50% + ${b.x * eased}px), calc(-50% + ${b.y * eased}px)) rotate(${b.rotate * eased}deg) scale(${0.25 + b.scale * eased})`
-        node.style.opacity = eased
-      }
-    },
-    [blastLayout, petalData],
-  )
-
+  // First-load gate: hold the page still while the entrance plays, ONCE.
+  // Wheel/trackpad go through Lenis (stop/start); touch needs a temporary
+  // non-passive preventDefault since Lenis runs syncTouch:false. Re-entries
+  // never lock — this effect runs only on mount. A safety timeout force-
+  // unlocks if the timeline's onComplete never fires (backgrounded tab
+  // throttles rAF, mid-entrance resize rebuilds the timeline, etc.).
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return undefined
-    const mql = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setReduceMotion(mql.matches)
-    const onChange = (e) => setReduceMotion(e.matches)
-    mql.addEventListener?.('change', onChange)
-    return () => mql.removeEventListener?.('change', onChange)
+    if (typeof window === 'undefined') return undefined
+    if (reducedMotion()) return undefined
+    // Browser-restored scroll (reload mid-page): the hero isn't on screen, so
+    // there is no entrance to guard — never hold the page hostage.
+    if (window.scrollY > 8) return undefined
+
+    const lenis = window.__lenis
+    lenis?.stop?.()
+    const prevent = (e) => { if (e.cancelable) e.preventDefault() }
+    document.addEventListener('touchmove', prevent, { passive: false })
+    document.addEventListener('wheel', prevent, { passive: false })
+
+    let done = false
+    const unlock = () => {
+      if (done) return
+      done = true
+      lenis?.start?.()
+      document.removeEventListener('touchmove', prevent)
+      document.removeEventListener('wheel', prevent)
+    }
+    unlockRef.current = unlock
+    const safety = setTimeout(unlock, 3500)
+    return () => {
+      clearTimeout(safety)
+      unlock()
+    }
   }, [])
 
-  // Wide/landscape viewports use a smaller content drop (13vh) than portrait
-  // phones (20vh) — formerly a CSS `@media (min-aspect-ratio: 13/10)` override
-  // on `top`. Mirrored here so applyProgress can fold it into the transform.
+  // Build the (paused) entrance timeline. Rebuilds when the layout inputs
+  // change (viewport resize → new scatter distances); after a rebuild the
+  // finished/none state is restored instead of replaying.
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return undefined
-    const mql = window.matchMedia('(min-aspect-ratio: 13/10)')
-    const apply = () => { contentShiftVhRef.current = mql.matches ? 13 : 20 }
-    apply()
-    mql.addEventListener?.('change', apply)
-    return () => mql.removeEventListener?.('change', apply)
-  }, [])
+    const rm = reducedMotion()
+    const fades = [revealBgRef.current, ...decorRefs.current].filter(Boolean)
 
-  // ---------------------------------------------------------------------------
-  // Gate drive — GSAP ScrollTrigger pin + scrub.
-  //
-  // This is a from-scratch rewrite of the gate→photoblast drive after three
-  // hand-rolled attempts (paint cuts, continuous rAF, gsap.ticker) failed to
-  // kill the "bergetar"/vibration. The fundamentals were wrong, not the tuning:
-  //
-  //   1. CSS `position: sticky` + Lenis: Lenis scrolls to SUB-PIXEL offsets, and
-  //      the browser re-rounds a sticky element's position every frame. The
-  //      pinned stage jittered up/down by a pixel and every transform riding on
-  //      it inherited the shake — a high-frequency vibration while the scrollbar
-  //      stayed stable. ScrollTrigger pins with `position: fixed`, which does NOT
-  //      ride the scroll, so there is nothing to re-round → no jitter.
-  //   2. A bespoke scroll loop (rAF or gsap.ticker) is a SECOND clock racing
-  //      Lenis. ScrollTrigger is already the ONE clock here: SmoothScroll feeds
-  //      it via `lenis.on('scroll', ScrollTrigger.update)`, so progress is
-  //      computed from the exact scroll value Lenis applied, same tick. No race.
-  //
-  // `applyProgress` (the visual math) is reused byte-for-byte; only what DRIVES
-  // it changed. `pinSpacing: false` because the 250vh section already reserves
-  // the scroll distance (matches the old sticky layout 1:1: 250vh − 100vh stage
-  // = 150vh of travel from progress 0→1).
-  useEffect(() => {
-    const section = containerRef.current
-    const stage = stageRef.current
-    if (!section || !stage) return undefined
-
-    // applyProgress reads the cached viewport height + aspect shift; refresh them
-    // whenever ScrollTrigger recomputes (initial layout, resize, font/img load).
-    const refreshCache = () => { vhRef.current = window.innerHeight }
-    refreshCache()
-
-    // Pin in BOTH cases so the 250vh section behaves identically to the old
-    // CSS-sticky stage (held pinned for the whole scroll). For reduced motion we
-    // simply freeze the gate at its final state (progress 1) instead of scrubbing.
-    const st = ScrollTrigger.create({
-      trigger: section,
-      start: 'top top',
-      end: 'bottom bottom',
-      pin: stage,
-      pinSpacing: false,
-      // anticipatePin smooths the moment of pinning; scrub ties progress to the
-      // (Lenis-driven) scroll position rather than a tween clock.
-      anticipatePin: 1,
-      scrub: true,
-      invalidateOnRefresh: true,
-      onRefresh: refreshCache,
-      onUpdate: (self) => applyProgress(reduceMotion ? 1 : self.progress),
+    const tl = gsap.timeline({
+      paused: true,
+      onComplete: () => {
+        playedRef.current = true
+        unlockRef.current?.()
+      },
     })
 
-    applyProgress(reduceMotion ? 1 : 0)
-    return () => st.kill()
-  }, [reduceMotion, applyProgress])
+    if (contentRef.current) {
+      tl.fromTo(contentRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.0, ease: 'power2.out' }, 0)
+    }
+    if (fades.length) {
+      tl.fromTo(fades, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.9, ease: 'power1.out' }, 0.25)
+    }
+    blastItems.forEach((b, i) => {
+      const node = blastRefs.current[i]
+      if (!node) return
+      gsap.set(node, { xPercent: -50, yPercent: -50 })
+      tl.fromTo(
+        node,
+        { x: 0, y: 0, rotation: 0, scale: 0.25, autoAlpha: 0 },
+        { x: b.x, y: b.y, rotation: b.rotate, scale: b.scale, autoAlpha: 1, duration: b.featured ? 0.8 : 0.7, ease: 'power3.out' },
+        b.featured ? 0.15 : 0.45 + b.delay * 2,
+      )
+    })
+    petalData.forEach((p, i) => {
+      const node = petalRefs.current[i]
+      if (!node) return
+      tl.fromTo(
+        node,
+        { rotation: p.slot.rot - 540 * p.speed, scale: 0, autoAlpha: 0 },
+        { rotation: p.slot.rot, scale: p.slot.scale, autoAlpha: 1, duration: 1.0, ease: 'power2.out' },
+        0.5 + p.slot.delay,
+      )
+    })
+    if (hintRef.current) {
+      tl.fromTo(hintRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'power1.out' }, 1.15)
+    }
+
+    if (rm) {
+      // Reduced motion: jump straight to the final state, never lock.
+      tl.progress(1)
+      playedRef.current = true
+      unlockRef.current?.()
+    } else if (playedRef.current) {
+      tl.progress(isVisibleRef.current ? 1 : 0)
+    }
+
+    tlRef.current = tl
+    return () => {
+      tl.kill()
+      tlRef.current = null
+    }
+  }, [blastItems, petalData])
+
+  // Play on enter, reverse on leave. GSAP resolves mid-flight direction
+  // changes smoothly (a quick flick back mid-entrance just rewinds from
+  // wherever it is — no snap).
+  useEffect(() => {
+    isVisibleRef.current = isVisible
+    const tl = tlRef.current
+    if (!tl || reducedMotion()) return
+    if (isVisible) tl.play()
+    else if (playedRef.current) tl.reverse()
+  }, [isVisible, blastItems, petalData])
 
   return (
     <section
-      ref={containerRef}
+      ref={sectionRef}
       className={styles.gate}
       aria-label="Welcome gate"
     >
-      <div className={styles.sticky} ref={stageRef}>
-        <div className={styles.revealBg} aria-hidden="true" />
+      <div className={styles.stage}>
+        <div className={styles.revealBg} ref={revealBgRef} aria-hidden="true" />
 
-        <DecorCorners />
+        <DecorCorners innerRef={(el) => { decorRefs.current[0] = el }} />
 
         {/* Cute colorful flowers in the top-left corner */}
-        <div className={styles.flowerClusteredTopLeft}>
+        <div className={styles.flowerClusteredTopLeft} ref={(el) => { decorRefs.current[1] = el }}>
           <CuteFlower size={44} color="#D97455" centerColor="#FFE9A8" style={{ transform: 'rotate(-10deg)' }} />
           <CuteFlower size={36} color="#E8553E" centerColor="#FFE9A8" style={{ transform: 'rotate(15deg) translateY(-6px)' }} />
           <CuteFlower size={34} color="#F5C842" centerColor="#E8553E" style={{ transform: 'rotate(35deg) translate(-22px, 8px)' }} />
         </div>
 
         {/* Botanical line-art in the bottom-left corner */}
-        <BotanicalLineArt className={styles.decorBottomLeftLineArt} />
+        <BotanicalLineArt className={styles.decorBottomLeftLineArt} innerRef={(el) => { decorRefs.current[2] = el }} />
 
         {/* Purple flower in the bottom-right corner */}
-        <div className={styles.flowerBottomRight}>
+        <div className={styles.flowerBottomRight} ref={(el) => { decorRefs.current[3] = el }}>
           <CuteFlower size={40} color="#A5A6E8" centerColor="#FFE9A8" style={{ transform: 'rotate(-20deg)' }} />
         </div>
 
-        {/* Edge petals — scale in then rotate with scroll */}
+        {/* Edge petals — spin in with the entrance, then rest (CSS float only) */}
         <div className={styles.petalLayer} aria-hidden="true">
           {(cfg.petals || []).map((name, i) => {
             const slot = PETAL_SLOTS[i % PETAL_SLOTS.length]
@@ -512,8 +506,8 @@ export default function Hero(props) {
               right: slot.right,
               bottom: slot.bottom,
             }
-            // transform + opacity are set imperatively in applyProgress (see
-            // above); base rest-state lives in CSS (.petalReveal opacity:0).
+            // transform + opacity are tweened by the entrance timeline; base
+            // rest-state lives in CSS (.petalReveal opacity:0).
             return (
               <div key={i} className={styles.petalAnchor} style={positionStyle}>
                 <div
@@ -532,44 +526,30 @@ export default function Hero(props) {
           })}
         </div>
 
-        {/* Photo blast — behind the card, NO text shown during this phase */}
+        {/* Photo blast — the featured card (old gate photo) at center plus the
+            scattered memories, all behind the glass text card. */}
         <div className={styles.blastLayer} aria-hidden="true">
-          {blastLayout.map((p, i) => (
-            // transform + opacity are set imperatively in applyProgress; base
+          {blastItems.map((b, i) => (
+            // transform + opacity are tweened by the entrance timeline; base
             // rest-state lives in CSS (.blastPhoto opacity:0). decoding="async"
             // keeps image decode off the main thread so it can't jank the blast.
             <img
               key={i}
-              src={p.src}
+              src={b.src}
               alt=""
-              className={styles.blastPhoto}
-              loading="lazy"
+              className={b.featured ? `${styles.blastPhoto} ${styles.blastFeatured}` : styles.blastPhoto}
+              loading={b.featured ? 'eager' : 'lazy'}
               decoding="async"
               ref={(el) => { blastRefs.current[i] = el }}
             />
           ))}
         </div>
 
-        {/* Main image — never disappears, only shrinks into a rounded card */}
-        <div className={styles.gateCard}>
-          {cfg.gateImage && (
-            // transform set imperatively in applyProgress; base + transition in CSS.
-            <img
-              src={cfg.gateImage}
-              alt=""
-              className={styles.gateImg}
-              ref={gateImgRef}
-            />
-          )}
-          <div className={styles.gateOverlay} aria-hidden="true" />
-        </div>
+        {/* Glow vignette behind/around the featured photo */}
+        <div className={styles.gateGlow} ref={(el) => { decorRefs.current[4] = el }} aria-hidden="true" />
 
-        {/* Glow vignette behind/around the card */}
-        <div className={styles.gateGlow} aria-hidden="true" />
-
-        {/* All gate text overlaid on the main image — fades out on scroll.
-            transform set imperatively in applyProgress; base + transition in CSS. */}
-        <div className={styles.gateContent} ref={gateContentRef}>
+        {/* All hero text on the glass card — fades in as one block. */}
+        <div className={styles.gateContent} ref={contentRef}>
           <div className={styles.glassCard}>
             <p className={styles.welcomeLine}>
               {/* Dry-brush stroke behind the eyebrow label. The band is filled
@@ -645,8 +625,8 @@ export default function Hero(props) {
           </div>
         </div>
 
-        {/* Scroll hint */}
-        <div className={styles.scrollHint} aria-hidden="true">
+        {/* Scroll hint — fades in when the entrance finishes */}
+        <div className={styles.scrollHint} ref={hintRef} aria-hidden="true">
           <span className={styles.scrollText}>{cfg.scrollHint}</span>
           <span className={styles.scrollLine} />
           <svg className={styles.scrollChev} viewBox="0 0 12 12" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">

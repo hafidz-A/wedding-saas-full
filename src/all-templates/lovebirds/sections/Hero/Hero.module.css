@@ -1,41 +1,34 @@
 /* ============================================================================
-   GATE → HERO (text stays, color blends with the blast composition)
+   HERO — play-once entrance (card fade-in + photo blast + petals)
 
-   Section is 250vh tall. Inner .sticky pins to top for 100vh.
-   The text NEVER fades — its colour interpolates from cream/gold (readable
-   over the dark gate image) to charcoal/coral (readable over the cream
-   blast composition) using color-mix() driven by --gate (0 → 1).
+   One viewport tall, NO scroll pinning. A paused GSAP timeline in Hero.jsx
+   plays the entrance once when the section enters the viewport and reverses
+   when it leaves (design: docs/superpowers/specs/
+   2026-07-02-lovebirds-hero-playonce-design.md). Every element the timeline
+   animates rests hidden here (opacity: 0) so the server-rendered first paint
+   has no flash before GSAP takes over.
    ============================================================================ */
 
 .gate {
   position: relative;
-  height: 250vh;
+  height: 100vh;
+  /* Small-viewport height: stable on phones while the URL bar shows/hides. */
+  height: 100svh;
   background: var(--color-cream);
   /* Horizontal clip: blast photos / petals / gateGlow (110vw) fly past the
      viewport edge and would otherwise widen the document on phones, letting
-     the whole template pan right. `clip` (not `hidden`) keeps vertical visible.
-     The clip is ALSO repeated on .sticky below: ScrollTrigger pins that stage
-     with position:fixed, which escapes this ancestor clip, so the stage must
-     clip its own overflowing children too. */
+     the whole template pan right. `clip` (not `hidden`) keeps vertical visible. */
   overflow: visible;
   overflow-x: clip;
   z-index: 2;
-  --gate: 0;
-  --hint: 1;
-  --overlay: 0.55;
 }
 
-/* The pinned stage. ScrollTrigger (see Hero.jsx) pins this for the gate's scroll
-   duration via position:fixed — NOT CSS `position: sticky`, which jittered
-   sub-pixel under Lenis smooth-scroll and was the root of the gate vibration.
-   Base position is relative; ScrollTrigger applies the fixed pin inline. */
-.sticky {
+/* The stage. Formerly `.sticky` (ScrollTrigger-pinned) — nothing sticks
+   anymore; it simply fills the section. */
+.stage {
   position: relative;
   width: 100%;
-  height: 100vh;
-  /* Clip horizontally here too (see .gate note) so the 110vw blast/glow can't
-     widen the document while the stage is position:fixed. Vertical stays visible
-     so petals/photos may spill above/below within the viewport. */
+  height: 100%;
   overflow-x: clip;
   overflow-y: visible;
   isolation: isolate;
@@ -52,7 +45,7 @@
     radial-gradient(38% 28% at 8%  84%, rgba(107, 53, 168, 0.14), transparent 70%),
     radial-gradient(38% 28% at 92% 82%, rgba(61, 155, 193, 0.14), transparent 70%),
     linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%);
-  opacity: var(--gate);
+  opacity: 0;
   z-index: 0;
 }
 
@@ -62,7 +55,7 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: var(--gate);
+  opacity: 0;
 }
 
 .decorTopLeft,
@@ -80,7 +73,7 @@
    Three nested divs avoid transform-vs-keyframe collision:
      .petalAnchor — fixed to edge slot
      .petalFloat  — infinite up/down via CSS `translate` property
-     .petalReveal — JS sets transform: rotate() scale() each frame
+     .petalReveal — GSAP timeline sets transform (spin-in) + opacity
 */
 .petalLayer {
   position: absolute;
@@ -104,7 +97,7 @@
 .petalReveal {
   width: 100%;
   height: 100%;
-  /* Rest-state hidden (gate < 0.55); JS reveals via imperative opacity/transform. */
+  /* Rest-state hidden; the timeline spins/scales it in. */
   opacity: 0;
   will-change: transform, opacity;
   filter: drop-shadow(0 8px 18px rgba(42, 33, 24, 0.18));
@@ -117,7 +110,7 @@
   50%      { translate: 0 -10px; }
 }
 
-/* ---------- Photo blast (behind card) ---------- */
+/* ---------- Photo blast (behind the glass card) ---------- */
 .blastLayer {
   position: absolute;
   inset: 0;
@@ -139,64 +132,24 @@
   box-shadow:
     0 8px 24px rgba(42, 33, 24, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.6);
-  /* Rest-state hidden (gate < 0.32); JS reveals via imperative opacity/transform. */
+  /* Rest-state mirrors the timeline's from-state (hidden, gathered at center). */
   opacity: 0;
+  transform: translate(-50%, -50%) scale(0.25);
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
 
-/* ---------- Gate card ---------- */
-.gateCard {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width:  calc(100vw - var(--gate) * (100vw - min(440px, 86vw)));
-  height: calc(100vh - var(--gate) * (100vh - min(580px, 66vh)));
-  border-radius: calc(var(--gate) * 28px);
-  overflow: hidden;
-  background: #1e1711;
-  /* Shadow blur radii kept modest: box-shadow is paint-bound and the card
-     resizes EVERY scroll frame, so every extra blur pixel is repainted over a
-     high-DPR viewport ~60x/s. 46px reads as the same soft premium shadow as the
-     old 90px but paints far cheaper — a chief gate-scroll jank source on
-     mobile/tablet. */
-  box-shadow:
-    0 calc(var(--gate) * 18px) calc(var(--gate) * 46px)
-      rgba(42, 33, 24, calc(var(--gate) * 0.40)),
-    0 0 0 1px rgba(42, 33, 24, calc(var(--gate) * 0.1)),
-    0 0 calc((1 - var(--gate)) * 34px) rgba(245, 200, 66, calc((1 - var(--gate)) * 0.22));
-  z-index: 4;
-}
-
-/* Inner vignette for the gate photo. A radial-gradient paints an order of
-   magnitude cheaper than the previous 100–200px inset box-shadow blur, which
-   re-ran a full-card gaussian blur every scroll frame as the card resized — the
-   single most expensive per-frame paint of the gate transition. Edge darkness
-   is now modulated by opacity (composited) rather than an animated blur radius. */
-.gateCard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 120% at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
-  opacity: calc(1 - var(--gate) * 0.45);
-  pointer-events: none;
+/* Featured center photo — the old fullscreen gate photo, now the hero of the
+   blast itself. Sizes mirror the old gateCard end-state per breakpoint. */
+.blastFeatured {
+  width: min(440px, 86vw);
+  height: min(580px, 66vh);
+  border-width: clamp(6px, 0.8vw, 10px);
+  border-radius: var(--radius-lg);
   z-index: 2;
 }
 
-.gateImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  /* Rest-state (gate=0); JS updates transform imperatively EVERY animation frame
-     (continuous rAF sampling, see applyProgress). No CSS transition: a transition
-     here lagged the image behind the scroll and made it shimmer against the
-     petals/blast, which track scroll exactly. */
-  transform: scale(1.16) translateY(-25px);
-  will-change: transform;
-}
-
+/* Glow vignette behind/around the featured photo */
 .gateGlow {
   position: absolute;
   top: 50%;
@@ -207,49 +160,29 @@
   background: radial-gradient(circle at 50% 50%, rgba(245, 200, 66, 0.22) 0%, rgba(232, 85, 62, 0.08) 50%, transparent 70%);
   pointer-events: none;
   z-index: 3;
-  opacity: calc(1 - var(--gate) * 1.5);
+  opacity: 0;
   will-change: opacity;
 }
 
-.gateOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.75) 100%);
-  opacity: var(--overlay);
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* ---------- Gate content (always visible, colour blends) ---------- */
+/* ---------- Gate content (glass card: text + countdown) ---------- */
 .gateContent {
   position: absolute;
-  /* GATE: drop the whole content block to the lower third so the couple's
-     faces stay clear; glide back to centre as the card forms (--gate 0→1).
-     The vertical drop USED to live on `top` (layout-bound — reflowed every
-     scroll frame). It's now folded entirely into the imperative translateY in
-     applyProgress(), so `top` is static and the whole motion is composited. The
-     wide-aspect (13vh) vs portrait (20vh) split is handled in JS via matchMedia. */
   top: 50%;
   left: 50%;
-  /* Rest-state (gate=0) carries the full vertical drop so the FIRST paint (before
-     JS runs) already sits dropped — no load-time jump. JS then overwrites this
-     inline transform every animation frame (px-based, aspect-aware) via
-     applyProgress. No CSS transition — per-frame sampling tracks scroll exactly;
-     a transition only lagged the content and made it judder. */
-  transform: translate(-50%, calc(-50% + (1 - var(--gate)) * (20vh - 16px)));
+  transform: translate(-50%, -50%);
   width: min(720px, 90vw);
   text-align: center;
   z-index: 5;
   pointer-events: none;
   display: grid;
   gap: clamp(12px, 1.8vw, 18px);
+  /* Timeline fades the whole block (card + contents together) in from 0. */
+  opacity: 0;
 }
 
-/* Readability halo for gate text that floats over the illustration where the
-   veil fades. The glow uses the theme's OWN glass background, so it reads as a
-   light halo on light themes (lifts the dark script + coral label) and a dark
-   halo on dark themes (lifts the light text) — never a hard-coded colour, so it
-   stays correct across all palettes. */
+/* Readability halo for text that floats over the blast photos. The glow uses
+   the theme's OWN glass background, so it reads as a light halo on light
+   themes and a dark halo on dark themes — never a hard-coded colour. */
 .coupleName,
 .date,
 .venue {
@@ -259,11 +192,8 @@
     0 1px 2px var(--glass-bg, rgba(255, 255, 255, 0.6));
 }
 
-/* Bottom-anchored "glass veil". The frosted panel now lives BEHIND the text
-   (::before) so its top edge can dissolve into the illustration via a mask
-   WITHOUT ever fading the text. Everything is driven by --gate so at the hero
-   end-state (gate=1) it restores to the full centred frosted card — the
-   gate→hero motion itself (card shrink, photo blast, petals) is untouched. */
+/* Frosted glass card behind the text (::before so it never fades the text
+   independently — the whole gateContent block fades as one). */
 .glassCard {
   position: relative;
   isolation: isolate;
@@ -288,15 +218,9 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.4));
-  /* Card shadow only materialises as the hero card forms — at the gate the
-     veil casts no hard rectangular shadow over the illustration. */
   box-shadow:
-    0 calc(var(--gate) * 24px) calc(var(--gate) * 60px) rgba(42, 33, 24, calc(var(--gate) * 0.12)),
+    0 24px 60px rgba(42, 33, 24, 0.12),
     inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-  /* Top edge dissolves softly into the image at the gate (gate=0); becomes a
-     solid full card at the hero end-state (gate=1). */
-  -webkit-mask-image: linear-gradient(to top, #000 calc(76% + var(--gate) * 24%), transparent);
-  mask-image: linear-gradient(to top, #000 calc(76% + var(--gate) * 24%), transparent);
 }
 
 /* Respect users who reduce transparency: drop the blur, lift the fill. */
@@ -469,7 +393,7 @@
   height: auto;
   pointer-events: none;
   z-index: 6;
-  opacity: calc(1 - var(--gate));
+  opacity: 0;
 }
 
 .flowerClusteredTopLeft {
@@ -479,7 +403,7 @@
   display: flex;
   pointer-events: none;
   z-index: 6;
-  opacity: calc(1 - var(--gate));
+  opacity: 0;
 }
 
 .flowerBottomRight {
@@ -488,13 +412,11 @@
   right: 24px;
   pointer-events: none;
   z-index: 6;
-  opacity: calc(1 - var(--gate));
+  opacity: 0;
 }
 
 .monogram {
-  /* Hidden at the gate: redundant with the large "Amara & Rizky" names right
-     above, and dropping it frees the vertical room the lowered card needs to
-     clear the scroll hint. */
+  /* Hidden: redundant with the large couple names right above. */
   display: none;
   font-family: var(--font-script); /* Tangerine — monogram is initials, not the couple name */
   font-style: normal;
@@ -535,7 +457,8 @@
   text-transform: uppercase;
   letter-spacing: 0.28em;
   font-size: clamp(10px, 1.1vw, 13px);
-  opacity: var(--hint);
+  /* Rest-state hidden; the timeline fades it in at the very end. */
+  opacity: 0;
   z-index: 6;
   pointer-events: none;
 }
@@ -562,19 +485,18 @@
 
 /* Responsive */
 
-/* Desktop boundary — pulls decoration inward so it doesn't crowd the gate
-   card on iPad Pro landscape and below. */
+/* Desktop boundary — pulls decoration inward so it doesn't crowd the featured
+   photo on iPad Pro landscape and below. */
 @media (max-width: 1023.98px) {
   .decorTopLeft,
   .decorBottomRight { width: clamp(100px, 18vw, 160px); }
 }
 
-/* Tablet / mobile boundary — tightens hero gate sizing + countdown width. */
+/* Tablet / mobile boundary — tightens sizing + countdown width. */
 @media (max-width: 767.98px) {
-  /* Backdrop-filter blur is the single most expensive mobile effect, and here it
-     must re-sample the moving blast photos behind the glass EVERY frame. Drop it
-     on phones and lean on a more opaque fill + the text-shadow halo for
-     readability — same trade the prefers-reduced-transparency fallback makes. */
+  /* Backdrop-filter blur is the single most expensive mobile effect, and here
+     it must re-sample the blast photos behind the glass. Drop it on phones and
+     lean on a more opaque fill + the text-shadow halo for readability. */
   .glassCard::before {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -585,11 +507,11 @@
     -webkit-backdrop-filter: none;
   }
 
-  .gateCard {
-    width:  calc(100vw - var(--gate) * (100vw - min(300px, 82vw)));
-    height: calc(100vh - var(--gate) * (100vh - min(420px, 58vh)));
+  .blastFeatured {
+    width: min(300px, 82vw);
+    height: min(420px, 58vh);
   }
-  .blastPhoto {
+  .blastPhoto:not(.blastFeatured) {
     /* Proportionally larger on mobile for premium feel */
     width: clamp(90px, 26vw, 160px);
     height: clamp(115px, 33vw, 200px);
@@ -617,11 +539,11 @@
   .decorTopLeft,
   .decorBottomRight { display: none; }
 
-  .gateCard {
-    width:  calc(100vw - var(--gate) * (100vw - min(280px, 78vw)));
-    height: calc(100vh - var(--gate) * (100vh - min(380px, 55vh)));
+  .blastFeatured {
+    width: min(280px, 78vw);
+    height: min(380px, 55vh);
   }
-  .blastPhoto {
+  .blastPhoto:not(.blastFeatured) {
     width: clamp(80px, 28vw, 130px);
     height: clamp(100px, 36vw, 165px);
     border-width: 3px;
@@ -634,11 +556,11 @@
 
 /* Ultra-small phones (iPhone SE, Galaxy S8, etc.) */
 @media (max-width: 380px) {
-  .gateCard {
-    width:  calc(100vw - var(--gate) * (100vw - min(250px, 76vw)));
-    height: calc(100vh - var(--gate) * (100vh - min(340px, 50vh)));
+  .blastFeatured {
+    width: min(250px, 76vw);
+    height: min(340px, 50vh);
   }
-  .blastPhoto {
+  .blastPhoto:not(.blastFeatured) {
     width: clamp(68px, 26vw, 110px);
     height: clamp(88px, 34vw, 140px);
     border-width: 2.5px;
