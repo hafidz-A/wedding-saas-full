@@ -14,12 +14,25 @@
   pointer-events: none;
 }
 
-.device {
+/* Reserves the SCALED footprint of the device (transform: scale() doesn't
+   change layout size), so the flex stage centres it and the caption sits just
+   below the visible bezel. Sized inline to outerW*scale × outerH*scale. */
+.scaler {
   position: relative;
+  flex: none;
+}
+
+/* The device is laid out at its TRUE pixel size (device.w/h + bezel) and then
+   `transform: scale()`d to fit — see DeviceStage.tsx. box-sizing:border-box so
+   the inline width/height include the bezel padding, leaving the screen exactly
+   device.w × device.h. */
+.device {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
   pointer-events: auto;
-  height: min(86vh, 920px);
-  max-width: 92vw;
-  aspect-ratio: var(--ar);
+  transform-origin: top left;
   background: #1b1916;
   padding: 9px;
   border-radius: var(--radius-device);
