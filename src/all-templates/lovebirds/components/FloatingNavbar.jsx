@@ -96,16 +96,31 @@ export default function FloatingNavbar({ sections = [], threshold = 600 }) {
         .map((it) => document.getElementById(it.id))
         .filter(Boolean)
       if (targets.length === 0) return null
+      // Latest in-band visible height per section. Two pitfalls this avoids:
+      //   1. `entries` only contains targets whose intersection CHANGED, so
+      //      picking the max within one callback compares against stale air —
+      //      track the latest value for ALL sections instead.
+      //   2. `intersectionRatio` normalizes by the section's OWN height: a
+      //      pinned multi-viewport section (gallery, story stack) never
+      //      out-ratios a short one (couple), so the highlight stuck on the
+      //      previous section. Absolute pixel height in the center band
+      //      (intersectionRect, clipped by rootMargin) has no such bias.
+      const bandHeights = new Map()
       const observer = new IntersectionObserver(
         (entries) => {
-          const sorted = [...entries]
-            .filter((e) => e.isIntersecting)
-            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-          if (sorted[0]) setActiveId(sorted[0].target.id)
+          entries.forEach((e) => {
+            bandHeights.set(e.target.id, e.isIntersecting ? e.intersectionRect.height : 0)
+          })
+          let bestId = null
+          let bestHeight = 0
+          bandHeights.forEach((h, id) => {
+            if (h > bestHeight) { bestHeight = h; bestId = id }
+          })
+          if (bestId) setActiveId(bestId)
         },
         {
           rootMargin: '-30% 0px -30% 0px',
-          threshold: [0, 0.25, 0.5, 0.75, 1],
+          threshold: [0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.75, 1],
         },
       )
       targets.forEach((el) => observer.observe(el))

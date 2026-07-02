@@ -524,7 +524,6 @@ export const BotanicalBorder = React.memo(() => {
   const sessionSeed = useMemo(() => Date.now(), [])
   const initialSection = useMemo(() => getInitialSectionId(), [])
   const activeSectionRef = useRef(initialSection)
-  const pendingSectionRef = useRef(initialSection)
   const pendingTimerRef = useRef<number | null>(null)
   const [activeSection, setActiveSection] = useState(initialSection)
   const sectionSeed = useMemo(
@@ -574,27 +573,36 @@ export const BotanicalBorder = React.memo(() => {
       return best.overlap > stableThreshold ? best.id : null
     }
 
-    const commitActiveSection = (sectionId: string, delay = 320) => {
-      if (pendingSectionRef.current === sectionId && activeSectionRef.current === sectionId) return
-      pendingSectionRef.current = sectionId
+    // Swap the sketch only when scrolling is IDLE. The swap remounts a
+    // full-height SVG layer (React commit + style/layout + raster of dozens of
+    // stroked paths) — doing that MID-FLING froze the scroll at section
+    // boundaries even after the reflow-thrash fix above. Decor can wait: the
+    // sketch now updates the moment the finger/wheel rests, and the stable
+    // section is recomputed AT COMMIT TIME so a long fling lands on the
+    // section the user actually stopped at, not the one mid-flight.
+    const IDLE_MS = 240
+    let lastScrollTs = 0
+    const onAnyScroll = () => { lastScrollTs = performance.now() }
+    window.addEventListener('scroll', onAnyScroll, { passive: true })
 
+    const scheduleIdleCommit = () => {
       if (pendingTimerRef.current !== null) {
         window.clearTimeout(pendingTimerRef.current)
       }
-
       pendingTimerRef.current = window.setTimeout(() => {
-        setActiveSection((current) => (current === pendingSectionRef.current ? current : pendingSectionRef.current))
-      }, delay)
-    }
-
-    const queueStableSection = (delay = 320) => {
-      const stableSectionId = findStableSection()
-      if (!stableSectionId) return
-      commitActiveSection(stableSectionId, delay)
+        pendingTimerRef.current = null
+        if (performance.now() - lastScrollTs < IDLE_MS) {
+          scheduleIdleCommit()
+          return
+        }
+        const stableSectionId = findStableSection()
+        if (!stableSectionId || stableSectionId === activeSectionRef.current) return
+        setActiveSection(stableSectionId)
+      }, IDLE_MS)
     }
 
     const observer = new IntersectionObserver(() => {
-      queueStableSection()
+      scheduleIdleCommit()
     }, {
       root: null,
       rootMargin: '-22% 0px -22% 0px',
@@ -603,12 +611,17 @@ export const BotanicalBorder = React.memo(() => {
     })
 
     sections.forEach((section) => observer.observe(section))
-    queueStableSection(0)
+    // Initial commit: nothing has scrolled yet, resolve the section directly.
+    const initialStable = findStableSection()
+    if (initialStable && initialStable !== activeSectionRef.current) {
+      setActiveSection(initialStable)
+    }
 
     return () => {
       if (pendingTimerRef.current !== null) {
         window.clearTimeout(pendingTimerRef.current)
       }
+      window.removeEventListener('scroll', onAnyScroll)
       observer.disconnect()
     }
   }, [initialSection])
