@@ -117,16 +117,20 @@ export const themes = {
       'linear-gradient(180deg, #FAF2EA 0%, #EAD0A8 100%)',
     /* fg is a deep clay brown (NOT the terracotta accent) — using #C85A32 as
        body text washed out against the peach-sand bg and clashed with the
-       palette name. Terracotta stays as the accent/button signature. */
+       palette name. Terracotta stays as the accent/button signature.
+       Accent deepened #C85A32 → #B34E2A (same hue): the old value only hit
+       3.82:1 against the cream button-fg/glass (both directions — RSVP
+       toggle/submit text, gift CTA, navbar) — below the 4.5:1 small-text AA
+       bar. The deeper clay measures 4.69:1 with no visible hue shift. */
     '--fg': '#46281A',
     '--fg-muted': '#5A6B52',
-    '--accent': '#C85A32',
+    '--accent': '#B34E2A',
     '--accent-soft': '#EAD0A8',
     '--glass-bg': 'rgba(255, 255, 255, 0.65)',
     '--glass-border': 'rgba(255, 255, 255, 0.5)',
     '--glass-text': '#46281A',
     '--glass-text-muted': '#5A6B52',
-    '--button-bg': '#C85A32',
+    '--button-bg': '#B34E2A',
     '--button-fg': '#FAF2EA',
   },
 

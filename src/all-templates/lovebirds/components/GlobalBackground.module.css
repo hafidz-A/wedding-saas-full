@@ -2,7 +2,16 @@
 
 .canvas {
   position: fixed;
-  inset: 0;
+  /* NOT `inset: 0`: a fixed element sized by inset tracks the LIVE viewport,
+     so every mobile URL-bar show/hide resized (and re-rastered) this whole
+     backdrop mid-scroll — a chief source of the on-device scroll jank the
+     🎨 device-preview iframe (whose viewport never changes) doesn't have.
+     Large-viewport units are constant regardless of the bar state. */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;

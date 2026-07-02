@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import styles from './Hero.module.css'
 import { deriveMonogram } from '../../config/monogram.js'
@@ -316,30 +316,39 @@ export default function Hero(props) {
   const blastRefs = useRef([])
   const tlRef = useRef(null)
   const isVisibleRef = useRef(false)
-  const viewportScale = useViewportScale()
+  const { w: vpW, h: vpH } = useViewportSize()
 
   const blastLayout = useMemo(() => {
     // Cap matches the editor (hero schema blastPhotos maxItems: 12) — each
     // blast photo animates independently, more turns the scatter to clutter.
     const photos = (cfg.blastPhotos || []).slice(0, 12)
-    // Base distance adapts to viewport: full on desktop, compressed on mobile
-    // so photos stay visible and don't fly off-screen
-    const baseDistance = 330 * viewportScale
-    const extraDistance = 160 * viewportScale
+    // Responsive scatter: the pattern is designed at desktop reach (330–490px
+    // from center), then each AXIS is compressed independently so no photo can
+    // land past the viewport edge — portrait phones get a tall narrow burst,
+    // landscape a wide flat one, and the featured photo always stays the
+    // visible center focus. (The old width-only scale pushed the farthest
+    // photos ~50px past the edge on phones and let them poke off-screen
+    // vertically on desktop.)
+    const DESIGN_REACH = 490 // base 330 + extra 160 at design size
+    // Approximate blast-card half sizes per breakpoint (mirrors the CSS clamps)
+    const halfW = vpW < 380 ? 45 : vpW < 480 ? 52 : vpW < 768 ? 62 : 100
+    const halfH = vpW < 380 ? 57 : vpW < 480 ? 66 : vpW < 768 ? 82 : 130
+    const scaleX = Math.min(1, Math.max(0.2, (vpW / 2 - halfW - 12) / DESIGN_REACH))
+    const scaleY = Math.min(1, Math.max(0.2, (vpH / 2 - halfH - 12) / (DESIGN_REACH * 0.92)))
     return photos.map((src, i) => {
       const seed = (i + 1) * 137.508
       const angle = (i / Math.max(1, photos.length)) * Math.PI * 2 + Math.sin(seed) * 0.7
-      const distance = baseDistance + Math.abs(Math.cos(seed * 1.3)) * extraDistance
+      const distance = 330 + Math.abs(Math.cos(seed * 1.3)) * 160
       return {
         src,
-        x: Math.cos(angle) * distance,
-        y: Math.sin(angle) * distance * 0.92,
+        x: Math.cos(angle) * distance * scaleX,
+        y: Math.sin(angle) * distance * 0.92 * scaleY,
         rotate: -28 + ((seed * 17) % 56),
         scale: 0.55 + Math.abs(Math.sin(seed * 0.7)) * 0.45,
         delay: (i % 6) * 0.04,
       }
     })
-  }, [cfg.blastPhotos, viewportScale])
+  }, [cfg.blastPhotos, vpW, vpH])
 
   // The old fullscreen gate photo is now the hero of the blast itself:
   // biggest card, dead-center, barely tilted, first to appear.
@@ -610,39 +619,28 @@ export default function Hero(props) {
 }
 
 /**
- * Returns a 0–1 scale factor based on viewport width so the blast
- * distance compresses on small screens and expands on large ones.
- *
- *   375px  → ~0.35  (photos stay tight around the card)
- *   428px  → ~0.42
- *   768px  → ~0.65
- *   1024px → ~0.82
- *   1440px → 1.0    (full desktop distance)
- *   1920px → 1.0    (capped)
+ * Live viewport size for the responsive blast scatter. Only feeds GSAP tween
+ * targets (never rendered markup), so reading window in the initializer is
+ * hydration-safe; the SSR fallback is the design (desktop) size.
  */
-function useViewportScale() {
-  const calc = useCallback(() => {
-    if (typeof window === 'undefined') return 1
-    const w = window.innerWidth
-    // Smoothly interpolate: 375→0.5, 768→0.75, 1440→1.0
-    const minW = 375
-    const maxW = 1440
-    const minScale = 0.5
-    const maxScale = 1.0
-    const t = Math.max(0, Math.min(1, (w - minW) / (maxW - minW)))
-    // Use easeOutQuad for a nicer curve — scales faster on tablets
-    const eased = 1 - (1 - t) * (1 - t)
-    return minScale + (maxScale - minScale) * eased
-  }, [])
-
-  const [scale, setScale] = useState(calc)
+function useViewportSize() {
+  const [size, setSize] = useState(() =>
+    typeof window === 'undefined'
+      ? { w: 1440, h: 900 }
+      : { w: window.innerWidth, h: window.innerHeight },
+  )
 
   useEffect(() => {
-    const onResize = () => setScale(calc())
-    window.addEventListener('resize', onResize)
-    onResize()
-    return () => window.removeEventListener('resize', onResize)
-  }, [calc])
+    const read = () =>
+      setSize((prev) => {
+        const w = window.innerWidth
+        const h = window.innerHeight
+        return prev.w === w && prev.h === h ? prev : { w, h }
+      })
+    read()
+    window.addEventListener('resize', read)
+    return () => window.removeEventListener('resize', read)
+  }, [])
 
-  return scale
+  return size
 }

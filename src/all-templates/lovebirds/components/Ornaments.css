@@ -7,7 +7,13 @@
 
 .lovebirds-ornament-root {
   position: fixed;
-  inset: 0;
+  /* Stable height (not `inset: 0`) so mobile URL-bar show/hide never resizes
+     + re-rasters this layer mid-scroll — see GlobalBackground .canvas note. */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
   pointer-events: none;
   overflow: hidden;
   z-index: 0;

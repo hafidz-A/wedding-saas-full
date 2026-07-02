@@ -23,6 +23,13 @@ const FLOWER_TYPES = [
 
 const STEM_COUNT = 9
 
+// Constant-height unit for fixed decorative layers: `lvh` ignores the mobile
+// URL bar collapsing/expanding (which resizes anything inset/percent-sized and
+// forces a full re-raster mid-scroll). Falls back to `vh` (also bar-stable in
+// modern browsers) where `lvh` isn't supported.
+const STABLE_VIEWPORT_HEIGHT =
+  typeof CSS !== 'undefined' && CSS.supports?.('height', '100lvh') ? '100lvh' : '100vh'
+
 type FlowerType = (typeof FLOWER_TYPES)[number]
 
 type Flower = {
@@ -477,7 +484,15 @@ export const BotanicalSketchLayer = React.memo(({
       data-active-section={activeSection}
       style={{
         position: fixed ? 'fixed' : 'absolute',
-        inset: 0,
+        // Stable height for the fixed case (not `inset: 0`): an inset-sized
+        // fixed layer tracks the live viewport, so mobile URL-bar show/hide
+        // resized + re-rastered this whole sketch layer mid-scroll. lvh is
+        // constant regardless of the bar state (iOS 15.4+/Chrome 108+).
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: fixed ? undefined : 0,
+        height: fixed ? STABLE_VIEWPORT_HEIGHT : undefined,
         pointerEvents: 'none',
         zIndex,
         overflow: 'hidden',
