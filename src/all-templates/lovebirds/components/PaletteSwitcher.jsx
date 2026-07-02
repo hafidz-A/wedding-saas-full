@@ -17,7 +17,7 @@ const ORNAMENTS = [
   { key: 'perched', label: 'Bertengger', emoji: '🪵' },
 ]
 
-export default function PaletteSwitcher() {
+export default function PaletteSwitcher({ hideDevices = false }) {
   const { theme, setTheme, ornamentType, setOrnamentType, device, setDevice } = useTheme()
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
@@ -91,21 +91,27 @@ export default function PaletteSwitcher() {
             ))}
           </div>
 
-          <div className={styles.divider} />
-          <div className={styles.groupTitle}>Tampilan</div>
-          <div className={styles.deviceRow}>
-            {DEVICE_PRESETS.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                className={`${styles.deviceBtn} ${device === d.id ? styles.active : ''}`}
-                onClick={() => setDevice(d.id)}
-                aria-pressed={device === d.id}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
+          {/* Hidden inside the phone-frame embed: picking a device there would
+              nest a frame inside the frame with no effect. */}
+          {!hideDevices && (
+            <>
+              <div className={styles.divider} />
+              <div className={styles.groupTitle}>Tampilan</div>
+              <div className={styles.deviceRow}>
+                {DEVICE_PRESETS.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    className={`${styles.deviceBtn} ${device === d.id ? styles.active : ''}`}
+                    onClick={() => setDevice(d.id)}
+                    aria-pressed={device === d.id}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </>

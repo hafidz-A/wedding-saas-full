@@ -228,7 +228,10 @@
     align-items: start;
     min-height: 0;
   }
-  .stage     { aspect-ratio: 4 / 5; max-height: 50vh; max-width: 380px; }
+  /* Cap the polaroid stack so it reads as a framed card with clear gutters
+     (the rotated corners of the white border used to reach ~94vw and felt
+     edge-to-edge). Width only — the GSAP stack animation is untouched. */
+  .stage     { aspect-ratio: 4 / 5; max-height: 50vh; max-width: min(320px, 82vw); }
   .cardNumber { font-size: clamp(80px, 22vw, 120px); }
   .descPanel  { padding: 0; text-align: left; }
   .descTitle  { font-size: clamp(28px, 8vw, 40px); }

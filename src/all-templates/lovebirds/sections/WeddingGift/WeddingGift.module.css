@@ -691,3 +691,13 @@ a.registryCard:hover {
   .actions > * { width: 100%; }
   .cardNumberRow { flex-wrap: wrap; }
 }
+
+/* Phones: cap the ATM cards so a clear gutter frames them (they spanned ~89vw
+   and read edge-to-edge inside the phone view / 🎨 device frames). */
+@media (max-width: 480px) {
+  .cardWrapper {
+    max-width: calc(100vw - 52px);
+    margin-inline: auto;
+    width: 100%;
+  }
+}

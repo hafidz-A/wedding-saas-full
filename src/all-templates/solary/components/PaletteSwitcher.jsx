@@ -3,7 +3,7 @@ import { useTheme } from "../contexts/ThemeContext.jsx";
 import { PALETTES } from "../config/themeTokens.js";
 import { DEVICE_PRESETS } from "@/lib/preview/devicePresets";
 
-export default function PaletteSwitcher() {
+export default function PaletteSwitcher({ hideDevices = false }) {
   const { palette, setPalette, device, setDevice } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef(null);
@@ -160,18 +160,24 @@ export default function PaletteSwitcher() {
             </button>
           </div>
 
-          <div className="theme-group-title" style={{ marginTop: 6 }}>Tampilan</div>
-          <div className="theme-buttons">
-            {DEVICE_PRESETS.map((d) => (
-              <button
-                key={d.id}
-                className={`btn-theme-select ${device === d.id ? "active" : ""}`}
-                onClick={() => setDevice(d.id)}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
+          {/* Hidden inside the phone-frame embed: picking a device there would
+              nest a frame inside the frame with no effect. */}
+          {!hideDevices && (
+            <>
+              <div className="theme-group-title" style={{ marginTop: 6 }}>Tampilan</div>
+              <div className="theme-buttons">
+                {DEVICE_PRESETS.map((d) => (
+                  <button
+                    key={d.id}
+                    className={`btn-theme-select ${device === d.id ? "active" : ""}`}
+                    onClick={() => setDevice(d.id)}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </>

@@ -49,7 +49,7 @@ import { getDevice } from '@/lib/preview/devicePresets'
  * `embed` = rendered inside the device-preview iframe (demo 🎨 "Tampilan"):
  * plain invitation, no device frame / 🎨, listens for theme messages.
  */
-export default function Shell({ config: incoming, slug, isDemo = false, embed = false }) {
+export default function Shell({ config: incoming, slug, isDemo = false, embed = false, embedSwitcher = false }) {
   const raw = incoming && incoming.sections ? incoming : defaultConfig
   const config = useMemo(() => normalizeSolaryConfig(raw), [raw])
 
@@ -69,7 +69,7 @@ export default function Shell({ config: incoming, slug, isDemo = false, embed = 
       <AudioProvider src={resolveAudioSrc(config)} defaultVolume={config.audio?.volume ?? 0.5}>
         <GuestProvider>
           <JourneyProvider>
-            <SolaryBody config={config} slug={slug} isDemo={isDemo} embed={embed} />
+            <SolaryBody config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
           </JourneyProvider>
         </GuestProvider>
       </AudioProvider>
@@ -91,7 +91,7 @@ function resolveAudioSrc(config) {
  * cinematic invitation, OR — when a non-desktop device is chosen — the
  * invitation framed in a device bezel (iframe) over a static cosmic backdrop.
  */
-function SolaryBody({ config, slug, isDemo, embed }) {
+function SolaryBody({ config, slug, isDemo, embed, embedSwitcher }) {
   const { palette, device, tokens } = useTheme()
 
   const visible = useMemo(
@@ -143,6 +143,8 @@ function SolaryBody({ config, slug, isDemo, embed }) {
       <>
         {body}
         <SolaryEmbedBridge />
+        {/* Phone-frame embeds of demo pages keep the 🎨 (device picker hidden). */}
+        {isDemo && embedSwitcher && <PaletteSwitcher hideDevices />}
       </>
     )
   }

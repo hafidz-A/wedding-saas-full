@@ -25,7 +25,7 @@ const MusicPopup = lazy(() => import('./sections/MusicPopup/index.js'))
  * DeviceStage). In embed mode we render the invitation plainly (no device
  * frame, no 🎨) and listen for theme messages from the parent window.
  */
-export default function Shell({ config, slug, isDemo = false, embed = false }) {
+export default function Shell({ config, slug, isDemo = false, embed = false, embedSwitcher = false }) {
   const sections = config?.sections || []
   const music = config?.music
   const musicActive = !!music?.url && music.enabled !== false
@@ -51,6 +51,7 @@ export default function Shell({ config, slug, isDemo = false, embed = false }) {
         musicActive={musicActive}
         isDemo={isDemo}
         embed={embed}
+        embedSwitcher={embedSwitcher}
       />
     </ThemeProvider>
   )
@@ -61,7 +62,7 @@ export default function Shell({ config, slug, isDemo = false, embed = false }) {
  * full invitation, OR — when a non-desktop device is picked in the 🎨 panel —
  * the invitation framed inside a device bezel (iframe) over a themed backdrop.
  */
-function LovebirdsBody({ config, slug, sections, music, musicActive, isDemo, embed }) {
+function LovebirdsBody({ config, slug, sections, music, musicActive, isDemo, embed, embedSwitcher }) {
   const { theme, ornamentType, device } = useTheme()
 
   const body = (
@@ -88,11 +89,14 @@ function LovebirdsBody({ config, slug, sections, music, musicActive, isDemo, emb
   )
 
   // Inside the preview iframe: render plainly + bridge theme messages in.
+  // Phone-frame embeds of demo pages keep the 🎨 switcher (device picker
+  // hidden — a frame inside the frame makes no sense there).
   if (embed) {
     return (
       <>
         {body}
         <EmbedThemeBridge />
+        {isDemo && embedSwitcher && <PaletteSwitcher hideDevices />}
       </>
     )
   }

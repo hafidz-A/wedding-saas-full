@@ -44,10 +44,12 @@
   flex: 1 1 auto;
 }
 
-/* Tablet-down padding */
+/* Tablet-down padding. The width cap keeps a thin visible gutter on phones so
+   the card reads as a framed panel instead of touching the screen edges. */
 @media (max-width: 768px) {
   .glass-card {
-    width: 100%;
+    width: min(100%, calc(100vw - 48px));
+    margin-inline: auto;
     padding: 1.25rem 1.1rem;
     border-radius: var(--radius-lg);
   }

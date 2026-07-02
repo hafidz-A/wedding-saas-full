@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import InvitationView from './InvitationView'
@@ -13,7 +14,7 @@ import { composeTitle } from '@/lib/meta/couple'
 
 interface PageProps {
   params: { template: string; slug: string }
-  searchParams?: { embed?: string; preview?: string }
+  searchParams?: { embed?: string; preview?: string; noframe?: string } & Record<string, string | string[] | undefined>
 }
 
 /**
@@ -37,6 +38,35 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   if (!isValidTemplate(template)) {
     notFound()
+  }
+
+  const isDemoSlugEarly = slug.startsWith('demo-') || slug === 'rizky-amara'
+
+  // ── Phone frame mode ─────────────────────────────────────────────────────
+  // On real phones the invitation is served inside a fullscreen same-origin
+  // iframe (`?embed=1`). The OUTER page then never scrolls, so the mobile
+  // browser's URL bar never collapses/expands — the iframe's viewport stays
+  // perfectly constant. That viewport churn (every bar transition resizes +
+  // re-rasters the fixed decorative layers mid-scroll) was the last big
+  // source of on-device scroll jank; the 🎨 device-preview iframe proved the
+  // frame is smooth on the same hardware. Trade-off (accepted): the URL bar
+  // stays visible instead of auto-hiding.
+  // Detection is phones-only (Android tablets/iPads keep the direct render);
+  // `?noframe=1` opts out for tooling/debugging, `embed=1` guards recursion.
+  if (!embed && searchParams?.noframe !== '1') {
+    const ua = headers().get('user-agent') || ''
+    const isPhone = /iPhone|iPod|Windows Phone/i.test(ua) || (/Android/i.test(ua) && /Mobile/i.test(ua))
+    if (isPhone) {
+      const qs = new URLSearchParams()
+      for (const [k, v] of Object.entries(searchParams || {})) {
+        if (k === 'embed' || k === 'noframe' || typeof v !== 'string') continue
+        qs.set(k, v)
+      }
+      qs.set('embed', '1')
+      // Demos keep the 🎨 switcher inside the frame (sans the device picker).
+      if (isDemoSlugEarly) qs.set('sw', '1')
+      return <PhoneFrameView src={`/${template}/${slug}?${qs.toString()}`} />
+    }
   }
 
   const hasSupabase =
@@ -163,7 +193,44 @@ export default async function Page({ params, searchParams }: PageProps) {
   // instead of POSTing a slug the API will 404 ("Invitation not found").
   const submitSlug = invitationId ? slug : null
 
-  return <InvitationView config={config} slug={submitSlug} templateId={templateId} isDemo={isDemoSlug} embed={embed} />
+  const embedSwitcher = searchParams?.sw === '1'
+
+  return (
+    <InvitationView
+      config={config}
+      slug={submitSlug}
+      templateId={templateId}
+      isDemo={isDemoSlug}
+      embed={embed}
+      embedSwitcher={embedSwitcher}
+    />
+  )
+}
+
+/**
+ * Fullscreen frameless iframe host for phone visitors (see the phone-frame
+ * block in Page). The outer document renders ONLY this fixed iframe, so it
+ * has nothing to scroll — all scrolling happens inside the frame, whose
+ * viewport never changes size.
+ */
+function PhoneFrameView({ src }: { src: string }) {
+  return (
+    <main style={{ position: 'fixed', inset: 0, overflow: 'hidden', background: '#FDF6EC' }}>
+      <iframe
+        src={src}
+        title="Undangan"
+        allow="autoplay; clipboard-write"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          border: 0,
+          display: 'block',
+        }}
+      />
+    </main>
+  )
 }
 
 /**

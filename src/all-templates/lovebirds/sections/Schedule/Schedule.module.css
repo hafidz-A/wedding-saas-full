@@ -239,12 +239,22 @@
 .accent-purple  { --accent: var(--color-purple); }
 
 /* ---------- Responsive ---------- */
+/* Phones keep the DESKTOP composition — time rail on the left of the cards —
+   just compacted (56px time column, 13px badge). The old mobile layout
+   stacked the time above each card, losing the timeline read the desktop
+   version is loved for. Animations untouched: only the grid geometry moves. */
 @media (max-width: 767.98px) {
-  .timelineLine { left: 22px; }
-  .event { grid-template-columns: 1fr; gap: 6px; padding-left: 44px; }
-  .timeBadge { text-align: left; font-size: 18px; padding-right: 0; }
-  .card { grid-template-columns: 1fr; gap: 12px; }
-  .card::before { left: -34px; top: -22px; transform: translate(0, 0); }
+  .timelineLine { left: 56px; }
+  .event { grid-template-columns: 56px 1fr; gap: 22px; }
+  .timeBadge { text-align: right; font-size: 13px; padding-right: 12px; }
+  .card { grid-template-columns: auto 1fr; gap: 10px; }
+  .card::before {
+    left: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+  }
 }
 
 /* Tighter spacing at tablet width while still pinned (768–1023px) */
