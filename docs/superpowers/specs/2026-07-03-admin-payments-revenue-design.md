@@ -31,7 +31,13 @@ amount is never stored, which makes any recomputed revenue drift.
 
 - **Depth = full:** transactions ledger + revenue summary + reconcile + trend
   chart + draft→paid conversion + CSV export.
-- **Refunds tracked now** — a refund marks a transaction excluded from revenue.
+- **Refunds tracked now via BOTH paths into one `refunds` ledger:** (1) **manual**
+  — operator refunded externally, clicks "Tandai refund" (works for any source:
+  xendit / manual / comp); (2) **Xendit Refund API** — operator clicks "Refund via
+  Xendit" on a Xendit-paid transaction, the app calls Xendit's refund endpoint and
+  records it (confirmed by a refund webhook). Either way the transaction is
+  excluded from revenue. Manual is the foundation; the Xendit path is the
+  automated add-on for online payments.
 - **Store `paid_amount_idr`** at payment time (design necessity, not optional).
 
 ## Data model (module-3 migration)
@@ -76,9 +82,15 @@ amount is never stored, which makes any recomputed revenue drift.
   - `adminRecheckPayment(invitationId)` / `adminRecheckUpgrade(invitationId)` /
     `adminRecheckQuotaAddon(invitationId)` — admin-gated mirrors of the owner
     `recheck*` (verify against Xendit + apply), not owner-scoped.
-  - `adminRefund(sourceType, sourceId, reason)` — insert a `refunds` row; refund
-    is **money-only** (does NOT auto-unpublish — the operator can `adminSuspend`
-    separately in module 2).
+  - `adminRefund(sourceType, sourceId, amountIDR, reason)` — **manual** path:
+    insert a `refunds` row (operator already returned the money externally). Works
+    for any source.
+  - `adminRefundViaXendit(sourceType, sourceId, reason)` — **automated** path
+    (Xendit-paid only): call the Xendit Refund API for the paid invoice, then
+    record the `refunds` row on success (and reconcile via the refund webhook).
+    Rejects non-`xendit` sources.
+  Refunds are **money-only** (do NOT auto-unpublish — the operator can
+  `adminSuspend` separately in module 2).
   - `adminExportTransactionsCsv(filter)`.
 
 ## Cross-module wiring (small changes elsewhere)
@@ -88,6 +100,10 @@ amount is never stored, which makes any recomputed revenue drift.
 - **Module-2 comp/manual action** sets `paid_amount_idr`: **comp → 0**; **manual
   → an operator-entered amount** (default the current plan price) so offline
   revenue is captured, not lost.
+- **`lib/payments/xendit.ts` + webhook gain refund support (net-new — none exists
+  today):** a `createXenditRefund(invoiceId, amountIDR)` call, and a refund-event
+  branch in the webhook that records/confirms the `refunds` row idempotently.
+  Statuses handled today are PENDING/PAID/SETTLED/EXPIRED — REFUNDED is new.
 
 ## Red-team / edge cases (baked in)
 
@@ -100,12 +116,17 @@ amount is never stored, which makes any recomputed revenue drift.
 - Backfill of the 14 existing rows is best-effort from current prices; flag rows
   where `paid_at` predates a known price change if it ever matters.
 - Admin reconcile still verifies against Xendit (never trusts a flag).
+- Two refund paths write ONE `refunds` ledger; the Xendit path only applies to
+  `xendit` sources (offline / comp use the manual path). The refund-webhook branch
+  is idempotent — a re-sent refund event never double-inserts.
 
 ## Testing
 
 - **Unit:** transaction union mapping (3 sources → one shape); revenue nets out
-  comp + refunds; `adminRefund` inserts a refunds row and drops the amount from
-  the summary; CSV formatting (escaping, headers); backfill computes
+  comp + refunds; `adminRefund` (manual) and `adminRefundViaXendit` (Xendit) each
+  insert one refunds row and drop the amount from the summary; `adminRefundViaXendit`
+  rejects non-xendit sources; the refund webhook is idempotent; CSV formatting
+  (escaping, headers); backfill computes
   `initialPurchaseAmount`; `adminRecheck*` verify + apply and are rejected for
   non-admins.
 - **Manual / browser:** seed a paid (xendit) + a comp + a manual + a refund →
@@ -114,12 +135,12 @@ amount is never stored, which makes any recomputed revenue drift.
 
 ## Out of scope
 
-- Partial refunds (full only).
-- Calling the Xendit refund API (operator refunds in the Xendit dashboard, then
-  records it here).
+- Partial refunds (full-amount refunds only, both paths).
 - Tax / e-faktur / invoice-document generation.
 
 ## Operator steps
 
 - Apply the module-3 migration (`invitations.paid_amount_idr`, `refunds` table).
 - Run the `paid_amount_idr` backfill for existing paid invitations.
+- Enable refunds on the Xendit account + configure the refund webhook (for the
+  automated refund path).
