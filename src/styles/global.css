@@ -270,4 +270,35 @@ body::after {
   z-index: 9999;
 }
 
+/* ============================================================================
+   Touch-device backdrop-filter kill — GLOBAL bug fix (2026-07-03).
+
+   `backdrop-filter` (frosted glass) re-samples its backdrop on EVERY repaint
+   and ACCUMULATES on mobile + tablet GPUs: any repaint source over a frosted
+   card — a ticking countdown, scrolling, an animation — progressively whitens
+   the frost until whatever is behind it (a photo, the scene) disappears.
+   Screenshot-verified on the Lovebirds Hero card (the couple photo vanished
+   over ~10s as the countdown ticked), and reported on iPad — which a
+   width-based media query MISSED (iPad is 820px wide, above the phone
+   breakpoint). That per-spot width patching is why the bug kept resurfacing.
+
+   `(hover: none) and (pointer: coarse)` matches EVERY touch device — phones AND
+   tablets (iPad, Android tablets) — regardless of width, so the accumulation
+   can never occur on any of them, in either template OR the marketing /
+   dashboard / nav / popup chrome. Desktop (fine pointer) keeps the frost: it
+   has no accumulation bug there. Dropping the (expensive) blur on touch is also
+   a straight perf win. Cards stay legible via their own semi-opaque fills +
+   text-shadow halos. DO NOT re-introduce a blur that a touch device runs over
+   repainting content — it brings the wash-out back. If a frosted look is ever
+   needed on touch, bake it as a static pre-blurred image layer, not
+   backdrop-filter, and verify it's stable at 4s vs 15s with content repainting. */
+@media (hover: none) and (pointer: coarse) {
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 
