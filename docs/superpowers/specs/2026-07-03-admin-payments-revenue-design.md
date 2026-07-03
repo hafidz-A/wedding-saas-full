@@ -10,8 +10,9 @@
 
 `/admin/payments` — accurate revenue reporting + a full transaction ledger +
 reconciliation of stuck payments + trend charts + a draft→paid conversion view +
-**CSV export** + **refund tracking**. Fixes the fact that the initial-purchase
-amount is never stored, which makes any recomputed revenue drift.
+**CSV export** + **refund tracking** (operator + a user-facing "Ajukan refund"
+request). Fixes the fact that the initial-purchase amount is never stored, which
+makes any recomputed revenue drift.
 
 ## Why (verified)
 
@@ -38,6 +39,12 @@ amount is never stored, which makes any recomputed revenue drift.
   records it (confirmed by a refund webhook). Either way the transaction is
   excluded from revenue. Manual is the foundation; the Xendit path is the
   automated add-on for online payments.
+- **User-facing refund REQUEST (operator approves) — NOT instant self-service.**
+  The couple gets an "Ajukan pengembalian dana" button that files a
+  `refund_requests` row (with a server-built usage snapshot); only the operator's
+  approval moves money (via the two paths above). Matches the policy's review
+  process (RefundContent §5) and closes the "use it then refund" loophole because
+  usage is detected + flagged (§3 "template sudah dipakai").
 - **Store `paid_amount_idr`** at payment time (design necessity, not optional).
 
 ## Data model (module-3 migration)
@@ -53,6 +60,14 @@ amount is never stored, which makes any recomputed revenue drift.
   timestamptz default now()`. RLS enabled, service-role only. A source row is
   "refunded" iff a `refunds` row references it. (Full refunds only — partial
   refunds out of scope.)
+- `refund_requests` table: `id uuid pk`, `invitation_id uuid`, `requested_by uuid`
+  (owner), `source_type text`, `source_id text`, `reason_category text`
+  (`duplicate_payment | system_failure | inaccessible | other`), `reason_text
+  text`, `usage_snapshot jsonb` (is_published, guest_count, rsvp_count,
+  config_edited, days_since_paid), `status text` (`pending | approved |
+  rejected`), `decided_by text`, `decision_note text`, `created_at`, `decided_at`.
+  RLS enabled; the owner may read their own rows, only the service role writes
+  decisions.
 
 ## Architecture
 
@@ -93,6 +108,23 @@ amount is never stored, which makes any recomputed revenue drift.
   `adminSuspend` separately in module 2).
   - `adminExportTransactionsCsv(filter)`.
 
+### Refund requests (user-facing → operator review)
+
+- **User** — `requestRefund(invitationId, { category, detail })` (owner-gated):
+  eligibility pre-check (paid, `paid_source != comp`, no existing pending request,
+  rate-limited); build a server-side **usage snapshot** (`is_published`, guest
+  count, rsvp/attendance count, config-edited heuristic, days since `paid_at`);
+  insert a `refund_requests` row (pending). Surfaced as an "Ajukan pengembalian
+  dana" button in the couple's dashboard, shown only when eligible.
+- **Operator** — the `/admin/payments` "Permintaan refund" panel lists pending
+  requests with the usage snapshot + an auto-verdict flag ("sudah dipakai — §3"
+  when published / has guests / has RSVPs).
+  - `adminApproveRefund(requestId, { method: 'manual' | 'xendit' })` — triggers
+    the matching refund path, marks the request `approved`, and **unpublishes /
+    suspends** the invitation (money back ⇒ the product comes down); idempotent.
+  - `adminRejectRefund(requestId, note)` — marks `rejected` with a reason (§7).
+  Both log to `admin_actions`.
+
 ## Cross-module wiring (small changes elsewhere)
 
 - **Webhook** `publishPaidInvitation` sets `paid_amount_idr = expectedAmount` and
@@ -119,6 +151,11 @@ amount is never stored, which makes any recomputed revenue drift.
 - Two refund paths write ONE `refunds` ledger; the Xendit path only applies to
   `xendit` sources (offline / comp use the manual path). The refund-webhook branch
   is idempotent — a re-sent refund event never double-inserts.
+- The refund-request **usage snapshot is a flag, not an auto-reject** — the
+  operator still decides (policy §5 discretion); it just makes "use it then refund"
+  abuse obvious. Config-edited detection is best-effort (heuristic).
+- Approving a request is **idempotent** and **unpublishes** the invitation; a user
+  can't re-request once approved, and comp/free has nothing to refund.
 
 ## Testing
 
@@ -128,7 +165,10 @@ amount is never stored, which makes any recomputed revenue drift.
   rejects non-xendit sources; the refund webhook is idempotent; CSV formatting
   (escaping, headers); backfill computes
   `initialPurchaseAmount`; `adminRecheck*` verify + apply and are rejected for
-  non-admins.
+  non-admins; `requestRefund` enforces eligibility (rejects comp / duplicate
+  pending / rate-limit) and builds the usage snapshot; `adminApproveRefund`
+  triggers a refund + unpublishes + is idempotent; `adminRejectRefund` records a
+  reason; requests are owner-gated, decisions admin-gated.
 - **Manual / browser:** seed a paid (xendit) + a comp + a manual + a refund →
   confirm the summary and by-source split; export CSV; reconcile a deliberately
   stuck payment.
@@ -136,11 +176,14 @@ amount is never stored, which makes any recomputed revenue drift.
 ## Out of scope
 
 - Partial refunds (full-amount refunds only, both paths).
+- **Instant self-service refunds** — deliberately excluded (violates the review
+  policy + huge abuse surface); users file a request, the operator decides.
 - Tax / e-faktur / invoice-document generation.
 
 ## Operator steps
 
-- Apply the module-3 migration (`invitations.paid_amount_idr`, `refunds` table).
+- Apply the module-3 migration (`invitations.paid_amount_idr`, `refunds` +
+  `refund_requests` tables).
 - Run the `paid_amount_idr` backfill for existing paid invitations.
 - Enable refunds on the Xendit account + configure the refund webhook (for the
   automated refund path).
