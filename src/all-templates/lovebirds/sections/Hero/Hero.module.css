@@ -494,19 +494,22 @@
 
 /* Tablet / mobile boundary — tightens sizing + countdown width. */
 @media (max-width: 767.98px) {
-  /* The frosted blur is KEPT on phones now (2026-07-03). It was dropped during
-     the old scroll-scrubbed gate (250vh pin) because the blur re-sampled the
-     MOVING blast photos every scroll frame — the phone card then looked flat
-     (sharp photo showing through at 0.55, no frost), noticeably less "glassy"
-     than the blurred desktop card the user liked. The gate is now play-once +
-     a single 100svh section (blast is static after the ~4s intro, you scroll
-     past once), so the per-frame cost is a fraction of before — affordable for
-     the matching frosted look on every device. `prefers-reduced-transparency`
-     still drops it for users who opt out. A hair lighter than desktop (10 vs
-     12px) as a cheap perf hedge. */
+  /* NO backdrop-filter on phones. A mobile blur was tried (commit 706b85f) to
+     match the desktop frost, but on phones the browser RE-SAMPLES the blur on
+     every repaint and accumulates it: the countdown ticking once a second
+     progressively whitened the card over ~10s until the couple photo behind it
+     vanished (screenshot-verified drift at 4s vs 15s — the user's "opacity gets
+     thick after a few seconds" report). Dropping the blur removes the bug at
+     the root: the 0.55 tint shows the photo sharply and STAYS put. Text stays
+     legible via the text-shadow halos + the countdown cells' own opaque fill. */
   .glassCard::before {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.9));
+  }
+  .countCell {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .blastFeatured {
