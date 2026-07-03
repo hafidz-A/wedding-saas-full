@@ -55,11 +55,14 @@ makes any recomputed revenue drift.
   guest_quota_extra)` (best-effort; may differ slightly if a price changed since
   purchase).
 - `refunds` table: `id uuid pk`, `invitation_id uuid`, `source_type text`
-  (`initial | upgrade | addon`), `source_id text` (the invitation / upgrade /
-  addon id), `amount_idr integer`, `reason text`, `admin_email text`, `created_at
-  timestamptz default now()`. RLS enabled, service-role only. A source row is
-  "refunded" iff a `refunds` row references it. (Full refunds only — partial
-  refunds out of scope.)
+  (`initial | upgrade | addon`), `source_id text`, `amount_idr integer` (**always
+  the stored paid amount — never user-supplied, never > paid**), `method text`
+  (`xendit | manual`), `status text` (`pending | succeeded | failed`),
+  `xendit_refund_id text` (Xendit path), `destination jsonb` (manual path: bank /
+  account_no / holder; Xendit path null = returned to the original source),
+  `reason text`, `admin_email text`, `created_at`, `confirmed_at`. RLS
+  service-role only. A source is "refunded" iff a `refunds` row with
+  `status='succeeded'` references it. (Full refunds only.)
 - `refund_requests` table: `id uuid pk`, `invitation_id uuid`, `requested_by uuid`
   (owner), `source_type text`, `source_id text`, `reason_category text`
   (`duplicate_payment | system_failure | inaccessible | other`), `reason_text
@@ -113,9 +116,12 @@ makes any recomputed revenue drift.
 - **User** — `requestRefund(invitationId, { category, detail })` (owner-gated):
   eligibility pre-check (paid, `paid_source != comp`, no existing pending request,
   rate-limited); build a server-side **usage snapshot** (`is_published`, guest
-  count, rsvp/attendance count, config-edited heuristic, days since `paid_at`);
-  insert a `refund_requests` row (pending). Surfaced as an "Ajukan pengembalian
-  dana" button in the couple's dashboard, shown only when eligible.
+  count, rsvp/attendance count, config-edited heuristic, days since `paid_at`), and
+  for a **manual/offline-paid** invitation also collect the **refund destination**
+  (bank, account number, holder name) — Xendit only refunds online payments to
+  their original source, so offline refunds need where to send it; insert a
+  `refund_requests` row (pending). Surfaced as an "Ajukan pengembalian dana" button
+  in the couple's dashboard, shown only when eligible.
 - **Operator** — the `/admin/payments` "Permintaan refund" panel lists pending
   requests with the usage snapshot + an auto-verdict flag ("sudah dipakai — §3"
   when published / has guests / has RSVPs).
@@ -133,9 +139,13 @@ makes any recomputed revenue drift.
   → an operator-entered amount** (default the current plan price) so offline
   revenue is captured, not lost.
 - **`lib/payments/xendit.ts` + webhook gain refund support (net-new — none exists
-  today):** a `createXenditRefund(invoiceId, amountIDR)` call, and a refund-event
-  branch in the webhook that records/confirms the `refunds` row idempotently.
-  Statuses handled today are PENDING/PAID/SETTLED/EXPIRED — REFUNDED is new.
+  today):** a `createXenditRefund(paymentId, amountIDR)` call (Xendit refunds
+  **only to the original payment method** — no destination is ever supplied), and a
+  branch for the **`refund.succeeded` / `refund.failed`** callbacks that updates the
+  `refunds` row's `status` idempotently. The row is created `pending` and flips to
+  `succeeded` only on `refund.succeeded` (Xendit statuses: SUCCEEDED / FAILED /
+  PENDING / CANCELLED). Today the webhook handles only PENDING/PAID/SETTLED/EXPIRED
+  invoice events — refund events are new.
 
 ## Red-team / edge cases (baked in)
 
@@ -155,6 +165,13 @@ makes any recomputed revenue drift.
   cannot return it. `paid_source` decides which path is allowed. Both paths write
   ONE `refunds` ledger; the refund-webhook branch is idempotent — a re-sent refund
   event never double-inserts.
+- **Money safety:** the refund amount is always the stored `paid_amount_idr` (never
+  user-supplied, never > paid); a source refunds once. Xendit refunds go **only to
+  the original payment method** (can't be diverted to a wrong account) and flip to
+  `succeeded` only on the `refund.succeeded` webhook; `refund.failed` or a channel
+  without API-refund support falls back to a manual disbursement (operator transfers
+  to the collected destination + records it). `refund.succeeded` = Xendit forwarded
+  it to the bank/issuer; final arrival follows the bank's own timeline.
 - The refund-request **usage snapshot is a flag, not an auto-reject** — the
   operator still decides (policy §5 discretion); it just makes "use it then refund"
   abuse obvious. Config-edited detection is best-effort (heuristic).
