@@ -494,17 +494,19 @@
 
 /* Tablet / mobile boundary — tightens sizing + countdown width. */
 @media (max-width: 767.98px) {
-  /* Backdrop-filter blur is the single most expensive mobile effect, and here
-     it must re-sample the blast photos behind the glass. Drop it on phones and
-     lean on a more opaque fill + the text-shadow halo for readability. */
+  /* The frosted blur is KEPT on phones now (2026-07-03). It was dropped during
+     the old scroll-scrubbed gate (250vh pin) because the blur re-sampled the
+     MOVING blast photos every scroll frame — the phone card then looked flat
+     (sharp photo showing through at 0.55, no frost), noticeably less "glassy"
+     than the blurred desktop card the user liked. The gate is now play-once +
+     a single 100svh section (blast is static after the ~4s intro, you scroll
+     past once), so the per-frame cost is a fraction of before — affordable for
+     the matching frosted look on every device. `prefers-reduced-transparency`
+     still drops it for users who opt out. A hair lighter than desktop (10 vs
+     12px) as a cheap perf hedge. */
   .glassCard::before {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: var(--glass-bg, rgba(255, 255, 255, 0.9));
-  }
-  .countCell {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   .blastFeatured {
