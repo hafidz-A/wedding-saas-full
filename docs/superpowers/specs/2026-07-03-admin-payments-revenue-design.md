@@ -148,9 +148,13 @@ makes any recomputed revenue drift.
 - Backfill of the 14 existing rows is best-effort from current prices; flag rows
   where `paid_at` predates a known price change if it ever matters.
 - Admin reconcile still verifies against Xendit (never trusts a flag).
-- Two refund paths write ONE `refunds` ledger; the Xendit path only applies to
-  `xendit` sources (offline / comp use the manual path). The refund-webhook branch
-  is idempotent — a re-sent refund event never double-inserts.
+- **Refund channel MUST match the payment channel.** Xendit can only reverse
+  money that entered through Xendit, so `adminRefundViaXendit` applies to `xendit`
+  sources only; **offline/manual payments are refunded by the operator transferring
+  the money back + "tandai refund"** — Xendit has no record of that money and
+  cannot return it. `paid_source` decides which path is allowed. Both paths write
+  ONE `refunds` ledger; the refund-webhook branch is idempotent — a re-sent refund
+  event never double-inserts.
 - The refund-request **usage snapshot is a flag, not an auto-reject** — the
   operator still decides (policy §5 discretion); it just makes "use it then refund"
   abuse obvious. Config-edited detection is best-effort (heuristic).
