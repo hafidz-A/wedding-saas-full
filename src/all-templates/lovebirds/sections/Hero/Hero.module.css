@@ -176,11 +176,8 @@
   pointer-events: none;
   display: grid;
   gap: clamp(12px, 1.8vw, 18px);
-  /* STATIC — no entrance fade. Animating opacity on this block re-rasterised
-     the frosted glass card's backdrop-filter in coarse steps on mobile GPUs
-     (the "frost weak→strong stepping" the user rejected). The card now simply
-     IS frosted from the first paint, matching the reference exactly; only the
-     blast photos, petals, and decor animate in around it. */
+  /* Timeline fades the whole block (card + contents together) in from 0. */
+  opacity: 0;
 }
 
 /* Readability halo for text that floats over the blast photos. The glow uses
