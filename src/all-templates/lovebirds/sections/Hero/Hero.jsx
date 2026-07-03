@@ -403,9 +403,10 @@ export default function Hero(props) {
     if (fades.length) {
       tl.fromTo(fades, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.2, ease: 'power1.out' }, 0.4)
     }
-    if (contentRef.current) {
-      tl.fromTo(contentRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1.1, ease: 'power2.out' }, 1.4)
-    }
+    // The glass card (contentRef) is DELIBERATELY not animated: fading opacity
+    // on its frosted backdrop-filter stepped the blur in coarse a/b/c/d stages
+    // on mobile GPUs. It's static (full frost from first paint, see
+    // .gateContent in the CSS); only the blast/petals/decor animate around it.
     petalData.forEach((p, i) => {
       const node = petalRefs.current[i]
       if (!node) return
