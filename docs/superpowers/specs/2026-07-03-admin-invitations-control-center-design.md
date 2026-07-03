@@ -38,13 +38,15 @@ else is per-slug.
 
 ## Approved decisions
 
-- **Create-for-client = full account provisioning.** The admin "Buat undangan"
-  form has a **template dropdown** (Lovebirds / Solary, same list as onboarding)
-  + plan + quota + couple details (bride/groom/date/venue) + slug + **client
-  email**. On submit: if the email has no account → create a Supabase auth user
-  and send a set-password/invite email; if it exists → link to it (no duplicate).
-  Payment path is a choice at creation: **"mark paid now"** (offline/comp) or
-  **"leave as draft"** (client pays Xendit later via the invite).
+- **Create-for-client = self-serve provisioning (invitation ALWAYS owned by the
+  client).** The admin "Buat undangan" form has a **template dropdown** (Lovebirds
+  / Solary) + plan + quota + couple details (bride/groom/date/venue) + slug +
+  **client email**, with a **live email check**: no account → create a Supabase
+  auth user + send a **branded (Resend) set-password email**; existing account →
+  link the invitation to it (no duplicate). Payment is a choice at creation:
+  **"mark paid now"** (offline/comp) or **"leave as draft"** (client pays Xendit
+  via the invite). Done-for-you / admin-owned invitations are **not** in scope
+  (deferred) — the couple always owns and edits their own invitation.
 - **`paid_source` (3-way): `xendit | manual | comp`.** xendit = online payment;
   manual = real money received offline (reseller / transfer — counts as revenue,
   flagged); comp = free (Rp 0). Module 3 sums revenue by source so comps/testing
@@ -91,10 +93,13 @@ else is per-slug.
   - `adminDeleteInvitation(id, confirmSlug)` — require `confirmSlug === slug`;
     remove `invitation-media/<id>/` files first, then delete the invitation row
     (children cascade). **Never** deletes the auth user.
-  - `adminCreateInvitationForClient(input)` — lookup/create the auth user by
-    email; build `config` (buildSeedConfig / getDefaultConfig); insert the
-    invitation (owner_user_id, email, plan, template, quota); if "mark paid now",
-    also apply the comp/manual paid transition.
+  - `adminCreateInvitationForClient(input)` — look up the auth user by email; if
+    absent, `auth.admin.createUser` (email pre-confirmed) + `generateLink({ type:
+    'recovery' })` for a set-password URL sent via a **branded Resend email**; if
+    present, link (no new user). Build `config` (buildSeedConfig /
+    getDefaultConfig); insert the invitation (owner_user_id = the client, email,
+    plan, template, quota); if "mark paid now", apply the comp/manual paid
+    transition. Roll back the invitation if provisioning fails (no orphan rows).
 - **Public render** (`[template]/[slug]/page.tsx`) and the **publish API**
   (`/api/invitation/[slug]/publish`) must both check `suspended_at`.
 - **Webhook** `publishPaidInvitation` path sets `paid_source = 'xendit'` (small
@@ -148,8 +153,12 @@ else is per-slug.
   ownership (module 5 — Users & data / PDP).
 - Full dashboard impersonation (support "view as couple"). MVP: open the public
   page / preview + read `config`; no session impersonation.
+- Done-for-you / admin-owned invitations + hand-off (transfer ownership) —
+  self-serve (owned-by-client) only for now.
 
 ## Operator steps
 
 - Apply the module-2 migration (`paid_source`, `suspended_at`, `admin_actions`)
   via the Supabase MCP `apply_migration` or SQL editor.
+- Create a **branded Resend email template** for the client set-password invite
+  (used by `adminCreateInvitationForClient` when provisioning a new account).
