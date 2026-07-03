@@ -322,27 +322,28 @@ export default function Hero(props) {
     // Cap matches the editor (hero schema blastPhotos maxItems: 12) — each
     // blast photo animates independently, more turns the scatter to clutter.
     const photos = (cfg.blastPhotos || []).slice(0, 12)
-    // Responsive scatter: the pattern is designed at desktop reach (330–490px
+    // Responsive scatter: the pattern is designed at desktop reach (370–555px
     // from center), then each AXIS is compressed independently so no photo can
     // land past the viewport edge — portrait phones get a tall narrow burst,
     // landscape a wide flat one, and the featured photo always stays the
     // visible center focus. (The old width-only scale pushed the farthest
     // photos ~50px past the edge on phones and let them poke off-screen
-    // vertically on desktop.)
-    const DESIGN_REACH = 490 // base 330 + extra 160 at design size
+    // vertically on desktop.) Reach widened ~13% + vertical factor 0.92→1.0
+    // (2026-07-03) so the burst spreads a touch further top/bottom/sides.
+    const DESIGN_REACH = 555 // base 370 + extra 185 at design size
     // Approximate blast-card half sizes per breakpoint (mirrors the CSS clamps)
     const halfW = vpW < 380 ? 45 : vpW < 480 ? 52 : vpW < 768 ? 62 : 100
     const halfH = vpW < 380 ? 57 : vpW < 480 ? 66 : vpW < 768 ? 82 : 130
     const scaleX = Math.min(1, Math.max(0.2, (vpW / 2 - halfW - 12) / DESIGN_REACH))
-    const scaleY = Math.min(1, Math.max(0.2, (vpH / 2 - halfH - 12) / (DESIGN_REACH * 0.92)))
+    const scaleY = Math.min(1, Math.max(0.2, (vpH / 2 - halfH - 12) / DESIGN_REACH))
     return photos.map((src, i) => {
       const seed = (i + 1) * 137.508
       const angle = (i / Math.max(1, photos.length)) * Math.PI * 2 + Math.sin(seed) * 0.7
-      const distance = 330 + Math.abs(Math.cos(seed * 1.3)) * 160
+      const distance = 370 + Math.abs(Math.cos(seed * 1.3)) * 185
       return {
         src,
         x: Math.cos(angle) * distance * scaleX,
-        y: Math.sin(angle) * distance * 0.92 * scaleY,
+        y: Math.sin(angle) * distance * scaleY,
         rotate: -28 + ((seed * 17) % 56),
         scale: 0.55 + Math.abs(Math.sin(seed * 0.7)) * 0.45,
         delay: (i % 6) * 0.04,
