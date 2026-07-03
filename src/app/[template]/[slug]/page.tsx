@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
+import TabletFrameUpgrade from './TabletFrameUpgrade'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import InvitationView from './InvitationView'
@@ -42,21 +43,33 @@ export default async function Page({ params, searchParams }: PageProps) {
 
   const isDemoSlugEarly = slug.startsWith('demo-') || slug === 'rizky-amara'
 
-  // ── Phone frame mode ─────────────────────────────────────────────────────
-  // On real phones the invitation is served inside a fullscreen same-origin
-  // iframe (`?embed=1`). The OUTER page then never scrolls, so the mobile
-  // browser's URL bar never collapses/expands — the iframe's viewport stays
-  // perfectly constant. That viewport churn (every bar transition resizes +
-  // re-rasters the fixed decorative layers mid-scroll) was the last big
-  // source of on-device scroll jank; the 🎨 device-preview iframe proved the
-  // frame is smooth on the same hardware. Trade-off (accepted): the URL bar
+  // ── Phone / touch-device frame mode ──────────────────────────────────────
+  // On real touch devices the invitation is served inside a fullscreen
+  // same-origin iframe (`?embed=1`). The OUTER page then never scrolls, so the
+  // mobile browser's URL bar never collapses/expands — the iframe's viewport
+  // stays perfectly constant. That viewport churn (every bar transition
+  // resizes + re-rasters the fixed decorative layers mid-scroll) was the last
+  // big source of on-device scroll jank; the 🎨 device-preview iframe proved
+  // the frame is smooth on the same hardware. The frame is sized 100%×100%, so
+  // it always fills the REAL device viewport (iPhone → iPhone-sized, iPad →
+  // iPad-sized) — never a fixed preset. Trade-off (accepted): the URL bar
   // stays visible instead of auto-hiding.
-  // Detection is phones-only (Android tablets/iPads keep the direct render);
+  //
+  // Detection is two-tier because iPadOS 13+ lies in its UA (reports itself as
+  // a "Macintosh" desktop), so the server literally cannot tell an iPad from a
+  // MacBook:
+  //   1. Phones + old iPads report honestly → framed here, server-side, with
+  //      no flash.
+  //   2. Modern iPads / touch tablets the UA hides → caught client-side by
+  //      <TabletFrameUpgrade> (pointer:coarse + tablet width), which sets the
+  //      `pfframe` cookie and reloads once; every visit after is framed here
+  //      via the cookie, flash-free.
   // `?noframe=1` opts out for tooling/debugging, `embed=1` guards recursion.
   if (!embed && searchParams?.noframe !== '1') {
     const ua = headers().get('user-agent') || ''
-    const isPhone = /iPhone|iPod|Windows Phone/i.test(ua) || (/Android/i.test(ua) && /Mobile/i.test(ua))
-    if (isPhone) {
+    const isPhone = /iPhone|iPod|iPad|Windows Phone/i.test(ua) || (/Android/i.test(ua) && /Mobile/i.test(ua))
+    const cookieFramed = cookies().get('pfframe')?.value === '1'
+    if (isPhone || cookieFramed) {
       const qs = new URLSearchParams()
       for (const [k, v] of Object.entries(searchParams || {})) {
         if (k === 'embed' || k === 'noframe' || typeof v !== 'string') continue
@@ -196,14 +209,19 @@ export default async function Page({ params, searchParams }: PageProps) {
   const embedSwitcher = searchParams?.sw === '1'
 
   return (
-    <InvitationView
-      config={config}
-      slug={submitSlug}
-      templateId={templateId}
-      isDemo={isDemoSlug}
-      embed={embed}
-      embedSwitcher={embedSwitcher}
-    />
+    <>
+      <InvitationView
+        config={config}
+        slug={submitSlug}
+        templateId={templateId}
+        isDemo={isDemoSlug}
+        embed={embed}
+        embedSwitcher={embedSwitcher}
+      />
+      {/* Only on the DIRECT (non-framed) render: upgrades touch tablets whose
+          UA the server couldn't identify (modern iPadOS) into frame mode. */}
+      {!embed && searchParams?.noframe !== '1' && <TabletFrameUpgrade />}
+    </>
   )
 }
 
