@@ -52,9 +52,17 @@ without a code deploy.
 - **Marketing stepper = per-card ("Opsi B")**, buttons-only (`readonly` number)
   so it can't fight the GSAP scroll-pin; it carries the chosen `extra` (blocks
   of 50 beyond base) to onboarding via the query string.
-- **Editor edits:** `display_name`, `price_idr`, `base_guest_quota`, `features`,
-  `duration_days`.
-- **No DB schema change** — all columns already exist. Only a new env var.
+- **Editor edits:** `display_name`, `price_idr`, `compare_at_price_idr`
+  (strikethrough "normal" price), `base_guest_quota`, `features`,
+  `duration_days`. The **feature bullets ARE the editable "plan description"**;
+  the template's long tagline/blurb stays in i18n (not editable in v1).
+- **Discounts: both, phased.** Phase 1 = *compare-at* ("harga coret") — one new
+  nullable column, display-only, charge unchanged, zero payment risk. Phase 2 =
+  *promo codes / vouchers* — new tables + checkout/webhook changes; specced
+  below, built after Phase 1.
+- **Minimal schema change** — plan/quota columns already exist; Phase 1 adds only
+  `template_plans.compare_at_price_idr`. Phase 2 adds promo tables. Plus the new
+  env var `ADMIN_EMAILS`.
 - Block price (Rp 10.000 / 50) and the 5.000 cap stay constants in
   `lib/payments/quota.ts`; not editable in v1.
 
@@ -118,16 +126,17 @@ every surface refreshes at once.
   `redirect('/')` (or a 404-style not-found so the route isn't discoverable).
   Fetches `getAllTemplatePlans()` and renders the editor.
 - **`app/admin/pricing/PricingEditor.tsx`** (client) — per template → per plan
-  form: `display_name`, `price_idr` (integer IDR), `base_guest_quota` (stepper /
-  numeric, multiple of 50), `duration_days` (integer or "lifetime" = null),
-  `features` (add/remove list). Calls `updatePlan`; shows saved / error via the
-  existing feedback pattern.
+  form: `display_name`, `price_idr` (integer IDR), `compare_at_price_idr`
+  (optional strikethrough price), `base_guest_quota` (stepper / numeric, multiple
+  of 50), `duration_days` (integer or "lifetime" = null), `features` (add/remove
+  list). Calls `updatePlan`; shows saved / error via the existing feedback
+  pattern.
 - **`app/admin/pricing/actions.ts`** (`'use server'`):
   - `updatePlan(templateId, planCode, patch)` — **re-verify `requireAdmin()`**;
-    validate: `price_idr` integer ≥ 0; `base_guest_quota` a multiple of
-    `BLOCK_SIZE` within `[BLOCK_SIZE, QUOTA_CAP]`; `duration_days` null or
-    integer > 0; `features` an array of non-empty strings; `display_name`
-    non-empty. Update `template_plans` (scoped by `template_id` + `plan_code`)
+    validate: `price_idr` integer ≥ 0; `compare_at_price_idr` null or integer
+    strictly > `price_idr`; `base_guest_quota` a multiple of `BLOCK_SIZE` within
+    `[BLOCK_SIZE, QUOTA_CAP]`; `duration_days` null or integer > 0; `features` an
+    array of non-empty strings; `display_name` non-empty. Update `template_plans` (scoped by `template_id` + `plan_code`)
     via the service-role admin client, then `revalidateTag(TEMPLATE_PLANS_TAG)`
     so all cached reads refresh within the request, not after the 60s TTL.
 - **Discoverability:** an "Admin" link rendered only when `isAdminEmail(session)`
@@ -160,36 +169,79 @@ every surface refreshes at once.
   price + add-on) so the buyer sees the full amount before Xendit.
   `completeOnboarding` already accepts `guestQuotaExtra` — unchanged.
 
+### Workstream 5 — Discounts (phased)
+
+**Phase 1 — Compare-at ("harga coret"), display-only. Ships with WS 1–4.**
+- Migration: `template_plans` + `compare_at_price_idr integer` (nullable).
+- `PlanDisplay` gains `compareAtPrice?: string` (formatIDR), set only when
+  `compare_at_price_idr` is present AND strictly greater than `price_idr`.
+- Cards (marketing + onboarding) render the compare-at struck through next to
+  the live price; absent ⇒ nothing changes.
+- Editor exposes a `compare_at_price_idr` field; `updatePlan` validates it as
+  null or an integer strictly greater than `price_idr` (otherwise store null — no
+  fake discount).
+- The charge (`price_idr`) and the whole webhook path are untouched — zero
+  payment risk.
+
+**Phase 2 — Promo codes / vouchers (built after Phase 1 lands).**
+- New table `promo_codes` (`code` unique, `type` percent|fixed, `value`,
+  `starts_at`, `ends_at`, `max_uses`, `used_count`, `scope` global|template|plan,
+  `status`).
+- Onboarding: a "kode promo" input → `validatePromo(code, template, plan, extra)`
+  returns the discounted total for preview (server computes it; never trusts a
+  client-sent amount).
+- `startCheckout`: re-validate the code server-side, compute the discounted
+  amount, and **record the expected charged amount on the invitation**
+  (`expected_amount_idr` + `promo_code`) — because the webhook can no longer
+  recompute the price from plan+extra alone.
+- **Webhook verification switches to compare against the recorded expected
+  amount** (mirrors how `quota_addons.amount_idr` is verified today), not a
+  recomputed plan price. This is the sensitive change and the reason Phase 2 is
+  isolated from Phase 1.
+- On paid: increment `used_count`; `max_uses` + active window enforced at
+  validation time.
+
 ## Data model
 
-- **No schema change.** `template_plans.{display_name, price_idr, features,
-  base_guest_quota, duration_days}` already exist and are populated.
+- **Phase 1 schema:** one new nullable column
+  `template_plans.compare_at_price_idr integer`. Everything else
+  (`display_name, price_idr, features, base_guest_quota, duration_days`) already
+  exists and is populated — verified live on `uknpuynhixrdqgsgmynl`.
+- **Phase 2 schema (later):** `promo_codes` table +
+  `invitations.{promo_code, expected_amount_idr}` (or a redemptions table).
 - **New env var `ADMIN_EMAILS`** (comma-separated). Add to `.env.example`; set in
   `.env.local` and Vercel. Absent ⇒ nobody is admin (editor inaccessible), which
   is the safe default.
 
 ## Key interfaces
 
-- `toPlanDisplay(row: TemplatePlanRow): PlanDisplay` (client-safe).
+- `toPlanDisplay(row: TemplatePlanRow): PlanDisplay` (client-safe) — `PlanDisplay`
+  includes `compareAtPrice?: string`.
 - `isAdminEmail(email?: string): boolean`; `requireAdmin(): Promise<{ email }>`.
-- `updatePlan(templateId: string, planCode: string, patch: Partial<{ display_name: string; price_idr: number; base_guest_quota: number; duration_days: number | null; features: string[] }>): Promise<{ ok: boolean; error?: string }>`.
+- `updatePlan(templateId: string, planCode: string, patch: Partial<{ display_name: string; price_idr: number; compare_at_price_idr: number | null; base_guest_quota: number; duration_days: number | null; features: string[] }>): Promise<{ ok: boolean; error?: string }>`.
 - Marketing card href: `/onboarding?template={id}&plan={code}&extra={blocks*50}`.
+- Phase 2: `validatePromo(code, templateId, planCode, extra): Promise<{ ok: boolean; discountedAmountIDR?: number; error?: string }>`.
 
 ## Testing
 
 - **Unit:** `isAdminEmail` (comma / spaces / case / empty env / undefined
   email); `updatePlan` validation (reject non-integer price, non-multiple-of-50
-  quota, over-cap quota, bad duration, empty features/name; accept a valid
-  patch); `toPlanDisplay` (DB row → shape; catalog fallback shape).
+  quota, over-cap quota, bad duration, empty features/name; **compare-at null or
+  strictly > price** — reject ≤ price; accept a valid patch); `toPlanDisplay`
+  (DB row → shape; **compareAtPrice set only when > price**; catalog fallback).
 - **i18n:** `dict-parity` covers the new `guestQuota` key.
-- **Manual / browser:** edit a price + base quota in `/admin/pricing` → the
-  marketing card, onboarding summary, and the Xendit amount all reflect it after
-  the action (tag revalidation), no deploy. Basic no longer shows `Buku tamu`.
-  Per-card stepper shows a correct live total and carries `extra` into
-  onboarding (floor = DB base). A signed-in non-admin hitting `/admin/pricing` is
-  redirected.
+- **Manual / browser:** edit a price + base quota + compare-at in
+  `/admin/pricing` → the marketing card, onboarding summary, and the Xendit
+  amount all reflect it after the action (tag revalidation), no deploy; the
+  strikethrough shows only when compare-at > price. Basic no longer shows
+  `Buku tamu`. Per-card stepper shows a correct live total and carries `extra`
+  into onboarding (floor = DB base). A signed-in non-admin hitting
+  `/admin/pricing` is redirected.
+- **Phase 2:** `validatePromo` (percent + fixed, expired / over-max-uses /
+  wrong-scope rejected); webhook accepts the recorded discounted amount and
+  rejects a mismatch; `used_count` increments once per paid redemption.
 
-## Out of scope (v1)
+## Out of scope
 
 - Editing the add-on block price (Rp 10.000 / 50) or the 5.000 cap from the UI.
 - Quota reduction / refunds; premium→basic downgrade.
@@ -197,9 +249,15 @@ every surface refreshes at once.
   solo operator).
 - A standalone public `/templates` page (the landing `VibeExploration` is the
   buying surface).
+- Editing the template tagline/blurb prose from the admin editor (stays in i18n).
+- Phase-2 promo: stacking multiple codes on one purchase; per-user redemption
+  limits.
 
 ## Operator steps
 
 - Set `ADMIN_EMAILS=arifinhafidz68@gmail.com` in `.env.local` and Vercel.
-- Migration + `template_plans` seeding: **already done** (verified on
-  `uknpuynhixrdqgsgmynl`). No action needed.
+- Apply the Phase-1 migration (adds `template_plans.compare_at_price_idr`) — a
+  new file; can go via the Supabase MCP `apply_migration`.
+- The quota migration + `template_plans` seeding are **already done** (verified
+  on `uknpuynhixrdqgsgmynl`). No action needed.
+- Phase 2 (later): apply the `promo_codes` migration before enabling that UI.
