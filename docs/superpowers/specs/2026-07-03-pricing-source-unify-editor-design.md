@@ -2,7 +2,7 @@
 
 > Date: 2026-07-03
 > Status: Approved decisions, ready for plan
-> Related: [2026-06-30-guest-quota-pricing-design.md](2026-06-30-guest-quota-pricing-design.md) (the quota engine this builds on)
+> Related: [2026-06-30-guest-quota-pricing-design.md](2026-06-30-guest-quota-pricing-design.md) (the quota engine this builds on); [admin foundation](2026-07-04-admin-foundation-design.md) (owns the `/admin` gate + shell this module first sketched)
 
 ## Goal
 
