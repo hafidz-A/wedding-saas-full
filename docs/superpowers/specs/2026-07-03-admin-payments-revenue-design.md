@@ -113,23 +113,30 @@ makes any recomputed revenue drift.
 
 ### Refund requests (user-facing → operator review)
 
-- **User** — `requestRefund(invitationId, { category, detail })` (owner-gated):
-  eligibility pre-check (paid, `paid_source != comp`, no existing pending request,
-  rate-limited); build a server-side **usage snapshot** (`is_published`, guest
-  count, rsvp/attendance count, config-edited heuristic, days since `paid_at`), and
-  for a **manual/offline-paid** invitation also collect the **refund destination**
-  (bank, account number, holder name) — Xendit only refunds online payments to
-  their original source, so offline refunds need where to send it; insert a
-  `refund_requests` row (pending). Surfaced as an "Ajukan pengembalian dana" button
-  in the couple's dashboard, shown only when eligible.
+- **User** — `requestRefund(invitationId, { category, detail, destination? })`
+  (owner-gated): eligibility pre-check (paid, `paid_source != comp`, no existing
+  pending request, rate-limited); build a server-side **usage snapshot**
+  (`is_published`, guest count, rsvp/attendance count, config-edited heuristic,
+  days since `paid_at`). **The refund channel is decided by `paid_source`, NOT
+  chosen by the client** — the "Ajukan pengembalian dana" form adapts: a Xendit-paid
+  invitation asks only for a **reason** (Xendit returns to the original payment
+  method automatically); a manual/offline-paid one additionally asks for the
+  **destination account** (bank, number, holder). Insert a `refund_requests` row
+  (pending); the button shows only when eligible.
 - **Operator** — the `/admin/payments` "Permintaan refund" panel lists pending
-  requests with the usage snapshot + an auto-verdict flag ("sudah dipakai — §3"
-  when published / has guests / has RSVPs).
+  requests in **plain language (no raw logs / cmd)**: couple, amount, how they paid,
+  reason, and a **plain-language eligibility verdict badge** from the usage snapshot
+  — "Masih layak" or "Tidak layak — §3 (sudah dipakai)" — with one-click Setujui /
+  Tolak.
   - `adminApproveRefund(requestId, { method: 'manual' | 'xendit' })` — triggers
     the matching refund path, marks the request `approved`, and **unpublishes /
     suspends** the invitation (money back ⇒ the product comes down); idempotent.
   - `adminRejectRefund(requestId, note)` — marks `rejected` with a reason (§7).
   Both log to `admin_actions`.
+- **Plain-language activity view** — an "Aktivitas" list in `/admin` renders
+  `admin_actions` (+ refund decisions) as human sentences ("Kamu menyetujui refund
+  Rani & Adi · 2 jam lalu"), so the operator monitors everything in the UI and
+  never reads cmd logs or raw request traces.
 
 ## Cross-module wiring (small changes elsewhere)
 
