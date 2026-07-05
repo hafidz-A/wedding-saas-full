@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { activePeriodStatus } from '@/lib/payments/active-period'
+import { isAdminEmail } from '@/lib/admin/is-admin'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
@@ -55,6 +56,10 @@ export default async function ProfilePage() {
       <main style={page}>
         <div style={wrap}>
           <h1 style={h1}>{p.title}</h1>
+
+          {isAdminEmail(user.email) && (
+            <a href="/admin" style={{ fontSize: 14, textDecoration: 'underline' }}>Buka panel admin →</a>
+          )}
 
           <section style={cardBox}>
             <p style={rowLabel}>{p.emailLabel}</p>
