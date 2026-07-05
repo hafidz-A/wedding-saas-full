@@ -10,6 +10,7 @@ import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
 import RenewButton from './RenewButton'
 import RecheckPaymentButton from './RecheckPaymentButton'
+import MfaEnroll from './MfaEnroll'
 import styles from './profile.module.css'
 
 /**
@@ -58,7 +59,13 @@ export default async function ProfilePage() {
           <h1 style={h1}>{p.title}</h1>
 
           {isAdminEmail(user.email) && (
-            <a href="/admin" style={{ fontSize: 14, textDecoration: 'underline' }}>Buka panel admin →</a>
+            <section style={cardBox}>
+              <p style={rowLabel}>Panel Admin</p>
+              <a href="/admin" style={{ fontSize: 14, textDecoration: 'underline', display: 'inline-block', margin: '4px 0 14px' }}>
+                Buka panel admin →
+              </a>
+              <MfaEnroll />
+            </section>
           )}
 
           <section style={cardBox}>
