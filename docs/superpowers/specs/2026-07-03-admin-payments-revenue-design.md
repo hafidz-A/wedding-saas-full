@@ -112,6 +112,9 @@ makes any recomputed revenue drift.
   stay in sync); an initial-purchase refund additionally unpublishes the invitation
   (via the request-approval flow). It doesn't touch unrelated state.
   - `adminExportTransactionsCsv(filter)`.
+  - `adminReconcileXendit()` — on-demand "Cocokkan sekarang": compares the
+    Xendit-sourced ledger rows against Xendit and flags any mismatch for the
+    operator (no scheduler).
 
 ### Refund requests (user-facing → operator review)
 
@@ -185,11 +188,12 @@ makes any recomputed revenue drift.
   to the collected destination + records it). `refund.succeeded` = Xendit forwarded
   it to the bank/issuer; final arrival follows the bank's own timeline.
 - **The admin ledger is the source of truth for TOTAL revenue** (Xendit + manual +
-  comp) — a superset of the Xendit dashboard, which only sees Xendit payments. A
-  periodic **reconciliation** compares the Xendit-sourced rows against Xendit to
-  flag drift. Report boundaries ("this month", CSV) use **Asia/Jakarta (WIB)**, not
-  UTC. The webhook dedups repeat events (the paid/refunded status guards already
-  make re-processing a no-op).
+  comp) — a superset of the Xendit dashboard, which only sees Xendit payments. An
+  **on-demand "Cocokkan sekarang" reconciliation** compares the Xendit-sourced rows
+  against Xendit to flag drift (operator-triggered by a button, no scheduler).
+  Report boundaries ("this month", CSV) use **Asia/Jakarta (WIB)**, not UTC. The
+  webhook dedups repeat events (the paid/refunded status guards already make
+  re-processing a no-op).
 - The refund-request **usage snapshot is a flag, not an auto-reject** — the
   operator still decides (policy §5 discretion); it just makes "use it then refund"
   abuse obvious. Config-edited detection is best-effort (heuristic).
