@@ -23,6 +23,13 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  // MFA (AAL2) challenge step — only used when the signed-in session still
+  // needs a second factor (e.g. an allowlisted admin with TOTP enrolled).
+  // Users with no enrolled factor never touch this branch or state.
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaError, setMfaError] = useState<string | null>(null)
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -56,68 +63,136 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
       return
     }
 
+    // Backwards-compatible MFA gate: only branches when the session actually
+    // needs a step-up to AAL2 (nextLevel) and isn't there yet (currentLevel).
+    // A user with no enrolled TOTP factor falls straight through unaffected.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aal?.nextLevel === 'aal2' && aal.currentLevel === 'aal1') {
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const totp = factors?.totp?.[0]
+      if (totp) {
+        setMfaFactorId(totp.id) // switches the UI to the 6-digit code step
+        setSubmitting(false)
+        return // stop here — do not redirect yet
+      }
+    }
+
     router.push(next || '/')
     router.refresh()
   }
 
+  async function verifyMfa() {
+    setMfaError(null)
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    )
+    const { data: ch, error: chErr } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId! })
+    if (chErr || !ch) {
+      setMfaError('Gagal memulai verifikasi. Coba lagi.')
+      return
+    }
+    const { error: verifyError } = await supabase.auth.mfa.verify({
+      factorId: mfaFactorId!,
+      challengeId: ch.id,
+      code: mfaCode,
+    })
+    if (verifyError) {
+      setMfaError('Kode salah, coba lagi.')
+      return
+    }
+    window.location.href = next || '/'
+  }
+
   return (
     <main style={panel}>
-      <form onSubmit={onSubmit} style={card}>
-        <header style={{ marginBottom: 4 }}>
-          <p style={kicker}>{dict.kicker}</p>
-          <h1 style={h1}>{dict.title}</h1>
-          <p style={muted}>{dict.subtitle}</p>
-        </header>
+      {mfaFactorId ? (
+        <div style={card}>
+          <header style={{ marginBottom: 4 }}>
+            <p style={kicker}>{dict.kicker}</p>
+            <h1 style={h1}>Verifikasi 2 Langkah</h1>
+            <p style={muted}>Masukkan 6 digit kode dari aplikasi authenticator kamu.</p>
+          </header>
 
-        <label style={field}>
-          <span style={lbl}>{dict.email}</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoFocus
-            placeholder={dict.emailPlaceholder}
-            style={input}
-          />
-        </label>
+          <label style={field}>
+            <span style={lbl}>Kode Verifikasi</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+              required
+              autoFocus
+              placeholder="123456"
+              style={input}
+            />
+          </label>
 
-        <label style={field}>
-          <span style={lbl}>{dict.password}</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder={dict.passwordPlaceholder}
-            style={input}
-          />
-        </label>
+          {mfaError && <p style={errorStyle}>{mfaError}</p>}
 
-        {error && <p style={errorStyle}>{error}</p>}
+          <button type="button" onClick={verifyMfa} className={authStyles.authPrimaryBtn} style={{ marginTop: 8 }}>
+            Verifikasi
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={onSubmit} style={card}>
+          <header style={{ marginBottom: 4 }}>
+            <p style={kicker}>{dict.kicker}</p>
+            <h1 style={h1}>{dict.title}</h1>
+            <p style={muted}>{dict.subtitle}</p>
+          </header>
 
-        <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn} style={{ marginTop: 8 }}>
-          {submitting ? dict.submitting : dict.submit}
-        </button>
+          <label style={field}>
+            <span style={lbl}>{dict.email}</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              placeholder={dict.emailPlaceholder}
+              style={input}
+            />
+          </label>
 
-        <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 14 }}>
-          {dict.forgotPrompt}{' '}
-          <Link href="/forgot-password" style={{ color: 'var(--interactive-primary)', textDecoration: 'underline' }}>
-            {dict.forgotLink}
-          </Link>
-        </p>
-        <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
-          {dict.noAccount}{' '}
-          <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'} style={{ color: 'var(--interactive-primary)', textDecoration: 'underline' }}>
-            {dict.signupLink}
-          </Link>
-        </p>
-        <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
-          <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'underline' }}>
-            {dict.back}
-          </Link>
-        </p>
-      </form>
+          <label style={field}>
+            <span style={lbl}>{dict.password}</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder={dict.passwordPlaceholder}
+              style={input}
+            />
+          </label>
+
+          {error && <p style={errorStyle}>{error}</p>}
+
+          <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn} style={{ marginTop: 8 }}>
+            {submitting ? dict.submitting : dict.submit}
+          </button>
+
+          <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 14 }}>
+            {dict.forgotPrompt}{' '}
+            <Link href="/forgot-password" style={{ color: 'var(--interactive-primary)', textDecoration: 'underline' }}>
+              {dict.forgotLink}
+            </Link>
+          </p>
+          <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
+            {dict.noAccount}{' '}
+            <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'} style={{ color: 'var(--interactive-primary)', textDecoration: 'underline' }}>
+              {dict.signupLink}
+            </Link>
+          </p>
+          <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 4 }}>
+            <Link href="/" style={{ color: 'var(--text-muted)', textDecoration: 'underline' }}>
+              {dict.back}
+            </Link>
+          </p>
+        </form>
+      )}
     </main>
   )
 }
