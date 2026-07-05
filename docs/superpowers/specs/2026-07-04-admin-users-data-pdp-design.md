@@ -46,7 +46,8 @@ for the couple.
 ## Data model (module-5 migration)
 
 - `account_deletion_requests` table: `id uuid pk`, `user_id uuid`, `email text`,
-  `reason text`, `status text` (`pending | processed | rejected`), `requested_at`,
+  `reason text`, `status text` (`pending | cancelled | processed | rejected`),
+  `requested_at`, `scheduled_for timestamptz` (= `requested_at` + **7-day grace**),
   `processed_by text`, `processed_at`, `note text`. RLS: owner reads own; only the
   service role writes decisions.
 - `invitations` + `pii_erased_at timestamptz` (null = intact; set when an account
@@ -60,7 +61,9 @@ for the couple.
   → a downloadable JSON bundle. Audited. Never touches another user's data;
   `password_hash` excluded.
 - `requestAccountDeletion(reason?)`: insert an `account_deletion_requests` row
-  (pending) behind a strong confirm dialog.
+  (pending, `scheduled_for` = now + 7 days) behind a strong confirm dialog. The user
+  can **cancel within the 7-day grace** (`cancelAccountDeletion()`); the operator
+  only processes on/after `scheduled_for`.
 
 ### Operator (`/admin/users`)
 - **Find user by email** → account info + their invitations (statuses + paid counts
@@ -99,6 +102,9 @@ Reuses module 0 (`requireAdmin`, `logAdminAction`, cache), the crypto lib
   `invitation-media/<id>/` explicitly.
 - **Deletion is request → operator-processed** (not instant self-delete) — prevents
   accidental/angry erasure and lets the operator apply the paid nuance.
+- **7-day grace before permanent:** the request is cancellable by the user for 7
+  days; `adminProcessDeletion` runs only on/after `scheduled_for` — a safety net for
+  regret / mis-click.
 - **Idempotent** — reprocessing a request is safe; an anonymized invitation
   (`pii_erased_at` set, `owner_user_id` null) renders as taken-down (not public).
 - **Detached invitations:** a paid+anonymized invitation has no owner — it exists

@@ -65,6 +65,9 @@ safe**: lose them and every encrypted row is unrecoverable forever.
 - [ ] Turn on **automatic backups** (money + PII data).
 - [ ] For branded auth emails (verify / reset), set Supabase Auth SMTP to Resend +
       customize the templates (optional but nicer than the default).
+- [ ] **Verify the `fincards.land` domain in Resend** — add the SPF / DKIM / DMARC
+      DNS records Resend gives you — so invite + notification emails don't land in
+      spam. Until verified, keep `RESEND_FROM` on `resend.dev`.
 
 ## 6. Admin console
 

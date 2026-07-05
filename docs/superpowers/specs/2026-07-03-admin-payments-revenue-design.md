@@ -54,6 +54,12 @@ makes any recomputed revenue drift.
   existing `is_paid` rows to `initialPurchaseAmount(currentPlanPrice,
   guest_quota_extra)` (best-effort; may differ slightly if a price changed since
   purchase).
+- `invitations` + `expected_amount_idr integer` (**locked at checkout-START** by
+  `startCheckout`) + `fee_idr integer` (the Xendit gateway fee on the paid invoice,
+  for net revenue; null for manual/comp). Locking the expected amount means a price
+  or promo change mid-checkout can't break an in-flight payment, and it's the
+  foundation for promo codes. `plan_upgrades` / `quota_addons` already store
+  `amount_idr`; add `fee_idr` to them too.
 - `refunds` table: `id uuid pk`, `invitation_id uuid`, `source_type text`
   (`initial | upgrade | addon`), `source_id text`, `amount_idr integer` (**always
   the stored paid amount — never user-supplied, never > paid**), `method text`
@@ -82,9 +88,11 @@ makes any recomputed revenue drift.
   Each carries `{ invitation_id, slug, couple, type, amount_idr, source, status:
   'paid'|'refunded', date }`; `refunded` when a `refunds` row references it.
 - **`/admin/payments/page.tsx`** (server, `requireAdmin()`):
-  - **Revenue summary** — net total, this month, **by source** (xendit + manual
-    count; comp always Rp 0), by plan, by template. Net = Σ paid (source ∈
-    {xendit, manual}) − Σ refunds. Comp + refunded excluded.
+  - **Revenue summary** — shows **gross** (what customers paid) AND **net received**
+    (gross − Xendit fees − refunds), this month, **by source** (xendit + manual
+    count; comp always Rp 0), by plan, by template. The Xendit fee per transaction
+    is captured from the paid invoice (`fee_idr`); manual/comp have no gateway fee.
+    Comp + refunded excluded from both.
   - **Trend chart** — revenue per month (last ~12), **dependency-free** (hand-
     rolled CSS/SVG bars using tokens — the project ships no chart lib and adds no
     UI library).
@@ -148,8 +156,15 @@ makes any recomputed revenue drift.
 
 ## Cross-module wiring (small changes elsewhere)
 
-- **Webhook** `publishPaidInvitation` sets `paid_amount_idr = expectedAmount` and
-  `paid_source = 'xendit'`.
+- **Webhook** verifies the payment against the stored **`expected_amount_idr`**
+  (locked at checkout), not a recomputed plan price — so editing a price or applying
+  a promo mid-checkout can't reject a legitimate payment. On success it sets
+  `paid_amount_idr = expected_amount_idr`, `paid_source = 'xendit'`, and reads
+  `fee_idr` from the paid invoice.
+- **Chargebacks (bank disputes):** a Xendit dispute/chargeback callback is recorded
+  (a `chargeback` marker on the transaction, netted out of revenue like a refund —
+  the bank pulled the money back) and **flagged for the operator**; it never
+  auto-refunds again.
 - **Module-2 comp/manual action** sets `paid_amount_idr`: **comp → 0**; **manual
   → an operator-entered amount** (default the current plan price) so offline
   revenue is captured, not lost.
@@ -215,6 +230,9 @@ makes any recomputed revenue drift.
 - **Manual / browser:** seed a paid (xendit) + a comp + a manual + a refund →
   confirm the summary and by-source split; export CSV; reconcile a deliberately
   stuck payment.
+- **Money-path e2e (before real money):** a full buy → pay (webhook) → refund
+  round-trip on the Xendit **sandbox** is required before switching to LIVE keys;
+  assert gross vs net (fee) + expected-amount locking hold.
 
 ## Out of scope
 

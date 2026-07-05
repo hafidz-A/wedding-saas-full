@@ -57,6 +57,10 @@ that responsibility now lives here.
   Payments · Users), admin identity, logout.
 - `app/admin/page.tsx`: overview KPIs (invitations, paid vs drafts, revenue this
   month, **pending refund requests**) + quick links.
+- **"Needs attention" + notifications:** a badge count in the admin nav (pending
+  refund requests + pending account-deletion requests + reconciliation mismatches +
+  failed webhooks) **and a daily email digest** (via the email helper) whenever any
+  are outstanding — so the operator isn't forced to keep checking `/admin`.
 - **Entry point:** an "Admin" link rendered **only when `isAdminEmail(session)`**
   (in the profile page and/or site nav). Non-admins never see it; the route is
   gated regardless. (Today there is no path to `/admin` at all.)

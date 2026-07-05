@@ -63,6 +63,9 @@ without a code deploy.
 - **Minimal schema change** — plan/quota columns already exist; Phase 1 adds only
   `template_plans.compare_at_price_idr`. Phase 2 adds promo tables. Plus the new
   env var `ADMIN_EMAILS`.
+- **Editing a price never breaks an in-flight purchase** — the amount is locked into
+  the draft at checkout-start (`expected_amount_idr`, see the payments spec), so a
+  price/compare-at/promo change only affects NEW checkouts.
 - Block price (Rp 10.000 / 50) and the 5.000 cap stay constants in
   `lib/payments/quota.ts`; not editable in v1.
 
