@@ -75,7 +75,8 @@ that responsibility now lives here.
   couple on a refund decision** (module 3). Net-new (only auth emails exist).
   Templates centralized here.
 - Env: `RESEND_API_KEY` + a from-address; absent ⇒ email is skipped/logged, never
-  crashes the action.
+  crashes the action. Sends are **best-effort** — a failed invite email never rolls
+  back the created account/invitation; a "kirim ulang undangan" action re-sends it.
 
 ### 5. Cache-invalidation map + helper
 - `revalidateInvitation(templateId, slug)` fires the standard set:
@@ -112,10 +113,18 @@ that responsibility now lives here.
   decrypt `*_enc` fields. Couple names come from `config`. Raw-PII export is a
   module-5, audited, break-glass feature.
 
-### 9. Concurrency / idempotency conventions
+### 9. Concurrency / idempotency + money integrity
 - Money mutations (comp, refund apply, upgrade/renewal webhook) are **idempotent**
-  and guarded (can't double-apply / double-refund). Non-money state = last-write-
-  wins, with `admin_actions` recording every write.
+  and guarded (can't double-apply / double-refund); a repeat webhook event is a
+  no-op. Non-money state = last-write-wins, with `admin_actions` recording every
+  write.
+- **Financial records survive:** a PAID invitation is **archived, never
+  hard-deleted** (its payments/refunds are kept for bookkeeping/tax); only unpaid
+  drafts are truly deleted.
+- **A refund reverses what was bought:** refunding an add-on decrements the quota,
+  refunding an upgrade reverts the plan — money and entitlement stay in sync.
+- The admin ledger is the **complete** money view (Xendit + manual + comp); the
+  Xendit slice is reconciled against Xendit to catch drift.
 
 ## Interfaces
 

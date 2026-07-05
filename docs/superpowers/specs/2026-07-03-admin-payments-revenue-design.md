@@ -107,8 +107,10 @@ makes any recomputed revenue drift.
     (Xendit-paid only): call the Xendit Refund API for the paid invoice, then
     record the `refunds` row on success (and reconcile via the refund webhook).
     Rejects non-`xendit` sources.
-  Refunds are **money-only** (do NOT auto-unpublish — the operator can
-  `adminSuspend` separately in module 2).
+  A refund also **reverses what was bought**: an add-on refund decrements
+  `guest_quota_extra`, an upgrade refund reverts the `plan` (money + entitlement
+  stay in sync); an initial-purchase refund additionally unpublishes the invitation
+  (via the request-approval flow). It doesn't touch unrelated state.
   - `adminExportTransactionsCsv(filter)`.
 
 ### Refund requests (user-facing → operator review)
@@ -129,8 +131,11 @@ makes any recomputed revenue drift.
   — "Masih layak" or "Tidak layak — §3 (sudah dipakai)" — with one-click Setujui /
   Tolak.
   - `adminApproveRefund(requestId, { method: 'manual' | 'xendit' })` — triggers
-    the matching refund path, marks the request `approved`, and **unpublishes /
-    suspends** the invitation (money back ⇒ the product comes down); idempotent.
+    the matching refund path, marks the request `approved`, **reverses the
+    entitlement** for add-on / upgrade sources (add-on refund → decrement
+    `guest_quota_extra`; upgrade refund → revert `plan` to `from_plan` + recompute
+    expiry), and for an initial-purchase refund **unpublishes / suspends** the
+    invitation (money back ⇒ the product comes down); idempotent.
   - `adminRejectRefund(requestId, note)` — marks `rejected` with a reason (§7).
   Both log to `admin_actions`.
 - **Plain-language activity view** — an "Aktivitas" list in `/admin` renders
@@ -179,6 +184,12 @@ makes any recomputed revenue drift.
   without API-refund support falls back to a manual disbursement (operator transfers
   to the collected destination + records it). `refund.succeeded` = Xendit forwarded
   it to the bank/issuer; final arrival follows the bank's own timeline.
+- **The admin ledger is the source of truth for TOTAL revenue** (Xendit + manual +
+  comp) — a superset of the Xendit dashboard, which only sees Xendit payments. A
+  periodic **reconciliation** compares the Xendit-sourced rows against Xendit to
+  flag drift. Report boundaries ("this month", CSV) use **Asia/Jakarta (WIB)**, not
+  UTC. The webhook dedups repeat events (the paid/refunded status guards already
+  make re-processing a no-op).
 - The refund-request **usage snapshot is a flag, not an auto-reject** — the
   operator still decides (policy §5 discretion); it just makes "use it then refund"
   abuse obvious. Config-edited detection is best-effort (heuristic).

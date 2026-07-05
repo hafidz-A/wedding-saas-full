@@ -61,6 +61,9 @@ else is per-slug.
   ('xendit','manual','comp'))`). Backfill: set `'xendit'` where `is_paid = true`
   (existing paid rows came through Xendit).
 - `invitations` + `suspended_at timestamptz` (null = not suspended).
+- `invitations` + `archived_at timestamptz` (null = active; set instead of deleting
+  a **paid** invitation — hides it from the default admin list while keeping the row
+  and all financial records).
 - `admin_actions` table: `id uuid pk`, `admin_email text not null`, `action text
   not null`, `target_type text`, `target_id text`, `meta jsonb`, `created_at
   timestamptz default now()`. RLS enabled, service-role only (no policies).
@@ -90,9 +93,12 @@ else is per-slug.
   - `adminChangePlan(id, plan)` — `plan` only; does NOT recompute expiry (avoid
     clobbering a lifetime). Guestbook access follows the new plan automatically.
   - `adminAddQuota(id, qtyGuests)` — `increment_guest_quota_extra` (comp quota).
-  - `adminDeleteInvitation(id, confirmSlug)` — require `confirmSlug === slug`;
-    remove `invitation-media/<id>/` files first, then delete the invitation row
-    (children cascade). **Never** deletes the auth user.
+  - `adminDeleteInvitation(id, confirmSlug)` — **only for UNPAID drafts**: require
+    `confirmSlug === slug`; remove `invitation-media/<id>/` files first, then delete
+    the invitation row (children cascade). **Never** deletes the auth user.
+  - `adminArchiveInvitation(id, on)` — a **paid** invitation cannot be hard-deleted
+    (it has financial records to keep); "delete" on a paid one sets `archived_at`
+    instead (hidden from the default list; row + payments/refunds preserved).
   - `adminCreateInvitationForClient(input)` — look up the auth user by email; if
     absent, `auth.admin.createUser` (email pre-confirmed) + `generateLink({ type:
     'recovery' })` for a set-password URL sent via a **branded Resend email**; if
@@ -119,9 +125,11 @@ else is per-slug.
 
 ## Red-team / edge cases (baked into the design)
 
-- Delete removes **storage first** (no cascade), then the row (children cascade);
-  **never** the auth user (owner may have other invitations) — account deletion
-  is module 5.
+- **Hard-delete is only for unpaid drafts** — a paid invitation is **archived**
+  (`archived_at`), never deleted, so its payment/refund history survives (bookkeeping
+  / tax). For a draft, delete removes **storage first** (no cascade), then the row
+  (children cascade); **never** the auth user (owner may have other invitations) —
+  account deletion is module 5.
 - **Type-to-confirm the slug** on delete (irreversible + encrypted guest PII).
 - **Suspend beats publish:** the couple's own publish path must check
   `suspended_at`, or a takedown is toothless.
@@ -158,7 +166,7 @@ else is per-slug.
 
 ## Operator steps
 
-- Apply the module-2 migration (`paid_source`, `suspended_at`, `admin_actions`)
-  via the Supabase MCP `apply_migration` or SQL editor.
+- Apply the module-2 migration (`paid_source`, `suspended_at`, `archived_at`,
+  `admin_actions`) via the Supabase MCP `apply_migration` or SQL editor.
 - Create a **branded Resend email template** for the client set-password invite
   (used by `adminCreateInvitationForClient` when provisioning a new account).
