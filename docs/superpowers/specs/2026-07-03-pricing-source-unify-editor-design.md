@@ -116,6 +116,11 @@ every surface refreshes at once.
 
 ### Workstream 3 — Operator price/quota editor (env-gated)
 
+> **Merged UI (operator's choice):** this is **not** a standalone `/admin/pricing`
+> — it is the **"Paket & Harga" section of the unified `/admin/templates` page**
+> (module 4). Module 1 owns the price/plan data-source unification + `updatePlan`;
+> module 4 owns the shared page. The paths below name that page's plans section.
+
 - **`lib/admin/is-admin.ts`** (`server-only`):
   - `isAdminEmail(email?: string): boolean` — parses `process.env.ADMIN_EMAILS`
     (comma-separated), trims + lowercases both sides, returns membership.

@@ -41,6 +41,20 @@ writes it + revalidates.
 - **Thumbnail = upload via the existing `/api/upload`** (stored URL).
 - Admin **chrome** is Indonesian-only (module 0), but the tagline/blurb it edits are
   **bilingual public marketing content** (two fields, id + en) — no contradiction.
+- **Unified page (merged with module 1):** the price/plan editor and this template
+  editor are **one page** `/admin/templates` — each template opens an editor with a
+  **Tampilan** (presentation) section + a **Paket & Harga** (plans) section. There is
+  **no separate `/admin/pricing`** (operator's mental model: a template = its look +
+  its prices).
+- **Two states only** (`enabled` on/off) — no per-template "Segera/preview" state;
+  "coming soon" stays auto-derived per category.
+- **Folded-in improvements (design notes, not questions):** a live card **preview**
+  while editing; EN tagline/blurb **pre-seeded** from the current copy (never start
+  blank); show **usage + revenue per template** (active invitations from module 2;
+  units sold + revenue from module 3) so a popular template isn't disabled by
+  mistake; a **draft (unpaid) on a just-disabled template can still finish
+  checkout** (disable blocks new picks, not an in-flight purchase); the editable
+  **accent is the card accent only**, not the template's internal palettes.
 
 ## Data model (module-4 migration)
 
@@ -55,8 +69,11 @@ writes it + revalidates.
 
 ## Architecture
 
-- **`/admin/templates/page.tsx`** (server, `requireAdmin()`): lists the code
-  templates (`TEMPLATE_IDS`), each with an edit form.
+- **`/admin/templates/page.tsx`** (server, `requireAdmin()`): the single unified
+  template page (no separate `/admin/pricing`). Lists the code templates
+  (`TEMPLATE_IDS`); each opens a two-section editor — **Tampilan** (presentation,
+  this module) + **Paket & Harga** (plans, via module 1's `updatePlan`) — with a
+  live card preview and a usage/revenue line per template.
 - **`TemplateEditor.tsx`** (client): per template — enabled toggle, label, category
   dropdown (from `CATEGORIES`), tags, accent (colour), thumbnail (upload via
   `/api/upload`), sort order, and tagline + blurb each with an **ID and EN** field.
