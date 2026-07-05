@@ -46,6 +46,11 @@ that responsibility now lives here.
 - `app/admin/layout.tsx` calls `requireAdmin()` **once** → gates every `/admin/*`
   page; on failure `redirect('/')`. **Every mutating server action re-checks
   `requireAdmin()`** (the layout gate does not protect action invocations).
+- **Admin MFA (free TOTP):** the admin account enrols an authenticator-app TOTP
+  factor (free on all Supabase tiers; SMS MFA is the paid one and is NOT used).
+  `requireAdmin()` requires an **MFA-verified session (AAL2)**, not just an
+  allowlisted email — a stolen password alone can't reach `/admin`. The login flow
+  handles the TOTP challenge for enrolled users.
 
 ### 2. Layout / nav / overview / entry
 - `app/admin/layout.tsx`: nav (Overview · Pricing · Templates · Invitations ·
@@ -100,6 +105,12 @@ that responsibility now lives here.
   `(source_type, source_id)` (so "refund once" isn't app-logic only).
 
 ### 7. Owner-app integration (honor admin actions) — easy to forget
+- **One shared visibility resolver** — a single `invitationPublicStatus(inv)` that
+  folds `is_published` + `is_paid` + `expires_at` + `suspended_at` + `archived_at` +
+  `pii_erased_at` into one verdict (viewable / draft / expired / suspended /
+  archived). The public page, profile, dashboard, and admin ALL use it — so a
+  suspended / archived / erased invitation can never leak on one surface while
+  hidden on another.
 - `suspended_at` is checked in **`[template]/[slug]/page.tsx`** (public render →
   taken-down state), **`/api/invitation/[slug]/publish`** (couple can't re-publish
   a suspended invitation), and a **dashboard banner** ("undangan disuspend /
@@ -112,6 +123,9 @@ that responsibility now lives here.
 - Admin lists/snapshots use `count` (guests / rsvps / attendances); **never**
   decrypt `*_enc` fields. Couple names come from `config`. Raw-PII export is a
   module-5, audited, break-glass feature.
+- An **anonymized** invitation (module 5 `pii_erased_at`) shows its couple name as
+  **"[dihapus]"** wherever it still appears (the payments ledger / CSV) — the
+  financial row is kept, the identity is not.
 
 ### 9. Concurrency / idempotency + money integrity
 - Money mutations (comp, refund apply, upgrade/renewal webhook) are **idempotent**
@@ -125,6 +139,9 @@ that responsibility now lives here.
   refunding an upgrade reverts the plan — money and entitlement stay in sync.
 - The admin ledger is the **complete** money view (Xendit + manual + comp); the
   Xendit slice is reconciled against Xendit to catch drift.
+- **User-facing sensitive actions are rate-limited** via the existing `rateLimit`:
+  `requestRefund`, `requestAccountDeletion`, and `exportMyData` (the decrypt path)
+  — so they can't be spammed or scraped.
 
 ## Interfaces
 
@@ -151,5 +168,9 @@ that responsibility now lives here.
 
 ## Operator steps
 
-- Set `ADMIN_EMAILS` (comma-separated) and `RESEND_API_KEY` + a from-address in
-  `.env.local` and Vercel.
+- Add `ADMIN_EMAILS` to `.env.example`; set `ADMIN_EMAILS=fincardsland@gmail.com` +
+  `RESEND_API_KEY` + a **verified `@fincards.land`** `RESEND_FROM` (not the
+  `resend.dev` test sender) in `.env.local` and Vercel.
+- Enrol a TOTP factor on the admin Supabase account (free).
+- See `docs/DEPLOYMENT-CHECKLIST.md` for the full Vercel / Xendit / Supabase /
+  Resend go-live steps.
