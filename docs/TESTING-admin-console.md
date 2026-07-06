@@ -175,6 +175,67 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 
 ---
 
+## Modul 3 — Pembayaran & Pendapatan
+
+> Modul ini dipotong 5: **3A** pondasi angka (simpan nominal asli tiap bayar) ·
+> **3B** layar `/admin/payments` (ringkasan, tren, tabel, CSV) · **3C** cocokkan &
+> cek-ulang · **3D** refund operator (manual + Xendit) · **3E** ajukan-refund
+> (pasangan → operator setujui). **Yang butuh Xendit sungguhan (refund otomatis,
+> webhook refund, chargeback) hanya bisa dites di sandbox saat go-live** — lihat
+> `docs/DEPLOYMENT-CHECKLIST.md`. Yang di bawah ini bisa dites SEKARANG tanpa uang asli.
+
+> **Siapkan bahan:** kamu butuh minimal satu undangan **berbayar manual** (bukan comp,
+> karena comp = gratis, tak bisa direfund). Cara cepat: `/admin/invitations` →
+> pilih satu draft → **Lunas manual** → nominal `149000`. (Atau **＋ Buat undangan**
+> untuk klien dengan Pembayaran = *Lunas manual*.)
+
+**T3.1 — Layar pendapatan (3A+3B)**
+1. Buka `/admin` → **Pembayaran** (`/admin/payments`).
+2. Kalau muncul kotak merah **“N undangan berbayar belum tercatat nominalnya”** → klik
+   **“Isi angka lama”** (di bagian Transaksi) → konfirmasi.
+- **Harusnya terlihat:** kartu **Masuk kotor**, **Bersih (kotor − fee)**, **Bulan ini (WIB)**,
+  **Direfund**; baris **Xendit / Manual**; **Conversion draft→bayar**; **grafik batang 12 bulan**;
+  lalu tabel **Transaksi**. Undangan yang tadi kamu *Lunas manual* muncul: sumber **manual**,
+  jumlah **Rp 149.000**, status **lunas**. Comp (mis. `tes-klien-01`) TIDAK menambah kotor.
+3. Klik **Ekspor CSV** → file `transaksi-YYYY-MM-DD.csv` terunduh (hanya kolom keuangan, tanpa data tamu).
+
+**T3.2 — Refund langsung oleh operator (3D, jalur manual)**
+1. Di tabel Transaksi, cari baris **manual** tadi (status *lunas*) → klik **Refund**.
+2. Muncul konfirmasi “tandai refund manual … pastikan sudah transfer balik” → **OK** → isi alasan → OK.
+- **Harusnya terlihat:** halaman reload; baris jadi **direfund** (redup), **Masuk kotor turun**,
+  **Direfund naik**. Buka `/admin/invitations` → undangan itu **tidak lagi tayang** (refund = produk turun).
+  *(Membuktikan: uang balik ⇄ entitlement ikut dibalik.)*
+3. *(Reversibel)* mau kembalikan untuk tes lain? Terbitkan lagi via `/admin/invitations` → **Terbitkan**.
+
+**T3.3 — Ajukan refund: pasangan → operator (3E)**
+> Butuh login sebagai **klien** (bukan admin). Paling gampang: buat undangan klien berbayar manual
+> lewat **＋ Buat undangan** (Pembayaran = Lunas manual), lalu login klien di **jendela incognito**.
+1. **Sebagai klien** buka dashboard undangannya → di bawah header ada tautan **“Ajukan pengembalian dana”** → klik.
+2. Pilih alasan (mis. *Bayar dobel*), isi rekening tujuan (karena bayar manual) → **Kirim permintaan**.
+- **Harusnya terlihat:** “✓ Permintaan … terkirim”.
+3. **Sebagai admin** buka `/admin/payments` → panel merah **“Permintaan refund (1)”** di atas.
+- **Harusnya terlihat:** baris berisi slug, nominal, alasan, ringkasan pemakaian, dan **badge verdikt**
+  (mis. *Masih layak* hijau, atau *Tidak layak — sudah dipakai* merah kalau sudah ada tamu/RSVP).
+4. Klik **Setujui** → (manual) konfirmasi → reload.
+- **Harusnya terlihat:** permintaan hilang dari panel; transaksinya jadi **direfund**; undangan **tidak tayang**.
+  Coba **Tolak** pada permintaan lain → hilang juga (tercatat sebagai ditolak).
+
+**T3.4 — Cocokkan dengan Xendit (3C)**
+1. Di `/admin/payments` klik **“Cocokkan sekarang”**.
+- **Harusnya terlihat (tanpa pembayaran Xendit nyangkut):** **“✓ Cocok semua…”**. Kalau ada pembayaran
+  Xendit yang LUNAS tapi belum masuk (webhook kelewat), muncul barisnya + tombol **Terapkan**.
+
+**T3.5 — Aktivitas mencatat refund**
+1. Buka `/admin` → **Aktivitas**.
+- **Harusnya terlihat:** entri **“Menyetujui refund …”**, **“Comp/lunas …”**, dll dengan email admin + waktu.
+
+> **Bersih-bersih:** undangan yang direfund jadi tidak tayang — terbitkan lagi atau arsipkan/ hapus
+> lewat `/admin/invitations` sesuai kebutuhan.
+
+---
+
 ## Belum dites (belum dibangun) — jangan dicari dulu
 
-- **Modul 3–5** — pembayaran/refund, metadata template, akun & data.
+- **Refund via Xendit + webhook refund + chargeback (3C/3D)** — perlu **sandbox Xendit** saat
+  go-live (aktifkan refund + webhook `refund.succeeded/failed`); ada di `docs/DEPLOYMENT-CHECKLIST.md`.
+- **Modul 4–5** — metadata/katalog template, akun & data (PDP).
