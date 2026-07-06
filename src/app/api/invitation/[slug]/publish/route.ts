@@ -29,6 +29,22 @@ export async function POST(req: Request, { params }: Ctx) {
   }
 
   const supabase = createSupabaseAdminClient()
+
+  // Suspend beats publish: an admin takedown (`suspended_at`) blocks the owner
+  // from re-publishing until it's lifted. Un-publishing (false) is always allowed.
+  if (body.is_published === true) {
+    const { data: row } = (await (supabase.from('invitations') as any)
+      .select('suspended_at')
+      .eq('id', owner.id)
+      .maybeSingle()) as { data: { suspended_at: string | null } | null }
+    if (row?.suspended_at) {
+      return NextResponse.json(
+        { error: 'Undangan sedang dinonaktifkan oleh admin dan belum bisa diterbitkan.' },
+        { status: 403 },
+      )
+    }
+  }
+
   // Cast to any at from() to avoid Supabase 'never' inference on untyped schema
   const { error } = await (supabase.from('invitations') as any)
     .update({ is_published: body.is_published, updated_at: new Date().toISOString() })

@@ -101,6 +101,13 @@ export default async function DashboardPage({ params }: PageProps) {
     )
   }
 
+  // 3a. Suspend gate (admin hard takedown). Shown before the payment gate: a
+  //     suspended owner can't reach the editor at all, so they can't hit the
+  //     Publish button (the publish API also refuses — belt and suspenders).
+  if (invitation.suspended_at) {
+    return <SuspendedNotice slug={slug} lang={lang} />
+  }
+
   // 3b. Payment gate: dashboard is locked while the invitation is unpaid or
   //     its active period has run out. Owner sees a "bayar / perpanjang"
   //     screen instead of the editor; preview link is offered only in the
@@ -260,6 +267,27 @@ function NoSuchInvitation({ slug, dict, lang }: { slug: string; dict: Dict['dash
           {dict.noInvitationPrefix} <code>{slug}</code> {dict.noInvitationSuffix}
         </h1>
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>{dict.noInvitationBody}</p>
+      </div>
+    </main>
+    </>
+  )
+}
+
+/** Admin hard-takedown notice shown to the owner in place of the editor. */
+function SuspendedNotice({ slug, lang }: { slug: string; lang: Lang }) {
+  return (
+    <>
+    <AuthChrome lang={lang} />
+    <main style={panelStyle}>
+      <div style={cardStyle}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 32, margin: '0 0 12px' }}>
+          Undangan dinonaktifkan sementara
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+          Undangan <code>{slug}</code> sedang dinonaktifkan sementara oleh tim FinCards,
+          jadi editor tidak bisa dibuka dan undangan tidak tayang untuk sementara.
+          Silakan hubungi tim FinCards untuk info lebih lanjut.
+        </p>
       </div>
     </main>
     </>

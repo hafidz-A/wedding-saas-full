@@ -102,7 +102,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     const admin = createSupabaseAdminClient()
     const { data, error } = (await admin
       .from('invitations')
-      .select('id, config, is_published, is_paid, template_id, expires_at, owner_user_id')
+      .select('id, config, is_published, is_paid, template_id, expires_at, owner_user_id, suspended_at')
       .eq('slug', slug)
       .maybeSingle()) as {
       data: {
@@ -113,6 +113,7 @@ export default async function Page({ params, searchParams }: PageProps) {
         template_id: string | null
         expires_at: string | null
         owner_user_id: string | null
+        suspended_at: string | null
       } | null
       error: any
     }
@@ -133,6 +134,12 @@ export default async function Page({ params, searchParams }: PageProps) {
 
     if (isExpired && !isDemoSlug) {
       return <ExpiredInvitationView slug={slug} />
+    }
+
+    // Suspend (admin hard takedown) hides the page from EVERYONE — including the
+    // owner's own preview. It beats the owner-preview bypass below on purpose.
+    if (data?.suspended_at && !isDemoSlug) {
+      return <SuspendedInvitationView slug={slug} />
     }
 
     // Guests can only see an invitation that is both published AND paid.
@@ -386,6 +393,45 @@ function NotReadyInvitationView({ slug }: { slug: string }) {
   )
 }
 
+/** Admin hard-takedown notice (suspend). Neutral wording — no accusation. */
+function SuspendedInvitationView({ slug }: { slug: string }) {
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 24,
+        background: 'linear-gradient(135deg, var(--surface-warm) 0%, var(--surface-sunken) 100%)',
+        fontFamily: 'var(--font-body, system-ui)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 480,
+          padding: 40,
+          background: 'rgba(255,255,255,0.95)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)',
+          textAlign: 'center',
+        }}
+      >
+        <p style={{ textTransform: 'uppercase', letterSpacing: '0.32em', fontSize: 11, color: 'var(--interactive-primary)', margin: '0 0 10px' }}>
+          Undangan
+        </p>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'italic', fontSize: 32, margin: 0, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+          Undangan dinonaktifkan sementara
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: '14px 0 0', fontSize: 14 }}>
+          Undangan{' '}
+          <code style={{ padding: '2px 8px', borderRadius: 'var(--radius-sm)', background: 'var(--border-subtle)', fontFamily: 'monospace', fontSize: 12 }}>{slug}</code>{' '}
+          sedang dinonaktifkan sementara. Silakan hubungi tim FinCards untuk info lebih lanjut.
+        </p>
+      </div>
+    </main>
+  )
+}
+
 function ExpiredInvitationView({ slug }: { slug: string }) {
   const t = getDict(getLang()).common.invitationExpired
   return (
@@ -517,20 +563,20 @@ export async function generateMetadata({ params }: PageProps) {
       const admin = createSupabaseAdminClient()
       const { data } = (await admin
         .from('invitations')
-        .select('config, is_published, is_paid, expires_at')
+        .select('config, is_published, is_paid, expires_at, suspended_at')
         .eq('slug', slug)
         .maybeSingle()) as {
-        data: { config: any; is_published: boolean; is_paid: boolean; expires_at: string | null } | null
+        data: { config: any; is_published: boolean; is_paid: boolean; expires_at: string | null; suspended_at: string | null } | null
       }
 
-      // Privacy gate: only a LIVE invitation (published + paid + not expired)
-      // exposes the couple's real title/description/photo in <head> and link
-      // previews. A draft/unpaid/expired row (whose page 404s) must NOT leak
-      // the couple's name or OG image to anyone who guesses the slug. Demo
-      // slugs are intentionally public previews.
+      // Privacy gate: only a LIVE invitation (published + paid + not expired +
+      // not suspended) exposes the couple's real title/description/photo in
+      // <head> and link previews. A draft/unpaid/expired/suspended row (whose
+      // page 404s) must NOT leak the couple's name or OG image to anyone who
+      // guesses the slug. Demo slugs are intentionally public previews.
       const isExpired =
         !!data?.expires_at && Date.parse(data.expires_at) < Date.now()
-      const isLive = !!data?.is_published && !!data?.is_paid && !isExpired
+      const isLive = !!data?.is_published && !!data?.is_paid && !isExpired && !data?.suspended_at
       if (!isDemoSlug && (!data || !isLive)) {
         return { title: fallbackTitle }
       }
