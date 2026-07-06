@@ -12,6 +12,8 @@ export interface TemplatePlanRow {
   sort_order: number
   /** Guests included in the plan price. effective_quota = this + guest_quota_extra. */
   base_guest_quota: number
+  /** Strike-through "was" price for discount display. null when no discount is active. */
+  compare_at_price_idr: number | null
 }
 
 /**
@@ -33,6 +35,7 @@ function mapRow(r: any): TemplatePlanRow {
     features: Array.isArray(r.features) ? (r.features as string[]) : [],
     sort_order: Number(r.sort_order),
     base_guest_quota: r.base_guest_quota == null ? 200 : Number(r.base_guest_quota),
+    compare_at_price_idr: r.compare_at_price_idr == null ? null : Number(r.compare_at_price_idr),
   }
 }
 
@@ -47,7 +50,7 @@ export const getTemplatePlans = unstable_cache(
   async (templateId: string): Promise<TemplatePlanRow[]> => {
     const supabase = createSupabaseAdminClient()
     const { data, error } = await (supabase.from('template_plans') as any)
-      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order, base_guest_quota')
+      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order, base_guest_quota, compare_at_price_idr')
       .eq('template_id', templateId)
       .order('sort_order', { ascending: true })
     if (error) {
@@ -65,7 +68,7 @@ export const getAllTemplatePlans = unstable_cache(
   async (): Promise<Record<string, TemplatePlanRow[]>> => {
     const supabase = createSupabaseAdminClient()
     const { data, error } = await (supabase.from('template_plans') as any)
-      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order, base_guest_quota')
+      .select('template_id, plan_code, display_name, price_idr, duration_days, features, sort_order, base_guest_quota, compare_at_price_idr')
       .order('template_id', { ascending: true })
       .order('sort_order', { ascending: true })
     if (error) {

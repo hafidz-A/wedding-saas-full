@@ -1,10 +1,21 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
+
+// unstable_cache is pulled in at module scope by template-plans.ts; keep it a
+// passthrough so the module graph loads outside a Next request scope.
+vi.mock('next/cache', () => ({ unstable_cache: (fn: any) => fn }))
+vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
+
 import { resolvePlanFrom, computeUpgradeAmount, planBaseQuota } from '../plans'
-import type { TemplatePlanRow } from '../template-plans'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { getTemplatePlans, type TemplatePlanRow } from '../template-plans'
+
+const mockAdmin = vi.mocked(createSupabaseAdminClient)
+beforeEach(() => { vi.clearAllMocks() })
 
 const rows: TemplatePlanRow[] = [
-  { template_id: 'lovebirds', plan_code: 'basic',   display_name: 'Basic',   price_idr: 149000, duration_days: 365,  features: [], sort_order: 1, base_guest_quota: 200 },
-  { template_id: 'lovebirds', plan_code: 'premium', display_name: 'Premium', price_idr: 299000, duration_days: null, features: [], sort_order: 2, base_guest_quota: 300 },
+  { template_id: 'lovebirds', plan_code: 'basic',   display_name: 'Basic',   price_idr: 149000, duration_days: 365,  features: [], sort_order: 1, base_guest_quota: 200, compare_at_price_idr: null },
+  { template_id: 'lovebirds', plan_code: 'premium', display_name: 'Premium', price_idr: 299000, duration_days: null, features: [], sort_order: 2, base_guest_quota: 300, compare_at_price_idr: null },
 ]
 
 describe('resolvePlanFrom', () => {
@@ -57,5 +68,45 @@ describe('planBaseQuota', () => {
   it('falls back to DEFAULT_BASE_QUOTA then 200 for unknown plans', () => {
     expect(planBaseQuota([], 'premium')).toBe(300)
     expect(planBaseQuota([], 'free')).toBe(200)
+  })
+})
+
+describe('getTemplatePlans — compare_at_price_idr', () => {
+  it('maps a numeric compare_at_price_idr onto the row', async () => {
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({
+        tables: {
+          template_plans: {
+            select: {
+              data: [
+                { template_id: 'lovebirds', plan_code: 'premium', display_name: 'Premium', price_idr: 299000, duration_days: null, features: [], sort_order: 2, base_guest_quota: 300, compare_at_price_idr: 399000 },
+              ],
+            },
+          },
+        },
+      }) as any,
+    )
+    const plans = await getTemplatePlans('lovebirds')
+    expect(plans[0].compare_at_price_idr).toBe(399000)
+  })
+
+  it('maps a null/absent compare_at_price_idr to null', async () => {
+    mockAdmin.mockReturnValue(
+      createFakeSupabase({
+        tables: {
+          template_plans: {
+            select: {
+              data: [
+                { template_id: 'lovebirds', plan_code: 'basic', display_name: 'Basic', price_idr: 149000, duration_days: 365, features: [], sort_order: 1, base_guest_quota: 200, compare_at_price_idr: null },
+                { template_id: 'lovebirds', plan_code: 'premium', display_name: 'Premium', price_idr: 299000, duration_days: null, features: [], sort_order: 2, base_guest_quota: 300 },
+              ],
+            },
+          },
+        },
+      }) as any,
+    )
+    const plans = await getTemplatePlans('lovebirds')
+    expect(plans[0].compare_at_price_idr).toBeNull()
+    expect(plans[1].compare_at_price_idr).toBeNull()
   })
 })
