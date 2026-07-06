@@ -1,5 +1,7 @@
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
+import { getAllTemplatePlans } from '@/lib/payments/template-plans'
+import { toPlanDisplay, type PlanDisplay } from '@/lib/payments/plan-display'
 import { SiteNav } from '@/components/site/SiteNav'
 import { SiteFooter } from '@/components/site/SiteFooter'
 import { SmoothScroll } from '@/components/marketing/SmoothScroll'
@@ -12,10 +14,14 @@ import { Testimonials } from '@/components/marketing/Testimonials'
 import { FinalCta } from '@/components/marketing/FinalCta'
 import stack from '@/components/marketing/StackReveal.module.css'
 
-export default function HomePage() {
+export default async function HomePage() {
   const lang = getLang()
   const t = getDict(lang)
-  
+
+  const rawPlans = await getAllTemplatePlans()
+  const plansByTemplate: Record<string, PlanDisplay[]> = {}
+  for (const tid of Object.keys(rawPlans)) plansByTemplate[tid] = rawPlans[tid].map(toPlanDisplay)
+
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
@@ -31,7 +37,7 @@ export default function HomePage() {
           <EmotionalHook t={t.landing.emotionalHook} />
 
           {/* 3. Template + Palette Explorer (replaces the old TemplateShowcase) */}
-          <VibeExploration lang={lang} t={t.landing.vibeExploration} />
+          <VibeExploration lang={lang} t={t.landing.vibeExploration} plans={plansByTemplate} />
 
           {/* 4. Invitation Feature Experience */}
           <Features t={t.landing.features} />

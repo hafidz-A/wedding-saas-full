@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Dict } from '@/lib/i18n'
+import { type PlanDisplay } from '@/lib/payments/plan-display'
 import { getCatalogEntry } from '@/config/templateCatalog'
 import { useReveal } from '@/hooks/useReveal'
 import { TEMPLATE_VIBES } from './vibeData'
@@ -17,7 +18,7 @@ import styles from './VibeExploration.module.css'
 
 type VibeDict = Dict['landing']['vibeExploration']
 
-export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict }) {
+export function VibeExploration({ lang, t, plans }: { lang: 'id' | 'en'; t: VibeDict; plans?: Record<string, PlanDisplay[]> }) {
   const { ref } = useReveal<HTMLDivElement>()
   const innerRef = useRef<HTMLDivElement>(null)
   const [pinned, setPinned] = useState(false)
@@ -100,6 +101,12 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
   const template = filtered[safeIndex] ?? TEMPLATE_VIBES[0]
   const palette = template.palettes[paletteIndex] ?? template.palettes[0]
   const catalog = getCatalogEntry(template.id)
+  const displayPlans: PlanDisplay[] =
+    plans?.[template.id] ??
+    (catalog.plans ?? []).map((pl: any) => ({
+      id: pl.id, name: pl.name, price: pl.price, amountIDR: pl.amountIDR ?? 0,
+      compareAtPrice: null, features: pl.features ?? [], baseQuota: 200,
+    }))
   const copy = t.byTemplate[template.id]
   const isDark = palette.mode === 'dark'
 
@@ -395,7 +402,7 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
                           {t.plansTitle}
                         </span>
                         <div className={styles.planGrid}>
-                          {(catalog.plans ?? []).map((pl: { id: string; name: string; price: string; features: string[] }) => (
+                          {displayPlans.map((pl) => (
                             <div
                               key={pl.id}
                               className={styles.planCard}
@@ -403,8 +410,14 @@ export function VibeExploration({ lang, t }: { lang: 'id' | 'en'; t: VibeDict })
                             >
                               <div className={styles.planTop}>
                                 <span className={styles.planName} style={{ color: palette.fg }}>{pl.name}</span>
-                                <span className={styles.planPrice} style={{ color: palette.accent }}>{pl.price}</span>
+                                <span className={styles.planPrice} style={{ color: palette.accent }}>
+                                  {pl.compareAtPrice && (
+                                    <span style={{ textDecoration: 'line-through', opacity: 0.55, marginRight: 6, color: palette.fgMuted }}>{pl.compareAtPrice}</span>
+                                  )}
+                                  {pl.price}
+                                </span>
                               </div>
+                              <span style={{ fontSize: 12, color: palette.fgMuted }}>{t.guestQuota.replace('{n}', String(pl.baseQuota))}</span>
                               <ul className={styles.planFeatures} style={{ color: palette.fgMuted }}>
                                 {pl.features.map((f: string) => (
                                   <li key={f}>{f}</li>
