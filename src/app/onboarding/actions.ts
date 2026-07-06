@@ -240,8 +240,10 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
       failureUrl: `${dash}?payment=failed`,
     })
 
+    // Lock the amount we're charging so the webhook verifies against IT (not a
+    // recomputed price) — a price/promo change mid-checkout can't break payment.
     await (admin.from('invitations') as any)
-      .update({ xendit_invoice_id: invoiceId, xendit_external_id: externalId })
+      .update({ xendit_invoice_id: invoiceId, xendit_external_id: externalId, expected_amount_idr: amountIDR })
       .eq('id', inv.id)
 
     return { ok: true, invoiceUrl }
@@ -277,7 +279,7 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, plan, template_id, owner_user_id, is_paid, xendit_invoice_id')
+      .select('id, plan, template_id, owner_user_id, is_paid, xendit_invoice_id, guest_quota_extra, expected_amount_idr')
       .eq('id', invitationId)
       .maybeSingle()) as {
       data: {
@@ -287,6 +289,8 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
         owner_user_id: string
         is_paid: boolean
         xendit_invoice_id: string | null
+        guest_quota_extra: number | null
+        expected_amount_idr: number | null
       } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
@@ -297,12 +301,16 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
     const resolved = await resolvePlan(inv.template_id, inv.plan)
     if (!resolved) return { ok: false, error: 'Plan tidak valid' }
 
+    // Verify against the amount LOCKED at checkout (plan + any quota add-on),
+    // falling back to a recompute for older checkouts. Using the plan price alone
+    // would wrongly reject anyone who bought extra guest quota.
+    const expected = inv.expected_amount_idr ?? initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
     const snap = await getXenditInvoice(inv.xendit_invoice_id)
-    if (!isPaidStatus(snap.status) || snap.amountIDR !== resolved.amountIDR) {
+    if (!isPaidStatus(snap.status) || snap.amountIDR !== expected) {
       return { ok: true, published: false, status: snap.status }
     }
 
-    await publishPaidInvitation(admin, inv)
+    await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expected, paidSource: 'xendit' })
     revalidatePath('/[template]/[slug]', 'page')
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     revalidatePath('/profile', 'page')

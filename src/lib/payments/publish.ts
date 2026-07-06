@@ -98,14 +98,19 @@ export async function publishPaidInvitation(
   admin: any,
   inv: PublishableInvitation,
   nowMs: number = Date.now(),
+  opts: { paidAmountIDR?: number | null; feeIDR?: number | null; paidSource?: string } = {},
 ): Promise<void> {
   const resolved = await resolvePlan(inv.template_id, inv.plan)
-  await (admin.from('invitations') as any)
-    .update({
-      is_paid: true,
-      is_published: true,
-      paid_at: new Date(nowMs).toISOString(),
-      expires_at: resolved ? resolved.expiresAt(nowMs) : null,
-    })
-    .eq('id', inv.id)
+  const patch: Record<string, unknown> = {
+    is_paid: true,
+    is_published: true,
+    paid_at: new Date(nowMs).toISOString(),
+    expires_at: resolved ? resolved.expiresAt(nowMs) : null,
+  }
+  // Additive money-capture (Module 3): record what was actually charged + how it
+  // was paid, so revenue never has to be recomputed from a (mutable) price later.
+  if (opts.paidAmountIDR != null) patch.paid_amount_idr = opts.paidAmountIDR
+  if (opts.feeIDR != null) patch.fee_idr = opts.feeIDR
+  if (opts.paidSource) patch.paid_source = opts.paidSource
+  await (admin.from('invitations') as any).update(patch).eq('id', inv.id)
 }

@@ -65,7 +65,7 @@ export async function POST(req: Request) {
   }
   const { data: inv } = (await admin
     .from('invitations')
-    .select('id, plan, template_id, is_paid, xendit_invoice_id, guest_quota_extra')
+    .select('id, plan, template_id, is_paid, xendit_invoice_id, guest_quota_extra, expected_amount_idr')
     .eq('id', invIdFromExt)
     .maybeSingle()) as {
     data: {
@@ -75,6 +75,7 @@ export async function POST(req: Request) {
       is_paid: boolean
       xendit_invoice_id: string | null
       guest_quota_extra: number | null
+      expected_amount_idr: number | null
     } | null
   }
   if (!inv || inv.is_paid) return NextResponse.json({ ok: true }) // unknown or already processed
@@ -85,10 +86,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
-  // The amount we expect is the plan price PLUS the guest-quota add-on the owner
-  // chose at checkout (stored on the draft). Verifying against the plan price
-  // alone would reject every purchase that bought extra quota.
-  const expectedAmount = initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
+  // Prefer the amount LOCKED at checkout-start (`expected_amount_idr`), so a price
+  // or promo change mid-checkout can't reject a legit payment. Fall back to the
+  // recomputed plan+quota amount for invitations whose checkout predates that lock.
+  const expectedAmount = inv.expected_amount_idr ?? initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
 
   // Authoritative verification: re-fetch THE INVOICE THAT FIRED THIS WEBHOOK
   // (body.id) rather than the row's stored invoice — they can differ if the
@@ -122,7 +123,8 @@ export async function POST(req: Request) {
 
   if (!verified) return NextResponse.json({ ok: true }) // ack, but do not publish
 
-  await publishPaidInvitation(admin, inv)
+  // Capture the actual charge + channel so revenue is never recomputed later.
+  await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expectedAmount, paidSource: 'xendit' })
   return NextResponse.json({ ok: true })
 }
 
