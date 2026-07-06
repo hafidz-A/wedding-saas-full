@@ -7,8 +7,9 @@ import { logAdminAction } from '@/lib/admin/log'
 import { revalidateInvitation } from '@/lib/admin/revalidate'
 import { resolvePlan } from '@/lib/payments/plans'
 import { initialPurchaseAmount } from '@/lib/payments/quota'
-import { getXenditInvoice, isPaidStatus } from '@/lib/payments/xendit'
+import { getXenditInvoice, isPaidStatus, createXenditRefund } from '@/lib/payments/xendit'
 import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon } from '@/lib/payments/publish'
+import { loadRefundSource, sourceHasOpenRefund, settleRefund, type RefundSourceType } from '@/lib/payments/refunds'
 import { buildTransactions, transactionsToCsv } from '@/lib/payments/transactions'
 import { fetchLedger } from './data'
 
@@ -182,4 +183,68 @@ export async function adminReconcileXendit(): Promise<{ ok: boolean; error?: str
 
   await logAdminAction(admin.email, { action: 'payments.reconcile', meta: { found: out.length } })
   return { ok: true, mismatches: out }
+}
+
+/**
+ * MANUAL refund: the operator already returned the money externally (offline
+ * transfer, or a channel Xendit can't reverse). Records a succeeded refunds row +
+ * reverses the entitlement. Works for any source EXCEPT comp (nothing to refund).
+ * The amount is always the STORED paid amount (never client-supplied).
+ */
+export async function adminRefund(
+  sourceType: RefundSourceType, sourceId: string, reason?: string,
+  destination?: { bank?: string; account_no?: string; holder?: string },
+): Promise<Result> {
+  const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
+  const db = createSupabaseAdminClient()
+  const src = await loadRefundSource(db, sourceType, sourceId)
+  if (!src) return { ok: false, error: 'Sumber tidak ditemukan / belum dibayar' }
+  if (src.paidSource === 'comp') return { ok: false, error: 'Comp (gratis) tidak bisa direfund' }
+  if (await sourceHasOpenRefund(db, sourceType, sourceId)) return { ok: false, error: 'Sumber ini sudah punya refund' }
+  const { data: inserted, error } = await (db.from('refunds') as any).insert({
+    invitation_id: src.invitationId, source_type: sourceType, source_id: sourceId,
+    amount_idr: src.amountIDR, method: 'manual', status: 'pending',
+    destination: destination ?? null, reason: reason ?? null, admin_email: admin.email,
+  }).select('id').single()
+  if (error || !inserted) return { ok: false, error: 'Gagal mencatat refund' }
+  // Operator already moved the money → settle now + reverse entitlement.
+  await settleRefund(db, (inserted as { id: string }).id)
+  await logAdminAction(admin.email, { action: 'refund.manual', targetType: 'invitation', targetId: src.invitationId, meta: { sourceType, amount: src.amountIDR } })
+  revalidateInvitation()
+  return { ok: true }
+}
+
+/**
+ * XENDIT refund: calls the Xendit Refund API (returns to the original payment
+ * method — can't be diverted). Records a PENDING row first, then fires the API;
+ * the refund.succeeded webhook flips it to succeeded + reverses the entitlement.
+ * xendit sources only — offline/manual money must use adminRefund.
+ */
+export async function adminRefundViaXendit(sourceType: RefundSourceType, sourceId: string, reason?: string): Promise<Result> {
+  const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
+  const db = createSupabaseAdminClient()
+  const src = await loadRefundSource(db, sourceType, sourceId)
+  if (!src) return { ok: false, error: 'Sumber tidak ditemukan / belum dibayar' }
+  if (src.paidSource !== 'xendit') return { ok: false, error: 'Refund via Xendit hanya untuk pembayaran Xendit. Untuk manual/offline: transfer balik lalu "Tandai refund".' }
+  if (!src.xenditInvoiceId) return { ok: false, error: 'Invoice Xendit tidak ditemukan untuk sumber ini' }
+  if (await sourceHasOpenRefund(db, sourceType, sourceId)) return { ok: false, error: 'Sumber ini sudah punya refund' }
+  const { data: inserted, error } = await (db.from('refunds') as any).insert({
+    invitation_id: src.invitationId, source_type: sourceType, source_id: sourceId,
+    amount_idr: src.amountIDR, method: 'xendit', status: 'pending', reason: reason ?? null, admin_email: admin.email,
+  }).select('id').single()
+  if (error || !inserted) return { ok: false, error: 'Gagal mencatat refund' }
+  const refundRowId = (inserted as { id: string }).id
+  let refund
+  try {
+    refund = await createXenditRefund(src.xenditInvoiceId, src.amountIDR)
+  } catch (e) {
+    await (db.from('refunds') as any).update({ status: 'failed', reason: `${reason ?? ''} [gagal: ${String(e).slice(0, 120)}]` }).eq('id', refundRowId)
+    return { ok: false, error: 'Refund Xendit gagal (channel ini mungkin tak dukung refund API). Transfer balik manual lalu "Tandai refund".' }
+  }
+  await (db.from('refunds') as any).update({ xendit_refund_id: refund.id }).eq('id', refundRowId)
+  // Some responses are SUCCEEDED synchronously; otherwise the webhook settles it.
+  if (refund.status === 'SUCCEEDED') await settleRefund(db, refundRowId)
+  await logAdminAction(admin.email, { action: 'refund.xendit', targetType: 'invitation', targetId: src.invitationId, meta: { sourceType, amount: src.amountIDR, xenditRefundId: refund.id, status: refund.status } })
+  revalidateInvitation()
+  return { ok: true }
 }

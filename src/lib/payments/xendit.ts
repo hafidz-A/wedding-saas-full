@@ -114,6 +114,39 @@ export async function expireXenditInvoice(invoiceId: string): Promise<void> {
   }
 }
 
+export interface XenditRefundResult { id: string; status: string }
+
+/**
+ * Create a refund for a paid invoice via the Xendit Refunds API. Xendit refunds
+ * ONLY to the original payment method — no destination is ever supplied, so money
+ * can't be diverted to a wrong account. The refund is confirmed asynchronously by
+ * the `refund.succeeded` webhook (status here may be PENDING).
+ *
+ * NOTE: the exact request field for an Invoice-API payment (invoice_id vs
+ * payment_id) + the endpoint version must be confirmed against the live account
+ * at go-live (docs.xendit.co/refunds). Some channels don't support API refunds —
+ * the caller falls back to a manual disbursement + "Tandai refund" on failure.
+ */
+export async function createXenditRefund(invoiceId: string, amountIDR: number): Promise<XenditRefundResult> {
+  const key = process.env.XENDIT_SECRET_KEY
+  if (!key) throw new Error('XENDIT_SECRET_KEY is not set')
+  if (!invoiceId) throw new Error('createXenditRefund: empty invoiceId')
+
+  const res = await fetch('https://api.xendit.co/refunds', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Basic ${Buffer.from(`${key}:`).toString('base64')}`,
+    },
+    body: JSON.stringify({ invoice_id: invoiceId, amount: amountIDR, currency: 'IDR', reason: 'REQUESTED_BY_CUSTOMER' }),
+  })
+  if (!res.ok) {
+    throw new Error(`Xendit refund failed: ${res.status} ${await res.text()}`)
+  }
+  const j = (await res.json()) as { id: string; status: string }
+  return { id: j.id, status: j.status }
+}
+
 /**
  * Extract the invitation id embedded in an external id we minted at checkout.
  * Format: `inv_<invitationId>_<timestamp>` (initial purchase) — the id is a

@@ -3,7 +3,8 @@
 
 import { useMemo, useState } from 'react'
 import { formatIDR, type Transaction } from '@/lib/payments/transactions'
-import { adminExportTransactionsCsv, adminBackfillPaidAmounts } from './actions'
+import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaXendit } from './actions'
+import type { RefundSourceType } from '@/lib/payments/refunds'
 
 function fmtDate(iso: string): string {
   if (!iso) return '—'
@@ -40,6 +41,30 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
     URL.revokeObjectURL(url)
   }
 
+  async function refund(t: Transaction) {
+    const sourceType = t.type as RefundSourceType
+    const sourceId = t.key.split(':').slice(1).join(':')
+    let method: 'manual' | 'xendit' = 'manual'
+    if (t.source === 'xendit') {
+      method = confirm(
+        `Refund ${formatIDR(t.amountIDR)} untuk "${t.slug}".\n\n` +
+        'OK  = via Xendit (otomatis, balik ke metode pembayaran asal)\n' +
+        'Batal = tandai refund manual (kamu transfer balik sendiri)',
+      ) ? 'xendit' : 'manual'
+    }
+    if (method === 'manual') {
+      if (!confirm(`Tandai refund MANUAL ${formatIDR(t.amountIDR)} untuk "${t.slug}"?\nPastikan kamu SUDAH transfer balik ke pelanggan.`)) return
+    }
+    const reason = prompt('Alasan refund (opsional):')
+    if (reason === null) return // cancelled
+    setBusy(true)
+    const res = method === 'xendit'
+      ? await adminRefundViaXendit(sourceType, sourceId, reason || undefined)
+      : await adminRefund(sourceType, sourceId, reason || undefined)
+    setBusy(false)
+    if (res.ok) { location.reload() } else { alert(res.error || 'Gagal') }
+  }
+
   async function backfill() {
     if (!confirm('Isi nominal untuk undangan berbayar lama (yang belum tercatat)?')) return
     setBusy(true)
@@ -71,12 +96,12 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ textAlign: 'left', color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              <th style={th}>Slug</th><th style={th}>Tipe</th><th style={th}>Sumber</th><th style={th}>Status</th><th style={{ ...th, textAlign: 'right' }}>Jumlah</th><th style={th}>Tanggal</th>
+              <th style={th}>Slug</th><th style={th}>Tipe</th><th style={th}>Sumber</th><th style={th}>Status</th><th style={{ ...th, textAlign: 'right' }}>Jumlah</th><th style={th}>Tanggal</th><th style={th}>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
-              <tr><td colSpan={6} style={{ ...td, color: 'var(--text-muted)' }}>Tidak ada transaksi.</td></tr>
+              <tr><td colSpan={7} style={{ ...td, color: 'var(--text-muted)' }}>Tidak ada transaksi.</td></tr>
             ) : rows.map((t) => (
               <tr key={t.key} style={{ borderTop: '0.5px solid var(--border-default)', opacity: t.status === 'refunded' ? 0.6 : 1 }}>
                 <td style={td}><a href={`/admin/invitations?q=${encodeURIComponent(t.slug)}`} style={{ color: 'var(--interactive-primary)' }}>{t.slug}</a></td>
@@ -85,6 +110,11 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
                 <td style={td}>{t.status === 'refunded' ? 'direfund' : 'lunas'}</td>
                 <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatIDR(t.amountIDR)}</td>
                 <td style={td}>{fmtDate(t.date)}</td>
+                <td style={td}>
+                  {t.status === 'paid' && t.source !== 'comp'
+                    ? <button type="button" disabled={busy} onClick={() => refund(t)} style={refundBtn}>Refund</button>
+                    : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -106,3 +136,4 @@ const ctl: React.CSSProperties = { height: 34, padding: '0 10px', borderRadius: 
 const btn: React.CSSProperties = { height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }
 const th: React.CSSProperties = { padding: '6px 8px', fontWeight: 500 }
 const td: React.CSSProperties = { padding: '8px 8px' }
+const refundBtn: React.CSSProperties = { height: 28, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--status-error)', background: 'transparent', color: 'var(--status-error)', fontSize: 12, cursor: 'pointer' }

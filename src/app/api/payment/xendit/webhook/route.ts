@@ -4,6 +4,7 @@ import { isValidCallbackToken, getXenditInvoice, isPaidStatus, invitationIdFromE
 import { resolvePlan } from '@/lib/payments/plans'
 import { initialPurchaseAmount } from '@/lib/payments/quota'
 import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
+import { settleRefund } from '@/lib/payments/refunds'
 
 /**
  * Xendit invoice webhook. Authenticated by the `x-callback-token` header
@@ -26,12 +27,35 @@ export async function POST(req: Request) {
     external_id?: string
     amount?: number
     paid_amount?: number
-  }
-  if (body.status !== 'PAID' || !body.external_id) {
-    return NextResponse.json({ ok: true })
+    event?: string
+    data?: { id?: string; status?: string }
   }
 
   const admin = createSupabaseAdminClient()
+
+  // Refund events (net-new). Xendit delivers these as { event, data } — distinct
+  // from the flat invoice callback below. Match our refunds row by the stored
+  // xendit_refund_id and settle/fail it idempotently. `settleRefund` reverses the
+  // entitlement exactly once (compare-and-set), so a re-sent event is a no-op.
+  // The exact envelope must be confirmed against the live account at go-live.
+  if (body.event && body.event.startsWith('refund.')) {
+    const rid = body.data?.id
+    if (rid) {
+      const { data: row } = (await admin.from('refunds').select('id, status').eq('xendit_refund_id', rid).maybeSingle()) as { data: { id: string; status: string } | null }
+      if (row) {
+        if (body.event === 'refund.succeeded' || body.data?.status === 'SUCCEEDED') {
+          await settleRefund(admin, row.id)
+        } else if (body.event === 'refund.failed' || body.data?.status === 'FAILED') {
+          await (admin.from('refunds') as any).update({ status: 'failed' }).eq('id', row.id).neq('status', 'succeeded')
+        }
+      }
+    }
+    return NextResponse.json({ ok: true })
+  }
+
+  if (body.status !== 'PAID' || !body.external_id) {
+    return NextResponse.json({ ok: true })
+  }
 
   // Plan upgrade (pay-the-difference) callbacks are keyed by an `upg_` external
   // id and recorded in plan_upgrades, separate from the initial purchase. Handle
