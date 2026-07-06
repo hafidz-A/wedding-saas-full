@@ -63,11 +63,23 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 - **Harusnya terlihat:** harga Basic ikut jadi angka baru. Artinya editor admin ↔ tampilan depan
   benar-benar tersambung.
 
+### Plan B2 — Stepper kuota di kartu + onboarding
+
+**T1.5 — Stepper +/- di kartu depan**
+1. Buka beranda `/` → bagian "Coba Vibe" → template Lovebirds → klik **"Beli Undangan"**.
+2. Di kartu paket ada tombol **− [angka] +** dengan **harga total** di sebelahnya.
+3. Klik **+** beberapa kali.
+- **Harusnya terlihat:** angka naik **per 50** (mis. 300 → 350 → 400), dan **harga total naik Rp 10.000 tiap +50**. Tombol **−** mati (abu-abu) saat sudah di angka dasar.
+
+**T1.6 — Pilihan kuota terbawa ke onboarding**
+1. Di kartu Premium, naikkan kuota **+100** (klik + dua kali) → klik **"Pilih paket ini"**.
+2. (Kalau diminta login/daftar, lanjutkan — atau kamu sudah login.)
+- **Harusnya terlihat:** halaman onboarding terbuka dengan stepper kuota **sudah di angka dasar + 100** (mis. 400 untuk Premium), plus baris **"Total: Rp …"** = harga paket + tambahan kuota.
+
 ---
 
 ## Belum dites (belum dibangun) — jangan dicari dulu
 
-- **Plan B2** — tombol +/- tambah kuota langsung di kartu depan (ditunda).
 - **Modul 2** — kelola semua undangan (comp, suspend, buatkan untuk klien).
 - **Modul 3–5** — pembayaran/refund, metadata template, akun & data.
 - Catatan "Aktivitas" (log admin) belum ditampilkan — datanya sudah dicatat, tampilannya menyusul.
