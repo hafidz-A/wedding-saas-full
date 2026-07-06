@@ -24,7 +24,13 @@ export default async function AdminInvitationsPage({ searchParams }: { searchPar
 
   return (
     <div>
-      <h1 style={{ fontSize: 22 }}>Undangan</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <h1 style={{ fontSize: 22, margin: 0 }}>Undangan</h1>
+        <a href="/admin/invitations/new"
+          style={{ height: 36, padding: '0 14px', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-sm)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+          ＋ Buat undangan
+        </a>
+      </div>
       <form style={{ margin: '12px 0' }}>
         <input name="q" defaultValue={searchParams.q || ''} placeholder="Cari slug atau email…"
           style={{ height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: 260 }} />

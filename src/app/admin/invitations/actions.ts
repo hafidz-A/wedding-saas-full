@@ -6,7 +6,11 @@ import { requireAdmin } from '@/lib/admin/is-admin'
 import { logAdminAction } from '@/lib/admin/log'
 import { revalidateInvitation } from '@/lib/admin/revalidate'
 import { resolvePlan } from '@/lib/payments/plans'
-import { BLOCK_SIZE, QUOTA_CAP } from '@/lib/payments/quota'
+import { BLOCK_SIZE, QUOTA_CAP, clampQuotaExtra, DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
+import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
+import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { sendAdminEmail } from '@/lib/email/send'
+import { siteBaseUrl } from '@/lib/site-url'
 import { compExpiry, type CompPeriod } from './period'
 
 type Result = { ok: boolean; error?: string }
@@ -143,4 +147,145 @@ export async function adminDeleteInvitation(id: string, confirmSlug: string): Pr
   await logAdminAction(admin.email, { action: 'invitation.delete', targetType: 'invitation', targetId: id, meta: { slug: inv.slug } })
   revalidateInvitation()
   return { ok: true }
+}
+
+export interface CreateForClientInput {
+  template: string
+  plan: string
+  guestQuotaExtra?: number
+  brideName: string
+  groomName: string
+  weddingDate: string
+  venue: string
+  slug: string
+  clientEmail: string
+  markPaid?: { source: 'manual' | 'comp'; amountIDR: number; period: CompPeriod }
+}
+
+export interface CreateForClientResult {
+  ok: boolean
+  error?: string
+  invitationId?: string
+  slug?: string
+  createdUser?: boolean
+  /** 6-digit set-password code for a NEW account (feeds the existing /reset-password flow). */
+  resetOtp?: string | null
+  resetUrl?: string
+  clientEmail?: string
+  emailSent?: boolean
+}
+
+/** Scan the auth users for one matching `email` (case-insensitive). MVP: first
+ *  page only (perPage 1000) — revisit with a filtered lookup past one page. */
+async function findAuthUserByEmail(db: any, email: string): Promise<any | null> {
+  const { data } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  const target = email.toLowerCase()
+  return (data?.users || []).find((u: any) => u.email?.toLowerCase() === target) || null
+}
+
+/**
+ * Provision an invitation FOR a client — the client ALWAYS owns it (self-serve
+ * model). Looks up the client by email; creates a confirmed auth account if none
+ * exists; builds the seeded config; inserts the invitation owned by the client;
+ * optionally marks it paid now (comp / manual offline money). For a NEW account
+ * it returns a 6-digit set-password code that feeds the existing token-based
+ * /reset-password page (and best-effort emails it). Rolls back a just-created
+ * user if the invitation insert fails, so a failure never leaves an orphan account.
+ */
+export async function adminCreateInvitationForClient(input: CreateForClientInput): Promise<CreateForClientResult> {
+  const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
+
+  // 1. Validate inputs (mirror onboarding).
+  let slug: string
+  try { slug = validateSlug(input.slug) } catch (e) { return { ok: false, error: e instanceof Error ? e.message : 'Slug tidak valid' } }
+  const template = isValidTemplate(input.template) ? input.template : DEFAULT_TEMPLATE_ID
+  const brideName = (input.brideName || '').trim()
+  const groomName = (input.groomName || '').trim()
+  const venue = (input.venue || '').trim()
+  const clientEmail = (input.clientEmail || '').trim().toLowerCase()
+  if (!brideName || !groomName) return { ok: false, error: 'Nama pengantin wajib diisi' }
+  if (!venue) return { ok: false, error: 'Lokasi acara wajib diisi' }
+  if (!input.weddingDate || isNaN(Date.parse(input.weddingDate))) return { ok: false, error: 'Tanggal acara tidak valid' }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clientEmail)) return { ok: false, error: 'Email klien tidak valid' }
+
+  const db = createSupabaseAdminClient()
+
+  // 2. Resolve plan + clamp quota against the plan base.
+  const plan = (await resolvePlan(template, input.plan)) ? input.plan : 'basic'
+  const baseForPlan = DEFAULT_BASE_QUOTA[plan] ?? 200
+  const guestQuotaExtra = clampQuotaExtra(baseForPlan, Number(input.guestQuotaExtra ?? 0))
+
+  // 3. Slug availability.
+  const { data: taken } = (await db.from('invitations').select('id').eq('slug', slug).maybeSingle()) as { data: { id: string } | null }
+  if (taken) return { ok: false, error: 'Slug sudah dipakai. Pilih yang lain.' }
+
+  // 4. Find or create the client's auth user (email pre-confirmed).
+  let user = await findAuthUserByEmail(db, clientEmail)
+  let createdUser = false
+  if (!user) {
+    const { data: created, error: cErr } = await (db as any).auth.admin.createUser({ email: clientEmail, email_confirm: true })
+    if (cErr || !created?.user) return { ok: false, error: `Gagal membuat akun klien: ${cErr?.message || 'tidak diketahui'}` }
+    user = created.user
+    createdUser = true
+  }
+
+  // 5. Build the seeded config + insert the invitation (owned by the client).
+  const config = template === 'lovebirds'
+    ? buildSeedConfig({ brideName, groomName, weddingDate: input.weddingDate, venue })
+    : getDefaultConfig(template)
+
+  const { data: inserted, error: insErr } = await (db.from('invitations') as any)
+    .insert({
+      slug, owner_user_id: user.id, email: clientEmail,
+      password_hash: 'supabase-auth-migrated',
+      plan, template_id: template, is_paid: false, is_published: false,
+      guest_quota_extra: guestQuotaExtra, config,
+    })
+    .select('id')
+    .single()
+  if (insErr || !inserted) {
+    // Roll back a just-created user so a failed insert leaves no orphan account.
+    if (createdUser) { try { await (db as any).auth.admin.deleteUser(user.id) } catch {} }
+    return { ok: false, error: 'Gagal menyimpan undangan. Coba lagi.' }
+  }
+  const invitationId = (inserted as { id: string }).id
+
+  // 6. Optional: mark paid now (comp / manual offline money), mirroring adminComp.
+  if (input.markPaid) {
+    const resolved = await resolvePlan(template, plan)
+    const nowMs = Date.now()
+    const expires = compExpiry(resolved ? resolved.expiresAt(nowMs) : null, input.markPaid.period, nowMs)
+    await (db.from('invitations') as any).update({
+      is_paid: true, is_published: true, paid_at: new Date(nowMs).toISOString(),
+      expires_at: expires, paid_source: input.markPaid.source,
+      paid_amount_idr: input.markPaid.source === 'comp' ? 0 : Math.max(0, Math.round(input.markPaid.amountIDR)),
+    }).eq('id', invitationId)
+  }
+
+  // 7. New account → generate a set-password code (feeds /reset-password). Email
+  //    it best-effort, but ALWAYS return the code so the operator can relay it
+  //    (Resend domain may be unverified). Existing accounts keep their password.
+  let resetOtp: string | null = null
+  let emailSent = false
+  const resetUrl = `${siteBaseUrl()}/reset-password?email=${encodeURIComponent(clientEmail)}`
+  if (createdUser) {
+    try {
+      const { data: link } = await (db as any).auth.admin.generateLink({ type: 'recovery', email: clientEmail })
+      resetOtp = link?.properties?.email_otp ?? null
+    } catch { /* operator can fall back to /forgot-password */ }
+    if (resetOtp) {
+      emailSent = await sendAdminEmail({
+        to: clientEmail,
+        subject: 'Undangan FinCards kamu sudah dibuat — atur password',
+        html: `<p>Halo,</p><p>Undangan <strong>${slug}</strong> sudah dibuatkan untukmu. Untuk masuk & mengeditnya, atur password dulu:</p><ol><li>Buka <a href="${resetUrl}">${resetUrl}</a></li><li>Masukkan email ini + kode <strong>${resetOtp}</strong></li><li>Buat password baru</li></ol><p>Setelah itu kamu bisa langsung membuka dashboard undanganmu. Terima kasih!</p>`,
+      })
+    }
+  }
+
+  await logAdminAction(admin.email, {
+    action: 'invitation.create_for_client', targetType: 'invitation', targetId: invitationId,
+    meta: { slug, template, plan, createdUser, markPaid: input.markPaid?.source ?? null },
+  })
+  revalidateInvitation()
+  return { ok: true, invitationId, slug, createdUser, resetOtp, resetUrl, clientEmail, emailSent }
 }
