@@ -13,6 +13,7 @@ import { TEMPLATE_VIBES } from './vibeData'
 import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories'
 import { VibeBackdrop } from './VibeBackdrop'
 import { PreviewMock } from './PreviewMock'
+import { VibePlanCard } from './VibePlanCard'
 import { readableOn } from '@/lib/color'
 import styles from './VibeExploration.module.css'
 
@@ -403,34 +404,17 @@ export function VibeExploration({ lang, t, plans }: { lang: 'id' | 'en'; t: Vibe
                         </span>
                         <div className={styles.planGrid}>
                           {displayPlans.map((pl) => (
-                            <div
+                            <VibePlanCard
                               key={pl.id}
-                              className={styles.planCard}
-                              style={{ borderColor: palette.surfaceBorder, background: palette.surface }}
-                            >
-                              <div className={styles.planTop}>
-                                <span className={styles.planName} style={{ color: palette.fg }}>{pl.name}</span>
-                                <span className={styles.planPrice} style={{ color: palette.accent }}>
-                                  {pl.compareAtPrice && (
-                                    <span style={{ textDecoration: 'line-through', opacity: 0.55, marginRight: 6, color: palette.fgMuted }}>{pl.compareAtPrice}</span>
-                                  )}
-                                  {pl.price}
-                                </span>
-                              </div>
-                              <span style={{ fontSize: 12, color: palette.fgMuted }}>{t.guestQuota.replace('{n}', String(pl.baseQuota))}</span>
-                              <ul className={styles.planFeatures} style={{ color: palette.fgMuted }}>
-                                {pl.features.map((f: string) => (
-                                  <li key={f}>{f}</li>
-                                ))}
-                              </ul>
-                              <Link
-                                href={`${buyHref}&plan=${pl.id}`}
-                                className={styles.planBtn}
-                                style={{ background: palette.accent, color: accentText }}
-                              >
-                                {t.choosePlan}
-                              </Link>
-                            </div>
+                              plan={pl}
+                              buyHref={buyHref}
+                              chooseLabel={t.choosePlan}
+                              quotaLabel={t.guestQuota}
+                              accentText={accentText}
+                              palette={palette}
+                              styles={styles}
+                              onQuotaChange={() => { setTimeout(() => ScrollTrigger.refresh(), 60) }}
+                            />
                           ))}
                         </div>
                       </motion.div>
