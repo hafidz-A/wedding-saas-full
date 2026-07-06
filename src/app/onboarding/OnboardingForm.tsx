@@ -7,7 +7,7 @@ import { templateCatalog } from '@/config/templateCatalog'
 import type { Dict, Lang } from '@/lib/i18n'
 import { LangToggle } from '@/components/site/LangToggle'
 import QuotaStepper from '@/components/dashboard/QuotaStepper'
-import { DEFAULT_BASE_QUOTA, quotaAddonAmount, QUOTA_CAP, formatIDR } from '@/lib/payments/quota'
+import { DEFAULT_BASE_QUOTA, quotaAddonAmount, QUOTA_CAP, formatIDR, clampQuotaExtra } from '@/lib/payments/quota'
 import authStyles from '@/components/site/AuthChrome.module.css'
 
 function firstWord(s: string): string {
@@ -16,16 +16,29 @@ function firstWord(s: string): string {
 
 const TEMPLATE_IDS = templateCatalog.map((t) => t.id)
 
-export default function OnboardingForm({ email, dict, lang }: { email: string; dict: Dict['onboarding']; lang: Lang }) {
+export default function OnboardingForm({
+  email,
+  dict,
+  lang,
+  planBase,
+  planPrice,
+}: {
+  email: string
+  dict: Dict['onboarding']
+  lang: Lang
+  planBase?: number
+  planPrice?: number
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryTemplate = searchParams.get('template') || ''
   const initialTemplate = TEMPLATE_IDS.includes(queryTemplate) ? queryTemplate : templateCatalog[0].id
   const plan = searchParams.get('plan') || 'basic'
-  const baseQuota = DEFAULT_BASE_QUOTA[plan] ?? 200
+  const baseQuota = planBase ?? (DEFAULT_BASE_QUOTA[plan] ?? 200)
+  const extraParam = parseInt(searchParams.get('extra') || '0', 10) || 0
 
   const [pending, startTransition] = useTransition()
-  const [guestTotal, setGuestTotal] = useState(baseQuota) // effective quota (base..cap)
+  const [guestTotal, setGuestTotal] = useState(baseQuota + clampQuotaExtra(baseQuota, extraParam)) // effective quota (base..cap)
   const guestExtra = Math.max(0, guestTotal - baseQuota)
   const [template, setTemplate] = useState(initialTemplate)
   const [slug, setSlug] = useState('')
@@ -277,6 +290,11 @@ export default function OnboardingForm({ email, dict, lang }: { email: string; d
             {guestExtra > 0 &&
               ` · ${dict.quota.addonHintPrefix} ${guestExtra} · +${formatIDR(quotaAddonAmount(guestExtra))}`}
           </span>
+          {planPrice ? (
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
+              Total: {formatIDR(planPrice + quotaAddonAmount(guestExtra))}
+            </span>
+          ) : null}
         </div>
 
         {error && <p style={errorStyle}>{error}</p>}

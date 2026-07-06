@@ -4,6 +4,8 @@ import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
 import OnboardingForm from './OnboardingForm'
+import { getTemplatePlans } from '@/lib/payments/template-plans'
+import { DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
 
 /**
  * Onboarding wizard — render the 5-field form for an authenticated user.
@@ -39,10 +41,19 @@ export default async function OnboardingPage({
     redirect(`/signup?next=${encodeURIComponent(here)}`)
   }
 
+  // Floor the guest-quota stepper on the chosen plan's DB base (falls back to
+  // the client-safe default when the row/template lookup comes up empty).
+  const templateParam = typeof searchParams.template === 'string' ? searchParams.template : ''
+  const planParam = typeof searchParams.plan === 'string' ? searchParams.plan : 'basic'
+  const plansForTemplate = await getTemplatePlans(templateParam || 'lovebirds')
+  const chosen = plansForTemplate.find((p) => p.plan_code === planParam)
+  const planBase = chosen?.base_guest_quota ?? (DEFAULT_BASE_QUOTA[planParam] ?? 200)
+  const planPrice = chosen?.price_idr ?? 0
+
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} lang={lang} />
+      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} lang={lang} planBase={planBase} planPrice={planPrice} />
     </>
   )
 }
