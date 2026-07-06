@@ -668,3 +668,64 @@ export async function recheckQuotaAddon(invitationId: string): Promise<RecheckRe
     return { ok: false, error: 'Gagal mengecek pembelian kuota. Coba lagi sebentar lagi.' }
   }
 }
+
+export interface RefundRequestInput {
+  category: 'duplicate_payment' | 'system_failure' | 'inaccessible' | 'other'
+  detail?: string
+  destination?: { bank?: string; account_no?: string; holder?: string }
+}
+
+/**
+ * Owner files a refund REQUEST (operator decides — never instant self-service).
+ * Eligibility pre-check (paid, not comp, no existing pending, rate-limited) + a
+ * server-built usage snapshot (published? guests/RSVPs/check-ins, config edited,
+ * days since paid) that powers the operator's plain-language verdict. The refund
+ * CHANNEL is decided later by paid_source, not chosen here — a manual/offline
+ * payment collects a destination account; a Xendit one doesn't need one.
+ */
+export async function requestRefund(invitationId: string, input: RefundRequestInput): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const server = createSupabaseServerClient()
+    const { data: { user } } = await server.auth.getUser()
+    if (!user) return { ok: false, error: 'Tidak ada sesi login' }
+
+    const { allowed } = await rateLimit(`refundreq:${user.id}`, { windowMs: 60_000, max: 4 })
+    if (!allowed) return { ok: false, error: 'Terlalu banyak permintaan. Coba lagi sebentar lagi.' }
+
+    const admin = createSupabaseAdminClient()
+    const { data: inv } = (await admin.from('invitations')
+      .select('id, owner_user_id, is_paid, paid_source, paid_at, is_published, updated_at')
+      .eq('id', invitationId).maybeSingle()) as { data: any | null }
+    if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    if (!inv.is_paid) return { ok: false, error: 'Belum ada pembayaran untuk direfund' }
+    if (inv.paid_source === 'comp') return { ok: false, error: 'Undangan gratis (comp) tidak bisa direfund' }
+
+    const { data: pending } = await (admin.from('refund_requests') as any)
+      .select('id').eq('invitation_id', invitationId).eq('status', 'pending').limit(1)
+    if (pending && pending.length) return { ok: false, error: 'Sudah ada permintaan refund yang sedang diproses.' }
+
+    const [g, r, a] = await Promise.all([
+      (admin.from('guests') as any).select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId),
+      (admin.from('rsvps') as any).select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId),
+      (admin.from('attendances') as any).select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId),
+    ])
+    const paidMs = inv.paid_at ? Date.parse(inv.paid_at) : Date.now()
+    const daysSincePaid = Math.max(0, Math.floor((Date.now() - paidMs) / 86_400_000))
+    const configEdited = !!inv.updated_at && Date.parse(inv.updated_at) > paidMs + 60_000
+    const usage_snapshot = {
+      is_published: !!inv.is_published,
+      guest_count: g.count ?? 0, rsvp_count: r.count ?? 0, attendance_count: a.count ?? 0,
+      config_edited: configEdited, days_since_paid: daysSincePaid,
+      destination: input.destination ?? null,
+    }
+    const { error } = await (admin.from('refund_requests') as any).insert({
+      invitation_id: invitationId, requested_by: user.id, source_type: 'initial', source_id: invitationId,
+      reason_category: input.category, reason_text: input.detail ?? null, usage_snapshot, status: 'pending',
+    })
+    if (error) return { ok: false, error: 'Gagal mengajukan refund. Mungkin sudah ada permintaan berjalan.' }
+    return { ok: true }
+  } catch (e) {
+    console.error('requestRefund error:', e)
+    return { ok: false, error: 'Terjadi kesalahan. Coba lagi sebentar lagi.' }
+  }
+}

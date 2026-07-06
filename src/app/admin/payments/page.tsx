@@ -5,9 +5,10 @@ import {
   buildTransactions, summarize, monthlyTrend, conversion, jakartaYearMonth, formatIDR,
   type MonthPoint,
 } from '@/lib/payments/transactions'
-import { fetchLedger } from './data'
+import { fetchLedger, fetchRefundRequests } from './data'
 import PaymentsClient from './PaymentsClient'
 import ReconcilePanel from './ReconcilePanel'
+import RefundRequestsPanel from './RefundRequestsPanel'
 
 export default async function AdminPaymentsPage() {
   const db = createSupabaseAdminClient()
@@ -20,6 +21,7 @@ export default async function AdminPaymentsPage() {
   const trend = monthlyTrend(txns, now, 12)
   const conv = conversion(ledger.paidCount, ledger.draftCount)
   const missingAmounts = ledger.initials.filter((i) => i.paid_amount_idr == null).length
+  const refundRequests = await fetchRefundRequests(db)
 
   return (
     <div>
@@ -49,6 +51,8 @@ export default async function AdminPaymentsPage() {
         <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>Tren pendapatan (12 bulan, WIB)</h2>
         <TrendChart points={trend} />
       </section>
+
+      <RefundRequestsPanel requests={refundRequests} />
 
       <ReconcilePanel />
 

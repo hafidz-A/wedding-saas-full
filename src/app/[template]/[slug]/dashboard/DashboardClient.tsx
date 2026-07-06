@@ -10,6 +10,7 @@ import TutorialTab from './TutorialTab'
 import GuestsTab from './GuestsTab'
 import GuestbookTab from './GuestbookTab'
 import GuestbookLocked from './GuestbookLocked'
+import RefundRequestButton from './RefundRequestButton'
 import { type GuestRow } from './guests/types'
 import { type AttendanceRow } from './guestbook/types'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
@@ -237,6 +238,10 @@ export default function DashboardClient({
             {payPending ? activePeriod.processing : activePeriod.payNow}
           </button>
         </div>
+      )}
+
+      {invitation.is_paid && invitation.paid_source !== 'comp' && (
+        <RefundRequestButton invitationId={invitation.id} paidSource={invitation.paid_source || 'xendit'} />
       )}
 
       <nav className={styles.nav}>

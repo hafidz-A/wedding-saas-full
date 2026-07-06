@@ -248,3 +248,46 @@ export async function adminRefundViaXendit(sourceType: RefundSourceType, sourceI
   revalidateInvitation()
   return { ok: true }
 }
+
+/**
+ * Approve a user refund REQUEST → fire the matching refund path (which reverses
+ * the entitlement + unpublishes an initial-purchase refund), then mark the request
+ * approved. If the refund itself fails, the request stays pending (operator can
+ * retry or switch to manual) — we never mark it approved without moving money.
+ */
+export async function adminApproveRefund(requestId: string, opts: { method: 'manual' | 'xendit'; note?: string }): Promise<Result> {
+  const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
+  const db = createSupabaseAdminClient()
+  const { data: req } = (await db.from('refund_requests')
+    .select('id, invitation_id, source_type, source_id, status, usage_snapshot')
+    .eq('id', requestId).maybeSingle()) as { data: any | null }
+  if (!req) return { ok: false, error: 'Permintaan tidak ditemukan' }
+  if (req.status !== 'pending') return { ok: false, error: 'Permintaan sudah diproses' }
+  const sourceType = (req.source_type || 'initial') as RefundSourceType
+  const sourceId = req.source_id || req.invitation_id
+  const destination = req.usage_snapshot?.destination ?? undefined
+  const refundRes = opts.method === 'xendit'
+    ? await adminRefundViaXendit(sourceType, sourceId, 'Disetujui dari permintaan refund')
+    : await adminRefund(sourceType, sourceId, 'Disetujui dari permintaan refund', destination)
+  if (!refundRes.ok) return refundRes // leave request pending if the refund didn't go through
+  await (db.from('refund_requests') as any)
+    .update({ status: 'approved', decided_by: admin.email, decision_note: opts.note ?? null, decided_at: new Date().toISOString() })
+    .eq('id', requestId)
+  await logAdminAction(admin.email, { action: 'refund.approve', targetType: 'invitation', targetId: req.invitation_id, meta: { method: opts.method } })
+  revalidateInvitation()
+  return { ok: true }
+}
+
+/** Reject a user refund request with a reason (policy §7). No money moves. */
+export async function adminRejectRefund(requestId: string, note?: string): Promise<Result> {
+  const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
+  const db = createSupabaseAdminClient()
+  const { data: req } = (await db.from('refund_requests').select('id, invitation_id, status').eq('id', requestId).maybeSingle()) as { data: any | null }
+  if (!req) return { ok: false, error: 'Permintaan tidak ditemukan' }
+  if (req.status !== 'pending') return { ok: false, error: 'Permintaan sudah diproses' }
+  await (db.from('refund_requests') as any)
+    .update({ status: 'rejected', decided_by: admin.email, decision_note: note ?? null, decided_at: new Date().toISOString() })
+    .eq('id', requestId)
+  await logAdminAction(admin.email, { action: 'refund.reject', targetType: 'invitation', targetId: req.invitation_id, meta: { note: note ?? null } })
+  return { ok: true }
+}

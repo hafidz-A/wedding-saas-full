@@ -46,3 +46,36 @@ export async function fetchLedger(db: any): Promise<Ledger> {
 
   return { initials, upgrades: attach(ups), addons: attach(ads), refunds: refs ?? [], paidCount, draftCount }
 }
+
+export interface RefundRequestView {
+  id: string
+  invitationId: string
+  slug: string
+  amountIDR: number
+  paidSource: string
+  category: string
+  detail: string | null
+  snapshot: any
+  createdAt: string
+}
+
+/** Pending refund requests joined with the invitation's slug + stored amount. */
+export async function fetchRefundRequests(db: any): Promise<RefundRequestView[]> {
+  const { data: reqs } = (await db.from('refund_requests')
+    .select('id, invitation_id, reason_category, reason_text, usage_snapshot, created_at')
+    .eq('status', 'pending').order('created_at', { ascending: true }).limit(200)) as { data: any[] | null }
+  const rows = reqs ?? []
+  if (!rows.length) return []
+  const ids = Array.from(new Set(rows.map((r) => r.invitation_id)))
+  const { data: invs } = (await db.from('invitations')
+    .select('id, slug, paid_amount_idr, paid_source').in('id', ids)) as { data: any[] | null }
+  const map = new Map<string, any>((invs ?? []).map((i) => [i.id, i]))
+  return rows.map((r) => {
+    const inv = map.get(r.invitation_id)
+    return {
+      id: r.id, invitationId: r.invitation_id, slug: inv?.slug ?? r.invitation_id,
+      amountIDR: Number(inv?.paid_amount_idr ?? 0), paidSource: inv?.paid_source ?? 'xendit',
+      category: r.reason_category, detail: r.reason_text, snapshot: r.usage_snapshot ?? {}, createdAt: r.created_at,
+    }
+  })
+}
