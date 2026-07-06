@@ -17,6 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ['/admin/invitations', 'Undangan'],
     ['/admin/payments', 'Pembayaran'],
     ['/admin/users', 'Akun & Data'],
+    ['/admin/activity', 'Aktivitas'],
   ] as const
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', minHeight: '100vh' }}>
