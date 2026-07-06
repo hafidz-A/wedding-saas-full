@@ -7,6 +7,7 @@ import {
 } from '@/lib/payments/transactions'
 import { fetchLedger } from './data'
 import PaymentsClient from './PaymentsClient'
+import ReconcilePanel from './ReconcilePanel'
 
 export default async function AdminPaymentsPage() {
   const db = createSupabaseAdminClient()
@@ -48,6 +49,8 @@ export default async function AdminPaymentsPage() {
         <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>Tren pendapatan (12 bulan, WIB)</h2>
         <TrendChart points={trend} />
       </section>
+
+      <ReconcilePanel />
 
       <PaymentsClient
         txns={txns}
