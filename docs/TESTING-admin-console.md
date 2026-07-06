@@ -78,8 +78,34 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 
 ---
 
+## Modul 2 — Invitations control center (Plan 2A)
+
+**T2.1 — Lihat semua undangan**
+1. `/admin` → klik **"Undangan"** (atau `/admin/invitations`).
+- **Harusnya terlihat:** daftar SEMUA undangan (dari semua akun). Tiap baris: `slug · template · plan`, lalu `email · status · sumber bayar`. Ada kotak **Cari**.
+
+**T2.2 — Cari**
+1. Ketik sebagian slug atau email di kotak → tekan Enter.
+- **Harusnya terlihat:** daftar tersaring.
+
+**T2.3 — Comp (gratiskan) / Lunas manual**
+1. Cari undangan berstatus **"Belum bayar"** → klik **"Comp (gratis)"**.
+- **Harusnya terlihat:** halaman reload; undangan jadi **Aktif/Seumur hidup**, sumber bayar **comp**, dan jadi tayang.
+2. Atau klik **"Lunas manual"** → masukkan nominal (mis. `149000`).
+- **Harusnya terlihat:** jadi aktif, sumber bayar **manual**.
+
+**T2.4 — Sembunyikan / Terbitkan**
+1. Klik **"Sembunyikan"** pada undangan yang tayang → reload → buka link publik `/…/slug`.
+- **Harusnya terlihat:** halaman publik TIDAK tayang. Klik **"Terbitkan"** lagi → tayang lagi.
+
+**T2.5 — Ganti plan / Tambah kuota**
+1. Ubah dropdown plan (basic ↔ premium). → **Harusnya:** reload, plan berubah di baris.
+2. Klik **"+50 kuota"**. → **Harusnya:** reload, muncul "+50 kuota" (atau bertambah) di baris.
+
+---
+
 ## Belum dites (belum dibangun) — jangan dicari dulu
 
-- **Modul 2** — kelola semua undangan (comp, suspend, buatkan untuk klien).
+- **Modul 2 lanjutan** — suspend (takedown kuat) + hormati di halaman publik, buatkan-undangan-untuk-klien, hapus/arsip.
 - **Modul 3–5** — pembayaran/refund, metadata template, akun & data.
 - Catatan "Aktivitas" (log admin) belum ditampilkan — datanya sudah dicatat, tampilannya menyusul.
