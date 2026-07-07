@@ -11,7 +11,14 @@ import { getXenditInvoice, isPaidStatus, createXenditRefund } from '@/lib/paymen
 import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { loadRefundSource, sourceHasOpenRefund, settleRefund, type RefundSourceType } from '@/lib/payments/refunds'
 import { buildTransactions, transactionsToCsv } from '@/lib/payments/transactions'
+import { sendAdminEmail } from '@/lib/email/send'
 import { fetchLedger } from './data'
+
+/** Best-effort email to the couple about a refund decision (no-op if Resend off). */
+async function notifyCouple(db: any, invitationId: string, subject: string, html: string) {
+  const { data: inv } = await db.from('invitations').select('email').eq('id', invitationId).maybeSingle()
+  if (inv?.email) await sendAdminEmail({ to: inv.email, subject, html })
+}
 
 type Result = { ok: boolean; error?: string }
 
@@ -273,6 +280,9 @@ export async function adminApproveRefund(requestId: string, opts: { method: 'man
   await (db.from('refund_requests') as any)
     .update({ status: 'approved', decided_by: admin.email, decision_note: opts.note ?? null, decided_at: new Date().toISOString() })
     .eq('id', requestId)
+  await notifyCouple(db, req.invitation_id,
+    'Pengembalian dana disetujui',
+    `<p>Halo,</p><p>Permintaan pengembalian dana undanganmu sudah <strong>disetujui</strong>. Dana dikembalikan ${opts.method === 'xendit' ? 'ke metode pembayaranmu (otomatis via Xendit)' : 'ke rekening yang kamu berikan (transfer manual)'}. Undanganmu dinonaktifkan. Terima kasih.</p>`)
   await logAdminAction(admin.email, { action: 'refund.approve', targetType: 'invitation', targetId: req.invitation_id, meta: { method: opts.method } })
   revalidateInvitation()
   return { ok: true }
@@ -288,6 +298,9 @@ export async function adminRejectRefund(requestId: string, note?: string): Promi
   await (db.from('refund_requests') as any)
     .update({ status: 'rejected', decided_by: admin.email, decision_note: note ?? null, decided_at: new Date().toISOString() })
     .eq('id', requestId)
+  await notifyCouple(db, req.invitation_id,
+    'Update permintaan pengembalian dana',
+    `<p>Halo,</p><p>Setelah kami tinjau, permintaan pengembalian dana undanganmu <strong>belum bisa kami setujui</strong>${note ? `: ${note}` : '.'} Kalau ada pertanyaan, silakan balas email ini.</p>`)
   await logAdminAction(admin.email, { action: 'refund.reject', targetType: 'invitation', targetId: req.invitation_id, meta: { note: note ?? null } })
   return { ok: true }
 }
