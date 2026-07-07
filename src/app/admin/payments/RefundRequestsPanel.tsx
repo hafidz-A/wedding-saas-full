@@ -81,6 +81,11 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                   Alasan: {CATEGORY[r.category] ?? r.category}{r.detail ? ` — ${r.detail}` : ''}
                 </div>
+                {r.destination && (r.destination.bank || r.destination.account_no) && (
+                  <div style={{ fontSize: 12, color: 'var(--text-primary)', marginTop: 2 }}>
+                    💳 Transfer ke: <strong>{r.destination.bank}</strong> · {r.destination.account_no} · a.n. {r.destination.holder}
+                  </div>
+                )}
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                   Pakai: {s.is_published ? 'tayang' : 'belum tayang'} · {s.guest_count} tamu · {s.rsvp_count} RSVP · {s.attendance_count} check-in · {s.days_since_paid} hari sejak bayar
                   {s.ever_used ? ' · ⚠ pernah dipakai (sticky)' : ''}

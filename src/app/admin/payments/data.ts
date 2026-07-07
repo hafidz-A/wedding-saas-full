@@ -3,6 +3,7 @@
 import 'server-only'
 import type { InitialRow, AddonUpgradeRow, RefundRow } from '@/lib/payments/transactions'
 import { buildUsageSnapshot } from '@/lib/payments/refund-usage'
+import { decryptField } from '@/lib/crypto/app'
 
 export interface Ledger {
   initials: InitialRow[]
@@ -62,6 +63,8 @@ export interface RefundRequestView {
   category: string
   detail: string | null
   snapshot: any
+  /** Decrypted refund destination (manual/offline payers only) — where to transfer. */
+  destination: { bank: string; account_no: string; holder: string } | null
   createdAt: string
 }
 
@@ -81,10 +84,14 @@ export async function fetchRefundRequests(db: any): Promise<RefundRequestView[]>
   return Promise.all(rows.map(async (r) => {
     const inv = map.get(r.invitation_id)
     const snapshot = inv ? await buildUsageSnapshot(db, r.invitation_id, inv) : (r.usage_snapshot ?? {})
+    const rawDest = r.usage_snapshot?.destination
+    const destination = rawDest
+      ? { bank: decryptField(rawDest.bank) ?? '', account_no: decryptField(rawDest.account_no) ?? '', holder: decryptField(rawDest.holder) ?? '' }
+      : null
     return {
       id: r.id, invitationId: r.invitation_id, slug: inv?.slug ?? r.invitation_id,
       amountIDR: Number(inv?.paid_amount_idr ?? 0), paidSource: inv?.paid_source ?? 'xendit',
-      category: r.reason_category, detail: r.reason_text, snapshot, createdAt: r.created_at,
+      category: r.reason_category, detail: r.reason_text, snapshot, destination, createdAt: r.created_at,
     }
   }))
 }

@@ -150,7 +150,10 @@ export function conversion(paidCount: number, draftCount: number): Conversion {
 /* ── CSV (financial fields only — NEVER guest PII) ── */
 
 function csvCell(v: string | number): string {
-  const s = String(v ?? '')
+  let s = String(v ?? '')
+  // Neutralize spreadsheet formula injection: a cell starting with = + - @ (or a
+  // control char) can execute as a formula in Excel/Sheets — prefix with a quote.
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
 

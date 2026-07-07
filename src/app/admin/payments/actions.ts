@@ -226,6 +226,7 @@ export async function adminRefund(
   const src = await loadRefundSource(db, sourceType, sourceId)
   if (!src) return { ok: false, error: 'Sumber tidak ditemukan / belum dibayar' }
   if (src.paidSource === 'comp') return { ok: false, error: 'Comp (gratis) tidak bisa direfund' }
+  if (src.amountIDR <= 0) return { ok: false, error: 'Nominal pembayaran belum tercatat — klik "Isi angka lama" di halaman Pembayaran dulu.' }
   if (await sourceHasOpenRefund(db, sourceType, sourceId)) return { ok: false, error: 'Sumber ini sudah punya refund' }
   const { data: inserted, error } = await (db.from('refunds') as any).insert({
     invitation_id: src.invitationId, source_type: sourceType, source_id: sourceId,
@@ -252,6 +253,7 @@ export async function adminRefundViaXendit(sourceType: RefundSourceType, sourceI
   const src = await loadRefundSource(db, sourceType, sourceId)
   if (!src) return { ok: false, error: 'Sumber tidak ditemukan / belum dibayar' }
   if (src.paidSource !== 'xendit') return { ok: false, error: 'Refund via Xendit hanya untuk pembayaran Xendit. Untuk manual/offline: transfer balik lalu "Tandai refund".' }
+  if (src.amountIDR <= 0) return { ok: false, error: 'Nominal pembayaran belum tercatat — klik "Isi angka lama" di halaman Pembayaran dulu.' }
   if (!src.xenditInvoiceId) return { ok: false, error: 'Invoice Xendit tidak ditemukan untuk sumber ini' }
   if (await sourceHasOpenRefund(db, sourceType, sourceId)) return { ok: false, error: 'Sumber ini sudah punya refund' }
   const { data: inserted, error } = await (db.from('refunds') as any).insert({

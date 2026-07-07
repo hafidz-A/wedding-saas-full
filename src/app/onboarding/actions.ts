@@ -16,6 +16,7 @@ import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQ
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
 import { buildUsageSnapshot } from '@/lib/payments/refund-usage'
+import { encryptField } from '@/lib/crypto/app'
 import { siteBaseUrl } from '@/lib/site-url'
 
 /** Max unpaid draft invitations a single account may stack up (anti-abuse). */
@@ -708,7 +709,13 @@ export async function requestRefund(invitationId: string, input: RefundRequestIn
     // Usage snapshot at request time (kept for the record). The admin panel
     // RECOMPUTES this live on every view, so a later edit shows up there.
     const usage = await buildUsageSnapshot(admin, invitationId, inv)
-    const usage_snapshot = { ...usage, destination: input.destination ?? null }
+    // Encrypt the refund destination (bank/account/holder) at rest — it's customer
+    // PII, same posture as RSVP/gift data. Decrypted only for the operator panel.
+    const d = input.destination
+    const destination = d
+      ? { bank: encryptField(d.bank ?? ''), account_no: encryptField(d.account_no ?? ''), holder: encryptField(d.holder ?? '') }
+      : null
+    const usage_snapshot = { ...usage, destination }
     const { error } = await (admin.from('refund_requests') as any).insert({
       invitation_id: invitationId, requested_by: user.id, source_type: 'initial', source_id: invitationId,
       reason_category: input.category, reason_text: input.detail ?? null, usage_snapshot, status: 'pending',
