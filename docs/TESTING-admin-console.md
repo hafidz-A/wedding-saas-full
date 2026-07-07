@@ -274,8 +274,45 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 
 ---
 
-## Belum dites (belum dibangun) — jangan dicari dulu
+## Modul 5 — Akun & Data (PDP)
+
+> ⚠️ **Modul ini MENGHAPUS data permanen.** Pakai **akun uji throwaway**, jangan akun asli.
+> Dipotong 3: **5A** rutin hapus/anonim + ekspor · **5B** self-service di `/profile` · **5C** operator `/admin/users`.
+
+> **Siapkan akun uji:** lewat **＋ Buat undangan** (Modul 2C) pakai email throwaway
+> `tes-hapus+01@contoh.com` — buat **dua** undangan untuk email yang sama: satu **Lunas manual**
+> (berbayar) + satu **Biarkan draft**. Login klien di **incognito** untuk T5.1/T5.2.
+
+**T5.1 — Ekspor data (pasangan & operator)**
+1. Sebagai **klien** (incognito): `/profile` → bagian **"Data & Akun"** → **"Unduh data saya (.json)"**.
+- **Harusnya:** file `.json` terunduh — isinya undangan + tamu/RSVP (kalau ada) dalam bentuk **terbaca** (bukan terenkripsi), **tanpa password**.
+2. Sebagai **admin**: `/admin/users` → ketik email klien → **"Ekspor data (.json)"**. → **Harusnya:** file serupa.
+
+**T5.2 — Ajukan hapus + tenggang 7 hari + batal**
+1. **Klien**: `/profile` → **"Ajukan hapus akun…"** → baca peringatan → **"Ya, ajukan hapus"**.
+- **Harusnya:** berubah jadi **"⏳ Permintaan hapus akun sedang berjalan. Dijadwalkan … (7 hari)"**.
+2. **Admin**: `/admin/users` → bagian **"Permintaan hapus akun"** → baris klien muncul; klik **"Proses hapus"**.
+- **Harusnya:** ditolak **"Masih dalam tenggang 7 hari…"** (belum bisa).
+3. **Klien**: **"Batalkan permintaan hapus"**. → **Harusnya:** permintaan hilang.
+
+**T5.3 — Proses hapus BENERAN (destruktif — akun uji!)**
+> Untuk menguji tanpa nunggu 7 hari: ajukan lagi (T5.2 langkah 1), lalu di **Supabase → SQL editor** jalankan:
+> `update account_deletion_requests set scheduled_for = now() - interval '1 day' where email='tes-hapus+01@contoh.com' and status='pending';`
+1. **Admin**: `/admin/users` → **"Proses hapus"** → konfirmasi merah → **"Ya, hapus permanen"**.
+- **Harusnya:** reload; permintaan hilang dari daftar.
+2. **Cek hasilnya:**
+   - Cari lagi email itu di `/admin/users` → **"Tidak ada akun"** (login terhapus).
+   - `/admin/invitations` cari slug **draft** → **HILANG** (terhapus total). Cari yang **berbayar** → slug jadi `deleted-xxxx`, tag **"PII terhapus"**, TAPI masih ada di `/admin/payments` sebagai transaksi (**uang tersimpan**).
+   - Buka publik slug berbayar → **TIDAK tayang**.
+3. **Aktivitas**: `/admin` → **Aktivitas** → ada **"Proses hapus akun …"**.
+
+> **Selesai — seluruh Admin Console (Modul 0–5) sudah dites.** Yang tersisa cuma bagian yang butuh
+> akun eksternal live (di bawah).
+
+---
+
+## Belum dites (butuh akun eksternal live) — jangan dicari dulu
 
 - **Refund via Xendit + webhook refund + chargeback (3C/3D)** — perlu **sandbox Xendit** saat
   go-live (aktifkan refund + webhook `refund.succeeded/failed`); ada di `docs/DEPLOYMENT-CHECKLIST.md`.
-- **Modul 5** — akun & data (PDP: cari/hapus akun, ekspor data).
+- **Email otomatis** (undang klien, keputusan refund) — jalan penuh begitu domain **Resend** diverifikasi.
