@@ -234,8 +234,48 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 
 ---
 
+## Modul 4 — Katalog & Tampilan Template
+
+> Dipotong 3: **4A** pondasi DB (tabel `templates` + seed) · **4B** editor "Tampilan"
+> di `/admin/templates` (nyala/mati, nama, kategori, tagline, dll) · **4C** halaman
+> depan & onboarding baca DB. T4.1–T4.5 satu rangkaian (edit → lihat di depan →
+> matikan → nyalakan lagi). Ingat: **mematikan template TIDAK merusak undangan yang
+> sudah ada** — cuma menyembunyikan dari halaman depan + pilihan onboarding.
+
+**T4.1 — Halaman editor gabungan**
+1. `/admin` → **Template & Harga** (`/admin/templates`).
+- **Harusnya terlihat:** tiap template (Lovebirds, Solary) jadi **satu kartu** berisi:
+  baris **"N undangan berbayar · pendapatan Rp …"**, bagian **Tampilan** (form + **preview kartu** di kanan),
+  lalu bagian **Paket & Harga** (kartu paket seperti Modul 1).
+
+**T4.2 — Edit Tampilan & simpan**
+1. Di Lovebirds → ubah **Tagline (ID)** jadi `Sinematik & mewah`, **Tagline (EN)** jadi `Cinematic & luxe`,
+   ganti **Warna aksen**, naikkan **Urutan** kalau mau → **Simpan Tampilan**.
+- **Harusnya terlihat:** **"Tersimpan ✓"** (hijau) + **preview kartu** ikut berubah. **Refresh** → tetap tersimpan.
+
+**T4.3 — Validasi menolak input ½ jadi**
+1. Isi **Tagline (ID)** saja, **Tagline (EN)** dikosongkan → Simpan. → **Harusnya:** merah "Tagline wajib diisi untuk ID dan EN".
+2. Isi **Warna aksen** = `merah` (bukan hex) → Simpan. → **Harusnya:** merah "Warna aksen harus hex…".
+3. Kosongkan **Nama** → Simpan. → **Harusnya:** merah "Nama template wajib diisi".
+
+**T4.4 — Halaman depan ikut berubah**
+1. Buka beranda `/` → bagian **"Coba Vibe"** → template Lovebirds.
+- **Harusnya terlihat:** tagline/aksennya = yang barusan kamu simpan di T4.2. *(Kalau masih lama, refresh — ada jeda cache ±1 menit.)*
+
+**T4.5 — Matikan template (reversibel) — bukti tak merusak undangan**
+1. Di `/admin/templates` → Solary → **hilangkan centang "Aktif"** → **Simpan Tampilan**.
+2. Buka beranda `/` → **Coba Vibe**. → **Harusnya:** Solary **tidak muncul** lagi di carousel (hanya Lovebirds).
+3. Buka `/onboarding?template=solary` (atau tombol Beli). → **Harusnya:** pilihan template **tanpa Solary**.
+4. **Tapi** buka demo lama `/solary/demo-solary`. → **Harusnya:** **tetap terbuka & jalan** (mematikan hanya menyembunyikan dari etalase, bukan mematikan undangan).
+5. Balik ke `/admin/templates` → **centang "Aktif"** Solary lagi → Simpan → beranda: Solary **muncul lagi**.
+
+**T4.6 — Aktivitas mencatat**
+1. `/admin` → **Aktivitas**. → **Harusnya:** ada entri **"Ubah tampilan template …"** (tiap simpan Tampilan) dan **"Ubah harga/paket …"** (tiap simpan paket).
+
+---
+
 ## Belum dites (belum dibangun) — jangan dicari dulu
 
 - **Refund via Xendit + webhook refund + chargeback (3C/3D)** — perlu **sandbox Xendit** saat
   go-live (aktifkan refund + webhook `refund.succeeded/failed`); ada di `docs/DEPLOYMENT-CHECKLIST.md`.
-- **Modul 4–5** — metadata/katalog template, akun & data (PDP).
+- **Modul 5** — akun & data (PDP: cari/hapus akun, ekspor data).

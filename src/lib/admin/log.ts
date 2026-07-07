@@ -49,6 +49,7 @@ export function renderAdminAction(row: { action: string; target_id?: string | nu
     'invitation.delete': `Hapus undangan ${ref}`,
     'invitation.create_for_client': `Buat undangan ${ref} untuk klien${meta.createdUser ? ' (akun baru)' : ''}`,
     'plan.update': `Ubah harga/paket ${ref}`,
+    'template.update': `Ubah tampilan template ${ref}`,
     'account.delete': `Hapus akun ${ref}`,
   }
   return (map[row.action] ?? `${row.action} ${ref}`).trim()
