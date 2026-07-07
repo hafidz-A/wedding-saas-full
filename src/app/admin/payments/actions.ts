@@ -188,6 +188,20 @@ export async function adminReconcileXendit(): Promise<{ ok: boolean; error?: str
     } catch {}
   }
 
+  // Reverse direction: rows WE marked paid via Xendit that Xendit no longer treats
+  // as paid (expired/refunded/disputed on their side) — flag for manual review.
+  // Capped to bound the number of Xendit lookups.
+  const { data: paidXendit } = (await db.from('invitations')
+    .select('id, slug, xendit_invoice_id')
+    .eq('is_paid', true).eq('paid_source', 'xendit').not('xendit_invoice_id', 'is', null).limit(100)) as { data: any[] | null }
+  for (const inv of paidXendit ?? []) {
+    try {
+      const snap = await getXenditInvoice(inv.xendit_invoice_id)
+      if (isPaidStatus(snap.status)) continue
+      out.push({ invitationId: inv.id, slug: inv.slug, type: 'initial', canApply: false, issue: `Kita catat LUNAS tapi Xendit "${snap.status}" — cek manual` })
+    } catch { /* skip */ }
+  }
+
   await logAdminAction(admin.email, { action: 'payments.reconcile', meta: { found: out.length } })
   return { ok: true, mismatches: out }
 }

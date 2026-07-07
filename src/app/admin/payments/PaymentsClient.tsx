@@ -1,7 +1,7 @@
 // src/app/admin/payments/PaymentsClient.tsx
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { formatIDR, type Transaction } from '@/lib/payments/transactions'
 import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaXendit } from './actions'
 import type { RefundSourceType } from '@/lib/payments/refunds'
@@ -19,17 +19,30 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   const [source, setSource] = useState('all')
   const [status, setStatus] = useState('all')
   const [q, setQ] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [page, setPage] = useState(0)
   const [busy, setBusy] = useState(false)
   const confirm = useAdminConfirm()
   const alertDialog = useAdminAlert()
   const formDialog = useAdminForm()
 
-  const rows = useMemo(() => txns.filter((t) =>
-    (type === 'all' || t.type === type) &&
-    (source === 'all' || t.source === source) &&
-    (status === 'all' || t.status === status) &&
-    (!q || t.slug.toLowerCase().includes(q.toLowerCase()))
-  ), [txns, type, source, status, q])
+  const rows = useMemo(() => txns.filter((t) => {
+    const d = t.date ? t.date.slice(0, 10) : ''
+    return (type === 'all' || t.type === type) &&
+      (source === 'all' || t.source === source) &&
+      (status === 'all' || t.status === status) &&
+      (!q || t.slug.toLowerCase().includes(q.toLowerCase())) &&
+      (!from || (d && d >= from)) &&
+      (!to || (d && d <= to))
+  }), [txns, type, source, status, q, from, to])
+
+  // Reset to the first page whenever the filters change.
+  useEffect(() => { setPage(0) }, [type, source, status, q, from, to])
+  const PAGE_SIZE = 50
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const safePage = Math.min(page, pageCount - 1)
+  const paged = rows.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)
 
   async function exportCsv() {
     setBusy(true)
@@ -96,6 +109,9 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
         <Select value={type} onChange={setType} options={[['all', 'Semua tipe'], ['initial', 'Awal'], ['upgrade', 'Upgrade'], ['addon', 'Kuota']]} />
         <Select value={source} onChange={setSource} options={[['all', 'Semua sumber'], ['xendit', 'Xendit'], ['manual', 'Manual'], ['comp', 'Comp']]} />
         <Select value={status} onChange={setStatus} options={[['all', 'Semua status'], ['paid', 'Lunas'], ['refunded', 'Direfund']]} />
+        <input type="date" title="Dari tanggal" value={from} onChange={(e) => setFrom(e.target.value)} style={ctl} />
+        <input type="date" title="Sampai tanggal" value={to} onChange={(e) => setTo(e.target.value)} style={ctl} />
+        {(from || to) && <button type="button" onClick={() => { setFrom(''); setTo('') }} style={ctl}>Reset tgl</button>}
       </div>
 
       <div style={{ overflowX: 'auto' }}>
@@ -108,7 +124,7 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
           <tbody>
             {rows.length === 0 ? (
               <tr><td colSpan={7} style={{ ...td, color: 'var(--text-muted)' }}>Tidak ada transaksi.</td></tr>
-            ) : rows.map((t) => (
+            ) : paged.map((t) => (
               <tr key={t.key} style={{ borderTop: '0.5px solid var(--border-default)', opacity: t.status === 'refunded' ? 0.6 : 1 }}>
                 <td style={td}><a href={`/admin/invitations?q=${encodeURIComponent(t.slug)}`} style={{ color: 'var(--interactive-primary)' }}>{t.slug}</a></td>
                 <td style={td}>{t.type}</td>
@@ -126,6 +142,14 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
           </tbody>
         </table>
       </div>
+
+      {pageCount > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 10 }}>
+          <button type="button" disabled={safePage === 0} onClick={() => setPage(safePage - 1)} style={{ ...btn, opacity: safePage === 0 ? 0.5 : 1 }}>← Sebelumnya</button>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Halaman {safePage + 1} / {pageCount}</span>
+          <button type="button" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)} style={{ ...btn, opacity: safePage >= pageCount - 1 ? 0.5 : 1 }}>Berikutnya →</button>
+        </div>
+      )}
     </section>
   )
 }

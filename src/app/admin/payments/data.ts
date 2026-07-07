@@ -17,24 +17,29 @@ export interface Ledger {
 export async function fetchLedger(db: any): Promise<Ledger> {
   const { data: invs } = (await db
     .from('invitations')
-    .select('id, slug, paid_amount_idr, paid_source, fee_idr, paid_at, is_paid')
+    .select('id, slug, plan, template_id, paid_amount_idr, paid_source, fee_idr, paid_at, is_paid')
     .limit(5000)) as { data: any[] | null }
   const rows = invs ?? []
-  const slugById = new Map<string, string>(rows.map((r) => [r.id, r.slug]))
+  const metaById = new Map<string, { slug: string; plan: string; template_id: string }>(
+    rows.map((r) => [r.id, { slug: r.slug, plan: r.plan ?? '', template_id: r.template_id ?? '' }]))
   const initials: InitialRow[] = rows
     .filter((r) => r.is_paid)
     .map((r) => ({
-      id: r.id, slug: r.slug, paid_amount_idr: r.paid_amount_idr,
-      paid_source: r.paid_source, fee_idr: r.fee_idr, paid_at: r.paid_at,
+      id: r.id, slug: r.slug, plan: r.plan ?? '', template_id: r.template_id ?? '',
+      paid_amount_idr: r.paid_amount_idr, paid_source: r.paid_source, fee_idr: r.fee_idr, paid_at: r.paid_at,
     }))
   const paidCount = initials.length
   const draftCount = rows.length - paidCount
 
   const attach = (arr: any[] | null): AddonUpgradeRow[] =>
-    (arr ?? []).map((r) => ({
-      id: r.id, invitation_id: r.invitation_id, slug: slugById.get(r.invitation_id) ?? r.invitation_id,
-      amount_idr: r.amount_idr, fee_idr: r.fee_idr, paid_at: r.paid_at,
-    }))
+    (arr ?? []).map((r) => {
+      const m = metaById.get(r.invitation_id)
+      return {
+        id: r.id, invitation_id: r.invitation_id, slug: m?.slug ?? r.invitation_id,
+        plan: m?.plan ?? '', template_id: m?.template_id ?? '',
+        amount_idr: r.amount_idr, fee_idr: r.fee_idr, paid_at: r.paid_at,
+      }
+    })
 
   const { data: ups } = (await db
     .from('plan_upgrades').select('id, invitation_id, amount_idr, fee_idr, paid_at, status')

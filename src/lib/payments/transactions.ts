@@ -18,6 +18,8 @@ export interface Transaction {
   key: string
   invitationId: string
   slug: string
+  plan: string
+  templateId: string
   type: TxnType
   amountIDR: number
   feeIDR: number
@@ -27,11 +29,11 @@ export interface Transaction {
 }
 
 export interface InitialRow {
-  id: string; slug: string
+  id: string; slug: string; plan?: string; template_id?: string
   paid_amount_idr: number | null; paid_source: string | null; fee_idr: number | null; paid_at: string | null
 }
 export interface AddonUpgradeRow {
-  id: string; invitation_id: string; slug: string
+  id: string; invitation_id: string; slug: string; plan?: string; template_id?: string
   amount_idr: number | null; fee_idr: number | null; paid_at: string | null
 }
 export interface RefundRow { source_type: string; source_id: string | null; status: string }
@@ -48,7 +50,7 @@ export function mapInitial(inv: InitialRow, refunded: Set<string>): Transaction 
   const source: TxnSource =
     inv.paid_source === 'manual' ? 'manual' : inv.paid_source === 'comp' ? 'comp' : 'xendit'
   return {
-    key, invitationId: inv.id, slug: inv.slug, type: 'initial',
+    key, invitationId: inv.id, slug: inv.slug, plan: inv.plan ?? '', templateId: inv.template_id ?? '', type: 'initial',
     amountIDR: Number(inv.paid_amount_idr ?? 0), feeIDR: Number(inv.fee_idr ?? 0),
     source, status: refunded.has(key) ? 'refunded' : 'paid', date: inv.paid_at ?? '',
   }
@@ -58,7 +60,7 @@ export function mapInitial(inv: InitialRow, refunded: Set<string>): Transaction 
 function mapAux(type: 'upgrade' | 'addon', r: AddonUpgradeRow, refunded: Set<string>): Transaction {
   const key = `${type}:${r.id}`
   return {
-    key, invitationId: r.invitation_id, slug: r.slug, type,
+    key, invitationId: r.invitation_id, slug: r.slug, plan: r.plan ?? '', templateId: r.template_id ?? '', type,
     amountIDR: Number(r.amount_idr ?? 0), feeIDR: Number(r.fee_idr ?? 0),
     source: 'xendit', status: refunded.has(key) ? 'refunded' : 'paid', date: r.paid_at ?? '',
   }
@@ -84,6 +86,8 @@ export interface RevenueSummary {
   compCount: number      // number of free comps (Rp 0)
   bySource: Record<TxnSource, number>
   byType: Record<TxnType, number>
+  byPlan: Record<string, number>
+  byTemplate: Record<string, number>
   count: number          // count of paid (non-comp, non-refunded) txns
 }
 
@@ -91,7 +95,8 @@ export interface RevenueSummary {
 export function summarize(txns: Transaction[]): RevenueSummary {
   const s: RevenueSummary = {
     grossIDR: 0, feesIDR: 0, netIDR: 0, refundedIDR: 0, compCount: 0,
-    bySource: { xendit: 0, manual: 0, comp: 0 }, byType: { initial: 0, upgrade: 0, addon: 0 }, count: 0,
+    bySource: { xendit: 0, manual: 0, comp: 0 }, byType: { initial: 0, upgrade: 0, addon: 0 },
+    byPlan: {}, byTemplate: {}, count: 0,
   }
   for (const t of txns) {
     if (t.status === 'refunded') { s.refundedIDR += t.amountIDR; continue }
@@ -100,6 +105,8 @@ export function summarize(txns: Transaction[]): RevenueSummary {
     s.feesIDR += t.feeIDR
     s.bySource[t.source] += t.amountIDR
     s.byType[t.type] += t.amountIDR
+    if (t.plan) s.byPlan[t.plan] = (s.byPlan[t.plan] ?? 0) + t.amountIDR
+    if (t.templateId) s.byTemplate[t.templateId] = (s.byTemplate[t.templateId] ?? 0) + t.amountIDR
     s.count += 1
   }
   s.netIDR = s.grossIDR - s.feesIDR

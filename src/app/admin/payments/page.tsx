@@ -47,6 +47,13 @@ export default async function AdminPaymentsPage() {
         <Card small label="Conversion draft→bayar" value={`${conv.ratePct}%`} sub={`${conv.paid} bayar · ${conv.drafts} draft`} />
       </section>
 
+      {(Object.keys(summary.byPlan).length > 0 || Object.keys(summary.byTemplate).length > 0) && (
+        <section style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '12px 0' }}>
+          {Object.entries(summary.byPlan).map(([plan, amt]) => <Card small key={`p-${plan}`} label={`Plan ${plan}`} value={formatIDR(amt)} />)}
+          {Object.entries(summary.byTemplate).map(([tpl, amt]) => <Card small key={`t-${tpl}`} label={`Template ${tpl}`} value={formatIDR(amt)} />)}
+        </section>
+      )}
+
       <section style={{ margin: '18px 0' }}>
         <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>Tren pendapatan (12 bulan, WIB)</h2>
         <TrendChart points={trend} />
