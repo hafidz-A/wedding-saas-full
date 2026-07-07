@@ -6,6 +6,7 @@ import {
   adminComp, adminSetPublished, adminChangePlan, adminAddQuota,
   adminSuspend, adminArchiveInvitation, adminDeleteInvitation,
 } from './actions'
+import { useAdminConfirm, useAdminForm } from '@/components/admin/AdminDialogProvider'
 
 interface Inv {
   id: string; slug: string; templateId: string; plan: string; email: string
@@ -16,6 +17,8 @@ interface Inv {
 export default function InvitationRow({ inv }: { inv: Inv }) {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const confirm = useAdminConfirm()
+  const formDialog = useAdminForm()
 
   async function run(fn: () => Promise<{ ok: boolean; error?: string }>) {
     setBusy(true); setMsg(null)
@@ -24,25 +27,47 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
     if (res.ok) { location.reload() } else { setMsg(res.error || 'Gagal') }
   }
 
-  function onSuspend() {
+  async function onSuspend() {
     if (inv.isSuspended) { run(() => adminSuspend(inv.id, false)); return }
-    const reason = prompt('Blokir undangan ini (takedown — publik + editor pasangan ikut mati). Alasan (opsional):')
-    if (reason === null) return // cancelled
-    run(() => adminSuspend(inv.id, true, reason || undefined))
+    const res = await formDialog({
+      title: 'Blokir undangan (takedown)',
+      message: 'Halaman publik + editor pasangan ikut mati sampai kamu buka blokir lagi.',
+      fields: [{ name: 'reason', label: 'Alasan (opsional)', type: 'textarea', placeholder: 'mis. laporan penyalahgunaan' }],
+      submitLabel: 'Blokir', tone: 'danger',
+    })
+    if (!res) return
+    run(() => adminSuspend(inv.id, true, res.reason || undefined))
   }
 
-  function onDelete() {
-    const typed = prompt(`Hapus PERMANEN undangan "${inv.slug}"? Tidak bisa dibatalkan. Ketik slug persis untuk konfirmasi:`)
-    if (typed === null) return
-    run(() => adminDeleteInvitation(inv.id, typed))
+  async function onDelete() {
+    const res = await formDialog({
+      title: `Hapus undangan "${inv.slug}"`,
+      message: 'Permanen dan tidak bisa dibatalkan (foto ikut terhapus). Ketik slug persis untuk konfirmasi.',
+      fields: [{ name: 'slug', label: `Ketik "${inv.slug}"`, placeholder: inv.slug, mustEqual: inv.slug }],
+      submitLabel: 'Hapus permanen', tone: 'danger',
+    })
+    if (!res) return
+    run(() => adminDeleteInvitation(inv.id, res.slug))
   }
 
-  function onArchive() {
-    const ok = confirm(inv.isArchived
-      ? 'Keluarkan dari arsip?'
-      : 'Arsipkan undangan berbayar ini? Disembunyikan dari daftar, tapi data & riwayat pembayaran tetap disimpan.')
+  async function onArchive() {
+    const ok = await confirm(inv.isArchived
+      ? { title: 'Keluarkan dari arsip?', message: 'Undangan muncul lagi di daftar aktif.', confirmLabel: 'Keluarkan' }
+      : { title: 'Arsipkan undangan berbayar?', message: 'Disembunyikan dari daftar, tapi data & riwayat pembayaran tetap disimpan.', confirmLabel: 'Arsipkan' })
     if (!ok) return
     run(() => adminArchiveInvitation(inv.id, !inv.isArchived))
+  }
+
+  async function onLunasManual() {
+    const res = await formDialog({
+      title: 'Tandai lunas (manual)',
+      message: 'Untuk uang yang kamu terima offline (transfer/tunai). Ini dihitung sebagai pendapatan.',
+      fields: [{ name: 'amount', label: 'Nominal diterima (Rp)', type: 'number', defaultValue: '0', required: true }],
+      submitLabel: 'Tandai lunas',
+    })
+    if (!res) return
+    const amount = parseInt(res.amount || '0', 10) || 0
+    run(() => adminComp(inv.id, { source: 'manual', amountIDR: amount, period: { kind: 'plan' } }))
   }
 
   return (
@@ -59,7 +84,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         <a href={`/${inv.templateId}/${inv.slug}`} target="_blank" rel="noreferrer" style={ghost}>Lihat</a>
         <button type="button" disabled={busy} onClick={() => run(() => adminSetPublished(inv.id, !inv.isPublished))} style={ghost}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</button>
         <button type="button" disabled={busy} onClick={() => run(() => adminComp(inv.id, { source: 'comp', amountIDR: 0, period: { kind: 'plan' } }))} style={ghost}>Comp (gratis)</button>
-        <button type="button" disabled={busy} onClick={() => { const a = parseInt(prompt('Nominal diterima (Rp):') || '0', 10) || 0; run(() => adminComp(inv.id, { source: 'manual', amountIDR: a, period: { kind: 'plan' } })) }} style={ghost}>Lunas manual</button>
+        <button type="button" disabled={busy} onClick={onLunasManual} style={ghost}>Lunas manual</button>
         <select disabled={busy} defaultValue={inv.plan} onChange={(e) => run(() => adminChangePlan(inv.id, e.target.value))} style={ghost}>
           <option value="basic">basic</option><option value="premium">premium</option>
         </select>

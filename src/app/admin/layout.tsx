@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin, AdminAuthError } from '@/lib/admin/is-admin'
+import { AdminDialogProvider } from '@/components/admin/AdminDialogProvider'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   try {
@@ -27,7 +28,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link key={href} href={href} style={{ fontSize: 14 }}>{label}</Link>
         ))}
       </nav>
-      <main style={{ padding: 24 }}>{children}</main>
+      <main style={{ padding: 24 }}>
+        <AdminDialogProvider>{children}</AdminDialogProvider>
+      </main>
     </div>
   )
 }

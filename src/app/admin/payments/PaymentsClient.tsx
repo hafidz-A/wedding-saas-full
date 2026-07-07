@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { formatIDR, type Transaction } from '@/lib/payments/transactions'
 import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaXendit } from './actions'
 import type { RefundSourceType } from '@/lib/payments/refunds'
+import { useAdminConfirm, useAdminAlert, useAdminForm } from '@/components/admin/AdminDialogProvider'
 
 function fmtDate(iso: string): string {
   if (!iso) return '—'
@@ -19,6 +20,9 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   const [status, setStatus] = useState('all')
   const [q, setQ] = useState('')
   const [busy, setBusy] = useState(false)
+  const confirm = useAdminConfirm()
+  const alertDialog = useAdminAlert()
+  const formDialog = useAdminForm()
 
   const rows = useMemo(() => txns.filter((t) =>
     (type === 'all' || t.type === type) &&
@@ -31,7 +35,7 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
     setBusy(true)
     const res = await adminExportTransactionsCsv()
     setBusy(false)
-    if (!res.ok || !res.csv) { alert(res.error || 'Gagal ekspor'); return }
+    if (!res.ok || !res.csv) { await alertDialog({ title: 'Gagal ekspor', message: res.error || 'Coba lagi.', tone: 'danger' }); return }
     const blob = new Blob([res.csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -44,34 +48,36 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   async function refund(t: Transaction) {
     const sourceType = t.type as RefundSourceType
     const sourceId = t.key.split(':').slice(1).join(':')
-    let method: 'manual' | 'xendit' = 'manual'
-    if (t.source === 'xendit') {
-      method = confirm(
-        `Refund ${formatIDR(t.amountIDR)} untuk "${t.slug}".\n\n` +
-        'OK  = via Xendit (otomatis, balik ke metode pembayaran asal)\n' +
-        'Batal = tandai refund manual (kamu transfer balik sendiri)',
-      ) ? 'xendit' : 'manual'
-    }
-    if (method === 'manual') {
-      if (!confirm(`Tandai refund MANUAL ${formatIDR(t.amountIDR)} untuk "${t.slug}"?\nPastikan kamu SUDAH transfer balik ke pelanggan.`)) return
-    }
-    const reason = prompt('Alasan refund (opsional):')
-    if (reason === null) return // cancelled
+    const isXendit = t.source === 'xendit'
+    const res = await formDialog({
+      title: `Refund ${formatIDR(t.amountIDR)}`,
+      message: isXendit
+        ? `Untuk "${t.slug}". Via Xendit = uang balik otomatis ke metode asal. Manual = kamu transfer balik sendiri lalu catat di sini.`
+        : `Untuk "${t.slug}". Dibayar offline → kamu transfer balik sendiri dulu, lalu catat di sini.`,
+      fields: [
+        ...(isXendit ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'xendit', options: [{ value: 'xendit', label: 'Via Xendit (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
+        { name: 'reason', label: 'Alasan (opsional)', type: 'textarea' as const, placeholder: 'mis. bayar dobel' },
+      ],
+      submitLabel: 'Proses refund', tone: 'danger',
+    })
+    if (!res) return
+    const method = (isXendit ? res.method : 'manual') as 'xendit' | 'manual'
     setBusy(true)
-    const res = method === 'xendit'
-      ? await adminRefundViaXendit(sourceType, sourceId, reason || undefined)
-      : await adminRefund(sourceType, sourceId, reason || undefined)
+    const r = method === 'xendit'
+      ? await adminRefundViaXendit(sourceType, sourceId, res.reason || undefined)
+      : await adminRefund(sourceType, sourceId, res.reason || undefined)
     setBusy(false)
-    if (res.ok) { location.reload() } else { alert(res.error || 'Gagal') }
+    if (r.ok) { location.reload() } else { await alertDialog({ title: 'Refund gagal', message: r.error || 'Coba lagi.', tone: 'danger' }) }
   }
 
   async function backfill() {
-    if (!confirm('Isi nominal untuk undangan berbayar lama (yang belum tercatat)?')) return
+    const ok = await confirm({ title: 'Isi angka lama', message: 'Isi nominal untuk undangan berbayar lama yang belum tercatat angkanya?', confirmLabel: 'Isi sekarang' })
+    if (!ok) return
     setBusy(true)
     const res = await adminBackfillPaidAmounts()
     setBusy(false)
-    if (!res.ok) { alert(res.error || 'Gagal'); return }
-    alert(`Selesai. Terisi: ${res.updated}, dilewati: ${res.skipped}.`)
+    if (!res.ok) { await alertDialog({ title: 'Gagal', message: res.error || 'Coba lagi.', tone: 'danger' }); return }
+    await alertDialog({ title: 'Selesai', message: `Terisi: ${res.updated}, dilewati: ${res.skipped}.` })
     location.reload()
   }
 

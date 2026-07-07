@@ -6,6 +6,7 @@ import { refundVerdict, type UsageSnapshot } from '@/lib/payments/refund-policy'
 import { formatIDR } from '@/lib/payments/transactions'
 import { adminApproveRefund, adminRejectRefund } from './actions'
 import type { RefundRequestView } from './data'
+import { useAdminForm } from '@/components/admin/AdminDialogProvider'
 
 const CATEGORY: Record<string, string> = {
   duplicate_payment: 'Bayar dobel', system_failure: 'Gagal sistem', inaccessible: 'Tidak bisa diakses', other: 'Lainnya',
@@ -23,27 +24,42 @@ function normalize(s: any): UsageSnapshot {
 export default function RefundRequestsPanel({ requests }: { requests: RefundRequestView[] }) {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const formDialog = useAdminForm()
   if (!requests.length) return null
 
   async function approve(r: RefundRequestView) {
-    let method: 'manual' | 'xendit' = 'manual'
-    if (r.paidSource === 'xendit') {
-      method = confirm(`Setujui refund ${formatIDR(r.amountIDR)} untuk "${r.slug}".\n\nOK = via Xendit (otomatis, balik ke metode asal)\nBatal = manual (kamu transfer balik sendiri)`) ? 'xendit' : 'manual'
-    }
-    if (method === 'manual' && !confirm(`Setujui refund MANUAL ${formatIDR(r.amountIDR)} untuk "${r.slug}"? Pastikan kamu (akan) transfer balik ke pelanggan.`)) return
+    const isXendit = r.paidSource === 'xendit'
+    const res = await formDialog({
+      title: `Setujui refund ${formatIDR(r.amountIDR)}`,
+      message: isXendit
+        ? `Untuk "${r.slug}". Via Xendit = uang balik otomatis. Manual = kamu transfer balik sendiri.`
+        : `Untuk "${r.slug}". Bayar offline → pastikan kamu (akan) transfer balik ke pelanggan.`,
+      fields: [
+        ...(isXendit ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'xendit', options: [{ value: 'xendit', label: 'Via Xendit (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
+        { name: 'note', label: 'Catatan (opsional)', type: 'textarea' as const },
+      ],
+      submitLabel: 'Setujui & refund', tone: 'danger',
+    })
+    if (!res) return
+    const method = (isXendit ? res.method : 'manual') as 'manual' | 'xendit'
     setBusy(true); setMsg(null)
-    const res = await adminApproveRefund(r.id, { method })
+    const out = await adminApproveRefund(r.id, { method, note: res.note || undefined })
     setBusy(false)
-    if (res.ok) location.reload(); else setMsg(res.error || 'Gagal')
+    if (out.ok) location.reload(); else setMsg(out.error || 'Gagal')
   }
 
   async function reject(r: RefundRequestView) {
-    const note = prompt('Alasan tolak (opsional):')
-    if (note === null) return
+    const res = await formDialog({
+      title: 'Tolak permintaan refund',
+      message: `Untuk "${r.slug}". Pasangan akan lihat statusnya jadi ditolak.`,
+      fields: [{ name: 'note', label: 'Alasan tolak (opsional)', type: 'textarea' as const }],
+      submitLabel: 'Tolak', tone: 'danger',
+    })
+    if (!res) return
     setBusy(true); setMsg(null)
-    const res = await adminRejectRefund(r.id, note || undefined)
+    const out = await adminRejectRefund(r.id, res.note || undefined)
     setBusy(false)
-    if (res.ok) location.reload(); else setMsg(res.error || 'Gagal')
+    if (out.ok) location.reload(); else setMsg(out.error || 'Gagal')
   }
 
   return (
