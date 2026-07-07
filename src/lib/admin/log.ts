@@ -50,7 +50,10 @@ export function renderAdminAction(row: { action: string; target_id?: string | nu
     'invitation.create_for_client': `Buat undangan ${ref} untuk klien${meta.createdUser ? ' (akun baru)' : ''}`,
     'plan.update': `Ubah harga/paket ${ref}`,
     'template.update': `Ubah tampilan template ${ref}`,
-    'account.delete': `Hapus akun ${ref}`,
+    'account.delete': `Proses hapus akun ${ref}`,
+    'account.deletion_reject': `Tolak permintaan hapus akun ${ref}`,
+    'data.export_self': `Unduh data sendiri`,
+    'data.export_admin': `Ekspor data akun ${ref}`,
   }
   return (map[row.action] ?? `${row.action} ${ref}`).trim()
 }
