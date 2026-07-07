@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/admin/is-admin'
 import { logAdminAction } from '@/lib/admin/log'
 import { TEMPLATE_PLANS_TAG } from '@/lib/payments/template-plans'
 import { TEMPLATES_TAG } from '@/lib/templates/catalog'
+import { isValidTemplate } from '@/config/templateIndex'
 import { validatePlanPatch, type PlanPatch } from './validate'
 import { validateTemplatePatch, type TemplatePatch } from './validate-template'
 
@@ -47,13 +48,18 @@ export async function updatePlan(templateId: string, planCode: string, patch: Pl
 export async function updateTemplate(templateId: string, patch: TemplatePatch): Promise<{ ok: boolean; error?: string }> {
   let admin: { email: string }
   try { admin = await requireAdmin() } catch { return { ok: false, error: 'Akses ditolak' } }
+  if (!isValidTemplate(templateId)) return { ok: false, error: 'Template tidak dikenal' }
   const v = validateTemplatePatch(patch)
   if (v.ok === false) return { ok: false, error: v.error }
 
+  // Whitelist columns — never spread the raw patch, so a crafted call can't write
+  // template_id (the PK), updated_at, or any unexpected column (no mass-assignment).
+  const cols: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  const ALLOWED = ['enabled', 'label', 'category', 'tags', 'accent', 'thumbnail', 'sort_order', 'tagline_id', 'tagline_en', 'blurb_id', 'blurb_en'] as const
+  for (const k of ALLOWED) if (k in patch) cols[k] = (patch as any)[k]
+
   const db = createSupabaseAdminClient()
-  const { error } = await (db.from('templates') as any)
-    .update({ ...patch, updated_at: new Date().toISOString() })
-    .eq('template_id', templateId)
+  const { error } = await (db.from('templates') as any).update(cols).eq('template_id', templateId)
   if (error) {
     console.error('[updateTemplate]', error)
     return { ok: false, error: 'Gagal menyimpan. Coba lagi.' }
