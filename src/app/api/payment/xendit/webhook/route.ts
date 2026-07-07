@@ -4,7 +4,8 @@ import { isValidCallbackToken, getXenditInvoice, isPaidStatus, invitationIdFromE
 import { resolvePlan } from '@/lib/payments/plans'
 import { initialPurchaseAmount } from '@/lib/payments/quota'
 import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
-import { settleRefund } from '@/lib/payments/refunds'
+import { settleRefund, sourceHasOpenRefund } from '@/lib/payments/refunds'
+import { logAdminAction } from '@/lib/admin/log'
 
 /**
  * Xendit invoice webhook. Authenticated by the `x-callback-token` header
@@ -28,10 +29,33 @@ export async function POST(req: Request) {
     amount?: number
     paid_amount?: number
     event?: string
-    data?: { id?: string; status?: string }
+    data?: { id?: string; status?: string; invoice_id?: string; reference_id?: string; payment_id?: string }
   }
 
   const admin = createSupabaseAdminClient()
+
+  // Chargebacks / disputes (a bank forcibly pulled the money back). Record as a
+  // 'chargeback' refund so it nets out of revenue + takes the invitation down
+  // (settleRefund → reverseEntitlement), and log it for the operator. Never
+  // double-nets a source that already has a refund. Envelope must be verified
+  // against the live account at go-live (docs.xendit.co disputes).
+  if (body.event && (body.event.includes('dispute') || body.event.includes('chargeback'))) {
+    const invoiceId = body.data?.invoice_id || body.data?.reference_id || body.data?.payment_id || body.data?.id
+    if (invoiceId) {
+      const { data: inv } = (await admin.from('invitations')
+        .select('id, paid_amount_idr').eq('xendit_invoice_id', invoiceId).maybeSingle()) as { data: { id: string; paid_amount_idr: number | null } | null }
+      if (inv && !(await sourceHasOpenRefund(admin, 'initial', inv.id))) {
+        const { data: row } = (await (admin.from('refunds') as any).insert({
+          invitation_id: inv.id, source_type: 'initial', source_id: inv.id,
+          amount_idr: Number(inv.paid_amount_idr ?? 0), method: 'chargeback', status: 'pending',
+          reason: 'Chargeback / dispute bank',
+        }).select('id').single()) as { data: { id: string } | null }
+        if (row) await settleRefund(admin, row.id)
+        await logAdminAction('system (xendit)', { action: 'payment.chargeback', targetType: 'invitation', targetId: inv.id })
+      }
+    }
+    return NextResponse.json({ ok: true })
+  }
 
   // Refund events (net-new). Xendit delivers these as { event, data } — distinct
   // from the flat invoice callback below. Match our refunds row by the stored

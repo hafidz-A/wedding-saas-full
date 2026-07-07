@@ -28,6 +28,9 @@ export function renderAdminAction(row: { action: string; target_id?: string | nu
   const map: Record<string, string> = {
     'refund.approve': `Menyetujui refund ${ref}`,
     'refund.reject': `Menolak refund ${ref}`,
+    'refund.manual': `Refund manual ${ref}`,
+    'refund.xendit': `Refund via Xendit ${ref}`,
+    'payment.chargeback': `Chargeback (dispute bank) ${ref}`,
     'invitation.comp': `Comp/lunas undangan ${ref}${meta.source ? ` (${meta.source})` : ''}`,
     'invitation.publish': `Terbitkan undangan ${ref}`,
     'invitation.unpublish': `Sembunyikan undangan ${ref}`,
