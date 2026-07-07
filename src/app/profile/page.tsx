@@ -11,6 +11,7 @@ import { SiteNav } from '@/components/site/SiteNav'
 import RenewButton from './RenewButton'
 import RecheckPaymentButton from './RecheckPaymentButton'
 import MfaEnroll from './MfaEnroll'
+import AccountDataSection from './AccountDataSection'
 import styles from './profile.module.css'
 
 /**
@@ -36,6 +37,10 @@ export default async function ProfilePage() {
     data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null }[] | null
   }
   const invitations = rows ?? []
+  const { data: delReq } = (await admin
+    .from('account_deletion_requests')
+    .select('scheduled_for').eq('user_id', user.id).eq('status', 'pending').limit(1).maybeSingle()) as { data: { scheduled_for: string | null } | null }
+  const pendingDeletion = delReq ? { scheduledFor: delReq.scheduled_for } : null
   const ap = t.common.activePeriod
   const now = Date.now()
 
@@ -132,6 +137,8 @@ export default async function ProfilePage() {
               })}
             </ul>
           )}
+
+          <AccountDataSection pending={pendingDeletion} />
         </div>
       </main>
     </>
