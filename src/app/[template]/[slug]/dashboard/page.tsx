@@ -212,6 +212,9 @@ export default async function DashboardPage({ params }: PageProps) {
     config_edited: false,
     days_since_paid: Math.max(0, Math.floor((Date.now() - paidMs) / 86_400_000)),
     ever_used: !!invitation.used_at,
+    days_since_published: invitation.published_at
+      ? Math.max(0, Math.floor((Date.now() - Date.parse(invitation.published_at)) / 86_400_000))
+      : null,
   }).eligible
 
   return (

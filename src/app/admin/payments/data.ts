@@ -74,7 +74,7 @@ export async function fetchRefundRequests(db: any): Promise<RefundRequestView[]>
   if (!rows.length) return []
   const ids = Array.from(new Set(rows.map((r) => r.invitation_id)))
   const { data: invs } = (await db.from('invitations')
-    .select('id, slug, paid_amount_idr, paid_source, is_published, paid_at, updated_at, used_at').in('id', ids)) as { data: any[] | null }
+    .select('id, slug, paid_amount_idr, paid_source, is_published, paid_at, updated_at, used_at, published_at').in('id', ids)) as { data: any[] | null }
   const map = new Map<string, any>((invs ?? []).map((i) => [i.id, i]))
   // Recompute the usage snapshot LIVE per request so the eligibility verdict the
   // operator acts on reflects CURRENT usage — not the frozen request-time photo.

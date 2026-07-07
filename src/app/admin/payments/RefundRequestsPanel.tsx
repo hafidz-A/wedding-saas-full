@@ -19,6 +19,7 @@ function normalize(s: any): UsageSnapshot {
     attendance_count: Number(s?.attendance_count ?? 0),
     config_edited: !!s?.config_edited, days_since_paid: Number(s?.days_since_paid ?? 0),
     ever_used: !!s?.ever_used,
+    days_since_published: s?.days_since_published == null ? null : Number(s.days_since_published),
   }
 }
 
