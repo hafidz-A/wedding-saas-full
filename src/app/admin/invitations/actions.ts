@@ -15,6 +15,11 @@ import { compExpiry, type CompPeriod } from './period'
 
 type Result = { ok: boolean; error?: string }
 
+/** Sanity cap for an operator-entered offline amount (a wedding invite is ~Rp
+ *  100–500k) — blocks a fat-fingered extra zero from inflating revenue. */
+const MAX_MANUAL_AMOUNT_IDR = 100_000_000
+const clampAmount = (n: number) => Math.min(MAX_MANUAL_AMOUNT_IDR, Math.max(0, Math.round(n || 0)))
+
 async function guard(): Promise<{ email: string } | null> {
   try { return await requireAdmin() } catch { return null }
 }
@@ -31,7 +36,7 @@ export async function adminComp(id: string, opts: { source: 'manual' | 'comp'; a
   // A suspended (taken-down) invitation must NOT auto-publish when comped.
   const { error } = await (db.from('invitations') as any).update({
     is_paid: true, is_published: !inv.suspended_at, paid_at: new Date(nowMs).toISOString(),
-    expires_at: expires, paid_source: opts.source, paid_amount_idr: opts.source === 'comp' ? 0 : Math.max(0, Math.round(opts.amountIDR)),
+    expires_at: expires, paid_source: opts.source, paid_amount_idr: opts.source === 'comp' ? 0 : clampAmount(opts.amountIDR),
   }).eq('id', id)
   if (error) return { ok: false, error: 'Gagal menyimpan' }
   await logAdminAction(admin.email, { action: 'invitation.comp', targetType: 'invitation', targetId: id, meta: { source: opts.source } })
@@ -59,6 +64,11 @@ export async function adminChangePlan(id: string, plan: string): Promise<Result>
   const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
   if (!plan.trim()) return { ok: false, error: 'Plan wajib' }
   const db = createSupabaseAdminClient()
+  // Reject an unknown plan for this template (a bad string would silently break
+  // the invitation's pricing/quota/guestbook resolution downstream).
+  const { data: inv } = (await db.from('invitations').select('template_id').eq('id', id).maybeSingle()) as { data: { template_id: string | null } | null }
+  if (!inv) return { ok: false, error: 'Undangan tidak ditemukan' }
+  if (!(await resolvePlan(inv.template_id ?? '', plan))) return { ok: false, error: `Plan "${plan}" tidak dikenal untuk template ini` }
   const { error } = await (db.from('invitations') as any).update({ plan }).eq('id', id)
   if (error) return { ok: false, error: 'Gagal menyimpan' }
   await logAdminAction(admin.email, { action: 'invitation.change_plan', targetType: 'invitation', targetId: id, meta: { plan } })
@@ -258,7 +268,7 @@ export async function adminCreateInvitationForClient(input: CreateForClientInput
     await (db.from('invitations') as any).update({
       is_paid: true, is_published: true, paid_at: new Date(nowMs).toISOString(),
       expires_at: expires, paid_source: input.markPaid.source,
-      paid_amount_idr: input.markPaid.source === 'comp' ? 0 : Math.max(0, Math.round(input.markPaid.amountIDR)),
+      paid_amount_idr: input.markPaid.source === 'comp' ? 0 : clampAmount(input.markPaid.amountIDR),
     }).eq('id', invitationId)
   }
 

@@ -20,6 +20,11 @@ async function notifyCouple(db: any, invitationId: string, subject: string, html
   if (inv?.email) await sendAdminEmail({ to: inv.email, subject, html })
 }
 
+/** Escape free-text before it lands in an outbound email's HTML body. */
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+}
+
 type Result = { ok: boolean; error?: string }
 
 async function guard(): Promise<{ email: string } | null> {
@@ -314,7 +319,7 @@ export async function adminRejectRefund(requestId: string, note?: string): Promi
     .eq('id', requestId)
   await notifyCouple(db, req.invitation_id,
     'Update permintaan pengembalian dana',
-    `<p>Halo,</p><p>Setelah kami tinjau, permintaan pengembalian dana undanganmu <strong>belum bisa kami setujui</strong>${note ? `: ${note}` : '.'} Kalau ada pertanyaan, silakan balas email ini.</p>`)
+    `<p>Halo,</p><p>Setelah kami tinjau, permintaan pengembalian dana undanganmu <strong>belum bisa kami setujui</strong>${note ? `: ${escapeHtml(note)}` : '.'} Kalau ada pertanyaan, silakan balas email ini.</p>`)
   await logAdminAction(admin.email, { action: 'refund.reject', targetType: 'invitation', targetId: req.invitation_id, meta: { note: note ?? null } })
   return { ok: true }
 }

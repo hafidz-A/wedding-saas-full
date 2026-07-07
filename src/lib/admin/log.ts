@@ -8,16 +8,22 @@ export interface AdminActionInput {
   meta?: Record<string, unknown>
 }
 
-/** Append one row to the admin_actions audit log (service-role, append-only). */
+/** Append one row to the admin_actions audit log (service-role, append-only).
+ *  BEST-EFFORT: a failed audit insert must never fail the action it records
+ *  (the mutation already happened) — it just logs to the server console. */
 export async function logAdminAction(adminEmail: string, a: AdminActionInput): Promise<void> {
-  const admin = createSupabaseAdminClient()
-  await (admin.from('admin_actions') as any).insert({
-    admin_email: adminEmail,
-    action: a.action,
-    target_type: a.targetType ?? null,
-    target_id: a.targetId ?? null,
-    meta: a.meta ?? null,
-  })
+  try {
+    const admin = createSupabaseAdminClient()
+    await (admin.from('admin_actions') as any).insert({
+      admin_email: adminEmail,
+      action: a.action,
+      target_type: a.targetType ?? null,
+      target_id: a.targetId ?? null,
+      meta: a.meta ?? null,
+    })
+  } catch (e) {
+    console.error('[logAdminAction] failed (ignored):', e)
+  }
 }
 
 /** Plain Indonesian one-liner for the Aktivitas view. Prefers a human-friendly

@@ -85,7 +85,12 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         <button type="button" disabled={busy} onClick={() => run(() => adminSetPublished(inv.id, !inv.isPublished))} style={ghost}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</button>
         <button type="button" disabled={busy} onClick={() => run(() => adminComp(inv.id, { source: 'comp', amountIDR: 0, period: { kind: 'plan' } }))} style={ghost}>Comp (gratis)</button>
         <button type="button" disabled={busy} onClick={onLunasManual} style={ghost}>Lunas manual</button>
-        <select disabled={busy} defaultValue={inv.plan} onChange={(e) => run(() => adminChangePlan(inv.id, e.target.value))} style={ghost}>
+        <select disabled={busy} value={inv.plan} onChange={async (e) => {
+          const next = e.target.value
+          if (next === inv.plan) return
+          const ok = await confirm({ title: 'Ganti plan?', message: `Ubah plan "${inv.slug}" dari ${inv.plan} → ${next}? Fitur (mis. Buku Tamu Premium) ikut menyesuaikan.`, confirmLabel: 'Ganti' })
+          if (ok) run(() => adminChangePlan(inv.id, next))
+        }} style={ghost}>
           <option value="basic">basic</option><option value="premium">premium</option>
         </select>
         <button type="button" disabled={busy} onClick={() => run(() => adminAddQuota(inv.id, 50))} style={ghost}>+50 kuota</button>
