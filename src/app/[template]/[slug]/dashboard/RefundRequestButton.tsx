@@ -9,7 +9,7 @@ import { requestRefund, type RefundRequestInput } from '@/app/onboarding/actions
  * reviews (never an instant refund). A manual/offline-paid invitation also
  * collects a destination account (Xendit returns to the original method).
  */
-export default function RefundRequestButton({ invitationId, paidSource, hasPendingRefund = false }: { invitationId: string; paidSource: string; hasPendingRefund?: boolean }) {
+export default function RefundRequestButton({ invitationId, paidSource, hasPendingRefund = false, eligible = true }: { invitationId: string; paidSource: string; hasPendingRefund?: boolean; eligible?: boolean }) {
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState<RefundRequestInput['category']>('duplicate_payment')
   const [detail, setDetail] = useState('')
@@ -40,6 +40,19 @@ export default function RefundRequestButton({ invitationId, paidSource, hasPendi
         </p>
         <p style={{ margin: 0, fontSize: 12.5, color: 'var(--status-error-dark, var(--status-error))' }}>
           ⚠ Selama menunggu keputusan, <strong>jangan mengubah undangan atau menambah tamu</strong> — kalau undangan sudah dipakai, refund bisa ditolak.
+        </p>
+      </div>
+    )
+  }
+
+  // Already declared not-eligible (sticky "sudah dipakai", or live past the
+  // grace window). Hide the self-serve form — offer a contact path instead so a
+  // genuine edge case can still reach the operator, but junk requests don't queue.
+  if (!eligible) {
+    return (
+      <div style={wrap}>
+        <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-muted)' }}>
+          Undangan ini sudah dipakai, jadi <strong>tidak memenuhi syarat pengembalian dana</strong>. Kalau menurutmu ada kekeliruan, hubungi tim FinCards.
         </p>
       </div>
     )

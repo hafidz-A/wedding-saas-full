@@ -5,6 +5,7 @@ import { isValidTemplate } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict, type Dict, type Lang } from '@/lib/i18n'
 import { activePeriodStatus } from '@/lib/payments/active-period'
+import { refundVerdict } from '@/lib/payments/refund-policy'
 import { resolveUpgrade, planBaseQuota } from '@/lib/payments/plans'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import { effectiveQuota } from '@/lib/payments/quota'
@@ -198,6 +199,21 @@ export default async function DashboardPage({ params }: PageProps) {
     .from('refund_requests').select('id').eq('invitation_id', invitation.id).eq('status', 'pending').limit(1)) as { data: any[] | null }
   const hasPendingRefund = !!(pendingRefund && pendingRefund.length)
 
+  // Same verdict the operator sees — computed from data already loaded (no extra
+  // queries). Drives whether the couple even sees the "Ajukan refund" button:
+  // if the invitation is already not-eligible (sticky "sudah dipakai"), the
+  // self-serve form is hidden (they'd only get rejected).
+  const paidMs = invitation.paid_at ? Date.parse(invitation.paid_at) : Date.now()
+  const refundEligible = refundVerdict({
+    is_published: !!invitation.is_published,
+    guest_count: guests.length,
+    rsvp_count: rsvpsDec.length,
+    attendance_count: attendances.length,
+    config_edited: false,
+    days_since_paid: Math.max(0, Math.floor((Date.now() - paidMs) / 86_400_000)),
+    ever_used: !!invitation.used_at,
+  }).eligible
+
   return (
     <DashboardClient
       slug={slug}
@@ -213,6 +229,7 @@ export default async function DashboardPage({ params }: PageProps) {
       upgrade={upgrade}
       quota={quota}
       hasPendingRefund={hasPendingRefund}
+      refundEligible={refundEligible}
     />
   )
 }
