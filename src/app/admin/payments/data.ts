@@ -2,6 +2,7 @@
 // Server-only ledger loader shared by the payments page + CSV export action.
 import 'server-only'
 import type { InitialRow, AddonUpgradeRow, RefundRow } from '@/lib/payments/transactions'
+import { buildUsageSnapshot } from '@/lib/payments/refund-usage'
 
 export interface Ledger {
   initials: InitialRow[]
@@ -68,14 +69,17 @@ export async function fetchRefundRequests(db: any): Promise<RefundRequestView[]>
   if (!rows.length) return []
   const ids = Array.from(new Set(rows.map((r) => r.invitation_id)))
   const { data: invs } = (await db.from('invitations')
-    .select('id, slug, paid_amount_idr, paid_source').in('id', ids)) as { data: any[] | null }
+    .select('id, slug, paid_amount_idr, paid_source, is_published, paid_at, updated_at').in('id', ids)) as { data: any[] | null }
   const map = new Map<string, any>((invs ?? []).map((i) => [i.id, i]))
-  return rows.map((r) => {
+  // Recompute the usage snapshot LIVE per request so the eligibility verdict the
+  // operator acts on reflects CURRENT usage — not the frozen request-time photo.
+  return Promise.all(rows.map(async (r) => {
     const inv = map.get(r.invitation_id)
+    const snapshot = inv ? await buildUsageSnapshot(db, r.invitation_id, inv) : (r.usage_snapshot ?? {})
     return {
       id: r.id, invitationId: r.invitation_id, slug: inv?.slug ?? r.invitation_id,
       amountIDR: Number(inv?.paid_amount_idr ?? 0), paidSource: inv?.paid_source ?? 'xendit',
-      category: r.reason_category, detail: r.reason_text, snapshot: r.usage_snapshot ?? {}, createdAt: r.created_at,
+      category: r.reason_category, detail: r.reason_text, snapshot, createdAt: r.created_at,
     }
-  })
+  }))
 }

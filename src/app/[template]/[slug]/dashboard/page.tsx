@@ -191,6 +191,13 @@ export default async function DashboardPage({ params }: PageProps) {
     invitationId: invitation.id,
   }
 
+  // Is there a refund request awaiting the operator's decision? Drives the
+  // dashboard's "sedang diproses" state (blocks a duplicate request) + the
+  // "editing may forfeit your refund" warning.
+  const { data: pendingRefund } = (await admin
+    .from('refund_requests').select('id').eq('invitation_id', invitation.id).eq('status', 'pending').limit(1)) as { data: any[] | null }
+  const hasPendingRefund = !!(pendingRefund && pendingRefund.length)
+
   return (
     <DashboardClient
       slug={slug}
@@ -205,6 +212,7 @@ export default async function DashboardPage({ params }: PageProps) {
       lang={lang}
       upgrade={upgrade}
       quota={quota}
+      hasPendingRefund={hasPendingRefund}
     />
   )
 }

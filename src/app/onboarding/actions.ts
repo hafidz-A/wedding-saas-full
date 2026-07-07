@@ -15,6 +15,7 @@ import { createXenditInvoice, getXenditInvoice, isPaidStatus, expireXenditInvoic
 import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
+import { buildUsageSnapshot } from '@/lib/payments/refund-usage'
 import { siteBaseUrl } from '@/lib/site-url'
 
 /** Max unpaid draft invitations a single account may stack up (anti-abuse). */
@@ -704,20 +705,10 @@ export async function requestRefund(invitationId: string, input: RefundRequestIn
       .select('id').eq('invitation_id', invitationId).eq('status', 'pending').limit(1)
     if (pending && pending.length) return { ok: false, error: 'Sudah ada permintaan refund yang sedang diproses.' }
 
-    const [g, r, a] = await Promise.all([
-      (admin.from('guests') as any).select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId),
-      (admin.from('rsvps') as any).select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId),
-      (admin.from('attendances') as any).select('id', { count: 'exact', head: true }).eq('invitation_id', invitationId),
-    ])
-    const paidMs = inv.paid_at ? Date.parse(inv.paid_at) : Date.now()
-    const daysSincePaid = Math.max(0, Math.floor((Date.now() - paidMs) / 86_400_000))
-    const configEdited = !!inv.updated_at && Date.parse(inv.updated_at) > paidMs + 60_000
-    const usage_snapshot = {
-      is_published: !!inv.is_published,
-      guest_count: g.count ?? 0, rsvp_count: r.count ?? 0, attendance_count: a.count ?? 0,
-      config_edited: configEdited, days_since_paid: daysSincePaid,
-      destination: input.destination ?? null,
-    }
+    // Usage snapshot at request time (kept for the record). The admin panel
+    // RECOMPUTES this live on every view, so a later edit shows up there.
+    const usage = await buildUsageSnapshot(admin, invitationId, inv)
+    const usage_snapshot = { ...usage, destination: input.destination ?? null }
     const { error } = await (admin.from('refund_requests') as any).insert({
       invitation_id: invitationId, requested_by: user.id, source_type: 'initial', source_id: invitationId,
       reason_category: input.category, reason_text: input.detail ?? null, usage_snapshot, status: 'pending',

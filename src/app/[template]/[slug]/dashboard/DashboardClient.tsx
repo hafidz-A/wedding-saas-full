@@ -36,6 +36,7 @@ export default function DashboardClient({
   lang,
   upgrade = null,
   quota,
+  hasPendingRefund = false,
 }: {
   slug: string
   template: string
@@ -49,6 +50,7 @@ export default function DashboardClient({
   lang: Lang
   upgrade?: { amountIDR: number } | null
   quota: { used: number; effective: number; invitationId: string }
+  hasPendingRefund?: boolean
 }) {
   const [payPending, startPay] = useTransition()
   const period = activePeriodStatus(invitation, Date.now())
@@ -241,7 +243,7 @@ export default function DashboardClient({
       )}
 
       {invitation.is_paid && invitation.paid_source !== 'comp' && (
-        <RefundRequestButton invitationId={invitation.id} paidSource={invitation.paid_source || 'xendit'} />
+        <RefundRequestButton invitationId={invitation.id} paidSource={invitation.paid_source || 'xendit'} hasPendingRefund={hasPendingRefund} />
       )}
 
       <nav className={styles.nav}>

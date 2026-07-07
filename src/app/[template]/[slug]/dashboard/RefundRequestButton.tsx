@@ -9,7 +9,7 @@ import { requestRefund, type RefundRequestInput } from '@/app/onboarding/actions
  * reviews (never an instant refund). A manual/offline-paid invitation also
  * collects a destination account (Xendit returns to the original method).
  */
-export default function RefundRequestButton({ invitationId, paidSource }: { invitationId: string; paidSource: string }) {
+export default function RefundRequestButton({ invitationId, paidSource, hasPendingRefund = false }: { invitationId: string; paidSource: string; hasPendingRefund?: boolean }) {
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState<RefundRequestInput['category']>('duplicate_payment')
   const [detail, setDetail] = useState('')
@@ -30,11 +30,16 @@ export default function RefundRequestButton({ invitationId, paidSource }: { invi
     if (res.ok) setDone(true); else setErr(res.error || 'Gagal')
   }
 
-  if (done) {
+  // Pending from the server (survives refresh → no duplicate request) OR just
+  // submitted. Shows status + the "editing forfeits your refund" warning.
+  if (hasPendingRefund || done) {
     return (
-      <div style={wrap}>
+      <div style={{ ...wrap, display: 'grid', gap: 6 }}>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--text-secondary)' }}>
-          ✓ Permintaan pengembalian dana terkirim. Tim FinCards akan meninjau & mengabari kamu.
+          ✓ Permintaan pengembalian dana <strong>sedang diproses</strong>. Tim FinCards akan meninjau & mengabari kamu.
+        </p>
+        <p style={{ margin: 0, fontSize: 12.5, color: 'var(--status-error-dark, var(--status-error))' }}>
+          ⚠ Selama menunggu keputusan, <strong>jangan mengubah undangan atau menambah tamu</strong> — kalau undangan sudah dipakai, refund bisa ditolak.
         </p>
       </div>
     )
