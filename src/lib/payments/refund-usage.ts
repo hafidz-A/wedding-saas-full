@@ -23,6 +23,9 @@ export async function buildUsageSnapshot(
     guest_count: g.count ?? 0,
     rsvp_count: r.count ?? 0,
     attendance_count: a.count ?? 0,
+    // Coarse hint only: updated_at also bumps on admin actions, so this is NOT
+    // reliable enough to drive the eligibility verdict (refundVerdict ignores it).
+    // Kept for the record; the verdict uses the accurate guest/RSVP/check-in signals.
     config_edited: !!inv.updated_at && Date.parse(inv.updated_at) > paidMs + 60_000,
     days_since_paid: Math.max(0, Math.floor((nowMs - paidMs) / 86_400_000)),
   }
