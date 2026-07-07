@@ -18,6 +18,7 @@ function normalize(s: any): UsageSnapshot {
     guest_count: Number(s?.guest_count ?? 0), rsvp_count: Number(s?.rsvp_count ?? 0),
     attendance_count: Number(s?.attendance_count ?? 0),
     config_edited: !!s?.config_edited, days_since_paid: Number(s?.days_since_paid ?? 0),
+    ever_used: !!s?.ever_used,
   }
 }
 
@@ -81,6 +82,7 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                   Pakai: {s.is_published ? 'tayang' : 'belum tayang'} · {s.guest_count} tamu · {s.rsvp_count} RSVP · {s.attendance_count} check-in · {s.days_since_paid} hari sejak bayar
+                  {s.ever_used ? ' · ⚠ pernah dipakai (sticky)' : ''}
                 </div>
                 <span style={{ display: 'inline-block', marginTop: 4, fontSize: 11, padding: '2px 8px', borderRadius: 'var(--radius-sm)', border: `1px solid ${v.eligible ? 'var(--color-emerald, #2e7d32)' : 'var(--status-error)'}`, color: v.eligible ? 'var(--color-emerald, #2e7d32)' : 'var(--status-error)' }}>
                   {v.label}

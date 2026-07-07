@@ -695,7 +695,7 @@ export async function requestRefund(invitationId: string, input: RefundRequestIn
 
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin.from('invitations')
-      .select('id, owner_user_id, is_paid, paid_source, paid_at, is_published, updated_at')
+      .select('id, owner_user_id, is_paid, paid_source, paid_at, is_published, updated_at, used_at')
       .eq('id', invitationId).maybeSingle()) as { data: any | null }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
     if (!inv.is_paid) return { ok: false, error: 'Belum ada pembayaran untuk direfund' }

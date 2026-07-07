@@ -9,7 +9,7 @@ import type { UsageSnapshot } from './refund-policy'
 export async function buildUsageSnapshot(
   db: any,
   invitationId: string,
-  inv: { is_published?: boolean; paid_at?: string | null; updated_at?: string | null },
+  inv: { is_published?: boolean; paid_at?: string | null; updated_at?: string | null; used_at?: string | null },
   nowMs: number = Date.now(),
 ): Promise<UsageSnapshot> {
   const [g, r, a] = await Promise.all([
@@ -28,5 +28,7 @@ export async function buildUsageSnapshot(
     // Kept for the record; the verdict uses the accurate guest/RSVP/check-in signals.
     config_edited: !!inv.updated_at && Date.parse(inv.updated_at) > paidMs + 60_000,
     days_since_paid: Math.max(0, Math.floor((nowMs - paidMs) / 86_400_000)),
+    // Sticky marker (DB trigger) — the robust, un-gameable "was ever used" signal.
+    ever_used: !!inv.used_at,
   }
 }
