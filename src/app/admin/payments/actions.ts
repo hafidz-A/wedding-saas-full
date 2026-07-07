@@ -81,7 +81,7 @@ export async function adminRecheckPayment(invitationId: string): Promise<Recheck
   const expected = inv.expected_amount_idr ?? initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
   const snap = await getXenditInvoice(inv.xendit_invoice_id)
   if (!isPaidStatus(snap.status) || snap.amountIDR !== expected) return { ok: true, applied: false, status: snap.status }
-  await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expected, paidSource: 'xendit' })
+  await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expected, paidSource: 'xendit', feeIDR: snap.feeIDR || null })
   await logAdminAction(admin.email, { action: 'payments.recheck', targetType: 'invitation', targetId: invitationId, meta: { type: 'initial' } })
   revalidateInvitation()
   return { ok: true, applied: true, status: snap.status }

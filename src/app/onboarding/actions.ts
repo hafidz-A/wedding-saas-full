@@ -311,7 +311,7 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
       return { ok: true, published: false, status: snap.status }
     }
 
-    await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expected, paidSource: 'xendit' })
+    await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expected, paidSource: 'xendit', feeIDR: snap.feeIDR || null })
     revalidatePath('/[template]/[slug]', 'page')
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     revalidatePath('/profile', 'page')

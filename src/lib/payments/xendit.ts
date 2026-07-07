@@ -55,6 +55,21 @@ export interface XenditInvoiceSnapshot {
   status: string // PENDING | PAID | SETTLED | EXPIRED
   amountIDR: number
   paidAmountIDR: number | null
+  /** Gateway fee on the paid invoice (for NET revenue). 0 when Xendit doesn't
+   *  return it on the invoice object (fees may only appear on settlement). */
+  feeIDR: number
+}
+
+/** Best-effort sum of the Xendit gateway fee from an invoice payload. Xendit
+ *  returns fees inconsistently (invoice `fees[]`, or not at all until settled),
+ *  so this never throws and yields 0 when absent. */
+export function feeFromInvoice(j: any): number {
+  if (Array.isArray(j?.fees)) {
+    const total = j.fees.reduce((s: number, f: any) => s + (Number(f?.value) || 0), 0)
+    if (total > 0) return Math.round(total)
+  }
+  const flat = Number(j?.fee ?? j?.fee_amount ?? j?.merchant_fee)
+  return Number.isFinite(flat) && flat > 0 ? Math.round(flat) : 0
 }
 
 /**
@@ -86,6 +101,7 @@ export async function getXenditInvoice(invoiceId: string): Promise<XenditInvoice
     status: j.status,
     amountIDR: Number(j.amount),
     paidAmountIDR: j.paid_amount == null ? null : Number(j.paid_amount),
+    feeIDR: feeFromInvoice(j),
   }
 }
 

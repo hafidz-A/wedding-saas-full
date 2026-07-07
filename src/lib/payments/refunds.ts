@@ -67,8 +67,14 @@ export async function reverseEntitlement(
         .eq('id', u.invitation_id)
     }
   } else if (r.source_type === 'initial' && r.invitation_id) {
-    // Money back ⇒ the product comes down.
-    await (db.from('invitations') as any).update({ is_published: false }).eq('id', r.invitation_id)
+    // Money back ⇒ the product comes FULLY down. Unpublish AND set suspended_at so
+    // the couple can't just hit "Terbitkan" again and keep a refunded invitation
+    // live — the public render, the owner publish API, and the dashboard all honour
+    // suspended_at. is_paid stays true so the transaction still shows as refunded
+    // in the ledger (it isn't a fresh draft).
+    await (db.from('invitations') as any)
+      .update({ is_published: false, suspended_at: new Date(nowMs).toISOString() })
+      .eq('id', r.invitation_id)
   }
 }
 

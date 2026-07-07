@@ -121,12 +121,14 @@ export async function POST(req: Request) {
   // equals the plan price (defends against tampered/mismatched callbacks and a
   // plan-price change between checkout and payment).
   let verified = false
+  let feeIDR = 0
   try {
     const snap = await getXenditInvoice(body.id ?? inv.xendit_invoice_id ?? '')
     verified =
       snap.externalId === body.external_id &&
       isPaidStatus(snap.status) &&
       snap.amountIDR === expectedAmount
+    feeIDR = snap.feeIDR
     if (!verified) {
       console.error('[xendit webhook] verification failed', {
         external_id: body.external_id,
@@ -147,8 +149,9 @@ export async function POST(req: Request) {
 
   if (!verified) return NextResponse.json({ ok: true }) // ack, but do not publish
 
-  // Capture the actual charge + channel so revenue is never recomputed later.
-  await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expectedAmount, paidSource: 'xendit' })
+  // Capture the actual charge + channel + gateway fee so revenue (gross & net) is
+  // never recomputed later.
+  await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expectedAmount, paidSource: 'xendit', feeIDR: feeIDR || null })
   return NextResponse.json({ ok: true })
 }
 

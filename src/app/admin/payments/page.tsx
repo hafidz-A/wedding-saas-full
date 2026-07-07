@@ -36,7 +36,7 @@ export default async function AdminPaymentsPage() {
 
       <section style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '12px 0' }}>
         <Card label="Masuk kotor (semua waktu)" value={formatIDR(summary.grossIDR)} sub={`${summary.count} transaksi`} />
-        <Card label="Bersih (kotor − fee)" value={formatIDR(summary.netIDR)} sub={`fee ${formatIDR(summary.feesIDR)}`} />
+        <Card label="Bersih diterima" value={formatIDR(summary.netIDR)} sub={summary.feesIDR > 0 ? `setelah fee ${formatIDR(summary.feesIDR)}` : 'fee Xendit belum tercatat (≈ kotor)'} />
         <Card label="Bulan ini (WIB)" value={formatIDR(monthSummary.grossIDR)} sub={`${monthSummary.count} transaksi`} />
         <Card label="Direfund" value={formatIDR(summary.refundedIDR)} sub={summary.compCount ? `${summary.compCount} comp (gratis)` : '—'} />
       </section>
