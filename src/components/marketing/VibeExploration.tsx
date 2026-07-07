@@ -7,6 +7,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Dict } from '@/lib/i18n'
 import { type PlanDisplay } from '@/lib/payments/plan-display'
+import { templateCopy, type TemplateDisplay } from '@/lib/templates/display'
 import { getCatalogEntry } from '@/config/templateCatalog'
 import { useReveal } from '@/hooks/useReveal'
 import { TEMPLATE_VIBES } from './vibeData'
@@ -19,7 +20,7 @@ import styles from './VibeExploration.module.css'
 
 type VibeDict = Dict['landing']['vibeExploration']
 
-export function VibeExploration({ lang, t, plans }: { lang: 'id' | 'en'; t: VibeDict; plans?: Record<string, PlanDisplay[]> }) {
+export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'en'; t: VibeDict; plans?: Record<string, PlanDisplay[]>; templates?: TemplateDisplay[] }) {
   const { ref } = useReveal<HTMLDivElement>()
   const innerRef = useRef<HTMLDivElement>(null)
   const [pinned, setPinned] = useState(false)
@@ -93,23 +94,31 @@ export function VibeExploration({ lang, t, plans }: { lang: 'id' | 'en'; t: Vibe
     return () => window.clearTimeout(id)
   }, [templateIndex, paletteIndex, plansOpen, category])
 
-  // Categories that actually have at least one template (others = "coming soon").
-  const activeCategories = useMemo(() => new Set(TEMPLATE_VIBES.map((tpl) => tpl.category)), [])
-  // Templates of the selected category — the carousel only cycles within these.
-  const filtered = useMemo(() => TEMPLATE_VIBES.filter((tpl) => tpl.category === category), [category])
+  // Effective template list: DB display data (enabled, sort order, category, label,
+  // tagline/blurb) merged with the code palettes (which stay in vibeData). Falls
+  // back to code + i18n when no DB templates were passed (or on a DB blip).
+  const effective = useMemo(() => {
+    const byId = new Map(TEMPLATE_VIBES.map((v) => [v.id as string, v]))
+    if (templates && templates.length) {
+      return templates
+        .filter((dt) => dt.enabled && byId.has(dt.id))
+        .map((dt) => {
+          const v = byId.get(dt.id)!
+          const copy = templateCopy(dt, lang)
+          return { id: v.id, label: dt.label || v.label, category: dt.category || v.category, demoSlug: v.demoSlug, palettes: v.palettes, tagline: copy.tagline, blurb: copy.blurb }
+        })
+    }
+    return TEMPLATE_VIBES.map((v) => ({ id: v.id, label: v.label, category: v.category, demoSlug: v.demoSlug, palettes: v.palettes, tagline: t.byTemplate[v.id]?.tagline ?? '', blurb: t.byTemplate[v.id]?.blurb ?? '' }))
+  }, [templates, lang, t])
+
+  // Categories that actually have at least one (enabled) template.
+  const activeCategories = useMemo(() => new Set(effective.map((tpl) => tpl.category)), [effective])
+  const filtered = useMemo(() => effective.filter((tpl) => tpl.category === category), [effective, category])
 
   const safeIndex = Math.min(templateIndex, Math.max(0, filtered.length - 1))
-  const template = filtered[safeIndex] ?? TEMPLATE_VIBES[0]
-  const palette = template.palettes[paletteIndex] ?? template.palettes[0]
-  const catalog = getCatalogEntry(template.id)
-  const displayPlans: PlanDisplay[] =
-    plans?.[template.id] ??
-    (catalog.plans ?? []).map((pl: any) => ({
-      id: pl.id, name: pl.name, price: pl.price, amountIDR: pl.amountIDR ?? 0,
-      compareAtPrice: null, features: pl.features ?? [], baseQuota: 200,
-    }))
-  const copy = t.byTemplate[template.id]
-  const isDark = palette.mode === 'dark'
+  const template = filtered[safeIndex] ?? effective[0]
+  const palette = template?.palettes[paletteIndex] ?? template?.palettes[0]
+  const isDark = palette?.mode === 'dark'
 
   const switchTemplate = (next: number) => {
     const len = filtered.length
@@ -127,9 +136,28 @@ export function VibeExploration({ lang, t, plans }: { lang: 'id' | 'en'; t: Vibe
     setPlansOpen(false)
   }
 
+  const accentText = useMemo(() => readableOn(palette?.accent ?? '#E8553E'), [palette?.accent])
+
+  // All templates disabled → graceful empty state (placed AFTER every hook).
+  if (!template || !palette) {
+    return (
+      <section id="vibe" ref={ref} className={styles.section}>
+        <div style={{ padding: '96px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          {lang === 'id' ? 'Template segera hadir.' : 'Templates coming soon.'}
+        </div>
+      </section>
+    )
+  }
+
+  const catalog = getCatalogEntry(template.id)
+  const displayPlans: PlanDisplay[] =
+    plans?.[template.id] ??
+    (catalog.plans ?? []).map((pl: any) => ({
+      id: pl.id, name: pl.name, price: pl.price, amountIDR: pl.amountIDR ?? 0,
+      compareAtPrice: null, features: pl.features ?? [], baseQuota: 200,
+    }))
   const previewHref = `/${template.id}/${template.demoSlug}`
   const buyHref = `/onboarding?template=${template.id}`
-  const accentText = useMemo(() => readableOn(palette.accent), [palette.accent])
 
   return (
     <section
@@ -320,13 +348,13 @@ export function VibeExploration({ lang, t, plans }: { lang: 'id' | 'en'; t: Vibe
                   transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <span className={styles.tagline} style={{ color: palette.accent }}>
-                    {copy.tagline}
+                    {template.tagline}
                   </span>
                   <h3 className={styles.paletteName} style={{ color: palette.fg }}>
                     {palette.label}
                   </h3>
                   <p className={styles.blurb} style={{ color: palette.fgMuted }}>
-                    {copy.blurb}
+                    {template.blurb}
                   </p>
 
                   <div className={styles.ambience}>

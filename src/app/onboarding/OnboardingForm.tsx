@@ -22,17 +22,23 @@ export default function OnboardingForm({
   lang,
   planBase,
   planPrice,
+  enabledTemplateIds,
 }: {
   email: string
   dict: Dict['onboarding']
   lang: Lang
   planBase?: number
   planPrice?: number
+  enabledTemplateIds?: string[]
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryTemplate = searchParams.get('template') || ''
-  const initialTemplate = TEMPLATE_IDS.includes(queryTemplate) ? queryTemplate : templateCatalog[0].id
+  // Only enabled templates are pickable; fall back to the full catalog if the
+  // server didn't pass a list (defensive).
+  const enabledIds = enabledTemplateIds && enabledTemplateIds.length ? enabledTemplateIds : TEMPLATE_IDS
+  const visibleCatalog = templateCatalog.filter((t) => enabledIds.includes(t.id))
+  const initialTemplate = enabledIds.includes(queryTemplate) ? queryTemplate : (visibleCatalog[0]?.id ?? templateCatalog[0].id)
   const plan = searchParams.get('plan') || 'basic'
   const baseQuota = planBase ?? (DEFAULT_BASE_QUOTA[plan] ?? 200)
   const extraParam = parseInt(searchParams.get('extra') || '0', 10) || 0
@@ -158,7 +164,7 @@ export default function OnboardingForm({
         <div style={field}>
           <span style={lbl}>{dict.form.pickTemplate}</span>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {templateCatalog.map((t) => {
+            {visibleCatalog.map((t) => {
               const active = t.id === template
               return (
                 <button

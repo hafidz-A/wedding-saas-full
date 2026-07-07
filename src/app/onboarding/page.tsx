@@ -5,6 +5,7 @@ import { getDict } from '@/lib/i18n'
 import { SiteNav } from '@/components/site/SiteNav'
 import OnboardingForm from './OnboardingForm'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
+import { getTemplates } from '@/lib/templates/catalog'
 import { DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
 
 /**
@@ -45,15 +46,21 @@ export default async function OnboardingPage({
   // the client-safe default when the row/template lookup comes up empty).
   const templateParam = typeof searchParams.template === 'string' ? searchParams.template : ''
   const planParam = typeof searchParams.plan === 'string' ? searchParams.plan : 'basic'
-  const plansForTemplate = await getTemplatePlans(templateParam || 'lovebirds')
+  const [plansForTemplate, templates] = await Promise.all([
+    getTemplatePlans(templateParam || 'lovebirds'),
+    getTemplates(),
+  ])
   const chosen = plansForTemplate.find((p) => p.plan_code === planParam)
   const planBase = chosen?.base_guest_quota ?? (DEFAULT_BASE_QUOTA[planParam] ?? 200)
   const planPrice = chosen?.price_idr ?? 0
+  // Only ENABLED templates are pickable for a NEW invitation (a disabled template
+  // still renders for existing invitations, just can't be freshly chosen).
+  const enabledTemplateIds = templates.filter((t) => t.enabled).map((t) => t.id)
 
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} lang={lang} planBase={planBase} planPrice={planPrice} />
+      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} lang={lang} planBase={planBase} planPrice={planPrice} enabledTemplateIds={enabledTemplateIds} />
     </>
   )
 }
