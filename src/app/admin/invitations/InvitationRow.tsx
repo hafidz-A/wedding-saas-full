@@ -27,8 +27,29 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
     if (res.ok) { location.reload() } else { setMsg(res.error || 'Gagal') }
   }
 
+  async function onTogglePublish() {
+    const ok = inv.isPublished
+      ? await confirm({ title: 'Sembunyikan undangan?', message: `"${inv.slug}" tidak akan tayang untuk tamu.`, confirmLabel: 'Sembunyikan', tone: 'danger' })
+      : await confirm({ title: 'Terbitkan undangan?', message: `"${inv.slug}" akan tayang untuk publik.`, confirmLabel: 'Terbitkan' })
+    if (ok) run(() => adminSetPublished(inv.id, !inv.isPublished))
+  }
+
+  async function onComp() {
+    const ok = await confirm({ title: 'Gratiskan undangan (comp)?', message: `"${inv.slug}" jadi lunas-gratis (Rp 0) + langsung tayang. Kalau ini uang yang kamu terima offline, pakai "Lunas manual".`, confirmLabel: 'Ya, gratiskan', tone: 'danger' })
+    if (ok) run(() => adminComp(inv.id, { source: 'comp', amountIDR: 0, period: { kind: 'plan' } }))
+  }
+
+  async function onAddQuota() {
+    const ok = await confirm({ title: 'Tambah 50 kuota?', message: `Tambah 50 kuota tamu GRATIS untuk "${inv.slug}".`, confirmLabel: 'Tambah 50' })
+    if (ok) run(() => adminAddQuota(inv.id, 50))
+  }
+
   async function onSuspend() {
-    if (inv.isSuspended) { run(() => adminSuspend(inv.id, false)); return }
+    if (inv.isSuspended) {
+      const ok = await confirm({ title: 'Buka blokir?', message: `"${inv.slug}" bisa tayang & diterbitkan lagi oleh pemiliknya.`, confirmLabel: 'Buka blokir' })
+      if (ok) run(() => adminSuspend(inv.id, false))
+      return
+    }
     const res = await formDialog({
       title: 'Blokir undangan (takedown)',
       message: 'Halaman publik + editor pasangan ikut mati sampai kamu buka blokir lagi.',
@@ -82,8 +103,8 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         <a href={`/${inv.templateId}/${inv.slug}`} target="_blank" rel="noreferrer" style={ghost}>Lihat</a>
-        <button type="button" disabled={busy} onClick={() => run(() => adminSetPublished(inv.id, !inv.isPublished))} style={ghost}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</button>
-        <button type="button" disabled={busy} onClick={() => run(() => adminComp(inv.id, { source: 'comp', amountIDR: 0, period: { kind: 'plan' } }))} style={ghost}>Comp (gratis)</button>
+        <button type="button" disabled={busy} onClick={onTogglePublish} style={ghost}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</button>
+        <button type="button" disabled={busy} onClick={onComp} style={ghost}>Comp (gratis)</button>
         <button type="button" disabled={busy} onClick={onLunasManual} style={ghost}>Lunas manual</button>
         <select disabled={busy} value={inv.plan} onChange={async (e) => {
           const next = e.target.value
@@ -93,7 +114,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         }} style={ghost}>
           <option value="basic">basic</option><option value="premium">premium</option>
         </select>
-        <button type="button" disabled={busy} onClick={() => run(() => adminAddQuota(inv.id, 50))} style={ghost}>+50 kuota</button>
+        <button type="button" disabled={busy} onClick={onAddQuota} style={ghost}>+50 kuota</button>
         <button type="button" disabled={busy} onClick={onSuspend} style={inv.isSuspended ? ghost : warn}>{inv.isSuspended ? 'Buka blokir' : 'Blokir'}</button>
         {inv.isPaid
           ? <button type="button" disabled={busy} onClick={onArchive} style={ghost}>{inv.isArchived ? 'Keluarkan arsip' : 'Arsipkan'}</button>

@@ -33,12 +33,18 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: {
   return (
     <div>
       <h1 style={{ fontSize: 22 }}>Akun &amp; Data</h1>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4, maxWidth: 620 }}>
+        Cari akun klien untuk <strong>mengunduh datanya</strong> atau melihat undangannya, dan proses <strong>permintaan hapus akun</strong>. Halaman ini kosong sampai kamu mencari — itu normal.
+      </p>
 
-      <section style={{ marginTop: 12 }}>
+      <section style={{ marginTop: 16 }}>
+        <h2 style={{ fontSize: 16, margin: '0 0 8px' }}>Cari akun</h2>
         <form>
-          <input name="q" defaultValue={searchParams.q || ''} placeholder="Cari akun dengan email persis…"
+          <input name="q" defaultValue={searchParams.q || ''} placeholder="Ketik email lengkap klien…"
             style={{ height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: 320 }} />
+          <button type="submit" style={{ height: 36, padding: '0 14px', marginLeft: 8, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', cursor: 'pointer' }}>Cari</button>
         </form>
+        {!q && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>Masukkan email <strong>lengkap &amp; persis</strong> milik klien, lalu tekan Cari — akun + tombol unduh datanya akan muncul di sini.</p>}
         {q && !found && <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 10 }}>Tidak ada akun dengan email itu.</p>}
         {found && (
           <div style={{ marginTop: 12, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 14 }}>
