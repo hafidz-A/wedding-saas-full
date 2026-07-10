@@ -1,5 +1,8 @@
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { toPublicTestimonial } from '@/lib/testimonials/validate'
+import type { PublicTestimonial } from '@/lib/testimonials/types'
 import { getAllTemplatePlans } from '@/lib/payments/template-plans'
 import { toPlanDisplay, type PlanDisplay } from '@/lib/payments/plan-display'
 import { getTemplates } from '@/lib/templates/catalog'
@@ -22,6 +25,19 @@ export default async function HomePage() {
   const [rawPlans, templates] = await Promise.all([getAllTemplatePlans(), getTemplates()])
   const plansByTemplate: Record<string, PlanDisplay[]> = {}
   for (const tid of Object.keys(rawPlans)) plansByTemplate[tid] = rawPlans[tid].map(toPlanDisplay)
+
+  // Approved (visible) customer testimonials. Safe-empty when Supabase is off.
+  let testimonials: PublicTestimonial[] = []
+  try {
+    const db = createSupabaseAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = (await (db.from('testimonials') as any)
+      .select('id, rating, body, author_name, is_anonymous, template_id, is_visible, created_at')
+      .eq('is_visible', true)
+      .order('created_at', { ascending: false })
+      .limit(30)) as { data: any[] | null }
+    testimonials = (data ?? []).map(toPublicTestimonial)
+  } catch { testimonials = [] }
 
   return (
     <>
@@ -48,7 +64,7 @@ export default async function HomePage() {
         <HowItWorks t={t.landing.howItWorks} />
 
         {/* 7. Testimonials / Social Proof */}
-        <Testimonials t={t.landing.testimonials} />
+        <Testimonials t={t.landing.testimonials} items={testimonials} />
 
         {/* 8. Final Emotional CTA */}
         <FinalCta t={t.landing.finalCta} />

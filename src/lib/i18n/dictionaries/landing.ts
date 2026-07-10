@@ -85,28 +85,12 @@ export const landing = {
         { title: 'Bagikan link', body: 'Sebar ke tamu lewat WhatsApp — pantau RSVP real-time.' },
       ],
     },
-    // TODO: verifikasi — kutipan testimonial & nama pasangan di bawah ini placeholder/demo,
-    // ganti dengan testimoni asli sebelum launch publik (berlaku untuk blok id & en).
     testimonials: {
       heading: 'Kata Mereka Yang Berbahagia',
       subheading: 'Dari pasangan yang undangannya sudah lebih dulu disebar.',
-      items: [
-        {
-          quote: 'Tamu kami sampai nanya bikinnya di mana. Planet 3D-nya beneran bergerak pas di-scroll — belum ada yang pernah lihat undangan kayak gini.',
-          author: 'Aria & Kirana',
-          plan: 'Solary Template',
-        },
-        {
-          quote: 'Lovebirds pas banget sama tema rustic kami. Begitu musiknya mulai dan polaroid-nya bergeser, beberapa kerabat kami nangis beneran.',
-          author: 'Dito & Rania',
-          plan: 'Lovebirds Template',
-        },
-        {
-          quote: 'Kami nggak pernah rekap RSVP manual. Siapa hadir, bawa berapa orang, ucapannya apa — tinggal buka dashboard, semuanya sudah di sana.',
-          author: 'Rian & Siska',
-          plan: 'Premium Tier',
-        },
-      ],
+      emptyHeading: 'Ceritamu bisa jadi yang pertama',
+      emptyBody: 'Belum ada ulasan yang tayang. Buat undanganmu, rasakan sendiri di hari bahagiamu, lalu jadilah pasangan pertama yang berbagi kesan di sini.',
+      emptyCta: 'Mulai Rancang Undangan',
     },
     finalCta: {
       title: 'Siap bikin undangan kalian?',
@@ -203,23 +187,9 @@ export const landing = {
     testimonials: {
       heading: 'Word From the Newlyweds',
       subheading: 'From couples whose invitations are already out in the world.',
-      items: [
-        {
-          quote: 'Our guests kept asking where we made it. The 3D planets actually move as you scroll — nobody had seen an invitation like it.',
-          author: 'Aria & Kirana',
-          plan: 'Solary Template',
-        },
-        {
-          quote: 'Lovebirds fit our rustic theme perfectly. The moment the music started and the polaroids slid in, a few of our relatives genuinely teared up.',
-          author: 'Dito & Rania',
-          plan: 'Lovebirds Template',
-        },
-        {
-          quote: 'We never tallied a single RSVP by hand. Who’s coming, how many they’re bringing, what they wrote — it’s all just there in the dashboard.',
-          author: 'Rian & Siska',
-          plan: 'Premium Tier',
-        },
-      ],
+      emptyHeading: 'Your story could be the first',
+      emptyBody: 'No reviews are live yet. Create your invitation, live your big day with it, then be the first couple to share how it felt.',
+      emptyCta: 'Start Designing',
     },
     finalCta: {
       title: 'Ready to create yours?',
