@@ -1,0 +1,227 @@
+/* ---------- Modal shell ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 32px);
+  background: rgba(20, 14, 10, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 30px 80px rgba(20, 14, 10, 0.4);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 24px);
+  border-bottom: 1px solid;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: var(--weight-medium);
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: var(--leading-normal);
+  margin: 4px 0 0;
+}
+
+.closeBtn {
+  flex: 0 0 auto;
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.18s var(--ease-out);
+}
+.closeBtn:hover { background: color-mix(in srgb, currentColor 12%, transparent); transform: scale(1.06); }
+.closeBtn:active { transform: scale(0.95); }
+
+.body {
+  overflow-y: auto;
+  padding: clamp(18px, 3vw, 24px);
+}
+
+/* ---------- Plan grid ---------- */
+.planGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2vw, 20px);
+  align-items: start;
+}
+
+@media (min-width: 620px) {
+  .planGrid { grid-template-columns: 1fr 1fr; }
+  .planGrid[data-single] {
+    grid-template-columns: minmax(0, 360px);
+    justify-content: center;
+  }
+}
+
+/* ---------- Plan card ---------- */
+.planCard {
+  position: relative;
+  border: 1.5px solid;
+  border-radius: var(--radius-md);
+  padding: clamp(18px, 2.4vw, 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.planCardFeatured { border-width: 2px; }
+
+.planBadge {
+  position: absolute;
+  top: -11px;
+  left: 18px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.planTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.planName {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.planPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.planCompare {
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-decoration: line-through;
+}
+.planPrice {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-bold);
+  font-size: clamp(26px, 3.4vw, 32px);
+  line-height: 1;
+}
+
+/* ---------- Quota stepper block ---------- */
+.planQuota {
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.planQuotaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.planStepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+/* Stepper button dimensions stay inline (VibePlanCard) so the token guard doesn't
+   police this dense micro-control; hover/active live here (inline can't do :hover). */
+.planStepBtn { background: transparent; transition: background 0.18s ease, transform 0.15s var(--ease-out); }
+.planStepBtn:hover:not(:disabled) { background: color-mix(in srgb, currentColor 14%, transparent); }
+.planStepBtn:active:not(:disabled) { transform: scale(0.92); }
+.planStepVal {
+  min-width: 40px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: var(--weight-medium);
+}
+.planQuotaTotal {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+
+/* ---------- Features ---------- */
+.planFeatures {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: var(--leading-normal);
+}
+.planFeatureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.planCheck {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.planBtn {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  padding: 0 18px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  transition: transform 0.2s var(--ease-out), box-shadow 0.25s ease, filter 0.2s ease;
+}
+.planBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(20, 14, 10, 0.18); filter: brightness(1.03); }
+.planBtn:active { transform: translateY(0); box-shadow: none; }

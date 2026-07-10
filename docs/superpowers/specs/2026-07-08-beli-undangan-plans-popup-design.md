@@ -90,6 +90,37 @@ through untouched:
                                      "Pilih paket ini" → /onboarding?…&plan=&extra=)
 ```
 
+## Safety invariants (verified end-to-end 2026-07-08)
+
+The popup is a **dumb entry point** — it only links to
+`/onboarding?template=X&plan=Y&extra=E`. Every money/plan decision is
+server-authoritative and **unchanged** by this work. Traced the full chain:
+
+- **Onboarding** (`completeOnboarding`): the chosen `plan` is re-validated
+  against DB `template_plans` (`resolvePlan(...) ? input.plan : 'basic'`) and
+  `extra` is snapped + capped server-side (`clampQuotaExtra`, `QUOTA_CAP`). Row
+  is inserted as an **unpaid draft** (`is_paid=false, is_published=false`). A
+  hand-crafted `?plan=…&extra=…` cannot inflate anything.
+- **Checkout** (`startCheckout`): owner-scoped + rate-limited; the charge is
+  computed **server-side** from the DB price — `initialPurchaseAmount(resolved.amountIDR,
+  guest_quota_extra)` — and locked into `expected_amount_idr`. The client never
+  supplies an amount.
+- **Xendit webhook** (`/api/payment/xendit/webhook`): `x-callback-token`
+  authenticated; re-fetches the invoice from Xendit and requires
+  `externalId` match + `PAID` + `amount === expected_amount_idr` before
+  publishing. A tampered/mismatched callback is ACKed but never published.
+- **Provisioning** (`publishPaidInvitation`): the plan the couple receives is
+  the server-validated `plan` on the row; expiry derives from that plan's
+  `duration_days`. So the user gets exactly the paid-for plan.
+- **Admin edits never break in-flight purchases** — the amount is locked at
+  checkout, so a mid-checkout price/compare-at change only affects new checkouts.
+
+The one thing to preserve on our side: the card's "Pilih paket ini" link must
+keep using `plan.id` (= `plan_code`, e.g. `basic`/`premium`) for `&plan=`, exactly
+as `VibePlanCard` does today. (Even a wrong value degrades safely — onboarding
+falls back to `basic`.) This work touches **none** of onboarding / checkout /
+webhook / `publish.ts` / `plans.ts` / `quota.ts` / admin / DB / Xendit code.
+
 ## Pieces
 
 1. **NEW `src/components/marketing/PlansModal.tsx`** (`'use client'`) — the

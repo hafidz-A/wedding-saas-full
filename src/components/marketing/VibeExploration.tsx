@@ -14,7 +14,7 @@ import { TEMPLATE_VIBES } from './vibeData'
 import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories'
 import { VibeBackdrop } from './VibeBackdrop'
 import { PreviewMock } from './PreviewMock'
-import { VibePlanCard } from './VibePlanCard'
+import { PlansModal } from './PlansModal'
 import { readableOn } from '@/lib/color'
 import styles from './VibeExploration.module.css'
 
@@ -92,7 +92,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
     if (typeof window === 'undefined') return
     const id = window.setTimeout(() => ScrollTrigger.refresh(), 60)
     return () => window.clearTimeout(id)
-  }, [templateIndex, paletteIndex, plansOpen, category])
+  }, [templateIndex, paletteIndex, category])
 
   // Effective template list: DB display data (enabled, sort order, category, label,
   // tagline/blurb) merged with the code palettes (which stay in vibeData). Falls
@@ -404,56 +404,36 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                       type="button"
                       className={styles.btnPrimary}
                       style={{ background: palette.accent, color: accentText }}
+                      aria-haspopup="dialog"
                       aria-expanded={plansOpen}
-                      onClick={() => setPlansOpen((v) => !v)}
+                      onClick={() => setPlansOpen(true)}
                     >
                       {t.buy}
-                      <span
-                        aria-hidden="true"
-                        className={`${styles.btnCaret} ${plansOpen ? styles.btnCaretOpen : ''}`}
-                      >
-                        ↓
-                      </span>
                     </button>
                   </div>
 
-                  {/* Inline plans */}
-                  <AnimatePresence initial={false}>
-                    {plansOpen && (
-                      <motion.div
-                        className={styles.plans}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
-                      >
-                        <span className={styles.plansTitle} style={{ color: palette.fgMuted }}>
-                          {t.plansTitle}
-                        </span>
-                        <div className={styles.planGrid}>
-                          {displayPlans.map((pl) => (
-                            <VibePlanCard
-                              key={pl.id}
-                              plan={pl}
-                              buyHref={buyHref}
-                              chooseLabel={t.choosePlan}
-                              quotaLabel={t.guestQuota}
-                              accentText={accentText}
-                              palette={palette}
-                              styles={styles}
-                              onQuotaChange={() => { setTimeout(() => ScrollTrigger.refresh(), 60) }}
-                            />
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </motion.div>
               </AnimatePresence>
             </div>
           </div>
         </div>
       </div>
+
+      {plansOpen && (
+        <PlansModal
+          plans={displayPlans}
+          buyHref={buyHref}
+          palette={palette}
+          accentText={accentText}
+          title={t.plansTitle}
+          subtitle={t.plansSubtitle}
+          closeLabel={t.closePlans}
+          chooseLabel={t.choosePlan}
+          quotaLabel={t.guestQuota}
+          popularLabel={t.popularBadge}
+          onClose={() => setPlansOpen(false)}
+        />
+      )}
     </section>
   )
 }
