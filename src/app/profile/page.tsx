@@ -7,8 +7,10 @@ import { activePeriodStatus } from '@/lib/payments/active-period'
 import { isAdminEmail } from '@/lib/admin/is-admin'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
+import { coupleDisplay, deriveCoupleFromConfig } from '@/lib/meta/couple'
 import { SiteNav } from '@/components/site/SiteNav'
 import RenewButton from './RenewButton'
+import ReviewButton from './ReviewButton'
 import RecheckPaymentButton from './RecheckPaymentButton'
 import MfaEnroll from './MfaEnroll'
 import AccountDataSection from './AccountDataSection'
@@ -31,12 +33,27 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('id, slug, template_id, is_paid, expires_at')
+    .select('id, slug, template_id, is_paid, expires_at, config')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
-    data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null }[] | null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null; config: any }[] | null
   }
   const invitations = rows ?? []
+
+  // Existing review per paid invitation → drives the "Ubah Ulasan" label + status chip.
+  const paidIds = invitations.filter((i) => i.is_paid).map((i) => i.id)
+  const reviewByInv = new Map<string, { rating: number; body: string; isAnonymous: boolean; isVisible: boolean }>()
+  if (paidIds.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: myReviews } = (await (admin.from('testimonials') as any)
+      .select('invitation_id, rating, body, is_anonymous, is_visible')
+      .in('invitation_id', paidIds)) as {
+      data: { invitation_id: string; rating: number; body: string; is_anonymous: boolean; is_visible: boolean }[] | null
+    }
+    for (const r of myReviews ?? [])
+      reviewByInv.set(r.invitation_id, { rating: r.rating, body: r.body, isAnonymous: r.is_anonymous, isVisible: r.is_visible })
+  }
   const { data: delReq } = (await admin
     .from('account_deletion_requests')
     .select('scheduled_for').eq('user_id', user.id).eq('status', 'pending').limit(1).maybeSingle()) as { data: { scheduled_for: string | null } | null }
@@ -114,6 +131,13 @@ export default async function ProfilePage() {
                     <span style={itemActions}>
                       <Link href={`/${tt}/${inv.slug}`} target="_blank" style={ghostLink}>{p.viewPublic}</Link>
                       <Link href={`/${tt}/${inv.slug}/dashboard`} style={solidLink}>{p.openDashboard}</Link>
+                      {inv.is_paid && (
+                        <ReviewButton
+                          invitationId={inv.id}
+                          defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
+                          existing={reviewByInv.get(inv.id) ?? null}
+                        />
+                      )}
                       {needsAction && (
                         <>
                           <RenewButton
