@@ -10,6 +10,8 @@ import PaymentsClient from './PaymentsClient'
 import ReconcilePanel from './ReconcilePanel'
 import RefundRequestsPanel from './RefundRequestsPanel'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminPaymentsPage() {
   const db = createSupabaseAdminClient()
   const ledger = await fetchLedger(db)

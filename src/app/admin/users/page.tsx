@@ -4,6 +4,9 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import UserExportButton from './UserExportButton'
 import DeletionRequestRow from './DeletionRequestRow'
 
+// Admin data must always be fresh — never serve a cached (stale) list.
+export const dynamic = 'force-dynamic'
+
 function fmt(iso: string | null): string {
   if (!iso) return '—'
   try { return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) } catch { return iso }

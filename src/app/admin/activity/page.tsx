@@ -14,6 +14,8 @@ function fmt(iso: string | null): string {
   } catch { return iso }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminActivityPage() {
   const db = createSupabaseAdminClient()
   const { data } = (await (db.from('admin_actions') as any)

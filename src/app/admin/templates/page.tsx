@@ -6,6 +6,8 @@ import { formatIDR } from '@/lib/payments/quota'
 import PlansEditor from './PlansEditor'
 import TemplateEditor from './TemplateEditor'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminTemplatesPage() {
   const [templates, byTemplate] = await Promise.all([getTemplates(), getAllTemplatePlans()])
 

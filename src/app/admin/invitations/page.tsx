@@ -7,6 +7,8 @@ const STATUS_LABEL: Record<string, string> = {
   draft: 'Belum bayar', lifetime: 'Seumur hidup', active: 'Aktif', expired: 'Kadaluarsa',
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminInvitationsPage({ searchParams }: { searchParams: { q?: string; archived?: string } }) {
   const db = createSupabaseAdminClient()
   const q = (searchParams.q || '').trim().toLowerCase()

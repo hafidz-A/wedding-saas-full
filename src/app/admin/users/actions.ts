@@ -6,11 +6,16 @@ import { requireAdmin } from '@/lib/admin/is-admin'
 import { logAdminAction } from '@/lib/admin/log'
 import { revalidateInvitation } from '@/lib/admin/revalidate'
 import { processAccountDeletion, buildUserExport } from '@/lib/admin/pdp'
+import { sendAdminEmail } from '@/lib/email/send'
 
 type Result = { ok: boolean; error?: string }
 
 async function guard(): Promise<{ email: string } | null> {
   try { return await requireAdmin() } catch { return null }
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
 }
 
 /**
@@ -35,6 +40,12 @@ export async function adminProcessDeletion(requestId: string): Promise<Result> {
   await (db.from('account_deletion_requests') as any)
     .update({ status: 'processed', processed_by: admin.email, processed_at: new Date().toISOString() })
     .eq('id', requestId)
+  // Confirm to the (now-deleted) couple's stored email — best-effort.
+  if (req.email) await sendAdminEmail({
+    to: req.email,
+    subject: 'Akun & data kamu telah dihapus',
+    html: `<p>Halo,</p><p>Sesuai permintaanmu, akun &amp; data pribadimu sudah <strong>dihapus</strong> dari FinCards. Undangan yang sudah dibayar kami simpan sebagai catatan keuangan tanpa identitas (kewajiban pembukuan). Terima kasih telah memakai FinCards.</p>`,
+  })
   await logAdminAction(admin.email, { action: 'account.delete', targetType: 'user', targetId: req.user_id, meta: { email: req.email, anonymized: result.anonymized, deleted: result.deleted } })
   revalidateInvitation()
   return { ok: true }
@@ -44,12 +55,18 @@ export async function adminProcessDeletion(requestId: string): Promise<Result> {
 export async function adminRejectDeletion(requestId: string, note?: string): Promise<Result> {
   const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
   const db = createSupabaseAdminClient()
-  const { data: req } = (await db.from('account_deletion_requests').select('id, status, user_id').eq('id', requestId).maybeSingle()) as { data: any | null }
+  const { data: req } = (await db.from('account_deletion_requests').select('id, status, user_id, email').eq('id', requestId).maybeSingle()) as { data: any | null }
   if (!req) return { ok: false, error: 'Permintaan tidak ditemukan' }
   if (req.status !== 'pending') return { ok: false, error: 'Permintaan sudah diproses / dibatalkan' }
   await (db.from('account_deletion_requests') as any)
     .update({ status: 'rejected', processed_by: admin.email, processed_at: new Date().toISOString(), note: note ?? null })
     .eq('id', requestId)
+  // Notify the couple (best-effort — no-op until Resend is configured).
+  if (req.email) await sendAdminEmail({
+    to: req.email,
+    subject: 'Permintaan hapus akun ditolak',
+    html: `<p>Halo,</p><p>Setelah kami tinjau, permintaan penghapusan akunmu <strong>belum bisa kami proses</strong>${note ? `: ${escapeHtml(note)}` : '.'} Akunmu tetap aktif seperti biasa. Kalau ada pertanyaan, silakan balas email ini.</p>`,
+  })
   await logAdminAction(admin.email, { action: 'account.deletion_reject', targetType: 'user', targetId: req.user_id ?? '', meta: { note: note ?? null } })
   return { ok: true }
 }
