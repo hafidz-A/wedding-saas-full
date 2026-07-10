@@ -121,6 +121,34 @@ create table if not exists public.playlist_songs (
 create index if not exists idx_playlist_invitation on public.playlist_songs (invitation_id, created_at desc);
 
 -- ============================================================================
+--  TABLE: testimonials
+--  Customer reviews of the product. One row per PAID invitation. Hidden by
+--  default; an admin flips is_visible to publish it on the marketing landing.
+--  Body is capped at 4000 chars as a safety net (<=400 words enforced in app).
+-- ============================================================================
+create table if not exists public.testimonials (
+  id            uuid primary key default gen_random_uuid(),
+  invitation_id uuid not null references public.invitations(id) on delete cascade,
+  user_id       uuid not null,                             -- owner (auth.uid) at submit time
+  rating        int  not null check (rating between 1 and 5),
+  body          text not null check (char_length(body) between 1 and 4000),
+  author_name   text not null,                             -- display name snapshot
+  is_anonymous  boolean not null default false,            -- couple chose to mask their name
+  template_id   text not null,                             -- template snapshot at submit time
+  is_visible    boolean not null default false,            -- DEFAULT hidden (moderation gate)
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now(),
+  unique (invitation_id)                                   -- one review per invitation
+);
+
+create index if not exists idx_testimonials_visible on public.testimonials (is_visible, created_at desc);
+
+drop trigger if exists trg_testimonials_updated on public.testimonials;
+create trigger trg_testimonials_updated
+  before update on public.testimonials
+  for each row execute function public.set_updated_at();
+
+-- ============================================================================
 --  STORAGE BUCKET: invitation-media
 --  For photo + GIF uploads from the admin editor. One folder per invitation:
 --    invitation-media/<invitation_id>/<filename>
@@ -151,6 +179,7 @@ alter table public.rsvps                enable row level security;
 alter table public.gift_confirmations   enable row level security;
 alter table public.guestbook_notes      enable row level security;
 alter table public.playlist_songs       enable row level security;
+alter table public.testimonials         enable row level security;
 
 -- Public can SELECT published invitations only
 drop policy if exists "public read published invitations" on public.invitations;
@@ -200,6 +229,13 @@ create policy "public read playlist"
       where i.id = playlist_songs.invitation_id and i.is_published = true
     )
   );
+
+-- Public can read VISIBLE testimonials (approved by an admin). Writes flow
+-- through server actions using the service_role key + ownership checks.
+drop policy if exists "public read visible testimonials" on public.testimonials;
+create policy "public read visible testimonials"
+  on public.testimonials for select
+  using (is_visible = true);
 
 -- rsvps + gift_confirmations are NOT publicly readable — only the couple
 -- (via service_role / dashboard) can read them. Submission is one-way.
