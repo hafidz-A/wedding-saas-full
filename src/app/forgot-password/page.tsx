@@ -98,8 +98,6 @@ function ForgotPasswordInner() {
           </div>
         ) : (
           <form onSubmit={onSubmit} style={{ display: 'grid', gap: 16 }}>
-            <p style={kicker}>{t.kicker}</p>
-            <h1 style={title}>{t.title}</h1>
             <p style={hint}>{t.hintForm}</p>
 
             <label style={{ display: 'grid', gap: 6 }}>
