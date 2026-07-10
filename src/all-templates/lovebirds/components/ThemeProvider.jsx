@@ -67,12 +67,17 @@ export default function ThemeProvider({
       if (isDeviceId(saved)) setDeviceState(saved)
     } catch {}
   }, [allowGuestSwitch])
-  useEffect(() => {
+  // Persist inside the setter (not an effect): a mount effect would write the
+  // 'desktop' default over the saved choice before restoring it — under React
+  // StrictMode's double effect run, the second restore then reads the clobbered
+  // value and the picked device reverts on reload.
+  const setDevice = useCallback((d) => {
+    if (!isDeviceId(d)) return
+    setDeviceState(d)
     if (allowGuestSwitch) {
-      try { sessionStorage.setItem(DEVICE_STORAGE_KEY, device) } catch {}
+      try { sessionStorage.setItem(DEVICE_STORAGE_KEY, d) } catch {}
     }
-  }, [device, allowGuestSwitch])
-  const setDevice = useCallback((d) => { if (isDeviceId(d)) setDeviceState(d) }, [])
+  }, [allowGuestSwitch])
 
   // Apply palette to the DOM whenever the theme changes.
   useEffect(() => {
