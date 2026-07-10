@@ -18,12 +18,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const db = createSupabaseAdminClient()
   const { count: pendingRefunds } = (await (db.from('refund_requests') as any)
     .select('id', { count: 'exact', head: true }).eq('status', 'pending')) as { count: number | null }
+  // "Ada notif": testimonials waiting for a decision → badge on Testimoni.
+  const { count: pendingTestimonials } = (await (db.from('testimonials') as any)
+    .select('id', { count: 'exact', head: true }).eq('is_visible', false)) as { count: number | null }
 
   const nav = [
     ['/admin', 'Ringkasan'],
     ['/admin/templates', 'Template & Harga'],
     ['/admin/invitations', 'Undangan'],
     ['/admin/payments', 'Pembayaran'],
+    ['/admin/testimonials', 'Testimoni'],
     ['/admin/users', 'Akun & Data'],
     ['/admin/activity', 'Aktivitas'],
   ] as const
@@ -32,7 +36,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <nav style={{ borderRight: '0.5px solid var(--border-default)', padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
         <strong style={{ marginBottom: 8 }}>Admin</strong>
         {nav.map(([href, label]) => {
-          const badge = href === '/admin/payments' ? (pendingRefunds ?? 0) : 0
+          const badge = href === '/admin/payments' ? (pendingRefunds ?? 0)
+            : href === '/admin/testimonials' ? (pendingTestimonials ?? 0)
+            : 0
           return (
             <Link key={href} href={href} style={{ fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <span>{label}</span>
