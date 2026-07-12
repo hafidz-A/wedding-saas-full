@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { submitReview } from './reviewActions'
 import { countWords, MAX_REVIEW_WORDS } from '@/lib/testimonials/validate'
 
-interface Existing { rating: number; body: string; isAnonymous: boolean; isVisible: boolean }
+export interface ReviewExisting { rating: number; body: string; isAnonymous: boolean; isVisible: boolean }
 
 export default function ReviewButton({
   invitationId,
@@ -13,7 +13,7 @@ export default function ReviewButton({
 }: {
   invitationId: string
   defaultName: string
-  existing: Existing | null
+  existing: ReviewExisting | null
 }) {
   const [open, setOpen] = useState(false)
   const [rating, setRating] = useState(existing?.rating ?? 0)

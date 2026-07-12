@@ -35,6 +35,8 @@ export const common = {
       browseTemplates: 'Lihat Semua Template',
       viewPublic: 'Lihat undangan',
       openDashboard: 'Buka dashboard',
+      moreActions: 'lainnya',
+      showLess: 'Lebih sedikit',
     },
     activePeriod: {
       draft: 'Draf — belum dibayar',
@@ -95,6 +97,8 @@ export const common = {
       browseTemplates: 'Browse Templates',
       viewPublic: 'View invitation',
       openDashboard: 'Open dashboard',
+      moreActions: 'more',
+      showLess: 'Show less',
     },
     activePeriod: {
       draft: 'Draft — not paid',

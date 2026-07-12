@@ -9,9 +9,7 @@ import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { coupleDisplay, deriveCoupleFromConfig } from '@/lib/meta/couple'
 import { SiteNav } from '@/components/site/SiteNav'
-import RenewButton from './RenewButton'
-import ReviewButton from './ReviewButton'
-import RecheckPaymentButton from './RecheckPaymentButton'
+import InvitationActions from './InvitationActions'
 import MfaEnroll from './MfaEnroll'
 import AccountDataSection from './AccountDataSection'
 import styles from './profile.module.css'
@@ -121,41 +119,30 @@ export default async function ProfilePage() {
               {invitations.map((inv) => {
                 const tt = tmpl(inv.template_id)
                 const periodStatus = activePeriodStatus(inv, now).status
-                const needsAction = periodStatus === 'draft' || periodStatus === 'expired'
                 return (
                   <li key={inv.slug} style={item}>
                     <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={itemSlug}>{inv.slug}</span>
                       <span style={periodChip}>{periodLabel(inv)}</span>
                     </span>
-                    <span style={itemActions}>
-                      <Link href={`/${tt}/${inv.slug}`} target="_blank" style={ghostLink}>{p.viewPublic}</Link>
-                      <Link href={`/${tt}/${inv.slug}/dashboard`} style={solidLink}>{p.openDashboard}</Link>
-                      {inv.is_paid && (
-                        <ReviewButton
-                          invitationId={inv.id}
-                          defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
-                          existing={reviewByInv.get(inv.id) ?? null}
-                        />
-                      )}
-                      {needsAction && (
-                        <>
-                          <RenewButton
-                            invitationId={inv.id}
-                            status={periodStatus}
-                            payNowLabel={ap.payNow}
-                            renewNowLabel={ap.renewNow}
-                            processingLabel={ap.processing}
-                          />
-                          {/* Manual fallback for a missed webhook — same control
-                              the dashboard PaymentGate offers, here too. */}
-                          <RecheckPaymentButton
-                            invitationId={inv.id}
-                            mode={periodStatus === 'expired' ? 'renewal' : 'payment'}
-                          />
-                        </>
-                      )}
-                    </span>
+                    <InvitationActions
+                      invitationId={inv.id}
+                      viewHref={`/${tt}/${inv.slug}`}
+                      dashboardHref={`/${tt}/${inv.slug}/dashboard`}
+                      periodStatus={periodStatus}
+                      isPaid={inv.is_paid}
+                      defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
+                      existingReview={reviewByInv.get(inv.id) ?? null}
+                      labels={{
+                        viewPublic: p.viewPublic,
+                        openDashboard: p.openDashboard,
+                        payNow: ap.payNow,
+                        renewNow: ap.renewNow,
+                        processing: ap.processing,
+                        more: p.moreActions,
+                        showLess: p.showLess,
+                      }}
+                    />
                   </li>
                 )
               })}
@@ -227,15 +214,4 @@ const periodChip: React.CSSProperties = {
   borderRadius: 'var(--radius-pill)',
   alignSelf: 'flex-start',
   marginLeft: -10,
-}
-const itemActions: React.CSSProperties = { display: 'flex', gap: 10, flexWrap: 'wrap' }
-const ghostLink: React.CSSProperties = {
-  height: 36, padding: '0 16px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)',
-  color: 'var(--text-primary)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
-  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
-}
-const solidLink: React.CSSProperties = {
-  height: 36, padding: '0 16px', borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)',
-  fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
-  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }

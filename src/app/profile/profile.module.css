@@ -45,3 +45,96 @@
     transform: none;
   }
 }
+
+/* ---- Invitation card action row: pills stay inline; a "+N / Lebih sedikit"
+       toggle collapses the extras once a card has more than 3 actions. ---- */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ghostBtn,
+.solidBtn {
+  height: var(--ctl-h-sm);
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.solidBtn {
+  background: var(--color-charcoal);
+  color: var(--surface-warm);
+}
+
+.solidBtn:hover {
+  background: #3a2e22;
+}
+
+.ghostBtn {
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.ghostBtn:hover {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+}
+
+/* Shrink/expand affordance — a dashed ghost pill so it reads as a control,
+   not another action. Chevron flips when the row is expanded. */
+.toggleBtn {
+  height: var(--ctl-h-sm);
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.toggleBtn:hover {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+  background: var(--interactive-primary-soft);
+}
+
+.toggleBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
+
+.toggleBtn svg {
+  transition: transform 0.2s ease;
+}
+
+.toggleBtn[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghostBtn,
+  .solidBtn,
+  .toggleBtn,
+  .toggleBtn svg {
+    transition: none;
+  }
+}
