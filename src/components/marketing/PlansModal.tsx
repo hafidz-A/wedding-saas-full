@@ -35,19 +35,29 @@ export function PlansModal({
     const prevActive = document.activeElement as HTMLElement | null
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onKey)
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    // The marketing page runs Lenis smooth-scroll, which hijacks wheel/touch at
-    // the window level — `body { overflow: hidden }` alone won't stop it, so a
-    // wheel over the modal would scroll the page behind. Pause Lenis while open
-    // (and `data-lenis-prevent` on the scroll area below lets the dialog scroll
-    // natively). No-op on pages without Lenis (reduced-motion / non-marketing).
+
+    // Fully lock the page behind the modal. Two things scroll it here:
+    //   1. the native scroller is <html> (not <body>) — so body overflow:hidden
+    //      alone leaves the page scrollable via wheel/touch over the backdrop;
+    //   2. Lenis smooth-scroll hijacks the wheel at the window level.
+    // Lock <html> + <body> overflow AND pause Lenis. Pad <html> by the scrollbar
+    // width so hiding it doesn't shift the background. `data-lenis-prevent` on the
+    // dialog body (below) keeps it natively scrollable. No-op without Lenis.
+    const html = document.documentElement
+    const body = document.body
     const lenis = (window as { __lenis?: { stop?: () => void; start?: () => void } }).__lenis
+    const scrollbarW = window.innerWidth - html.clientWidth
+    const prev = { htmlOverflow: html.style.overflow, bodyOverflow: body.style.overflow, htmlPadRight: html.style.paddingRight }
     lenis?.stop?.()
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    if (scrollbarW > 0) html.style.paddingRight = `${scrollbarW}px`
     dialogRef.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prevOverflow
+      html.style.overflow = prev.htmlOverflow
+      body.style.overflow = prev.bodyOverflow
+      html.style.paddingRight = prev.htmlPadRight
       lenis?.start?.()
       prevActive?.focus?.()
     }
