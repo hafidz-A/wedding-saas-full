@@ -76,10 +76,35 @@
 .dims {
   position: relative;
   pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-body, system-ui);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.dimsText {
   opacity: 0.6;
+}
+
+/* Tablet-only orientation toggle next to the caption. Dark translucent so it
+   reads on both paper-light and cosmic-dark backdrops. */
+.rotateBtn {
+  pointer-events: auto;
+  height: var(--ctl-h-sm);
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-pill);
+  background: rgba(20, 18, 16, 0.65);
+  color: #fff;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.rotateBtn:hover {
+  background: rgba(20, 18, 16, 0.85);
 }

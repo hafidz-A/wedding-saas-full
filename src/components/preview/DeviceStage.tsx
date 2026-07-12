@@ -56,9 +56,27 @@ export function DeviceStage({
   const payloadRef = useRef(payload)
   payloadRef.current = payload
 
+  // Foldables expose a Fold/Unfold toggle: folded = the cover screen (device.w/h),
+  // unfolded = the wider inner display (device.unfolded). The inner screen is a
+  // mini-tablet, so it rotates too.
+  const [unfolded, setUnfolded] = useState(false)
+  const foldable = !!device.unfolded
+  const baseW = foldable && unfolded ? device.unfolded!.w : device.w
+  const baseH = foldable && unfolded ? device.unfolded!.h : device.h
+
+  // Tablets can rotate (people hold iPads both ways), as does an unfolded fold;
+  // ordinary phones stay portrait. Rotating swaps the SCREEN dimensions, so the
+  // iframe viewport is the real landscape logical px (1180×820 for iPad Air) and
+  // the inner page reflows through its own breakpoints — same faithful-viewport
+  // rule as portrait.
+  const [landscape, setLandscape] = useState(false)
+  const rotatable = device.kind === 'tablet' || (foldable && unfolded)
+  const scrW = rotatable && landscape ? baseH : baseW
+  const scrH = rotatable && landscape ? baseW : baseH
+
   const bezel = BEZEL[device.kind]
-  const outerW = device.w + bezel * 2
-  const outerH = device.h + bezel * 2
+  const outerW = scrW + bezel * 2
+  const outerH = scrH + bezel * 2
 
   // Fit-to-window scale for the true-pixel device. Recomputed on host resize
   // (zoom counts as a resize) so the bezel keeps filling the stage — but the
@@ -109,13 +127,40 @@ export function DeviceStage({
           {device.notch === 'island' && <span className={styles.island} aria-hidden="true" />}
           {device.notch === 'notch' && <span className={styles.notch} aria-hidden="true" />}
           {device.notch === 'punch' && <span className={styles.punch} aria-hidden="true" />}
-          <div className={styles.screen} style={{ width: device.w, height: device.h }}>
+          <div className={styles.screen} style={{ width: scrW, height: scrH }}>
             <iframe ref={iframeRef} className={styles.frame} src={src} title={`Preview ${device.label}`} />
           </div>
         </div>
       </div>
       <span className={styles.dims}>
-        {device.label} · {device.w} × {device.h}
+        <span className={styles.dimsText}>
+          {device.label} · {scrW} × {scrH}
+        </span>
+        {foldable && (
+          <button
+            type="button"
+            className={styles.rotateBtn}
+            onClick={() => {
+              setUnfolded((v) => !v)
+              setLandscape(false) // folded cover screen is portrait-only
+            }}
+            aria-pressed={unfolded}
+            title={unfolded ? 'Lipat (layar depan)' : 'Buka (layar dalam)'}
+          >
+            {unfolded ? '❏ Lipat' : '⛶ Buka'}
+          </button>
+        )}
+        {rotatable && (
+          <button
+            type="button"
+            className={styles.rotateBtn}
+            onClick={() => setLandscape((v) => !v)}
+            aria-pressed={landscape}
+            title={landscape ? 'Putar ke portrait' : 'Putar ke landscape'}
+          >
+            ⟳ Rotate
+          </button>
+        )}
       </span>
     </div>
   )
