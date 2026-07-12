@@ -164,11 +164,15 @@ const page: React.CSSProperties = {
   color: 'var(--text-primary)',
 }
 const wrap: React.CSSProperties = { maxWidth: 720, margin: '0 auto', width: '100%' }
+// Shared left inset. Every card pads its content by this much, so the headings
+// (which sit outside the cards) get the same padding-left — headings, card
+// labels, invitation titles and their buttons then all share one vertical line.
+const CONTENT_PAD = 24
 const h1: React.CSSProperties = {
   fontFamily: 'var(--font-heading)',
-  fontSize: 'clamp(32px, 6vw, 52px)', margin: '0 0 24px',
+  fontSize: 'clamp(32px, 6vw, 52px)', margin: '0 0 24px', paddingLeft: CONTENT_PAD,
 }
-const h2: React.CSSProperties = { fontSize: 18, fontWeight: 600, margin: '32px 0 12px' }
+const h2: React.CSSProperties = { fontSize: 18, fontWeight: 600, margin: '32px 0 12px', paddingLeft: CONTENT_PAD }
 const cardBox: React.CSSProperties = {
   background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)', padding: 24,
   boxShadow: '0 20px 60px rgba(42,33,24,0.10)',
@@ -202,7 +206,7 @@ const emptyBodyStyle: React.CSSProperties = {
 const list: React.CSSProperties = { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }
 const item: React.CSSProperties = {
   display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 14,
-  background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)', padding: '16px 20px',
+  background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)', padding: `16px ${CONTENT_PAD}px`,
   boxShadow: '0 10px 30px rgba(42,33,24,0.08)',
 }
 const itemSlug: React.CSSProperties = { fontWeight: 600, fontSize: 16 }
