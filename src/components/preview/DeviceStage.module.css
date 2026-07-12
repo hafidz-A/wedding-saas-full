@@ -73,6 +73,20 @@
 .notch { top: 9px; width: 42%; height: 19px; border-radius: 0 0 15px 15px; }
 .punch { top: 17px; width: 9px; height: 9px; border-radius: 50%; }
 
+/* Landscape (rotatable devices): the cutout follows the rotation to the left
+   edge, vertically centred — the horizontal top bars become vertical side bars,
+   so the % dimension moves from width to height. */
+.island.landscape,
+.notch.landscape,
+.punch.landscape {
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+}
+.island.landscape { left: 15px; width: 15px; height: 26%; }
+.notch.landscape { left: 9px; width: 19px; height: 42%; border-radius: 0 15px 15px 0; }
+.punch.landscape { left: 17px; }
+
 .dims {
   position: relative;
   pointer-events: none;

@@ -71,8 +71,13 @@ export function DeviceStage({
   // rule as portrait.
   const [landscape, setLandscape] = useState(false)
   const rotatable = device.kind === 'tablet' || (foldable && unfolded)
-  const scrW = rotatable && landscape ? baseH : baseW
-  const scrH = rotatable && landscape ? baseW : baseH
+  const isLandscape = rotatable && landscape
+  const scrW = isLandscape ? baseH : baseW
+  const scrH = isLandscape ? baseW : baseH
+
+  // In landscape the camera cutout follows the rotation to the (physical top =)
+  // left edge, instead of staying pinned to the visual top.
+  const cutout = (base: string) => (isLandscape ? `${base} ${styles.landscape}` : base)
 
   const bezel = BEZEL[device.kind]
   const outerW = scrW + bezel * 2
@@ -124,9 +129,9 @@ export function DeviceStage({
           className={`${styles.device} ${styles[device.kind]}`}
           style={{ width: outerW, height: outerH, transform: `scale(${scale})` }}
         >
-          {device.notch === 'island' && <span className={styles.island} aria-hidden="true" />}
-          {device.notch === 'notch' && <span className={styles.notch} aria-hidden="true" />}
-          {device.notch === 'punch' && <span className={styles.punch} aria-hidden="true" />}
+          {device.notch === 'island' && <span className={cutout(styles.island)} aria-hidden="true" />}
+          {device.notch === 'notch' && <span className={cutout(styles.notch)} aria-hidden="true" />}
+          {device.notch === 'punch' && <span className={cutout(styles.punch)} aria-hidden="true" />}
           <div className={styles.screen} style={{ width: scrW, height: scrH }}>
             <iframe ref={iframeRef} className={styles.frame} src={src} title={`Preview ${device.label}`} />
           </div>
