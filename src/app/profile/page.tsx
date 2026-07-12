@@ -8,6 +8,7 @@ import { isAdminEmail } from '@/lib/admin/is-admin'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
 import { coupleDisplay, deriveCoupleFromConfig } from '@/lib/meta/couple'
+import { getCatalogEntry } from '@/config/templateCatalog'
 import { SiteNav } from '@/components/site/SiteNav'
 import InvitationActions from './InvitationActions'
 import MfaEnroll from './MfaEnroll'
@@ -133,6 +134,7 @@ export default async function ProfilePage() {
                       isPaid={inv.is_paid}
                       defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
                       existingReview={reviewByInv.get(inv.id) ?? null}
+                      category={getCatalogEntry(inv.template_id ?? '').category}
                       labels={{
                         viewPublic: p.viewPublic,
                         openDashboard: p.openDashboard,

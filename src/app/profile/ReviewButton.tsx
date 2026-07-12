@@ -6,14 +6,29 @@ import { countWords, MAX_REVIEW_WORDS } from '@/lib/testimonials/validate'
 
 export interface ReviewExisting { rating: number; body: string; isAnonymous: boolean; isVisible: boolean }
 
+/**
+ * Thank-you body tailored to the invitation's category. Heading stays universal;
+ * only the closing line changes so a non-wedding invitation (birthday, aqiqah,
+ * graduation, corporate) gets a fitting sentiment. Falls back to wedding.
+ */
+const THANKS_BODY: Record<string, string> = {
+  wedding: 'Ulasanmu sudah kami terima dengan senang hati. Cerita sepertimu yang membuat kami terus berbenah — sekaligus membantu pasangan lain menemukan momen indahnya. Selamat berbahagia, ya. 🤍',
+  birthday: 'Ulasanmu sudah kami terima dengan senang hati. Cerita sepertimu yang membuat kami terus berbenah — sekaligus membantu orang lain merayakan hari spesialnya. Semoga tahun ini penuh kebahagiaan. 🤍',
+  aqiqah: 'Ulasanmu sudah kami terima dengan senang hati. Cerita sepertimu yang membuat kami terus berbenah — sekaligus membantu keluarga lain menyambut buah hatinya dengan hangat. Semoga menjadi keberkahan untuk si kecil. 🤍',
+  graduation: 'Ulasanmu sudah kami terima dengan senang hati. Cerita sepertimu yang membuat kami terus berbenah — sekaligus membantu orang lain merayakan pencapaiannya. Selamat atas pencapaianmu, ya! 🤍',
+  corporate: 'Ulasanmu sudah kami terima dengan senang hati. Cerita sepertimu yang membuat kami terus berbenah — sekaligus membantu tim lain menyiapkan acaranya dengan lebih matang. Sukses selalu untuk acara dan langkah berikutnya.',
+}
+
 export default function ReviewButton({
   invitationId,
   defaultName,
   existing,
+  category = 'wedding',
 }: {
   invitationId: string
   defaultName: string
   existing: ReviewExisting | null
+  category?: string
 }) {
   const [open, setOpen] = useState(false)
   const [rating, setRating] = useState(existing?.rating ?? 0)
@@ -119,7 +134,7 @@ export default function ReviewButton({
             </span>
             <h2 style={{ fontSize: 21, margin: '16px 0 8px' }}>Terima kasih, sungguh</h2>
             <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-secondary)', margin: 0 }}>
-              Ulasanmu sudah kami terima dengan senang hati. Cerita sepertimu yang membuat kami terus berbenah — sekaligus membantu pasangan lain menemukan momen indahnya. Selamat berbahagia, ya. 🤍
+              {THANKS_BODY[category] ?? THANKS_BODY.wedding}
             </p>
             <div style={{ marginTop: 16, fontSize: 11, letterSpacing: '0.04em', color: 'var(--text-muted)' }}>menutup otomatis dalam beberapa detik</div>
           </div>

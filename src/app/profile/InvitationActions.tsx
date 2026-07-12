@@ -26,6 +26,7 @@ export default function InvitationActions({
   isPaid,
   defaultName,
   existingReview,
+  category,
   labels,
 }: {
   invitationId: string
@@ -35,6 +36,7 @@ export default function InvitationActions({
   isPaid: boolean
   defaultName: string
   existingReview: ReviewExisting | null
+  category: string
   labels: {
     viewPublic: string
     openDashboard: string
@@ -70,7 +72,7 @@ export default function InvitationActions({
     />
   ) : null
   const reviewEl = isPaid ? (
-    <ReviewButton invitationId={invitationId} defaultName={defaultName} existing={existingReview} />
+    <ReviewButton invitationId={invitationId} defaultName={defaultName} existing={existingReview} category={category} />
   ) : null
   // Manual fallback for a missed webhook — same control the dashboard PaymentGate offers.
   const recheckEl = needsAction ? (
