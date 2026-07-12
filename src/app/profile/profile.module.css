@@ -46,14 +46,49 @@
   }
 }
 
-/* ---- Invitation card action row: pills stay inline; a "+N / Lebih sedikit"
-       toggle collapses the extras once a card has more than 3 actions. ---- */
+/* ---- Invitation card action row ----
+   Cards with =3 actions render a single static row (.actionRow).
+   Cards with more collapse the secondaries: the collapsed set and the full
+   set live as two stacked layers inside .actionsShell. Toggling cross-fades
+   between them (old set fades out first, full set fades in a beat later) while
+   the shell animates its height, so nothing jump-reflows. */
 
-.actions {
+.actionRow {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.actionsShell {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* height is animated imperatively via the Web Animations API, then released
+     back to 'auto' so it stays responsive to wrapping. */
+}
+
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  opacity: 0;
+  pointer-events: none;
+  /* outgoing layer: fade out quickly, no delay */
+  transition: opacity 0.16s ease;
+}
+
+.layerActive {
+  position: relative;
+  opacity: 1;
+  pointer-events: auto;
+  /* incoming layer: appear a beat after the old one has cleared */
+  transition: opacity 0.24s ease 0.12s;
 }
 
 .ghostBtn,
@@ -134,7 +169,10 @@
   .ghostBtn,
   .solidBtn,
   .toggleBtn,
-  .toggleBtn svg {
+  .toggleBtn svg,
+  .actionsShell,
+  .layer,
+  .layerActive {
     transition: none;
   }
 }

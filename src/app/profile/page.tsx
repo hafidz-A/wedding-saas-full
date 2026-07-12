@@ -201,7 +201,7 @@ const emptyBodyStyle: React.CSSProperties = {
 }
 const list: React.CSSProperties = { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }
 const item: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
+  display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 14,
   background: 'rgba(255,255,255,0.94)', borderRadius: 'var(--radius-md)', padding: '16px 20px',
   boxShadow: '0 10px 30px rgba(42,33,24,0.08)',
 }
