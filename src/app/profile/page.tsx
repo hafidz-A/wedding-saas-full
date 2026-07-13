@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { activePeriodStatus } from '@/lib/payments/active-period'
+import { refundVerdict } from '@/lib/payments/refund-policy'
 import { isAdminEmail } from '@/lib/admin/is-admin'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
@@ -13,6 +14,7 @@ import { SiteNav } from '@/components/site/SiteNav'
 import InvitationActions from './InvitationActions'
 import MfaEnroll from './MfaEnroll'
 import AccountDataSection from './AccountDataSection'
+import ProfileRefundControl from './ProfileRefundControl'
 import styles from './profile.module.css'
 
 /**
@@ -32,11 +34,11 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('id, slug, template_id, is_paid, expires_at, config')
+    .select('id, slug, template_id, is_paid, expires_at, config, paid_source, is_published, paid_at, used_at, published_at')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null; config: any }[] | null
+    data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null }[] | null
   }
   const invitations = rows ?? []
 
@@ -57,6 +59,31 @@ export default async function ProfilePage() {
     .from('account_deletion_requests')
     .select('scheduled_for').eq('user_id', user.id).eq('status', 'pending').limit(1).maybeSingle()) as { data: { scheduled_for: string | null } | null }
   const pendingDeletion = delReq ? { scheduledFor: delReq.scheduled_for } : null
+
+  // Per-invitation refund control (paid, non-comp): pending request + sticky
+  // eligibility (same refundVerdict the dashboard/admin use; the sticky used_at/
+  // published_at signals mean no extra live guest-count query is needed here).
+  const refundState = new Map<string, { paidSource: string; eligible: boolean; hasPending: boolean }>()
+  const refundableIds = invitations.filter((i) => i.is_paid && i.paid_source !== 'comp').map((i) => i.id)
+  if (refundableIds.length) {
+    const { data: pend } = (await admin.from('refund_requests')
+      .select('invitation_id').in('invitation_id', refundableIds).eq('status', 'pending')) as { data: { invitation_id: string }[] | null }
+    const pendingSet = new Set((pend ?? []).map((r) => r.invitation_id))
+    const nowMs = Date.now()
+    for (const inv of invitations) {
+      if (!inv.is_paid || inv.paid_source === 'comp') continue
+      const paidMs = inv.paid_at ? Date.parse(inv.paid_at) : nowMs
+      const eligible = refundVerdict({
+        is_published: !!inv.is_published, guest_count: 0, rsvp_count: 0, attendance_count: 0,
+        config_edited: false,
+        days_since_paid: Math.max(0, Math.floor((nowMs - paidMs) / 86_400_000)),
+        ever_used: !!inv.used_at,
+        days_since_published: inv.published_at ? Math.max(0, Math.floor((nowMs - Date.parse(inv.published_at)) / 86_400_000)) : null,
+      }).eligible
+      refundState.set(inv.id, { paidSource: inv.paid_source ?? 'xendit', eligible, hasPending: pendingSet.has(inv.id) })
+    }
+  }
+
   const ap = t.common.activePeriod
   const now = Date.now()
 
@@ -126,6 +153,7 @@ export default async function ProfilePage() {
                       <span style={itemSlug}>{inv.slug}</span>
                       <span style={periodChip}>{periodLabel(inv)}</span>
                     </span>
+                    <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     <InvitationActions
                       invitationId={inv.id}
                       viewHref={`/${tt}/${inv.slug}`}
@@ -145,6 +173,10 @@ export default async function ProfilePage() {
                         showLess: p.showLess,
                       }}
                     />
+                    {refundState.get(inv.id) && (
+                      <ProfileRefundControl invitationId={inv.id} {...refundState.get(inv.id)!} />
+                    )}
+                    </span>
                   </li>
                 )
               })}
