@@ -13,12 +13,12 @@
  *     [--template=lovebirds|solary] [--full]
  *
  * Example:
- *   node scripts/create-invitation.mjs rizky-amara demo1234 \
- *     --bride="Amara Sastrawijaya" \
- *     --groom="Rizky Pratama" \
+ *   node scripts/create-invitation.mjs adi-rani demo1234 \
+ *     --bride="Rani Sastrawijaya" \
+ *     --groom="Adi Pratama" \
  *     --date=2026-11-15T16:00 \
  *     --venue="The Grand Ballroom, Jakarta" \
- *     --email=rizky@gmail.com \
+ *     --email=adi@gmail.com \
  *     --plan=premium \
  *     --template=lovebirds --full
  *
@@ -28,7 +28,7 @@
  *                                instead of the 6-section starter
  *
  * After running, share with the couple (URLs are /<template>/<slug>):
- *   • Public URL:   /<template>/<slug>          (e.g. /lovebirds/rizky-amara)
+ *   • Public URL:   /<template>/<slug>          (e.g. /lovebirds/adi-rani)
  *   • Dashboard:    /<template>/<slug>/dashboard
  *   • Login with:   their email + the password you set
  *   • Forgot pwd:   /forgot-password   (Supabase Auth handles the reset email)

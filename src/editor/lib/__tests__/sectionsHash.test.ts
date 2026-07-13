@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { hashSections } from '../sectionsHash'
 
 const sections = [
-  { id: 'hero', type: 'hero', props: { coupleName: 'Amara & Rizky', date: '2026-11-15' } },
+  { id: 'hero', type: 'hero', props: { coupleName: 'Rani & Adi', date: '2026-11-15' } },
   { id: 'story', type: 'ourStory', props: { cards: [{ title: 'First Meet' }] } },
 ]
 
@@ -13,7 +13,7 @@ describe('hashSections', () => {
 
   it('ignores object key ORDER (server and client serialize independently)', () => {
     const reordered = [
-      { props: { date: '2026-11-15', coupleName: 'Amara & Rizky' }, type: 'hero', id: 'hero' },
+      { props: { date: '2026-11-15', coupleName: 'Rani & Adi' }, type: 'hero', id: 'hero' },
       { type: 'ourStory', props: { cards: [{ title: 'First Meet' }] }, id: 'story' },
     ]
     expect(hashSections(reordered)).toBe(hashSections(sections))

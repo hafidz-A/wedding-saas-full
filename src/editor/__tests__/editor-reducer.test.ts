@@ -79,11 +79,11 @@ describe('UPDATE_COUPLE', () => {
   } as any
 
   it('sets a single couple name without dropping the other', () => {
-    const next = reducer(base, { type: 'UPDATE_COUPLE', key: 'name1', value: 'Amara' } as any)
-    expect(next.config.couple).toEqual({ name1: 'Amara', name2: 'B' })
+    const next = reducer(base, { type: 'UPDATE_COUPLE', key: 'name1', value: 'Rani' } as any)
+    expect(next.config.couple).toEqual({ name1: 'Rani', name2: 'B' })
   })
   it('initializes couple when absent', () => {
-    const next = reducer({ ...base, config: { sections: [] } }, { type: 'UPDATE_COUPLE', key: 'name2', value: 'Rizky' } as any)
-    expect(next.config.couple).toEqual({ name2: 'Rizky' })
+    const next = reducer({ ...base, config: { sections: [] } }, { type: 'UPDATE_COUPLE', key: 'name2', value: 'Adi' } as any)
+    expect(next.config.couple).toEqual({ name2: 'Adi' })
   })
 })

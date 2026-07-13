@@ -25,7 +25,7 @@ Navbar tidak punya field sendiri; ia mem-parse string title:
 logo={config.meta?.title?.split('—')[0]?.trim() || 'Wedding'}
 ```
 
-Jadi `"Amaraaa & Rizky — Our Wedding"` → navbar menampilkan `"Amaraaa & Rizky"`.
+Jadi `"Raniii & Adi — Our Wedding"` → navbar menampilkan `"Raniii & Adi"`.
 Satu kotak membebani dua makna, dan navbar rapuh karena bergantung pada tanda `—`.
 
 Catatan: nama mempelai sebenarnya sudah dikumpulkan terpisah saat onboarding
@@ -58,10 +58,10 @@ perubahan.
 
 | Field | Peran | Contoh |
 |---|---|---|
-| `meta.coupleName1` | Mempelai 1 (sumber kebenaran) | `Amaraaa` |
-| `meta.coupleName2` | Mempelai 2 (sumber kebenaran) | `Rizky` |
+| `meta.coupleName1` | Mempelai 1 (sumber kebenaran) | `Raniii` |
+| `meta.coupleName2` | Mempelai 2 (sumber kebenaran) | `Adi` |
 | `meta.titleSuffix` | Akhiran setelah `—` | `Our Wedding` |
-| `meta.title` *(derived)* | `n1 & n2 — suffix` | `Amaraaa & Rizky — Our Wedding` |
+| `meta.title` *(derived)* | `n1 & n2 — suffix` | `Raniii & Adi — Our Wedding` |
 
 Aturan komposisi:
 
@@ -81,7 +81,7 @@ Ganti satu input TITLE dengan:
 - **Mempelai 2** — input teks, tanpa `maxLength`, tanpa counter.
 - **Akhiran judul** — input teks, tanpa `maxLength`, tanpa counter (placeholder
   contoh: `Our Wedding`).
-- Baris bantu kecil: "Judul jadi: *Amaraaa & Rizky — Our Wedding*" (preview title turunan).
+- Baris bantu kecil: "Judul jadi: *Raniii & Adi — Our Wedding*" (preview title turunan).
 
 Field **Deskripsi** dan **foto share (og:image)** tidak berubah. Bagian "Share preview"
 tetap memakai title turunan.

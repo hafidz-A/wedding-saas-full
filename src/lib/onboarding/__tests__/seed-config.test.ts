@@ -3,11 +3,11 @@ import { buildSeedConfig, validateSlug } from '../seed-config'
 
 describe('validateSlug', () => {
   it('accepts a clean slug and returns it unchanged', () => {
-    expect(validateSlug('rizky-amara')).toBe('rizky-amara')
+    expect(validateSlug('adi-rani')).toBe('adi-rani')
   })
 
   it('lowercases and trims', () => {
-    expect(validateSlug('  Rizky-Amara  ')).toBe('rizky-amara')
+    expect(validateSlug('  Adi-Rani  ')).toBe('adi-rani')
   })
 
   it('accepts digits', () => {
@@ -34,8 +34,8 @@ describe('validateSlug', () => {
 
 describe('buildSeedConfig', () => {
   const input = {
-    brideName: 'Amara Sastrawijaya',
-    groomName: 'Rizky Pratama',
+    brideName: 'Rani Sastrawijaya',
+    groomName: 'Adi Pratama',
     weddingDate: '2025-11-15T16:00',
     venue: 'The Grand Ballroom, Jakarta',
   }
@@ -44,22 +44,22 @@ describe('buildSeedConfig', () => {
     const cfg = buildSeedConfig(input)
     const hero = cfg.sections.find((s: any) => s.type === 'hero')
     expect(hero).toBeDefined()
-    expect(hero.props.coupleName).toBe('Amara & Rizky')
-    expect(hero.props.brideName).toBe('Amara')
-    expect(hero.props.groomName).toBe('Rizky')
+    expect(hero.props.coupleName).toBe('Rani & Adi')
+    expect(hero.props.brideName).toBe('Rani')
+    expect(hero.props.groomName).toBe('Adi')
   })
 
   it('derives monogram and hashtag on the footer', () => {
     const cfg = buildSeedConfig(input)
     const footer = cfg.sections.find((s: any) => s.type === 'footer')
     expect(footer).toBeDefined()
-    expect(footer.props.monogram).toBe('A & R')
-    expect(footer.props.hashtag).toBe('#AmaraAndRizky')
+    expect(footer.props.monogram).toBe('R & A')
+    expect(footer.props.hashtag).toBe('#RaniAndAdi')
   })
 
   it('sets meta title and enables every section (full template)', () => {
     const cfg = buildSeedConfig(input)
-    expect(cfg.couple).toEqual({ name1: 'Amara', name2: 'Rizky' })
+    expect(cfg.couple).toEqual({ name1: 'Rani', name2: 'Adi' })
     expect(cfg.meta.titleSuffix).toBe('Our Wedding')
     expect(cfg.sections.every((s: any) => s.enabled === true)).toBe(true)
   })
@@ -70,7 +70,7 @@ describe('buildSeedConfig', () => {
     const heroA = a.sections.find((s: any) => s.type === 'hero')
     const heroB = b.sections.find((s: any) => s.type === 'hero')
     // First result must be untouched by the second call (deep clone, not shared ref).
-    expect(heroA.props.coupleName).toBe('Amara & Rizky')
+    expect(heroA.props.coupleName).toBe('Rani & Adi')
     expect(heroB.props.coupleName).toBe('Other & Someone')
   })
 })

@@ -446,7 +446,7 @@ npm run dev
 ```
 
 Open `http://localhost:3000/made-nanda`. Verify:
-- Couple name shows "Nanda & Made" (not "Rizky & Amara")
+- Couple name shows "Nanda & Made" (not "Adi & Rani")
 - Countdown target matches 2026-11-15
 - All sections are visible (ourStory, brideGroom, gallery, accommodations, faq, playlist, etc.)
 - No crashes or missing-section errors in the console
@@ -494,16 +494,16 @@ cd c:\Users\arifi\Downloads\wedding-saas-next
 npm install                                  # one-time, ~3 min
 # Edit .env.local with Supabase URL + 2 keys
 # Run supabase/schema.sql in Supabase SQL Editor first
-node scripts/create-invitation.mjs rizky-amara demo1234 \
-  --bride="Amara Sastrawijaya" \
-  --groom="Rizky Pratama" \
+node scripts/create-invitation.mjs adi-rani demo1234 \
+  --bride="Rani Sastrawijaya" \
+  --groom="Adi Pratama" \
   --date=2025-11-15T16:00 \
   --venue="The Grand Ballroom, Jakarta" \
   --email=demo@example.com \
   --plan=premium
-node scripts/seed-full-config.mjs rizky-amara \
-  --bride="Amara Sastrawijaya" \
-  --groom="Rizky Pratama" \
+node scripts/seed-full-config.mjs adi-rani \
+  --bride="Rani Sastrawijaya" \
+  --groom="Adi Pratama" \
   --date=2025-11-15T16:00 \
   --venue="The Grand Ballroom, Jakarta"
 npm run dev

@@ -3,8 +3,8 @@ import { buildGuestLink } from '../guestLink'
 
 describe('buildGuestLink', () => {
   it('appends ?to= on a bare URL', () => {
-    expect(buildGuestLink('https://x.test/lovebirds/amara', 'Ahmad')).toBe(
-      'https://x.test/lovebirds/amara?to=Ahmad',
+    expect(buildGuestLink('https://x.test/lovebirds/rani', 'Ahmad')).toBe(
+      'https://x.test/lovebirds/rani?to=Ahmad',
     )
   })
 

@@ -40,7 +40,7 @@ The dashboard's `editor` tab renders a two-column layout (`<EditorRoot>`):
 │ (left, 280px)    │  (right, fills rest)                         │
 │                  │                                              │
 │ ⠿ Hero      ●    │  ┌─ Hero ────────────────────────────────┐  │
-│ ⠿ Our Story ●    │  │ Couple name   [Rizky & Amara______ ]  │  │
+│ ⠿ Our Story ●    │  │ Couple name   [Adi & Rani______ ]  │  │
 │ ⠿ Gallery   ○    │  │ Wedding date  [2025-11-15T16:00____]  │  │
 │ ⠿ Schedule  ●    │  │ Venue         [The Grand Ballroom__ ]  │  │
 │ ⠿ RSVP      ●    │  │ Gate image    [thumbnail] [↑ Upload]   │  │

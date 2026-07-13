@@ -7,7 +7,7 @@ const brideField: TestField = { key: 'brideName', linkedGroup: 'couple' }
 const groomField: TestField = { key: 'groomName', linkedGroup: 'couple' }
 const plainField: TestField = { key: 'venue' }
 const heroFields: TestField[] = [coupleField, brideField, groomField, plainField]
-const couple = { name1: 'Amara', name2: 'Rizky' }
+const couple = { name1: 'Rani', name2: 'Adi' }
 
 describe('isCoupleField', () => {
   it('is true only for linkedGroup === couple', () => {
@@ -54,12 +54,12 @@ describe('coupleSeedValues', () => {
       heroFields,
       couple,
     )
-    expect(seed).toEqual({ coupleName: 'Amara & Rizky', brideName: 'Amara', groomName: 'Rizky' })
+    expect(seed).toEqual({ coupleName: 'Rani & Adi', brideName: 'Rani', groomName: 'Adi' })
     expect('venue' in seed).toBe(false)
   })
   it('seeds only coupleName for footer/openingGate-style sections', () => {
     expect(coupleSeedValues({ type: 'footer', props: {} }, [coupleField, plainField], couple))
-      .toEqual({ coupleName: 'Amara & Rizky' })
+      .toEqual({ coupleName: 'Rani & Adi' })
   })
 })
 
@@ -77,7 +77,7 @@ describe('lock lifecycle (locked → unlock → relink)', () => {
     // 2. Unlock: seed inherited values, then set the override flag.
     const seed = coupleSeedValues({ type: 'hero', props }, heroFields, couple)
     props = { ...props, ...seed, coupleOverride: true }
-    expect(props.coupleName).toBe('Amara & Rizky') // seeded from the inherited value
+    expect(props.coupleName).toBe('Rani & Adi') // seeded from the inherited value
     expect(isCoupleFieldLocked(coupleField, props, couple)).toBe(false) // now editable
     expect(shouldShowRelink(heroFields, props, couple)).toBe(true) // relink now visible
 

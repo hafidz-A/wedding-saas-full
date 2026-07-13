@@ -13,13 +13,13 @@ export interface CoupleData {
 
 const clean = (s: string | null | undefined): string => (s ?? '').replace(/\s+/g, ' ').trim()
 
-/** "Amara & Rizky" — empty sides dropped, no dangling separator. */
+/** "Rani & Adi" — empty sides dropped, no dangling separator. */
 export function coupleDisplay(c: CoupleData | null | undefined): string {
   const cc = c ?? {}
   return [cc.name1, cc.name2].map(clean).filter(Boolean).join(' & ')
 }
 
-/** SEO/share title: "Amara & Rizky — Our Wedding" (suffix optional). */
+/** SEO/share title: "Rani & Adi — Our Wedding" (suffix optional). */
 export function composeTitle(c: CoupleData | null | undefined, suffix?: string | null): string {
   const names = coupleDisplay(c)
   const s = clean(suffix)

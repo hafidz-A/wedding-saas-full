@@ -136,7 +136,7 @@ export default function CreateInvitationForm() {
       </Row>
 
       <Field label="Slug (alamat undangan — huruf kecil, angka, tanda hubung)">
-        <input required value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="rizky-amara" style={input} />
+        <input required value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="adi-rani" style={input} />
       </Field>
 
       <Field label="Pembayaran">

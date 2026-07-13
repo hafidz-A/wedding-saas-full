@@ -1,5 +1,5 @@
 /**
- * Derive a couple monogram ("Amara & Rizky" → "A & R") from the couple's
+ * Derive a couple monogram ("Rani & Adi" → "R & A") from the couple's
  * DISPLAY name, so the Hero gate, the Couple cards and the Footer all show the
  * same initials in the same order — driven by whatever order the couple chose
  * for their name. Falls back to the explicit bride/groom names (bride first),

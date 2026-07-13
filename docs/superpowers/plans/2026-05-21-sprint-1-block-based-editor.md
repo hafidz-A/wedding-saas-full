@@ -2648,14 +2648,14 @@ Leave running for Task 15.
 
 **Prereqs:**
 - `.env.local` is filled per README (Supabase URL, anon key, service role, ADMIN_SESSION_SECRET).
-- An invitation exists, e.g. `rizky-amara` from `node scripts/create-invitation.mjs rizky-amara demo1234 premium`.
+- An invitation exists, e.g. `adi-rani` from `node scripts/create-invitation.mjs adi-rani demo1234 premium`.
 - The `invitation-media` Storage bucket exists in Supabase (per README setup step 2).
 
 Walk through every Success Criterion from the spec. For each step, the expected outcome is in **bold**.
 
 - [ ] **Step 15.1: Login + editor visible**
 
-  1. In a browser, open `http://localhost:3000/rizky-amara/dashboard`.
+  1. In a browser, open `http://localhost:3000/adi-rani/dashboard`.
   2. Log in with password `demo1234`.
   3. Click the **Editor** tab.
 
@@ -2675,7 +2675,7 @@ Walk through every Success Criterion from the spec. For each step, the expected 
 - [ ] **Step 15.3: Edit text fields**
 
   1. Select **Hero** in the left rail.
-  2. In **Couple name**, change "Rizky & Amara" to "Rizky & Amara ❤".
+  2. In **Couple name**, change "Adi & Rani" to "Adi & Rani ❤".
   3. In **Venue**, change to "Grand Ballroom, Bali".
   4. Click **Save**.
   5. Reload the public page tab.
@@ -2731,7 +2731,7 @@ Walk through every Success Criterion from the spec. For each step, the expected 
 
   Expected: **Pill flips to gray "Draft ○".**
 
-  2. Open the public URL `/rizky-amara` in a fresh incognito tab.
+  2. Open the public URL `/adi-rani` in a fresh incognito tab.
 
   Expected: **Not-found / unpublished view.** Toggle back to Published in the dashboard, refresh incognito tab — public page returns.
 
@@ -2755,7 +2755,7 @@ Walk through every Success Criterion from the spec. For each step, the expected 
 - [ ] **Step 15.11: Authorization check**
 
   1. In a fresh incognito window (no admin cookie), open DevTools Network tab.
-  2. Run: `fetch('/api/invitation/rizky-amara/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: '{"config":{"sections":[]}}' }).then(r => r.status)`
+  2. Run: `fetch('/api/invitation/adi-rani/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: '{"config":{"sections":[]}}' }).then(r => r.status)`
 
   Expected: **403.** Same for `/api/upload` and `/api/invitation/<slug>/publish`.
 

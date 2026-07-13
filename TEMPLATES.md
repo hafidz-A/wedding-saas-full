@@ -90,9 +90,9 @@ Di onboarding form, tambahin step awal "Pilih template" yang set `template_id` s
 ### URL routing
 
 ```
-/lovebirds/rizky-amara           ← couple pakai Lovebirds
+/lovebirds/adi-rani           ← couple pakai Lovebirds
 /solary/budi-sari              ← couple pakai Solary
-/lovebirds/rizky-amara/dashboard ← dashboard (shared UI)
+/lovebirds/adi-rani/dashboard ← dashboard (shared UI)
 ```
 
 Next.js routes:
@@ -231,7 +231,7 @@ Tolong restructure project agar support multi-template:
 8. Update onboarding action: tambahin template selection
 9. Update semua import yang reference src/sections/ atau src/config/pageConfig
    ke lokasi baru
-10. Test: npm run dev → buka /lovebirds/rizky-amara → harus sama persis
+10. Test: npm run dev → buka /lovebirds/adi-rani → harus sama persis
     seperti sebelum restructure
 11. Build: npm run build → harus clean
 12. Commit dengan pesan: "refactor: restructure to multi-template architecture"

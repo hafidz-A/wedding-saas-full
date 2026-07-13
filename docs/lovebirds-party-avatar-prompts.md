@@ -2,7 +2,7 @@
 
 Prompt produksi untuk 6 avatar **bridal party** (3 bridesmaids + 3 groomsmen)
 dengan gaya **ilustrasi cat air + tinta** yang SAMA dengan set pasangan
-Amara & Rizky (lihat `docs/lovebirds-character-system.md` untuk format & karakter
+Rani & Adi (lihat `docs/lovebirds-character-system.md` untuk format & karakter
 pasangan). Dipakai bersama oleh Lovebirds (`weddingParty`) dan Solary
 (`teamPlanet`) lewat registry key yang sama.
 
@@ -20,7 +20,7 @@ pasangan). Dipakai bersama oleh Lovebirds (`weddingParty`) dan Solary
    (mis. `public/templates/lovebirds/demo/bridePortrait.jpg` +
    `coupleClassic.jpg`) dan tulis *"match this hand-painted watercolor-and-ink
    illustration style exactly, but a different person"*. Teks saja akan drift.
-3. **Ini ORANG BERBEDA dari Amara & Rizky** — tiru **gaya lukisannya**, bukan
+3. **Ini ORANG BERBEDA dari Rani & Adi** — tiru **gaya lukisannya**, bukan
    wajah pasangannya.
 4. **Rasio 1:1 (kotak).** Avatar dirender dalam lingkaran kecil → wajah di tengah
    dengan sedikit ruang di atas kepala (head-and-shoulders).
@@ -254,5 +254,5 @@ background, dark moody tones, copying the reference couple's exact faces.
 - [ ] Medium watercolor-ink + latar kertas ivory deckle + wash sage-green — sama dgn set pasangan
 - [ ] Kulit sawo matang Indonesia; busana earth-tone (coral/terracotta/sage/olive) + aksen emas
 - [ ] Head-and-shoulders, di tengah, senyum hangat, kotak 1:1
-- [ ] 6 orang berbeda; BUKAN wajah Amara/Rizky
+- [ ] 6 orang berbeda; BUKAN wajah Rani/Adi
 - [ ] Variasi terjaga: hijab (Putri), kacamata (Aldi), variasi jenggot/rambut groomsmen

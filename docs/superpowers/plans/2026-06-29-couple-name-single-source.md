@@ -56,10 +56,10 @@ import {
 
 describe('coupleDisplay', () => {
   it('joins names with " & " and trims/collapses', () => {
-    expect(coupleDisplay({ name1: '  Amara ', name2: 'Rizky ' })).toBe('Amara & Rizky')
+    expect(coupleDisplay({ name1: '  Rani ', name2: 'Adi ' })).toBe('Rani & Adi')
   })
   it('drops an empty side without a dangling separator', () => {
-    expect(coupleDisplay({ name1: 'Amara', name2: '' })).toBe('Amara')
+    expect(coupleDisplay({ name1: 'Rani', name2: '' })).toBe('Rani')
     expect(coupleDisplay({})).toBe('')
     expect(coupleDisplay(null)).toBe('')
   })
@@ -67,21 +67,21 @@ describe('coupleDisplay', () => {
 
 describe('composeTitle', () => {
   it('appends the suffix after " — "', () => {
-    expect(composeTitle({ name1: 'Amara', name2: 'Rizky' }, 'Our Wedding')).toBe('Amara & Rizky — Our Wedding')
+    expect(composeTitle({ name1: 'Rani', name2: 'Adi' }, 'Our Wedding')).toBe('Rani & Adi — Our Wedding')
   })
   it('omits the suffix segment when empty, and returns suffix alone when no names', () => {
-    expect(composeTitle({ name1: 'Amara', name2: 'Rizky' }, '')).toBe('Amara & Rizky')
+    expect(composeTitle({ name1: 'Rani', name2: 'Adi' }, '')).toBe('Rani & Adi')
     expect(composeTitle({}, 'Our Wedding')).toBe('Our Wedding')
   })
 })
 
 describe('parseCoupleFromTitle', () => {
   it('splits "n1 & n2 — suffix"', () => {
-    expect(parseCoupleFromTitle('Amara & Rizky — Our Wedding'))
-      .toEqual({ name1: 'Amara', name2: 'Rizky', titleSuffix: 'Our Wedding' })
+    expect(parseCoupleFromTitle('Rani & Adi — Our Wedding'))
+      .toEqual({ name1: 'Rani', name2: 'Adi', titleSuffix: 'Our Wedding' })
   })
   it('handles no em-dash and extra ampersands', () => {
-    expect(parseCoupleFromTitle('Amara & Rizky')).toEqual({ name1: 'Amara', name2: 'Rizky', titleSuffix: '' })
+    expect(parseCoupleFromTitle('Rani & Adi')).toEqual({ name1: 'Rani', name2: 'Adi', titleSuffix: '' })
     expect(parseCoupleFromTitle('A & B & C — Day')).toEqual({ name1: 'A', name2: 'B & C', titleSuffix: 'Day' })
     expect(parseCoupleFromTitle(undefined)).toEqual({ name1: '', name2: '', titleSuffix: '' })
   })
@@ -89,7 +89,7 @@ describe('parseCoupleFromTitle', () => {
 
 describe('hasCouple', () => {
   it('is true only when at least one name is non-empty', () => {
-    expect(hasCouple({ name1: 'Amara' })).toBe(true)
+    expect(hasCouple({ name1: 'Rani' })).toBe(true)
     expect(hasCouple({ name1: '  ', name2: '' })).toBe(false)
     expect(hasCouple(undefined)).toBe(false)
   })
@@ -97,21 +97,21 @@ describe('hasCouple', () => {
 
 describe('navName', () => {
   it('prefers config.couple, then legacy meta.title, then fallback', () => {
-    expect(navName({ couple: { name1: 'Amara', name2: 'Rizky' }, meta: { title: 'ignore — x' } })).toBe('Amara & Rizky')
-    expect(navName({ meta: { title: 'Amara & Rizky — Our Wedding' } })).toBe('Amara & Rizky')
+    expect(navName({ couple: { name1: 'Rani', name2: 'Adi' }, meta: { title: 'ignore — x' } })).toBe('Rani & Adi')
+    expect(navName({ meta: { title: 'Rani & Adi — Our Wedding' } })).toBe('Rani & Adi')
     expect(navName({}, 'Galactic')).toBe('Galactic')
   })
 })
 
 describe('injectCoupleProps', () => {
-  const couple = { name1: 'Amara', name2: 'Rizky' }
+  const couple = { name1: 'Rani', name2: 'Adi' }
   it('injects bride/groom/couple for hero', () => {
     const out = injectCoupleProps({ type: 'hero', props: { brideName: 'OLD', groomName: 'OLD', coupleName: 'OLD' } }, couple)
-    expect(out).toMatchObject({ brideName: 'Amara', groomName: 'Rizky', coupleName: 'Amara & Rizky' })
+    expect(out).toMatchObject({ brideName: 'Rani', groomName: 'Adi', coupleName: 'Rani & Adi' })
   })
   it('injects coupleName for footer and openingGate', () => {
-    expect(injectCoupleProps({ type: 'footer', props: { coupleName: 'OLD' } }, couple).coupleName).toBe('Amara & Rizky')
-    expect(injectCoupleProps({ type: 'openingGate', props: {} }, couple).coupleName).toBe('Amara & Rizky')
+    expect(injectCoupleProps({ type: 'footer', props: { coupleName: 'OLD' } }, couple).coupleName).toBe('Rani & Adi')
+    expect(injectCoupleProps({ type: 'openingGate', props: {} }, couple).coupleName).toBe('Rani & Adi')
   })
   it('passes through when overridden, when couple empty, or for non-couple types', () => {
     expect(injectCoupleProps({ type: 'hero', props: { coupleName: 'OLD', coupleOverride: true } }, couple).coupleName).toBe('OLD')
@@ -125,12 +125,12 @@ describe('deriveCoupleFromConfig', () => {
     expect(deriveCoupleFromConfig({ couple: { name1: 'A', name2: 'B' } })).toEqual({ name1: 'A', name2: 'B' })
   })
   it('falls back to hero bride/groom, then hero coupleName, then meta.title', () => {
-    expect(deriveCoupleFromConfig({ sections: [{ type: 'hero', props: { brideName: 'Amara', groomName: 'Rizky' } }] }))
-      .toEqual({ name1: 'Amara', name2: 'Rizky' })
-    expect(deriveCoupleFromConfig({ sections: [{ type: 'hero', props: { coupleName: 'Amara & Rizky' } }] }))
-      .toEqual({ name1: 'Amara', name2: 'Rizky' })
-    expect(deriveCoupleFromConfig({ meta: { title: 'Amara & Rizky — Our Wedding' } }))
-      .toEqual({ name1: 'Amara', name2: 'Rizky' })
+    expect(deriveCoupleFromConfig({ sections: [{ type: 'hero', props: { brideName: 'Rani', groomName: 'Adi' } }] }))
+      .toEqual({ name1: 'Rani', name2: 'Adi' })
+    expect(deriveCoupleFromConfig({ sections: [{ type: 'hero', props: { coupleName: 'Rani & Adi' } }] }))
+      .toEqual({ name1: 'Rani', name2: 'Adi' })
+    expect(deriveCoupleFromConfig({ meta: { title: 'Rani & Adi — Our Wedding' } }))
+      .toEqual({ name1: 'Rani', name2: 'Adi' })
   })
 })
 ```
@@ -160,13 +160,13 @@ export interface CoupleData {
 
 const clean = (s: string | null | undefined): string => (s ?? '').replace(/\s+/g, ' ').trim()
 
-/** "Amara & Rizky" — empty sides dropped, no dangling separator. */
+/** "Rani & Adi" — empty sides dropped, no dangling separator. */
 export function coupleDisplay(c: CoupleData | null | undefined): string {
   const cc = c ?? {}
   return [cc.name1, cc.name2].map(clean).filter(Boolean).join(' & ')
 }
 
-/** SEO/share title: "Amara & Rizky — Our Wedding" (suffix optional). */
+/** SEO/share title: "Rani & Adi — Our Wedding" (suffix optional). */
 export function composeTitle(c: CoupleData | null | undefined, suffix?: string | null): string {
   const names = coupleDisplay(c)
   const s = clean(suffix)
@@ -297,12 +297,12 @@ describe('UPDATE_COUPLE', () => {
   } as any
 
   it('sets a single couple name without dropping the other', () => {
-    const next = reducer(base, { type: 'UPDATE_COUPLE', key: 'name1', value: 'Amara' } as any)
-    expect(next.config.couple).toEqual({ name1: 'Amara', name2: 'B' })
+    const next = reducer(base, { type: 'UPDATE_COUPLE', key: 'name1', value: 'Rani' } as any)
+    expect(next.config.couple).toEqual({ name1: 'Rani', name2: 'B' })
   })
   it('initializes couple when absent', () => {
-    const next = reducer({ ...base, config: { sections: [] } }, { type: 'UPDATE_COUPLE', key: 'name2', value: 'Rizky' } as any)
-    expect(next.config.couple).toEqual({ name2: 'Rizky' })
+    const next = reducer({ ...base, config: { sections: [] } }, { type: 'UPDATE_COUPLE', key: 'name2', value: 'Adi' } as any)
+    expect(next.config.couple).toEqual({ name2: 'Adi' })
   })
 })
 ```
@@ -450,9 +450,9 @@ In `src/lib/i18n/dictionaries/dashboard.ts`, inside the **`id`** locale's `edito
           heading: 'Nama Pasangan',
           hint: 'Diatur di sini sekali — terpakai di seluruh undangan (pembuka, footer, navbar, judul tab).',
           name1: 'Mempelai 1',
-          name1Ph: 'mis. Amara',
+          name1Ph: 'mis. Rani',
           name2: 'Mempelai 2',
-          name2Ph: 'mis. Rizky',
+          name2Ph: 'mis. Adi',
           preview: 'Tampil sebagai',
         },
         coupleLock: {
@@ -474,9 +474,9 @@ Inside the **`en`** locale's `editor: {` object, add:
           heading: 'Couple names',
           hint: 'Set once here — used across the whole invitation (opening, footer, navbar, browser tab title).',
           name1: 'Partner 1',
-          name1Ph: 'e.g. Amara',
+          name1Ph: 'e.g. Rani',
           name2: 'Partner 2',
-          name2Ph: 'e.g. Rizky',
+          name2Ph: 'e.g. Adi',
           preview: 'Shows as',
         },
         coupleLock: {
@@ -1218,10 +1218,10 @@ git commit -m "feat(meta): edit title suffix; SEO title derives from couple"
 
 - [ ] **Step 1: Update the seed-config test**
 
-In `src/lib/onboarding/__tests__/seed-config.test.ts`, the existing assertion `expect(cfg.meta.title).toBe('Amara & Rizky — Our Wedding')` (line ~62) must change to assert the new canonical shape. Replace it with:
+In `src/lib/onboarding/__tests__/seed-config.test.ts`, the existing assertion `expect(cfg.meta.title).toBe('Rani & Adi — Our Wedding')` (line ~62) must change to assert the new canonical shape. Replace it with:
 
 ```ts
-    expect(cfg.couple).toEqual({ name1: 'Amara', name2: 'Rizky' })
+    expect(cfg.couple).toEqual({ name1: 'Rani', name2: 'Adi' })
     expect(cfg.meta.titleSuffix).toBe('Our Wedding')
 ```
 
@@ -1256,7 +1256,7 @@ Set, alongside building the config object:
 In `src/all-templates/lovebirds/defaultConfig.js`, add a top-level `couple` near `meta` (so the bundled demo also has it):
 
 ```js
-  couple: { name1: 'Amara', name2: 'Rizky' },
+  couple: { name1: 'Rani', name2: 'Adi' },
 ```
 
 In `src/all-templates/solary/config/pageConfig.js`, add a top-level `couple` next to `meta` (line ~22):

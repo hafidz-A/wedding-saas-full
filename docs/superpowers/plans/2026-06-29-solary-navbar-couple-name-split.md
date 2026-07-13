@@ -52,20 +52,20 @@ import { composeTitle, parseTitle, navNameFromMeta } from '../title'
 
 describe('composeTitle', () => {
   it('joins two names with " & " and appends suffix after " — "', () => {
-    expect(composeTitle({ coupleName1: 'Amaraaa', coupleName2: 'Rizky', titleSuffix: 'Our Wedding' }))
-      .toBe('Amaraaa & Rizky — Our Wedding')
+    expect(composeTitle({ coupleName1: 'Raniii', coupleName2: 'Adi', titleSuffix: 'Our Wedding' }))
+      .toBe('Raniii & Adi — Our Wedding')
   })
   it('collapses whitespace and trims', () => {
-    expect(composeTitle({ coupleName1: '  Amaraaa  ', coupleName2: ' Rizky ', titleSuffix: '  Our   Wedding ' }))
-      .toBe('Amaraaa & Rizky — Our Wedding')
+    expect(composeTitle({ coupleName1: '  Raniii  ', coupleName2: ' Adi ', titleSuffix: '  Our   Wedding ' }))
+      .toBe('Raniii & Adi — Our Wedding')
   })
   it('omits the suffix segment when suffix is empty', () => {
-    expect(composeTitle({ coupleName1: 'Amaraaa', coupleName2: 'Rizky', titleSuffix: '' }))
-      .toBe('Amaraaa & Rizky')
+    expect(composeTitle({ coupleName1: 'Raniii', coupleName2: 'Adi', titleSuffix: '' }))
+      .toBe('Raniii & Adi')
   })
   it('drops a missing name without a dangling " & "', () => {
-    expect(composeTitle({ coupleName1: 'Amaraaa', coupleName2: '', titleSuffix: 'Our Wedding' }))
-      .toBe('Amaraaa — Our Wedding')
+    expect(composeTitle({ coupleName1: 'Raniii', coupleName2: '', titleSuffix: 'Our Wedding' }))
+      .toBe('Raniii — Our Wedding')
   })
   it('returns just the suffix when both names are empty', () => {
     expect(composeTitle({ coupleName1: '', coupleName2: '', titleSuffix: 'Our Wedding' }))
@@ -75,12 +75,12 @@ describe('composeTitle', () => {
 
 describe('parseTitle', () => {
   it('splits "n1 & n2 — suffix" into parts', () => {
-    expect(parseTitle('Amaraaa & Rizky — Our Wedding'))
-      .toEqual({ coupleName1: 'Amaraaa', coupleName2: 'Rizky', titleSuffix: 'Our Wedding' })
+    expect(parseTitle('Raniii & Adi — Our Wedding'))
+      .toEqual({ coupleName1: 'Raniii', coupleName2: 'Adi', titleSuffix: 'Our Wedding' })
   })
   it('handles a title with no em-dash (no suffix)', () => {
-    expect(parseTitle('Amaraaa & Rizky'))
-      .toEqual({ coupleName1: 'Amaraaa', coupleName2: 'Rizky', titleSuffix: '' })
+    expect(parseTitle('Raniii & Adi'))
+      .toEqual({ coupleName1: 'Raniii', coupleName2: 'Adi', titleSuffix: '' })
   })
   it('keeps a suffix that itself contains an em-dash', () => {
     expect(parseTitle('A & R — Our — Wedding'))
@@ -98,12 +98,12 @@ describe('parseTitle', () => {
 
 describe('navNameFromMeta', () => {
   it('prefers structured names joined with " & "', () => {
-    expect(navNameFromMeta({ coupleName1: 'Amaraaa', coupleName2: 'Rizky', title: 'ignored — x' }))
-      .toBe('Amaraaa & Rizky')
+    expect(navNameFromMeta({ coupleName1: 'Raniii', coupleName2: 'Adi', title: 'ignored — x' }))
+      .toBe('Raniii & Adi')
   })
   it('falls back to the part before the em-dash of title', () => {
-    expect(navNameFromMeta({ title: 'Amaraaa & Rizky — Our Wedding' }))
-      .toBe('Amaraaa & Rizky')
+    expect(navNameFromMeta({ title: 'Raniii & Adi — Our Wedding' }))
+      .toBe('Raniii & Adi')
   })
   it('uses the provided fallback when nothing is available', () => {
     expect(navNameFromMeta({}, 'Galactic')).toBe('Galactic')
@@ -206,19 +206,19 @@ Add these cases inside the `describe('PUT /api/invitation/[slug]/meta', …)` bl
     mockOwner.mockResolvedValue(OWNER)
     const fake = rowFake()
     mockAdmin.mockReturnValue(fake as any)
-    const res = await PUT(put({ coupleName1: '  Amaraaa ', coupleName2: 'Rizky', titleSuffix: 'Our Wedding' }), ctx)
+    const res = await PUT(put({ coupleName1: '  Raniii ', coupleName2: 'Adi', titleSuffix: 'Our Wedding' }), ctx)
     expect(res.status).toBe(200)
     const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
-    expect(upd.value.config.meta.coupleName1).toBe('Amaraaa')
-    expect(upd.value.config.meta.coupleName2).toBe('Rizky')
+    expect(upd.value.config.meta.coupleName1).toBe('Raniii')
+    expect(upd.value.config.meta.coupleName2).toBe('Adi')
     expect(upd.value.config.meta.titleSuffix).toBe('Our Wedding')
-    expect(upd.value.config.meta.title).toBe('Amaraaa & Rizky — Our Wedding')
+    expect(upd.value.config.meta.title).toBe('Raniii & Adi — Our Wedding')
   })
 
   it('treats name-only payloads as a valid update (not 400)', async () => {
     mockOwner.mockResolvedValue(OWNER)
     mockAdmin.mockReturnValue(rowFake() as any)
-    expect((await PUT(put({ coupleName1: 'Amaraaa' }), ctx)).status).toBe(200)
+    expect((await PUT(put({ coupleName1: 'Raniii' }), ctx)).status).toBe(200)
   })
 ```
 
@@ -342,9 +342,9 @@ In the `id` locale, inside the `meta: {` object (right after the `fTitlePlacehol
 
 ```ts
         fName1: 'Mempelai 1',
-        fName1Placeholder: 'mis. Amara',
+        fName1Placeholder: 'mis. Rani',
         fName2: 'Mempelai 2',
-        fName2Placeholder: 'mis. Rizky',
+        fName2Placeholder: 'mis. Adi',
         fSuffix: 'Akhiran judul',
         fSuffixPlaceholder: 'mis. Undangan Pernikahan',
         titlePreviewLabel: 'Judul jadi',
@@ -356,9 +356,9 @@ In the `en` locale, inside the `meta: {` object (right after its `fTitlePlacehol
 
 ```ts
         fName1: 'Partner 1',
-        fName1Placeholder: 'e.g. Amara',
+        fName1Placeholder: 'e.g. Rani',
         fName2: 'Partner 2',
-        fName2Placeholder: 'e.g. Rizky',
+        fName2Placeholder: 'e.g. Adi',
         fSuffix: 'Title suffix',
         fSuffixPlaceholder: 'e.g. Wedding Invitation',
         titlePreviewLabel: 'Title becomes',

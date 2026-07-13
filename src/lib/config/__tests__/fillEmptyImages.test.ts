@@ -43,7 +43,7 @@ describe('fillEmptyImages', () => {
           { src: 'https://keep.me/y.jpg', alt: 'y' },
           { src: '   ', alt: 'empty 2' },
         ]}),
-        section('footer', { photos: [{ src: '', alt: 'Amara' }] }),
+        section('footer', { photos: [{ src: '', alt: 'Rani' }] }),
       ],
     }
     const out = fillEmptyImages(cfg)!

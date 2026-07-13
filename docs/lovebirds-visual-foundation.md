@@ -40,12 +40,12 @@ or invented here.
 
 ## A. Master Character Bible
 
-The template has exactly one couple — **Amara** (bride) and **Rizky** (groom),
+The template has exactly one couple — **Rani** (bride) and **Adi** (groom),
 Indonesian, modern, late-20s/early-30s. They are the *only* humans in the
 system. Every face-bearing asset is one of them; there is never a third unnamed
 couple. (Identity carried from `docs/lovebirds-character-system.md` §1.)
 
-### A1 — Recurring bride: Amara
+### A1 — Recurring bride: Rani
 | Attribute | Locked value |
 |---|---|
 | Age read | 28 |
@@ -57,25 +57,25 @@ couple. (Identity carried from `docs/lovebirds-character-system.md` §1.)
 | Build / height | Slim, graceful posture; **165 cm** |
 | Wardrobe | Earth-tone — cream, soft coral, emerald; flowy modern kebaya / dress; minimal **gold** jewelry |
 
-### A2 — Recurring groom: Rizky
+### A2 — Recurring groom: Adi
 | Attribute | Locked value |
 |---|---|
 | Age read | 30 |
 | Face | Soft-square; defined jaw; strong chin |
-| Skin | Warm olive, a touch **deeper than Amara**, golden-olive undertone |
+| Skin | Warm olive, a touch **deeper than Rani**, golden-olive undertone |
 | Eyes | Dark brown; thick brows; calm warm gaze |
 | Hair | Black, neat & short; **well-groomed light short beard** |
 | **Signature features** | Light short beard (kept neat); thick brows |
-| Build / height | Athletic-slim, broad shoulders; **178 cm (~13 cm taller than Amara)** |
+| Build / height | Athletic-slim, broad shoulders; **178 cm (~13 cm taller than Rani)** |
 | Wardrobe | Earth-tone — cream/emerald blazer, linen shirt, modern beskap (formal); brown leather-strap watch |
 
 ### A3 — Physical consistency requirements (non-negotiable)
 1. Same face every time — shape, feature placement, proportions identical;
    verified against the two canonical solo portraits, never re-derived.
-2. Signature features always consistent (Amara's hair & dimple, Rizky's beard,
+2. Signature features always consistent (Rani's hair & dimple, Adi's beard,
    thick brows, jaw line) — the fastest "it's them" cues.
-3. Skin tone never drifts — no lightening/whitening; Rizky stays slightly deeper
-   than Amara.
+3. Skin tone never drifts — no lightening/whitening; Adi stays slightly deeper
+   than Rani.
 4. Height differential constant (~13 cm) wherever both stand — eye-lines,
    shoulder heights, embrace geometry reflect it.
 5. Mature adult proportions (~7–7.5 heads). No chibi / big-head / child-like.
@@ -84,7 +84,7 @@ couple. (Identity carried from `docs/lovebirds-character-system.md` §1.)
 
 ### A4 — Visual consistency requirements
 1. Wardrobe stays in the earth-tone family (cream / coral / gold / emerald).
-2. Jewelry minimal & gold for Amara; Rizky's brown leather watch is a recurring
+2. Jewelry minimal & gold for Rani; Adi's brown leather watch is a recurring
    prop.
 3. They appear as a pair — same line weight, render, and lighting on both.
 4. Solo slots only where the layout demands one person (2 Bride & Groom portrait
@@ -165,12 +165,12 @@ Five Our Story chapters from `defaultConfig.js`:
 | 01 | The First Meeting — "a quiet evening by the sea" | First encounter, shy spark — both present |
 | 02 | Our First Date — "bonfires, salty wind, sky turning gold" | The two on a dusk beach by a small bonfire, intimate |
 | 03 | Our Holiday Together — "shared snacks… home is the other person" | Couple together at a scenic spot, arm-in-arm, at ease |
-| 04 | The Proposal — "a quiet question… a yes" | Rizky kneeling, Amara's genuine emotional reaction |
+| 04 | The Proposal — "a quiet question… a yes" | Adi kneeling, Rani's genuine emotional reaction |
 | 05 | The Wedding Day — "surrounded by the people we love" | Couple at the altar/arch, hands joined |
 
 Cross-chapter: chronological progression legible (subtle wardrobe/season/time
 shifts 2020→wedding), wardrobe stays earth-tone, recurring motifs carry through
-(lovebirds, palette, Rizky's watch, Amara's gold). Same two people age forward
+(lovebirds, palette, Adi's watch, Rani's gold). Same two people age forward
 into the wedding.
 
 ### C3 — Memory-driven storytelling
@@ -212,13 +212,13 @@ Only valid solo frames: the two portrait cards and two footer polaroids.
 
 ## E. Consistency Rules (cross-asset contract)
 
-1. **One couple, period.** Amara & Rizky in every face-bearing slot. Can't tell
+1. **One couple, period.** Rani & Adi in every face-bearing slot. Can't tell
    it's them → fail.
 2. **Reference hierarchy.** The two canonical **solo portraits** define the
    faces; generate/lock them first, then carry them as visual reference into
    every scene (text alone drifts).
 3. **Identity invariants travel with every prompt:** face shape, skin tone
-   (Rizky deeper), hair, signature features (Rizky's beard / thick brows / jaw),
+   (Adi deeper), hair, signature features (Adi's beard / thick brows / jaw),
    ~13 cm height gap.
 4. **Palette discipline.** Locked palette only (§B2); one dominant accent per
    image, mapped to the chapter's existing accent where one exists (Our Story
@@ -244,7 +244,7 @@ Only valid solo frames: the two portrait cards and two footer polaroids.
 
 ## Slot map (for Phase 3)
 
-Face-bearing (Amara & Rizky, interacting unless a designated solo):
+Face-bearing (Rani & Adi, interacting unless a designated solo):
 `coupleGate` (hero, both faces) · `bridePortrait` / `groomPortrait` (canonical
 solos) · `coupleClassic` · `coupleCasual` · `storyFirstMeet` · `storyFirstDate`
 · `storyHoliday` · `storyProposal` · `storyWedding` · plus couple-bearing gallery

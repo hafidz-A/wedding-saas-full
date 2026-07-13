@@ -18,9 +18,9 @@ beforeEach(() => {
 })
 
 const OWNER = { id: 'inv-1', owner_user_id: 'user-1' }
-const ctx = { params: { slug: 'rizky-amara' } }
+const ctx = { params: { slug: 'adi-rani' } }
 function put(body: any, raw = false) {
-  return new Request('http://localhost/api/invitation/rizky-amara/theme', {
+  return new Request('http://localhost/api/invitation/adi-rani/theme', {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: raw ? (body as string) : JSON.stringify(body),

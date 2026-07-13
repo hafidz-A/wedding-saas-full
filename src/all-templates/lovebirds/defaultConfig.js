@@ -16,9 +16,9 @@ const demoWeddingDateFullText = `Saturday, 15 November ${targetYear}`
 const demoRsvpDateText = `Kindly respond by 1 November ${targetYear}`
 
 export const defaultConfig = {
-  couple: { name1: 'Amara', name2: 'Rizky' },
+  couple: { name1: 'Rani', name2: 'Adi' },
   meta: {
-    title: 'Amara & Rizky — Our Wedding',
+    title: 'Rani & Adi — Our Wedding',
     description: 'Cinematic wedding invitation experience',
   },
 
@@ -39,9 +39,9 @@ export const defaultConfig = {
       enabled: true,
       theme: 'darkLuxury',
       props: {
-        coupleName: 'Amara & Rizky',
-        brideName: 'Amara',
-        groomName: 'Rizky',
+        coupleName: 'Rani & Adi',
+        brideName: 'Rani',
+        groomName: 'Adi',
         weddingDate: demoWeddingDate,
         venue: 'The Grand Ballroom, Jakarta',
         welcomeText: 'Welcome, our dear guest',
@@ -184,20 +184,20 @@ export const defaultConfig = {
         people: [
           {
             role: 'Bride',
-            name: 'Amara Sastrawijaya',
+            name: 'Rani Sastrawijaya',
             photo: demoImg('bridePortrait', 800),
             parents: 'Daughter of Mr. & Mrs. Sastrawijaya',
             bio: 'A daughter, a dreamer, a designer of warm spaces and warmer conversations. Born in Bandung, in love with quiet mornings.',
-            instagram: '@amara.s',
+            instagram: '@rani.s',
             direction: 'right',
           },
           {
             role: 'Groom',
-            name: 'Rizky Pratama',
+            name: 'Adi Pratama',
             photo: demoImg('groomPortrait', 800),
             parents: 'Son of Mr. & Mrs. Pratama',
-            bio: 'A son, a builder, a believer in slow Sundays. Born in Jakarta, made better by every shared meal with Amara.',
-            instagram: '@rizky.p',
+            bio: 'A son, a builder, a believer in slow Sundays. Born in Jakarta, made better by every shared meal with Rani.',
+            instagram: '@adi.p',
             direction: 'left',
           },
         ],
@@ -280,32 +280,32 @@ export const defaultConfig = {
         confirmationEnabled: true,
         accounts: [
           {
-            id: 'bca-amara',
+            id: 'bca-rani',
             type: 'bank',
             name: 'BCA',
             accountNumber: '1234567890',
-            accountHolder: 'Amara Sastrawijaya',
+            accountHolder: 'Rani Sastrawijaya',
             accent: 'coral',
           },
           {
-            id: 'mandiri-rizky',
+            id: 'mandiri-adi',
             type: 'bank',
             name: 'Mandiri',
             accountNumber: '1450098876543',
-            accountHolder: 'Rizky Pratama',
+            accountHolder: 'Adi Pratama',
             accent: 'emerald',
           },
           {
-            id: 'ovo-amara',
+            id: 'ovo-rani',
             type: 'ewallet',
             name: 'OVO',
             accountNumber: '0812-3456-7890',
-            accountHolder: 'Amara Sastrawijaya',
+            accountHolder: 'Rani Sastrawijaya',
             accent: 'purple',
           },
         ],
         giftAddress:
-          'Untuk kado fisik, mohon kirimkan ke alamat: Jl. Senopati No. 45, Kebayoran Baru, Jakarta Selatan 12190 — atas nama Rizky Pratama (+62 812 0000 0000).',
+          'Untuk kado fisik, mohon kirimkan ke alamat: Jl. Senopati No. 45, Kebayoran Baru, Jakarta Selatan 12190 — atas nama Adi Pratama (+62 812 0000 0000).',
       },
     },
 
@@ -315,18 +315,18 @@ export const defaultConfig = {
       enabled: true,
       theme: 'warmCream',
       props: {
-        monogram: 'A & R',
-        hashtag: '#AmaraAndRizky',
+        monogram: 'R & A',
+        hashtag: '#RaniAndAdi',
         message: 'Thank you for being part of our story.',
-        coupleName: 'Amara & Rizky',
+        coupleName: 'Rani & Adi',
         // Two photos shown as tilted polaroids below the monogram (bride, groom).
         photos: [
-          { src: demoImg('bridePortrait', 600), alt: 'Amara' },
-          { src: demoImg('groomPortrait', 600), alt: 'Rizky' },
+          { src: demoImg('bridePortrait', 600), alt: 'Rani' },
+          { src: demoImg('groomPortrait', 600), alt: 'Adi' },
         ],
         socials: [
           { id: 's-ig',   label: 'Instagram', url: '#'                          },
-          { id: 's-mail', label: 'Email',     url: 'mailto:hello@rizkyamara.id' },
+          { id: 's-mail', label: 'Email',     url: 'mailto:hello@adirani.id' },
           { id: 's-spot', label: 'Spotify',   url: '#'                          },
         ],
       },

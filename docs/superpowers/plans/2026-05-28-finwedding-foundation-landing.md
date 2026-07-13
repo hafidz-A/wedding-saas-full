@@ -748,7 +748,7 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
           <div className={styles.phone}>
             <div className={styles.phoneCard}>
               <span className={styles.phoneScript}>The Wedding of</span>
-              <span className={styles.phoneNames}>Amara &amp; Rizky</span>
+              <span className={styles.phoneNames}>Rani &amp; Adi</span>
               <span className={styles.phoneDate}>11 · 15 · 2026</span>
             </div>
           </div>

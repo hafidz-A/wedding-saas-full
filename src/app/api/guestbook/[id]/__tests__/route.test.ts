@@ -27,14 +27,14 @@ describe('DELETE /api/guestbook/[id]', () => {
 
   it('403 when not the owner', async () => {
     mockOwner.mockResolvedValue(null)
-    const [req, ctx] = del('rizky-amara')
+    const [req, ctx] = del('adi-rani')
     expect((await DELETE(req, ctx)).status).toBe(403)
   })
 
   it('404 when the note does not exist', async () => {
     mockOwner.mockResolvedValue(OWNER)
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { guestbook_notes: { select: { data: null } } } }) as any)
-    const [req, ctx] = del('rizky-amara')
+    const [req, ctx] = del('adi-rani')
     expect((await DELETE(req, ctx)).status).toBe(404)
   })
 
@@ -43,7 +43,7 @@ describe('DELETE /api/guestbook/[id]', () => {
     mockAdmin.mockReturnValue(
       createFakeSupabase({ tables: { guestbook_notes: { select: { data: { invitation_id: 'OTHER-inv' } } } } }) as any,
     )
-    const [req, ctx] = del('rizky-amara')
+    const [req, ctx] = del('adi-rani')
     expect((await DELETE(req, ctx)).status).toBe(403)
   })
 
@@ -51,7 +51,7 @@ describe('DELETE /api/guestbook/[id]', () => {
     mockOwner.mockResolvedValue(OWNER)
     const fake = createFakeSupabase({ tables: { guestbook_notes: { select: { data: { invitation_id: 'inv-1' } }, delete: {} } } })
     mockAdmin.mockReturnValue(fake as any)
-    const [req, ctx] = del('rizky-amara')
+    const [req, ctx] = del('adi-rani')
     expect((await DELETE(req, ctx)).status).toBe(200)
     expect(fake._calls.some((c) => c.kind === 'delete' && c.table === 'guestbook_notes')).toBe(true)
   })

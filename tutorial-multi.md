@@ -231,7 +231,7 @@ Kenapa ada "saklar" (InvitationView)?
 ```
 /                                  → marketing landing
 /templates                         → galeri semua template (preview + pilih)
-/<template>/<slug>                 → undangan publik   (mis. /lovebirds/rizky-amara)
+/<template>/<slug>                 → undangan publik   (mis. /lovebirds/adi-rani)
 /<template>/<slug>/dashboard       → dashboard admin (shared UI)
 /<template>/demo-<template>        → preview demo (tanpa DB/login)
 /signup /login /onboarding         → auth flow (static routes, tidak ke-catch [template])
@@ -257,7 +257,7 @@ Satu tabel `invitations`, tiap baris = 1 couple:
 
 | kolom | fungsi |
 |---|---|
-| `slug` | identitas unik di URL (mis. `rizky-amara`). **Global unik** — makanya API cukup pakai slug. |
+| `slug` | identitas unik di URL (mis. `adi-rani`). **Global unik** — makanya API cukup pakai slug. |
 | `template_id` | template mana yang dipakai (`'lovebirds'`/`'solary'`) → menentukan VISUAL |
 | `config` (JSONB) | ISI undangan (section + props) → menentukan KONTEN |
 | `owner_user_id` | pemilik (FK ke Supabase Auth user) → menentukan SIAPA yang boleh edit |
@@ -292,11 +292,11 @@ Cara couple login: buka `/<template>/<slug>/dashboard` → isi email+password �
 
 Bikin akun + undangan untuk testing (lewat script, paling cepat):
 ```powershell
-node scripts/create-invitation.mjs rizky-amara passwordku `
-  --bride="Amara" --groom="Rizky" --date=2026-11-15T16:00 `
+node scripts/create-invitation.mjs adi-rani passwordku `
+  --bride="Rani" --groom="Adi" --date=2026-11-15T16:00 `
   --venue="Jakarta" --email=kamu@email.com --template=lovebirds --full
 ```
-Lalu login di `/lovebirds/rizky-amara/dashboard`.
+Lalu login di `/lovebirds/adi-rani/dashboard`.
 
 Catatan:
 - **Preview/demo tidak butuh login** (pakai `defaultConfig`).

@@ -103,7 +103,7 @@
   color: var(--ftr-fg);
   letter-spacing: -0.01em;
   line-height: 1;
-  /* Always one line — a long hashtag (#AmaraAndRizky) used to wrap. The
+  /* Always one line — a long hashtag (#RaniAndAdi) used to wrap. The
      font-size is auto-fitted down in JS when the single line would overflow,
      so it stays on one line at every viewport without ever clipping. */
   white-space: nowrap;

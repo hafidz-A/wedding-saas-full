@@ -58,12 +58,12 @@ Satu template undangan pernikahan cinematic premium, dijual ke **N** pasangan. T
                   ┌──────────────────┼───────────────────┐
                   │                  │                   │
         ┌─────────▼────────┐ ┌───────▼──────┐  ┌─────────▼────────┐
-        │ /amara-rizky     │ │ /budi-sari   │  │ /faza-rina       │
+        │ /rani-adi     │ │ /budi-sari   │  │ /faza-rina       │
         │  (public invite) │ │  (public ..) │  │  (public ..)     │
         └──────────────────┘ └──────────────┘  └──────────────────┘
                   │                  │                   │
         ┌─────────▼────────┐ ┌───────▼──────┐  ┌─────────▼────────┐
-        │ /amara-rizky/    │ │ /budi-sari/  │  │ /faza-rina/      │
+        │ /rani-adi/    │ │ /budi-sari/  │  │ /faza-rina/      │
         │   dashboard      │ │   dashboard  │  │   dashboard      │
         │ (password A)     │ │ (password B) │  │ (password C)     │
         └──────────────────┘ └──────────────┘  └──────────────────┘
@@ -91,7 +91,7 @@ Satu template undangan pernikahan cinematic premium, dijual ke **N** pasangan. T
 | `/forgot-password` | Server | — | Kirim email reset password ke `owner_email` |
 
 **Premium feature — custom domain:**
-- Kolom `invitations.custom_domain` boleh diisi dengan domain user (mis. `amara-rizky.com`)
+- Kolom `invitations.custom_domain` boleh diisi dengan domain user (mis. `rani-adi.com`)
 - Middleware (`middleware.ts`) deteksi `host` header → kalau cocok dengan `custom_domain`, rewrite URL ke `/<slug>`
 - Vercel custom domain setup di luar scope (dilakukan operator secara manual)
 
@@ -323,7 +323,7 @@ Semua route di bawah `app/api/`. Selalu validate payload (zod recommended).
 **Request body:**
 ```json
 {
-  "slug": "amara-rizky",
+  "slug": "rani-adi",
   "guest_name": "Budi Santoso",
   "attending": true,
   "guest_count": 2,
@@ -448,7 +448,7 @@ Layout: section list (kiri) + field editor (kanan) + preview (bawah, full width)
 ```json
 {
   "meta": {
-    "title": "Amara & Rizky — Our Wedding",
+    "title": "Rani & Adi — Our Wedding",
     "description": "Cinematic wedding invitation"
   },
   "sections": [
@@ -460,9 +460,9 @@ Layout: section list (kiri) + field editor (kanan) + preview (bawah, full width)
       "navLabel": "Top",
       "navHidden": false,
       "props": {
-        "coupleName": "Rizky & Amara",
-        "brideName": "Amara",
-        "groomName": "Rizky",
+        "coupleName": "Adi & Rani",
+        "brideName": "Rani",
+        "groomName": "Adi",
         "weddingDate": "2025-11-15T16:00:00",
         "venue": "The Grand Ballroom, Jakarta",
         "gateImage": "https://...jpg",
@@ -556,8 +556,8 @@ Operator jalankan di lokal untuk daftar pasangan baru. Konek langsung ke Supabas
 
 ```bash
 node scripts/create-invitation.mjs <slug> <password> \
-  --bride="Amara Sastrawijaya" \
-  --groom="Rizky Pratama" \
+  --bride="Rani Sastrawijaya" \
+  --groom="Adi Pratama" \
   --date=2026-11-15T16:00 \
   --venue="The Grand Ballroom, Jakarta" \
   --email=couple@gmail.com \
@@ -816,10 +816,10 @@ NEXT_PUBLIC_APP_URL=https://weddingsite.com   # untuk generate absolute URLs
 - **Default:** subdomain `<your-app>.vercel.app` → tiap slug = `<your-app>.vercel.app/<slug>`
 - **Production:** domain sendiri `weddingsite.com` → tiap slug = `weddingsite.com/<slug>`
 - **Premium custom domain:**
-  - Pasangan beli `amara-rizky.com`
+  - Pasangan beli `rani-adi.com`
   - Pasangan point DNS CNAME ke Vercel
-  - Operator add domain di Vercel project + isi `invitations.custom_domain = 'amara-rizky.com'`
-  - `middleware.ts` rewrite request dengan `host=amara-rizky.com` ke path `/amara-rizky`
+  - Operator add domain di Vercel project + isi `invitations.custom_domain = 'rani-adi.com'`
+  - `middleware.ts` rewrite request dengan `host=rani-adi.com` ke path `/rani-adi`
 
 ### Middleware sample
 ```ts
@@ -1030,7 +1030,7 @@ docs/
 
 | Istilah | Arti |
 |---|---|
-| **Slug** | URL identifier per pasangan (mis. `amara-rizky`) |
+| **Slug** | URL identifier per pasangan (mis. `rani-adi`) |
 | **Tenant** | Satu pasangan = satu tenant |
 | **Service role key** | Supabase API key yang bypass RLS (server-only) |
 | **Anon key** | Supabase API key untuk client (terbatas RLS) |

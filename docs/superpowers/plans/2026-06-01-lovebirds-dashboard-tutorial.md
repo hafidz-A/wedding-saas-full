@@ -625,8 +625,8 @@ Screenshot keys needed: `start-header`, `editor-list`, `editor-add`,
 
 If none exists, seed one:
 ```bash
-node scripts/create-invitation.mjs demo-lovebirds demo1234 --bride="Amara" --groom="Rizky" --date=2025-11-15T16:00 --venue="Jakarta" --email=demo@example.com --plan=premium --template=lovebirds
-node scripts/seed-full-config.mjs demo-lovebirds --bride="Amara" --groom="Rizky" --date=2025-11-15T16:00 --venue="Jakarta"
+node scripts/create-invitation.mjs demo-lovebirds demo1234 --bride="Rani" --groom="Adi" --date=2025-11-15T16:00 --venue="Jakarta" --email=demo@example.com --plan=premium --template=lovebirds
+node scripts/seed-full-config.mjs demo-lovebirds --bride="Rani" --groom="Adi" --date=2025-11-15T16:00 --venue="Jakarta"
 ```
 (Check `create-invitation.mjs --help` / source for the exact `--template` flag
 name; adjust if different. Premium plan ensures the Buku Tamu screenshot is

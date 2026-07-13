@@ -287,7 +287,7 @@ describe('fillEmptyImages', () => {
           { name: 'Maya', role: 'Maid of Honor', photo: '' },
           { name: 'Dimas', role: 'Best Man', photo: '' },
         ]}),
-        section('footer', { photos: [{ src: '', alt: 'Amara' }] }),
+        section('footer', { photos: [{ src: '', alt: 'Rani' }] }),
       ],
     }
     const out = fillEmptyImages(cfg)!
@@ -541,7 +541,7 @@ Then replace, keeping every other prop byte-identical:
 | ourStory card-5 "The Wedding Day" | 1606800052052 | `demoImg('storyWedding', 1400)` |
 | brideGroom Bride photo | 1525186402429 | `demoImg('bridePortrait', 800)` |
 | brideGroom Groom photo | 1507003211169 | `demoImg('groomPortrait', 800)` |
-| footer photos Amara/Rizky | same two | `demoImg('bridePortrait', 600)` / `demoImg('groomPortrait', 600)` |
+| footer photos Rani/Adi | same two | `demoImg('bridePortrait', 600)` / `demoImg('groomPortrait', 600)` |
 
 galleryMasonry — 16 photos, each matched to its existing `alt`:
 
@@ -769,7 +769,7 @@ Run: `node scripts/check-demo-images.mjs` → all ✓.
 
 With `npm run dev` running, screenshot and READ each of:
 1. `http://localhost:3000` — landing: EmotionalHook + Features polaroids look right.
-2. `http://localhost:3000/lovebirds/rizky-amara` (or `/lovebirds/demo-anything`) — hero gate, blast photos, story cards match titles, bride/groom portraits gendered correctly, all 16 gallery photos match alts, footer polaroids.
+2. `http://localhost:3000/lovebirds/adi-rani` (or `/lovebirds/demo-anything`) — hero gate, blast photos, story cards match titles, bride/groom portraits gendered correctly, all 16 gallery photos match alts, footer polaroids.
 3. `http://localhost:3000/solary/demo-check` — gate photos, Neptune portrait, Uranus timeline (the empty 2021 "Gravity" item must show fallback photos, proving fillEmptyImages), Saturn ring captions vs photos, Venus team avatars gendered correctly, Mercury wishlist images.
 4. Dashboard editor (dummy lovebirds login from memory: `/lovebirds/dummy-lovebirds/dashboard`) — clear an image → hint text appears under the field; preview iframe still shows a contextual photo there.
 

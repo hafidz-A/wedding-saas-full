@@ -21,14 +21,14 @@ interface PageProps {
 /**
  * Public invitation page (multi-template).
  *
- * URL shape: /<template>/<slug>  e.g. /lovebirds/rizky-amara
+ * URL shape: /<template>/<slug>  e.g. /lovebirds/adi-rani
  *
  * Server component → validates the template segment, fetches the invitation
  * row by slug, and renders <InvitationView> which dispatches to the matching
  * template Shell. The actual template used for rendering is the row's
  * `template_id` (the URL segment is canonicalised to it).
  *
- * Demo slugs (`demo-*`, or the legacy `rizky-amara`) fall back to the
+ * Demo slugs (`demo-*`, or the legacy `adi-rani`) fall back to the
  * template's bundled defaultConfig so previews work without a DB row.
  */
 export default async function Page({ params, searchParams }: PageProps) {
@@ -41,7 +41,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     notFound()
   }
 
-  const isDemoSlugEarly = slug.startsWith('demo-') || slug === 'rizky-amara'
+  const isDemoSlugEarly = slug.startsWith('demo-') || slug === 'adi-rani'
 
   // ── Phone / touch-device frame mode ──────────────────────────────────────
   // On real touch devices the invitation is served inside a fullscreen
@@ -87,7 +87,7 @@ export default async function Page({ params, searchParams }: PageProps) {
     !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
     !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  const isDemoSlug = slug.startsWith('demo-') || slug === 'rizky-amara'
+  const isDemoSlug = slug.startsWith('demo-') || slug === 'adi-rani'
 
   let config: any = null
   let invitationId: string | null = null
@@ -556,7 +556,7 @@ export async function generateMetadata({ params }: PageProps) {
       !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
       !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    const isDemoSlug = slug.startsWith('demo-') || slug === 'rizky-amara'
+    const isDemoSlug = slug.startsWith('demo-') || slug === 'adi-rani'
 
     let config: any = null
     if (hasSupabase) {

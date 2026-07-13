@@ -80,7 +80,7 @@ create table if not exists public.gift_confirmations (
   id              uuid primary key default gen_random_uuid(),
   invitation_id   uuid not null references public.invitations(id) on delete cascade,
   guest_name      text not null,
-  account_used    text not null,                             -- e.g. "BCA — Amara Sastrawijaya"
+  account_used    text not null,                             -- e.g. "BCA — Rani Sastrawijaya"
   amount          numeric(14,2),                             -- nullable; guest may skip
   currency        text not null default 'IDR',
   message         text,
@@ -247,7 +247,7 @@ create policy "public read visible testimonials"
 -- ============================================================================
 insert into public.invitations (slug, password_hash, template_id, plan, is_published, config, owner_email)
 values (
-  'rizky-amara',
+  'adi-rani',
   '$2b$10$REPLACE_WITH_REAL_HASH_OF_demo1234',
   'classic',
   'premium',

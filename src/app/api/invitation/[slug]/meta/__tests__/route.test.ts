@@ -14,9 +14,9 @@ beforeEach(() => {
 })
 
 const OWNER = { id: 'inv-1', owner_user_id: 'user-1' }
-const ctx = { params: { slug: 'rizky-amara' } }
+const ctx = { params: { slug: 'adi-rani' } }
 function put(body: any, raw = false) {
-  return new Request('http://localhost/api/invitation/rizky-amara/meta', {
+  return new Request('http://localhost/api/invitation/adi-rani/meta', {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: raw ? (body as string) : JSON.stringify(body),
@@ -49,10 +49,10 @@ describe('PUT /api/invitation/[slug]/meta', () => {
     mockOwner.mockResolvedValue(OWNER)
     const fake = rowFake()
     mockAdmin.mockReturnValue(fake as any)
-    const res = await PUT(put({ title: '  Amara   &   Rizky  ' }), ctx)
+    const res = await PUT(put({ title: '  Rani   &   Adi  ' }), ctx)
     expect(res.status).toBe(200)
     const upd = fake._calls.find((c) => c.kind === 'update' && c.table === 'invitations')!
-    expect(upd.value.config.meta.title).toBe('Amara & Rizky')
+    expect(upd.value.config.meta.title).toBe('Rani & Adi')
   })
 
   it('an empty-string field clears the value', async () => {

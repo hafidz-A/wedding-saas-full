@@ -1210,9 +1210,9 @@ export const dashboard = {
         heading: 'Nama Pasangan',
         hint: 'Diatur di sini sekali — terpakai di seluruh undangan (pembuka, footer, navbar, judul tab).',
         name1: 'Mempelai 1',
-        name1Ph: 'mis. Amara',
+        name1Ph: 'mis. Rani',
         name2: 'Mempelai 2',
-        name2Ph: 'mis. Rizky',
+        name2Ph: 'mis. Adi',
         preview: 'Tampil sebagai',
       },
       coupleLock: {
@@ -2451,9 +2451,9 @@ export const dashboard = {
         heading: 'Couple names',
         hint: 'Set once here — used across the whole invitation (opening, footer, navbar, browser tab title).',
         name1: 'Partner 1',
-        name1Ph: 'e.g. Amara',
+        name1Ph: 'e.g. Rani',
         name2: 'Partner 2',
-        name2Ph: 'e.g. Rizky',
+        name2Ph: 'e.g. Adi',
         preview: 'Shows as',
       },
       coupleLock: {

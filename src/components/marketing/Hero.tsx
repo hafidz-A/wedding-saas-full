@@ -118,7 +118,7 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
               </div>
               <div className={styles.cardBody} style={{ transform: 'translateZ(20px)', transformStyle: 'preserve-3d' }}>
                 <span className={styles.phoneScript} style={{ transform: 'translateZ(10px)' }}>The Wedding of</span>
-                <span className={styles.phoneNames} style={{ transform: 'translateZ(15px)' }}>Amara &amp; Rizky</span>
+                <span className={styles.phoneNames} style={{ transform: 'translateZ(15px)' }}>Rani &amp; Adi</span>
                 <div className={styles.divider} style={{ transform: 'translateZ(10px)' }}>
                   <div className={styles.line} />
                   <span className={styles.dot}>✦</span>

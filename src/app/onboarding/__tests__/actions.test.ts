@@ -39,11 +39,11 @@ beforeEach(() => {
 
 function input(over: Partial<Record<string, string>> = {}) {
   return {
-    slug: 'rizky-amara',
+    slug: 'adi-rani',
     template: 'lovebirds',
     plan: 'premium',
-    brideName: 'Amara Sastrawijaya',
-    groomName: 'Rizky Pratama',
+    brideName: 'Rani Sastrawijaya',
+    groomName: 'Adi Pratama',
     weddingDate: '2026-11-15T16:00:00',
     venue: 'The Grand Ballroom',
     ...over,
@@ -88,8 +88,8 @@ describe('completeOnboarding', () => {
     const r = await completeOnboarding(input())
     expect(r.ok).toBe(true)
     expect(r.invitationId).toBe('inv-9')
-    expect(r.publicUrl).toBe('/lovebirds/rizky-amara')
-    expect(r.dashboardUrl).toBe('/lovebirds/rizky-amara/dashboard')
+    expect(r.publicUrl).toBe('/lovebirds/adi-rani')
+    expect(r.dashboardUrl).toBe('/lovebirds/adi-rani/dashboard')
     const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'invitations')!
     expect(ins.value.is_paid).toBe(false)
     expect(ins.value.is_published).toBe(false)
@@ -112,11 +112,11 @@ describe('completeOnboarding', () => {
 describe('checkSlugAvailable', () => {
   it('available when free', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: null } } } }) as any)
-    expect(await checkSlugAvailable('rizky-amara')).toEqual({ available: true })
+    expect(await checkSlugAvailable('adi-rani')).toEqual({ available: true })
   })
   it('unavailable when taken', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: { id: 'x' } } } } }) as any)
-    expect((await checkSlugAvailable('rizky-amara')).available).toBe(false)
+    expect((await checkSlugAvailable('adi-rani')).available).toBe(false)
   })
   it('rejects an invalid format without hitting the DB', async () => {
     expect((await checkSlugAvailable('a')).available).toBe(false)

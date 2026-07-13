@@ -451,8 +451,8 @@ Setiap template harus punya 1 demo invitation di database yang bisa di-preview t
 # Lovebirds demo
 node scripts/create-invitation.mjs demo-lovebirds demo1234 `
   --template=lovebirds `
-  --bride="Amara Sastrawijaya" `
-  --groom="Rizky Pratama" `
+  --bride="Rani Sastrawijaya" `
+  --groom="Adi Pratama" `
   --date=2025-11-15T16:00 `
   --venue="The Grand Ballroom, Jakarta"
 
@@ -574,9 +574,9 @@ npm run dev
 # http://localhost:3000/templates → 2 card (Lovebirds + Solary) tampil
 
 # Lovebirds template
-# http://localhost:3000/lovebirds/rizky-amara → harus render identik
+# http://localhost:3000/lovebirds/adi-rani → harus render identik
 # http://localhost:3000/lovebirds/demo-lovebirds → demo preview jalan
-# http://localhost:3000/lovebirds/rizky-amara/dashboard → login harus jalan
+# http://localhost:3000/lovebirds/adi-rani/dashboard → login harus jalan
 
 # Solary template
 # http://localhost:3000/solary/demo-solary → demo preview jalan (planet 3D, dll)

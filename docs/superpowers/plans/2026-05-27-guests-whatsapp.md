@@ -954,14 +954,14 @@ In the Supabase SQL Editor (paste a real ciphertext to verify the column accepts
 --            console.log(encryptField('Test Tamu'))"
 insert into guests (invitation_id, name_enc, phone_enc)
 values (
-  (select id from invitations where slug = 'rizky-amara'),
+  (select id from invitations where slug = 'adi-rani'),
   '<paste-base64-ciphertext-here>',
   '<paste-or-NULL>'
 );
 
 -- Confirm the row is unreadable in raw SQL:
 select id, name_enc, phone_enc from guests
- where invitation_id = (select id from invitations where slug = 'rizky-amara');
+ where invitation_id = (select id from invitations where slug = 'adi-rani');
 -- Expected: name_enc and phone_enc are base64 gibberish, not "Test Tamu".
 
 -- Clean up:
@@ -1024,7 +1024,7 @@ In `src/app/[slug]/dashboard/DashboardClient.tsx`:
 ```powershell
 npm run dev
 ```
-Visit `http://localhost:3000/rizky-amara/dashboard`. Log in.
+Visit `http://localhost:3000/adi-rani/dashboard`. Log in.
 Expected: Dashboard renders without error. `guests` is empty `[]` so nothing visible yet — that's correct. If the smoke-test ciphertext row from Task 7 Step 3 was left in the DB, it should now appear decrypted in the React tree (visible once Task 11 wires up the tab).
 
 **Important:** if you see an error like `GUESTS_ENCRYPTION_KEY env var is required`, the dev server picked up the codebase before the `.env.local` change. Restart `npm run dev`.
@@ -1479,7 +1479,7 @@ git commit -m "feat(guests): add default invite-message template to config"
 
 - [ ] **Step 1: Final responsive check**
 
-Open `/rizky-amara/dashboard` at 320px, 768px, 1024px viewport widths. Verify:
+Open `/adi-rani/dashboard` at 320px, 768px, 1024px viewport widths. Verify:
 - "Tamu" tab button is reachable (in mobile, it should be in the same row as other tabs — overflow-scroll the tab bar if it already wraps that way)
 - Add-guest form wraps cleanly at 320px (the recent responsive refactor already covers `flex-wrap: wrap`)
 - Import modal stays within viewport at 320px (`maxHeight: '90vh'` + `overflowY: 'auto'` already in place)
@@ -1498,7 +1498,7 @@ Click "Kirim WA" → close the WA tab → refresh dashboard → row still shows 
 
 - [ ] **Step 4: Verify auth scoping**
 
-In a private window, try `POST` to the dashboard's server action endpoint as a different slug. Expected: `requireSlugSession` throws. (Or: log in as `rizky-amara`, then in DevTools change the URL hash to another slug's dashboard — the cookie should not grant access.)
+In a private window, try `POST` to the dashboard's server action endpoint as a different slug. Expected: `requireSlugSession` throws. (Or: log in as `adi-rani`, then in DevTools change the URL hash to another slug's dashboard — the cookie should not grant access.)
 
 - [ ] **Step 5: Verify the encryption boundary at rest**
 
@@ -1506,7 +1506,7 @@ In the Supabase SQL Editor, peek at the raw rows after a real guest has been imp
 ```sql
 select id, name_enc, phone_enc, group_label, sent_at
   from guests
- where invitation_id = (select id from invitations where slug = 'rizky-amara')
+ where invitation_id = (select id from invitations where slug = 'adi-rani')
  limit 5;
 ```
 Expected:

@@ -8,7 +8,7 @@ bagian kecil dari desain ini)
 
 ## Masalah
 
-Nama pasangan (panggilan singkat, mis. "Amara & Rizky", "Aruna & Daksa") **terduplikasi
+Nama pasangan (panggilan singkat, mis. "Rani & Adi", "Aruna & Daksa") **terduplikasi
 di banyak tempat** di kedua template dan akan terus bertambah seiring template baru:
 
 | Tempat | Field | Dipakai untuk |
@@ -52,7 +52,7 @@ sengaja.
 ### 1. Data — `config.couple`
 
 ```jsonc
-config.couple = { name1: "Amara", name2: "Rizky" }
+config.couple = { name1: "Rani", name2: "Adi" }
 ```
 
 Nilai tampil (display) di mana-mana: `coupleDisplay = [name1, name2].map(trim).filter(Boolean).join(' & ')`.
@@ -67,10 +67,10 @@ dipakai** — kanoniknya pindah ke `config.couple`.
 interface CoupleData { name1?: string; name2?: string }
 
 coupleDisplay(c: CoupleData): string
-  // "Amara & Rizky" (segmen kosong di-drop, tanpa " & " menggantung)
+  // "Rani & Adi" (segmen kosong di-drop, tanpa " & " menggantung)
 
 composeTitle(c: CoupleData, suffix?: string): string
-  // "Amara & Rizky — Our Wedding" (suffix opsional)
+  // "Rani & Adi — Our Wedding" (suffix opsional)
 
 parseCoupleFromTitle(title?: string): { name1: string; name2: string; titleSuffix: string }
   // migrasi/prefill dari meta.title lama
@@ -103,7 +103,7 @@ Title SEO: `meta.title` turunan dari `config.couple` + suffix saat disimpan.
 ### 4. Panel "Pasangan" di editor
 
 Komponen baru di paling atas editor (di atas daftar section): dua input **Mempelai 1 /
-Mempelai 2** (tanpa batas karakter) + baris preview "Tampil sebagai: *Amara & Rizky*".
+Mempelai 2** (tanpa batas karakter) + baris preview "Tampil sebagai: *Rani & Adi*".
 Simpan ke `config.couple` lewat route khusus `PUT /api/invitation/[slug]/couple`
 (meniru pola `/meta`, `/music`, `/palette`). Menyimpan panel ini juga me-recompute
 `meta.title` turunan agar SEO selalu sinkron.
@@ -137,7 +137,7 @@ Granularitas: satu kunci per section (hero membuka bride+groom+couple sekaligus)
 
 Hapus input nama dari tab Meta. Sisakan: **Deskripsi**, **foto share (og:image)**,
 dan **Akhiran judul** (`meta.titleSuffix`). Title SEO ditampilkan sebagai preview turunan
-"Judul jadi: *Amara & Rizky — Our Wedding*". Tab Meta tetap menyimpan suffix + desc +
+"Judul jadi: *Rani & Adi — Our Wedding*". Tab Meta tetap menyimpan suffix + desc +
 image; nama tidak lagi di sini.
 
 ### 7. Schema & flag

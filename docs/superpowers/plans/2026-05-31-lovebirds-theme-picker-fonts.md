@@ -1078,7 +1078,7 @@ Run: `npm run build` → Expected: success, no type errors.
 
 - [ ] **Step 2: Browser smoke test (demo)**
 
-Start `npm run dev`, open `http://localhost:3000/lovebirds/rizky-amara` (a demo slug →
+Start `npm run dev`, open `http://localhost:3000/lovebirds/adi-rani` (a demo slug →
 `isDemo=true`). Confirm:
 - The 🎨 button appears bottom-right; opening it lists 7 palettes in Terang/Gelap groups.
 - Selecting **Midnight Stardust** / **Blossom Velvet** re-themes the whole card (body bg,
