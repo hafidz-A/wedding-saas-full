@@ -34,11 +34,17 @@ export default function SaveBar() {
 
       <button
         type="button"
+        role="switch"
+        aria-checked={isPublished}
         disabled={publishBusy}
         onClick={togglePublish}
-        className={`${styles.pill} ${isPublished ? styles.pillOn : styles.pillOff}`}
+        title={isPublished ? t.published : t.draft}
+        className={`${styles.switch} ${isPublished ? styles.switchOn : styles.switchOff}`}
       >
-        {isPublished ? t.published : t.draft}
+        <span className={styles.switchLabel}>{isPublished ? t.published : t.draft}</span>
+        <span className={styles.switchTrack} aria-hidden="true">
+          <span className={styles.switchKnob} />
+        </span>
       </button>
 
       <button

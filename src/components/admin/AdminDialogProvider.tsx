@@ -141,7 +141,7 @@ export function AdminDialogProvider({ children }: { children: ReactNode }) {
 }
 
 const scrim: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 1000 }
-const card: React.CSSProperties = { width: '100%', maxWidth: 440, background: 'var(--surface-raised, #fff)', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', padding: 20 }
+const card: React.CSSProperties = { width: '100%', maxWidth: 440, maxHeight: 'min(90vh, 90dvh)', overflowY: 'auto', background: 'var(--surface-raised, #fff)', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', padding: 20 }
 const titleStyle: React.CSSProperties = { fontSize: 17, margin: '0 0 6px' }
 const msgStyle: React.CSSProperties = { fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 10px' }
 const labelStyle: React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }

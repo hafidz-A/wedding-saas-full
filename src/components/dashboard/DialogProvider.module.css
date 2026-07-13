@@ -10,6 +10,10 @@
 }
 .card {
   width: min(420px, 100%);
+  /* Cap to the viewport and scroll inside — a long message on a short screen
+     must not push the action buttons off the bottom. */
+  max-height: min(90vh, 90dvh);
+  overflow-y: auto;
   background: var(--color-cream, var(--surface-base));
   border-radius: var(--radius-md);
   padding: 28px 26px 22px;

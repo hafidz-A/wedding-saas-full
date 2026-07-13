@@ -12,7 +12,11 @@
   min-height: calc(100vh - 160px);
   background: rgba(255, 255, 255, 0.55);
   border-radius: var(--radius-md);
+  /* `clip` (not `hidden`) keeps the rounded-corner clipping WITHOUT turning
+     .wrap into a scroll container — otherwise it would trap the sticky
+     section-list sidebar below and it could never pin to the viewport. */
   overflow: hidden;
+  overflow: clip;
   box-shadow: var(--shadow-sm);
 }
 
@@ -60,6 +64,14 @@
   background: rgba(255, 255, 255, 0.55);
   display: flex;
   flex-direction: column;
+  /* Pin the sidebar to the viewport and cap its height so a long section list
+     scrolls INSIDE the panel (the inner list is overflow-y:auto) instead of
+     growing the whole page — a real scrollbar appears when the box is too
+     short. `align-self:flex-start` stops it stretching to the taller field pane. */
+  align-self: flex-start;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 24px);
 }
 
 .fieldPane {
@@ -67,6 +79,13 @@
   padding: clamp(16px, 3vw, 28px);
   overflow: auto;
   min-width: 0;
+  /* Match the sticky section-list sidebar: pin to the viewport and cap the
+     height so a long field form scrolls INSIDE the pane instead of growing the
+     whole page. Keeps both editor columns symmetric. */
+  align-self: flex-start;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 24px);
 }
 
 @media (max-width: 1023.98px) {
@@ -101,6 +120,10 @@
     width: 100%;
     border-right: none;
     border-bottom: 1.5px solid var(--border-subtle);
+    /* Cancel the desktop sticky pin — on mobile it's a fixed-height stacked box. */
+    position: static;
+    align-self: auto;
+    top: auto;
     height: 440px;
     max-height: 60vh;
     overflow: hidden;

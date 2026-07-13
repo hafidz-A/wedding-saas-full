@@ -1152,8 +1152,8 @@ export const dashboard = {
       unsaved: '● Perubahan belum disimpan',
       savedPrefix: 'Tersimpan',
       upToDate: 'Semua sudah tersimpan',
-      published: 'Terbit ●',
-      draft: 'Draf ○',
+      published: 'Terbit',
+      draft: 'Draf',
       save: 'Simpan',
       conflictTitle: 'Perubahan tidak bisa disimpan',
       conflictBody:
@@ -2393,8 +2393,8 @@ export const dashboard = {
       unsaved: '● Unsaved changes',
       savedPrefix: 'Saved',
       upToDate: 'All up to date',
-      published: 'Published ●',
-      draft: 'Draft ○',
+      published: 'Published',
+      draft: 'Draft',
       save: 'Save',
       conflictTitle: "Changes couldn't be saved",
       conflictBody:

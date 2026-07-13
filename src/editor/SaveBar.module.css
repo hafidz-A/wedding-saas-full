@@ -21,7 +21,7 @@
 .errTxt    { font-size: var(--font-size-xs); color: var(--interactive-primary); }
 
 /* ── Shared control base: consistent focus ring + tactile press ── */
-.pill,
+.switch,
 .saveBtn {
   font-family: inherit;
   border: none;
@@ -32,32 +32,63 @@
     box-shadow var(--duration-base) var(--ease-in-out),
     transform var(--duration-fast) var(--ease-in-out);
 }
-.pill:focus-visible,
 .saveBtn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
 }
-.pill:active,
 .saveBtn:not(:disabled):active { transform: translateY(1px); }
 
-/* ── Publish toggle ── */
-.pill {
+/* ── Publish switch (Draf ⇄ Terbit) ── */
+.switch {
   height: var(--ctl-h-sm);
-  padding: 1px 16px 0 16px;
+  padding: 0 4px 0 12px;
   border-radius: var(--radius-pill);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.switch:hover:not(:disabled) { background: rgba(42, 33, 24, 0.05); }
+.switch:disabled { opacity: 0.55; cursor: default; }
+
+.switchLabel {
   font-size: var(--font-size-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   line-height: 1;
+  transition: color var(--duration-base) var(--ease-in-out);
 }
-.pillOn  { background: var(--color-emerald); color: #fff; }
-.pillOff { background: var(--border-strong); color: var(--text-primary); }
-.pillOn:hover  { background: color-mix(in srgb, var(--color-emerald) 88%, #000); }
-.pillOff:hover { background: rgba(42, 33, 24, 0.24); }
-.pill:disabled { opacity: 0.55; cursor: default; }
+.switchOn  .switchLabel { color: var(--color-emerald); }
+.switchOff .switchLabel { color: var(--text-muted); }
+
+.switchTrack {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  transition: background var(--duration-base) var(--ease-in-out);
+}
+.switchOn .switchTrack { background: var(--color-emerald); }
+
+.switchKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-round);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(42, 33, 24, 0.28);
+  transition: transform var(--duration-base) var(--ease-in-out);
+}
+.switchOn .switchKnob { transform: translateX(18px); }
+
+.switch:focus-visible { outline: none; }
+.switch:focus-visible .switchTrack {
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+}
 
 /* ── Save button ── */
 .saveBtn {
@@ -176,8 +207,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pill, .saveBtn, .bannerReload, .bannerDismiss { transition: none; }
-  .pill:active, .saveBtn:not(:disabled):active, .bannerReload:active { transform: none; }
+  .switch, .switchLabel, .switchTrack, .switchKnob,
+  .saveBtn, .bannerReload, .bannerDismiss { transition: none; }
+  .saveBtn:not(:disabled):active, .bannerReload:active { transform: none; }
   .bannerWrap { animation: none; }
   .bannerDot { animation: none; }
 }

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import RsvpsTab, { type RsvpRow } from './RsvpsTab'
 import GiftsTab, { type GiftRow } from './GiftsTab'
 import EditorWorkspace, { type EditorSubTab } from './EditorWorkspace'
+import NavScroller from './NavScroller'
 import TutorialTab from './TutorialTab'
 import GuestsTab from './GuestsTab'
 import GuestbookTab from './GuestbookTab'
@@ -248,7 +249,10 @@ export default function DashboardClient({
         <RefundRequestButton invitationId={invitation.id} paidSource={invitation.paid_source || 'xendit'} hasPendingRefund={hasPendingRefund} eligible={refundEligible} />
       )}
 
-      <nav className={styles.nav}>
+      <NavScroller
+        leftLabel={lang === 'id' ? 'Geser tab ke kiri' : 'Scroll tabs left'}
+        rightLabel={lang === 'id' ? 'Geser tab ke kanan' : 'Scroll tabs right'}
+      >
         {tabKeys.map((t) => (
           <button
             key={t}
@@ -259,7 +263,7 @@ export default function DashboardClient({
             {dict.chrome.tabs[t]}
           </button>
         ))}
-      </nav>
+      </NavScroller>
 
       <section className={styles.content}>
         <AnimatePresence mode="wait">
