@@ -9,8 +9,9 @@ import type { Lang } from '@/lib/i18n/config'
  * Source: legal draft "SYARAT DAN KETENTUAN.docx" (brand updated to FinCards).
  * The English version is a professional rendering of the Indonesian original,
  * not a literal translation; the Indonesian text prevails in case of conflict.
- * Contact details (WhatsApp/Telepon 0812345678, Email fincardsland@gmail.com)
- * are placeholders for launch — swap for the final business line when ready.
+ * WhatsApp/Telepon is the live FinCards business line (0851-1055-3938); the
+ * Email (fincardsland@gmail.com) is a launch placeholder — swap for the final
+ * business inbox when ready.
  */
 export default function TermsContent({ lang = 'id' }: { lang?: Lang }) {
   return lang === 'en' ? <TermsEn /> : <TermsId />
@@ -190,8 +191,8 @@ function TermsId() {
       <h2>17. Kontak</h2>
       <p>Untuk informasi lebih lanjut, Pengguna dapat menghubungi {BRAND} melalui:</p>
       <ul>
-        <li>WhatsApp: <code>0812345678</code></li>
-        <li>Telepon: <code>0812345678</code></li>
+        <li>WhatsApp: <code>0851-1055-3938</code></li>
+        <li>Telepon: <code>0851-1055-3938</code></li>
         <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
       <p><strong>Dengan menggunakan layanan {BRAND}, Pengguna menyatakan telah membaca, memahami, dan menyetujui seluruh isi Syarat dan Ketentuan ini.</strong></p>
@@ -373,8 +374,8 @@ function TermsEn() {
       <h2>17. Contact</h2>
       <p>For further information, Users may contact {BRAND} via:</p>
       <ul>
-        <li>WhatsApp: <code>0812345678</code></li>
-        <li>Phone: <code>0812345678</code></li>
+        <li>WhatsApp: <code>0851-1055-3938</code></li>
+        <li>Phone: <code>0851-1055-3938</code></li>
         <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
       <p><strong>By using the {BRAND} services, the User affirms that they have read, understood, and agreed to these Terms and Conditions in their entirety.</strong></p>

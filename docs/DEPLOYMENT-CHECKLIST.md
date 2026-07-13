@@ -81,8 +81,8 @@ safe**: lose them and every encrypted row is unrecoverable forever.
 
 - [ ] Refund / Terms / Privacy show `fincardsland@gmail.com` ✓ and reference
       `fincards.land`.
-- [ ] **Business phone** in the legal docs is still a placeholder (`0812345678`) —
-      replace once you have a real business number.
+- [x] **Business phone** in the legal docs is the live FinCards line
+      (`0851-1055-3938`), set on WhatsApp + Telepon rows of Terms / Refund / Privacy.
 
 ## 8. Pre-launch smoke test
 

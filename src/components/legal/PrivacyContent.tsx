@@ -105,8 +105,8 @@ function PrivacyId() {
       <h2>15. Hubungi {BRAND}</h2>
       <p>Untuk informasi lebih lanjut, Pengguna dapat menghubungi {BRAND} melalui:</p>
       <ul>
-        <li>WhatsApp: <code>0812345678</code></li>
-        <li>Telepon: <code>0812345678</code></li>
+        <li>WhatsApp: <code>0851-1055-3938</code></li>
+        <li>Telepon: <code>0851-1055-3938</code></li>
         <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
     </>
@@ -200,8 +200,8 @@ function PrivacyEn() {
       <h2>15. Contact {BRAND}</h2>
       <p>For further information, the User may contact {BRAND} via:</p>
       <ul>
-        <li>WhatsApp: <code>0812345678</code></li>
-        <li>Phone: <code>0812345678</code></li>
+        <li>WhatsApp: <code>0851-1055-3938</code></li>
+        <li>Phone: <code>0851-1055-3938</code></li>
         <li>Email: <code>fincardsland@gmail.com</code></li>
       </ul>
     </>
