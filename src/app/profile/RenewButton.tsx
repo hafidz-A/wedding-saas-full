@@ -8,7 +8,7 @@ import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css
  * Inline "Bayar / Perpanjang" CTA shown next to each invitation in the
  * profile list when its payment status needs action. Calls the same
  * startCheckout server action as the dashboard banner / PaymentGate and
- * redirects the browser to the Xendit invoice URL.
+ * redirects the browser to the Midtrans invoice URL.
  */
 export default function RenewButton({
   invitationId,

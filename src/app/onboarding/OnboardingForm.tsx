@@ -101,7 +101,7 @@ export default function OnboardingForm({
         setError(result.error || dict.form.errFail)
         return
       }
-      // Draft created — kick off payment and redirect to the Xendit invoice.
+      // Draft created — kick off payment and redirect to the Midtrans invoice.
       if (result.invitationId) {
         const checkout = await startCheckout(result.invitationId)
         if (checkout.ok && checkout.invoiceUrl) {

@@ -80,7 +80,7 @@ export default async function ProfilePage() {
         ever_used: !!inv.used_at,
         days_since_published: inv.published_at ? Math.max(0, Math.floor((nowMs - Date.parse(inv.published_at)) / 86_400_000)) : null,
       }).eligible
-      refundState.set(inv.id, { paidSource: inv.paid_source ?? 'xendit', eligible, hasPending: pendingSet.has(inv.id) })
+      refundState.set(inv.id, { paidSource: inv.paid_source ?? 'midtrans', eligible, hasPending: pendingSet.has(inv.id) })
     }
   }
 

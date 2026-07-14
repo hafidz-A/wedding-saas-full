@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 
 /**
  * Absolute base URL (no trailing slash) for building EXTERNAL redirect targets —
- * notably the Xendit success/failure URLs handed to createXenditInvoice.
+ * notably the Midtrans Snap finish URL handed to createSnapTransaction.
  *
  * Order of preference:
  *   1. NEXT_PUBLIC_SITE_URL when set (lets you pin a canonical domain).
@@ -11,7 +11,7 @@ import { headers } from 'next/headers'
  *      stays correct even when NEXT_PUBLIC_SITE_URL was missing at build time
  *      (NEXT_PUBLIC_* is inlined at build; an unset var becomes an empty string
  *      in the bundle). Without this fallback an empty base produced a *relative*
- *      success URL that Xendit resolved against its own checkout domain → 404.
+ *      success URL that Midtrans resolved against its own checkout domain → 404.
  *
  * Returns '' only if there is neither an env value nor a host header, which does
  * not happen inside a real request. Callers may still build a (relative) URL in

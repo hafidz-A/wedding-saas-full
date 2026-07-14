@@ -10,7 +10,7 @@
  */
 
 export type TxnType = 'initial' | 'upgrade' | 'addon'
-export type TxnSource = 'xendit' | 'manual' | 'comp'
+export type TxnSource = 'midtrans' | 'manual' | 'comp'
 export type TxnStatus = 'paid' | 'refunded'
 
 export interface Transaction {
@@ -48,7 +48,7 @@ export function refundedKeySet(refunds: RefundRow[]): Set<string> {
 export function mapInitial(inv: InitialRow, refunded: Set<string>): Transaction {
   const key = `initial:${inv.id}`
   const source: TxnSource =
-    inv.paid_source === 'manual' ? 'manual' : inv.paid_source === 'comp' ? 'comp' : 'xendit'
+    inv.paid_source === 'manual' ? 'manual' : inv.paid_source === 'comp' ? 'comp' : 'midtrans'
   return {
     key, invitationId: inv.id, slug: inv.slug, plan: inv.plan ?? '', templateId: inv.template_id ?? '', type: 'initial',
     amountIDR: Number(inv.paid_amount_idr ?? 0), feeIDR: Number(inv.fee_idr ?? 0),
@@ -56,13 +56,13 @@ export function mapInitial(inv: InitialRow, refunded: Set<string>): Transaction 
   }
 }
 
-/** Upgrades + add-ons are always Xendit-paid (there is no offline path for them). */
+/** Upgrades + add-ons are always gateway-paid (there is no offline path for them). */
 function mapAux(type: 'upgrade' | 'addon', r: AddonUpgradeRow, refunded: Set<string>): Transaction {
   const key = `${type}:${r.id}`
   return {
     key, invitationId: r.invitation_id, slug: r.slug, plan: r.plan ?? '', templateId: r.template_id ?? '', type,
     amountIDR: Number(r.amount_idr ?? 0), feeIDR: Number(r.fee_idr ?? 0),
-    source: 'xendit', status: refunded.has(key) ? 'refunded' : 'paid', date: r.paid_at ?? '',
+    source: 'midtrans', status: refunded.has(key) ? 'refunded' : 'paid', date: r.paid_at ?? '',
   }
 }
 
@@ -95,7 +95,7 @@ export interface RevenueSummary {
 export function summarize(txns: Transaction[]): RevenueSummary {
   const s: RevenueSummary = {
     grossIDR: 0, feesIDR: 0, netIDR: 0, refundedIDR: 0, compCount: 0,
-    bySource: { xendit: 0, manual: 0, comp: 0 }, byType: { initial: 0, upgrade: 0, addon: 0 },
+    bySource: { midtrans: 0, manual: 0, comp: 0 }, byType: { initial: 0, upgrade: 0, addon: 0 },
     byPlan: {}, byTemplate: {}, count: 0,
   }
   for (const t of txns) {

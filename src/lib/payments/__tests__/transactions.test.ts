@@ -5,7 +5,7 @@ import {
 } from '../transactions'
 
 const init = (o: Partial<InitialRow> & { id: string; slug: string }): InitialRow => ({
-  paid_amount_idr: 149000, paid_source: 'xendit', fee_idr: 0, paid_at: '2026-07-01T03:00:00Z', ...o,
+  paid_amount_idr: 149000, paid_source: 'midtrans', fee_idr: 0, paid_at: '2026-07-01T03:00:00Z', ...o,
 })
 const aux = (o: Partial<AddonUpgradeRow> & { id: string; invitation_id: string; slug: string }): AddonUpgradeRow => ({
   amount_idr: 50000, fee_idr: 0, paid_at: '2026-07-02T03:00:00Z', ...o,
@@ -31,7 +31,7 @@ describe('mapInitial', () => {
     expect(mapInitial(init({ id: 'x', slug: 's', paid_source: 'manual' }), refunded)).toMatchObject({
       key: 'initial:x', type: 'initial', source: 'manual', status: 'refunded', amountIDR: 149000,
     })
-    expect(mapInitial(init({ id: 'y', slug: 's', paid_source: null }), refunded).source).toBe('xendit')
+    expect(mapInitial(init({ id: 'y', slug: 's', paid_source: null }), refunded).source).toBe('midtrans')
     expect(mapInitial(init({ id: 'z', slug: 's', paid_source: 'comp', paid_amount_idr: 0 }), refunded).status).toBe('paid')
   })
 })
@@ -45,7 +45,7 @@ describe('buildTransactions', () => {
       refunds: [],
     })
     expect(txns.map((t) => t.type)).toEqual(['upgrade', 'addon', 'initial'])
-    expect(txns.find((t) => t.type === 'upgrade')?.source).toBe('xendit')
+    expect(txns.find((t) => t.type === 'upgrade')?.source).toBe('midtrans')
   })
 })
 
@@ -53,10 +53,10 @@ describe('summarize', () => {
   it('nets out comp + refunded, computes net = gross − fees, groups by source', () => {
     const txns = buildTransactions({
       initials: [
-        init({ id: 'i1', slug: 'a', paid_amount_idr: 149000, paid_source: 'xendit', fee_idr: 4000 }),
+        init({ id: 'i1', slug: 'a', paid_amount_idr: 149000, paid_source: 'midtrans', fee_idr: 4000 }),
         init({ id: 'i2', slug: 'b', paid_amount_idr: 200000, paid_source: 'manual', fee_idr: 0 }),
         init({ id: 'i3', slug: 'c', paid_amount_idr: 0, paid_source: 'comp' }),
-        init({ id: 'i4', slug: 'd', paid_amount_idr: 149000, paid_source: 'xendit' }),
+        init({ id: 'i4', slug: 'd', paid_amount_idr: 149000, paid_source: 'midtrans' }),
       ],
       upgrades: [], addons: [],
       refunds: [{ source_type: 'initial', source_id: 'i4', status: 'succeeded' }],
@@ -67,7 +67,7 @@ describe('summarize', () => {
     expect(s.netIDR).toBe(345000)
     expect(s.refundedIDR).toBe(149000)     // i4
     expect(s.compCount).toBe(1)
-    expect(s.bySource.xendit).toBe(149000)
+    expect(s.bySource.midtrans).toBe(149000)
     expect(s.bySource.manual).toBe(200000)
     expect(s.count).toBe(2)
   })

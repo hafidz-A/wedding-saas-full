@@ -80,7 +80,7 @@ function TermsId() {
         <li>layanan diaktifkan oleh sistem {BRAND}.</li>
       </ol>
       <p>{BRAND} berhak menolak, menangguhkan, atau membatalkan pemesanan apabila ditemukan indikasi pelanggaran hukum, penyalahgunaan layanan, penggunaan identitas palsu, atau keadaan lain yang menurut pertimbangan {BRAND} dapat menimbulkan risiko bagi {BRAND} maupun pihak ketiga.</p>
-      <p>Seluruh biaya layanan yang tercantum pada {BRAND} dinyatakan dalam Rupiah dan wajib dibayarkan melalui metode pembayaran yang tersedia, termasuk namun tidak terbatas pada <strong>Xendit</strong>.</p>
+      <p>Seluruh biaya layanan yang tercantum pada {BRAND} dinyatakan dalam Rupiah dan wajib dibayarkan melalui metode pembayaran yang tersedia, termasuk namun tidak terbatas pada <strong>Midtrans</strong>.</p>
       <p>Pengguna memahami dan menyetujui bahwa biaya layanan yang telah dibayarkan tidak dapat diminta kembali, kecuali dalam kondisi sesuai dengan <a href="/refund">Kebijakan Pengembalian Dana</a> {BRAND} yang berlaku.</p>
       <p>Masa Aktif layanan mengikuti Paket yang dipilih oleh Pengguna. Setelah Masa Aktif berakhir, {BRAND} berhak membatasi, menonaktifkan, menghapus, atau mengarsipkan halaman Acara dan data terkait sesuai kebijakan penyimpanan data yang berlaku.</p>
 
@@ -263,7 +263,7 @@ function TermsEn() {
         <li>the service has been activated by the {BRAND} system.</li>
       </ol>
       <p>{BRAND} reserves the right to decline, suspend, or cancel any order upon indication of unlawful conduct, misuse of the service, use of a false identity, or any other circumstance which, in {BRAND}&rsquo;s reasonable judgment, may expose {BRAND} or third parties to risk.</p>
-      <p>All service fees displayed on {BRAND} are quoted in Indonesian Rupiah and are payable through the available payment methods, including but not limited to <strong>Xendit</strong>.</p>
+      <p>All service fees displayed on {BRAND} are quoted in Indonesian Rupiah and are payable through the available payment methods, including but not limited to <strong>Midtrans</strong>.</p>
       <p>The User understands and agrees that service fees, once paid, are non-refundable save under the conditions prescribed in the prevailing {BRAND} <a href="/refund">Refund Policy</a>.</p>
       <p>The Active Period of the service follows the Plan the User has selected. Upon its expiry, {BRAND} reserves the right to restrict, deactivate, delete, or archive the Event page and any associated data in accordance with its prevailing data-retention policy.</p>
 

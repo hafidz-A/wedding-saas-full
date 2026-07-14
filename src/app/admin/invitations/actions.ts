@@ -24,7 +24,7 @@ async function guard(): Promise<{ email: string } | null> {
   try { return await requireAdmin() } catch { return null }
 }
 
-/** Mark an invitation paid without Xendit (offline/manual money, or a free comp). */
+/** Mark an invitation paid without Midtrans (offline/manual money, or a free comp). */
 export async function adminComp(id: string, opts: { source: 'manual' | 'comp'; amountIDR: number; period: CompPeriod }): Promise<Result> {
   const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
   const db = createSupabaseAdminClient()

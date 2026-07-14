@@ -141,7 +141,7 @@ export default function CreateInvitationForm() {
 
       <Field label="Pembayaran">
         <select value={payMode} onChange={(e) => setPayMode(e.target.value as PayMode)} style={input}>
-          <option value="none">Biarkan draft (klien bayar sendiri via Xendit)</option>
+          <option value="none">Biarkan draft (klien bayar sendiri via Midtrans)</option>
           <option value="comp">Comp — gratiskan (Rp 0)</option>
           <option value="manual">Lunas manual — uang diterima offline</option>
         </select>

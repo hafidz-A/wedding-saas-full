@@ -61,10 +61,7 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   async function refund(t: Transaction) {
     const sourceType = t.type as RefundSourceType
     const sourceId = t.key.split(':').slice(1).join(':')
-    // TxnSource is still 'xendit' | 'manual' | 'comp' (transactions.ts rename is
-    // Task 6) — cast so this channel-aware check compiles today and keeps
-    // working once that rename lands and 'midtrans' becomes a real member.
-    const isMidtrans = (t.source as string) === 'midtrans'
+    const isMidtrans = t.source === 'midtrans'
     const res = await formDialog({
       title: `Refund ${formatIDR(t.amountIDR)}`,
       message: isMidtrans

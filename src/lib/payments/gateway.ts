@@ -3,7 +3,7 @@
  * verification. SERVER ONLY — never import from a 'use client' file (uses the
  * server key). Client-safe channel helpers live in ./refund-channels.ts.
  *
- * Replaces the former Xendit wrapper. Key differences from Xendit:
+ * Replaces the former gateway wrapper. Key differences from that provider:
  *  - everything is keyed by OUR order_id (not the gateway's invoice id);
  *  - webhook auth = sha512 signature_key (no callback-token header);
  *  - gross_amount arrives as a decimal string ("149000.00").
@@ -97,7 +97,7 @@ export interface SnapTransactionArgs {
 
 /**
  * Create a Snap transaction and return the hosted-payment redirect URL —
- * the drop-in replacement for the old hosted Xendit invoice URL.
+ * the drop-in replacement for the old hosted invoice URL.
  */
 export async function createSnapTransaction(
   a: SnapTransactionArgs,

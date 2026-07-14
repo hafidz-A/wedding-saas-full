@@ -5,7 +5,7 @@ import { recheckPayment, recheckRenewal } from '@/app/onboarding/actions'
 import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
 /**
- * "Saya sudah bayar — cek ulang" CTA. Fallback for when the Xendit webhook was
+ * "Saya sudah bayar — cek ulang" CTA. Fallback for when the Midtrans webhook was
  * missed or delayed: re-queries the invoice and publishes the invitation if it
  * is genuinely paid. Reloads on success; shows an inline note if still pending.
  *

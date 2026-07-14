@@ -27,16 +27,16 @@ export default function ReconcilePanel() {
     const res = await fn(m.invitationId)
     setBusy(false)
     if (res.ok && (res as any).applied) { location.reload(); return }
-    setMsg(res.error || `Status Xendit: ${(res as any).status ?? '—'} — belum bisa diterapkan`)
+    setMsg(res.error || `Status Midtrans: ${(res as any).status ?? '—'} — belum bisa diterapkan`)
   }
 
   return (
     <section style={{ margin: '18px 0', border: '0.5px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div>
-          <h2 style={{ fontSize: 15, margin: 0 }}>Cocokkan dengan Xendit</h2>
+          <h2 style={{ fontSize: 15, margin: 0 }}>Cocokkan dengan Midtrans</h2>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0' }}>
-            Cari pembayaran yang sudah LUNAS di Xendit tapi belum masuk ke sistem (webhook kelewat).
+            Cari pembayaran yang sudah LUNAS di Midtrans tapi belum masuk ke sistem (webhook kelewat).
           </p>
         </div>
         <button type="button" disabled={busy} onClick={reconcile} style={btn}>{busy ? 'Mengecek…' : 'Cocokkan sekarang'}</button>

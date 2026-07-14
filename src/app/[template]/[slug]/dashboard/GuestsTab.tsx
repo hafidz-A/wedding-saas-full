@@ -61,7 +61,7 @@ export default function GuestsTab({ slug, guests, quota, publicUrl, messageTempl
   const [quotaQty, setQuotaQty] = useState(50)
   const [quotaPending, setQuotaPending] = useState(false)
 
-  // On return from a quota-add-on Xendit checkout (?quota=1), reconcile the
+  // On return from a quota-add-on Midtrans checkout (?quota=1), reconcile the
   // payment (in case the webhook was late) then refresh so the meter updates.
   useEffect(() => {
     if (typeof window === 'undefined') return

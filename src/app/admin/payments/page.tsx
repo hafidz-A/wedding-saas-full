@@ -38,13 +38,13 @@ export default async function AdminPaymentsPage() {
 
       <section style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '12px 0' }}>
         <Card label="Masuk kotor (semua waktu)" value={formatIDR(summary.grossIDR)} sub={`${summary.count} transaksi`} />
-        <Card label="Bersih diterima" value={formatIDR(summary.netIDR)} sub={summary.feesIDR > 0 ? `setelah fee ${formatIDR(summary.feesIDR)}` : 'fee Xendit belum tercatat (≈ kotor)'} />
+        <Card label="Bersih diterima" value={formatIDR(summary.netIDR)} sub={summary.feesIDR > 0 ? `setelah fee ${formatIDR(summary.feesIDR)}` : 'fee Midtrans belum tercatat (≈ kotor)'} />
         <Card label="Bulan ini (WIB)" value={formatIDR(monthSummary.grossIDR)} sub={`${monthSummary.count} transaksi`} />
         <Card label="Direfund" value={formatIDR(summary.refundedIDR)} sub={summary.compCount ? `${summary.compCount} comp (gratis)` : '—'} />
       </section>
 
       <section style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '12px 0' }}>
-        <Card small label="Xendit" value={formatIDR(summary.bySource.xendit)} />
+        <Card small label="Midtrans" value={formatIDR(summary.bySource.midtrans)} />
         <Card small label="Manual (offline)" value={formatIDR(summary.bySource.manual)} />
         <Card small label="Conversion draft→bayar" value={`${conv.ratePct}%`} sub={`${conv.paid} bayar · ${conv.drafts} draft`} />
       </section>
