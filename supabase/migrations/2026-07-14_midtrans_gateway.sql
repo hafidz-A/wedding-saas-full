@@ -51,9 +51,13 @@ alter table public.quota_addons  add column if not exists paid_channel text;
 alter table public.refunds add column if not exists refund_key text;
 
 -- Provenance values: 'xendit' → 'midtrans' / method 'xendit' → 'gateway'.
--- ORDER MATTERS: rewrite legacy rows BEFORE re-adding the stricter constraint,
--- otherwise the new check fails on existing 'xendit' rows.
+-- ORDER MATTERS: drop each check constraint BEFORE rewriting its rows, then
+-- re-add the stricter list — otherwise the UPDATE (or the re-add) fails on
+-- rows the old/new list doesn't cover.
+alter table public.invitations drop constraint if exists invitations_paid_source_check;
 update public.invitations set paid_source = 'midtrans' where paid_source = 'xendit';
+alter table public.invitations add constraint invitations_paid_source_check
+  check (paid_source in ('midtrans','manual','comp'));
 alter table public.refunds drop constraint if exists refunds_method_check;
 update public.refunds set method = 'gateway' where method = 'xendit';
 alter table public.refunds add constraint refunds_method_check
