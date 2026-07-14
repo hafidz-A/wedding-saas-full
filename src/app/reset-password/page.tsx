@@ -51,6 +51,11 @@ function ResetPasswordInner() {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
   const [hasInvitation, setHasInvitation] = useState(false)
+  // 2FA (MFA) accounts (e.g. admin) need an AAL2 session to change the password:
+  // after the email OTP we reveal an authenticator-code field and elevate.
+  const [mfaCode, setMfaCode] = useState('')
+  const [needsMfa, setNeedsMfa] = useState(false)
+  const [recovered, setRecovered] = useState(false) // email OTP already consumed
   const { pwned, checking } = usePwnedPassword(password)
 
   async function onSubmit(e: React.FormEvent) {
@@ -61,7 +66,7 @@ function ResetPasswordInner() {
       setError(t.errEmail)
       return
     }
-    if (!token.trim()) {
+    if (!recovered && !token.trim()) {
       setError(t.errToken)
       return
     }
@@ -76,32 +81,66 @@ function ResetPasswordInner() {
 
     setSubmitting(true)
 
-    // Free, self-hosted leaked-password check (HIBP k-anonymity). Fails open.
-    if ((await pwnedPasswordCount(password)) > 0) {
-      setError(rules.breached)
-      setSubmitting(false)
-      return
-    }
-
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     )
 
-    // 1. Verify the 6-digit OTP to get a recovery session
-    const { error: verifyErr } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: token.trim(),
-      type: 'recovery',
-    })
-
-    if (verifyErr) {
-      setError(verifyErr.message || t.errVerify)
-      setSubmitting(false)
-      return
+    // 1. Consume the 6-digit recovery OTP ONCE → an (AAL1) recovery session.
+    //    The OTP is single-use, so on a second submit (the 2FA step below) we
+    //    reuse the session we already have instead of re-verifying the code.
+    if (!recovered) {
+      // Free, self-hosted leaked-password check (HIBP k-anonymity). Fails open.
+      if ((await pwnedPasswordCount(password)) > 0) {
+        setError(rules.breached)
+        setSubmitting(false)
+        return
+      }
+      const { error: verifyErr } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: token.trim(),
+        type: 'recovery',
+      })
+      if (verifyErr) {
+        setError(verifyErr.message || t.errVerify)
+        setSubmitting(false)
+        return
+      }
+      setRecovered(true)
     }
 
-    // 2. Set the new password using the now-active recovery session
+    // 2. Accounts with 2FA (MFA) enrolled — e.g. the admin — need an AAL2 session
+    //    to change email/password. Elevate with the authenticator app's code.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
+      if (!mfaCode.trim()) {
+        setNeedsMfa(true)
+        setError(t.errMfaNeeded)
+        setSubmitting(false)
+        return
+      }
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const totp = factors?.totp?.[0]
+      if (!totp) {
+        setError(t.errMfaNoFactor)
+        setSubmitting(false)
+        return
+      }
+      const { data: ch, error: chErr } = await supabase.auth.mfa.challenge({ factorId: totp.id })
+      if (chErr || !ch) {
+        setError(chErr?.message || t.errMfaFailed)
+        setSubmitting(false)
+        return
+      }
+      const { error: verErr } = await supabase.auth.mfa.verify({ factorId: totp.id, challengeId: ch.id, code: mfaCode.trim() })
+      if (verErr) {
+        setError(t.errMfaCode)
+        setSubmitting(false)
+        return
+      }
+    }
+
+    // 3. Set the new password (AAL2 session if MFA, AAL1 otherwise).
     const { error: updErr } = await supabase.auth.updateUser({ password })
     if (updErr) {
       setError(updErr.message || t.errUpdate)
@@ -222,6 +261,25 @@ function ResetPasswordInner() {
             autoComplete="new-password"
           />
         </label>
+
+        {needsMfa && (
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span style={label}>{t.mfaLabel}</span>
+            <input
+              type="text"
+              required
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="123456"
+              style={{ ...input, letterSpacing: '0.3em', fontVariantNumeric: 'tabular-nums', fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}
+              autoFocus
+            />
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.mfaHint}</span>
+          </label>
+        )}
 
         {error && <p style={errorStyle}>{error}</p>}
 
