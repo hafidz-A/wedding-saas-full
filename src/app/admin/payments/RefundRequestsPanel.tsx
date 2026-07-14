@@ -45,6 +45,19 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
     })
     if (!res) return
     const method = (gatewayEligible ? res.method : 'manual') as 'manual' | 'gateway'
+    if (method === 'manual' && r.destination && (r.destination.bank || r.destination.account_no)) {
+      // Anti-hijack gate (spec §6d): the destination account here was supplied by
+      // the CUSTOMER — force the operator to explicitly confirm the account
+      // holder's name matches the payer before any manual money moves
+      // (mustEqual disables the submit button until 'yes' is picked).
+      const confirmed = await formDialog({
+        title: 'Konfirmasi sebelum transfer manual',
+        message: `Rekening tujuan dari pelanggan: ${r.destination.bank} · ${r.destination.account_no} · a.n. ${r.destination.holder}. Pastikan nama pemilik rekening cocok dengan pembayar "${r.slug}" sebelum lanjut.`,
+        fields: [{ name: 'confirmed', label: 'Sudah dicocokkan?', type: 'select', defaultValue: 'no', options: [{ value: 'no', label: 'Belum saya cek' }, { value: 'yes', label: 'Nama pemilik rekening SUDAH saya cocokkan' }], mustEqual: 'yes' }],
+        submitLabel: 'Lanjut refund manual', tone: 'danger',
+      })
+      if (!confirmed) return
+    }
     setBusy(true); setMsg(null)
     const out = await adminApproveRefund(r.id, { method, note: res.note || undefined })
     setBusy(false)
