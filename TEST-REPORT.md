@@ -2,6 +2,13 @@
 
 Laporan suite automated test. Cakupan sel-per-sel: lihat `TEST-MATRIX.md`. Temuan: `BUG-LEDGER.md`.
 
+## Run verifikasi migrasi Midtrans (2026-07-15)
+- **Konteks:** verifikasi penuh pasca migrasi Xendit → Midtrans Snap (spec/plan 2026-07-14; commits `e787eda..a3c501e`).
+- **`npm run test:all`** → **exit 0**: tsc bersih · vitest **593 test / 89 file HIJAU** · Playwright **82 passed, 1 flaky (a11y login — lolos retry), 6 skipped** (1.1 jam, 3 viewport).
+- **`npm run verify:security`** → semua check at-rest + RLS HIJAU (termasuk destinasi refund terenkripsi).
+- **`node scripts/diag-midtrans.mjs`** → key LIVE valid terhadap `api.midtrans.com` (200); akun production AKTIF. E2E sandbox (QRIS + VA + refund drill) menunggu key `SB-Mid-server-…` + deploy preview (webhook butuh URL publik) — checklist di plan Task 8.
+- **Cakupan baru:** 16 test gateway (signature/order-id/channel) + 11 test webhook Midtrans menggantikan test Xendit lama.
+
 ## Ringkasan eksekutif (2026-06-14)
 - **Mode:** B (fix-as-you-go) · **Backend test:** mock + intercept (E2E undangan/auth nol sentuhan prod; dashboard = login dummy read-only atas izin user)
 - **vitest** `npx vitest run` → **344 test / 57 file — HIJAU**
