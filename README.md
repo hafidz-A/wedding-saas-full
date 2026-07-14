@@ -3,7 +3,7 @@
 Multi-tenant SaaS undangan pernikahan digital. **Beberapa** template cinematic, banyak pasangan — tiap
 pasangan punya URL slug, akun pemilik, dashboard editor, dan database RSVP / Gift / Tamu sendiri.
 Model bisnis: **self-serve, bayar sekali** (couple daftar → pilih template → edit preview gratis →
-bayar via Xendit untuk terbit).
+bayar via Midtrans untuk terbit).
 
 ```
 fincards.land/                          ← marketing
@@ -24,7 +24,7 @@ fincards.land/admin                     ← konsol operator (allowlist email)
 | Animasi | motion 12 + GSAP 3.15 + lenis; Solary + three.js |
 | Backend | Supabase (Postgres + Storage + RLS) |
 | Auth | Supabase Auth (email+password, verifikasi email, reset password, MFA TOTP opsional) |
-| Payments | Xendit (invoice + webhook) |
+| Payments | Midtrans (Snap redirect + notification webhook) |
 | Email | Resend |
 | Hosting | Vercel |
 
@@ -46,7 +46,7 @@ npm install
 1. Buat project baru di [supabase.com](https://supabase.com).
 2. **SQL Editor** → jalankan `supabase/schema.sql` (base), lalu **semua** file di
    `supabase/migrations/` **berurutan sesuai tanggal**. (Base saja tidak cukup — kolom seperti
-   `owner_user_id`, `is_paid`, `xendit_*`, kolom `*_enc`, tabel `guests`/`attendances`/`template_plans`/
+   `owner_user_id`, `is_paid`, `gateway_*` (payment), kolom `*_enc`, tabel `guests`/`attendances`/`template_plans`/
    `refund_requests` semuanya datang dari migration.)
 3. **Storage** → pastikan bucket `invitation-media` ada + public (dibuat oleh `schema.sql`).
 4. Isi harga tiap template di tabel `template_plans` (atau lewat `/admin` → Templates → Plans).
@@ -77,9 +77,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000  # production: https://www.fincards.l
 APP_ENCRYPTION_KEY=...        # 32-byte hex, untuk config PII + RSVP/gift
 GUESTS_ENCRYPTION_KEY=...     # 32-byte hex, untuk tabel guests + token RSVP
 
-# Pembayaran (Xendit)
-XENDIT_SECRET_KEY=...
-XENDIT_CALLBACK_TOKEN=...     # verifikasi webhook
+# Pembayaran (Midtrans)
+MIDTRANS_SERVER_KEY=...           # Dashboard → Settings → Access Keys
+MIDTRANS_IS_PRODUCTION=false      # 'true' = API production, selain itu sandbox
 
 # Konsol admin — email yang boleh buka /admin (pisahkan koma)
 ADMIN_EMAILS=you@example.com
@@ -111,9 +111,9 @@ Ini jalur utama — **Anda tidak perlu melakukan apa-apa** untuk onboarding bias
 1. Pasangan **/signup** (buat akun, verifikasi email).
 2. **/onboarding** — pilih template, slug, isi nama + tanggal + venue, pilih plan (+ kuota tamu ekstra).
    Sistem membuat **draft belum bayar**.
-3. Mereka edit preview gratis di dashboard, lalu **bayar via Xendit** untuk menerbitkan.
-4. Webhook Xendit otomatis mem-*publish*. (Kalau webhook telat, tombol "Saya sudah bayar — cek ulang"
-   di dashboard memaksa verifikasi ulang.)
+3. Mereka edit preview gratis di dashboard, lalu **bayar via Midtrans** untuk menerbitkan.
+4. Webhook notifikasi Midtrans otomatis mem-*publish*. (Kalau webhook telat, tombol "Saya sudah bayar —
+   cek ulang" di dashboard memaksa verifikasi ulang.)
 
 ### B. Onboarding manual / undangan gratis (comp)
 
@@ -151,7 +151,7 @@ QR check-in (Premium), reset password sendiri via **/forgot-password**, kelola a
 - **"Refund / batal"** → pasangan ajukan lewat dashboard/`/refund`; Anda putuskan di `/admin` → Payments
   → Refund requests (operator yang memutuskan, bukan otomatis). Takedown cepat: `/admin` set
   `suspended_at` (sembunyikan halaman dari semua orang).
-- **"Perpanjang / upgrade / tambah kuota tamu"** → dari dashboard pasangan sendiri (checkout Xendit
+- **"Perpanjang / upgrade / tambah kuota tamu"** → dari dashboard pasangan sendiri (checkout Midtrans
   terpisah: renewal, upgrade pay-the-difference ke Premium, add-on kuota per blok 50 tamu).
 
 ### E. Data & monitoring (SQL cepat)
@@ -172,7 +172,7 @@ group by i.slug order by rsvp desc;
 ```
 
 Sebagian besar tugas monitoring/revenue kini ada di **/admin** (Invitations, Payments & revenue,
-Activity). Cek quota service di dashboard masing-masing (Supabase Usage, Resend, Vercel, Xendit).
+Activity). Cek quota service di dashboard masing-masing (Supabase Usage, Resend, Vercel, Midtrans).
 
 ### F. Harga & plan
 
@@ -196,7 +196,7 @@ wedding-saas-next/
 │   │   │   ├── checkin/                          ← QR / manual check-in
 │   │   │   └── dashboard/                        ← editor + tab RSVP/Gifts/Guests/BukuTamu/Tutorial + PaymentGate
 │   │   ├── admin/                                ← konsol operator
-│   │   └── api/                                  ← rsvp, gift, guestbook, checkin, upload, auth/*, payment/xendit/webhook, invitation/[slug]/{config,publish,meta,music,theme}
+│   │   └── api/                                  ← rsvp, gift, guestbook, checkin, upload, auth/*, payment/midtrans/webhook, invitation/[slug]/{config,publish,meta,music,theme}
 │   ├── all-templates/<id>/                       ← lovebirds, solary (sections/config/Shell)
 │   ├── config/                                   ← templateIndex.js, templateCatalog.js
 │   ├── editor/                                   ← block editor (schemas, fields, EditorRoot)
@@ -211,11 +211,11 @@ wedding-saas-next/
 ## Deploy ke Vercel
 
 1. Push repo ke GitHub → Import di Vercel.
-2. Tambah **semua** env var (sama seperti `.env.local`, termasuk kunci enkripsi & Xendit).
-3. Set `NEXT_PUBLIC_SITE_URL` ke URL production (penting untuk OG tag, link reset, dan URL sukses/gagal
-   Xendit).
-4. Set webhook Xendit ke `https://<domain>/api/payment/xendit/webhook` dengan callback token yang sama
-   dengan `XENDIT_CALLBACK_TOKEN`.
+2. Tambah **semua** env var (sama seperti `.env.local`, termasuk kunci enkripsi & Midtrans).
+3. Set `NEXT_PUBLIC_SITE_URL` ke URL production (penting untuk OG tag, link reset, dan redirect finish
+   Midtrans Snap).
+4. Midtrans Dashboard → Settings → Configuration → **Payment Notification URL** =
+   `https://www.fincards.land/api/payment/midtrans/webhook`.
 5. (Opsional) custom domain di Vercel → Domains.
 
 ---

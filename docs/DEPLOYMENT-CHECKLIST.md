@@ -5,7 +5,7 @@ Practical steps to take the app + the admin console to production on
 
 > Domain: `fincards.land` (canonical **www.fincards.land**) · Contact + admin
 > email: `fincardsland@gmail.com` · Business phone: **belum ada** (needed for
-> Xendit KYC — see below).
+> Midtrans KYC — see below).
 
 ---
 
@@ -19,8 +19,8 @@ Practical steps to take the app + the admin console to production on
 | `NEXT_PUBLIC_SITE_URL` | `https://www.fincards.land` | **redeploy after change** (inlined at build) |
 | `GUESTS_ENCRYPTION_KEY` | your backed-up key | **secret — see §2** |
 | `APP_ENCRYPTION_KEY` | your backed-up key | **secret — see §2** |
-| `XENDIT_SECRET_KEY` | Xendit → Settings → API Keys (**LIVE** `xnd_production_…`) | secret |
-| `XENDIT_CALLBACK_TOKEN` | Xendit → Settings → Webhooks | must match exactly |
+| `MIDTRANS_SERVER_KEY` | Midtrans → Settings → Access Keys (**production** `Mid-server-…`) | secret |
+| `MIDTRANS_IS_PRODUCTION` | `true` | anything else = sandbox API base |
 | `RESEND_API_KEY` | resend.com → API Keys | secret |
 | `RESEND_FROM` | e.g. `undangan@fincards.land` | **must be a verified fincards.land sender**, not `resend.dev` |
 | `ADMIN_EMAILS` | `fincardsland@gmail.com` | who can enter `/admin` |
@@ -43,16 +43,16 @@ safe**: lose them and every encrypted row is unrecoverable forever.
 - [ ] `fincards.land` added to the Vercel project; **www.fincards.land** is the
       canonical (apex redirects to www).
 - [ ] `NEXT_PUBLIC_SITE_URL=https://www.fincards.land` set → **redeploy** (otherwise
-      Xendit redirect + email links point at the wrong host).
+      the Midtrans Snap finish redirect + email links point at the wrong host).
 
-## 4. Xendit (payments)
+## 4. Midtrans (payments)
 
-- [ ] Switch to **LIVE** API keys (`xnd_production_…`).
-- [ ] Webhook URL = `https://www.fincards.land/api/payment/xendit/webhook`, with the
-      **callback token** matching `XENDIT_CALLBACK_TOKEN`.
-- [ ] **Enable refunds** on the account + subscribe to the **`refund.succeeded` /
-      `refund.failed`** events (module 3).
-- [ ] **Business KYC** — Xendit requires business verification to go live and to
+- [ ] Switch to **production** Access Keys (`Mid-server-…`, Settings → Access Keys)
+      + set `MIDTRANS_IS_PRODUCTION=true`.
+- [ ] Midtrans Dashboard → Settings → Configuration → **Payment Notification URL** =
+      `https://www.fincards.land/api/payment/midtrans/webhook`. (The same endpoint
+      also receives refund + chargeback notifications — module 3.)
+- [ ] **Business KYC** — Midtrans requires business verification to go live and to
       disburse refunds. A **business phone** is usually required → obtain one, then
       fill it into the legal docs (§7).
 - [ ] Do one **real small live payment** end-to-end before launch.

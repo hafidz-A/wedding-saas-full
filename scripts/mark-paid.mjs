@@ -3,7 +3,7 @@
  * scripts/mark-paid.mjs
  *
  * Flip an invitation's payment status for testing without going through
- * Xendit. Reads SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL
+ * Midtrans. Reads SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL
  * from .env.local.
  *
  * Usage:

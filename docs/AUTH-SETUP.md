@@ -200,11 +200,12 @@ Checklist yang HARUS diselaraskan ke domain baru:
 
 Tanpa ini, link konfirmasi/reset di email ditolak Supabase.
 
-### D.3 Xendit (mode LIVE)
-- Webhook callback → `https://www.fincards.land/api/payment/xendit/webhook`
-- `XENDIT_SECRET_KEY` = live key (`xnd_production_...`), `XENDIT_CALLBACK_TOKEN`
-  = token dari dashboard live (harus sama persis dengan env Vercel).
-- Success/failure redirect otomatis ikut `NEXT_PUBLIC_SITE_URL` lewat
+### D.3 Midtrans (mode LIVE)
+- Payment Notification URL → `https://www.fincards.land/api/payment/midtrans/webhook`
+  (Dashboard → Settings → Configuration).
+- `MIDTRANS_SERVER_KEY` = production Server Key (`Mid-server-...`, dari Settings →
+  Access Keys), `MIDTRANS_IS_PRODUCTION=true`.
+- Redirect finish Snap otomatis ikut `NEXT_PUBLIC_SITE_URL` lewat
   `src/lib/site-url.ts` — tidak perlu hardcode.
 
 ### D.4 Resend (email branded)
@@ -215,7 +216,7 @@ Tanpa ini, link konfirmasi/reset di email ditolak Supabase.
 ### D.5 Verifikasi
 - `https://www.fincards.land/robots.txt` & `/sitemap.xml` → host = www.fincards.land.
 - Signup akun baru → link email mengarah ke www.fincards.land (bukan localhost/.vercel.app).
-- Checkout Xendit kecil → webhook menandai paid.
+- Checkout Midtrans kecil → webhook menandai paid.
 
 > Catatan kode: tidak ada localhost yang di-hardcode di jalur produksi. Fallback
 > `'http://localhost:3000'` di `layout.tsx`, `sitemap.ts`, `robots.ts` hanya

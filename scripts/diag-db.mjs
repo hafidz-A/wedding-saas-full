@@ -31,7 +31,7 @@ const supabase = createClient(url, key, { auth: { persistSession: false } })
 // Columns the onboarding insert writes — every one must exist.
 const REQUIRED = {
   invitations: ['id', 'slug', 'owner_user_id', 'email', 'password_hash', 'plan',
-                'template_id', 'is_paid', 'is_published', 'config', 'xendit_invoice_id', 'xendit_external_id'],
+                'template_id', 'is_paid', 'is_published', 'config', 'gateway_txn_id', 'gateway_order_id'],
   rsvps: ['id', 'invitation_id'],
   gift_confirmations: ['id', 'invitation_id'],
   guestbook_notes: ['id', 'invitation_id'],

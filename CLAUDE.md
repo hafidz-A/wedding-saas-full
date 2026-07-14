@@ -21,7 +21,7 @@ one row in `invitations` with its own slug, owner account, editor dashboard, RSV
 databases, and buku-tamu (guest-book) ledger.
 
 Business model: **self-serve, one-time payment**. Couple signs up → picks a template → fills basic
-data → edits a live preview for free → **pays once (via Xendit) to publish**. Plans are DB-driven per
+data → edits a live preview for free → **pays once (via Midtrans) to publish**. Plans are DB-driven per
 template (`basic` / `premium`); Premium unlocks the buku-tamu attendance ledger + QR check-in. Add-ons:
 extra guest quota (50-guest blocks), pay-the-difference upgrade to Premium, renewal when the active
 period expires. Phase: **go-to-market** (see the marketing assets in `docs/marketing/`).
@@ -40,7 +40,7 @@ since diverged substantially (play-once hero, ornament system, folded registry, 
 | Animation | motion 12 + GSAP 3.15 + lenis (smooth scroll); Solary adds three.js |
 | Backend | Supabase (Postgres + Storage + RLS) |
 | Auth | **Supabase Auth** (email+password accounts, email verify, password reset, optional TOTP MFA) |
-| Payments | **Xendit** hosted invoices + webhook |
+| Payments | **Midtrans** Snap (redirect) + notification webhook |
 | Forms | react-hook-form 7.55 + zod |
 | Drag/drop | @dnd-kit (editor section reorder) |
 | Email | Resend (password reset, notifications) |
@@ -86,9 +86,10 @@ Key facts:
 
 - A guest sees a public invitation only when it is **`is_published` AND `is_paid`** and not expired /
   suspended. The signed-in **owner can preview** their own unpublished/unpaid invitation.
-- Onboarding inserts an **unpaid draft** (`is_paid=false`). `startCheckout` creates a Xendit invoice;
-  the **webhook** (`/api/payment/xendit/webhook`) publishes on PAID. A manual "saya sudah bayar — cek
-  ulang" fallback (`recheckPayment`) re-queries Xendit if the webhook is missed.
+- Onboarding inserts an **unpaid draft** (`is_paid=false`). `startCheckout` creates a Midtrans Snap
+  transaction; the **notification webhook** (`/api/payment/midtrans/webhook`) publishes on settlement.
+  A manual "saya sudah bayar — cek ulang" fallback (`recheckPayment`) re-queries Midtrans if the
+  webhook is missed.
 - Dashboard is behind a **PaymentGate**: `draft`/`expired` shows a pay/renew screen instead of the editor.
 - Active period: `template_plans.duration_days` (NULL = lifetime). Renewal (`ren_`), Premium upgrade
   (`upg_`, pay-the-difference), and guest-quota add-on (`qta_`) each have their own checkout + recheck.
@@ -191,7 +192,7 @@ src/
 │   │   ├── checkin/                               ← QR / manual check-in
 │   │   └── dashboard/                             ← editor + tabs + PaymentGate + guests/guestbook actions
 │   ├── admin/                                     ← operator console (invitations, payments, templates, testimonials, users, activity)
-│   └── api/                                       ← rsvp, gift, guestbook, checkin, upload, auth/*, payment/xendit/webhook, invitation/[slug]/{config,publish,meta,music,theme}
+│   └── api/                                       ← rsvp, gift, guestbook, checkin, upload, auth/*, payment/midtrans/webhook, invitation/[slug]/{config,publish,meta,music,theme}
 ├── all-templates/<id>/                            ← lovebirds, solary (sections, config, renderers, styles, Shell)
 ├── config/                                        ← templateIndex.js, templateCatalog.js, categories.js
 ├── editor/                                        ← block editor (schemas, fields, EditorRoot, templatePolicy)
@@ -207,7 +208,8 @@ supabase/                                          ← schema.sql (base) + migra
 
 1. **`supabase/schema.sql` is the ORIGINAL bcrypt-era base** and is out of date on its own (still shows
    `password_hash not null`, `template_id default 'classic'`, old RLS). The real schema = base **plus**
-   every file in `supabase/migrations/` (owner_user_id, is_paid, xendit_*, guest_quota_extra, `*_enc`
+   every file in `supabase/migrations/` (owner_user_id, is_paid, gateway_* payment columns (renamed
+   from xendit_* by `2026-07-14_midtrans_gateway.sql`), guest_quota_extra, `*_enc`
    columns, guests, attendances, refund_requests, plan_upgrades, quota_addons, template_plans, admin
    tables, testimonials, …). Apply base then all migrations in date order.
 2. **Empty-config behaviour:** a real invitation with empty `config` renders a "belum siap" notice (does
@@ -231,13 +233,13 @@ supabase/                                          ← schema.sql (base) + migra
 ```powershell
 npm install
 # Fill .env.local (see .env.local.example): Supabase x3, NEXT_PUBLIC_SITE_URL,
-# APP_ENCRYPTION_KEY, GUESTS_ENCRYPTION_KEY, XENDIT_SECRET_KEY, XENDIT_CALLBACK_TOKEN,
+# APP_ENCRYPTION_KEY, GUESTS_ENCRYPTION_KEY, MIDTRANS_SERVER_KEY, MIDTRANS_IS_PRODUCTION,
 # ADMIN_EMAILS, RESEND_API_KEY/FROM. Apply supabase/schema.sql + all migrations first.
 npm run dev
 ```
 
 - Marketing: http://localhost:3000 · Demo invitation: http://localhost:3000/lovebirds/demo-lovebirds (or /solary/demo-solary)
-- Onboarding path (real): /signup → /onboarding → pay (Xendit) → /[template]/[slug]/dashboard
+- Onboarding path (real): /signup → /onboarding → pay (Midtrans) → /[template]/[slug]/dashboard
 - Comp/admin bootstrap without payment: `node scripts/create-invitation.mjs …` or `/admin/invitations/new`
 
 **Tests:** `npm run typecheck` · `npm run test` (vitest) · `npm run test:e2e` (Playwright) ·
