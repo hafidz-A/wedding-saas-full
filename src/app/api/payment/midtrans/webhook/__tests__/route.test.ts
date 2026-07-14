@@ -229,6 +229,37 @@ describe('POST /api/payment/midtrans/webhook', () => {
     expect(mockLog).toHaveBeenCalledWith('system (midtrans)', { action: 'payment.chargeback', targetType: 'invitation', targetId: 'inv-1' })
   })
 
+  it('records a chargeback on an upg_ order with the UPGRADE amount, not the invitation paid_amount_idr', async () => {
+    const admin = createFakeSupabase({
+      tables: {
+        plan_upgrades: {
+          select: [
+            { data: { id: 'u1', invitation_id: 'inv-1' } }, // sourceFromOrderId lookup
+            { data: { amount_idr: 50000 } }, // refundable-amount lookup
+          ],
+        },
+        // Decoy: invitations.paid_amount_idr is the INITIAL purchase amount and
+        // must NOT be used to net an upgrade chargeback.
+        invitations: { select: { data: { paid_amount_idr: 149000 } } },
+        refunds: { insert: { data: { id: 'rc2' } } },
+      },
+    })
+    mockAdmin.mockReturnValue(admin as any)
+    mockHasOpenRefund.mockResolvedValue(false)
+    const body = withSig({ order_id: 'upg_inv-1_1', status_code: '200', gross_amount: '50000.00', transaction_status: 'chargeback' })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    const ins = admin.lastCall('insert')
+    expect(ins?.table).toBe('refunds')
+    expect(ins?.value).toEqual({
+      invitation_id: 'inv-1', source_type: 'upgrade', source_id: 'u1',
+      amount_idr: 50000, method: 'chargeback', status: 'pending',
+      reason: 'Chargeback / dispute bank',
+    })
+    expect(mockSettleRefund).toHaveBeenCalledOnce()
+    expect(mockSettleRefund.mock.calls[0][1]).toBe('rc2')
+  })
+
   it('skips a chargeback when the source already has an open refund', async () => {
     const admin = createFakeSupabase({
       tables: { invitations: { select: { data: { paid_amount_idr: 149000 } } } },

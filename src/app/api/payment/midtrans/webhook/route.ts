@@ -257,6 +257,11 @@ async function handleQuotaAddon(admin: ReturnType<typeof createSupabaseAdminClie
 /** Resolve which refundable source an order id belongs to. */
 async function sourceFromOrderId(admin: any, orderId: string):
   Promise<{ sourceType: RefundSourceType; sourceId: string; invitationId: string } | null> {
+  // A refunded RENEWAL payment has no dedicated ledger row of its own — it nets
+  // the invitation's initial paid_amount_idr and takes the invitation down, same
+  // as a refund of the original purchase. This is a deliberate, defensive choice:
+  // we only support FULL refunds today, so "the whole thing came back" is the
+  // correct (if slightly conservative) accounting for a renewal chargeback/refund.
   const invId = invitationIdFromOrderId(orderId) ?? renewalIdFromOrderId(orderId)
   if (invId) return { sourceType: 'initial', sourceId: invId, invitationId: invId }
   const table = orderId.startsWith('upg_') ? 'plan_upgrades' : orderId.startsWith('qta_') ? 'quota_addons' : null
@@ -264,6 +269,29 @@ async function sourceFromOrderId(admin: any, orderId: string):
   const { data } = await admin.from(table).select('id, invitation_id').eq('gateway_order_id', orderId).maybeSingle()
   if (!data) return null
   return { sourceType: table === 'plan_upgrades' ? 'upgrade' : 'addon', sourceId: data.id, invitationId: data.invitation_id }
+}
+
+/**
+ * The amount a refund/chargeback against `src` should net out of revenue.
+ * 'initial' nets the invitation's stored paid_amount_idr; 'upgrade'/'addon' net
+ * their OWN recorded amount_idr — NOT the invitation's initial purchase amount,
+ * which would silently corrupt the ledger for upgrade/add-on chargebacks.
+ * Mirrors loadRefundSource's `Number(x ?? 0)` coercion.
+ */
+async function refundableAmountFor(
+  admin: any,
+  src: { sourceType: RefundSourceType; sourceId: string; invitationId: string },
+): Promise<number> {
+  if (src.sourceType === 'upgrade') {
+    const { data } = await admin.from('plan_upgrades').select('amount_idr').eq('id', src.sourceId).maybeSingle()
+    return Number((data as any)?.amount_idr ?? 0)
+  }
+  if (src.sourceType === 'addon') {
+    const { data } = await admin.from('quota_addons').select('amount_idr').eq('id', src.sourceId).maybeSingle()
+    return Number((data as any)?.amount_idr ?? 0)
+  }
+  const { data } = await admin.from('invitations').select('paid_amount_idr').eq('id', src.invitationId).maybeSingle()
+  return Number((data as any)?.paid_amount_idr ?? 0)
 }
 
 /**
@@ -287,10 +315,10 @@ async function handleRefundEvent(admin: ReturnType<typeof createSupabaseAdminCli
   }
   // No row → the refund was fired from the Midtrans dashboard directly.
   // Record it so money and entitlement can't drift apart.
-  const { data: inv } = await admin.from('invitations').select('paid_amount_idr').eq('id', src.invitationId).maybeSingle()
+  const amountIDR = await refundableAmountFor(admin, src)
   const { data: inserted } = await (admin.from('refunds') as any).insert({
     invitation_id: src.invitationId, source_type: src.sourceType, source_id: src.sourceId,
-    amount_idr: Number((inv as any)?.paid_amount_idr ?? 0), method: 'gateway', status: 'pending',
+    amount_idr: amountIDR, method: 'gateway', status: 'pending',
     reason: 'Refund dari dashboard Midtrans',
   }).select('id').single()
   if (inserted) await settleRefund(admin, (inserted as { id: string }).id)
@@ -308,10 +336,10 @@ async function handleChargeback(admin: ReturnType<typeof createSupabaseAdminClie
   const src = await sourceFromOrderId(admin, orderId)
   if (!src) return NextResponse.json({ ok: true })
   if (await sourceHasOpenRefund(admin, src.sourceType, src.sourceId)) return NextResponse.json({ ok: true })
-  const { data: inv } = await admin.from('invitations').select('paid_amount_idr').eq('id', src.invitationId).maybeSingle()
+  const amountIDR = await refundableAmountFor(admin, src)
   const { data: row } = await (admin.from('refunds') as any).insert({
     invitation_id: src.invitationId, source_type: src.sourceType, source_id: src.sourceId,
-    amount_idr: Number((inv as any)?.paid_amount_idr ?? 0), method: 'chargeback', status: 'pending',
+    amount_idr: amountIDR, method: 'chargeback', status: 'pending',
     reason: 'Chargeback / dispute bank',
   }).select('id').single()
   if (row) await settleRefund(admin, (row as { id: string }).id)

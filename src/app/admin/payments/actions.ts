@@ -290,7 +290,7 @@ export async function adminRefundViaGateway(sourceType: RefundSourceType, source
     // gateway error; the admin re-runs the MANUAL route, which inserts a fresh
     // row (sourceHasOpenRefund ignores failed rows) and settles immediately.
     await (db.from('refunds') as any).update({ status: 'failed', reason: `${reason ?? ''} [gagal: ${String(e).slice(0, 160)}]` }).eq('id', refundRowId)
-    return { ok: false, error: 'Refund Midtrans gagal (saldo Midtrans kurang atau channel menolak). Transfer balik manual lalu "Tandai refund".' }
+    return { ok: false, error: 'Refund Midtrans gagal (saldo kurang / channel menolak). CEK DASHBOARD MIDTRANS dulu — kalau refund ternyata masuk, JANGAN transfer manual. Kalau benar-benar gagal: transfer balik manual lalu "Tandai refund".' }
   }
   await (db.from('refunds') as any).update({ gateway_refund_id: refund.refundId }).eq('id', refundRowId)
   // Direct Refund usually confirms synchronously; the webhook settles otherwise.
