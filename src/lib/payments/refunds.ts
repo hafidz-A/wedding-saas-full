@@ -10,28 +10,32 @@ export type RefundSourceType = 'initial' | 'upgrade' | 'addon'
 export interface RefundSource {
   invitationId: string
   amountIDR: number          // the STORED paid amount — never user-supplied
-  paidSource: 'xendit' | 'manual' | 'comp'
-  xenditInvoiceId: string | null
+  paidSource: 'midtrans' | 'manual' | 'comp'
+  gatewayOrderId: string | null
+  /** Payment channel captured at PAID time — decides API refund vs manual. */
+  paidChannel: string | null
 }
 
 /** Resolve a refundable source to its invitation + stored amount + payment channel. */
 export async function loadRefundSource(db: any, sourceType: RefundSourceType, sourceId: string): Promise<RefundSource | null> {
   if (sourceType === 'initial') {
     const { data } = await db.from('invitations')
-      .select('id, paid_amount_idr, paid_source, xendit_invoice_id, is_paid').eq('id', sourceId).maybeSingle()
+      .select('id, paid_amount_idr, paid_source, gateway_order_id, paid_channel, is_paid').eq('id', sourceId).maybeSingle()
     if (!data || !data.is_paid) return null
     return {
       invitationId: data.id, amountIDR: Number(data.paid_amount_idr ?? 0),
-      paidSource: (data.paid_source as any) || 'xendit', xenditInvoiceId: data.xendit_invoice_id ?? null,
+      paidSource: (data.paid_source as any) || 'midtrans',
+      gatewayOrderId: data.gateway_order_id ?? null, paidChannel: data.paid_channel ?? null,
     }
   }
   const table = sourceType === 'upgrade' ? 'plan_upgrades' : 'quota_addons'
   const { data } = await db.from(table)
-    .select('id, invitation_id, amount_idr, xendit_invoice_id, status').eq('id', sourceId).maybeSingle()
+    .select('id, invitation_id, amount_idr, gateway_order_id, paid_channel, status').eq('id', sourceId).maybeSingle()
   if (!data || data.status !== 'paid') return null
   return {
     invitationId: data.invitation_id, amountIDR: Number(data.amount_idr ?? 0),
-    paidSource: 'xendit', xenditInvoiceId: data.xendit_invoice_id ?? null, // upgrades/add-ons are always Xendit
+    paidSource: 'midtrans', // upgrades/add-ons are always gateway-paid
+    gatewayOrderId: data.gateway_order_id ?? null, paidChannel: data.paid_channel ?? null,
   }
 }
 

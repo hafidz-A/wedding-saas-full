@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import {
-  adminReconcileXendit, adminRecheckPayment, adminRecheckUpgrade, adminRecheckQuotaAddon,
+  adminReconcileGateway, adminRecheckPayment, adminRecheckUpgrade, adminRecheckQuotaAddon,
   type ReconcileMismatch,
 } from './actions'
 
@@ -15,7 +15,7 @@ export default function ReconcilePanel() {
 
   async function reconcile() {
     setBusy(true); setMsg(null)
-    const res = await adminReconcileXendit()
+    const res = await adminReconcileGateway()
     setBusy(false); setRan(true)
     if (!res.ok) { setMsg(res.error || 'Gagal'); return }
     setRows(res.mismatches ?? [])

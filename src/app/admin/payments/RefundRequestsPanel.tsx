@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { refundVerdict, type UsageSnapshot } from '@/lib/payments/refund-policy'
 import { formatIDR } from '@/lib/payments/transactions'
 import { adminApproveRefund, adminRejectRefund } from './actions'
+import { canApiRefund } from '@/lib/payments/refund-channels'
 import type { RefundRequestView } from './data'
 import { useAdminForm } from '@/components/admin/AdminDialogProvider'
 
@@ -30,20 +31,20 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
   if (!requests.length) return null
 
   async function approve(r: RefundRequestView) {
-    const isXendit = r.paidSource === 'xendit'
+    const gatewayEligible = r.paidSource === 'midtrans' && canApiRefund(r.paidChannel)
     const res = await formDialog({
       title: `Setujui refund ${formatIDR(r.amountIDR)}`,
-      message: isXendit
-        ? `Untuk "${r.slug}". Via Xendit = uang balik otomatis. Manual = kamu transfer balik sendiri.`
-        : `Untuk "${r.slug}". Bayar offline → pastikan kamu (akan) transfer balik ke pelanggan.`,
+      message: gatewayEligible
+        ? `Untuk "${r.slug}". Via Midtrans = uang balik otomatis. Manual = kamu transfer balik sendiri.`
+        : `Untuk "${r.slug}". Channel ini (${r.paidChannel ?? 'transfer bank/VA'}) tidak mendukung refund otomatis → transfer balik sendiri ke rekening tujuan, lalu catat di sini.`,
       fields: [
-        ...(isXendit ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'xendit', options: [{ value: 'xendit', label: 'Via Xendit (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
+        ...(gatewayEligible ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'gateway', options: [{ value: 'gateway', label: 'Via Midtrans (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
         { name: 'note', label: 'Catatan (opsional)', type: 'textarea' as const },
       ],
       submitLabel: 'Setujui & refund', tone: 'danger',
     })
     if (!res) return
-    const method = (isXendit ? res.method : 'manual') as 'manual' | 'xendit'
+    const method = (gatewayEligible ? res.method : 'manual') as 'manual' | 'gateway'
     setBusy(true); setMsg(null)
     const out = await adminApproveRefund(r.id, { method, note: res.note || undefined })
     setBusy(false)

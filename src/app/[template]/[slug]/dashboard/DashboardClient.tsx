@@ -246,7 +246,7 @@ export default function DashboardClient({
       )}
 
       {invitation.is_paid && invitation.paid_source !== 'comp' && (
-        <RefundRequestButton invitationId={invitation.id} paidSource={invitation.paid_source || 'xendit'} hasPendingRefund={hasPendingRefund} eligible={refundEligible} />
+        <RefundRequestButton invitationId={invitation.id} paidSource={invitation.paid_source || 'midtrans'} paidChannel={invitation.paid_channel ?? null} hasPendingRefund={hasPendingRefund} eligible={refundEligible} />
       )}
 
       <NavScroller

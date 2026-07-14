@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { formatIDR, type Transaction } from '@/lib/payments/transactions'
-import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaXendit } from './actions'
+import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaGateway } from './actions'
 import type { RefundSourceType } from '@/lib/payments/refunds'
 import { useAdminConfirm, useAdminAlert, useAdminForm } from '@/components/admin/AdminDialogProvider'
 
@@ -61,23 +61,38 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   async function refund(t: Transaction) {
     const sourceType = t.type as RefundSourceType
     const sourceId = t.key.split(':').slice(1).join(':')
-    const isXendit = t.source === 'xendit'
+    // TxnSource is still 'xendit' | 'manual' | 'comp' (transactions.ts rename is
+    // Task 6) — cast so this channel-aware check compiles today and keeps
+    // working once that rename lands and 'midtrans' becomes a real member.
+    const isMidtrans = (t.source as string) === 'midtrans'
     const res = await formDialog({
       title: `Refund ${formatIDR(t.amountIDR)}`,
-      message: isXendit
-        ? `Untuk "${t.slug}". Via Xendit = uang balik otomatis ke metode asal. Manual = kamu transfer balik sendiri lalu catat di sini.`
+      message: isMidtrans
+        ? `Untuk "${t.slug}". Via Midtrans = uang balik otomatis ke metode asal. Manual = kamu transfer balik sendiri lalu catat di sini.`
         : `Untuk "${t.slug}". Dibayar offline → kamu transfer balik sendiri dulu, lalu catat di sini.`,
       fields: [
-        ...(isXendit ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'xendit', options: [{ value: 'xendit', label: 'Via Xendit (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
+        ...(isMidtrans ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'gateway', options: [{ value: 'gateway', label: 'Via Midtrans (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
         { name: 'reason', label: 'Alasan (opsional)', type: 'textarea' as const, placeholder: 'mis. bayar dobel' },
       ],
       submitLabel: 'Proses refund', tone: 'danger',
     })
     if (!res) return
-    const method = (isXendit ? res.method : 'manual') as 'xendit' | 'manual'
+    const method = (isMidtrans ? res.method : 'manual') as 'gateway' | 'manual'
+    if (method === 'manual') {
+      // Anti-hijack gate: force the operator to explicitly confirm they matched
+      // the destination account's holder name before any manual money moves
+      // (mustEqual disables the submit button until 'yes' is picked).
+      const confirmed = await formDialog({
+        title: 'Konfirmasi sebelum transfer manual',
+        message: `Pastikan kamu sudah mencocokkan nama pemilik rekening tujuan untuk "${t.slug}" sebelum lanjut.`,
+        fields: [{ name: 'confirmed', label: 'Sudah dicocokkan?', type: 'select', defaultValue: 'no', options: [{ value: 'no', label: 'Belum saya cek' }, { value: 'yes', label: 'Nama pemilik rekening SUDAH saya cocokkan' }], mustEqual: 'yes' }],
+        submitLabel: 'Lanjut refund manual', tone: 'danger',
+      })
+      if (!confirmed) return
+    }
     setBusy(true)
-    const r = method === 'xendit'
-      ? await adminRefundViaXendit(sourceType, sourceId, res.reason || undefined)
+    const r = method === 'gateway'
+      ? await adminRefundViaGateway(sourceType, sourceId, res.reason || undefined)
       : await adminRefund(sourceType, sourceId, res.reason || undefined)
     setBusy(false)
     if (r.ok) { location.reload() } else { await alertDialog({ title: 'Refund gagal', message: r.error || 'Coba lagi.', tone: 'danger' }) }
@@ -107,7 +122,7 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
         <input placeholder="Cari slug…" value={q} onChange={(e) => setQ(e.target.value)} style={ctl} />
         <Select value={type} onChange={setType} options={[['all', 'Semua tipe'], ['initial', 'Awal'], ['upgrade', 'Upgrade'], ['addon', 'Kuota']]} />
-        <Select value={source} onChange={setSource} options={[['all', 'Semua sumber'], ['xendit', 'Xendit'], ['manual', 'Manual'], ['comp', 'Comp']]} />
+        <Select value={source} onChange={setSource} options={[['all', 'Semua sumber'], ['midtrans', 'Midtrans'], ['manual', 'Manual'], ['comp', 'Comp']]} />
         <Select value={status} onChange={setStatus} options={[['all', 'Semua status'], ['paid', 'Lunas'], ['refunded', 'Direfund']]} />
         <input type="date" title="Dari tanggal" value={from} onChange={(e) => setFrom(e.target.value)} style={ctl} />
         <input type="date" title="Sampai tanggal" value={to} onChange={(e) => setTo(e.target.value)} style={ctl} />

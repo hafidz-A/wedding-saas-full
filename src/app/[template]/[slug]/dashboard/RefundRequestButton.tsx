@@ -3,13 +3,15 @@
 
 import { useState } from 'react'
 import { requestRefund, type RefundRequestInput } from '@/app/onboarding/actions'
+import { canApiRefund } from '@/lib/payments/refund-channels'
 
 /**
  * Owner-facing "Ajukan pengembalian dana". Files a refund REQUEST the operator
- * reviews (never an instant refund). A manual/offline-paid invitation also
- * collects a destination account (Xendit returns to the original method).
+ * reviews (never an instant refund). A manual/offline-paid invitation, or a
+ * Midtrans channel that doesn't support the Direct Refund API (bank transfer/
+ * VA), also collects a destination account.
  */
-export default function RefundRequestButton({ invitationId, paidSource, hasPendingRefund = false, eligible = true }: { invitationId: string; paidSource: string; hasPendingRefund?: boolean; eligible?: boolean }) {
+export default function RefundRequestButton({ invitationId, paidSource, paidChannel, hasPendingRefund = false, eligible = true }: { invitationId: string; paidSource: string; paidChannel: string | null; hasPendingRefund?: boolean; eligible?: boolean }) {
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState<RefundRequestInput['category']>('duplicate_payment')
   const [detail, setDetail] = useState('')
@@ -20,7 +22,7 @@ export default function RefundRequestButton({ invitationId, paidSource, hasPendi
   const [done, setDone] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  const needsDestination = paidSource === 'manual'
+  const needsDestination = paidSource === 'manual' || (paidSource === 'midtrans' && !canApiRefund(paidChannel))
 
   async function submit() {
     setBusy(true); setErr(null)
@@ -85,7 +87,7 @@ export default function RefundRequestButton({ invitationId, paidSource, hasPendi
       </label>
       {needsDestination && (
         <div style={{ display: 'grid', gap: 6 }}>
-          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>Karena kamu bayar via transfer/manual, isi rekening tujuan pengembalian:</p>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>Karena kamu bayar via transfer bank/VA (atau manual), isi rekening tujuan pengembalian:</p>
           <input placeholder="Bank" value={bank} onChange={(e) => setBank(e.target.value)} style={ctl} />
           <input placeholder="Nomor rekening" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} style={ctl} />
           <input placeholder="Nama pemilik rekening" value={holder} onChange={(e) => setHolder(e.target.value)} style={ctl} />

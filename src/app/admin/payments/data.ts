@@ -60,6 +60,7 @@ export interface RefundRequestView {
   slug: string
   amountIDR: number
   paidSource: string
+  paidChannel: string | null
   category: string
   detail: string | null
   snapshot: any
@@ -77,7 +78,7 @@ export async function fetchRefundRequests(db: any): Promise<RefundRequestView[]>
   if (!rows.length) return []
   const ids = Array.from(new Set(rows.map((r) => r.invitation_id)))
   const { data: invs } = (await db.from('invitations')
-    .select('id, slug, paid_amount_idr, paid_source, is_published, paid_at, updated_at, used_at, published_at').in('id', ids)) as { data: any[] | null }
+    .select('id, slug, paid_amount_idr, paid_source, paid_channel, is_published, paid_at, updated_at, used_at, published_at').in('id', ids)) as { data: any[] | null }
   const map = new Map<string, any>((invs ?? []).map((i) => [i.id, i]))
   // Recompute the usage snapshot LIVE per request so the eligibility verdict the
   // operator acts on reflects CURRENT usage — not the frozen request-time photo.
@@ -90,7 +91,8 @@ export async function fetchRefundRequests(db: any): Promise<RefundRequestView[]>
       : null
     return {
       id: r.id, invitationId: r.invitation_id, slug: inv?.slug ?? r.invitation_id,
-      amountIDR: Number(inv?.paid_amount_idr ?? 0), paidSource: inv?.paid_source ?? 'xendit',
+      amountIDR: Number(inv?.paid_amount_idr ?? 0), paidSource: inv?.paid_source ?? 'midtrans',
+      paidChannel: inv?.paid_channel ?? null,
       category: r.reason_category, detail: r.reason_text, snapshot, destination, createdAt: r.created_at,
     }
   }))
