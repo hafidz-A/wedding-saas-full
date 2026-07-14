@@ -7,24 +7,26 @@ vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('@/lib/payments/plans', () => ({ resolvePlan: vi.fn(), resolveUpgrade: vi.fn(), planBaseQuota: vi.fn(() => 200) }))
 vi.mock('@/lib/payments/template-plans', () => ({ getTemplatePlans: vi.fn(async () => []) }))
-vi.mock('@/lib/payments/xendit', () => ({
-  createXenditInvoice: vi.fn(),
-  getXenditInvoice: vi.fn(),
-  isPaidStatus: vi.fn(() => true),
-  expireXenditInvoice: vi.fn(),
+vi.mock('@/lib/payments/gateway', () => ({
+  createSnapTransaction: vi.fn(),
+  getTransactionStatus: vi.fn(),
+  isPaidStatus: vi.fn(),
+  expireTransaction: vi.fn(),
+  mintOrderId: (p: string, id: string, now = Date.now()) => `${p}_${id}_${now.toString(36)}`,
+  canApiRefund: (c: string | null | undefined) => !!c && ['credit_card','gopay','shopeepay','dana','ovo','qris','kredivo','akulaku'].includes(c),
 }))
 vi.mock('@/lib/payments/publish', () => ({ publishPaidInvitation: vi.fn(), applyPaidUpgrade: vi.fn(), applyPaidQuotaAddon: vi.fn() }))
 
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { resolvePlan } from '@/lib/payments/plans'
-import { createXenditInvoice, getXenditInvoice, isPaidStatus } from '@/lib/payments/xendit'
+import { createSnapTransaction, getTransactionStatus, isPaidStatus } from '@/lib/payments/gateway'
 import { publishPaidInvitation, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { completeOnboarding, checkSlugAvailable, startCheckout, recheckPayment, startQuotaAddonCheckout } from '../actions'
 
 const mockAdmin = vi.mocked(createSupabaseAdminClient)
 const mockResolvePlan = vi.mocked(resolvePlan)
-const mockCreateInvoice = vi.mocked(createXenditInvoice)
-const mockGetInvoice = vi.mocked(getXenditInvoice)
+const mockCreateInvoice = vi.mocked(createSnapTransaction)
+const mockGetInvoice = vi.mocked(getTransactionStatus)
 const mockIsPaid = vi.mocked(isPaidStatus)
 const mockPublish = vi.mocked(publishPaidInvitation)
 
@@ -124,7 +126,7 @@ describe('checkSlugAvailable', () => {
 })
 
 describe('startCheckout', () => {
-  const INV = { id: 'inv-1', slug: 'x', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1', email: 'e@x.com', is_paid: false, xendit_invoice_id: null }
+  const INV = { id: 'inv-1', slug: 'x', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1', email: 'e@x.com', is_paid: false, gateway_order_id: null }
 
   it('fails without a session', async () => {
     getUser.mockResolvedValue({ data: { user: null } })
@@ -139,18 +141,18 @@ describe('startCheckout', () => {
     expect((await startCheckout('inv-1')).ok).toBe(false)
   })
 
-  it('creates an invoice and returns the hosted URL', async () => {
+  it('creates a transaction and returns the hosted URL', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: INV }, update: {} } } }) as any)
-    mockCreateInvoice.mockResolvedValue({ id: 'invc-1', invoiceUrl: 'https://pay.test/invc-1' } as any)
+    mockCreateInvoice.mockResolvedValue({ token: 't', redirectUrl: 'https://app.sandbox.midtrans.com/snap/v2/vtweb/xyz' } as any)
     const r = await startCheckout('inv-1')
     expect(r.ok).toBe(true)
-    expect(r.invoiceUrl).toBe('https://pay.test/invc-1')
+    expect(r.invoiceUrl).toBe('https://app.sandbox.midtrans.com/snap/v2/vtweb/xyz')
   })
 
   it('charges plan price + guest-quota add-on', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: { ...INV, guest_quota_extra: 100 } }, update: {} } } }) as any)
     mockResolvePlan.mockResolvedValue({ amountIDR: 100000 } as any)
-    mockCreateInvoice.mockResolvedValue({ id: 'invc-1', invoiceUrl: 'https://pay.test/invc-1' } as any)
+    mockCreateInvoice.mockResolvedValue({ token: 't', redirectUrl: 'https://app.sandbox.midtrans.com/snap/v2/vtweb/xyz' } as any)
     await startCheckout('inv-1')
     // 100000 plan + 2 blocks * 10000 = 120000
     expect(mockCreateInvoice.mock.calls[0][0]).toMatchObject({ amountIDR: 120000 })
@@ -165,10 +167,10 @@ describe('startQuotaAddonCheckout', () => {
     expect((await startQuotaAddonCheckout('inv-1', 100)).ok).toBe(false)
   })
 
-  it('inserts a pending quota_addons row + qta_ invoice for the right amount', async () => {
+  it('inserts a pending quota_addons row + qta_ transaction for the right amount', async () => {
     const fake = createFakeSupabase({ tables: { invitations: { select: { data: PAID } }, quota_addons: { insert: {} } } })
     mockAdmin.mockReturnValue(fake as any)
-    mockCreateInvoice.mockResolvedValue({ id: 'invc-1', invoiceUrl: 'https://pay.test/invc-1' } as any)
+    mockCreateInvoice.mockResolvedValue({ token: 't', redirectUrl: 'https://app.sandbox.midtrans.com/snap/v2/vtweb/xyz' } as any)
     const r = await startQuotaAddonCheckout('inv-1', 100)
     expect(r.ok).toBe(true)
     expect(mockCreateInvoice.mock.calls[0][0]).toMatchObject({ amountIDR: 20000 })
@@ -176,7 +178,8 @@ describe('startQuotaAddonCheckout', () => {
     expect(ins.value.qty_guests).toBe(100)
     expect(ins.value.amount_idr).toBe(20000)
     expect(ins.value.status).toBe('pending')
-    expect(String(ins.value.xendit_external_id)).toMatch(/^qta_/)
+    expect(ins.value.gateway_txn_id).toBe(null)
+    expect(String(ins.value.gateway_order_id)).toMatch(/^qta_/)
   })
 
   it('rejects when the purchase would exceed the 5000 cap', async () => {
@@ -189,7 +192,7 @@ describe('startQuotaAddonCheckout', () => {
 })
 
 describe('recheckPayment', () => {
-  const INV = { id: 'inv-1', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1', is_paid: false, xendit_invoice_id: 'invc-1' }
+  const INV = { id: 'inv-1', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1', is_paid: false, gateway_order_id: 'inv_inv-1_abc' }
 
   it('returns early when already paid', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: { ...INV, is_paid: true } } } } }) as any)
@@ -197,18 +200,18 @@ describe('recheckPayment', () => {
     expect(mockPublish).not.toHaveBeenCalled()
   })
 
-  it('publishes when Xendit confirms paid for the right amount', async () => {
+  it('publishes when Midtrans confirms paid for the right amount', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: INV } } } }) as any)
-    mockGetInvoice.mockResolvedValue({ status: 'PAID', amountIDR: 100000 } as any)
+    mockGetInvoice.mockResolvedValue({ orderId: INV.gateway_order_id, transactionId: 'mid-1', status: 'settlement', fraudStatus: null, grossAmountIDR: 100000, paymentType: 'qris' } as any)
     const r = await recheckPayment('inv-1')
     expect(r).toMatchObject({ ok: true, published: true })
     expect(mockPublish).toHaveBeenCalledOnce()
   })
 
-  it('does NOT publish when the invoice is still unpaid', async () => {
+  it('does NOT publish when the transaction is still unpaid', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: INV } } } }) as any)
     mockIsPaid.mockReturnValue(false)
-    mockGetInvoice.mockResolvedValue({ status: 'PENDING', amountIDR: 100000 } as any)
+    mockGetInvoice.mockResolvedValue({ orderId: INV.gateway_order_id, transactionId: null, status: 'pending', fraudStatus: null, grossAmountIDR: 100000, paymentType: null } as any)
     const r = await recheckPayment('inv-1')
     expect(r).toMatchObject({ ok: true, published: false })
     expect(mockPublish).not.toHaveBeenCalled()

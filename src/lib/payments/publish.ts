@@ -89,7 +89,7 @@ export async function extendActivePeriod(
 /**
  * Flip an invitation to paid + published and stamp its active period.
  *
- * Shared by the Xendit webhook and the manual "recheck payment" action so both
+ * Shared by the payment webhook and the manual "recheck payment" action so both
  * compute the expiry the exact same way. The CALLER is responsible for verifying
  * the payment is genuine (PAID status + correct amount) BEFORE calling this —
  * this helper only performs the state transition.
@@ -98,7 +98,10 @@ export async function publishPaidInvitation(
   admin: any,
   inv: PublishableInvitation,
   nowMs: number = Date.now(),
-  opts: { paidAmountIDR?: number | null; feeIDR?: number | null; paidSource?: string } = {},
+  opts: {
+    paidAmountIDR?: number | null; feeIDR?: number | null; paidSource?: string
+    paidChannel?: string | null; gatewayTxnId?: string | null
+  } = {},
 ): Promise<void> {
   const resolved = await resolvePlan(inv.template_id, inv.plan)
   const patch: Record<string, unknown> = {
@@ -112,5 +115,9 @@ export async function publishPaidInvitation(
   if (opts.paidAmountIDR != null) patch.paid_amount_idr = opts.paidAmountIDR
   if (opts.feeIDR != null) patch.fee_idr = opts.feeIDR
   if (opts.paidSource) patch.paid_source = opts.paidSource
+  // Channel + gateway txn id captured at paid time — refund routing (canApiRefund)
+  // depends on paid_channel being recorded here.
+  if (opts.paidChannel != null) patch.paid_channel = opts.paidChannel
+  if (opts.gatewayTxnId != null) patch.gateway_txn_id = opts.gatewayTxnId
   await (admin.from('invitations') as any).update(patch).eq('id', inv.id)
 }

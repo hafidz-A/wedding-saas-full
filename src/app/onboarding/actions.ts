@@ -11,7 +11,8 @@ import {
   initialPurchaseAmount, clampQuotaExtra, quotaAddonAmount, effectiveQuota,
   QUOTA_CAP, DEFAULT_BASE_QUOTA,
 } from '@/lib/payments/quota'
-import { createXenditInvoice, getXenditInvoice, isPaidStatus, expireXenditInvoice } from '@/lib/payments/xendit'
+import { createSnapTransaction, getTransactionStatus, isPaidStatus, expireTransaction, mintOrderId } from '@/lib/payments/gateway'
+import { canApiRefund } from '@/lib/payments/refund-channels'
 import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
@@ -51,7 +52,7 @@ export interface OnboardingResult {
  *   - Caps how many UNPAID drafts one account may stack up (anti-abuse).
  *   - Builds the full 14-section config with the couple's data substituted.
  *   - Inserts the row as an unpaid draft (is_paid=false, is_published=false);
- *     payment publishes it via the Xendit webhook.
+ *     payment publishes it via the payment webhook.
  *
  * Returns a structured result object (not throws) so the client UI can
  * display the exact error message — Next.js sanitizes thrown errors in
@@ -129,7 +130,7 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
         : getDefaultConfig(template)
 
     // 6. Insert as an UNPAID DRAFT (is_paid=false, is_published=false). Payment
-    //    publishes it via the Xendit webhook. Legacy NOT NULL columns (from the
+    //    publishes it via the payment webhook. Legacy NOT NULL columns (from the
     //    bcrypt-era schema) are set the same way scripts/create-invitation.mjs does.
     const { data: inserted, error } = await (admin.from('invitations') as any)
       .insert({
@@ -193,9 +194,10 @@ export interface CheckoutResult {
 }
 
 /**
- * Create a Xendit invoice for an invitation the caller owns, and persist the
- * Xendit ids on the row so the webhook can correlate the PAID callback.
- * Returns the hosted invoice URL for the client to redirect to.
+ * Create a Midtrans Snap transaction for an invitation the caller owns, and
+ * persist the gateway order id on the row so the webhook can correlate the
+ * PAID callback. Returns the hosted Snap redirect URL for the client to
+ * redirect to.
  */
 export async function startCheckout(invitationId: string): Promise<CheckoutResult> {
   try {
@@ -209,10 +211,10 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, xendit_invoice_id, guest_quota_extra')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, gateway_order_id, guest_quota_extra')
       .eq('id', invitationId)
       .maybeSingle()) as {
-      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; xendit_invoice_id: string | null; guest_quota_extra: number | null } | null
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; gateway_order_id: string | null; guest_quota_extra: number | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
     if (inv.is_paid) return { ok: false, error: 'Undangan ini sudah dibayar' }
@@ -224,31 +226,31 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
     // webhook computes the same expected amount from guest_quota_extra.
     const amountIDR = initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
 
-    // Expire any prior outstanding invoice so a customer who re-opens checkout
+    // Expire any prior outstanding transaction so a customer who re-opens checkout
     // can't accidentally pay an old link the webhook would no longer publish
-    // against (and to prevent a double-charge across two live invoices).
-    if (inv.xendit_invoice_id) await expireXenditInvoice(inv.xendit_invoice_id)
+    // against (and to prevent a double-charge across two live transactions).
+    if (inv.gateway_order_id) await expireTransaction(inv.gateway_order_id)
 
     const base = siteBaseUrl()
-    const externalId = `inv_${inv.id}_${Date.now()}`
+    const orderId = mintOrderId('inv', inv.id)
     const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
 
-    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
-      externalId,
+    const { redirectUrl } = await createSnapTransaction({
+      orderId,
       amountIDR,
       payerEmail: inv.email ?? user.email ?? undefined,
-      description: `Undangan ${inv.slug} — plan ${inv.plan}`,
-      successUrl: `${dash}?paid=1`,
-      failureUrl: `${dash}?payment=failed`,
+      itemName: `Undangan ${inv.slug} — plan ${inv.plan}`,
+      finishUrl: `${dash}?paid=1`,
     })
 
     // Lock the amount we're charging so the webhook verifies against IT (not a
     // recomputed price) — a price/promo change mid-checkout can't break payment.
+    // gateway_txn_id is filled later by the webhook (Midtrans mints it at pay time).
     await (admin.from('invitations') as any)
-      .update({ xendit_invoice_id: invoiceId, xendit_external_id: externalId, expected_amount_idr: amountIDR })
+      .update({ gateway_order_id: orderId, gateway_txn_id: null, expected_amount_idr: amountIDR })
       .eq('id', inv.id)
 
-    return { ok: true, invoiceUrl }
+    return { ok: true, invoiceUrl: redirectUrl }
   } catch (e) {
     console.error('startCheckout error:', e)
     return { ok: false, error: 'Gagal memulai pembayaran. Coba lagi sebentar lagi.' }
@@ -263,11 +265,11 @@ export interface RecheckResult {
 }
 
 /**
- * Manual fallback for a missed / late Xendit webhook. The owner clicks
- * "Saya sudah bayar — cek ulang"; we re-query the invoice from Xendit and, if
- * it is genuinely paid for the correct amount, publish the invitation right
- * away. Safe to call repeatedly — returns early if already paid, and verifies
- * the amount the same way the webhook does.
+ * Manual fallback for a missed / late Midtrans webhook. The owner clicks
+ * "Saya sudah bayar — cek ulang"; we re-query the transaction from Midtrans
+ * and, if it is genuinely paid for the correct amount, publish the invitation
+ * right away. Safe to call repeatedly — returns early if already paid, and
+ * verifies the amount the same way the webhook does.
  */
 export async function recheckPayment(invitationId: string): Promise<RecheckResult> {
   try {
@@ -281,7 +283,7 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, plan, template_id, owner_user_id, is_paid, xendit_invoice_id, guest_quota_extra, expected_amount_idr')
+      .select('id, plan, template_id, owner_user_id, is_paid, gateway_order_id, guest_quota_extra, expected_amount_idr')
       .eq('id', invitationId)
       .maybeSingle()) as {
       data: {
@@ -290,14 +292,14 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
         template_id: string
         owner_user_id: string
         is_paid: boolean
-        xendit_invoice_id: string | null
+        gateway_order_id: string | null
         guest_quota_extra: number | null
         expected_amount_idr: number | null
       } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
     if (inv.is_paid) return { ok: true, published: true, status: 'PAID' }
-    if (!inv.xendit_invoice_id)
+    if (!inv.gateway_order_id)
       return { ok: false, error: 'Belum ada transaksi pembayaran untuk undangan ini' }
 
     const resolved = await resolvePlan(inv.template_id, inv.plan)
@@ -307,12 +309,15 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
     // falling back to a recompute for older checkouts. Using the plan price alone
     // would wrongly reject anyone who bought extra guest quota.
     const expected = inv.expected_amount_idr ?? initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
-    const snap = await getXenditInvoice(inv.xendit_invoice_id)
-    if (!isPaidStatus(snap.status) || snap.amountIDR !== expected) {
+    const snap = await getTransactionStatus(inv.gateway_order_id)
+    if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== expected) {
       return { ok: true, published: false, status: snap.status }
     }
 
-    await publishPaidInvitation(admin, inv, Date.now(), { paidAmountIDR: expected, paidSource: 'xendit', feeIDR: snap.feeIDR || null })
+    await publishPaidInvitation(admin, inv, Date.now(), {
+      paidAmountIDR: expected, paidSource: 'midtrans', feeIDR: null,
+      paidChannel: snap.paymentType, gatewayTxnId: snap.transactionId,
+    })
     revalidatePath('/[template]/[slug]', 'page')
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     revalidatePath('/profile', 'page')
@@ -326,9 +331,10 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
 /**
  * Start a renewal for an already-paid invitation whose active period has run
  * out. Re-bills the SAME plan (no plan change — that's the separate upgrade
- * flow) via a Xendit invoice keyed by a `ren_` external id, so the webhook
- * extends the active period instead of treating it as a first purchase (which
- * its `is_paid` guard would reject). Returns the hosted invoice URL.
+ * flow) via a Midtrans Snap transaction keyed by a `ren_` order id, so the
+ * webhook extends the active period instead of treating it as a first
+ * purchase (which its `is_paid` guard would reject). Returns the hosted Snap
+ * redirect URL.
  */
 export async function startRenewal(invitationId: string): Promise<CheckoutResult> {
   try {
@@ -342,10 +348,10 @@ export async function startRenewal(invitationId: string): Promise<CheckoutResult
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, expires_at, xendit_invoice_id')
+      .select('id, slug, plan, template_id, owner_user_id, email, is_paid, expires_at, gateway_order_id')
       .eq('id', invitationId)
       .maybeSingle()) as {
-      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; expires_at: string | null; xendit_invoice_id: string | null } | null
+      data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; expires_at: string | null; gateway_order_id: string | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
 
@@ -357,27 +363,26 @@ export async function startRenewal(invitationId: string): Promise<CheckoutResult
     const resolved = await resolvePlan(inv.template_id, inv.plan)
     if (!resolved) return { ok: false, error: 'Plan tidak valid' }
 
-    // Expire the prior invoice so an old link can't be paid against later.
-    if (inv.xendit_invoice_id) await expireXenditInvoice(inv.xendit_invoice_id)
+    // Expire the prior transaction so an old link can't be paid against later.
+    if (inv.gateway_order_id) await expireTransaction(inv.gateway_order_id)
 
     const base = siteBaseUrl()
-    const externalId = `ren_${inv.id}_${Date.now()}`
+    const orderId = mintOrderId('ren', inv.id)
     const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
 
-    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
-      externalId,
+    const { redirectUrl } = await createSnapTransaction({
+      orderId,
       amountIDR: resolved.amountIDR,
       payerEmail: inv.email ?? user.email ?? undefined,
-      description: `Perpanjang undangan ${inv.slug} — plan ${inv.plan}`,
-      successUrl: `${dash}?renewed=1`,
-      failureUrl: `${dash}?renewal=failed`,
+      itemName: `Perpanjang undangan ${inv.slug} — plan ${inv.plan}`,
+      finishUrl: `${dash}?renewed=1`,
     })
 
     await (admin.from('invitations') as any)
-      .update({ xendit_invoice_id: invoiceId, xendit_external_id: externalId })
+      .update({ gateway_order_id: orderId, gateway_txn_id: null })
       .eq('id', inv.id)
 
-    return { ok: true, invoiceUrl }
+    return { ok: true, invoiceUrl: redirectUrl }
   } catch (e) {
     console.error('startRenewal error:', e)
     return { ok: false, error: 'Gagal memulai perpanjangan. Coba lagi sebentar lagi.' }
@@ -386,8 +391,8 @@ export async function startRenewal(invitationId: string): Promise<CheckoutResult
 
 /**
  * Manual fallback for a missed renewal webhook. Re-fetches the latest `ren_`
- * invoice from Xendit and, if genuinely paid for the current plan price,
- * extends the active period. Safe to call repeatedly.
+ * transaction from Midtrans and, if genuinely paid for the current plan
+ * price, extends the active period. Safe to call repeatedly.
  */
 export async function recheckRenewal(invitationId: string): Promise<RecheckResult> {
   try {
@@ -401,24 +406,24 @@ export async function recheckRenewal(invitationId: string): Promise<RecheckResul
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin
       .from('invitations')
-      .select('id, plan, template_id, owner_user_id, is_paid, expires_at, xendit_invoice_id, xendit_external_id')
+      .select('id, plan, template_id, owner_user_id, is_paid, expires_at, gateway_order_id')
       .eq('id', invitationId)
       .maybeSingle()) as {
-      data: { id: string; plan: string; template_id: string; owner_user_id: string; is_paid: boolean; expires_at: string | null; xendit_invoice_id: string | null; xendit_external_id: string | null } | null
+      data: { id: string; plan: string; template_id: string; owner_user_id: string; is_paid: boolean; expires_at: string | null; gateway_order_id: string | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
 
     const period = activePeriodStatus(inv, Date.now())
     if (period.status !== 'expired') return { ok: true, published: true, status: 'ACTIVE' }
 
-    if (!inv.xendit_invoice_id || !inv.xendit_external_id?.startsWith('ren_'))
+    if (!inv.gateway_order_id?.startsWith('ren_'))
       return { ok: false, error: 'Belum ada transaksi perpanjangan untuk undangan ini' }
 
     const resolved = await resolvePlan(inv.template_id, inv.plan)
     if (!resolved) return { ok: false, error: 'Plan tidak valid' }
 
-    const snap = await getXenditInvoice(inv.xendit_invoice_id)
-    if (!isPaidStatus(snap.status) || snap.amountIDR !== resolved.amountIDR) {
+    const snap = await getTransactionStatus(inv.gateway_order_id)
+    if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== resolved.amountIDR) {
       return { ok: true, published: false, status: snap.status }
     }
 
@@ -437,10 +442,11 @@ const UPGRADE_TARGET_PLAN = 'premium'
 
 /**
  * Start a "pay the difference" upgrade to Premium for an already-paid invitation
- * the caller owns. Creates a Xendit invoice for the price difference (keyed by
- * an `upg_` external id), records a pending plan_upgrades row, and returns the
- * hosted invoice URL. Does NOT change the live invitation — the webhook /
- * recheckUpgrade applies the plan change only after the upgrade is paid.
+ * the caller owns. Creates a Midtrans Snap transaction for the price difference
+ * (keyed by an `upg_` order id), records a pending plan_upgrades row, and
+ * returns the hosted Snap redirect URL. Does NOT change the live invitation —
+ * the webhook / recheckUpgrade applies the plan change only after the upgrade
+ * is paid.
  */
 export async function startUpgradeCheckout(invitationId: string): Promise<CheckoutResult> {
   try {
@@ -467,16 +473,15 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
     if (!resolved) return { ok: false, error: 'Upgrade tidak tersedia untuk plan ini' }
 
     const base = siteBaseUrl()
-    const externalId = `upg_${inv.id}_${Date.now()}`
+    const orderId = mintOrderId('upg', inv.id)
     const dash = `${base}/${inv.template_id}/${inv.slug}/dashboard`
 
-    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
-      externalId,
+    const { redirectUrl } = await createSnapTransaction({
+      orderId,
       amountIDR: resolved.amountIDR,
       payerEmail: inv.email ?? user.email ?? undefined,
-      description: `Upgrade ${inv.slug} ke Premium`,
-      successUrl: `${dash}?upgraded=1`,
-      failureUrl: `${dash}?upgrade=failed`,
+      itemName: `Upgrade ${inv.slug} ke Premium`,
+      finishUrl: `${dash}?upgraded=1`,
     })
 
     await (admin.from('plan_upgrades') as any).insert({
@@ -484,12 +489,12 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
       from_plan: inv.plan,
       to_plan: UPGRADE_TARGET_PLAN,
       amount_idr: resolved.amountIDR,
-      xendit_invoice_id: invoiceId,
-      xendit_external_id: externalId,
+      gateway_txn_id: null,
+      gateway_order_id: orderId,
       status: 'pending',
     })
 
-    return { ok: true, invoiceUrl }
+    return { ok: true, invoiceUrl: redirectUrl }
   } catch (e) {
     console.error('startUpgradeCheckout error:', e)
     return { ok: false, error: 'Gagal memulai upgrade. Coba lagi sebentar lagi.' }
@@ -498,8 +503,8 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
 
 /**
  * Manual fallback for a missed upgrade webhook: re-fetch the latest pending
- * upgrade's invoice from Xendit and, if genuinely paid for the right amount,
- * apply the plan change. Safe to call repeatedly.
+ * upgrade's transaction from Midtrans and, if genuinely paid for the right
+ * amount, apply the plan change. Safe to call repeatedly.
  */
 export async function recheckUpgrade(invitationId: string): Promise<RecheckResult> {
   try {
@@ -523,19 +528,19 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
 
     const { data: upg } = (await admin
       .from('plan_upgrades')
-      .select('id, invitation_id, to_plan, amount_idr, xendit_invoice_id, status')
+      .select('id, invitation_id, to_plan, amount_idr, gateway_order_id, status')
       .eq('invitation_id', inv.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()) as {
-      data: { id: string; invitation_id: string; to_plan: string; amount_idr: number; xendit_invoice_id: string | null; status: string } | null
+      data: { id: string; invitation_id: string; to_plan: string; amount_idr: number; gateway_order_id: string | null; status: string } | null
     }
-    if (!upg || !upg.xendit_invoice_id)
+    if (!upg || !upg.gateway_order_id)
       return { ok: false, error: 'Tidak ada upgrade yang menunggu pembayaran' }
 
-    const snap = await getXenditInvoice(upg.xendit_invoice_id)
-    if (!isPaidStatus(snap.status) || snap.amountIDR !== Number(upg.amount_idr)) {
+    const snap = await getTransactionStatus(upg.gateway_order_id)
+    if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== Number(upg.amount_idr)) {
       return { ok: true, published: false, status: snap.status }
     }
 
@@ -557,10 +562,10 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
 /**
  * Start a "buy extra guest quota" checkout for an already-paid invitation the
  * caller owns. Snaps the requested qty UP to a clean 50-block, refuses anything
- * that would push the effective quota over QUOTA_CAP, creates a Xendit invoice
- * for the add-on (keyed by a `qta_` external id), records a pending quota_addons
- * row, and returns the hosted invoice URL. The webhook / recheckQuotaAddon bumps
- * guest_quota_extra only after the add-on is paid.
+ * that would push the effective quota over QUOTA_CAP, creates a Midtrans Snap
+ * transaction for the add-on (keyed by a `qta_` order id), records a pending
+ * quota_addons row, and returns the hosted Snap redirect URL. The webhook /
+ * recheckQuotaAddon bumps guest_quota_extra only after the add-on is paid.
  */
 export async function startQuotaAddonCheckout(invitationId: string, qtyGuests: number): Promise<CheckoutResult> {
   try {
@@ -595,28 +600,27 @@ export async function startQuotaAddonCheckout(invitationId: string, qtyGuests: n
 
     const amountIDR = quotaAddonAmount(qty)
     const baseUrl = siteBaseUrl()
-    const externalId = `qta_${inv.id}_${Date.now()}`
+    const orderId = mintOrderId('qta', inv.id)
     const dash = `${baseUrl}/${inv.template_id}/${inv.slug}/dashboard`
 
-    const { id: invoiceId, invoiceUrl } = await createXenditInvoice({
-      externalId,
+    const { redirectUrl } = await createSnapTransaction({
+      orderId,
       amountIDR,
       payerEmail: inv.email ?? user.email ?? undefined,
-      description: `Tambah ${qty} kuota tamu — ${inv.slug}`,
-      successUrl: `${dash}?quota=1`,
-      failureUrl: `${dash}?quota=failed`,
+      itemName: `Tambah ${qty} kuota tamu — ${inv.slug}`,
+      finishUrl: `${dash}?quota=1`,
     })
 
     await (admin.from('quota_addons') as any).insert({
       invitation_id: inv.id,
       qty_guests: qty,
       amount_idr: amountIDR,
-      xendit_invoice_id: invoiceId,
-      xendit_external_id: externalId,
+      gateway_txn_id: null,
+      gateway_order_id: orderId,
       status: 'pending',
     })
 
-    return { ok: true, invoiceUrl }
+    return { ok: true, invoiceUrl: redirectUrl }
   } catch (e) {
     console.error('startQuotaAddonCheckout error:', e)
     return { ok: false, error: 'Gagal memulai pembelian kuota. Coba lagi sebentar lagi.' }
@@ -625,8 +629,8 @@ export async function startQuotaAddonCheckout(invitationId: string, qtyGuests: n
 
 /**
  * Manual fallback for a missed `qta_` webhook: re-fetch the latest pending
- * quota_addons invoice from Xendit and, if genuinely paid for the recorded
- * amount, apply the extra. Safe to call repeatedly.
+ * quota_addons transaction from Midtrans and, if genuinely paid for the
+ * recorded amount, apply the extra. Safe to call repeatedly.
  */
 export async function recheckQuotaAddon(invitationId: string): Promise<RecheckResult> {
   try {
@@ -647,18 +651,18 @@ export async function recheckQuotaAddon(invitationId: string): Promise<RecheckRe
 
     const { data: addon } = (await admin
       .from('quota_addons')
-      .select('id, invitation_id, qty_guests, amount_idr, xendit_invoice_id, status')
+      .select('id, invitation_id, qty_guests, amount_idr, gateway_order_id, status')
       .eq('invitation_id', inv.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()) as {
-      data: { id: string; invitation_id: string; qty_guests: number; amount_idr: number; xendit_invoice_id: string | null; status: string } | null
+      data: { id: string; invitation_id: string; qty_guests: number; amount_idr: number; gateway_order_id: string | null; status: string } | null
     }
-    if (!addon || !addon.xendit_invoice_id) return { ok: false, error: 'Tidak ada pembelian kuota yang menunggu pembayaran' }
+    if (!addon || !addon.gateway_order_id) return { ok: false, error: 'Tidak ada pembelian kuota yang menunggu pembayaran' }
 
-    const snap = await getXenditInvoice(addon.xendit_invoice_id)
-    if (!isPaidStatus(snap.status) || snap.amountIDR !== Number(addon.amount_idr)) {
+    const snap = await getTransactionStatus(addon.gateway_order_id)
+    if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== Number(addon.amount_idr)) {
       return { ok: true, published: false, status: snap.status }
     }
 
@@ -682,8 +686,9 @@ export interface RefundRequestInput {
  * Eligibility pre-check (paid, not comp, no existing pending, rate-limited) + a
  * server-built usage snapshot (published? guests/RSVPs/check-ins, config edited,
  * days since paid) that powers the operator's plain-language verdict. The refund
- * CHANNEL is decided later by paid_source, not chosen here — a manual/offline
- * payment collects a destination account; a Xendit one doesn't need one.
+ * CHANNEL is decided later by paid_source + paid_channel, not chosen here — a
+ * manual/offline payment (or a Midtrans channel without API refund) collects a
+ * destination account; an API-refundable Midtrans channel doesn't need one.
  */
 export async function requestRefund(invitationId: string, input: RefundRequestInput): Promise<{ ok: boolean; error?: string }> {
   try {
@@ -696,7 +701,7 @@ export async function requestRefund(invitationId: string, input: RefundRequestIn
 
     const admin = createSupabaseAdminClient()
     const { data: inv } = (await admin.from('invitations')
-      .select('id, owner_user_id, is_paid, paid_source, paid_at, is_published, updated_at, used_at, published_at')
+      .select('id, owner_user_id, is_paid, paid_source, paid_channel, paid_at, is_published, updated_at, used_at, published_at')
       .eq('id', invitationId).maybeSingle()) as { data: any | null }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
     if (!inv.is_paid) return { ok: false, error: 'Belum ada pembayaran untuk direfund' }
@@ -706,12 +711,22 @@ export async function requestRefund(invitationId: string, input: RefundRequestIn
       .select('id').eq('invitation_id', invitationId).eq('status', 'pending').limit(1)
     if (pending && pending.length) return { ok: false, error: 'Sudah ada permintaan refund yang sedang diproses.' }
 
+    // A destination account is REQUIRED whenever the money can't go back
+    // automatically: manual/offline payments, and Midtrans channels without
+    // API refund (bank transfer / VA). Collecting it now avoids a second
+    // round-trip with the customer at decision time.
+    const needsDestination = inv.paid_source === 'manual' ||
+      (inv.paid_source === 'midtrans' && !canApiRefund(inv.paid_channel))
+    const d = input.destination
+    if (needsDestination && !(d?.bank?.trim() && d?.account_no?.trim() && d?.holder?.trim())) {
+      return { ok: false, error: 'Isi bank, nomor rekening, dan nama pemilik untuk tujuan pengembalian dana.' }
+    }
+
     // Usage snapshot at request time (kept for the record). The admin panel
     // RECOMPUTES this live on every view, so a later edit shows up there.
     const usage = await buildUsageSnapshot(admin, invitationId, inv)
     // Encrypt the refund destination (bank/account/holder) at rest — it's customer
     // PII, same posture as RSVP/gift data. Decrypted only for the operator panel.
-    const d = input.destination
     const destination = d
       ? { bank: encryptField(d.bank ?? ''), account_no: encryptField(d.account_no ?? ''), holder: encryptField(d.holder ?? '') }
       : null
