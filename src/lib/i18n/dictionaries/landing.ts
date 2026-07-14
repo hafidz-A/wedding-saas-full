@@ -94,7 +94,7 @@ export const landing = {
     },
     finalCta: {
       title: 'Siap bikin undangan kalian?',
-      subtitle: 'Rancang dulu sampai puas, lihat preview-nya — bayar hanya saat mau diterbitkan.',
+      subtitle: 'Desain sesuai keinginan anda!',
       cta: 'Mulai Rancang Sekarang',
     },
   },
@@ -193,7 +193,7 @@ export const landing = {
     },
     finalCta: {
       title: 'Ready to create yours?',
-      subtitle: 'Design it your way, preview the whole thing — pay only when you’re ready to publish.',
+      subtitle: 'Design it your way!',
       cta: 'Start Designing Now',
     },
   },
