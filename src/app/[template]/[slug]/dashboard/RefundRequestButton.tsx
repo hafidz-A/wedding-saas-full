@@ -15,7 +15,13 @@ export default function RefundRequestButton({ invitationId, paidSource, paidChan
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState<RefundRequestInput['category']>('duplicate_payment')
   const [detail, setDetail] = useState('')
+  // Destination kind adapts the labels: a bank account (VA/manual payers) or an
+  // e-wallet number (GoPay/OVO/DANA/…). Both are stored in the SAME encrypted
+  // shape {bank, account_no, holder} — `bank` carries the wallet name for
+  // e-wallets, so the server contract and admin panels need no change.
+  const [destType, setDestType] = useState<'bank' | 'ewallet'>('bank')
   const [bank, setBank] = useState('')
+  const [wallet, setWallet] = useState('GoPay')
   const [accountNo, setAccountNo] = useState('')
   const [holder, setHolder] = useState('')
   const [busy, setBusy] = useState(false)
@@ -26,7 +32,9 @@ export default function RefundRequestButton({ invitationId, paidSource, paidChan
 
   async function submit() {
     setBusy(true); setErr(null)
-    const destination = needsDestination ? { bank, account_no: accountNo, holder } : undefined
+    const destination = needsDestination
+      ? { bank: destType === 'ewallet' ? wallet : bank, account_no: accountNo, holder }
+      : undefined
     const res = await requestRefund(invitationId, { category, detail: detail || undefined, destination })
     setBusy(false)
     if (res.ok) setDone(true); else setErr(res.error || 'Gagal')
@@ -87,10 +95,34 @@ export default function RefundRequestButton({ invitationId, paidSource, paidChan
       </label>
       {needsDestination && (
         <div style={{ display: 'grid', gap: 6 }}>
-          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>Karena kamu bayar via transfer bank/VA (atau manual), isi rekening tujuan pengembalian:</p>
-          <input placeholder="Bank" value={bank} onChange={(e) => setBank(e.target.value)} style={ctl} />
-          <input placeholder="Nomor rekening" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} style={ctl} />
-          <input placeholder="Nama pemilik rekening" value={holder} onChange={(e) => setHolder(e.target.value)} style={ctl} />
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
+            Metode pembayaranmu tidak mendukung refund otomatis, jadi dana dikembalikan via transfer. Mau dikembalikan ke mana?
+          </p>
+          <label style={lbl}>Tujuan pengembalian
+            <select value={destType} onChange={(e) => setDestType(e.target.value as 'bank' | 'ewallet')} style={ctl}>
+              <option value="bank">Rekening bank</option>
+              <option value="ewallet">E-wallet (GoPay / OVO / DANA / ShopeePay)</option>
+            </select>
+          </label>
+          {destType === 'bank' ? (
+            <>
+              <input placeholder="Bank (contoh: BCA)" value={bank} onChange={(e) => setBank(e.target.value)} style={ctl} />
+              <input placeholder="Nomor rekening" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} style={ctl} />
+              <input placeholder="Nama pemilik rekening" value={holder} onChange={(e) => setHolder(e.target.value)} style={ctl} />
+            </>
+          ) : (
+            <>
+              <select value={wallet} onChange={(e) => setWallet(e.target.value)} style={ctl}>
+                <option value="GoPay">GoPay</option>
+                <option value="OVO">OVO</option>
+                <option value="DANA">DANA</option>
+                <option value="ShopeePay">ShopeePay</option>
+                <option value="LinkAja">LinkAja</option>
+              </select>
+              <input placeholder="Nomor HP e-wallet (08xx…)" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} style={ctl} inputMode="tel" />
+              <input placeholder="Nama pemilik akun" value={holder} onChange={(e) => setHolder(e.target.value)} style={ctl} />
+            </>
+          )}
         </div>
       )}
       {err && <span style={{ fontSize: 12, color: 'var(--status-error)' }}>{err}</span>}
