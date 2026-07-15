@@ -18,6 +18,18 @@ yang dicatat demi transparansi (anti-cheat: tidak ada kegagalan yang disembunyik
 - **Catatan visual:** pill toggle kini sedikit lebih gelap dari coral lain — silakan
   eyeball; trivial revert kalau kurang sreg.
 
+### [serious · admin] Tombol recheck admin crash — objek guard dioper sebagai DB client — DITEMUKAN review chip Midtrans (2026-07-15) → ✅ FIXED `bdcaa49`
+- **Repro:** `/admin/payments` → tombol "Terapkan" (recheck initial/upgrade/kuota).
+  `adminRecheckPayment`/`adminRecheckUpgrade`/`adminRecheckQuotaAddon` di
+  `src/app/admin/payments/actions.ts` mengoper `admin` (hasil `guard()` = `{email}`)
+  alih-alih `db` (Supabase client) ke `publishPaidInvitation`/`applyPaidUpgrade`/
+  `applyPaidQuotaAddon` → `.from is not a function` saat runtime. Lolos typecheck
+  karena parameter helper-nya `any`. Pre-existing sejak Module 3 (era Xendit) —
+  jalur recovery webhook-kelewat di admin tidak pernah benar-benar berfungsi.
+- **Fix:** oper `db` di ketiga call site + regression test baru di
+  `src/app/admin/payments/__tests__/actions.test.ts` (mock publish helper throw
+  kalau `arg[0].from` bukan function — mereproduksi crash pra-fix).
+
 Selain ini, L1 + L2 (14 route + 3 action) + L3 E2E (auth/undangan/dashboard/isolasi-tenant)
 tidak mengungkap bug perilaku. Kode defensif: validasi input, gate published+paid,
 enkripsi PII, IDOR/cross-tenant guard, verifikasi nominal webhook, magic-byte upload.
