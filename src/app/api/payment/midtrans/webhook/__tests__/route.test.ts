@@ -273,6 +273,57 @@ describe('POST /api/payment/midtrans/webhook', () => {
     expect(mockLog).not.toHaveBeenCalled()
   })
 
+  it('does NOT re-publish a settlement when the invitation is already paid', async () => {
+    mockAdmin.mockReturnValue(invFake({ ...INV, is_paid: true }) as any)
+    const body = withSig({
+      order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00',
+      transaction_status: 'settlement',
+    })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    expect(mockPublish).not.toHaveBeenCalled()
+    expect(mockSnap).not.toHaveBeenCalled()
+  })
+
+  it('does NOT re-apply an upg_ settlement whose upgrade is already paid', async () => {
+    const UPG_PAID = { id: 'u1', invitation_id: 'inv-1', to_plan: 'premium', amount_idr: 50000, gateway_order_id: 'upg_inv-1_1', status: 'paid' }
+    const admin = createFakeSupabase({ tables: { plan_upgrades: { select: { data: UPG_PAID } } } })
+    mockAdmin.mockReturnValue(admin as any)
+    const body = withSig({
+      order_id: 'upg_inv-1_1', status_code: '200', gross_amount: '50000.00',
+      transaction_status: 'settlement',
+    })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    expect(mockUpgrade).not.toHaveBeenCalled()
+    expect(mockSnap).not.toHaveBeenCalled()
+  })
+
+  it('does NOT re-apply a qta_ settlement whose addon is already paid', async () => {
+    const ADDON_PAID = { id: 'a1', invitation_id: 'inv-1', qty_guests: 100, amount_idr: 20000, gateway_order_id: 'qta_inv-1_1', status: 'paid' }
+    const admin = createFakeSupabase({ tables: { quota_addons: { select: { data: ADDON_PAID } } } })
+    mockAdmin.mockReturnValue(admin as any)
+    const body = withSig({
+      order_id: 'qta_inv-1_1', status_code: '200', gross_amount: '20000.00',
+      transaction_status: 'settlement',
+    })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    expect(mockAddonApply).not.toHaveBeenCalled()
+    expect(mockSnap).not.toHaveBeenCalled()
+  })
+
+  it('does NOT re-settle a refund notification whose row already succeeded', async () => {
+    const admin = createFakeSupabase({
+      tables: { refunds: { select: { data: [{ id: 'r1', status: 'succeeded' }] } } },
+    })
+    mockAdmin.mockReturnValue(admin as any)
+    const body = withSig({ order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00', transaction_status: 'refund' })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    expect(mockSettleRefund).not.toHaveBeenCalled()
+  })
+
   it('acks pending/expire without side effects', async () => {
     mockAdmin.mockReturnValue(invFake() as any)
     const body = withSig({ order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00', transaction_status: 'pending' })

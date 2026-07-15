@@ -15,13 +15,25 @@ vi.mock('@/lib/payments/gateway', () => ({
   mintOrderId: (p: string, id: string, now = Date.now()) => `${p}_${id}_${now.toString(36)}`,
   canApiRefund: (c: string | null | undefined) => !!c && ['credit_card','gopay','shopeepay','dana','ovo','qris','kredivo','akulaku'].includes(c),
 }))
-vi.mock('@/lib/payments/publish', () => ({ publishPaidInvitation: vi.fn(), applyPaidUpgrade: vi.fn(), applyPaidQuotaAddon: vi.fn() }))
+vi.mock('@/lib/payments/publish', () => ({
+  publishPaidInvitation: vi.fn(), applyPaidUpgrade: vi.fn(), applyPaidQuotaAddon: vi.fn(), extendActivePeriod: vi.fn(),
+}))
+vi.mock('@/lib/crypto/app', () => ({ encryptField: vi.fn((s: string | null | undefined) => (s == null ? null : `enc:${s}`)) }))
+vi.mock('@/lib/payments/refund-usage', () => ({
+  buildUsageSnapshot: vi.fn(async () => ({
+    is_published: false, guest_count: 0, rsvp_count: 0, attendance_count: 0,
+    config_edited: false, days_since_paid: 0, ever_used: false, days_since_published: null,
+  })),
+}))
 
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { resolvePlan } from '@/lib/payments/plans'
 import { createSnapTransaction, getTransactionStatus, isPaidStatus } from '@/lib/payments/gateway'
-import { publishPaidInvitation, applyPaidQuotaAddon } from '@/lib/payments/publish'
-import { completeOnboarding, checkSlugAvailable, startCheckout, recheckPayment, startQuotaAddonCheckout } from '../actions'
+import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon, extendActivePeriod } from '@/lib/payments/publish'
+import {
+  completeOnboarding, checkSlugAvailable, startCheckout, recheckPayment, startQuotaAddonCheckout,
+  recheckRenewal, recheckUpgrade, recheckQuotaAddon, requestRefund,
+} from '../actions'
 
 const mockAdmin = vi.mocked(createSupabaseAdminClient)
 const mockResolvePlan = vi.mocked(resolvePlan)
@@ -29,6 +41,9 @@ const mockCreateInvoice = vi.mocked(createSnapTransaction)
 const mockGetInvoice = vi.mocked(getTransactionStatus)
 const mockIsPaid = vi.mocked(isPaidStatus)
 const mockPublish = vi.mocked(publishPaidInvitation)
+const mockApplyUpgrade = vi.mocked(applyPaidUpgrade)
+const mockApplyAddon = vi.mocked(applyPaidQuotaAddon)
+const mockExtend = vi.mocked(extendActivePeriod)
 
 const USER = { id: 'user-1', email: 'u@example.com' }
 beforeEach(() => {
@@ -206,6 +221,10 @@ describe('recheckPayment', () => {
     const r = await recheckPayment('inv-1')
     expect(r).toMatchObject({ ok: true, published: true })
     expect(mockPublish).toHaveBeenCalledOnce()
+    expect(mockPublish.mock.calls[0][3]).toEqual(expect.objectContaining({
+      paidAmountIDR: 100000, paidSource: 'midtrans', feeIDR: null,
+      paidChannel: 'qris', gatewayTxnId: 'mid-1',
+    }))
   })
 
   it('does NOT publish when the transaction is still unpaid', async () => {
@@ -215,5 +234,91 @@ describe('recheckPayment', () => {
     const r = await recheckPayment('inv-1')
     expect(r).toMatchObject({ ok: true, published: false })
     expect(mockPublish).not.toHaveBeenCalled()
+  })
+})
+
+describe('recheckRenewal', () => {
+  const INV = {
+    id: 'inv-1', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1',
+    is_paid: true, expires_at: '2020-01-01T00:00:00Z', gateway_order_id: 'ren_inv-1_abc',
+  }
+
+  it('extends the active period when Midtrans confirms paid for the current plan price', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: INV } } } }) as any)
+    mockGetInvoice.mockResolvedValue({ orderId: INV.gateway_order_id, transactionId: 'mid-2', status: 'settlement', fraudStatus: null, grossAmountIDR: 100000, paymentType: 'qris' } as any)
+    const r = await recheckRenewal('inv-1')
+    expect(r).toMatchObject({ ok: true, published: true })
+    expect(mockExtend).toHaveBeenCalledOnce()
+    expect(mockExtend.mock.calls[0][1]).toEqual(INV)
+  })
+
+  it('does NOT extend when the re-fetched amount mismatches the plan price', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({ tables: { invitations: { select: { data: INV } } } }) as any)
+    mockGetInvoice.mockResolvedValue({ orderId: INV.gateway_order_id, transactionId: 'mid-2', status: 'settlement', fraudStatus: null, grossAmountIDR: 50000, paymentType: 'qris' } as any)
+    const r = await recheckRenewal('inv-1')
+    expect(r).toMatchObject({ ok: true, published: false })
+    expect(mockExtend).not.toHaveBeenCalled()
+  })
+})
+
+describe('recheckUpgrade', () => {
+  const INV = { id: 'inv-1', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1' }
+  const UPG = { id: 'u1', invitation_id: 'inv-1', to_plan: 'premium', amount_idr: 50000, gateway_order_id: 'upg_inv-1_abc', status: 'pending' }
+
+  it('applies the pending upgrade when Midtrans confirms paid for the right amount', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      tables: { invitations: { select: { data: INV } }, plan_upgrades: { select: { data: UPG } } },
+    }) as any)
+    mockGetInvoice.mockResolvedValue({ orderId: UPG.gateway_order_id, transactionId: 'mid-3', status: 'settlement', fraudStatus: null, grossAmountIDR: 50000, paymentType: 'gopay' } as any)
+    const r = await recheckUpgrade('inv-1')
+    expect(r).toMatchObject({ ok: true, published: true })
+    expect(mockApplyUpgrade).toHaveBeenCalledOnce()
+    expect(mockApplyUpgrade.mock.calls[0][1]).toEqual({ id: 'u1', invitation_id: 'inv-1', to_plan: 'premium', template_id: 'lovebirds' })
+  })
+})
+
+describe('recheckQuotaAddon', () => {
+  const INV = { id: 'inv-1', owner_user_id: 'user-1' }
+  const ADDON = { id: 'a1', invitation_id: 'inv-1', qty_guests: 100, amount_idr: 20000, gateway_order_id: 'qta_inv-1_abc', status: 'pending' }
+
+  it('applies the pending addon when Midtrans confirms paid for the recorded amount', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      tables: { invitations: { select: { data: INV } }, quota_addons: { select: { data: ADDON } } },
+    }) as any)
+    mockGetInvoice.mockResolvedValue({ orderId: ADDON.gateway_order_id, transactionId: 'mid-4', status: 'settlement', fraudStatus: null, grossAmountIDR: 20000, paymentType: 'qris' } as any)
+    const r = await recheckQuotaAddon('inv-1')
+    expect(r).toMatchObject({ ok: true, published: true })
+    expect(mockApplyAddon).toHaveBeenCalledOnce()
+    expect(mockApplyAddon.mock.calls[0][1]).toEqual({ id: 'a1', invitation_id: 'inv-1', qty_guests: 100 })
+  })
+})
+
+describe('requestRefund', () => {
+  const INV = {
+    id: 'inv-1', owner_user_id: 'user-1', is_paid: true, paid_source: 'midtrans', paid_channel: 'bank_transfer',
+    paid_at: null, is_published: false, updated_at: null, used_at: null, published_at: null,
+  }
+
+  it('requires a destination for a midtrans bank_transfer payment (no API refund)', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      tables: { invitations: { select: { data: INV } }, refund_requests: { select: { data: [] } } },
+    }) as any)
+    const r = await requestRefund('inv-1', { category: 'other' })
+    expect(r.ok).toBe(false)
+    expect(r.error).toMatch(/Isi bank/i)
+  })
+
+  it('does NOT require a destination for a midtrans qris payment (API-refundable)', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { ...INV, paid_channel: 'qris' } } },
+        refund_requests: { select: { data: [] }, insert: {} },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    const r = await requestRefund('inv-1', { category: 'other' })
+    expect(r.ok).toBe(true)
+    const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'refund_requests')!
+    expect(ins.value.usage_snapshot.destination).toBeNull()
   })
 })
