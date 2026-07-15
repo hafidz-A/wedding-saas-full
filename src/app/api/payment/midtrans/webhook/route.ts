@@ -31,6 +31,44 @@ interface MidtransNotification {
   payment_type?: string
 }
 
+/**
+ * Shared verify-then-apply core used by every paid-event handler below: re-fetch
+ * the transaction from Midtrans (the AUTHORITATIVE source), confirm it's PAID and
+ * the amount matches `expected`, falling back to the signature-authenticated body
+ * amount if the re-fetch itself fails. `matchOrderId`, when passed, additionally
+ * requires the re-fetched order id to equal it (handleInitial's extra guard,
+ * since the customer may have re-opened checkout under a different order id than
+ * the row's stored one). `label` only varies the console.error prefix so each
+ * call site's logs still read exactly as they did before extraction.
+ */
+async function verifyPaidAmount(
+  orderId: string,
+  expected: number,
+  body: MidtransNotification,
+  opts: { matchOrderId?: string; label?: string } = {},
+): Promise<{ verified: boolean; channel: string | null; txnId: string | null }> {
+  const label = opts.label ?? ''
+  let verified = false
+  let channel: string | null = body.payment_type ?? null
+  let txnId: string | null = body.transaction_id ?? null
+  try {
+    const snap = await getTransactionStatus(orderId)
+    verified = isPaidStatus(snap.status, snap.fraudStatus) && snap.grossAmountIDR === expected
+    if (opts.matchOrderId !== undefined) verified = verified && snap.orderId === opts.matchOrderId
+    channel = snap.paymentType ?? channel
+    txnId = snap.transactionId ?? txnId
+    if (!verified) {
+      console.error(`[midtrans webhook] ${label}verification failed`, {
+        order_id: orderId, snapStatus: snap.status, snapAmount: snap.grossAmountIDR, expected,
+      })
+    }
+  } catch (e) {
+    verified = parseGrossAmount(body.gross_amount) === expected
+    console.error(`[midtrans webhook] ${label}re-fetch failed, used body amount`, e)
+  }
+  return { verified, channel, txnId }
+}
+
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as MidtransNotification
   if (!verifySignature(body)) {
@@ -93,19 +131,7 @@ async function handleInitial(admin: ReturnType<typeof createSupabaseAdminClient>
   // (body.order_id — the customer may have re-opened checkout, so it can
   // differ from the row's stored gateway_order_id). Falls back to the
   // signature-authenticated body amount if the re-fetch fails.
-  let verified = false
-  let channel: string | null = body.payment_type ?? null
-  let txnId: string | null = body.transaction_id ?? null
-  try {
-    const snap = await getTransactionStatus(body.order_id ?? '')
-    verified = snap.orderId === body.order_id && isPaidStatus(snap.status, snap.fraudStatus) && snap.grossAmountIDR === expected
-    channel = snap.paymentType ?? channel
-    txnId = snap.transactionId ?? txnId
-    if (!verified) console.error('[midtrans webhook] verification failed', { order_id: body.order_id, snapStatus: snap.status, snapAmount: snap.grossAmountIDR, expected })
-  } catch (e) {
-    verified = parseGrossAmount(body.gross_amount) === expected
-    console.error('[midtrans webhook] re-fetch failed, used body amount', e)
-  }
+  const { verified, channel, txnId } = await verifyPaidAmount(body.order_id ?? '', expected, body, { matchOrderId: body.order_id })
   if (!verified) return NextResponse.json({ ok: true }) // ack, but do not publish
 
   await publishPaidInvitation(admin, inv, Date.now(), {
@@ -145,19 +171,7 @@ async function handleUpgrade(admin: ReturnType<typeof createSupabaseAdminClient>
   if (!inv) return NextResponse.json({ ok: true })
 
   const expected = Number(upg.amount_idr)
-  let verified = false
-  try {
-    const snap = await getTransactionStatus(body.order_id ?? '')
-    verified = isPaidStatus(snap.status, snap.fraudStatus) && snap.grossAmountIDR === expected
-    if (!verified) {
-      console.error('[midtrans webhook] upgrade verification failed', {
-        order_id: body.order_id, snapStatus: snap.status, snapAmount: snap.grossAmountIDR, expected,
-      })
-    }
-  } catch (e) {
-    verified = parseGrossAmount(body.gross_amount) === expected
-    console.error('[midtrans webhook] upgrade re-fetch failed, used body amount', e)
-  }
+  const { verified } = await verifyPaidAmount(body.order_id ?? '', expected, body, { label: 'upgrade ' })
   if (!verified) return NextResponse.json({ ok: true })
 
   await applyPaidUpgrade(admin, {
@@ -198,19 +212,7 @@ async function handleRenewal(admin: ReturnType<typeof createSupabaseAdminClient>
     return NextResponse.json({ ok: true })
   }
 
-  let verified = false
-  try {
-    const snap = await getTransactionStatus(body.order_id ?? '')
-    verified = isPaidStatus(snap.status, snap.fraudStatus) && snap.grossAmountIDR === resolved.amountIDR
-    if (!verified) {
-      console.error('[midtrans webhook] renewal verification failed', {
-        order_id: body.order_id, snapStatus: snap.status, snapAmount: snap.grossAmountIDR, expected: resolved.amountIDR,
-      })
-    }
-  } catch (e) {
-    verified = parseGrossAmount(body.gross_amount) === resolved.amountIDR
-    console.error('[midtrans webhook] renewal re-fetch failed, used body amount', e)
-  }
+  const { verified } = await verifyPaidAmount(body.order_id ?? '', resolved.amountIDR, body, { label: 'renewal ' })
   if (!verified) return NextResponse.json({ ok: true })
 
   await extendActivePeriod(admin, inv)
@@ -237,19 +239,7 @@ async function handleQuotaAddon(admin: ReturnType<typeof createSupabaseAdminClie
   if (!addon || addon.status === 'paid') return NextResponse.json({ ok: true })
 
   const expected = Number(addon.amount_idr)
-  let verified = false
-  try {
-    const snap = await getTransactionStatus(body.order_id ?? '')
-    verified = isPaidStatus(snap.status, snap.fraudStatus) && snap.grossAmountIDR === expected
-    if (!verified) {
-      console.error('[midtrans webhook] quota addon verification failed', {
-        order_id: body.order_id, snapStatus: snap.status, snapAmount: snap.grossAmountIDR, expected,
-      })
-    }
-  } catch (e) {
-    verified = parseGrossAmount(body.gross_amount) === expected
-    console.error('[midtrans webhook] quota addon re-fetch failed, used body amount', e)
-  }
+  const { verified } = await verifyPaidAmount(body.order_id ?? '', expected, body, { label: 'quota addon ' })
   if (!verified) return NextResponse.json({ ok: true })
 
   await applyPaidQuotaAddon(admin, {

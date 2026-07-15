@@ -94,7 +94,7 @@ export async function adminRecheckPayment(invitationId: string): Promise<Recheck
   const expected = inv.expected_amount_idr ?? initialPurchaseAmount(resolved.amountIDR, Number(inv.guest_quota_extra ?? 0))
   const snap = await getTransactionStatus(inv.gateway_order_id)
   if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== expected) return { ok: true, applied: false, status: snap.status }
-  await publishPaidInvitation(admin, inv, Date.now(), {
+  await publishPaidInvitation(db, inv, Date.now(), {
     paidAmountIDR: expected, paidSource: 'midtrans', feeIDR: null,
     paidChannel: snap.paymentType, gatewayTxnId: snap.transactionId,
   })
@@ -116,7 +116,7 @@ export async function adminRecheckUpgrade(invitationId: string): Promise<Recheck
   if (!upg || !upg.gateway_order_id) return { ok: false, error: 'Tidak ada upgrade menunggu bayar' }
   const snap = await getTransactionStatus(upg.gateway_order_id)
   if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== Number(upg.amount_idr)) return { ok: true, applied: false, status: snap.status }
-  await applyPaidUpgrade(admin, { id: upg.id, invitation_id: upg.invitation_id, to_plan: upg.to_plan, template_id: inv.template_id })
+  await applyPaidUpgrade(db, { id: upg.id, invitation_id: upg.invitation_id, to_plan: upg.to_plan, template_id: inv.template_id })
   await (db.from('plan_upgrades') as any)
     .update({ paid_channel: snap.paymentType ?? null, gateway_txn_id: snap.transactionId ?? null })
     .eq('id', upg.id)
@@ -136,7 +136,7 @@ export async function adminRecheckQuotaAddon(invitationId: string): Promise<Rech
   if (!addon || !addon.gateway_order_id) return { ok: false, error: 'Tidak ada pembelian kuota menunggu bayar' }
   const snap = await getTransactionStatus(addon.gateway_order_id)
   if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== Number(addon.amount_idr)) return { ok: true, applied: false, status: snap.status }
-  await applyPaidQuotaAddon(admin, { id: addon.id, invitation_id: addon.invitation_id, qty_guests: Number(addon.qty_guests) })
+  await applyPaidQuotaAddon(db, { id: addon.id, invitation_id: addon.invitation_id, qty_guests: Number(addon.qty_guests) })
   await (db.from('quota_addons') as any)
     .update({ paid_channel: snap.paymentType ?? null, gateway_txn_id: snap.transactionId ?? null })
     .eq('id', addon.id)
