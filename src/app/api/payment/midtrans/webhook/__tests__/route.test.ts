@@ -313,6 +313,33 @@ describe('POST /api/payment/midtrans/webhook', () => {
     expect(mockSnap).not.toHaveBeenCalled()
   })
 
+  it('acks a partial_refund WITHOUT settling — the ledger is full-refunds-only', async () => {
+    const admin = createFakeSupabase({
+      tables: { refunds: { select: { data: [{ id: 'r1', status: 'pending' }] } } },
+    })
+    mockAdmin.mockReturnValue(admin as any)
+    const body = withSig({ order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00', transaction_status: 'partial_refund' })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    expect(mockSettleRefund).not.toHaveBeenCalled()
+  })
+
+  it('logs a partial_refund as ignored instead of touching refunds rows', async () => {
+    const admin = createFakeSupabase({
+      tables: { refunds: { select: { data: [{ id: 'r1', status: 'pending' }] } } },
+    })
+    mockAdmin.mockReturnValue(admin as any)
+    const body = withSig({ order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00', transaction_status: 'partial_refund' })
+    const res = await post(body)
+    expect(res.status).toBe(200)
+    expect(mockLog).toHaveBeenCalledOnce()
+    expect(mockLog).toHaveBeenCalledWith('system (midtrans)', {
+      action: 'refund.partial_ignored', targetType: 'invitation', targetId: 'inv-1', meta: { orderId: 'inv_inv-1_1' },
+    })
+    expect(admin.lastCall('insert')).toBeUndefined()
+    expect(admin.lastCall('update')).toBeUndefined()
+  })
+
   it('does NOT re-settle a refund notification whose row already succeeded', async () => {
     const admin = createFakeSupabase({
       tables: { refunds: { select: { data: [{ id: 'r1', status: 'succeeded' }] } } },

@@ -37,6 +37,7 @@ export function renderAdminAction(row: { action: string; target_id?: string | nu
     'refund.manual': `Refund manual ${ref}`,
     'refund.gateway': `Refund via Midtrans ${ref}`,
     'refund.gateway_initiated': `Refund dari dashboard Midtrans ${ref}`,
+    'refund.partial_ignored': `Partial refund diabaikan (ledger cuma full refund) ${ref}`,
     'payment.chargeback': `Chargeback (dispute bank) ${ref}`,
     'invitation.comp': `Comp/lunas undangan ${ref}${meta.source ? ` (${meta.source})` : ''}`,
     'invitation.publish': `Terbitkan undangan ${ref}`,

@@ -18,7 +18,7 @@ export interface Ledger {
 export async function fetchLedger(db: any): Promise<Ledger> {
   const { data: invs } = (await db
     .from('invitations')
-    .select('id, slug, plan, template_id, paid_amount_idr, paid_source, fee_idr, paid_at, is_paid')
+    .select('id, slug, plan, template_id, paid_amount_idr, paid_source, paid_channel, fee_idr, paid_at, is_paid')
     .limit(5000)) as { data: any[] | null }
   const rows = invs ?? []
   const metaById = new Map<string, { slug: string; plan: string; template_id: string }>(
@@ -27,7 +27,8 @@ export async function fetchLedger(db: any): Promise<Ledger> {
     .filter((r) => r.is_paid)
     .map((r) => ({
       id: r.id, slug: r.slug, plan: r.plan ?? '', template_id: r.template_id ?? '',
-      paid_amount_idr: r.paid_amount_idr, paid_source: r.paid_source, fee_idr: r.fee_idr, paid_at: r.paid_at,
+      paid_amount_idr: r.paid_amount_idr, paid_source: r.paid_source, paid_channel: r.paid_channel ?? null,
+      fee_idr: r.fee_idr, paid_at: r.paid_at,
     }))
   const paidCount = initials.length
   const draftCount = rows.length - paidCount
@@ -38,15 +39,15 @@ export async function fetchLedger(db: any): Promise<Ledger> {
       return {
         id: r.id, invitation_id: r.invitation_id, slug: m?.slug ?? r.invitation_id,
         plan: m?.plan ?? '', template_id: m?.template_id ?? '',
-        amount_idr: r.amount_idr, fee_idr: r.fee_idr, paid_at: r.paid_at,
+        amount_idr: r.amount_idr, fee_idr: r.fee_idr, paid_at: r.paid_at, paid_channel: r.paid_channel ?? null,
       }
     })
 
   const { data: ups } = (await db
-    .from('plan_upgrades').select('id, invitation_id, amount_idr, fee_idr, paid_at, status')
+    .from('plan_upgrades').select('id, invitation_id, amount_idr, fee_idr, paid_at, paid_channel, status')
     .eq('status', 'paid')) as { data: any[] | null }
   const { data: ads } = (await db
-    .from('quota_addons').select('id, invitation_id, amount_idr, fee_idr, paid_at, status')
+    .from('quota_addons').select('id, invitation_id, amount_idr, fee_idr, paid_at, paid_channel, status')
     .eq('status', 'paid')) as { data: any[] | null }
   const { data: refs } = (await db
     .from('refunds').select('source_type, source_id, status')) as { data: RefundRow[] | null }

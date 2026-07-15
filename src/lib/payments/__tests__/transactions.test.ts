@@ -5,10 +5,10 @@ import {
 } from '../transactions'
 
 const init = (o: Partial<InitialRow> & { id: string; slug: string }): InitialRow => ({
-  paid_amount_idr: 149000, paid_source: 'midtrans', fee_idr: 0, paid_at: '2026-07-01T03:00:00Z', ...o,
+  paid_amount_idr: 149000, paid_source: 'midtrans', paid_channel: null, fee_idr: 0, paid_at: '2026-07-01T03:00:00Z', ...o,
 })
 const aux = (o: Partial<AddonUpgradeRow> & { id: string; invitation_id: string; slug: string }): AddonUpgradeRow => ({
-  amount_idr: 50000, fee_idr: 0, paid_at: '2026-07-02T03:00:00Z', ...o,
+  amount_idr: 50000, fee_idr: 0, paid_channel: null, paid_at: '2026-07-02T03:00:00Z', ...o,
 })
 
 describe('refundedKeySet', () => {
@@ -33,6 +33,12 @@ describe('mapInitial', () => {
     })
     expect(mapInitial(init({ id: 'y', slug: 's', paid_source: null }), refunded).source).toBe('midtrans')
     expect(mapInitial(init({ id: 'z', slug: 's', paid_source: 'comp', paid_amount_idr: 0 }), refunded).status).toBe('paid')
+  })
+
+  it('carries paid_channel through (null when absent)', () => {
+    const refunded = new Set<string>()
+    expect(mapInitial(init({ id: 'x', slug: 's', paid_channel: 'qris' }), refunded).paidChannel).toBe('qris')
+    expect(mapInitial(init({ id: 'y', slug: 's' }), refunded).paidChannel).toBe(null)
   })
 })
 

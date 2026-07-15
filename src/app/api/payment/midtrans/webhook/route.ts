@@ -41,7 +41,16 @@ export async function POST(req: Request) {
   const orderId = body.order_id ?? ''
   const status = body.transaction_status ?? ''
 
-  if (status === 'refund' || status === 'partial_refund') return handleRefundEvent(admin, orderId)
+  // 'refund' = the FULL amount came back — the ledger models refunds as
+  // all-or-nothing, so this settles the row + reverses entitlement.
+  // 'partial_refund' = Midtrans dashboard did a PARTIAL refund. We have no
+  // partial-refund accounting (amount_idr / entitlement reversal both assume
+  // 100%), so treat it as informational only: log it for the operator and ACK
+  // 200 (don't retry), but do NOT settle the row or touch entitlement — doing
+  // so would falsely mark the source fully refunded and take a still-partially
+  // -paid invitation down.
+  if (status === 'refund') return handleRefundEvent(admin, orderId)
+  if (status === 'partial_refund') return handlePartialRefund(admin, orderId)
   if (status === 'chargeback') return handleChargeback(admin, orderId)
   if (!isPaidStatus(status, body.fraud_status)) return NextResponse.json({ ok: true }) // pending/deny/cancel/expire
 
@@ -323,6 +332,24 @@ async function handleRefundEvent(admin: ReturnType<typeof createSupabaseAdminCli
   }).select('id').single()
   if (inserted) await settleRefund(admin, (inserted as { id: string }).id)
   await logAdminAction('system (midtrans)', { action: 'refund.gateway_initiated', targetType: 'invitation', targetId: src.invitationId })
+  return NextResponse.json({ ok: true })
+}
+
+/**
+ * Partial refund notifications (an operator refunded LESS than the full
+ * amount from the Midtrans dashboard). The ledger only models full refunds —
+ * settling here would wrongly zero out entitlement for a still-partially-paid
+ * invitation. So: resolve which source it belongs to (for a useful audit
+ * log), log it as ignored, and ACK 200 without touching `refunds` or
+ * entitlement. An operator who needs to fully refund the rest can do so
+ * normally afterward (that fires a real 'refund' event).
+ */
+async function handlePartialRefund(admin: ReturnType<typeof createSupabaseAdminClient>, orderId: string) {
+  const src = await sourceFromOrderId(admin, orderId)
+  await logAdminAction('system (midtrans)', {
+    action: 'refund.partial_ignored', targetType: 'invitation', targetId: src?.invitationId,
+    meta: { orderId },
+  })
   return NextResponse.json({ ok: true })
 }
 

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { formatIDR, type Transaction } from '@/lib/payments/transactions'
 import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaGateway } from './actions'
 import type { RefundSourceType } from '@/lib/payments/refunds'
+import { canApiRefund } from '@/lib/payments/refund-channels'
 import { useAdminConfirm, useAdminAlert, useAdminForm } from '@/components/admin/AdminDialogProvider'
 
 function fmtDate(iso: string): string {
@@ -61,20 +62,25 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   async function refund(t: Transaction) {
     const sourceType = t.type as RefundSourceType
     const sourceId = t.key.split(':').slice(1).join(':')
-    const isMidtrans = t.source === 'midtrans'
+    // Only channels the Midtrans Refund API actually supports (credit_card,
+    // gopay, shopeepay, dana, ovo, qris, kredivo, akulaku) can go the automatic
+    // route — VA/bank_transfer/cstore always fail server-side, so don't offer it.
+    const gatewayEligible = t.source === 'midtrans' && canApiRefund(t.paidChannel)
     const res = await formDialog({
       title: `Refund ${formatIDR(t.amountIDR)}`,
-      message: isMidtrans
+      message: gatewayEligible
         ? `Untuk "${t.slug}". Via Midtrans = uang balik otomatis ke metode asal. Manual = kamu transfer balik sendiri lalu catat di sini.`
-        : `Untuk "${t.slug}". Dibayar offline → kamu transfer balik sendiri dulu, lalu catat di sini.`,
+        : t.source === 'midtrans'
+          ? `Untuk "${t.slug}". Channel ini (${t.paidChannel ?? 'transfer bank/VA'}) tidak mendukung refund otomatis → transfer balik sendiri ke rekening tujuan, lalu catat di sini.`
+          : `Untuk "${t.slug}". Dibayar offline → kamu transfer balik sendiri dulu, lalu catat di sini.`,
       fields: [
-        ...(isMidtrans ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'gateway', options: [{ value: 'gateway', label: 'Via Midtrans (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
+        ...(gatewayEligible ? [{ name: 'method', label: 'Cara refund', type: 'select' as const, defaultValue: 'gateway', options: [{ value: 'gateway', label: 'Via Midtrans (otomatis)' }, { value: 'manual', label: 'Manual (transfer sendiri)' }] }] : []),
         { name: 'reason', label: 'Alasan (opsional)', type: 'textarea' as const, placeholder: 'mis. bayar dobel' },
       ],
       submitLabel: 'Proses refund', tone: 'danger',
     })
     if (!res) return
-    const method = (isMidtrans ? res.method : 'manual') as 'gateway' | 'manual'
+    const method = (gatewayEligible ? res.method : 'manual') as 'gateway' | 'manual'
     if (method === 'manual') {
       // Anti-hijack gate: force the operator to explicitly confirm they matched
       // the destination account's holder name before any manual money moves

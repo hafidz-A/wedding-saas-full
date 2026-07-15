@@ -550,6 +550,9 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
       to_plan: upg.to_plan,
       template_id: inv.template_id,
     })
+    await (admin.from('plan_upgrades') as any)
+      .update({ paid_channel: snap.paymentType ?? null, gateway_txn_id: snap.transactionId ?? null })
+      .eq('id', upg.id)
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     revalidatePath('/profile', 'page')
     return { ok: true, published: true, status: snap.status }
@@ -667,6 +670,9 @@ export async function recheckQuotaAddon(invitationId: string): Promise<RecheckRe
     }
 
     await applyPaidQuotaAddon(admin, { id: addon.id, invitation_id: addon.invitation_id, qty_guests: Number(addon.qty_guests) })
+    await (admin.from('quota_addons') as any)
+      .update({ paid_channel: snap.paymentType ?? null, gateway_txn_id: snap.transactionId ?? null })
+      .eq('id', addon.id)
     revalidatePath('/[template]/[slug]/dashboard', 'page')
     return { ok: true, published: true, status: snap.status }
   } catch (e) {

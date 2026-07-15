@@ -26,15 +26,19 @@ export interface Transaction {
   source: TxnSource
   status: TxnStatus
   date: string // ISO paid_at
+  /** Midtrans payment_type (e.g. 'qris', 'bank_transfer') — null for manual/comp. */
+  paidChannel: string | null
 }
 
 export interface InitialRow {
   id: string; slug: string; plan?: string; template_id?: string
   paid_amount_idr: number | null; paid_source: string | null; fee_idr: number | null; paid_at: string | null
+  paid_channel?: string | null
 }
 export interface AddonUpgradeRow {
   id: string; invitation_id: string; slug: string; plan?: string; template_id?: string
   amount_idr: number | null; fee_idr: number | null; paid_at: string | null
+  paid_channel?: string | null
 }
 export interface RefundRow { source_type: string; source_id: string | null; status: string }
 
@@ -53,6 +57,7 @@ export function mapInitial(inv: InitialRow, refunded: Set<string>): Transaction 
     key, invitationId: inv.id, slug: inv.slug, plan: inv.plan ?? '', templateId: inv.template_id ?? '', type: 'initial',
     amountIDR: Number(inv.paid_amount_idr ?? 0), feeIDR: Number(inv.fee_idr ?? 0),
     source, status: refunded.has(key) ? 'refunded' : 'paid', date: inv.paid_at ?? '',
+    paidChannel: inv.paid_channel ?? null,
   }
 }
 
@@ -63,6 +68,7 @@ function mapAux(type: 'upgrade' | 'addon', r: AddonUpgradeRow, refunded: Set<str
     key, invitationId: r.invitation_id, slug: r.slug, plan: r.plan ?? '', templateId: r.template_id ?? '', type,
     amountIDR: Number(r.amount_idr ?? 0), feeIDR: Number(r.fee_idr ?? 0),
     source: 'midtrans', status: refunded.has(key) ? 'refunded' : 'paid', date: r.paid_at ?? '',
+    paidChannel: r.paid_channel ?? null,
   }
 }
 

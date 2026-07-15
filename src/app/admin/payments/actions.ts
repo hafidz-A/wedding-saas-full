@@ -117,6 +117,9 @@ export async function adminRecheckUpgrade(invitationId: string): Promise<Recheck
   const snap = await getTransactionStatus(upg.gateway_order_id)
   if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== Number(upg.amount_idr)) return { ok: true, applied: false, status: snap.status }
   await applyPaidUpgrade(admin, { id: upg.id, invitation_id: upg.invitation_id, to_plan: upg.to_plan, template_id: inv.template_id })
+  await (db.from('plan_upgrades') as any)
+    .update({ paid_channel: snap.paymentType ?? null, gateway_txn_id: snap.transactionId ?? null })
+    .eq('id', upg.id)
   await logAdminAction(admin.email, { action: 'payments.recheck', targetType: 'invitation', targetId: invitationId, meta: { type: 'upgrade' } })
   revalidateInvitation()
   return { ok: true, applied: true, status: snap.status }
@@ -134,6 +137,9 @@ export async function adminRecheckQuotaAddon(invitationId: string): Promise<Rech
   const snap = await getTransactionStatus(addon.gateway_order_id)
   if (!isPaidStatus(snap.status, snap.fraudStatus) || snap.grossAmountIDR !== Number(addon.amount_idr)) return { ok: true, applied: false, status: snap.status }
   await applyPaidQuotaAddon(admin, { id: addon.id, invitation_id: addon.invitation_id, qty_guests: Number(addon.qty_guests) })
+  await (db.from('quota_addons') as any)
+    .update({ paid_channel: snap.paymentType ?? null, gateway_txn_id: snap.transactionId ?? null })
+    .eq('id', addon.id)
   await logAdminAction(admin.email, { action: 'payments.recheck', targetType: 'invitation', targetId: invitationId, meta: { type: 'addon' } })
   revalidateInvitation()
   return { ok: true, applied: true, status: snap.status }
