@@ -6,6 +6,7 @@ import {
   adminReconcileGateway, adminRecheckPayment, adminRecheckUpgrade, adminRecheckQuotaAddon,
   type ReconcileMismatch,
 } from './actions'
+import { Button } from '@/components/ui/Button'
 
 export default function ReconcilePanel() {
   const [busy, setBusy] = useState(false)
@@ -39,7 +40,7 @@ export default function ReconcilePanel() {
             Cari pembayaran yang sudah LUNAS di Midtrans tapi belum masuk ke sistem (webhook kelewat).
           </p>
         </div>
-        <button type="button" disabled={busy} onClick={reconcile} style={btn}>{busy ? 'Mengecek…' : 'Cocokkan sekarang'}</button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={reconcile}>{busy ? 'Mengecek…' : 'Cocokkan sekarang'}</Button>
       </div>
 
       {msg && <p style={{ fontSize: 12, color: 'var(--status-error)', marginTop: 8 }}>{msg}</p>}
@@ -57,7 +58,7 @@ export default function ReconcilePanel() {
                 <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{m.issue}</div>
               </div>
               {m.canApply
-                ? <button type="button" disabled={busy} onClick={() => apply(m)} style={btn}>Terapkan</button>
+                ? <Button size="sm" variant="ghost" disabled={busy} onClick={() => apply(m)}>Terapkan</Button>
                 : <span style={{ fontSize: 12, color: 'var(--status-error)' }}>Perlu dicek manual</span>}
             </div>
           ))}
@@ -66,5 +67,3 @@ export default function ReconcilePanel() {
     </section>
   )
 }
-
-const btn: React.CSSProperties = { height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }
