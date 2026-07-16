@@ -12,7 +12,13 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['src/**/__tests__/**/*.test.ts', 'src/**/__tests__/**/*.test.js'],
+    include: [
+      'src/**/__tests__/**/*.test.ts',
+      'src/**/__tests__/**/*.test.js',
+      'src/**/__tests__/**/*.test.tsx',
+      'scripts/**/__tests__/**/*.test.mjs',
+    ],
     globals: false,
+    css: { modules: { classNameStrategy: 'non-scoped' } },
   },
 })
