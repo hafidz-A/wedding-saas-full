@@ -3,6 +3,8 @@
 
 import { useState } from 'react'
 import { requestRefund, type RefundRequestInput } from '@/app/onboarding/actions'
+import { Button } from '@/components/ui/Button'
+import ui from '@/components/ui/controls.module.css'
 
 /**
  * Compact per-invitation refund control for the /profile list. Mirrors the
@@ -67,7 +69,7 @@ export default function ProfileRefundControl({
               Ditinjau operator dulu (bukan refund otomatis). Hanya untuk kasus seperti bayar dobel / gagal sistem / tidak bisa diakses — bukan karena undangan sudah dipakai.
             </p>
             <label style={lbl}>Alasan
-              <select value={category} onChange={(e) => setCategory(e.target.value as any)} style={ctl}>
+              <select value={category} onChange={(e) => setCategory(e.target.value as any)} className={ui.input}>
                 <option value="duplicate_payment">Bayar dobel</option>
                 <option value="system_failure">Gagal sistem</option>
                 <option value="inaccessible">Tidak bisa diakses</option>
@@ -75,20 +77,20 @@ export default function ProfileRefundControl({
               </select>
             </label>
             <label style={lbl}>Keterangan (opsional)
-              <textarea value={detail} onChange={(e) => setDetail(e.target.value)} rows={2} style={{ ...ctl, height: 'auto', padding: 8 }} />
+              <textarea value={detail} onChange={(e) => setDetail(e.target.value)} rows={2} className={ui.input} style={{ height: 'auto', padding: 8 }} />
             </label>
             {needsDestination && (
               <div style={{ display: 'grid', gap: 6, marginTop: 4 }}>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>Karena bayar via transfer/manual, isi rekening tujuan:</p>
-                <input placeholder="Bank" value={bank} onChange={(e) => setBank(e.target.value)} style={ctl} />
-                <input placeholder="Nomor rekening" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} style={ctl} />
-                <input placeholder="Nama pemilik rekening" value={holder} onChange={(e) => setHolder(e.target.value)} style={ctl} />
+                <input placeholder="Bank" value={bank} onChange={(e) => setBank(e.target.value)} className={ui.input} />
+                <input placeholder="Nomor rekening" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} className={ui.input} />
+                <input placeholder="Nama pemilik rekening" value={holder} onChange={(e) => setHolder(e.target.value)} className={ui.input} />
               </div>
             )}
             {err && <span style={{ fontSize: 12, color: 'var(--status-error)' }}>{err}</span>}
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button type="button" disabled={busy} onClick={submit} style={solid}>{busy ? 'Mengirim…' : 'Kirim permintaan'}</button>
-              <button type="button" disabled={busy} onClick={() => setOpen(false)} style={ghost}>Batal</button>
+              <Button size="sm" disabled={busy} onClick={submit}>{busy ? 'Mengirim…' : 'Kirim permintaan'}</Button>
+              <Button size="sm" variant="ghost" disabled={busy} onClick={() => setOpen(false)}>Batal</Button>
             </div>
           </div>
         </div>
@@ -105,6 +107,3 @@ const tip: React.CSSProperties = { position: 'absolute', bottom: 'calc(100% + 8p
 const scrim: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 1000 }
 const card: React.CSSProperties = { width: '100%', maxWidth: 420, background: 'var(--surface-raised, #fff)', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)', padding: 20, textAlign: 'left' }
 const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }
-const ctl: React.CSSProperties = { height: 38, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--surface-warm, #fff)', color: 'var(--text-primary)', fontSize: 14, boxSizing: 'border-box' }
-const solid: React.CSSProperties = { height: 38, padding: '0 16px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }
-const ghost: React.CSSProperties = { height: 38, padding: '0 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }

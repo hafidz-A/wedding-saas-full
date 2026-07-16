@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { submitReview } from './reviewActions'
 import { countWords, MAX_REVIEW_WORDS } from '@/lib/testimonials/validate'
+import { Button } from '@/components/ui/Button'
+import ui from '@/components/ui/controls.module.css'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 
 export interface ReviewExisting { rating: number; body: string; isAnonymous: boolean; isVisible: boolean }
 
@@ -53,6 +56,9 @@ export default function ReviewButton({
     return () => clearTimeout(id)
   }, [thanks])
 
+  useEscapeToClose(() => { if (!busy) setOpen(false) }, open)
+  useEscapeToClose(() => setThanks(false), thanks)
+
   async function submit() {
     setBusy(true); setErr(null)
     const res = await submitReview({ invitationId, rating, body, authorName: name, isAnonymous: anon })
@@ -65,11 +71,11 @@ export default function ReviewButton({
   return (
     <>
       {!open ? (
-        <button type="button" onClick={() => setOpen(true)} style={triggerBtn}>
+        <Button size="sm" variant="ghost" onClick={() => setOpen(true)}>
           {hasReviewed ? 'Ubah Ulasan' : 'Beri Ulasan'}
-        </button>
+        </Button>
       ) : (
-        <div style={scrim} role="dialog" aria-modal="true" onClick={() => !busy && setOpen(false)}>
+        <div style={scrim} role="dialog" aria-modal="true" aria-label="Bagikan pengalamanmu" onClick={() => !busy && setOpen(false)}>
           <div style={card} onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontSize: 18, margin: '0 0 4px' }}>Bagikan pengalamanmu</h2>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 14px' }}>
@@ -114,10 +120,10 @@ export default function ReviewButton({
             {err && <p style={{ color: 'var(--status-error)', fontSize: 13, margin: '10px 0 0' }}>{err}</p>}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
-              <button type="button" disabled={busy} onClick={() => setOpen(false)} style={ghost}>Batal</button>
-              <button type="button" disabled={invalid} onClick={submit} style={{ ...solid, opacity: invalid ? 0.5 : 1 }}>
+              <Button size="sm" variant="ghost" disabled={busy} onClick={() => setOpen(false)}>Batal</Button>
+              <Button size="sm" disabled={invalid} onClick={submit}>
                 {busy ? 'Menyimpan…' : 'Kirim ulasan'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -126,7 +132,7 @@ export default function ReviewButton({
       {thanks && (
         <div style={scrim} role="dialog" aria-modal="true" aria-label="Terima kasih" onClick={() => setThanks(false)}>
           <div style={{ ...card, maxWidth: 400, textAlign: 'center', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-            <button type="button" onClick={() => setThanks(false)} aria-label="Tutup" style={closeBtn}>×</button>
+            <button type="button" onClick={() => setThanks(false)} aria-label="Tutup" className={ui.iconBtn} style={closeBtnPos}>×</button>
             <span style={checkCircle} aria-hidden>
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 6 9 17l-5-5" />
@@ -144,13 +150,10 @@ export default function ReviewButton({
   )
 }
 
-const triggerBtn: React.CSSProperties = { height: 36, padding: '0 16px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--text-primary)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' }
 const scrim: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 1000 }
 const card: React.CSSProperties = { width: '100%', maxWidth: 460, background: '#fff', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)', boxShadow: '0 20px 60px rgba(42,33,24,0.20)', padding: 22 }
 const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 12, color: 'var(--text-muted)' }
 const ctl: React.CSSProperties = { height: 44, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: '#fff', color: 'var(--text-primary)', fontSize: 14, boxSizing: 'border-box', fontStyle: 'normal' }
 const starBtn: React.CSSProperties = { background: 'none', border: 'none', fontSize: 30, lineHeight: 1, cursor: 'pointer', padding: 0 }
-const solid: React.CSSProperties = { height: 44, padding: '0 20px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }
-const ghost: React.CSSProperties = { height: 44, padding: '0 18px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }
-const closeBtn: React.CSSProperties = { position: 'absolute', top: 10, right: 12, width: 30, height: 30, border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: 22, lineHeight: 1, cursor: 'pointer' }
+const closeBtnPos: React.CSSProperties = { position: 'absolute', top: 10, right: 12 }
 const checkCircle: React.CSSProperties = { display: 'inline-grid', placeItems: 'center', width: 56, height: 56, borderRadius: '50%', background: 'var(--color-coral, #E8553E)', color: '#fff', marginTop: 4 }
