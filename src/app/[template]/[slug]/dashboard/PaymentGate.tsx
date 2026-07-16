@@ -138,13 +138,13 @@ const body: React.CSSProperties = {
 }
 const btnRow: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 22 }
 const primaryBtn: React.CSSProperties = {
-  height: 44, padding: '0 24px', borderRadius: '999px', background: 'var(--interactive-primary)', color: '#fff',
+  height: 44, padding: '0 24px', borderRadius: 'var(--radius-pill)', background: 'var(--interactive-primary)', color: '#fff',
   border: 0, fontSize: 13, fontWeight: 600, letterSpacing: '0.14em',
   textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'inherit',
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }
 const ghostBtn: React.CSSProperties = {
-  height: 36, padding: '0 22px', borderRadius: '999px', background: 'transparent', color: 'var(--text-primary)',
+  height: 36, padding: '0 22px', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-primary)',
   border: '1px solid var(--border-strong)', fontSize: 12, letterSpacing: '0.14em',
   textTransform: 'uppercase', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
 }
@@ -161,7 +161,7 @@ const ftrLink: React.CSSProperties = {
   fontSize: 12, color: 'var(--text-muted)', textDecoration: 'underline',
 }
 const ftrLogout: React.CSSProperties = {
-  height: 36, padding: '0 14px', borderRadius: '999px', background: 'transparent',
+  height: 36, padding: '0 14px', borderRadius: 'var(--radius-pill)', background: 'transparent',
   color: 'var(--text-muted)', border: '1px solid var(--border-default)',
   fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
   fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,

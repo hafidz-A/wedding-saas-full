@@ -96,7 +96,7 @@ const cta: React.CSSProperties = {
   height: 36,
   padding: '1px 20px 0 20px',
   lineHeight: 1,
-  borderRadius: '999px',
+  borderRadius: 'var(--radius-pill)',
   background: 'var(--interactive-primary)',
   color: '#fff',
   border: 0,

@@ -232,7 +232,7 @@ const primaryBtn: React.CSSProperties = {
   marginTop: 8,
   height: 44,
   padding: '1px 24px 0 24px',
-  borderRadius: '999px',
+  borderRadius: 'var(--radius-pill)',
   background: 'var(--color-charcoal)',
   color: 'var(--surface-warm)',
   border: 0,

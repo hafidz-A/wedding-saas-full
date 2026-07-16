@@ -366,6 +366,12 @@
   --z-modal:    400;
   --z-toast:    500;
   --z-top:      999;
+  /* Promise-based dialogs (src/components/ui/DialogProvider) must beat every
+     app modal, including the dashboard modals that hardcode z-index: 1000
+     (pre-existing — GuestEditModal, GuestImportModal, GuestsTab, guestbook/
+     WalkInDialog via styles.ts). A confirm() opened from inside one of those
+     modals has to render on top, not underneath it. */
+  --z-dialog:   4000;
 
   /* ─── SIZING TOKENS ─── */
   --size-icon-xs:   16px;

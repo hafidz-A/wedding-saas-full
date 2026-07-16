@@ -106,7 +106,7 @@ export function DialogProvider({ children, labels }: { children: ReactNode; labe
         className={styles.scrim}
         role="dialog"
         aria-modal="true"
-        aria-label={state.opts.title || state.opts.message}
+        aria-label={state.opts.title || state.opts.message || 'Dialog'}
         onClick={() => settle(isForm ? null : false)}
       >
         <div className={styles.card} onClick={(e) => e.stopPropagation()}>
@@ -115,7 +115,7 @@ export function DialogProvider({ children, labels }: { children: ReactNode; labe
 
           {isForm && (
             <div className={styles.fields}>
-              {state.opts.fields.map((f) => {
+              {state.opts.fields.map((f, idx) => {
                 const v = state.values[f.name] ?? ''
                 const set = (nv: string) =>
                   setState((s) => (s && s.kind === 'form' ? { ...s, values: { ...s.values, [f.name]: nv } } : s))
@@ -148,7 +148,7 @@ export function DialogProvider({ children, labels }: { children: ReactNode; labe
                         value={v}
                         placeholder={f.placeholder}
                         onChange={(e) => set(e.target.value)}
-                        autoFocus
+                        autoFocus={idx === 0}
                       />
                     )}
                     {f.help && <span className={styles.help}>{f.help}</span>}

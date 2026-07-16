@@ -28,6 +28,16 @@ describe('scanTsx', () => {
   it("allows borderRadius: 'var(--radius-pill)'", () => {
     expect(scanTsx("const pill = { borderRadius: 'var(--radius-pill)' }")).toHaveLength(0)
   })
+  it("flags quoted borderRadius: '999px'", () => {
+    const out = scanTsx("const pill = { borderRadius: '999px' }")
+    expect(out).toHaveLength(1)
+    expect(out[0].why).toContain('radius-pill')
+  })
+  it('flags quoted borderRadius: "999px" (double quotes)', () => {
+    const out = scanTsx('const pill = { borderRadius: "999px" }')
+    expect(out).toHaveLength(1)
+    expect(out[0].why).toContain('radius-pill')
+  })
   it('flags off-scale height inside a button-named style const', () => {
     const src = 'const saveBtn: React.CSSProperties = {\n  height: 40,\n}'
     const out = scanTsx(src)

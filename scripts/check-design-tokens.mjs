@@ -14,9 +14,11 @@
  *      clamp(), %, and multi-value decorative shapes are exempt)
  *   4. an off-scale height/width on a BUTTON selector (btn/button/cta/toggle/
  *      pill/seg/hamburger/burger) — must be 36/44/52 via --ctl-h*.
- * Also scans `.tsx`/`.jsx` inline `React.CSSProperties` objects for the same
- * drift (numeric `borderRadius: 999` and off-scale heights in button-named
- * style consts) — the blind spot that let the admin console drift silently.
+ * Also scans `.tsx`/`.jsx`/`.ts` inline `React.CSSProperties` objects for the
+ * same drift (`borderRadius: 999` numeric OR quoted `'999px'`/`"999px"`, and
+ * off-scale heights in button-named style consts) — the blind spot that let
+ * the admin console drift silently. `.d.ts`, `__tests__/`, and `scripts/`
+ * (outside `src/`) are excluded from the walk.
  *
  * Run: `npm run check:tokens`
  */
@@ -32,9 +34,11 @@ function walk(dir) {
   const out = []
   for (const name of readdirSync(dir)) {
     const p = join(dir, name)
+    if (name === '__tests__') continue
     const s = statSync(p)
     if (s.isDirectory()) out.push(...walk(p))
-    else if (/\.(css|tsx|jsx)$/.test(name)) out.push(p)
+    else if (name.endsWith('.d.ts')) continue
+    else if (/\.(css|tsx|jsx|ts)$/.test(name)) out.push(p)
   }
   return out
 }

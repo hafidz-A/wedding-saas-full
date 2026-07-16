@@ -36,9 +36,10 @@ export function scanCss(source) {
 }
 
 /**
- * Inline-style rules for .tsx/.jsx — the blind spot that let the admin console
+ * Inline-style rules for .tsx/.jsx/.ts — the blind spot that let the admin console
  * drift: React.CSSProperties objects are invisible to the CSS scan.
- * 1. numeric `borderRadius: 999` → use 'var(--radius-pill)'
+ * 1. `borderRadius: 999` (numeric) OR `borderRadius: '999px'` / `"999px"` (quoted
+ *    string) → use 'var(--radius-pill)'
  * 2. off-scale `height:`/`minHeight:` inside a style const whose NAME looks
  *    like a control (btn/button/cta/input/ctl) → 36/44/52 only.
  */
@@ -50,7 +51,7 @@ export function scanTsx(source) {
     const decl = line.match(/(?:const|let)\s+(\w+)\s*(?::\s*React\.CSSProperties)?\s*=\s*\{/)
     if (decl) currentConst = decl[1]
 
-    if (/\bborderRadius:\s*999\b/.test(line)) {
+    if (/\bborderRadius:\s*(?:999\b|['"]999px['"])/.test(line)) {
       offenses.push({ line: i + 1, text: line.trim(), why: "raw 999 radius; use 'var(--radius-pill)'" })
     }
     if (BUTTON_CONST.test(currentConst)) {

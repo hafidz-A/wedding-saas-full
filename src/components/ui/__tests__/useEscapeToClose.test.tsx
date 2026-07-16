@@ -36,4 +36,25 @@ describe('useEscapeToClose', () => {
     pressEscape()
     expect(onClose).not.toHaveBeenCalled()
   })
+
+  it('stacked dialogs: Escape only closes the most recently mounted one', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    renderHook(() => useEscapeToClose(first))
+    renderHook(() => useEscapeToClose(second))
+    pressEscape()
+    expect(second).toHaveBeenCalledTimes(1)
+    expect(first).not.toHaveBeenCalled()
+  })
+
+  it('after the top dialog unmounts, Escape falls through to the next one', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    renderHook(() => useEscapeToClose(first))
+    const { unmount: unmountSecond } = renderHook(() => useEscapeToClose(second))
+    unmountSecond()
+    pressEscape()
+    expect(first).toHaveBeenCalledTimes(1)
+    expect(second).not.toHaveBeenCalled()
+  })
 })
