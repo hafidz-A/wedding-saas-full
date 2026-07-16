@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { adminExportUserData } from './actions'
 import { useAdminAlert } from '@/components/admin/AdminDialogProvider'
+import { Button } from '@/components/ui/Button'
 
 export default function UserExportButton({ userId }: { userId: string }) {
   const [busy, setBusy] = useState(false)
@@ -22,8 +23,8 @@ export default function UserExportButton({ userId }: { userId: string }) {
   }
 
   return (
-    <button type="button" disabled={busy} onClick={run} style={{ height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }}>
+    <Button size="sm" variant="ghost" disabled={busy} onClick={run}>
       {busy ? 'Menyiapkan…' : 'Ekspor data (.json)'}
-    </button>
+    </Button>
   )
 }

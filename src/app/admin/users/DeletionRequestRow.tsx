@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { adminProcessDeletion, adminRejectDeletion } from './actions'
 import { useAdminConfirm, useAdminForm, useAdminAlert } from '@/components/admin/AdminDialogProvider'
+import { Button } from '@/components/ui/Button'
 
 interface Req {
   id: string; email: string; reason: string
@@ -56,12 +57,9 @@ export default function DeletionRequestRow({ req }: { req: Req }) {
         </div>
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
-        <button type="button" disabled={busy} onClick={process} style={danger}>Proses hapus</button>
-        <button type="button" disabled={busy} onClick={reject} style={ghost}>Tolak</button>
+        <Button size="sm" variant="danger" disabled={busy} onClick={process}>Proses hapus</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={reject}>Tolak</Button>
       </div>
     </div>
   )
 }
-
-const danger: React.CSSProperties = { height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--status-error)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }
-const ghost: React.CSSProperties = { height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }

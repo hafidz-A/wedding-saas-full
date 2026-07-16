@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminConfirm } from '@/components/admin/AdminDialogProvider'
 import { setTestimonialVisible, deleteTestimonial } from './actions'
+import { Button } from '@/components/ui/Button'
 
 export interface AdminTestimonial {
   id: string
@@ -54,10 +55,10 @@ export default function ModerationRow({ t }: { t: AdminTestimonial }) {
       <td style={{ ...td, fontStyle: 'normal', maxWidth: 380 }}>{t.body}</td>
       <td style={{ ...td, whiteSpace: 'nowrap' }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" disabled={busy} onClick={toggle} style={btn}>
+          <Button size="sm" variant="ghost" disabled={busy} onClick={toggle}>
             {t.isVisible ? 'Sembunyikan' : 'Munculkan'}
-          </button>
-          <button type="button" disabled={busy} onClick={remove} style={{ ...btn, color: 'var(--status-error)' }}>Hapus</button>
+          </Button>
+          <Button size="sm" variant="ghostDanger" disabled={busy} onClick={remove}>Hapus</Button>
         </div>
       </td>
     </tr>
@@ -66,4 +67,3 @@ export default function ModerationRow({ t }: { t: AdminTestimonial }) {
 
 const td: React.CSSProperties = { padding: '12px 10px', fontSize: 14, verticalAlign: 'top' }
 const badge: React.CSSProperties = { marginLeft: 8, fontSize: 11, color: 'var(--text-secondary)', background: 'var(--surface-sunken)', padding: '2px 8px', borderRadius: 'var(--radius-pill)' }
-const btn: React.CSSProperties = { height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }

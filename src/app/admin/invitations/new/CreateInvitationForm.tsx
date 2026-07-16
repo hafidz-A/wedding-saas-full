@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { adminCreateInvitationForClient, type CreateForClientResult } from '../actions'
+import { Button } from '@/components/ui/Button'
 
 const TEMPLATES = [
   { id: 'lovebirds', label: 'Lovebirds' },
@@ -89,7 +90,7 @@ export default function CreateInvitationForm() {
             </p>
           </div>
         )}
-        <button type="button" onClick={() => setResult(null)} style={{ ...btn, marginTop: 14 }}>Buat lagi</button>
+        <Button size="sm" onClick={() => setResult(null)} style={{ marginTop: 14 }}>Buat lagi</Button>
       </div>
     )
   }
@@ -172,7 +173,7 @@ export default function CreateInvitationForm() {
       {result && !result.ok && <p style={{ color: 'var(--status-error)', fontSize: 13, margin: 0 }}>{result.error}</p>}
 
       <div>
-        <button type="submit" disabled={busy} style={btn}>{busy ? 'Membuat…' : 'Buat undangan'}</button>
+        <Button size="sm" type="submit" disabled={busy}>{busy ? 'Membuat…' : 'Buat undangan'}</Button>
       </div>
     </form>
   )
@@ -192,7 +193,6 @@ function Row({ children }: { children: React.ReactNode }) {
 }
 
 const input: React.CSSProperties = { height: 36, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontSize: 14, width: '100%', boxSizing: 'border-box' }
-const btn: React.CSSProperties = { height: 40, padding: '0 20px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }
 const link: React.CSSProperties = { color: 'var(--interactive-primary)' }
 const panel: React.CSSProperties = { maxWidth: 620, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: 20 }
 const notice: React.CSSProperties = { marginTop: 12, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: 14, background: 'var(--surface-sunken, transparent)' }
