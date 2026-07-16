@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 
 /**
  * In-app dialogs for the /admin console — replaces native browser
@@ -57,6 +58,7 @@ export function AdminDialogProvider({ children }: { children: ReactNode }) {
     for (const f of opts.fields) values[f.name] = f.defaultValue ?? ''
     setState({ kind: 'form', opts, values, resolve })
   }), [])
+  useEscapeToClose(() => settle(state?.kind === 'form' ? null : false), state !== null)
 
   function settle(result: boolean | Record<string, string> | null) {
     if (!state) return

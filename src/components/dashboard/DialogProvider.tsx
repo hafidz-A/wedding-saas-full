@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import styles from './DialogProvider.module.css'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 
 interface ConfirmOpts {
   title?: string
@@ -63,6 +64,7 @@ export function DialogProvider({ children, labels }: { children: ReactNode; labe
       new Promise<void>((resolve) => setState({ kind: 'alert', opts, resolve: () => resolve() })),
     [],
   )
+  useEscapeToClose(() => close(false), state !== null)
 
   function close(result: boolean) {
     if (state) state.resolve(result)

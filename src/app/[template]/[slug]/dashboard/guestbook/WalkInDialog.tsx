@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useDashboardDict } from '../DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 import { addWalkInAttendance, addUnlistedAttendance, searchWalkInGuests, type WalkInGuestHit } from './actions'
 import { type AttendanceRow } from './types'
 import {
@@ -39,6 +40,7 @@ export default function WalkInDialog({
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
   const confirmDialog = useConfirm()
+  useEscapeToClose(onClose)
 
   // Debounced typeahead — only while no guest is picked yet.
   useEffect(() => {
