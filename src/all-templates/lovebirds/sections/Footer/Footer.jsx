@@ -4,8 +4,8 @@ import { useEffect, useRef } from 'react'
 import useScrollReveal from '../../hooks/useScrollReveal.js'
 import SceneFrame from '../../components/SceneFrame.jsx'
 import styles from './Footer.module.css'
-import { deriveMonogram } from '../../config/monogram.js'
 import { safeExternalUrl } from '@/lib/safeUrl'
+import { BRAND } from '@/lib/brand'
 
 const DEFAULTS = {
   monogram: 'A & R',
@@ -14,28 +14,6 @@ const DEFAULTS = {
   coupleName: 'The Happy Couple',
   socials: [],
   photos: [],
-}
-
-function MonogramSvg({ text }) {
-  // currentColor inherits the footer's palette contrast colour (--ftr-fg, same
-  // as the hashtag), so the monogram stays legible on EVERY palette instead of a
-  // fixed cream→gold that vanishes on light/gold backgrounds.
-  return (
-    <svg viewBox="0 0 200 200" className={styles.monogram} aria-hidden="true">
-      <circle cx="100" cy="100" r="86" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.85" />
-      <circle cx="100" cy="100" r="76" fill="none" stroke="currentColor" strokeWidth="0.6" opacity="0.5" />
-      <text
-        x="50%" y="54%"
-        dominantBaseline="middle"
-        textAnchor="middle"
-        style={{ fontFamily: 'var(--font-script)', fontStyle: 'normal' }}
-        fontSize="52"
-        fill="currentColor"
-      >
-        {text}
-      </text>
-    </svg>
-  )
 }
 
 function SocialIcon({ label }) {
@@ -62,9 +40,8 @@ function SocialIcon({ label }) {
 }
 
 export default function Footer(props) {
-  const { monogram, hashtag, message, coupleName, socials, photos } = { ...DEFAULTS, ...props }
+  const { hashtag, message, coupleName, socials, photos } = { ...DEFAULTS, ...props }
   const { ref, isVisible } = useScrollReveal()
-  const monogramText = deriveMonogram(coupleName, undefined, monogram)
   const couplePhotos = (Array.isArray(photos) ? photos : []).filter((p) => p && p.src).slice(0, 2)
 
   // Keep the hashtag on a single line at any length / device: the CSS sets the
@@ -103,8 +80,6 @@ export default function Footer(props) {
     >
       <SceneFrame />
       <div className={styles.inner}>
-        <MonogramSvg text={monogramText} />
-
         {couplePhotos.length > 0 && (
           <div className={styles.couplePhotos} aria-label="The couple">
             {couplePhotos.map((p, i) => (
@@ -155,7 +130,7 @@ export default function Footer(props) {
         </p>
 
         <p className={styles.fineprint}>
-          © {new Date().getFullYear()} {coupleName}. Made with care.
+          © {new Date().getFullYear()} {BRAND}. Made with care.
         </p>
       </div>
     </footer>

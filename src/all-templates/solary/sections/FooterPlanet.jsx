@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import GlassCard, { CardChild } from "../components/GlassCard.jsx";
 import FooterPhotoFrames from "../components/FooterPhotoFrames.jsx";
+import { BRAND } from "@/lib/brand";
 
 /* The Sun has an easter egg: clicking it (in scene OR via this
    button fallback) opens a hidden message. The scene fires
@@ -50,6 +51,11 @@ export default function FooterPlanet({ sectionLabel, planetName, heading, body, 
             </p>
           </CardChild>
         )}
+        <CardChild>
+          <p className="mono faint center-text" style={{ marginTop: signature ? "0.75rem" : "2rem", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase" }}>
+            © {new Date().getFullYear()} {BRAND}
+          </p>
+        </CardChild>
       </GlassCard>
 
       {open && easterEggMessage && (
