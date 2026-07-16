@@ -193,6 +193,14 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
     programmaticJump(toIdx, cameraDuration);
   };
 
+  // Named (not inline) so the design-token guard's const-scoped scan doesn't
+  // misattribute this decorative 8px dot to the neighboring button style below.
+  const logoDotStyle = {
+    width: 8, height: 8, borderRadius: "50%",
+    background: "var(--color-accent)", flex: "0 0 auto",
+    boxShadow: "0 0 12px rgba(var(--color-glow)/0.8)",
+  };
+
   const iconBtnStyle = {
     // Fluid: shrinks 44 → 36 on narrow screens (36 stays ≥ --tap-target/--ctl-h-sm).
     width: "clamp(36px, 10vw, 44px)", height: "clamp(36px, 10vw, 44px)",
@@ -239,11 +247,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
         display: "inline-flex", alignItems: "center", gap: 10,
         flex: "1 1 auto", minWidth: 0, overflow: "hidden",
       }}>
-        <span aria-hidden="true" style={{
-          width: 8, height: 8, borderRadius: "50%",
-          background: "var(--color-accent)", flex: "0 0 auto",
-          boxShadow: "0 0 12px rgba(var(--color-glow)/0.8)",
-        }} />
+        <span aria-hidden="true" style={logoDotStyle} />
         <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{logo}</span>
       </a>
 

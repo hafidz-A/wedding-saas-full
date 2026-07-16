@@ -86,7 +86,7 @@ export default function GiftPlanet({ sectionLabel, planetName, heading, accounts
                 <div className="mono" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--color-accent-text)", marginBottom: 8 }}>{a.bank}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, letterSpacing: "0.08em" }}>{a.number}</div>
                 <div style={{ color: "var(--color-fg-mute)", marginTop: 4, fontSize: 14 }}>a/n {a.name}</div>
-                <button type="button" onClick={() => copy(a.number, i)} style={{ position: "absolute", top: 12, right: 12, padding: "6px 10px", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", borderRadius: 999, border: "1px solid var(--color-line)", color: "var(--color-fg-mute)", background: "transparent", cursor: "pointer" }}>
+                <button type="button" onClick={() => copy(a.number, i)} style={{ position: "absolute", top: 12, right: 12, padding: "6px 10px", fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", borderRadius: "var(--radius-pill)", border: "1px solid var(--color-line)", color: "var(--color-fg-mute)", background: "transparent", cursor: "pointer" }}>
                   {copied === i ? "Copied" : "Copy"}
                 </button>
                 {confirmationEnabled && (

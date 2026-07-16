@@ -106,7 +106,7 @@ const demoNoteStyle = {
   maxWidth: 'min(86vw, 560px)',
   margin: '0 auto 28px',
   padding: '10px 22px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   background: 'var(--glass-bg, rgba(255,255,255,0.6))',
   border: '1px solid var(--glass-border, rgba(42,33,24,0.12))',
   color: 'var(--fg-muted, rgba(42,33,24,0.7))',
