@@ -151,7 +151,13 @@ export async function sendPaymentReceipt(
       if (addon?.qty_guests != null) extraLine = `Tambahan kuota: <strong>${addon.qty_guests} tamu</strong>`
     }
 
-    if (amountIDR == null) amountIDR = 0
+    // Never send an "Rp 0" receipt — if the amount can't be resolved (unknown
+    // plan, no paid upgrade/addon row), skip with a log instead of misleading
+    // the customer.
+    if (amountIDR == null || amountIDR <= 0) {
+      console.error('[receipt] amount unresolved — skipped', { invitationId, kind })
+      return
+    }
 
     const html = renderHtml({
       slug: inv.slug,

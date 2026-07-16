@@ -76,6 +76,12 @@ describe('sendPaymentReceipt', () => {
     expect(mail.html).toContain('50 tamu')
   })
 
+  it('upgrade: skips (never sends Rp 0) when no paid plan_upgrades row is found', async () => {
+    const db = fakeDb({ invitations: INV }) // no plan_upgrades row → amount unresolved
+    await sendPaymentReceipt(db as any, 'inv-1', 'upgrade')
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
   it('skips silently when the invitation has no email', async () => {
     const db = fakeDb({ invitations: { ...INV, email: null } })
     await sendPaymentReceipt(db as any, 'inv-1', 'initial')
