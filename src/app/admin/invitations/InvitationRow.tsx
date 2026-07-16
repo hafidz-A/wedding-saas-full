@@ -128,7 +128,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
 
 // Still used by the "Lihat" anchor and the plan <select> below — neither is a
 // <button>, so they can't move to the shared <Button> component.
-const ghost: React.CSSProperties = { height: 32, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }
+const ghost: React.CSSProperties = { height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }
 
 function chip(color: string): React.CSSProperties {
   return { marginLeft: 8, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: `1px solid ${color}`, color }
