@@ -2,6 +2,12 @@
 
 Laporan suite automated test. Cakupan sel-per-sel: lihat `TEST-MATRIX.md`. Temuan: `BUG-LEDGER.md`.
 
+## Run design-system hardening (2026-07-17)
+- **Konteks:** eksekusi plan `docs/superpowers/plans/2026-07-16-design-system-hardening.md` (13 task + final-review fix wave; commits `4d7658e..b29ceb1`). Lapisan `src/components/ui/` baru (Button, DialogProvider terpadu, useEscapeToClose), migrasi admin/profile, token `--status-danger*`/`--z-dialog`, guard token kini memindai inline style `.tsx/.jsx/.ts`.
+- **Gates di head:** tsc bersih · vitest **649 test / 95 file HIJAU** (593 → 649: +26 test komponen ui via jsdom/@testing-library + +11 test `scripts/lib/token-rules` + suite receipt email) · `npm run check:tokens` → `✓ design tokens clean (radius + control heights, css + inline tsx)`.
+- **Infra test baru:** jsdom + @testing-library/react (file `.test.tsx` opt-in via docblock `@vitest-environment jsdom`; CSS modules `classNameStrategy: 'non-scoped'`).
+- **Playwright:** tidak dijalankan pada wave ini (perubahan UI-layer; smoke visual manual disarankan sebelum merge — lihat catatan restyle dialog dashboard di ledger).
+
 ## Run verifikasi migrasi Midtrans (2026-07-15)
 - **Konteks:** verifikasi penuh pasca migrasi Xendit → Midtrans Snap (spec/plan 2026-07-14; commits `e787eda..a3c501e`).
 - **`npm run test:all`** → **exit 0**: tsc bersih · vitest **593 test / 89 file HIJAU** · Playwright **82 passed, 1 flaky (a11y login — lolos retry), 6 skipped** (1.1 jam, 3 viewport).
