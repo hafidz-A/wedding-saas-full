@@ -6,6 +6,7 @@ import { getTemplatePolicy, availableAddTypes } from './templatePolicy'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict, useDashboardLang } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { localizeLabel } from './schemas/types'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 
 interface Props {
   template: string
@@ -26,6 +27,12 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
   const entries = types.map((type) => [type, registry[type]] as const)
 
   const wrapRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  useEscapeToClose(() => {
+    setOpen(false)
+    triggerRef.current?.focus()
+  }, open)
 
   useEffect(() => {
     if (!open) return
@@ -42,8 +49,11 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
   return (
     <div ref={wrapRef} style={{ position: 'relative' }}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
         style={{
           width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-sm)',
           border: '1px dashed var(--border-strong)', background: 'transparent',
@@ -55,6 +65,8 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
       </button>
       {open && (
         <div
+          role="menu"
+          aria-label={t.addSection}
           style={{
             position: 'absolute', bottom: 'calc(100% + 4px)', left: 0, right: 0,
             maxHeight: 320, overflow: 'auto', background: 'var(--surface-raised)',
@@ -66,6 +78,7 @@ export default function AddSectionMenu({ template, onAdd }: Props) {
             <button
               key={type}
               type="button"
+              role="menuitem"
               onClick={() => { onAdd(type, localizeLabel(schema.label, lang), schema.defaults); setOpen(false) }}
               style={{
                 display: 'block', width: '100%', textAlign: 'left',
