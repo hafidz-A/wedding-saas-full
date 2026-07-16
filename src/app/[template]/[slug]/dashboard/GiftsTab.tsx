@@ -6,7 +6,7 @@ import { downloadCsv, omitColumns } from './lib/csv'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useAlert } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
-import tabs from './dashboardTabs.module.css'
+import tabs from './tabPanels.module.css'
 import ctrl from './dashboardControls.module.css'
 
 export interface GiftRow {

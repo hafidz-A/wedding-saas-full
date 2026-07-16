@@ -168,9 +168,16 @@ Env-gated by `ADMIN_EMAILS` allowlist (`src/lib/admin/is-admin.ts` + `require-ad
   - **Control heights:** `--ctl-h-sm 36 · --ctl-h 44 (DEFAULT for every button/CTA/input; = --tap-target)
     · --ctl-h-lg 52 (hero/gate CTA)`. Public surfaces default 44; dense admin (dashboard/editor tables,
     icon buttons) use 36.
+  - **Status colors:** `--status-danger` scale (`tokens.css`) replaces hardcoded reds in dashboard/admin
+    danger buttons and controls — don't reintroduce a raw `#`-red.
   - **Guardrail:** `npm run check:tokens` fails on the dead `--border-radius-*` namespace, raw `999px`,
     single-px radius literals, or an off-scale height on a button selector. Run it after touching
     control/token CSS.
+- **Shared controls:** `src/components/ui/` — `<Button variant size>`, unified `DialogProvider`
+  (confirm/alert/form + Escape), `useEscapeToClose`, `controls.module.css` (.input/.iconBtn).
+  New buttons/dialogs MUST use these; do not hand-roll inline-styled controls.
+- `npm run check:tokens` now also scans **inline styles in .tsx/.jsx** (999 radius, off-scale
+  control heights on btn/input-named consts) — "clean" covers admin/profile inline styles too.
 - **`'use client'`** on all section/component/hook files. Server components are `src/app/**/page.tsx`,
   `layout.tsx`, and `src/app/api/**/route.ts`; server actions are `'use server'` files (`actions.ts`).
 - **i18n:** ID + EN dictionaries in `src/lib/i18n/dictionaries/`; keep dict parity (there's a test).

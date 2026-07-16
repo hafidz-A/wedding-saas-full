@@ -23,7 +23,7 @@ import { buildPrintHtml } from '@/lib/guestbook/printHtml'
 import {
   sub,
 } from './guestbook/styles'
-import tabs from './dashboardTabs.module.css'
+import tabs from './tabPanels.module.css'
 import ctrl from './dashboardControls.module.css'
 
 interface Props {
