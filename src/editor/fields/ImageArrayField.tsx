@@ -125,7 +125,7 @@ function SortableTile({ id, url, onRemove }: { id: string; url: string; onRemove
         type="button"
         onClick={(e) => { e.stopPropagation(); onRemove() }}
         onPointerDown={(e) => e.stopPropagation()}
-        style={thumbRemoveMark}
+        style={thumbRemoveBtn}
       >
         ×
       </button>
@@ -139,10 +139,13 @@ const lbl:  React.CSSProperties = { fontSize: 11, textTransform: 'uppercase', le
 const count:React.CSSProperties = { letterSpacing: '0.06em', color: 'rgba(42,33,24,0.45)' }
 const grid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }
 const tile: React.CSSProperties = { width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', display: 'block' }
-// Not a --ctl-h scale control: a small 22px "×" overlay badge on an image
-// thumbnail, not a CTA/toggle/input. Named to keep the token guard's
-// button-const height check from matching it.
-const thumbRemoveMark: React.CSSProperties = { position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: 'var(--radius-pill)', background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', fontSize: 14, lineHeight: 1, cursor: 'pointer' }
+// Real interactive control (removes an uploaded image) — on the 36px dense
+// icon-button scale (--ctl-h-sm), same rung as ctrl.iconBtn / ui.iconBtn.
+// Kept as a bespoke dark circular badge (rather than the bordered
+// ui.iconBtn look) so it stays legible over arbitrary photo backgrounds;
+// offset to hang mostly outside the thumbnail's corner so it doesn't
+// obscure the image underneath.
+const thumbRemoveBtn: React.CSSProperties = { position: 'absolute', top: -8, right: -8, width: 36, height: 36, borderRadius: 'var(--radius-pill)', background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', fontSize: 16, lineHeight: 1, cursor: 'pointer' }
 const empty:React.CSSProperties = { gridColumn: '1 / -1', padding: 24, textAlign: 'center', color: 'rgba(42,33,24,0.5)', fontSize: 13, border: '1px dashed var(--border-strong)', borderRadius: 'var(--radius-sm)' }
 const errStyle: React.CSSProperties = { fontSize: 12, color: 'var(--interactive-primary)' }
 const hlp:  React.CSSProperties = { fontSize: 11, color: 'var(--text-muted)' }
