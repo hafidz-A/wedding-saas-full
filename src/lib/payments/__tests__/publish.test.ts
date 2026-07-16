@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../plans', () => ({ resolvePlan: vi.fn() }))
+vi.mock('@/lib/email/receipt', () => ({ sendPaymentReceipt: vi.fn() }))
 import { resolvePlan } from '../plans'
-import { extendActivePeriod, applyPaidQuotaAddon } from '../publish'
+import { sendPaymentReceipt } from '@/lib/email/receipt'
+import { extendActivePeriod, applyPaidQuotaAddon, publishPaidInvitation } from '../publish'
 import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
 
 function fakeAdmin() {
@@ -48,6 +50,40 @@ describe('extendActivePeriod', () => {
     await extendActivePeriod(admin as any, { id: 'inv-2', plan: 'premium', template_id: 'solary' })
     expect(admin._calls[0].value.expires_at).toBeNull()
     expect(admin._calls[0].value.is_published).toBe(true)
+  })
+})
+
+describe('publishPaidInvitation', () => {
+  it('sends the initial receipt when paidSource is midtrans', async () => {
+    vi.mocked(resolvePlan).mockResolvedValue({
+      planId: 'basic',
+      amountIDR: 100000,
+      expiresAt: () => null,
+    } as any)
+    const admin = fakeAdmin()
+    await publishPaidInvitation(
+      admin as any,
+      { id: 'inv-1', plan: 'basic', template_id: 'solary' },
+      1_700_000_000_000,
+      { paidSource: 'midtrans' },
+    )
+    expect(sendPaymentReceipt).toHaveBeenCalledWith(admin, 'inv-1', 'initial')
+  })
+
+  it('does not send a receipt for a comp/manual admin publish', async () => {
+    vi.mocked(resolvePlan).mockResolvedValue({
+      planId: 'basic',
+      amountIDR: 100000,
+      expiresAt: () => null,
+    } as any)
+    const admin = fakeAdmin()
+    await publishPaidInvitation(
+      admin as any,
+      { id: 'inv-1', plan: 'basic', template_id: 'solary' },
+      1_700_000_000_000,
+      { paidSource: 'comp' },
+    )
+    expect(sendPaymentReceipt).not.toHaveBeenCalled()
   })
 })
 
