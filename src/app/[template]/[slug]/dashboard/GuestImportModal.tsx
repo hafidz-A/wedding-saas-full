@@ -6,6 +6,7 @@ import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { importGuests } from './guests/actions'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 import ctrl from './dashboardControls.module.css'
 
 export default function GuestImportModal({
@@ -24,6 +25,8 @@ export default function GuestImportModal({
 
   const preview = useMemo(() => parseGuestImport(text), [text])
 
+  useEscapeToClose(onClose)
+
   const handleImport = () => {
     if (preview.length === 0) return
     setError(null)
@@ -40,7 +43,7 @@ export default function GuestImportModal({
   }
 
   return (
-    <div style={overlay} onClick={onClose}>
+    <div style={overlay} onClick={onClose} role="dialog" aria-modal="true" aria-label={t.title}>
       <div style={dialog} onClick={(e) => e.stopPropagation()}>
         <header style={header}>
           <h3 style={{ margin: 0 }}>{t.title}</h3>

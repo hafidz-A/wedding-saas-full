@@ -37,7 +37,7 @@
   /* --font-display now resolves to Montserrat (design cleanup). */
   font-family: var(--font-display);
   font-style: normal; font-size: 20px;
-  color: #2A2118;
+  color: var(--color-charcoal);
 }
 .close { background: none; border: 0; font-size: 20px; cursor: pointer; color: rgba(42, 33, 24, 0.55); line-height: 1; }
 .groupTitle {
@@ -51,10 +51,10 @@
   padding: 9px 10px; border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
-  font-family: var(--font-body); font-size: 12px; color: #2A2118;
+  font-family: var(--font-body); font-size: 12px; color: var(--color-charcoal);
   text-align: left;
 }
-.swatchBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
+.swatchBtn.active { border-color: var(--color-charcoal); outline: 2px solid var(--color-charcoal); }
 .dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(42, 33, 24, 0.15); }
 
 /* Ornament type chooser (Birds / Butterflies / Perched) */
@@ -65,10 +65,10 @@
   padding: 8px 4px; border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
-  font-family: var(--font-body); font-size: 10px; color: #2A2118;
+  font-family: var(--font-body); font-size: 10px; color: var(--color-charcoal);
 }
 .ornamentBtn .emoji { font-size: 18px; line-height: 1; }
-.ornamentBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
+.ornamentBtn.active { border-color: var(--color-charcoal); outline: 2px solid var(--color-charcoal); }
 
 /* Display / device chooser (Desktop / iPhone / iPad / Galaxy …) */
 .deviceRow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -76,7 +76,7 @@
   padding: 8px 10px; border-radius: var(--radius-sm);
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: #fff; cursor: pointer;
-  font-family: var(--font-body); font-size: 11px; color: #2A2118;
+  font-family: var(--font-body); font-size: 11px; color: var(--color-charcoal);
   text-align: center;
 }
-.deviceBtn.active { border-color: #2A2118; outline: 2px solid #2A2118; }
+.deviceBtn.active { border-color: var(--color-charcoal); outline: 2px solid var(--color-charcoal); }

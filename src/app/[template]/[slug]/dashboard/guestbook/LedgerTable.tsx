@@ -5,7 +5,7 @@ import { type AttendanceRow } from './types'
 import { badgeRsvp, badgeWalkin, badgeUnlisted } from './styles'
 import ctrl from '../dashboardControls.module.css'
 import { attendanceCategory } from '@/lib/guestbook/category'
-import tabs from '../dashboardTabs.module.css'
+import tabs from '../tabPanels.module.css'
 
 interface Labels {
   colName: string; colSource: string; colGuests: string; colNote: string

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { updatePlan } from './actions'
 import type { PlanPatch } from './validate'
 import { formatIDR } from '@/lib/payments/quota'
+import { Button } from '@/components/ui/Button'
 
 interface PlanInit extends PlanPatch { plan_code: string }
 
@@ -44,7 +45,7 @@ export default function PlansEditor({ templateId, plan }: { templateId: string; 
       <Field label="Kuota tamu (kelipatan 50)"><input value={quota} onChange={(e) => setQuota(e.target.value)} inputMode="numeric" style={inp} /></Field>
       <Field label="Masa aktif (hari, kosong = seumur hidup)"><input value={duration} onChange={(e) => setDuration(e.target.value)} inputMode="numeric" style={inp} /></Field>
       <Field label="Fitur (satu per baris)"><textarea value={features} onChange={(e) => setFeatures(e.target.value)} rows={4} style={{ ...inp, resize: 'vertical' }} /></Field>
-      <button type="button" onClick={save} disabled={busy} style={btn}>{busy ? 'Menyimpan…' : 'Simpan'}</button>
+      <Button size="sm" onClick={save} disabled={busy} style={{ marginTop: 4 }}>{busy ? 'Menyimpan…' : 'Simpan'}</Button>
       {msg && <span style={{ fontSize: 13, color: msg.ok ? 'var(--color-emerald)' : 'var(--interactive-primary)' }}>{msg.text}</span>}
     </div>
   )
@@ -60,4 +61,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inp: React.CSSProperties = { height: 36, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box' }
-const btn: React.CSSProperties = { height: 40, borderRadius: 'var(--radius-pill)', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', border: 0, fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 4 }

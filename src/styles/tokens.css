@@ -219,6 +219,18 @@
   --status-error:            var(--interactive-primary); /* #E8553E */
   --status-error-dark:       #B23A28;
   --status-error-soft:       var(--interactive-primary-soft);
+  /* Destructive-action red scale. Distinct from --status-error (which aliases
+     the coral --interactive-primary and is used for inline error text/banners):
+     these are the "true red" destructive-button colors previously hardcoded in
+     dashboardControls.module.css. Values are 1:1 with the old literals. */
+  --status-danger:           #DC2626;
+  --status-danger-strong:    #B91C1C; /* hover fill */
+  --status-danger-deep:      #991B1B; /* hover border */
+  --status-danger-bright:    #EF4444; /* ghost/outline border */
+  --status-danger-soft:      rgba(239, 68, 68, 0.08);
+  --shadow-danger:           0 4px 14px rgba(220, 38, 38, 0.35);
+  --shadow-danger-hover:     0 6px 18px rgba(185, 28, 28, 0.45);
+  --focus-ring-danger:       0 0 0 3px rgba(239, 68, 68, 0.25), 0 0 0 1.5px #DC2626;
   --status-neutral:          #8A7F70;
   --status-neutral-soft:     rgba(42, 33, 24, 0.12);
   --text-disabled:           rgba(42, 33, 24, 0.40);

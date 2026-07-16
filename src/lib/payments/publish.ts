@@ -1,5 +1,6 @@
 import 'server-only'
 import { resolvePlan } from './plans'
+import { sendPaymentReceipt } from '@/lib/email/receipt'
 
 export interface PublishableInvitation {
   id: string
@@ -36,6 +37,9 @@ export async function applyPaidUpgrade(
   await (admin.from('plan_upgrades') as any)
     .update({ status: 'paid', paid_at: new Date(nowMs).toISOString() })
     .eq('id', upgrade.id)
+  // Receipt is best-effort — sendPaymentReceipt never throws, so a failure here
+  // can never roll back the upgrade that was just applied.
+  await sendPaymentReceipt(admin, upgrade.invitation_id, 'upgrade')
 }
 
 export interface PaidQuotaAddon {
@@ -64,6 +68,9 @@ export async function applyPaidQuotaAddon(
   await (admin.from('quota_addons') as any)
     .update({ status: 'paid', paid_at: new Date(nowMs).toISOString() })
     .eq('id', addon.id)
+  // Receipt is best-effort — sendPaymentReceipt never throws, so a failure here
+  // can never roll back the quota top-up that was just applied.
+  await sendPaymentReceipt(admin, addon.invitation_id, 'addon')
 }
 
 /**
@@ -84,6 +91,9 @@ export async function extendActivePeriod(
       expires_at: resolved ? resolved.expiresAt(nowMs) : null,
     })
     .eq('id', inv.id)
+  // Receipt is best-effort — sendPaymentReceipt never throws, so a failure here
+  // can never roll back the renewal that was just applied.
+  await sendPaymentReceipt(admin, inv.id, 'renewal')
 }
 
 /**
@@ -120,4 +130,7 @@ export async function publishPaidInvitation(
   if (opts.paidChannel != null) patch.paid_channel = opts.paidChannel
   if (opts.gatewayTxnId != null) patch.gateway_txn_id = opts.gatewayTxnId
   await (admin.from('invitations') as any).update(patch).eq('id', inv.id)
+  // Receipt is best-effort (never throws) and only for real Midtrans payments —
+  // comp/manual admin publishes (paidSource !== 'midtrans') stay silent.
+  if (opts.paidSource === 'midtrans') await sendPaymentReceipt(admin, inv.id, 'initial')
 }

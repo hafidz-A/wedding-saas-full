@@ -6,6 +6,7 @@ import { type GuestRow } from './guests/types'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 import ctrl from './dashboardControls.module.css'
 
 /**
@@ -38,6 +39,8 @@ export default function GuestEditModal({
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  useEscapeToClose(onClose)
+
   function onSave() {
     setError(null)
     startTransition(async () => {
@@ -58,7 +61,7 @@ export default function GuestEditModal({
   }
 
   return (
-    <div style={overlay} onClick={onClose}>
+    <div style={overlay} onClick={onClose} role="dialog" aria-modal="true" aria-label={t.title}>
       <div style={dialog} onClick={(e) => e.stopPropagation()}>
         <header style={header}>
           <h3 style={{ margin: 0 }}>{t.title}</h3>

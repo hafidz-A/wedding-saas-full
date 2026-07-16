@@ -157,18 +157,6 @@ const deviceBtnActive: React.CSSProperties = {
   boxShadow: '0 1px 4px rgba(42,33,24,0.1)',
 }
 
-const refreshBtn: React.CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: 'var(--radius-sm)',
-  border: '1px solid rgba(42,33,24,0.15)',
-  background: 'var(--surface-raised)',
-  cursor: 'pointer',
-  fontSize: 16,
-  lineHeight: 1,
-  flexShrink: 0,
-}
-
 const stageWrap: React.CSSProperties = {
   flex: 1,
   padding: '20px 24px 24px',

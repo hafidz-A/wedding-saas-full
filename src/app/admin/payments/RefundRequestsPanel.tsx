@@ -8,6 +8,7 @@ import { adminApproveRefund, adminRejectRefund } from './actions'
 import { canApiRefund } from '@/lib/payments/refund-channels'
 import type { RefundRequestView } from './data'
 import { useAdminForm } from '@/components/admin/AdminDialogProvider'
+import { Button } from '@/components/ui/Button'
 
 const CATEGORY: Record<string, string> = {
   duplicate_payment: 'Bayar dobel', system_failure: 'Gagal sistem', inaccessible: 'Tidak bisa diakses', other: 'Lainnya',
@@ -109,8 +110,8 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
-                <button type="button" disabled={busy} onClick={() => approve(r)} style={solid}>Setujui</button>
-                <button type="button" disabled={busy} onClick={() => reject(r)} style={ghost}>Tolak</button>
+                <Button size="sm" disabled={busy} onClick={() => approve(r)}>Setujui</Button>
+                <Button size="sm" variant="ghostDanger" disabled={busy} onClick={() => reject(r)}>Tolak</Button>
               </div>
             </div>
           )
@@ -119,6 +120,3 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
     </section>
   )
 }
-
-const solid: React.CSSProperties = { height: 32, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }
-const ghost: React.CSSProperties = { height: 32, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }

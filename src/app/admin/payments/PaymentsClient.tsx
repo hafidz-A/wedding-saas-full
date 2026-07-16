@@ -7,6 +7,8 @@ import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, admi
 import type { RefundSourceType } from '@/lib/payments/refunds'
 import { canApiRefund } from '@/lib/payments/refund-channels'
 import { useAdminConfirm, useAdminAlert, useAdminForm } from '@/components/admin/AdminDialogProvider'
+import { Button } from '@/components/ui/Button'
+import ui from '@/components/ui/controls.module.css'
 
 function fmtDate(iso: string): string {
   if (!iso) return '—'
@@ -117,19 +119,19 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
         <h2 style={{ fontSize: 15, margin: 0 }}>Transaksi ({rows.length})</h2>
         <div style={{ display: 'flex', gap: 6 }}>
-          {canBackfill && <button type="button" disabled={busy} onClick={backfill} style={btn}>Isi angka lama</button>}
-          <button type="button" disabled={busy} onClick={exportCsv} style={btn}>Ekspor CSV</button>
+          {canBackfill && <Button size="sm" variant="ghost" disabled={busy} onClick={backfill}>Isi angka lama</Button>}
+          <Button size="sm" variant="ghost" disabled={busy} onClick={exportCsv}>Ekspor CSV</Button>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-        <input placeholder="Cari slug…" value={q} onChange={(e) => setQ(e.target.value)} style={ctl} />
+        <input placeholder="Cari slug…" value={q} onChange={(e) => setQ(e.target.value)} className={ui.input} style={{ flex: '1 1 160px', minWidth: 0 }} />
         <Select value={type} onChange={setType} options={[['all', 'Semua tipe'], ['initial', 'Awal'], ['upgrade', 'Upgrade'], ['addon', 'Kuota']]} />
         <Select value={source} onChange={setSource} options={[['all', 'Semua sumber'], ['midtrans', 'Midtrans'], ['manual', 'Manual'], ['comp', 'Comp']]} />
         <Select value={status} onChange={setStatus} options={[['all', 'Semua status'], ['paid', 'Lunas'], ['refunded', 'Direfund']]} />
-        <input type="date" title="Dari tanggal" value={from} onChange={(e) => setFrom(e.target.value)} style={ctl} />
-        <input type="date" title="Sampai tanggal" value={to} onChange={(e) => setTo(e.target.value)} style={ctl} />
-        {(from || to) && <button type="button" onClick={() => { setFrom(''); setTo('') }} style={ctl}>Reset tgl</button>}
+        <input type="date" title="Dari tanggal" value={from} onChange={(e) => setFrom(e.target.value)} className={ui.input} style={{ width: 144, flex: '0 0 auto' }} />
+        <input type="date" title="Sampai tanggal" value={to} onChange={(e) => setTo(e.target.value)} className={ui.input} style={{ width: 144, flex: '0 0 auto' }} />
+        {(from || to) && <Button size="sm" variant="ghost" onClick={() => { setFrom(''); setTo('') }}>Reset tgl</Button>}
       </div>
 
       <div style={{ overflowX: 'auto' }}>
@@ -152,7 +154,7 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
                 <td style={td}>{fmtDate(t.date)}</td>
                 <td style={td}>
                   {t.status === 'paid' && t.source !== 'comp'
-                    ? <button type="button" disabled={busy} onClick={() => refund(t)} style={refundBtn}>Refund</button>
+                    ? <Button size="sm" variant="ghostDanger" disabled={busy} onClick={() => refund(t)}>Refund</Button>
                     : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                 </td>
               </tr>
@@ -163,9 +165,9 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
 
       {pageCount > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 10 }}>
-          <button type="button" disabled={safePage === 0} onClick={() => setPage(safePage - 1)} style={{ ...btn, opacity: safePage === 0 ? 0.5 : 1 }}>← Sebelumnya</button>
+          <Button size="sm" variant="ghost" disabled={safePage === 0} onClick={() => setPage(safePage - 1)}>← Sebelumnya</Button>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Halaman {safePage + 1} / {pageCount}</span>
-          <button type="button" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)} style={{ ...btn, opacity: safePage >= pageCount - 1 ? 0.5 : 1 }}>Berikutnya →</button>
+          <Button size="sm" variant="ghost" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)}>Berikutnya →</Button>
         </div>
       )}
     </section>
@@ -174,14 +176,11 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: [string, string][] }) {
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)} style={ctl}>
+    <select value={value} onChange={(e) => onChange(e.target.value)} className={ui.input} style={{ width: 150, flex: '0 0 auto' }}>
       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
     </select>
   )
 }
 
-const ctl: React.CSSProperties = { height: 34, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontSize: 13 }
-const btn: React.CSSProperties = { height: 34, padding: '0 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer' }
 const th: React.CSSProperties = { padding: '6px 8px', fontWeight: 500 }
 const td: React.CSSProperties = { padding: '8px 8px' }
-const refundBtn: React.CSSProperties = { height: 28, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--status-error)', background: 'transparent', color: 'var(--status-error)', fontSize: 12, cursor: 'pointer' }

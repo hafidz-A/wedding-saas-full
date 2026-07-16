@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { Button } from '@/components/ui/Button'
 
 type Step = 'loading' | 'idle' | 'verify' | 'done' | 'already'
 
@@ -84,9 +85,9 @@ export default function MfaEnroll() {
   return (
     <div>
       {step === 'idle' && (
-        <button type="button" onClick={start} disabled={busy} style={btn}>
+        <Button size="sm" onClick={start} disabled={busy} style={{ alignSelf: 'flex-start' }}>
           {busy ? 'Memuat…' : 'Aktifkan 2FA'}
-        </button>
+        </Button>
       )}
       {step === 'verify' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 320 }}>
@@ -107,9 +108,9 @@ export default function MfaEnroll() {
             placeholder="123456"
             style={input}
           />
-          <button type="button" onClick={confirm} disabled={busy || code.length !== 6} style={btn}>
+          <Button size="sm" onClick={confirm} disabled={busy || code.length !== 6} style={{ alignSelf: 'flex-start' }}>
             {busy ? 'Memverifikasi…' : 'Verifikasi & aktifkan'}
-          </button>
+          </Button>
         </div>
       )}
       {err && <p style={{ fontSize: 13, color: 'var(--interactive-primary)', marginTop: 6 }}>{err}</p>}
@@ -117,18 +118,6 @@ export default function MfaEnroll() {
   )
 }
 
-const btn: React.CSSProperties = {
-  height: 40,
-  padding: '0 18px',
-  borderRadius: 'var(--radius-pill)',
-  background: 'var(--color-charcoal)',
-  color: 'var(--surface-warm)',
-  border: 0,
-  fontSize: 13,
-  fontWeight: 600,
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
-}
 const input: React.CSSProperties = {
   height: 44,
   padding: '0 14px',

@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { CATEGORIES } from '@/config/categories'
 import { updateTemplate } from './actions'
 import type { TemplateDisplay } from '@/lib/templates/display'
+import { Button } from '@/components/ui/Button'
 
 /**
  * "Tampilan" editor for one template — enable/disable + display metadata + the
@@ -79,7 +80,7 @@ export default function TemplateEditor({ templateId, initial }: { templateId: st
         </Row>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button type="button" disabled={busy} onClick={save} style={saveBtn}>{busy ? 'Menyimpan…' : 'Simpan Tampilan'}</button>
+          <Button size="sm" disabled={busy} onClick={save}>{busy ? 'Menyimpan…' : 'Simpan Tampilan'}</Button>
           {msg && <span style={{ fontSize: 13, color: msg.ok ? 'var(--color-emerald, #2e7d32)' : 'var(--status-error)' }}>{msg.text}</span>}
         </div>
       </div>
@@ -111,4 +112,3 @@ function Row({ children }: { children: React.ReactNode }) {
 
 const input: React.CSSProperties = { height: 36, padding: '0 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--surface-raised)', color: 'var(--text-primary)', fontSize: 14, width: '100%', boxSizing: 'border-box' }
 const row: React.CSSProperties = { display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text-secondary)' }
-const saveBtn: React.CSSProperties = { height: 38, padding: '0 18px', borderRadius: 'var(--radius-sm)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', fontSize: 13, fontWeight: 600, cursor: 'pointer' }

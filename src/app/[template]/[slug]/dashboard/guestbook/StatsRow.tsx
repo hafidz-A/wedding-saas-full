@@ -2,7 +2,7 @@
 
 import { computeStats, type LedgerStatInput } from '@/lib/guestbook/stats'
 import { statBox, statLabel, statValue } from './styles'
-import tabs from '../dashboardTabs.module.css'
+import tabs from '../tabPanels.module.css'
 
 interface Labels {
   statTotal: string

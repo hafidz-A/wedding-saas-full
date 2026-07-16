@@ -1,6 +1,8 @@
-/* Shared responsive primitives for all dashboard tabs (RSVP, Gifts,
-   Guests, Notes, etc.). Each tab imports this CSS module and applies the
-   classes to its own structure. Tab-specific colors stay inline.
+/* Tab PANEL content layout (stats rows, tables, cards) — NOT the ARIA
+   tab-nav widget; that lives in EditorWorkspace.tsx. Shared responsive
+   primitives for all dashboard tab panels (RSVP, Gifts, Guests, Notes,
+   etc.). Each tab imports this CSS module and applies the classes to its
+   own structure. Tab-specific colors stay inline.
 
    Breakpoints (consistent with the rest of the project):
      mobile:  <768px   → table collapses to stacked cards

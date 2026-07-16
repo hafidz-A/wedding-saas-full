@@ -7,6 +7,7 @@ import {
   adminSuspend, adminArchiveInvitation, adminDeleteInvitation,
 } from './actions'
 import { useAdminConfirm, useAdminForm } from '@/components/admin/AdminDialogProvider'
+import { Button } from '@/components/ui/Button'
 
 interface Inv {
   id: string; slug: string; templateId: string; plan: string; email: string
@@ -103,9 +104,9 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         <a href={`/${inv.templateId}/${inv.slug}`} target="_blank" rel="noreferrer" style={ghost}>Lihat</a>
-        <button type="button" disabled={busy} onClick={onTogglePublish} style={ghost}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</button>
-        <button type="button" disabled={busy} onClick={onComp} style={ghost}>Comp (gratis)</button>
-        <button type="button" disabled={busy} onClick={onLunasManual} style={ghost}>Lunas manual</button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onTogglePublish}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onComp}>Comp (gratis)</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onLunasManual}>Lunas manual</Button>
         <select disabled={busy} value={inv.plan} onChange={async (e) => {
           const next = e.target.value
           if (next === inv.plan) return
@@ -114,20 +115,20 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         }} style={ghost}>
           <option value="basic">basic</option><option value="premium">premium</option>
         </select>
-        <button type="button" disabled={busy} onClick={onAddQuota} style={ghost}>+50 kuota</button>
-        <button type="button" disabled={busy} onClick={onSuspend} style={inv.isSuspended ? ghost : warn}>{inv.isSuspended ? 'Buka blokir' : 'Blokir'}</button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onAddQuota}>+50 kuota</Button>
+        <Button size="sm" variant={inv.isSuspended ? 'ghost' : 'ghostDanger'} disabled={busy} onClick={onSuspend}>{inv.isSuspended ? 'Buka blokir' : 'Blokir'}</Button>
         {inv.isPaid
-          ? <button type="button" disabled={busy} onClick={onArchive} style={ghost}>{inv.isArchived ? 'Keluarkan arsip' : 'Arsipkan'}</button>
-          : <button type="button" disabled={busy} onClick={onDelete} style={danger}>Hapus</button>}
+          ? <Button size="sm" variant="ghost" disabled={busy} onClick={onArchive}>{inv.isArchived ? 'Keluarkan arsip' : 'Arsipkan'}</Button>
+          : <Button size="sm" variant="ghostDanger" disabled={busy} onClick={onDelete}>Hapus</Button>}
       </div>
       {msg && <span style={{ fontSize: 12, color: 'var(--status-error)', width: '100%' }}>{msg}</span>}
     </div>
   )
 }
 
-const ghost: React.CSSProperties = { height: 32, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }
-const warn: React.CSSProperties = { ...ghost, borderColor: 'var(--status-error)', color: 'var(--status-error)' }
-const danger: React.CSSProperties = { ...ghost, borderColor: 'var(--status-error)', background: 'var(--status-error)', color: '#fff' }
+// Still used by the "Lihat" anchor and the plan <select> below — neither is a
+// <button>, so they can't move to the shared <Button> component.
+const ghost: React.CSSProperties = { height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }
 
 function chip(color: string): React.CSSProperties {
   return { marginLeft: 8, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: `1px solid ${color}`, color }

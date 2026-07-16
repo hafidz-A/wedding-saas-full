@@ -21,10 +21,10 @@ export default function SectionSkeleton({ label = 'section' }) {
           gap: '16px',
         }}
       >
-        <div className="skeleton-bar" style={{ height: 18, width: '60%', borderRadius: 999 }} />
-        <div className="skeleton-bar" style={{ height: 14, width: '90%', borderRadius: 999 }} />
-        <div className="skeleton-bar" style={{ height: 14, width: '80%', borderRadius: 999 }} />
-        <div className="skeleton-bar" style={{ height: 14, width: '70%', borderRadius: 999 }} />
+        <div className="skeleton-bar" style={{ height: 18, width: '60%', borderRadius: 'var(--radius-pill)' }} />
+        <div className="skeleton-bar" style={{ height: 14, width: '90%', borderRadius: 'var(--radius-pill)' }} />
+        <div className="skeleton-bar" style={{ height: 14, width: '80%', borderRadius: 'var(--radius-pill)' }} />
+        <div className="skeleton-bar" style={{ height: 14, width: '70%', borderRadius: 'var(--radius-pill)' }} />
       </div>
     </div>
   )
