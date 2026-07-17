@@ -29,6 +29,11 @@ export function useEscapeToClose(onClose: () => void, enabled: boolean = true) {
     onCloseRef.current = onClose
   })
 
+  // CAVEAT (stack-reorder footgun): toggling `enabled` false→true re-pushes this
+  // instance to the TOP of the stack. If a host modal's busy flag flips back to
+  // enabled while a promise-dialog is still open above it, the modal would steal
+  // Escape from the dialog. Today no flow does this (dialogs settle before busy
+  // flips), but if you add one, disable the host's hook while a dialog is pending.
   useEffect(() => {
     if (!enabled) return
     const myId = id.current!

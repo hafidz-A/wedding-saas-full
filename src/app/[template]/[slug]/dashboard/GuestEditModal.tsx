@@ -61,11 +61,11 @@ export default function GuestEditModal({
   }
 
   return (
-    <div style={overlay} onClick={onClose} role="dialog" aria-modal="true" aria-label={t.title}>
+    <div style={overlay} onClick={() => { if (!pending) onClose() }} role="dialog" aria-modal="true" aria-label={t.title}>
       <div style={dialog} onClick={(e) => e.stopPropagation()}>
         <header style={header}>
           <h3 style={{ margin: 0 }}>{t.title}</h3>
-          <button type="button" onClick={onClose} className={ctrl.iconBtn} aria-label={t.close}>×</button>
+          <button type="button" onClick={onClose} disabled={pending} className={ctrl.iconBtn} aria-label={t.close}>×</button>
         </header>
 
         <label style={field}>

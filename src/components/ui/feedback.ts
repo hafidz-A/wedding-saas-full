@@ -1,4 +1,4 @@
-// Pure, testable core for the dashboard action-feedback system.
+// Pure, testable core for the shared toast feedback system (dashboard + admin).
 // The React provider (FeedbackProvider.tsx) wires these to the toast DOM.
 
 export type ToastKind = 'ok' | 'fail'
