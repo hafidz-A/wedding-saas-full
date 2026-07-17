@@ -102,7 +102,7 @@
   height: var(--ctl-h);
   font-size: 26px;
   line-height: var(--leading-none);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   border: 1px solid;
   background: transparent;
   cursor: pointer;
@@ -211,7 +211,7 @@
 .bullet {
   width: 9px;
   height: 9px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   flex: 0 0 auto;
   transition: transform 0.3s ease;
 }
@@ -282,7 +282,7 @@
 .swatch {
   width: var(--ctl-h-sm);
   height: var(--ctl-h-sm);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   border: 1px solid;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }

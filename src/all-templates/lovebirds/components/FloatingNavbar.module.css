@@ -38,7 +38,7 @@
   height: var(--ctl-h);
   min-height: 0;                /* opt out of global 44px floor — these live in desktop nav only */
   margin: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   border: 1px solid rgba(42, 33, 24, 0.12);
   background: rgba(253, 246, 236, 0.95);
   color: var(--color-charcoal, #2a2118);

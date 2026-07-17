@@ -19,6 +19,8 @@ export function scanCss(source) {
       offenses.push({ line: i + 1, text: trimmed, why: 'raw 999px; use var(--radius-pill) / --r-pill' })
     } else if (/border-radius\s*:\s*\d+px\s*;/.test(line) && !trimmed.startsWith('--')) {
       offenses.push({ line: i + 1, text: trimmed, why: 'off-scale radius literal; use a --radius-* token' })
+    } else if (/border-radius\s*:\s*50%\s*(!important\s*)?;/.test(line) && !trimmed.startsWith('--')) {
+      offenses.push({ line: i + 1, text: trimmed, why: 'raw 50% radius; use var(--radius-round)' })
     }
     const lastSeg = currentSel.split(/\s+/).pop() || ''
     if (BUTTON_SEL.test(lastSeg)) {
@@ -53,6 +55,9 @@ export function scanTsx(source) {
 
     if (/\bborderRadius:\s*(?:999\b|['"]999px['"])/.test(line)) {
       offenses.push({ line: i + 1, text: line.trim(), why: "raw 999 radius; use 'var(--radius-pill)'" })
+    }
+    if (/\bborderRadius:\s*['"]50%['"]/.test(line)) {
+      offenses.push({ line: i + 1, text: line.trim(), why: "raw 50% radius; use var(--radius-round)" })
     }
     if (BUTTON_CONST.test(currentConst)) {
       const m = line.match(/\b(?:height|minHeight):\s*(\d+)\s*[,}\s]/)

@@ -161,7 +161,7 @@ export default function OrnamentTab({
       <div style={{ ...previewPanel, background: active.background, borderColor: active.surfaceBorder }}>
         <PreviewScene type={type} accent={active.accent} accentSoft={accentSoft} paletteKey={active.key} />
         <span style={{ ...paletteChip, color: active.fgMuted, borderColor: active.surfaceBorder }}>
-          <span style={{ width: 11, height: 11, borderRadius: '50%', background: active.accent, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
+          <span style={{ width: 11, height: 11, borderRadius: 'var(--radius-round)', background: active.accent, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }} />
           {active.label}
         </span>
       </div>

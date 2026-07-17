@@ -21,7 +21,7 @@ export default function DetailsPlanet({ sectionLabel, planetName, heading, cards
             {cards.map((c, i) => (
               <div key={i} className="detail-card">
                 <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--color-accent-text)", marginBottom: 14 }}>
-                  <span style={{ width: 36, height: 36, borderRadius: "50%", display: "grid", placeItems: "center", border: "1px solid var(--color-line)", background: "var(--color-accent-soft)" }}>
+                  <span style={{ width: 36, height: 36, borderRadius: "var(--radius-round)", display: "grid", placeItems: "center", border: "1px solid var(--color-line)", background: "var(--color-accent-soft)" }}>
                     {ICONS[c.icon] || ICONS.sparkle}
                   </span>
                   <span className="mono" style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" }}>{c.label}</span>

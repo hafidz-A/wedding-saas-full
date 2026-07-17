@@ -188,7 +188,7 @@ fieldset.field > .label {
 .stepBtn {
   width: var(--ctl-h);
   height: var(--ctl-h);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: var(--rsvp-fg);
   color: var(--rsvp-bg);
   font-size: 20px;
@@ -283,7 +283,7 @@ fieldset.field > .label {
   place-items: center;
   width: 64px;
   height: 64px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: var(--rsvp-bg, var(--color-coral));
   color: var(--rsvp-fg, #fff);
   font-size: 28px;

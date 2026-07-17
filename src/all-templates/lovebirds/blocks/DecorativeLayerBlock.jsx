@@ -38,7 +38,7 @@ export default function DecorativeLayerBlock({
         opacity,
         background,
         filter: shape === 'noise' ? undefined : `blur(${blur}px)`,
-        borderRadius: '50%',
+        borderRadius: 'var(--radius-round)',
       }}
       aria-hidden="true"
     />

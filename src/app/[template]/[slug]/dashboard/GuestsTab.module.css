@@ -296,7 +296,7 @@
     min-width: 36px !important;
     min-height: var(--ctl-h-sm) !important;
     flex-shrink: 0 !important;
-    border-radius: 50% !important;
+    border-radius: var(--radius-round) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;

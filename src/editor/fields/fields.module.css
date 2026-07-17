@@ -71,7 +71,7 @@
   width: 14px;
   height: 14px;
   margin-top: 1px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: rgba(42, 33, 24, 0.22);
   color: #fff;
   font-size: 9px;

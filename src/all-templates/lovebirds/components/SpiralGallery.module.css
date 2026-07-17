@@ -72,7 +72,7 @@
 .tunnelGlow {
   position: absolute;
   inset: 12%;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background:
     radial-gradient(circle, rgba(232, 85, 62, 0.18), transparent 56%),
     radial-gradient(circle at 40% 42%, rgba(245, 200, 66, 0.16), transparent 42%);
@@ -170,7 +170,7 @@
   width: min(68vw, 560px);
   aspect-ratio: 1;
   border: 1px solid rgba(200, 154, 31, 0.18);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }

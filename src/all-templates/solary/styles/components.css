@@ -317,7 +317,7 @@
 
 .travel-orbit::before {
   content: ""; position: absolute; inset: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   border: 1px dashed rgba(var(--color-glow)/0.35);
   animation: spin 14s linear infinite;
 }
@@ -326,7 +326,7 @@
   position: absolute;
   top: 50%; left: 100%;
   width: 10px; height: 10px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: radial-gradient(circle at 30% 30%, rgba(var(--color-glow)/1), rgba(var(--color-glow)/0.4));
   box-shadow: 0 0 12px rgba(var(--color-glow)/0.85);
   transform: translate(-50%, -50%);
@@ -978,7 +978,7 @@
 /* Avatar circle (Venus) */
 .avatar {
   aspect-ratio: 1 / 1;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   border: 1px solid var(--color-line);
   position: relative;
   overflow: hidden;
@@ -1021,7 +1021,7 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   pointer-events: none;
   z-index: 1000;
   animation: fly 0.8s ease-out forwards;

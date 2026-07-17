@@ -284,7 +284,7 @@ function Toggle({
         <span
           style={{
             position: 'absolute', top: 2, left: checked ? 18 : 2,
-            width: 18, height: 18, borderRadius: '50%', background: 'var(--surface-raised)',
+            width: 18, height: 18, borderRadius: 'var(--radius-round)', background: 'var(--surface-raised)',
             transition: 'left 0.2s ease', boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
           }}
         />

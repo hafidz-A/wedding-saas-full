@@ -14,11 +14,11 @@ export const badgeWalkin: React.CSSProperties = { display: 'inline-block', paddi
 export const badgeUnlisted: React.CSSProperties = { display: 'inline-block', padding: '3px 9px', borderRadius: 'var(--radius-pill)', fontSize: 11, background: 'rgba(180,120,20,0.14)', color: '#9A6A12', whiteSpace: 'nowrap' }
 // 36×36 = the --ctl-h-sm icon-button rung (dense dashboard control); was an
 // off-scale 28px, caught once the design-token guard started scanning .ts.
-export const deleteBtn: React.CSSProperties = { width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(196,63,42,0.25)', background: 'transparent', color: '#C43F2A', cursor: 'pointer', fontSize: 18, lineHeight: 1, display: 'grid', placeItems: 'center' }
+export const deleteBtn: React.CSSProperties = { width: 36, height: 36, borderRadius: 'var(--radius-round)', border: '1px solid rgba(196,63,42,0.25)', background: 'transparent', color: '#C43F2A', cursor: 'pointer', fontSize: 18, lineHeight: 1, display: 'grid', placeItems: 'center' }
 export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(42,33,24,0.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 1000 }
 export const modal: React.CSSProperties = { width: 'min(440px, 100%)', background: '#F5EFE3', borderRadius: 18, padding: 24, boxShadow: '0 24px 70px rgba(42,33,24,0.3)', maxHeight: '85vh', overflowY: 'auto' }
 export const modalHeader: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }
-export const modalClose: React.CSSProperties = { width: 32, height: 32, borderRadius: '50%', border: '1px solid rgba(42,33,24,0.2)', background: 'transparent', cursor: 'pointer', fontSize: 20, lineHeight: 1 }
+export const modalClose: React.CSSProperties = { width: 32, height: 32, borderRadius: 'var(--radius-round)', border: '1px solid rgba(42,33,24,0.2)', background: 'transparent', cursor: 'pointer', fontSize: 20, lineHeight: 1 }
 export const dialogHint: React.CSSProperties = { margin: 0, fontSize: 13, color: 'rgba(42,33,24,0.6)', lineHeight: 1.5, padding: '8px 0' }
 export const resultList: React.CSSProperties = { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 260, overflowY: 'auto' }
 export const resultRow: React.CSSProperties = { width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(42,33,24,0.1)', background: '#fff', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 2 }

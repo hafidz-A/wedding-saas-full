@@ -323,7 +323,7 @@
 .dot {
   width: 5px;
   height: 5px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: var(--color-coral);
   display: inline-block;
   flex-shrink: 0;

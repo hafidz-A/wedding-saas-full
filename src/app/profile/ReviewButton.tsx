@@ -156,4 +156,4 @@ const lbl: React.CSSProperties = { display: 'grid', gap: 4, fontSize: 12, color:
 const ctl: React.CSSProperties = { height: 44, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: '#fff', color: 'var(--text-primary)', fontSize: 14, boxSizing: 'border-box', fontStyle: 'normal' }
 const starBtn: React.CSSProperties = { background: 'none', border: 'none', fontSize: 30, lineHeight: 1, cursor: 'pointer', padding: 0 }
 const closeBtnPos: React.CSSProperties = { position: 'absolute', top: 10, right: 12 }
-const checkCircle: React.CSSProperties = { display: 'inline-grid', placeItems: 'center', width: 56, height: 56, borderRadius: '50%', background: 'var(--color-coral, #E8553E)', color: '#fff', marginTop: 4 }
+const checkCircle: React.CSSProperties = { display: 'inline-grid', placeItems: 'center', width: 56, height: 56, borderRadius: 'var(--radius-round)', background: 'var(--color-coral, #E8553E)', color: '#fff', marginTop: 4 }

@@ -189,7 +189,7 @@ const deviceBar: React.CSSProperties = {
 const deviceDot: React.CSSProperties = {
   width: 8,
   height: 8,
-  borderRadius: '50%',
+  borderRadius: 'var(--radius-round)',
   background: 'var(--border-strong)',
   flexShrink: 0,
 }

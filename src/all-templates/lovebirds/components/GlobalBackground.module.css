@@ -25,7 +25,7 @@
 
 .wash {
   position: absolute;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   filter: blur(80px);
   opacity: 0;
   animation: washPulse 12s ease-in-out infinite;

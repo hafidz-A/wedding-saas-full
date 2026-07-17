@@ -208,7 +208,7 @@ const legacyCard: React.CSSProperties = {
   borderRadius: 'var(--radius-md)',
 }
 const legacyIcon: React.CSSProperties = {
-  width: 36, height: 36, borderRadius: '50%',
+  width: 36, height: 36, borderRadius: 'var(--radius-round)',
   background: 'var(--interactive-primary-soft)', color: 'var(--interactive-primary-hover)',
   display: 'grid', placeItems: 'center',
   fontSize: 18, fontWeight: 700, flexShrink: 0,

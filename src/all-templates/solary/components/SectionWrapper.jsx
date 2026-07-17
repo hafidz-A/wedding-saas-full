@@ -192,7 +192,7 @@ export default function SectionWrapper({ section, index, total, children }) {
             style={{
               width: 6,
               height: 6,
-              borderRadius: "50%",
+              borderRadius: "var(--radius-round)",
               background: "var(--color-accent)",
               boxShadow: "0 0 12px rgba(var(--color-glow)/0.8)",
             }}

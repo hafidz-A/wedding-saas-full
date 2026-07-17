@@ -71,7 +71,7 @@
 }
 .island { top: 15px; width: 26%; height: 15px; border-radius: var(--radius-pill); }
 .notch { top: 9px; width: 42%; height: 19px; border-radius: 0 0 15px 15px; }
-.punch { top: 17px; width: 9px; height: 9px; border-radius: 50%; }
+.punch { top: 17px; width: 9px; height: 9px; border-radius: var(--radius-round); }
 
 /* Landscape (rotatable devices): the cutout follows the rotation to the left
    edge, vertically centred — the horizontal top bars become vertical side bars,

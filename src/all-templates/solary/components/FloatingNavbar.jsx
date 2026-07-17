@@ -196,7 +196,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
   // Named (not inline) so the design-token guard's const-scoped scan doesn't
   // misattribute this decorative 8px dot to the neighboring button style below.
   const logoDotStyle = {
-    width: 8, height: 8, borderRadius: "50%",
+    width: 8, height: 8, borderRadius: "var(--radius-round)",
     background: "var(--color-accent)", flex: "0 0 auto",
     boxShadow: "0 0 12px rgba(var(--color-glow)/0.8)",
   };
@@ -206,7 +206,7 @@ export default function FloatingNavbar({ logo = "Galactic", allSections = [] }) 
     width: "clamp(36px, 10vw, 44px)", height: "clamp(36px, 10vw, 44px)",
     flex: "0 0 auto",
     display: "grid", placeItems: "center",
-    borderRadius: "50%",
+    borderRadius: "var(--radius-round)",
     background: "var(--nav-arrow-bg)",
     border: "var(--nav-arrow-border)",
     color: "var(--nav-arrow-color)",

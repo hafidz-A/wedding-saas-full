@@ -172,7 +172,7 @@
 .tipIcon {
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: var(--accent, var(--color-sky));
   color: #fff;
   display: grid;

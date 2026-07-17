@@ -51,3 +51,19 @@ describe('scanTsx', () => {
     expect(scanTsx('const thumb = {\n  height: 120,\n}')).toHaveLength(0)
   })
 })
+
+describe('radius-round rules', () => {
+  it('flags plain border-radius: 50% in css', () => {
+    expect(scanCss('.dot {\n  border-radius: 50%;\n}')).toHaveLength(1)
+  })
+  it('does not flag compound 50% shapes', () => {
+    expect(scanCss('.blob {\n  border-radius: 50% 0 50% 50%;\n}')).toHaveLength(0)
+    expect(scanCss('.egg {\n  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;\n}')).toHaveLength(0)
+  })
+  it('allows var(--radius-round)', () => {
+    expect(scanCss('.dot {\n  border-radius: var(--radius-round);\n}')).toHaveLength(0)
+  })
+  it("flags inline borderRadius: '50%'", () => {
+    expect(scanTsx("const dot = { borderRadius: '50%' }")).toHaveLength(1)
+  })
+})

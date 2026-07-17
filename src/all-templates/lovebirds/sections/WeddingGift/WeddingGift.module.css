@@ -179,7 +179,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: color-mix(in srgb, var(--card-accent) 14%, transparent);
   color: var(--card-accent);
   flex-shrink: 0;
@@ -636,7 +636,7 @@ a.registryCard:hover {
   place-items: center;
   width: 64px;
   height: 64px;
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: var(--accent, var(--color-coral));
   color: var(--wg-on-accent);
   font-size: 28px;

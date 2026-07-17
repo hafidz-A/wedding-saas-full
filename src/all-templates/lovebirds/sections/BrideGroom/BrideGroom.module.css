@@ -40,7 +40,7 @@
   top: 15%; left: 10%;
   width: clamp(200px, 35vw, 500px);
   height: clamp(200px, 35vw, 500px);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: radial-gradient(circle, rgba(232, 85, 62, 0.08) 0%, transparent 70%);
   filter: blur(60px);
   animation: glowPulse 10s ease-in-out infinite;
@@ -51,7 +51,7 @@
   bottom: 20%; right: 8%;
   width: clamp(180px, 30vw, 450px);
   height: clamp(180px, 30vw, 450px);
-  border-radius: 50%;
+  border-radius: var(--radius-round);
   background: radial-gradient(circle, rgba(107, 53, 168, 0.07) 0%, transparent 70%);
   filter: blur(60px);
   animation: glowPulse 12s ease-in-out infinite 3s;
