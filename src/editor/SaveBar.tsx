@@ -2,6 +2,7 @@
 
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
+import { Button } from '@/components/ui/Button'
 import styles from './SaveBar.module.css'
 
 /**
@@ -47,14 +48,13 @@ export default function SaveBar() {
         </span>
       </button>
 
-      <button
-        type="button"
+      <Button
+        size="sm"
         disabled={!isDirty || isSaving}
         onClick={save}
-        className={styles.saveBtn}
       >
         {t.save}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -74,9 +74,9 @@ export function RemoteChangeBanner() {
       <div className={styles.bannerCard}>
         <span className={styles.bannerDot} aria-hidden="true" />
         <p className={styles.bannerText}>{isDirty ? t.remoteBannerTextDirty : t.remoteBannerText}</p>
-        <button type="button" className={styles.bannerReload} onClick={() => window.location.reload()}>
+        <Button size="sm" onClick={() => window.location.reload()}>
           {t.conflictReload}
-        </button>
+        </Button>
         <button
           type="button"
           className={styles.bannerDismiss}

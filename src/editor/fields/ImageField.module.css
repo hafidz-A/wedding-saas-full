@@ -88,39 +88,6 @@
 
 .btns { display: flex; flex-direction: column; gap: 6px; }
 
-.btn, .btnGhost {
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    background var(--duration-base) var(--ease-in-out),
-    border-color var(--duration-base) var(--ease-in-out),
-    box-shadow var(--duration-base) var(--ease-in-out),
-    transform var(--duration-fast) var(--ease-in-out);
-}
-.btn:not(:disabled):active, .btnGhost:active { transform: translateY(1px); }
-.btn:focus-visible, .btnGhost:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
-}
-.btn {
-  background: var(--color-charcoal);
-  color: var(--surface-warm);
-  border: 1px solid transparent;
-}
-.btn:not(:disabled):hover { background: var(--color-charcoal-hover); box-shadow: var(--shadow-sm); }
-.btn:disabled { opacity: 0.55; cursor: progress; }
-.btnGhost {
-  background: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-strong);
-}
-.btnGhost:hover { background: rgba(42, 33, 24, 0.04); border-color: var(--interactive-primary); color: var(--interactive-primary); }
-
 .err  { font-size: var(--font-size-sm); color: var(--interactive-primary); }
 .help { font-size: var(--font-size-xs); color: var(--text-muted); }
 .hint { font-size: var(--font-size-xs); color: var(--text-muted); font-style: normal; }
@@ -131,7 +98,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dropEmpty, .thumbZone, .dropIcon, .btn, .btnGhost { transition: none; }
+  .dropEmpty, .thumbZone, .dropIcon { transition: none; }
   .dragActive { transform: none; }
   .uploading { animation: none; }
 }

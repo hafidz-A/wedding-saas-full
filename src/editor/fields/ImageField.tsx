@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useUpload } from '../lib/useUpload'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
+import { Button } from '@/components/ui/Button'
 import styles from './ImageField.module.css'
 
 interface Props {
@@ -91,12 +92,12 @@ export default function ImageField({ label, value, onChange, slug, help }: Props
             {dragActive && <span className={styles.thumbHint}>{t.imageDropHint ?? 'Drop to replace'}</span>}
           </div>
           <div className={styles.btns}>
-            <button type="button" className={styles.btn} disabled={isUploading} onClick={openPicker}>
+            <Button size="sm" disabled={isUploading} onClick={openPicker}>
               {isUploading ? (t.imageUploading ?? 'Uploading…') : (t.imageReplace ?? 'Replace')}
-            </button>
-            <button type="button" className={styles.btnGhost} onClick={() => onChange('')}>
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => onChange('')}>
               {t.imageRemove ?? 'Remove'}
-            </button>
+            </Button>
           </div>
         </div>
       ) : (

@@ -20,9 +20,8 @@
 .savingTxt { font-size: var(--font-size-sm); color: rgba(42, 33, 24, 0.65); }
 .errTxt    { font-size: var(--font-size-xs); color: var(--interactive-primary); }
 
-/* ── Shared control base: consistent focus ring + tactile press ── */
-.switch,
-.saveBtn {
+/* ── Publish switch (Draf ⇄ Terbit) ── */
+.switch {
   font-family: inherit;
   border: none;
   cursor: pointer;
@@ -31,15 +30,6 @@
     color var(--duration-base) var(--ease-in-out),
     box-shadow var(--duration-base) var(--ease-in-out),
     transform var(--duration-fast) var(--ease-in-out);
-}
-.saveBtn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
-}
-.saveBtn:not(:disabled):active { transform: translateY(1px); }
-
-/* ── Publish switch (Draf ⇄ Terbit) ── */
-.switch {
   height: var(--ctl-h-sm);
   padding: 0 4px 0 12px;
   border-radius: var(--radius-pill);
@@ -90,27 +80,6 @@
   box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
 }
 
-/* ── Save button ── */
-.saveBtn {
-  height: var(--ctl-h-sm);
-  padding: 1px 20px 0 20px;
-  border-radius: var(--radius-pill);
-  background: var(--color-charcoal);
-  color: var(--surface-warm);
-  font-size: var(--font-size-sm);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-.saveBtn:not(:disabled):hover {
-  background: var(--color-charcoal-hover);
-  box-shadow: var(--shadow-sm);
-}
-.saveBtn:disabled { opacity: 0.4; cursor: default; }
-
 /* ─────────────────────────────────────────────────────────────
    Remote-change banner (cross-tab notice) — token-aligned.
    ───────────────────────────────────────────────────────────── */
@@ -150,34 +119,6 @@
   line-height: var(--leading-snug);
   color: var(--text-primary);
 }
-.bannerReload {
-  flex: 0 0 auto;
-  height: var(--ctl-h-sm);
-  padding: 1px 16px 0 16px;
-  border-radius: var(--radius-pill);
-  background: var(--color-charcoal);
-  color: var(--surface-warm);
-  font-size: var(--font-size-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  transition:
-    background var(--duration-base) var(--ease-in-out),
-    box-shadow var(--duration-base) var(--ease-in-out),
-    transform var(--duration-fast) var(--ease-in-out);
-}
-.bannerReload:hover { background: var(--color-charcoal-hover); box-shadow: var(--shadow-sm); }
-.bannerReload:active { transform: translateY(1px); }
-.bannerReload:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
-}
 .bannerDismiss {
   flex: 0 0 auto;
   width: var(--ctl-h-sm);
@@ -208,8 +149,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .switch, .switchLabel, .switchTrack, .switchKnob,
-  .saveBtn, .bannerReload, .bannerDismiss { transition: none; }
-  .saveBtn:not(:disabled):active, .bannerReload:active { transform: none; }
+  .bannerDismiss { transition: none; }
   .bannerWrap { animation: none; }
   .bannerDot { animation: none; }
 }
