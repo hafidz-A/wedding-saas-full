@@ -6,6 +6,7 @@ import { motion } from 'motion/react'
 import type { Dict } from '@/lib/i18n'
 import { Hero3dBackground } from './Hero3dBackground'
 import styles from './Hero.module.css'
+import cta from './cta.module.css'
 
 export function Hero({ t }: { t: Dict['landing']['hero'] }) {
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
@@ -82,11 +83,11 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
           <p className={styles.subtitle}>{t.subtitle}</p>
           
           <div className={styles.actions}>
-            <Link href="/#vibe" className={styles.primary}>
+            <Link href="/#vibe" className={cta.cta}>
               {t.ctaPrimary}
-              <span className={styles.btnArrow}>↓</span>
+              <span className={cta.arrow}>↓</span>
             </Link>
-            <Link href="/#vibe" className={styles.secondary}>
+            <Link href="/#vibe" className={cta.ctaSecondary}>
               {t.ctaSecondary}
             </Link>
           </div>

@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import type { Dict } from '@/lib/i18n'
 import { useReveal } from '@/hooks/useReveal'
 import styles from './FinalCta.module.css'
+import cta from './cta.module.css'
 
 export function FinalCta({ t }: { t: Dict['landing']['finalCta'] }) {
   const { ref, revealed } = useReveal<HTMLDivElement>()
@@ -50,9 +51,9 @@ export function FinalCta({ t }: { t: Dict['landing']['finalCta'] }) {
             animate={revealed ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Link href="/#vibe" className={styles.cta}>
+            <Link href="/#vibe" className={cta.cta}>
               {t.cta}
-              <span className={styles.arrow}>↓</span>
+              <span className={cta.arrow}>↓</span>
             </Link>
           </motion.div>
         </div>
