@@ -53,7 +53,7 @@ export default function ModerationRow({ t }: { t: AdminTestimonial }) {
         <span style={{ color: 'var(--border-strong, #ccc)' }}>{'★'.repeat(5 - t.rating)}</span>
       </td>
       {/* Body: NEVER italic (global constraint). */}
-      <td data-label="Ulasan" className={tbl.tdEllipsis} style={{ fontStyle: 'normal' }} title={t.body}>{t.body}</td>
+      <td data-label="Ulasan" className={`${tbl.tdEllipsis} ${tbl.tdWide}`} style={{ fontStyle: 'normal' }} title={t.body}>{t.body}</td>
       <td data-label="Aksi" style={{ whiteSpace: 'nowrap' }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button size="sm" variant="ghost" disabled={busy} onClick={toggle}>

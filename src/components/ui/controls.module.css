@@ -13,7 +13,7 @@
   line-height: 1;
   border-radius: var(--radius-pill);
   font-size: var(--font-size-sm);
-  letter-spacing: 0.12em;
+  letter-spacing: var(--tracking-btn);
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
@@ -51,7 +51,7 @@
   border: 1px solid var(--border-strong);
   background: transparent;
   color: var(--text-primary);
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-wide);
 }
 .ghost:not(:disabled):hover {
   border-color: var(--interactive-primary);

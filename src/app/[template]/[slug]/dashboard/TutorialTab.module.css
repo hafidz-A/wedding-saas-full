@@ -1,4 +1,10 @@
-.wrap { max-width: 920px; margin: 0 auto; }
+.wrap {
+  /* File-local palette — hoisted repeated literals (design-system closure). */
+  --tt-muted: var(--tt-muted);
+  --tt-paper: var(--tt-paper);
+  max-width: 920px;
+  margin: 0 auto;
+}
 
 .subnav {
   display: flex;
@@ -53,7 +59,7 @@
   font-size: 13px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #8a7866;
+  color: var(--tt-muted);
   margin: 24px 0 10px;
 }
 
@@ -66,7 +72,7 @@
   list-style: decimal outside;
 }
 .steps li { padding: 3px 0; }
-.steps li::marker { color: #8a7866; font-weight: var(--weight-bold); }
+.steps li::marker { color: var(--tt-muted); font-weight: var(--weight-bold); }
 
 .bullets { list-style: none; margin: 0; padding: 0; }
 .bullets li {
@@ -89,7 +95,7 @@
 }
 .shotCap {
   font-size: 12px;
-  color: #8a7866;
+  color: var(--tt-muted);
   margin-top: 6px;
   text-align: center;
 }
@@ -101,7 +107,7 @@
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #8a7866;
+  color: var(--tt-muted);
 }
 .groupTabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
@@ -111,7 +117,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 14px 16px;
-  background: #fbf7ee;
+  background: var(--tt-paper);
 }
 .guideTitle { font-size: 16px; font-weight: var(--weight-semibold); margin: 0 0 var(--space-2); color: var(--text-primary); }
 .guideRow { margin: var(--space-1) 0; line-height: var(--leading-normal); color: var(--text-primary); }
@@ -123,7 +129,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  background: #fbf7ee;
+  background: var(--tt-paper);
 }
 .faqQ { font-weight: var(--weight-semibold); cursor: pointer; color: var(--text-primary); list-style: none; }
 .faqQ::-webkit-details-marker { display: none; }
@@ -147,7 +153,7 @@
 .search:hover:not(:focus) { border-color: var(--border-strong); }
 .search:focus { outline: none; border-color: var(--interactive-primary); box-shadow: 0 0 0 3px var(--interactive-primary-soft); }
 
-.noResult { color: #8a7866; font-size: 13px; margin: 0 0 var(--space-4); }
+.noResult { color: var(--tt-muted); font-size: 13px; margin: 0 0 var(--space-4); }
 
 .openTab {
   display: inline-block;

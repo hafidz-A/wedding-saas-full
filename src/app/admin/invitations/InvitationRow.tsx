@@ -6,7 +6,9 @@ import {
   adminComp, adminSetPublished, adminChangePlan, adminAddQuota,
   adminSuspend, adminArchiveInvitation, adminDeleteInvitation,
 } from './actions'
+import { useRouter } from 'next/navigation'
 import { useAdminConfirm, useAdminForm } from '@/components/admin/AdminDialogProvider'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 import { Button } from '@/components/ui/Button'
 import ui from '@/components/ui/controls.module.css'
 
@@ -21,12 +23,14 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
   const [msg, setMsg] = useState<string | null>(null)
   const confirm = useAdminConfirm()
   const formDialog = useAdminForm()
+  const fb = useFeedback()
+  const router = useRouter()
 
   async function run(fn: () => Promise<{ ok: boolean; error?: string }>) {
     setBusy(true); setMsg(null)
     const res = await fn()
     setBusy(false)
-    if (res.ok) { location.reload() } else { setMsg(res.error || 'Gagal') }
+    if (res.ok) { fb.ok(); router.refresh() } else { setMsg(res.error || 'Gagal') }
   }
 
   async function onTogglePublish() {

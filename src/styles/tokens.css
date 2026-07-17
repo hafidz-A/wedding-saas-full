@@ -277,6 +277,7 @@
   --tracking-tight:   -0.01em;   /* large display headings */
   --tracking-wide:     0.10em;   /* label, badge */
   --tracking-widest:   0.32em;   /* eyebrow / kicker ALL-CAPS */
+  --tracking-btn:      0.12em;   /* shared Button/pill uppercase labels */
 
   /* ─── CARD / DIALOG / TOAST TOKENS (Scope C) ─── */
   --card-bg:           var(--surface-raised);

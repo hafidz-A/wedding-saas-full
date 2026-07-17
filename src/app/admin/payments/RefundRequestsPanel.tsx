@@ -7,7 +7,9 @@ import { formatIDR } from '@/lib/payments/transactions'
 import { adminApproveRefund, adminRejectRefund } from './actions'
 import { canApiRefund } from '@/lib/payments/refund-channels'
 import type { RefundRequestView } from './data'
+import { useRouter } from 'next/navigation'
 import { useAdminForm } from '@/components/admin/AdminDialogProvider'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 import { Button } from '@/components/ui/Button'
 
 const CATEGORY: Record<string, string> = {
@@ -29,6 +31,8 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
   const formDialog = useAdminForm()
+  const fb = useFeedback()
+  const router = useRouter()
   if (!requests.length) return null
 
   async function approve(r: RefundRequestView) {
@@ -62,7 +66,7 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
     setBusy(true); setMsg(null)
     const out = await adminApproveRefund(r.id, { method, note: res.note || undefined })
     setBusy(false)
-    if (out.ok) location.reload(); else setMsg(out.error || 'Gagal')
+    if (out.ok) { fb.ok('Refund disetujui'); router.refresh() } else setMsg(out.error || 'Gagal')
   }
 
   async function reject(r: RefundRequestView) {
@@ -76,7 +80,7 @@ export default function RefundRequestsPanel({ requests }: { requests: RefundRequ
     setBusy(true); setMsg(null)
     const out = await adminRejectRefund(r.id, res.note || undefined)
     setBusy(false)
-    if (out.ok) location.reload(); else setMsg(out.error || 'Gagal')
+    if (out.ok) { fb.ok('Permintaan ditolak'); router.refresh() } else setMsg(out.error || 'Gagal')
   }
 
   return (

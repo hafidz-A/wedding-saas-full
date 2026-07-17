@@ -170,6 +170,10 @@ Env-gated by `ADMIN_EMAILS` allowlist (`src/lib/admin/is-admin.ts` + `require-ad
     icon buttons) use 36.
   - **Status colors:** `--status-danger` scale (`tokens.css`) replaces hardcoded reds in dashboard/admin
     danger buttons and controls — don't reintroduce a raw `#`-red.
+  - **Sanctioned off-token exceptions (deliberate, do not "fix"):** Solary `themes.css`
+    (self-contained per-template palette), template-section decorative values (gradient stops,
+    organic shapes, optical 1px/odd-px spacing nudges), and file-local `--wg-*`/`--tt-*`
+    component vars. Everything else must be on-token; spacing swaps are equal-value only.
   - **Guardrail:** `npm run check:tokens` fails on the dead `--border-radius-*` namespace, raw `999px`,
     single-px radius literals, an off-scale height on a button selector, or a non-token `border-radius:
     50%` (use `--radius-round`). Run it after touching control/token CSS.

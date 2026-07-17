@@ -80,6 +80,16 @@
   }
 }
 
+/* Wider ellipsis cell for read-heavy columns (e.g. testimonial review body). */
+.tdWide {
+  max-width: 380px;
+}
+@media (max-width: 767.98px) {
+  .tdWide {
+    max-width: none;
+  }
+}
+
 /* Numeric cell: right-aligned + tabular figures on desktop/tablet; on
    mobile the card-collapse layout reads label-then-value left to right,
    so numbers go back to left alignment. */
@@ -134,7 +144,7 @@
     border: none;
   }
 
-  .table td::before {
+  .table td[data-label]::before {
     content: attr(data-label);
     display: block;
     font-size: 10px;

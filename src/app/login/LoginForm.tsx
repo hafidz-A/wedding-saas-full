@@ -247,24 +247,6 @@ const input: React.CSSProperties = {
   fontFamily: 'inherit',
   boxSizing: 'border-box',
 }
-const submitBtn: React.CSSProperties = {
-  marginTop: 8,
-  height: 44,
-  padding: '1px 24px 0 24px',
-  borderRadius: 'var(--radius-pill)',
-  background: 'var(--color-charcoal)',
-  color: 'var(--surface-warm)',
-  border: 0,
-  fontSize: 13,
-  fontWeight: 600,
-  letterSpacing: '0.16em',
-  textTransform: 'uppercase',
-  cursor: 'pointer',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  lineHeight: 1,
-}
 const errorStyle: React.CSSProperties = {
   margin: 0,
   padding: '10px 12px',

@@ -2,10 +2,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   adminReconcileGateway, adminRecheckPayment, adminRecheckUpgrade, adminRecheckQuotaAddon,
   type ReconcileMismatch,
 } from './actions'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 import { Button } from '@/components/ui/Button'
 
 export default function ReconcilePanel() {
@@ -13,6 +15,8 @@ export default function ReconcilePanel() {
   const [ran, setRan] = useState(false)
   const [rows, setRows] = useState<ReconcileMismatch[]>([])
   const [msg, setMsg] = useState<string | null>(null)
+  const fb = useFeedback()
+  const router = useRouter()
 
   async function reconcile() {
     setBusy(true); setMsg(null)
@@ -27,7 +31,12 @@ export default function ReconcilePanel() {
     const fn = m.type === 'initial' ? adminRecheckPayment : m.type === 'upgrade' ? adminRecheckUpgrade : adminRecheckQuotaAddon
     const res = await fn(m.invitationId)
     setBusy(false)
-    if (res.ok && (res as any).applied) { location.reload(); return }
+    if (res.ok && (res as any).applied) {
+      fb.ok('Diterapkan — pembayaran masuk')
+      setRows((prev) => prev.filter((x) => x !== m))
+      router.refresh()
+      return
+    }
     setMsg(res.error || `Status Midtrans: ${(res as any).status ?? '—'} — belum bisa diterapkan`)
   }
 
