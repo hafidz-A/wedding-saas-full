@@ -2,12 +2,14 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatIDR, type Transaction } from '@/lib/payments/transactions'
 import { adminExportTransactionsCsv, adminBackfillPaidAmounts, adminRefund, adminRefundViaGateway } from './actions'
 import type { RefundSourceType } from '@/lib/payments/refunds'
 import { canApiRefund } from '@/lib/payments/refund-channels'
 import { useAdminConfirm, useAdminAlert, useAdminForm } from '@/components/admin/AdminDialogProvider'
 import { Button } from '@/components/ui/Button'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 import ui from '@/components/ui/controls.module.css'
 
 function fmtDate(iso: string): string {
@@ -29,6 +31,8 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
   const confirm = useAdminConfirm()
   const alertDialog = useAdminAlert()
   const formDialog = useAdminForm()
+  const fb = useFeedback()
+  const router = useRouter()
 
   const rows = useMemo(() => txns.filter((t) => {
     const d = t.date ? t.date.slice(0, 10) : ''
@@ -100,7 +104,7 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
       ? await adminRefundViaGateway(sourceType, sourceId, res.reason || undefined)
       : await adminRefund(sourceType, sourceId, res.reason || undefined)
     setBusy(false)
-    if (r.ok) { location.reload() } else { await alertDialog({ title: 'Refund gagal', message: r.error || 'Coba lagi.', tone: 'danger' }) }
+    if (r.ok) { fb.ok('Refund diproses'); router.refresh() } else { await alertDialog({ title: 'Refund gagal', message: r.error || 'Coba lagi.', tone: 'danger' }) }
   }
 
   async function backfill() {
@@ -110,8 +114,8 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
     const res = await adminBackfillPaidAmounts()
     setBusy(false)
     if (!res.ok) { await alertDialog({ title: 'Gagal', message: res.error || 'Coba lagi.', tone: 'danger' }); return }
-    await alertDialog({ title: 'Selesai', message: `Terisi: ${res.updated}, dilewati: ${res.skipped}.` })
-    location.reload()
+    fb.ok(`Terisi: ${res.updated}, dilewati: ${res.skipped}`)
+    router.refresh()
   }
 
   return (

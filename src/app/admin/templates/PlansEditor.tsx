@@ -6,6 +6,7 @@ import { updatePlan } from './actions'
 import type { PlanPatch } from './validate'
 import { formatIDR } from '@/lib/payments/quota'
 import { Button } from '@/components/ui/Button'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 
 interface PlanInit extends PlanPatch { plan_code: string }
 
@@ -17,10 +18,10 @@ export default function PlansEditor({ templateId, plan }: { templateId: string; 
   const [duration, setDuration] = useState(plan.duration_days == null ? '' : String(plan.duration_days))
   const [features, setFeatures] = useState(plan.features.join('\n'))
   const [busy, setBusy] = useState(false)
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const fb = useFeedback()
 
   async function save() {
-    setBusy(true); setMsg(null)
+    setBusy(true)
     const patch: PlanPatch = {
       display_name: displayName,
       price_idr: parseInt(price.replace(/\D/g, ''), 10) || 0,
@@ -31,7 +32,7 @@ export default function PlansEditor({ templateId, plan }: { templateId: string; 
     }
     const res = await updatePlan(templateId, plan.plan_code, patch)
     setBusy(false)
-    setMsg(res.ok ? { ok: true, text: 'Tersimpan ✓' } : { ok: false, text: res.error || 'Gagal' })
+    res.ok ? fb.ok('Tersimpan') : fb.fail(res.error || 'Gagal')
   }
 
   return (
@@ -46,7 +47,6 @@ export default function PlansEditor({ templateId, plan }: { templateId: string; 
       <Field label="Masa aktif (hari, kosong = seumur hidup)"><input value={duration} onChange={(e) => setDuration(e.target.value)} inputMode="numeric" style={inp} /></Field>
       <Field label="Fitur (satu per baris)"><textarea value={features} onChange={(e) => setFeatures(e.target.value)} rows={4} style={{ ...inp, resize: 'vertical' }} /></Field>
       <Button size="sm" onClick={save} disabled={busy} style={{ marginTop: 4 }}>{busy ? 'Menyimpan…' : 'Simpan'}</Button>
-      {msg && <span style={{ fontSize: 13, color: msg.ok ? 'var(--color-emerald)' : 'var(--interactive-primary)' }}>{msg.text}</span>}
     </div>
   )
 }

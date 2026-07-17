@@ -2,9 +2,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { adminProcessDeletion, adminRejectDeletion } from './actions'
 import { useAdminConfirm, useAdminForm, useAdminAlert } from '@/components/admin/AdminDialogProvider'
 import { Button } from '@/components/ui/Button'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 
 interface Req {
   id: string; email: string; reason: string
@@ -16,6 +18,8 @@ export default function DeletionRequestRow({ req }: { req: Req }) {
   const confirm = useAdminConfirm()
   const formDialog = useAdminForm()
   const alertDialog = useAdminAlert()
+  const fb = useFeedback()
+  const router = useRouter()
 
   async function process() {
     if (!req.due) {
@@ -31,7 +35,7 @@ export default function DeletionRequestRow({ req }: { req: Req }) {
     setBusy(true)
     const res = await adminProcessDeletion(req.id)
     setBusy(false)
-    if (res.ok) location.reload(); else await alertDialog({ title: 'Gagal', message: res.error || 'Coba lagi.', tone: 'danger' })
+    if (res.ok) { fb.ok('Penghapusan diproses'); router.refresh() } else await alertDialog({ title: 'Gagal', message: res.error || 'Coba lagi.', tone: 'danger' })
   }
 
   async function reject() {
@@ -45,7 +49,7 @@ export default function DeletionRequestRow({ req }: { req: Req }) {
     setBusy(true)
     const out = await adminRejectDeletion(req.id, res.note || undefined)
     setBusy(false)
-    if (out.ok) location.reload(); else await alertDialog({ title: 'Gagal', message: out.error || 'Coba lagi.', tone: 'danger' })
+    if (out.ok) { fb.ok('Permintaan ditolak'); router.refresh() } else await alertDialog({ title: 'Gagal', message: out.error || 'Coba lagi.', tone: 'danger' })
   }
 
   return (

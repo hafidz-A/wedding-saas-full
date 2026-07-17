@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { requireAdmin, AdminAuthError } from '@/lib/admin/is-admin'
 import { AdminDialogProvider } from '@/components/admin/AdminDialogProvider'
+import { FeedbackProvider } from '@/components/ui/FeedbackProvider'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -50,7 +51,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         })}
       </nav>
       <main style={{ padding: 24 }}>
-        <AdminDialogProvider>{children}</AdminDialogProvider>
+        <AdminDialogProvider>
+          <FeedbackProvider>{children}</FeedbackProvider>
+        </AdminDialogProvider>
       </main>
     </div>
   )

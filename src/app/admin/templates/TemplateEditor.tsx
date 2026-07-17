@@ -6,6 +6,7 @@ import { CATEGORIES } from '@/config/categories'
 import { updateTemplate } from './actions'
 import type { TemplateDisplay } from '@/lib/templates/display'
 import { Button } from '@/components/ui/Button'
+import { useFeedback } from '@/components/ui/FeedbackProvider'
 
 /**
  * "Tampilan" editor for one template — enable/disable + display metadata + the
@@ -25,10 +26,10 @@ export default function TemplateEditor({ templateId, initial }: { templateId: st
   const [blurbId, setBlurbId] = useState(initial.blurbId)
   const [blurbEn, setBlurbEn] = useState(initial.blurbEn)
   const [busy, setBusy] = useState(false)
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const fb = useFeedback()
 
   async function save() {
-    setBusy(true); setMsg(null)
+    setBusy(true)
     const res = await updateTemplate(templateId, {
       enabled, label, category,
       tags: tags.split(',').map((s) => s.trim()).filter(Boolean),
@@ -36,7 +37,7 @@ export default function TemplateEditor({ templateId, initial }: { templateId: st
       tagline_id: taglineId, tagline_en: taglineEn, blurb_id: blurbId, blurb_en: blurbEn,
     })
     setBusy(false)
-    setMsg(res.ok ? { ok: true, text: 'Tersimpan ✓' } : { ok: false, text: res.error || 'Gagal' })
+    res.ok ? fb.ok('Tersimpan') : fb.fail(res.error || 'Gagal')
   }
 
   return (
@@ -81,7 +82,6 @@ export default function TemplateEditor({ templateId, initial }: { templateId: st
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Button size="sm" disabled={busy} onClick={save}>{busy ? 'Menyimpan…' : 'Simpan Tampilan'}</Button>
-          {msg && <span style={{ fontSize: 13, color: msg.ok ? 'var(--color-emerald, #2e7d32)' : 'var(--status-error)' }}>{msg.text}</span>}
         </div>
       </div>
 
