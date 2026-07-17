@@ -17,6 +17,7 @@
   text-transform: uppercase;
   cursor: pointer;
   white-space: nowrap;
+  text-decoration: none;
   transition:
     background var(--duration-base) var(--ease-out),
     color var(--duration-base) var(--ease-out),
