@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { BRAND } from '@/lib/brand'
+import { BRAND, BRAND_TAGLINE } from '@/lib/brand'
 import { Montserrat, Biryani, Tangerine, Great_Vibes } from 'next/font/google'
 import NoOverscroll from '@/components/NoOverscroll'
 import '../styles/global.css'
@@ -41,7 +41,7 @@ const greatVibes = Great_Vibes({
 })
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
-const DESCRIPTION = `${BRAND} — undangan digital yang terasa seperti film pendek. Rancang dulu sampai puas, bayar saat mau diterbitkan, sebar link-nya lewat WhatsApp.`
+const DESCRIPTION = `${BRAND} — ${BRAND_TAGLINE} Undangan digital yang terasa seperti film pendek. Rancang dulu sampai puas, bayar saat mau diterbitkan, sebar link-nya lewat WhatsApp.`
 
 export const metadata: Metadata = {
   // metadataBase makes relative OG/twitter image URLs resolve to absolute ones
