@@ -62,9 +62,9 @@
 .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
 .mobilePanel {
-  display: flex; flex-direction: column; gap: 8px; align-items: stretch;
+  display: flex; flex-direction: column; gap: var(--space-2); align-items: stretch;
   margin: 10px clamp(12px, 3vw, 28px) 0;
-  padding: 16px;
+  padding: var(--space-4);
   background: rgba(253, 246, 236, 0.98);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(42, 33, 24, 0.12);
@@ -76,7 +76,7 @@
   display: flex; align-items: center; justify-content: flex-start;
   width: 100%;
   height: var(--ctl-h);
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   font-size: 14px;
   font-weight: var(--weight-medium);
   color: var(--color-charcoal);
@@ -103,7 +103,7 @@
   box-shadow: 0 4px 12px rgba(232, 85, 62, 0.12);
 }
 .mobilePanel form { width: 100%; margin: 0; }
-.mobilePanel .cta { width: 100%; text-align: center; margin-top: 4px; height: var(--ctl-h); display: inline-flex; align-items: center; justify-content: center; }
+.mobilePanel .cta { width: 100%; text-align: center; margin-top: var(--space-1); height: var(--ctl-h); display: inline-flex; align-items: center; justify-content: center; }
 
 .profileWrap { position: relative; display: inline-block; }
 .profileTrigger {

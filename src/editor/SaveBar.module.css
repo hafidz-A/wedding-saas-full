@@ -31,7 +31,7 @@
     box-shadow var(--duration-base) var(--ease-in-out),
     transform var(--duration-fast) var(--ease-in-out);
   height: var(--ctl-h-sm);
-  padding: 0 4px 0 12px;
+  padding: 0 var(--space-1) 0 var(--space-3);
   border-radius: var(--radius-pill);
   background: transparent;
   display: inline-flex;

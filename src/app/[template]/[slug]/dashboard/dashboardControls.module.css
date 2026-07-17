@@ -294,10 +294,10 @@
 .seg {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   background: var(--border-subtle);
   border-radius: var(--radius-pill);
-  padding: 4px;
+  padding: var(--space-1);
 }
 .segBtn {
   font-family: inherit;

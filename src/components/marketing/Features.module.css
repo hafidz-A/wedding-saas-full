@@ -44,7 +44,7 @@
   font-size: clamp(15px, 1.8vw, 17px);
   line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
-  margin: 4px 0 0;
+  margin: var(--space-1) 0 0;
   font-weight: var(--weight-light);
 }
 
@@ -173,7 +173,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px 16px;
+  padding: var(--space-5) var(--space-4);
 }
 
 .screenShadow {
@@ -219,7 +219,7 @@
 }
 
 .mockInput {
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid rgba(42, 33, 24, 0.1);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);
@@ -258,7 +258,7 @@
 }
 
 .mockSelect {
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid rgba(42, 33, 24, 0.1);
   border-radius: var(--radius-sm);
   background: var(--surface-raised);

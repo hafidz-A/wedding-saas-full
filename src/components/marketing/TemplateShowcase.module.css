@@ -44,7 +44,7 @@
   font-size: clamp(15px, 1.8vw, 17px);
   line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
-  margin: 4px 0 0;
+  margin: var(--space-1) 0 0;
   font-weight: var(--weight-light);
 }
 
@@ -176,7 +176,7 @@
   line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
   font-weight: var(--weight-light);
-  margin: 0 0 8px;
+  margin: 0 0 var(--space-2);
 }
 
 .actions {

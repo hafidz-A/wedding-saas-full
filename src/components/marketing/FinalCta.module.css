@@ -113,7 +113,7 @@
   line-height: var(--leading-relaxed);
   color: var(--color-charcoal-light);
   max-width: 42ch;
-  margin: 0 0 16px;
+  margin: 0 0 var(--space-4);
   font-weight: var(--weight-light);
 }
 

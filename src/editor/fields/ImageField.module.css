@@ -2,7 +2,7 @@
    top of the existing click-to-upload. Visual language matches the rest of the
    editor (tokens, dashed empty state, pill buttons). */
 
-.field { display: grid; gap: 8px; }
+.field { display: grid; gap: var(--space-2); }
 
 .label {
   font-size: var(--font-size-xs);

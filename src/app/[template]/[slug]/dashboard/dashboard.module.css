@@ -24,8 +24,8 @@
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 12px !important;
-    padding: 12px 16px !important;
+    gap: var(--space-3) !important;
+    padding: var(--space-3) var(--space-4) !important;
   }
   .headerActions {
     display: none !important;
@@ -146,7 +146,7 @@
    ───────────────────────────────────────────────────────────── */
 
 .tab {
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -225,7 +225,7 @@
   border-color: var(--interactive-primary);
   background: var(--interactive-primary-soft);
 }
-.ghostBtnSm { padding: 0 16px; font-size: var(--font-size-xs); letter-spacing: 0.12em; height: var(--ctl-h-sm); }
+.ghostBtnSm { padding: 0 var(--space-4); font-size: var(--font-size-xs); letter-spacing: 0.12em; height: var(--ctl-h-sm); }
 
 /* Solid dark pill (View live). */
 .solidBtn {
@@ -308,10 +308,10 @@
   background: var(--surface-warm);
   border-bottom: 1.5px solid var(--interactive-primary);
   z-index: 100;
-  padding: 16px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   box-shadow: var(--shadow-md);
 }
 .mobileDropdownContent .ghostBtn,

@@ -12,7 +12,7 @@
   background: var(--color-charcoal);
   color: var(--color-cream);
   height: var(--ctl-h);
-  padding: 0 24px;
+  padding: 0 var(--space-5);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-btn);
   transition:
@@ -41,7 +41,7 @@
   text-transform: uppercase;
   color: var(--color-charcoal);
   height: var(--ctl-h);
-  padding: 0 24px;
+  padding: 0 var(--space-5);
   border-radius: var(--radius-pill);
   border: 1px solid var(--border-strong);
   display: inline-flex;

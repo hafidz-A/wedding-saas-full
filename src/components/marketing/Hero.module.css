@@ -139,7 +139,7 @@
   line-height: 1.75;
   color: var(--color-charcoal-light);
   max-width: 48ch;
-  margin: 24px 0 0;
+  margin: var(--space-5) 0 0;
   font-weight: var(--weight-light);
 }
 
@@ -266,7 +266,7 @@
   align-items: center;
   justify-content: center;
   height: var(--ctl-h);
-  padding: 0 16px;
+  padding: 0 var(--space-4);
   font-family: var(--font-body);
   font-size: 9px;
   font-weight: var(--weight-semibold);

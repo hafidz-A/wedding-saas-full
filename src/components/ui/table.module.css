@@ -130,7 +130,7 @@
   }
 
   .table td {
-    padding: 4px 0;
+    padding: var(--space-1) 0;
     border: none;
   }
 

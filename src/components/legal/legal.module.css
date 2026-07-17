@@ -16,7 +16,7 @@
 }
 
 .prose p {
-  margin: 0 0 12px;
+  margin: 0 0 var(--space-3);
 }
 
 /*

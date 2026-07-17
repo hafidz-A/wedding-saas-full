@@ -81,7 +81,7 @@
     border: 1px solid var(--border-default);
     padding: 6px;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     box-shadow: var(--shadow-md);
   }
   .subnavOpen {

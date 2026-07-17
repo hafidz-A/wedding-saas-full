@@ -106,19 +106,19 @@
 .groupTabs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 
 /* per-section guide cards */
-.guideList { display: flex; flex-direction: column; gap: var(--space-3); margin: 8px 0 4px; }
+.guideList { display: flex; flex-direction: column; gap: var(--space-3); margin: var(--space-2) 0 var(--space-1); }
 .guideCard {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 14px 16px;
   background: #fbf7ee;
 }
-.guideTitle { font-size: 16px; font-weight: var(--weight-semibold); margin: 0 0 8px; color: var(--text-primary); }
-.guideRow { margin: 4px 0; line-height: var(--leading-normal); color: var(--text-primary); }
+.guideTitle { font-size: 16px; font-weight: var(--weight-semibold); margin: 0 0 var(--space-2); color: var(--text-primary); }
+.guideRow { margin: var(--space-1) 0; line-height: var(--leading-normal); color: var(--text-primary); }
 .guideLabel { font-weight: var(--weight-semibold); color: var(--text-secondary); margin-right: var(--space-1); white-space: nowrap; }
 
 /* FAQ accordion */
-.faqList { display: flex; flex-direction: column; gap: var(--space-2); margin: 8px 0 4px; }
+.faqList { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-2) 0 var(--space-1); }
 .faqItem {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
@@ -147,12 +147,12 @@
 .search:hover:not(:focus) { border-color: var(--border-strong); }
 .search:focus { outline: none; border-color: var(--interactive-primary); box-shadow: 0 0 0 3px var(--interactive-primary-soft); }
 
-.noResult { color: #8a7866; font-size: 13px; margin: 0 0 16px; }
+.noResult { color: #8a7866; font-size: 13px; margin: 0 0 var(--space-4); }
 
 .openTab {
   display: inline-block;
   margin: 0 0 18px;
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-charcoal);
   background: var(--color-charcoal);
