@@ -2,6 +2,11 @@
 
 Laporan suite automated test. Cakupan sel-per-sel: lihat `TEST-MATRIX.md`. Temuan: `BUG-LEDGER.md`.
 
+## Run design-system follow-ups (2026-07-17, wave 2)
+- **Konteks:** eksekusi plan `docs/superpowers/plans/2026-07-17-design-system-follow-ups.md` (11 task + post-review fixes; commits `3d4501b..055a228`). ButtonLink, konsolidasi CTA marketing, migrasi auth/editor ke `<Button>`, FeedbackProvider naik ke `ui/` (admin dapat toast + `router.refresh`), `ui/table.module.css` (tabel admin responsif), sweep `--radius-round` (~59 situs + rule guard baru), sweep `--space-*` equal-value (78 baris), fix kecil (BooleanField, Escape/klik-busy-guard, InvitationRow).
+- **Gates di head:** tsc bersih · vitest **657 test / 97 file HIJAU** (649 → 657: +2 ButtonLink, +2 Feedback ui, +4 token-rules radius-round) · `check:tokens` bersih (kini juga menegakkan `--radius-round`).
+- **Visual e2e:** `npx playwright test e2e/visual.spec.ts` → 9/9 HIJAU setelah regenerasi baseline `signup-desktop` (diff = perubahan tombol auth yang terdokumentasi di Task 3 + re-center kartu; viewport lain lolos). Full `test:all` Playwright tidak dijalankan pada wave ini.
+
 ## Run design-system hardening (2026-07-17)
 - **Konteks:** eksekusi plan `docs/superpowers/plans/2026-07-16-design-system-hardening.md` (13 task + final-review fix wave; commits `4d7658e..b29ceb1`). Lapisan `src/components/ui/` baru (Button, DialogProvider terpadu, useEscapeToClose), migrasi admin/profile, token `--status-danger*`/`--z-dialog`, guard token kini memindai inline style `.tsx/.jsx/.ts`.
 - **Gates di head:** tsc bersih · vitest **649 test / 95 file HIJAU** (593 → 649: +26 test komponen ui via jsdom/@testing-library + +11 test `scripts/lib/token-rules` + suite receipt email) · `npm run check:tokens` → `✓ design tokens clean (radius + control heights, css + inline tsx)`.
