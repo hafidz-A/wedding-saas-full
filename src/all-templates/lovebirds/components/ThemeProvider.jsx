@@ -45,15 +45,20 @@ export default function ThemeProvider({
     return initial
   })
 
-  const [ornamentType, setOrnamentState] = useState(() => {
-    if (allowGuestSwitch && typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem(ORNAMENT_STORAGE_KEY)
-        if (saved && isOrnamentType(saved)) return saved
-      } catch {}
-    }
-    return initialOrnament
-  })
+  // Ornament starts from the couple's default on BOTH server and first client
+  // render. The ornament SVGs render via dangerouslySetInnerHTML, and React
+  // skips innerHTML comparison during hydration — a mismatched initializer
+  // would silently keep the server's markup and the saved choice never shows.
+  // The saved choice is restored in an effect after mount (same pattern as
+  // the device state below).
+  const [ornamentType, setOrnamentState] = useState(initialOrnament)
+  useEffect(() => {
+    if (!allowGuestSwitch || typeof window === 'undefined') return
+    try {
+      const saved = sessionStorage.getItem(ORNAMENT_STORAGE_KEY)
+      if (isOrnamentType(saved)) setOrnamentState(saved)
+    } catch {}
+  }, [allowGuestSwitch])
 
   // Live-preview device frame (demo only). Starts 'desktop' on BOTH server and
   // first client render (it changes the rendered tree, so reading sessionStorage
@@ -91,13 +96,6 @@ export default function ThemeProvider({
   // theme-* class off <body> so other routes don't inherit this palette.
   useEffect(() => () => clearTheme(), [])
 
-  // Persist ornament choice in demo mode.
-  useEffect(() => {
-    if (allowGuestSwitch) {
-      try { sessionStorage.setItem(ORNAMENT_STORAGE_KEY, ornamentType) } catch {}
-    }
-  }, [ornamentType, allowGuestSwitch])
-
   // Locked mode: always follow the couple's saved defaults.
   useEffect(() => {
     if (!allowGuestSwitch) {
@@ -110,9 +108,16 @@ export default function ThemeProvider({
     if (isThemeName(name)) setThemeState(name)
   }, [])
 
+  // Persist inside the setter (not an effect): a mount effect would write the
+  // default ornament over the saved choice before the restore effect reads it
+  // (StrictMode double-run clobber — same reasoning as setDevice above).
   const setOrnamentType = useCallback((type) => {
-    if (isOrnamentType(type)) setOrnamentState(type)
-  }, [])
+    if (!isOrnamentType(type)) return
+    setOrnamentState(type)
+    if (allowGuestSwitch) {
+      try { sessionStorage.setItem(ORNAMENT_STORAGE_KEY, type) } catch {}
+    }
+  }, [allowGuestSwitch])
 
   const value = { theme, setTheme, ornamentType, setOrnamentType, device, setDevice, options: THEME_ORDER }
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
