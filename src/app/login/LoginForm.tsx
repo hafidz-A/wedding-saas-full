@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import type { Dict } from '@/lib/i18n'
 import { safeNext } from '@/lib/auth/safeNext'
-import authStyles from '@/components/site/AuthChrome.module.css'
+import { Button } from '@/components/ui/Button'
 
 /**
  * /login — slug-agnostic password login.
@@ -131,9 +131,9 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
 
           {mfaError && <p style={errorStyle}>{mfaError}</p>}
 
-          <button type="button" onClick={verifyMfa} className={authStyles.authPrimaryBtn} style={{ marginTop: 8 }}>
+          <Button style={{ marginTop: 8 }} onClick={verifyMfa}>
             Verifikasi
-          </button>
+          </Button>
         </div>
       ) : (
         <form onSubmit={onSubmit} style={card}>
@@ -170,9 +170,9 @@ export default function LoginForm({ dict }: { dict: Dict['auth']['login'] }) {
 
           {error && <p style={errorStyle}>{error}</p>}
 
-          <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn} style={{ marginTop: 8 }}>
+          <Button type="submit" disabled={submitting} style={{ marginTop: 8 }}>
             {submitting ? dict.submitting : dict.submit}
-          </button>
+          </Button>
 
           <p style={{ ...muted, fontSize: 13, textAlign: 'center', marginTop: 14 }}>
             {dict.forgotPrompt}{' '}

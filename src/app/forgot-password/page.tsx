@@ -7,7 +7,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
 import { AuthChrome } from '@/components/site/AuthChrome'
-import authStyles from '@/components/site/AuthChrome.module.css'
+import { Button, ButtonLink } from '@/components/ui/Button'
 
 /**
  * /forgot-password — sends a Supabase Auth password reset email.
@@ -78,22 +78,20 @@ function ForgotPasswordInner() {
             <p style={hint}>
               {t.sentHintPrefix} <strong>{email}</strong> {t.sentHintSuffix}
             </p>
-            <Link
+            <ButtonLink
               href={`/reset-password?email=${encodeURIComponent(email)}${slug ? `&slug=${encodeURIComponent(slug)}&template=${encodeURIComponent(template)}` : ''}`}
-              className={authStyles.authPrimaryBtn}
-              style={{ textAlign: 'center', textDecoration: 'none', display: 'flex' }}
             >
               {t.continueToken}
-            </Link>
+            </ButtonLink>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
               {slug && (
-                <Link href={`/${template}/${slug}/dashboard`} className={authStyles.authGhostBtn}>
+                <ButtonLink variant="ghost" href={`/${template}/${slug}/dashboard`}>
                   {t.backLogin}
-                </Link>
+                </ButtonLink>
               )}
-              <button type="button" onClick={() => { setSent(false); setEmail('') }} className={authStyles.authGhostBtn}>
+              <Button variant="ghost" onClick={() => { setSent(false); setEmail('') }}>
                 {t.resendOther}
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
@@ -115,9 +113,9 @@ function ForgotPasswordInner() {
 
             {error && <p style={errorStyle}>{error}</p>}
 
-            <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn}>
+            <Button type="submit" disabled={submitting}>
               {submitting ? t.submitting : t.submit}
-            </button>
+            </Button>
 
             <p style={{ textAlign: 'center', margin: 0 }}>
               {slug ? (

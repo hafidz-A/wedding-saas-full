@@ -7,7 +7,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { getDict } from '@/lib/i18n'
 import { useClientLang } from '@/lib/i18n/useClientLang'
 import { AuthChrome } from '@/components/site/AuthChrome'
-import authStyles from '@/components/site/AuthChrome.module.css'
+import { Button } from '@/components/ui/Button'
 import { safeNext } from '@/lib/auth/safeNext'
 
 /**
@@ -147,9 +147,9 @@ function VerifySignupInner() {
           </p>
         )}
 
-        <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn}>
+        <Button type="submit" disabled={submitting}>
           {submitting ? t.submitting : t.submit}
-        </button>
+        </Button>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: 4 }}>
           <button

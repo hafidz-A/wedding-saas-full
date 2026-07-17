@@ -11,7 +11,7 @@ import { isPasswordValid } from '@/lib/auth/passwordPolicy'
 import { pwnedPasswordCount } from '@/lib/auth/pwnedPassword'
 import { usePwnedPassword } from '@/lib/auth/usePwnedPassword'
 import PasswordChecklist from '@/components/auth/PasswordChecklist'
-import authStyles from '@/components/site/AuthChrome.module.css'
+import { Button } from '@/components/ui/Button'
 
 /**
  * /reset-password — TOKEN-based password reset.
@@ -283,9 +283,9 @@ function ResetPasswordInner() {
 
         {error && <p style={errorStyle}>{error}</p>}
 
-        <button type="submit" disabled={submitting} className={authStyles.authPrimaryBtn}>
+        <Button type="submit" disabled={submitting}>
           {submitting ? t.submitting : t.submit}
-        </button>
+        </Button>
 
         <p style={{ textAlign: 'center', margin: 0 }}>
           <Link href="/forgot-password" style={linkStyle}>{t.resend}</Link>
