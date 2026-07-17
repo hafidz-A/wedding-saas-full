@@ -11,6 +11,7 @@ import { useAdminConfirm, useAdminAlert, useAdminForm } from '@/components/admin
 import { Button } from '@/components/ui/Button'
 import { useFeedback } from '@/components/ui/FeedbackProvider'
 import ui from '@/components/ui/controls.module.css'
+import tbl from '@/components/ui/table.module.css'
 
 function fmtDate(iso: string): string {
   if (!iso) return '—'
@@ -138,25 +139,25 @@ export default function PaymentsClient({ txns, canBackfill }: { txns: Transactio
         {(from || to) && <Button size="sm" variant="ghost" onClick={() => { setFrom(''); setTo('') }}>Reset tgl</Button>}
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      <div className={tbl.tableWrap}>
+        <table className={tbl.table}>
           <thead>
-            <tr style={{ textAlign: 'left', color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              <th style={th}>Slug</th><th style={th}>Tipe</th><th style={th}>Sumber</th><th style={th}>Status</th><th style={{ ...th, textAlign: 'right' }}>Jumlah</th><th style={th}>Tanggal</th><th style={th}>Aksi</th>
+            <tr>
+              <th>Slug</th><th>Tipe</th><th>Sumber</th><th>Status</th><th className={tbl.tdNum}>Jumlah</th><th>Tanggal</th><th>Aksi</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
-              <tr><td colSpan={7} style={{ ...td, color: 'var(--text-muted)' }}>Tidak ada transaksi.</td></tr>
+              <tr><td colSpan={7} style={{ color: 'var(--text-muted)' }}>Tidak ada transaksi.</td></tr>
             ) : paged.map((t) => (
-              <tr key={t.key} style={{ borderTop: '0.5px solid var(--border-default)', opacity: t.status === 'refunded' ? 0.6 : 1 }}>
-                <td style={td}><a href={`/admin/invitations?q=${encodeURIComponent(t.slug)}`} style={{ color: 'var(--interactive-primary)' }}>{t.slug}</a></td>
-                <td style={td}>{t.type}</td>
-                <td style={td}>{t.source}</td>
-                <td style={td}>{t.status === 'refunded' ? 'direfund' : 'lunas'}</td>
-                <td style={{ ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatIDR(t.amountIDR)}</td>
-                <td style={td}>{fmtDate(t.date)}</td>
-                <td style={td}>
+              <tr key={t.key} style={{ opacity: t.status === 'refunded' ? 0.6 : 1 }}>
+                <td data-label="Slug"><a href={`/admin/invitations?q=${encodeURIComponent(t.slug)}`} style={{ color: 'var(--interactive-primary)' }}>{t.slug}</a></td>
+                <td data-label="Tipe">{t.type}</td>
+                <td data-label="Sumber">{t.source}</td>
+                <td data-label="Status">{t.status === 'refunded' ? 'direfund' : 'lunas'}</td>
+                <td data-label="Jumlah" className={tbl.tdNum}>{formatIDR(t.amountIDR)}</td>
+                <td data-label="Tanggal">{fmtDate(t.date)}</td>
+                <td data-label="Aksi">
                   {t.status === 'paid' && t.source !== 'comp'
                     ? <Button size="sm" variant="ghostDanger" disabled={busy} onClick={() => refund(t)}>Refund</Button>
                     : <span style={{ color: 'var(--text-muted)' }}>—</span>}
@@ -185,6 +186,3 @@ function Select({ value, onChange, options }: { value: string; onChange: (v: str
     </select>
   )
 }
-
-const th: React.CSSProperties = { padding: '6px 8px', fontWeight: 500 }
-const td: React.CSSProperties = { padding: '8px 8px' }

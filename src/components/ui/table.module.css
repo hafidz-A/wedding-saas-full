@@ -1,0 +1,147 @@
+/* Canonical shared responsive-table pattern. Promoted (copied verbatim,
+   plus .tdNum) from the dashboard's tabPanels.module.css, which pioneered
+   this pattern for RSVP/Gifts/Guests/etc. tab tables. Use this module for
+   any new admin/dashboard table going forward instead of hand-rolling
+   inline table styles or a fresh copy of the pattern.
+
+   Breakpoints (consistent with the rest of the project):
+     mobile:  <768px   → table collapses to stacked cards
+     tablet:  768-1023 → table stays, tighter padding + smaller font
+     desktop: ≥1024px  → unchanged                                       */
+
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-raised);
+  font-size: 13px;
+}
+
+.table thead tr {
+  text-align: left;
+  border-bottom: 1px solid rgba(42, 33, 24, 0.1);
+}
+
+.table th {
+  padding: 10px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  background: rgba(42, 33, 24, 0.02);
+}
+
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+
+/* Subtle row hover for scannability (desktop/tablet; mobile rows are cards). */
+.table tbody tr {
+  transition: background var(--duration-base) var(--ease-in-out);
+}
+@media (min-width: 768px) {
+  .table tbody tr:hover {
+    background: rgba(42, 33, 24, 0.025);
+  }
+}
+
+.empty {
+  padding: clamp(28px, 4vw, 40px);
+  text-align: center;
+  color: rgba(42, 33, 24, 0.5);
+  font-size: 13px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+}
+
+/* Long-text cell that needs ellipsis on desktop but should wrap on mobile
+   (where the table collapses to vertical cards and there's no width
+   constraint). */
+.tdEllipsis {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+  .tdEllipsis {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+
+/* Numeric cell: right-aligned + tabular figures on desktop/tablet; on
+   mobile the card-collapse layout reads label-then-value left to right,
+   so numbers go back to left alignment. */
+.tdNum {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 767.98px) {
+  .tdNum {
+    text-align: left;
+  }
+}
+
+/* ── Tablet (768-1023px): tighten table ── */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .table th,
+  .table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ── Mobile (<768px): collapse table to stacked cards ── */
+@media (max-width: 767.98px) {
+  .table thead {
+    display: none;
+  }
+
+  .tableWrap {
+    border: 0;
+    overflow: visible;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table tr {
+    background: rgba(42, 33, 24, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+
+  .table td {
+    padding: 4px 0;
+    border: none;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(42, 33, 24, 0.5);
+    margin-bottom: 2px;
+    font-weight: var(--weight-medium);
+  }
+}

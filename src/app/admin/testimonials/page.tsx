@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import ModerationRow, { type AdminTestimonial } from './ModerationRow'
+import tbl from '@/components/ui/table.module.css'
 
 export default async function AdminTestimonialsPage({
   searchParams,
@@ -51,19 +52,21 @@ export default async function AdminTestimonialsPage({
       {rows.length === 0 ? (
         <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Belum ada testimoni.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ textAlign: 'left', fontSize: 12, color: 'var(--text-muted)' }}>
-              <th style={{ padding: '0 10px 8px' }}>Penulis</th>
-              <th style={{ padding: '0 10px 8px' }}>Rating</th>
-              <th style={{ padding: '0 10px 8px' }}>Ulasan</th>
-              <th style={{ padding: '0 10px 8px' }}>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((t) => <ModerationRow key={t.id} t={t} />)}
-          </tbody>
-        </table>
+        <div className={tbl.tableWrap}>
+          <table className={tbl.table}>
+            <thead>
+              <tr>
+                <th>Penulis</th>
+                <th>Rating</th>
+                <th>Ulasan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((t) => <ModerationRow key={t.id} t={t} />)}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )
