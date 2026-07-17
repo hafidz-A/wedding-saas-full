@@ -40,7 +40,7 @@ export default function WalkInDialog({
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
   const confirmDialog = useConfirm()
-  useEscapeToClose(onClose)
+  useEscapeToClose(onClose, !saving)
 
   // Debounced typeahead — only while no guest is picked yet.
   useEffect(() => {

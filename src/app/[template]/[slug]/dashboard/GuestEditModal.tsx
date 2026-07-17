@@ -39,7 +39,7 @@ export default function GuestEditModal({
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  useEscapeToClose(onClose)
+  useEscapeToClose(onClose, !pending)
 
   function onSave() {
     setError(null)

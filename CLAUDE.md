@@ -171,11 +171,13 @@ Env-gated by `ADMIN_EMAILS` allowlist (`src/lib/admin/is-admin.ts` + `require-ad
   - **Status colors:** `--status-danger` scale (`tokens.css`) replaces hardcoded reds in dashboard/admin
     danger buttons and controls — don't reintroduce a raw `#`-red.
   - **Guardrail:** `npm run check:tokens` fails on the dead `--border-radius-*` namespace, raw `999px`,
-    single-px radius literals, or an off-scale height on a button selector. Run it after touching
-    control/token CSS.
-- **Shared controls:** `src/components/ui/` — `<Button variant size>`, unified `DialogProvider`
-  (confirm/alert/form + Escape), `useEscapeToClose`, `controls.module.css` (.input/.iconBtn).
-  New buttons/dialogs MUST use these; do not hand-roll inline-styled controls.
+    single-px radius literals, an off-scale height on a button selector, or a non-token `border-radius:
+    50%` (use `--radius-round`). Run it after touching control/token CSS.
+- **Shared controls:** `src/components/ui/` — `<Button variant size>`, `<ButtonLink>` (link-as-button,
+  same variants), unified `DialogProvider` (confirm/alert/form + Escape), `useEscapeToClose`,
+  `FeedbackProvider` toast (ui-level, used by both admin and dashboard), `controls.module.css`
+  (.input/.iconBtn), `table.module.css` (responsive table → card collapse on mobile). New
+  buttons/dialogs/tables MUST use these; do not hand-roll inline-styled controls.
 - `npm run check:tokens` now also scans **inline styles in .tsx/.jsx** (999 radius, off-scale
   control heights on btn/input-named consts) — "clean" covers admin/profile inline styles too.
 - **`'use client'`** on all section/component/hook files. Server components are `src/app/**/page.tsx`,

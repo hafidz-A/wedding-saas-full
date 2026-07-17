@@ -82,3 +82,20 @@
 @media (prefers-reduced-motion: reduce) {
   .control { transition: none; }
 }
+
+/* Checkbox field (BooleanField) — inline label AFTER the control, unlike the
+   stacked .label/.control fields. */
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.checkBox { width: 18px; height: 18px; accent-color: var(--interactive-primary); }
+.checkBox:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+  border-radius: var(--radius-xs);
+}
+.checkLabel { font-size: 13px; color: var(--text-primary); }
+.checkHelp { font-size: 11px; color: var(--text-muted); margin-left: 28px; }

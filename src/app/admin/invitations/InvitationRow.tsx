@@ -8,6 +8,7 @@ import {
 } from './actions'
 import { useAdminConfirm, useAdminForm } from '@/components/admin/AdminDialogProvider'
 import { Button } from '@/components/ui/Button'
+import ui from '@/components/ui/controls.module.css'
 
 interface Inv {
   id: string; slug: string; templateId: string; plan: string; email: string
@@ -103,7 +104,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{inv.email} · {inv.statusLabel}{inv.paidSource ? ` · ${inv.paidSource}` : ''}{inv.quotaExtra ? ` · +${inv.quotaExtra} kuota` : ''}</div>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        <a href={`/${inv.templateId}/${inv.slug}`} target="_blank" rel="noreferrer" style={ghost}>Lihat</a>
+        <a href={`/${inv.templateId}/${inv.slug}`} target="_blank" rel="noreferrer" className={`${ui.btn} ${ui.sm} ${ui.ghost}`}>Lihat</a>
         <Button size="sm" variant="ghost" disabled={busy} onClick={onTogglePublish}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</Button>
         <Button size="sm" variant="ghost" disabled={busy} onClick={onComp}>Comp (gratis)</Button>
         <Button size="sm" variant="ghost" disabled={busy} onClick={onLunasManual}>Lunas manual</Button>
@@ -112,7 +113,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
           if (next === inv.plan) return
           const ok = await confirm({ title: 'Ganti plan?', message: `Ubah plan "${inv.slug}" dari ${inv.plan} → ${next}? Fitur (mis. Buku Tamu Premium) ikut menyesuaikan.`, confirmLabel: 'Ganti' })
           if (ok) run(() => adminChangePlan(inv.id, next))
-        }} style={ghost}>
+        }} style={selectCtl}>
           <option value="basic">basic</option><option value="premium">premium</option>
         </select>
         <Button size="sm" variant="ghost" disabled={busy} onClick={onAddQuota}>+50 kuota</Button>
@@ -126,9 +127,10 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
   )
 }
 
-// Still used by the "Lihat" anchor and the plan <select> below — neither is a
-// <button>, so they can't move to the shared <Button> component.
-const ghost: React.CSSProperties = { height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }
+// Still used by the plan <select> below — a <select> isn't a <button>, so it
+// can't move to the shared <Button> component (the "Lihat" anchor now uses
+// controls.module.css classes directly instead).
+const selectCtl: React.CSSProperties = { height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-primary)', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }
 
 function chip(color: string): React.CSSProperties {
   return { marginLeft: 8, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: `1px solid ${color}`, color }

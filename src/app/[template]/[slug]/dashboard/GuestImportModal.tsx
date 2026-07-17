@@ -25,7 +25,7 @@ export default function GuestImportModal({
 
   const preview = useMemo(() => parseGuestImport(text), [text])
 
-  useEscapeToClose(onClose)
+  useEscapeToClose(onClose, !pending)
 
   const handleImport = () => {
     if (preview.length === 0) return
