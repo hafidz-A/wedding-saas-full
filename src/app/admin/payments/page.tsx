@@ -5,10 +5,12 @@ import {
   buildTransactions, summarize, monthlyTrend, conversion, jakartaYearMonth, formatIDR,
   type MonthPoint,
 } from '@/lib/payments/transactions'
+import { getPaymentSettings } from '@/lib/payments/payment-settings'
 import { fetchLedger, fetchRefundRequests } from './data'
 import PaymentsClient from './PaymentsClient'
 import ReconcilePanel from './ReconcilePanel'
 import RefundRequestsPanel from './RefundRequestsPanel'
+import PaymentModeCard from './PaymentModeCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,10 +26,13 @@ export default async function AdminPaymentsPage() {
   const conv = conversion(ledger.paidCount, ledger.draftCount)
   const missingAmounts = ledger.initials.filter((i) => i.paid_amount_idr == null).length
   const refundRequests = await fetchRefundRequests(db)
+  const paymentSettings = await getPaymentSettings()
 
   return (
     <div>
       <h1 style={{ fontSize: 22 }}>Pembayaran &amp; Pendapatan</h1>
+
+      <PaymentModeCard initial={paymentSettings} />
 
       {missingAmounts > 0 && (
         <div style={{ margin: '10px 0', padding: 12, border: '1px solid var(--status-error)', borderRadius: 'var(--radius-sm)', fontSize: 13 }}>
