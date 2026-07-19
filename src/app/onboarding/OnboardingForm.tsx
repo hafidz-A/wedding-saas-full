@@ -9,7 +9,7 @@ import type { Dict, Lang } from '@/lib/i18n'
 // `server-only` payment-settings module into the client bundle.
 import type { PaymentMode } from '@/lib/payments/payment-settings'
 import { DEFAULT_BASE_QUOTA, formatIDR, quotaAddonAmount } from '@/lib/payments/quota'
-import { buildManualLinks, type ManualPayContext, type ManualContact } from '@/lib/payments/manual-pay'
+import { buildManualLinks, formatDateLabel, type ManualPayContext, type ManualContact } from '@/lib/payments/manual-pay'
 import { Button } from '@/components/ui/Button'
 import InvitationDetailsForm, {
   type InvitationValues,
@@ -24,6 +24,7 @@ export default function OnboardingForm({
   lang,
   planBase,
   planPrice,
+  planName,
   enabledTemplateIds,
   paymentMode = 'gateway',
   manualContact,
@@ -34,6 +35,8 @@ export default function OnboardingForm({
   lang: Lang
   planBase?: number
   planPrice?: number
+  /** Plan display name (e.g. "Premium") for the manual-mode message; falls back to the plan code. */
+  planName?: string
   enabledTemplateIds?: string[]
   // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
   // the footer hands off to WhatsApp/Email instead of Midtrans checkout.
@@ -67,6 +70,10 @@ export default function OnboardingForm({
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
+    // Manual mode has no gateway submit — the footer's WhatsApp/Email buttons
+    // are the only action. Guard here so an Enter keypress in a field can't
+    // trigger completeOnboarding (which would fail for an anonymous visitor).
+    if (paymentMode === 'manual') return
     if (!values || !values.valid) return
     setError('')
     startTransition(async () => {
@@ -111,12 +118,12 @@ export default function OnboardingForm({
     const ctx: ManualPayContext = {
       kind: 'new',
       templateLabel,
-      planName: values.plan,
+      planName: planName ?? values.plan,
       priceLabel: formatIDR((planPrice ?? 0) + quotaAddonAmount(values.guestExtra)),
       guestTotal: values.guestTotal,
       bride: values.bride,
       groom: values.groom,
-      dateLabel: values.date,
+      dateLabel: values.date ? formatDateLabel(values.date) : undefined,
       venue: values.venue,
       slug: values.slug,
       lang,
@@ -160,9 +167,11 @@ export default function OnboardingForm({
         <header>
           <p style={kicker}>{dict.form.kicker}</p>
           <h1 style={h1}>{dict.form.title}</h1>
-          <p style={muted}>
-            {dict.form.subtitlePrefix} <b>{email}</b>{dict.form.subtitleSuffix}
-          </p>
+          {email && (
+            <p style={muted}>
+              {dict.form.subtitlePrefix} <b>{email}</b>{dict.form.subtitleSuffix}
+            </p>
+          )}
         </header>
 
         <InvitationDetailsForm

@@ -6,9 +6,6 @@ import { motion, AnimatePresence } from 'motion/react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Dict } from '@/lib/i18n'
-// Type-only import — erased at compile time, so this never pulls the
-// `server-only` payment-settings module into the client bundle.
-import type { PaymentMode } from '@/lib/payments/payment-settings'
 import { type PlanDisplay } from '@/lib/payments/plan-display'
 import { templateCopy, type TemplateDisplay } from '@/lib/templates/display'
 import { getCatalogEntry } from '@/config/templateCatalog'
@@ -23,27 +20,7 @@ import styles from './VibeExploration.module.css'
 
 type VibeDict = Dict['landing']['vibeExploration']
 
-export function VibeExploration({
-  lang,
-  t,
-  plans,
-  templates,
-  paymentMode = 'gateway',
-  manualContact,
-  manualPayDict,
-  onboardingDict,
-}: {
-  lang: 'id' | 'en'
-  t: VibeDict
-  plans?: Record<string, PlanDisplay[]>
-  templates?: TemplateDisplay[]
-  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
-  // the plan CTA opens ManualOrderModal instead of linking to /onboarding.
-  paymentMode?: PaymentMode
-  manualContact?: { whatsapp: string; email: string }
-  manualPayDict?: Dict['manualPay']
-  onboardingDict?: Dict['onboarding']
-}) {
+export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'en'; t: VibeDict; plans?: Record<string, PlanDisplay[]>; templates?: TemplateDisplay[] }) {
   const { ref } = useReveal<HTMLDivElement>()
   const innerRef = useRef<HTMLDivElement>(null)
   const [pinned, setPinned] = useState(false)
@@ -455,13 +432,6 @@ export function VibeExploration({
           quotaLabel={t.guestQuota}
           popularLabel={t.popularBadge}
           onClose={() => setPlansOpen(false)}
-          lang={lang}
-          templateId={template.id}
-          templateLabel={template.label}
-          paymentMode={paymentMode}
-          manualContact={manualContact}
-          manualPayDict={manualPayDict}
-          onboardingDict={onboardingDict}
         />
       )}
     </section>

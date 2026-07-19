@@ -30,7 +30,21 @@ export default async function OnboardingPage({
   const supabase = createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  // Read plan/template/settings up front — the payment mode decides whether an
+  // anonymous visitor is allowed onto this page at all.
+  const templateParam = typeof searchParams.template === 'string' ? searchParams.template : ''
+  const planParam = typeof searchParams.plan === 'string' ? searchParams.plan : 'basic'
+  const [plansForTemplate, templates, paymentSettings] = await Promise.all([
+    getTemplatePlans(templateParam || 'lovebirds'),
+    getTemplates(),
+    getPaymentSettings(),
+  ])
+
+  // Gateway mode needs an account (it creates a draft + starts checkout), so an
+  // anonymous visitor is bounced to /signup and brought back here afterwards.
+  // Manual mode collects the same data but only hands off to WhatsApp/Email — no
+  // draft, no auth — so anyone can fill it in directly (login-free by design).
+  if (!user && paymentSettings.mode !== 'manual') {
     // Rebuild the current URL so post-signup brings the user back here with
     // the same template/plan picks intact.
     const qs = new URLSearchParams()
@@ -45,16 +59,10 @@ export default async function OnboardingPage({
 
   // Floor the guest-quota stepper on the chosen plan's DB base (falls back to
   // the client-safe default when the row/template lookup comes up empty).
-  const templateParam = typeof searchParams.template === 'string' ? searchParams.template : ''
-  const planParam = typeof searchParams.plan === 'string' ? searchParams.plan : 'basic'
-  const [plansForTemplate, templates, paymentSettings] = await Promise.all([
-    getTemplatePlans(templateParam || 'lovebirds'),
-    getTemplates(),
-    getPaymentSettings(),
-  ])
   const chosen = plansForTemplate.find((p) => p.plan_code === planParam)
   const planBase = chosen?.base_guest_quota ?? (DEFAULT_BASE_QUOTA[planParam] ?? 200)
   const planPrice = chosen?.price_idr ?? 0
+  const planName = chosen?.display_name ?? planParam
   // Only ENABLED templates are pickable for a NEW invitation (a disabled template
   // still renders for existing invitations, just can't be freshly chosen).
   const enabledTemplateIds = templates.filter((t) => t.enabled).map((t) => t.id)
@@ -63,11 +71,12 @@ export default async function OnboardingPage({
     <>
       <SiteNav lang={lang} t={t.common} />
       <OnboardingForm
-        email={user.email ?? ''}
+        email={user?.email ?? ''}
         dict={t.onboarding}
         lang={lang}
         planBase={planBase}
         planPrice={planPrice}
+        planName={planName}
         enabledTemplateIds={enabledTemplateIds}
         paymentMode={paymentSettings.mode}
         manualContact={{ whatsapp: paymentSettings.whatsapp, email: paymentSettings.email }}

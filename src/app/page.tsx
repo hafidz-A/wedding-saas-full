@@ -6,7 +6,6 @@ import type { PublicTestimonial } from '@/lib/testimonials/types'
 import { getAllTemplatePlans } from '@/lib/payments/template-plans'
 import { toPlanDisplay, type PlanDisplay } from '@/lib/payments/plan-display'
 import { getTemplates } from '@/lib/templates/catalog'
-import { getPaymentSettings } from '@/lib/payments/payment-settings'
 import { SiteNav } from '@/components/site/SiteNav'
 import { SiteFooter } from '@/components/site/SiteFooter'
 import { SmoothScroll } from '@/components/marketing/SmoothScroll'
@@ -23,11 +22,7 @@ export default async function HomePage() {
   const lang = getLang()
   const t = getDict(lang)
 
-  const [rawPlans, templates, paymentSettings] = await Promise.all([
-    getAllTemplatePlans(),
-    getTemplates(),
-    getPaymentSettings(),
-  ])
+  const [rawPlans, templates] = await Promise.all([getAllTemplatePlans(), getTemplates()])
   const plansByTemplate: Record<string, PlanDisplay[]> = {}
   for (const tid of Object.keys(rawPlans)) plansByTemplate[tid] = rawPlans[tid].map(toPlanDisplay)
 
@@ -59,16 +54,7 @@ export default async function HomePage() {
           <EmotionalHook t={t.landing.emotionalHook} />
 
           {/* 3. Template + Palette Explorer (replaces the old TemplateShowcase) */}
-          <VibeExploration
-            lang={lang}
-            t={t.landing.vibeExploration}
-            plans={plansByTemplate}
-            templates={templates}
-            paymentMode={paymentSettings.mode}
-            manualContact={{ whatsapp: paymentSettings.whatsapp, email: paymentSettings.email }}
-            manualPayDict={t.manualPay}
-            onboardingDict={t.onboarding}
-          />
+          <VibeExploration lang={lang} t={t.landing.vibeExploration} plans={plansByTemplate} templates={templates} />
 
           {/* 4. Invitation Feature Experience */}
           <Features t={t.landing.features} />

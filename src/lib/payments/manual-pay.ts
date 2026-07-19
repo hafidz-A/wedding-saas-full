@@ -115,3 +115,16 @@ export function buildManualLinks(
   )
   return { waUrl, mailtoUrl, emailAddress: contact.email, copyText: plain }
 }
+
+/**
+ * formatDateLabel — a `datetime-local` value ("YYYY-MM-DDTHH:mm") rendered for a
+ * human message as "DD/MM/YYYY HH:mm". String-based (no Date/timezone math) since
+ * the value is already a naive local time — parsing it through `Date` would risk a
+ * TZ-shifted label. Returns the input unchanged if it doesn't match the shape.
+ */
+export function formatDateLabel(v: string): string {
+  const m = v.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/)
+  if (!m) return v
+  const [, y, mo, d, h, mi] = m
+  return `${d}/${mo}/${y} ${h}:${mi}`
+}

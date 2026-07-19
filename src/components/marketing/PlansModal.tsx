@@ -3,10 +3,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'motion/react'
-import type { Dict } from '@/lib/i18n'
-// Type-only import — erased at compile time, so this never pulls the
-// `server-only` payment-settings module into the client bundle.
-import type { PaymentMode } from '@/lib/payments/payment-settings'
 import type { PlanDisplay } from '@/lib/payments/plan-display'
 import { VibePlanCard } from './VibePlanCard'
 import { pickFeaturedPlanId } from './pickFeaturedPlan'
@@ -18,13 +14,6 @@ export function PlansModal({
   plans, buyHref, palette, accentText,
   title, subtitle, closeLabel, chooseLabel, quotaLabel, popularLabel,
   onClose,
-  lang,
-  templateId,
-  templateLabel,
-  paymentMode = 'gateway',
-  manualContact,
-  manualPayDict,
-  onboardingDict,
 }: {
   plans: PlanDisplay[]
   buyHref: string
@@ -37,15 +26,6 @@ export function PlansModal({
   quotaLabel: string
   popularLabel: string
   onClose: () => void
-  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
-  // threaded down to VibePlanCard, which mounts ManualOrderModal.
-  lang?: 'id' | 'en'
-  templateId?: string
-  templateLabel?: string
-  paymentMode?: PaymentMode
-  manualContact?: { whatsapp: string; email: string }
-  manualPayDict?: Dict['manualPay']
-  onboardingDict?: Dict['onboarding']
 }) {
   const dialogRef = useRef<HTMLDivElement>(null)
 
@@ -136,13 +116,6 @@ export function PlansModal({
                 accentText={accentText}
                 palette={palette}
                 styles={styles}
-                lang={lang}
-                templateId={templateId}
-                templateLabel={templateLabel}
-                paymentMode={paymentMode}
-                manualContact={manualContact}
-                manualPayDict={manualPayDict}
-                onboardingDict={onboardingDict}
               />
             ))}
           </div>

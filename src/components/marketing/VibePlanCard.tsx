@@ -3,26 +3,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import type { Dict } from '@/lib/i18n'
-// Type-only import — erased at compile time, so this never pulls the
-// `server-only` payment-settings module into the client bundle.
-import type { PaymentMode } from '@/lib/payments/payment-settings'
 import type { PlanDisplay } from '@/lib/payments/plan-display'
 import { snapQuotaToBlock, quotaAddonAmount, BLOCK_SIZE, QUOTA_CAP, formatIDR } from '@/lib/payments/quota'
-import ManualOrderModal from '@/components/payments/ManualOrderModal'
 
 interface Palette { fg: string; fgMuted: string; accent: string; surface: string; surfaceBorder: string }
 
 export function VibePlanCard({
   plan, buyHref, chooseLabel, quotaLabel, popularLabel, featured,
   accentText, palette, styles, onQuotaChange,
-  lang,
-  templateId,
-  templateLabel,
-  paymentMode = 'gateway',
-  manualContact,
-  manualPayDict,
-  onboardingDict,
 }: {
   plan: PlanDisplay
   buyHref: string
@@ -34,29 +22,11 @@ export function VibePlanCard({
   palette: Palette
   styles: Record<string, string>
   onQuotaChange?: () => void
-  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
-  // when paymentMode==='manual' the CTA opens ManualOrderModal instead of
-  // linking to /onboarding.
-  lang?: 'id' | 'en'
-  templateId?: string
-  templateLabel?: string
-  paymentMode?: PaymentMode
-  manualContact?: { whatsapp: string; email: string }
-  manualPayDict?: Dict['manualPay']
-  onboardingDict?: Dict['onboarding']
 }) {
   const base = plan.baseQuota
   const [total, setTotal] = useState(base)
   const extra = Math.max(0, total - base)
   const liveTotal = plan.amountIDR + quotaAddonAmount(extra)
-  const [orderOpen, setOrderOpen] = useState(false)
-
-  // Manual mode needs every one of these to actually mount the modal; if any
-  // is missing (defensive — e.g. an older caller not yet passing them), fall
-  // straight back to the gateway /onboarding link so the CTA never dead-ends.
-  const manualReady =
-    paymentMode === 'manual' &&
-    Boolean(manualContact && manualPayDict && onboardingDict && templateId && lang)
 
   const step = (delta: number) => {
     setTotal(snapQuotaToBlock(total + delta, base, QUOTA_CAP))
@@ -110,45 +80,15 @@ export function VibePlanCard({
         ))}
       </ul>
 
-      {manualReady ? (
-        <button
-          type="button"
-          className={styles.planBtn}
-          style={featured
-            ? { background: palette.accent, color: accentText }
-            : { background: 'transparent', color: palette.accent, border: `1.5px solid ${palette.accent}` }}
-          onClick={() => setOrderOpen(true)}
-        >
-          {chooseLabel}
-        </button>
-      ) : (
-        <Link
-          href={`${buyHref}&plan=${plan.id}&extra=${extra}`}
-          className={styles.planBtn}
-          style={featured
-            ? { background: palette.accent, color: accentText }
-            : { background: 'transparent', color: palette.accent, border: `1.5px solid ${palette.accent}` }}
-        >
-          {chooseLabel}
-        </Link>
-      )}
-
-      {orderOpen && manualReady && (
-        <ManualOrderModal
-          contact={manualContact!}
-          dict={manualPayDict!}
-          onbDict={onboardingDict!}
-          lang={lang!}
-          template={templateId!}
-          templateLabel={templateLabel ?? ''}
-          plan={plan.id}
-          planName={plan.name}
-          planBase={plan.baseQuota}
-          planPrice={plan.amountIDR}
-          extra={extra}
-          onClose={() => setOrderOpen(false)}
-        />
-      )}
+      <Link
+        href={`${buyHref}&plan=${plan.id}&extra=${extra}`}
+        className={styles.planBtn}
+        style={featured
+          ? { background: palette.accent, color: accentText }
+          : { background: 'transparent', color: palette.accent, border: `1.5px solid ${palette.accent}` }}
+      >
+        {chooseLabel}
+      </Link>
     </div>
   )
 }
