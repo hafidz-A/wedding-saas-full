@@ -21,6 +21,11 @@ import { LangToggle } from '@/components/site/LangToggle'
 import { startCheckout } from '@/app/onboarding/actions'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import type { Dict, Lang } from '@/lib/i18n'
+// Type-only import — erased at compile time, so this never pulls the
+// `server-only` payment-settings module into the client bundle.
+import type { PaymentMode } from '@/lib/payments/payment-settings'
+import type { ManualContact } from '@/lib/payments/manual-pay'
+import ManualPayModal from '@/components/payments/ManualPayModal'
 import styles from './dashboard.module.css'
 
 /** Client-side dashboard: tab switcher for editor, RSVPs, gifts, guests, music, background. */
@@ -39,6 +44,10 @@ export default function DashboardClient({
   quota,
   hasPendingRefund = false,
   refundEligible = true,
+  planName,
+  paymentMode = 'gateway',
+  manualContact,
+  manualPayDict,
 }: {
   slug: string
   template: string
@@ -54,8 +63,16 @@ export default function DashboardClient({
   quota: { used: number; effective: number; invitationId: string }
   hasPendingRefund?: boolean
   refundEligible?: boolean
+  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
+  // the unpaid banner + guestbook-lock + guest-quota CTAs open ManualPayModal
+  // instead of running the startX server actions.
+  planName?: string
+  paymentMode?: PaymentMode
+  manualContact?: ManualContact
+  manualPayDict?: Dict['manualPay']
 }) {
   const [payPending, startPay] = useTransition()
+  const [showManualPay, setShowManualPay] = useState(false)
   const period = activePeriodStatus(invitation, Date.now())
   const periodLabel =
     period.status === 'lifetime'
@@ -66,7 +83,16 @@ export default function DashboardClient({
       ? `${activePeriod.activeUntilPrefix} ${new Date(period.expiresAt).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
       : activePeriod.draft
 
+  const manualReady = paymentMode === 'manual' && !!manualContact && !!manualPayDict
+
   function onPay() {
+    // Manual mode: hand off to the WhatsApp/Email contact modal instead of
+    // Midtrans. Guard defensively — if the manual props are missing, fall
+    // back to the gateway path below so the button never dead-ends.
+    if (manualReady) {
+      setShowManualPay(true)
+      return
+    }
     startPay(async () => {
       const res = await startCheckout(invitation.id)
       if (res.ok && res.invoiceUrl) window.location.href = res.invoiceUrl
@@ -299,6 +325,10 @@ export default function DashboardClient({
                     : `/${template}/${slug}`
                 }
                 messageTemplate={invitation?.config?.inviteMessageTemplate}
+                planName={planName}
+                paymentMode={paymentMode}
+                manualContact={manualContact}
+                manualPayDict={manualPayDict}
               />
             )}
 
@@ -311,7 +341,15 @@ export default function DashboardClient({
                   souvenirEnabled={(invitation.guestbook_souvenir_enabled as boolean) ?? false}
                 />
               ) : (
-                <GuestbookLocked invitationId={invitation.id} amountIDR={upgrade?.amountIDR ?? null} />
+                <GuestbookLocked
+                  invitationId={invitation.id}
+                  amountIDR={upgrade?.amountIDR ?? null}
+                  slug={slug}
+                  planName={planName}
+                  paymentMode={paymentMode}
+                  manualContact={manualContact}
+                  manualPayDict={manualPayDict}
+                />
               ))}
 
             {tab === 'tutorial' && (
@@ -325,6 +363,16 @@ export default function DashboardClient({
         </AnimatePresence>
       </section>
     </main>
+    {showManualPay && manualContact && manualPayDict && (
+      <ManualPayModal
+        contact={manualContact}
+        dict={manualPayDict}
+        kind="pay-draft"
+        slug={slug}
+        planName={planName ?? ''}
+        onClose={() => setShowManualPay(false)}
+      />
+    )}
     </FeedbackProvider>
     </DialogProvider>
     </DashboardI18nProvider>

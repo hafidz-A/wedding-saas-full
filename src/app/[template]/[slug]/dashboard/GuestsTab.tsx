@@ -22,6 +22,12 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import QuotaStepper from '@/components/dashboard/QuotaStepper'
 import { startQuotaAddonCheckout, recheckQuotaAddon } from '@/app/onboarding/actions'
 import { quotaAddonAmount, QUOTA_CAP, formatIDR } from '@/lib/payments/quota'
+import type { Dict } from '@/lib/i18n'
+// Type-only import — erased at compile time, so this never pulls the
+// `server-only` payment-settings module into the client bundle.
+import type { PaymentMode } from '@/lib/payments/payment-settings'
+import type { ManualContact } from '@/lib/payments/manual-pay'
+import ManualPayModal from '@/components/payments/ManualPayModal'
 import styles from './GuestsTab.module.css'
 import ctrl from './dashboardControls.module.css'
 
@@ -31,9 +37,26 @@ interface Props {
   quota: { used: number; effective: number; invitationId: string }
   publicUrl: string
   messageTemplate?: string
+  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
+  // the guest-quota add-on CTA opens ManualPayModal instead of running
+  // startQuotaAddonCheckout.
+  planName?: string
+  paymentMode?: PaymentMode
+  manualContact?: ManualContact
+  manualPayDict?: Dict['manualPay']
 }
 
-export default function GuestsTab({ slug, guests, quota, publicUrl, messageTemplate }: Props) {
+export default function GuestsTab({
+  slug,
+  guests,
+  quota,
+  publicUrl,
+  messageTemplate,
+  planName,
+  paymentMode = 'gateway',
+  manualContact,
+  manualPayDict,
+}: Props) {
   const t = useDashboardDict().tabs.guests
   const fm = useDashboardDict().feedback
   const fb = useFeedback()
@@ -60,6 +83,8 @@ export default function GuestsTab({ slug, guests, quota, publicUrl, messageTempl
   const [showQuota, setShowQuota] = useState(false)
   const [quotaQty, setQuotaQty] = useState(50)
   const [quotaPending, setQuotaPending] = useState(false)
+  const [showManualPay, setShowManualPay] = useState(false)
+  const manualReady = paymentMode === 'manual' && !!manualContact && !!manualPayDict
 
   // On return from a quota-add-on Midtrans checkout (?quota=1), reconcile the
   // payment (in case the webhook was late) then refresh so the meter updates.
@@ -75,6 +100,14 @@ export default function GuestsTab({ slug, guests, quota, publicUrl, messageTempl
   }, [])
 
   async function buyQuota() {
+    // Manual mode: hand off to the WhatsApp/Email contact modal instead of
+    // Midtrans. Guard defensively — if the manual props are missing, fall
+    // back to the gateway path below so the button never dead-ends.
+    if (manualReady) {
+      setShowQuota(false)
+      setShowManualPay(true)
+      return
+    }
     setQuotaPending(true)
     const res = await startQuotaAddonCheckout(quota.invitationId, quotaQty)
     if (res.ok && res.invoiceUrl) {
@@ -603,6 +636,18 @@ export default function GuestsTab({ slug, guests, quota, publicUrl, messageTempl
             </div>
           </div>
         </div>
+      )}
+
+      {showManualPay && manualContact && manualPayDict && (
+        <ManualPayModal
+          contact={manualContact}
+          dict={manualPayDict}
+          kind="quota"
+          slug={slug}
+          planName={planName ?? ''}
+          guestTotal={quotaQty}
+          onClose={() => setShowManualPay(false)}
+        />
       )}
     </div>
   )

@@ -9,6 +9,7 @@ import { refundVerdict } from '@/lib/payments/refund-policy'
 import { resolveUpgrade, planBaseQuota } from '@/lib/payments/plans'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import { effectiveQuota } from '@/lib/payments/quota'
+import { getPaymentSettings } from '@/lib/payments/payment-settings'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
@@ -114,6 +115,18 @@ export default async function DashboardPage({ params }: PageProps) {
   //     screen instead of the editor; preview link is offered only in the
   //     unpaid case (expired view is closed for everyone).
   const period = activePeriodStatus(invitation, Date.now())
+
+  // Global gateway|manual payment-mode switch + this invitation's plan display
+  // name — needed by the payment gate below AND by the four in-dashboard pay/
+  // upgrade/quota CTAs further down, so it's fetched once here and threaded
+  // through both branches (reused as `planRows` for the guest-quota meter too).
+  const [paymentSettings, planRows] = await Promise.all([
+    getPaymentSettings(),
+    getTemplatePlans(invitation.template_id ?? canonicalTemplate),
+  ])
+  const planName = planRows.find((p) => p.plan_code === invitation.plan)?.display_name ?? invitation.plan
+  const manualContact = { whatsapp: paymentSettings.whatsapp, email: paymentSettings.email }
+
   if (period.status === 'draft' || period.status === 'expired') {
     // PaymentGate is a client component that reads the dashboard dictionary via
     // useDashboardDict(), so it MUST be wrapped in the provider — otherwise the
@@ -126,6 +139,10 @@ export default async function DashboardPage({ params }: PageProps) {
           slug={slug}
           template={canonicalTemplate}
           status={period.status}
+          planName={planName}
+          paymentMode={paymentSettings.mode}
+          manualContact={manualContact}
+          manualPayDict={t.manualPay}
         />
       </DashboardI18nProvider>
     )
@@ -233,6 +250,10 @@ export default async function DashboardPage({ params }: PageProps) {
       quota={quota}
       hasPendingRefund={hasPendingRefund}
       refundEligible={refundEligible}
+      planName={planName}
+      paymentMode={paymentSettings.mode}
+      manualContact={manualContact}
+      manualPayDict={t.manualPay}
     />
   )
 }

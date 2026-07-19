@@ -6,6 +6,12 @@ import { startCheckout, startRenewal } from '@/app/onboarding/actions'
 import RecheckPaymentButton from '@/app/profile/RecheckPaymentButton'
 import { AuthChrome } from '@/components/site/AuthChrome'
 import { useDashboardDict, useDashboardLang } from './DashboardI18nProvider'
+import type { Dict } from '@/lib/i18n'
+// Type-only import — erased at compile time, so this never pulls the
+// `server-only` payment-settings module into the client bundle.
+import type { PaymentMode } from '@/lib/payments/payment-settings'
+import type { ManualContact } from '@/lib/payments/manual-pay'
+import ManualPayModal from '@/components/payments/ManualPayModal'
 
 /**
  * Full-screen gate shown in place of the dashboard when payment is required:
@@ -25,19 +31,38 @@ export default function PaymentGate({
   slug,
   template,
   status,
+  planName,
+  paymentMode = 'gateway',
+  manualContact,
+  manualPayDict,
 }: {
   invitationId: string
   slug: string
   template: string
   status: 'draft' | 'expired'
+  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
+  // the pay/renew CTA opens ManualPayModal instead of running startCheckout/startRenewal.
+  planName?: string
+  paymentMode?: PaymentMode
+  manualContact?: ManualContact
+  manualPayDict?: Dict['manualPay']
 }) {
   const [pending, start] = useTransition()
   const [err, setErr] = useState<string | null>(null)
+  const [showManual, setShowManual] = useState(false)
   const t = useDashboardDict().paymentGate
   const lang = useDashboardLang()
   const isExpired = status === 'expired'
+  const manualReady = paymentMode === 'manual' && !!manualContact && !!manualPayDict
 
   function onPay() {
+    // Manual mode: hand off to the WhatsApp/Email contact modal instead of
+    // Midtrans. Guard defensively — if the manual props are missing, fall
+    // back to the gateway path below so the button never dead-ends.
+    if (manualReady) {
+      setShowManual(true)
+      return
+    }
     setErr(null)
     // Open the payment tab synchronously inside the click (so the popup blocker
     // permits it); navigate it once the invoice URL is ready, or close it on
@@ -95,6 +120,16 @@ export default function PaymentGate({
         </footer>
       </div>
     </main>
+    {showManual && manualContact && manualPayDict && (
+      <ManualPayModal
+        contact={manualContact}
+        dict={manualPayDict}
+        kind={isExpired ? 'renew' : 'pay-draft'}
+        slug={slug}
+        planName={planName ?? ''}
+        onClose={() => setShowManual(false)}
+      />
+    )}
     </>
   )
 }

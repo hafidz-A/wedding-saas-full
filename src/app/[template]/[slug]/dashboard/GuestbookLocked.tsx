@@ -3,6 +3,12 @@
 import { useState, useTransition } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { startUpgradeCheckout, recheckUpgrade } from '@/app/onboarding/actions'
+import type { Dict } from '@/lib/i18n'
+// Type-only import — erased at compile time, so this never pulls the
+// `server-only` payment-settings module into the client bundle.
+import type { PaymentMode } from '@/lib/payments/payment-settings'
+import type { ManualContact } from '@/lib/payments/manual-pay'
+import ManualPayModal from '@/components/payments/ManualPayModal'
 
 /** Format an IDR amount as "Rp 150.000". */
 function formatIDR(amount: number): string {
@@ -19,17 +25,38 @@ function formatIDR(amount: number): string {
 export default function GuestbookLocked({
   invitationId,
   amountIDR,
+  slug,
+  planName,
+  paymentMode = 'gateway',
+  manualContact,
+  manualPayDict,
 }: {
   invitationId: string
   amountIDR: number | null
+  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
+  // the upgrade CTA opens ManualPayModal instead of running startUpgradeCheckout.
+  slug?: string
+  planName?: string
+  paymentMode?: PaymentMode
+  manualContact?: ManualContact
+  manualPayDict?: Dict['manualPay']
 }) {
   const dict = useDashboardDict()
   const t = (dict.tabs as any).guestbookLocked
   const [pending, start] = useTransition()
   const [rechecking, setRechecking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showManual, setShowManual] = useState(false)
+  const manualReady = paymentMode === 'manual' && !!manualContact && !!manualPayDict && !!slug
 
   function onUpgrade() {
+    // Manual mode: hand off to the WhatsApp/Email contact modal instead of
+    // Midtrans. Guard defensively — if the manual props are missing, fall
+    // back to the gateway path below so the button never dead-ends.
+    if (manualReady) {
+      setShowManual(true)
+      return
+    }
     setError(null)
     start(async () => {
       const res = await startUpgradeCheckout(invitationId)
@@ -71,6 +98,16 @@ export default function GuestbookLocked({
 
         {error && <p style={errStyle}>{error}</p>}
       </div>
+      {showManual && manualContact && manualPayDict && slug && (
+        <ManualPayModal
+          contact={manualContact}
+          dict={manualPayDict}
+          kind="upgrade"
+          slug={slug}
+          planName={planName ?? ''}
+          onClose={() => setShowManual(false)}
+        />
+      )}
     </div>
   )
 }
