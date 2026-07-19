@@ -4,6 +4,7 @@ import { auth } from './dictionaries/auth'
 import { onboarding } from './dictionaries/onboarding'
 import { templates } from './dictionaries/templates'
 import { dashboard } from './dictionaries/dashboard'
+import { manualPay } from './dictionaries/manualPay'
 import type { Lang } from './config'
 
 const dict = {
@@ -14,6 +15,7 @@ const dict = {
     onboarding: onboarding.id,
     templates: templates.id,
     dashboard: dashboard.id,
+    manualPay: manualPay.id,
   },
   en: {
     common: common.en,
@@ -22,6 +24,7 @@ const dict = {
     onboarding: onboarding.en,
     templates: templates.en,
     dashboard: dashboard.en,
+    manualPay: manualPay.en,
   },
 } as const
 
