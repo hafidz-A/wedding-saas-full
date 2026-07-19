@@ -41,8 +41,8 @@ import { resolvePlan } from '@/lib/payments/plans'
 import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import {
   adminRefundViaGateway, adminRecheckPayment, adminRecheckUpgrade, adminRecheckQuotaAddon,
-  validatePaymentPatch,
 } from '../actions'
+import { validatePaymentPatch } from '@/lib/payments/validate-payment'
 
 const mockAdmin = vi.mocked(createSupabaseAdminClient)
 const mockRequireAdmin = vi.mocked(requireAdmin)

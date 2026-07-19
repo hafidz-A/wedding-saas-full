@@ -12,7 +12,8 @@ import { getTransactionStatus, isPaidStatus, createGatewayRefund, canApiRefund }
 import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { loadRefundSource, sourceHasOpenRefund, settleRefund, type RefundSourceType } from '@/lib/payments/refunds'
 import { buildTransactions, transactionsToCsv } from '@/lib/payments/transactions'
-import { PAYMENT_SETTINGS_TAG, type PaymentSettings, type PaymentMode } from '@/lib/payments/payment-settings'
+import { PAYMENT_SETTINGS_TAG } from '@/lib/payments/payment-settings'
+import { validatePaymentPatch } from '@/lib/payments/validate-payment'
 import { sendAdminEmail } from '@/lib/email/send'
 import { encryptField } from '@/lib/crypto/app'
 import { fetchLedger } from './data'
@@ -355,38 +356,6 @@ export async function adminRejectRefund(requestId: string, note?: string): Promi
     `<p>Halo,</p><p>Setelah kami tinjau, permintaan pengembalian dana undanganmu <strong>belum bisa kami setujui</strong>${note ? `: ${escapeHtml(note)}` : '.'} Kalau ada pertanyaan, silakan balas email ini.</p>`)
   await logAdminAction(admin.email, { action: 'refund.reject', targetType: 'invitation', targetId: req.invitation_id, meta: { note: note ?? null } })
   return { ok: true }
-}
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-/**
- * Pure validator for the admin payment-mode patch. `gateway` allows blank
- * contacts (Midtrans doesn't need them). `manual` requires a WhatsApp number
- * (digits only, a leading `0` normalized to the `62` country code — mirrors
- * how a business line is usually typed locally) and a plausible email, since
- * both are the only hand-off channels once the gateway is bypassed.
- */
-export function validatePaymentPatch(input: unknown): { ok: true; value: PaymentSettings } | { ok: false; error: string } {
-  if (!input || typeof input !== 'object') return { ok: false, error: 'Data tidak valid' }
-  const v = input as Record<string, unknown>
-  const mode = v.mode
-  if (mode !== 'gateway' && mode !== 'manual') return { ok: false, error: 'Mode pembayaran tidak dikenal' }
-
-  const rawWhatsapp = typeof v.whatsapp === 'string' ? v.whatsapp : ''
-  const rawEmail = typeof v.email === 'string' ? v.email : ''
-
-  if (mode === 'gateway') {
-    return { ok: true, value: { mode, whatsapp: rawWhatsapp.trim(), email: rawEmail.trim() } }
-  }
-
-  let whatsapp = rawWhatsapp.replace(/\D/g, '')
-  if (whatsapp.startsWith('0')) whatsapp = `62${whatsapp.slice(1)}`
-  if (!whatsapp) return { ok: false, error: 'Nomor WhatsApp wajib diisi' }
-
-  const email = rawEmail.trim()
-  if (!EMAIL_RE.test(email)) return { ok: false, error: 'Format email tidak valid' }
-
-  return { ok: true, value: { mode: mode as PaymentMode, whatsapp, email } }
 }
 
 /** Flip the global gateway|manual payment-mode switch. Admin-gated + audited;
