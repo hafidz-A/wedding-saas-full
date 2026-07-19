@@ -5,7 +5,11 @@ vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
 vi.mock('@/lib/admin/is-admin', () => ({ requireAdmin: vi.fn() }))
 vi.mock('@/lib/admin/log', () => ({ logAdminAction: vi.fn() }))
 vi.mock('@/lib/admin/revalidate', () => ({ revalidateInvitation: vi.fn() }))
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('next/cache', () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+  unstable_cache: (fn: (...args: any[]) => any) => fn,
+}))
 vi.mock('@/lib/payments/plans', () => ({ resolvePlan: vi.fn() }))
 vi.mock('@/lib/payments/gateway', () => ({
   getTransactionStatus: vi.fn(),
@@ -37,6 +41,7 @@ import { resolvePlan } from '@/lib/payments/plans'
 import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import {
   adminRefundViaGateway, adminRecheckPayment, adminRecheckUpgrade, adminRecheckQuotaAddon,
+  validatePaymentPatch,
 } from '../actions'
 
 const mockAdmin = vi.mocked(createSupabaseAdminClient)
@@ -227,5 +232,18 @@ describe('ITEM 0 fix — admin recheck actions pass the DB client, not the guard
     expect(r).toMatchObject({ ok: true, applied: true })
     expect(mockApplyAddon).toHaveBeenCalledOnce()
     expect(typeof mockApplyAddon.mock.calls[0][0].from).toBe('function')
+  })
+})
+
+describe('validatePaymentPatch', () => {
+  it('normalizes a leading-zero phone to 62', () => {
+    const r = validatePaymentPatch({ mode: 'manual', whatsapp: '0851-1055-3938', email: 'a@b.com' })
+    expect(r.ok && r.value.whatsapp).toBe('6285110553938')
+  })
+  it('rejects manual mode with a bad email', () => {
+    expect(validatePaymentPatch({ mode: 'manual', whatsapp: '628', email: 'nope' }).ok).toBe(false)
+  })
+  it('allows gateway with blank contacts', () => {
+    expect(validatePaymentPatch({ mode: 'gateway', whatsapp: '', email: '' }).ok).toBe(true)
   })
 })
