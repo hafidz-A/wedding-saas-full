@@ -223,8 +223,10 @@ supabase/                                          ← schema.sql (base) + migra
    `password_hash not null`, `template_id default 'classic'`, old RLS). The real schema = base **plus**
    every file in `supabase/migrations/` (owner_user_id, is_paid, gateway_* payment columns (renamed
    from xendit_* by `2026-07-14_midtrans_gateway.sql`), guest_quota_extra, `*_enc`
-   columns, guests, attendances, refund_requests, plan_upgrades, quota_addons, template_plans, admin
-   tables, testimonials, …). Apply base then all migrations in date order.
+   columns, guests, attendances, refund_requests, plan_upgrades, quota_addons, template_plans,
+   app_settings (global key/value operator settings, e.g. the payment `gateway`|`manual` mode switch —
+   `2026-07-19_app_settings.sql`), admin tables, testimonials, …). Apply base then all migrations in
+   date order.
 2. **Empty-config behaviour:** a real invitation with empty `config` renders a "belum siap" notice (does
    NOT leak the demo couple). Only **demo slugs** (`demo-*`, legacy `adi-rani`) fall back to the
    template's bundled `defaultConfig`. `fillEmptyImages` supplies placeholder photos at render time only.
