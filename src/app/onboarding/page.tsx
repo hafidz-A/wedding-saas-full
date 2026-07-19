@@ -7,6 +7,7 @@ import OnboardingForm from './OnboardingForm'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import { getTemplates } from '@/lib/templates/catalog'
 import { DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
+import { getPaymentSettings } from '@/lib/payments/payment-settings'
 
 /**
  * Onboarding wizard — render the 5-field form for an authenticated user.
@@ -46,9 +47,10 @@ export default async function OnboardingPage({
   // the client-safe default when the row/template lookup comes up empty).
   const templateParam = typeof searchParams.template === 'string' ? searchParams.template : ''
   const planParam = typeof searchParams.plan === 'string' ? searchParams.plan : 'basic'
-  const [plansForTemplate, templates] = await Promise.all([
+  const [plansForTemplate, templates, paymentSettings] = await Promise.all([
     getTemplatePlans(templateParam || 'lovebirds'),
     getTemplates(),
+    getPaymentSettings(),
   ])
   const chosen = plansForTemplate.find((p) => p.plan_code === planParam)
   const planBase = chosen?.base_guest_quota ?? (DEFAULT_BASE_QUOTA[planParam] ?? 200)
@@ -60,7 +62,17 @@ export default async function OnboardingPage({
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
-      <OnboardingForm email={user.email ?? ''} dict={t.onboarding} lang={lang} planBase={planBase} planPrice={planPrice} enabledTemplateIds={enabledTemplateIds} />
+      <OnboardingForm
+        email={user.email ?? ''}
+        dict={t.onboarding}
+        lang={lang}
+        planBase={planBase}
+        planPrice={planPrice}
+        enabledTemplateIds={enabledTemplateIds}
+        paymentMode={paymentSettings.mode}
+        manualContact={{ whatsapp: paymentSettings.whatsapp, email: paymentSettings.email }}
+        manualPayDict={t.manualPay}
+      />
     </>
   )
 }

@@ -5,7 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { completeOnboarding, startCheckout } from './actions'
 import { templateCatalog } from '@/config/templateCatalog'
 import type { Dict, Lang } from '@/lib/i18n'
-import { DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
+// Type-only import — erased at compile time, so this never pulls the
+// `server-only` payment-settings module into the client bundle.
+import type { PaymentMode } from '@/lib/payments/payment-settings'
+import { DEFAULT_BASE_QUOTA, formatIDR, quotaAddonAmount } from '@/lib/payments/quota'
+import { buildManualLinks, type ManualPayContext, type ManualContact } from '@/lib/payments/manual-pay'
 import { Button } from '@/components/ui/Button'
 import InvitationDetailsForm, {
   type InvitationValues,
@@ -21,6 +25,9 @@ export default function OnboardingForm({
   planBase,
   planPrice,
   enabledTemplateIds,
+  paymentMode = 'gateway',
+  manualContact,
+  manualPayDict,
 }: {
   email: string
   dict: Dict['onboarding']
@@ -28,6 +35,11 @@ export default function OnboardingForm({
   planBase?: number
   planPrice?: number
   enabledTemplateIds?: string[]
+  // Manual-payment fallback (additive, byte-for-byte unchanged when 'gateway'):
+  // the footer hands off to WhatsApp/Email instead of Midtrans checkout.
+  paymentMode?: PaymentMode
+  manualContact?: ManualContact
+  manualPayDict?: Dict['manualPay']
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -90,6 +102,29 @@ export default function OnboardingForm({
     })
   }
 
+  // Manual-mode hand-off: build the same "new purchase" message as
+  // ManualOrderModal, straight from the current InvitationValues snapshot.
+  // No draft is created and neither completeOnboarding nor startCheckout runs.
+  function handleManualSend(channel: 'wa' | 'email') {
+    if (!values || !values.valid || !manualContact || !manualPayDict) return
+    const templateLabel = templateOptions.find((opt) => opt.id === values.template)?.label ?? values.template
+    const ctx: ManualPayContext = {
+      kind: 'new',
+      templateLabel,
+      planName: values.plan,
+      priceLabel: formatIDR((planPrice ?? 0) + quotaAddonAmount(values.guestExtra)),
+      guestTotal: values.guestTotal,
+      bride: values.bride,
+      groom: values.groom,
+      dateLabel: values.date,
+      venue: values.venue,
+      slug: values.slug,
+      lang,
+    }
+    const links = buildManualLinks(manualContact, ctx, manualPayDict)
+    window.open(channel === 'wa' ? links.waUrl : links.mailtoUrl, '_blank', 'noopener,noreferrer')
+  }
+
   if (done) {
     return (
       <main style={panel}>
@@ -142,12 +177,31 @@ export default function OnboardingForm({
           extra={extraParam}
           onValidChange={setValues}
           footer={
-            <>
-              {error && <p style={errorStyle}>{error}</p>}
-              <Button type="submit" disabled={pending || !values?.valid} style={{ marginTop: 8 }}>
-                {pending ? dict.form.submitting : dict.form.submit}
-              </Button>
-            </>
+            paymentMode === 'manual' && manualContact && manualPayDict ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
+                <p style={{ ...muted, fontSize: 13 }}>{manualPayDict.note}</p>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <Button type="button" disabled={!values?.valid} onClick={() => handleManualSend('wa')}>
+                    {manualPayDict.waButton}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={!values?.valid}
+                    onClick={() => handleManualSend('email')}
+                  >
+                    {manualPayDict.emailButton}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {error && <p style={errorStyle}>{error}</p>}
+                <Button type="submit" disabled={pending || !values?.valid} style={{ marginTop: 8 }}>
+                  {pending ? dict.form.submitting : dict.form.submit}
+                </Button>
+              </>
+            )
           }
         />
       </form>
