@@ -23,6 +23,8 @@ export interface ManualPayContext {
   venue?: string
   slug?: string
   lang?: 'id' | 'en'
+  /** Signed-in buyer's account email — appended only when present (anonymous = omitted). */
+  accountEmail?: string
 }
 
 export interface ManualContact {
@@ -47,6 +49,7 @@ export interface ManualPayDict {
     url: string
     guests: string
     lang: string
+    account: string
   }
   existing: Record<Exclude<ManualPayKind, 'new'>, string>
   subject: Record<ManualPayKind, string>
@@ -87,6 +90,7 @@ export function buildManualMessage(
     if (ctx.slug) lines.push(`• ${dict.order.url}: weddingsite/${ctx.slug}`)
     if (ctx.guestTotal != null) lines.push(`• ${dict.order.guests}: ${ctx.guestTotal}`)
     if (ctx.lang) lines.push(`• ${dict.order.lang}: ${ctx.lang}`)
+    if (ctx.accountEmail) lines.push(`• ${dict.order.account}: ${ctx.accountEmail}`)
     return { plain: lines.join('\n'), emailSubject }
   }
 

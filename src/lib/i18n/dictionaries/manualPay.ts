@@ -18,6 +18,7 @@ export const manualPay = {
       url: 'URL',
       guests: 'Jumlah tamu',
       lang: 'Bahasa dashboard',
+      account: 'Akun',
     },
     existing: {
       'pay-draft': 'Halo FinCards, saya mau menyelesaikan pembayaran undangan {{slug}} (paket {{plan}}).',
@@ -52,6 +53,7 @@ export const manualPay = {
       url: 'URL',
       guests: 'Guest count',
       lang: 'Dashboard language',
+      account: 'Account',
     },
     existing: {
       'pay-draft': 'Hi FinCards, I would like to complete payment for invitation {{slug}} (plan {{plan}}).',

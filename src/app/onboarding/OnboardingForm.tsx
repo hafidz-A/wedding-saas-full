@@ -127,6 +127,9 @@ export default function OnboardingForm({
       venue: values.venue,
       slug: values.slug,
       lang,
+      // Signed-in buyer → include their account email so the operator can create
+      // the invitation under that existing account. Anonymous → email is '' → omitted.
+      accountEmail: email || undefined,
     }
     const links = buildManualLinks(manualContact, ctx, manualPayDict)
     window.open(channel === 'wa' ? links.waUrl : links.mailtoUrl, '_blank', 'noopener,noreferrer')

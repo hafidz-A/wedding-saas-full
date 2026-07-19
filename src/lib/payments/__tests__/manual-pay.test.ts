@@ -3,7 +3,8 @@ import { buildManualMessage, buildManualLinks, type ManualPayContext } from '../
 
 const dict = {
   order: { intro: 'Halo FinCards, saya mau beli undangan:', plan: 'Paket', template: 'Template',
-    couple: 'Mempelai', date: 'Tanggal', venue: 'Lokasi', url: 'URL', guests: 'Jumlah tamu', lang: 'Bahasa' },
+    couple: 'Mempelai', date: 'Tanggal', venue: 'Lokasi', url: 'URL', guests: 'Jumlah tamu', lang: 'Bahasa',
+    account: 'Akun' },
   existing: { 'pay-draft': 'Halo FinCards, saya mau menyelesaikan pembayaran undangan {{slug}} (paket {{plan}}).',
     renew: 'perpanjang {{slug}}', upgrade: 'upgrade {{slug}}', quota: 'kuota {{slug}}' },
   subject: { new: 'Pesanan undangan', 'pay-draft': 'Pembayaran {{slug}}', renew: 'Perpanjang {{slug}}',
@@ -24,6 +25,11 @@ describe('buildManualMessage', () => {
     const { plain } = buildManualMessage({ kind: 'pay-draft', templateLabel: '', planName: 'Basic',
       priceLabel: '', slug: 'adi-rani' }, dict as any)
     expect(plain).toContain('adi-rani'); expect(plain).toContain('Basic')
+  })
+  it('appends the account email only when the buyer is signed in', () => {
+    expect(buildManualMessage(newCtx, dict as any).plain).not.toContain('Akun:')
+    const signedIn = buildManualMessage({ ...newCtx, accountEmail: 'buyer@mail.com' }, dict as any)
+    expect(signedIn.plain).toContain('Akun: buyer@mail.com')
   })
 })
 
