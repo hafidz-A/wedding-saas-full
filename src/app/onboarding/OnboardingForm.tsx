@@ -1,18 +1,16 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { completeOnboarding, checkSlugAvailable, startCheckout } from './actions'
+import { completeOnboarding, startCheckout } from './actions'
 import { templateCatalog } from '@/config/templateCatalog'
 import type { Dict, Lang } from '@/lib/i18n'
-import { LangToggle } from '@/components/site/LangToggle'
-import QuotaStepper from '@/components/dashboard/QuotaStepper'
-import { DEFAULT_BASE_QUOTA, quotaAddonAmount, QUOTA_CAP, formatIDR, clampQuotaExtra } from '@/lib/payments/quota'
+import { DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
 import { Button } from '@/components/ui/Button'
-
-function firstWord(s: string): string {
-  return s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
-}
+import InvitationDetailsForm, {
+  type InvitationValues,
+  type TemplateOption,
+} from '@/components/onboarding/InvitationDetailsForm'
 
 const TEMPLATE_IDS = templateCatalog.map((t) => t.id)
 
@@ -38,64 +36,37 @@ export default function OnboardingForm({
   // server didn't pass a list (defensive).
   const enabledIds = enabledTemplateIds && enabledTemplateIds.length ? enabledTemplateIds : TEMPLATE_IDS
   const visibleCatalog = templateCatalog.filter((t) => enabledIds.includes(t.id))
+  const templateOptions: TemplateOption[] = visibleCatalog.map((t) => ({
+    id: t.id,
+    label: t.label,
+    accent: t.accent,
+    tags: t.tags,
+  }))
   const initialTemplate = enabledIds.includes(queryTemplate) ? queryTemplate : (visibleCatalog[0]?.id ?? templateCatalog[0].id)
   const plan = searchParams.get('plan') || 'basic'
   const baseQuota = planBase ?? (DEFAULT_BASE_QUOTA[plan] ?? 200)
   const extraParam = parseInt(searchParams.get('extra') || '0', 10) || 0
 
   const [pending, startTransition] = useTransition()
-  const [guestTotal, setGuestTotal] = useState(baseQuota + clampQuotaExtra(baseQuota, extraParam)) // effective quota (base..cap)
-  const guestExtra = Math.max(0, guestTotal - baseQuota)
   const [template, setTemplate] = useState(initialTemplate)
-  const [slug, setSlug] = useState('')
-  const [slugTouched, setSlugTouched] = useState(false)
-  const [bride, setBride] = useState('')
-  const [groom, setGroom] = useState('')
-  const [date, setDate] = useState('')
-  const [venue, setVenue] = useState('')
+  const [values, setValues] = useState<InvitationValues | null>(null)
   const [error, setError] = useState('')
   const [done, setDone] = useState<{ slug: string; publicUrl: string; dashboardUrl: string } | null>(null)
-  const [slugStatus, setSlugStatus] = useState<{ checking?: boolean; available?: boolean; reason?: string }>(
-    {},
-  )
-
-  // Auto-suggest slug from bride+groom first names until user edits it themselves
-  useEffect(() => {
-    if (slugTouched) return
-    const a = firstWord(bride)
-    const b = firstWord(groom)
-    if (a && b) setSlug(`${a}-${b}`)
-    else if (a) setSlug(a)
-    else if (b) setSlug(b)
-  }, [bride, groom, slugTouched])
-
-  // Debounced slug availability check
-  useEffect(() => {
-    if (!slug) {
-      setSlugStatus({})
-      return
-    }
-    setSlugStatus({ checking: true })
-    const t = setTimeout(async () => {
-      const res = await checkSlugAvailable(slug)
-      setSlugStatus({ checking: false, ...res })
-    }, 400)
-    return () => clearTimeout(t)
-  }, [slug])
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!values || !values.valid) return
     setError('')
     startTransition(async () => {
       const result = await completeOnboarding({
-        slug,
-        template,
-        plan,
-        brideName: bride,
-        groomName: groom,
-        weddingDate: date,
-        venue,
-        guestQuotaExtra: guestExtra,
+        slug: values.slug,
+        template: values.template,
+        plan: values.plan,
+        brideName: values.bride,
+        groomName: values.groom,
+        weddingDate: values.date,
+        venue: values.venue,
+        guestQuotaExtra: values.guestExtra,
       })
       if (!result.ok) {
         setError(result.error || dict.form.errFail)
@@ -148,8 +119,6 @@ export default function OnboardingForm({
     )
   }
 
-  const slugOk = slug && slugStatus.available && !slugStatus.checking
-
   return (
     <main style={panel}>
       <form onSubmit={onSubmit} style={card}>
@@ -161,153 +130,26 @@ export default function OnboardingForm({
           </p>
         </header>
 
-        <div style={field}>
-          <span style={lbl}>{dict.form.pickTemplate}</span>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {visibleCatalog.map((t) => {
-              const active = t.id === template
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTemplate(t.id)}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    border: active
-                      ? `2px solid ${t.accent || 'var(--color-charcoal)'}`
-                      : '1px solid var(--border-default)',
-                    background: active ? 'rgba(42,33,24,0.04)' : 'transparent',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <span style={{ display: 'block', fontWeight: 600, color: 'var(--text-primary)', fontSize: 15 }}>
-                    {t.label}
-                  </span>
-                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>
-                    {t.tags.join(' · ')}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div style={{ ...field, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <span style={lbl}>{dict.form.language}</span>
-          <LangToggle lang={lang} label={dict.form.language} />
-        </div>
-
-        <label style={field}>
-          <span style={lbl}>{dict.form.bride}</span>
-          <input
-            value={bride}
-            onChange={(e) => setBride(e.target.value)}
-            placeholder={dict.form.bridePlaceholder}
-            required
-            style={input}
-          />
-        </label>
-
-        <label style={field}>
-          <span style={lbl}>{dict.form.groom}</span>
-          <input
-            value={groom}
-            onChange={(e) => setGroom(e.target.value)}
-            placeholder={dict.form.groomPlaceholder}
-            required
-            style={input}
-          />
-        </label>
-
-        <label style={field}>
-          <span style={lbl}>{dict.form.date}</span>
-          <input
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-            style={input}
-          />
-        </label>
-
-        <label style={field}>
-          <span style={lbl}>{dict.form.venue}</span>
-          <input
-            value={venue}
-            onChange={(e) => setVenue(e.target.value)}
-            placeholder={dict.form.venuePlaceholder}
-            required
-            style={input}
-          />
-        </label>
-
-        <label style={field}>
-          <span style={lbl}>{dict.form.url}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>weddingsite/</span>
-            <input
-              value={slug}
-              onChange={(e) => {
-                setSlugTouched(true)
-                setSlug(e.target.value.toLowerCase())
-              }}
-              placeholder={dict.form.urlPlaceholder}
-              required
-              minLength={3}
-              maxLength={40}
-              pattern="[a-z0-9]+(-[a-z0-9]+)*"
-              style={{ ...input, flex: 1 }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 12,
-              color:
-                slugStatus.checking
-                  ? 'var(--text-secondary)'
-                  : slugStatus.available
-                  ? 'var(--color-emerald)'
-                  : slugStatus.reason
-                  ? 'var(--interactive-primary)'
-                  : 'var(--color-charcoal-light)',
-              marginTop: 4,
-            }}
-          >
-            {slug && slugStatus.checking && dict.form.checking}
-            {slug && !slugStatus.checking && slugStatus.available && dict.form.available}
-            {slug && !slugStatus.checking && slugStatus.reason && `✗ ${slugStatus.reason}`}
-            {!slug && dict.form.urlHelp}
-          </span>
-        </label>
-
-        <div style={field}>
-          <span style={lbl}>{dict.quota.label}</span>
-          <QuotaStepper
-            value={guestTotal}
-            min={baseQuota}
-            max={QUOTA_CAP}
-            onChange={setGuestTotal}
-            typableHint={dict.quota.typableHint}
-          />
-          <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-            {dict.quota.includedPrefix} {baseQuota}
-            {guestExtra > 0 &&
-              ` · ${dict.quota.addonHintPrefix} ${guestExtra} · +${formatIDR(quotaAddonAmount(guestExtra))}`}
-          </span>
-          {planPrice ? (
-            <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-              Total: {formatIDR(planPrice + quotaAddonAmount(guestExtra))}
-            </span>
-          ) : null}
-        </div>
-
-        {error && <p style={errorStyle}>{error}</p>}
-
-        <Button type="submit" disabled={pending || !slugOk} style={{ marginTop: 8 }}>
-          {pending ? dict.form.submitting : dict.form.submit}
-        </Button>
+        <InvitationDetailsForm
+          dict={dict}
+          lang={lang}
+          plan={plan}
+          planBase={baseQuota}
+          planPrice={planPrice ?? 0}
+          templateOptions={templateOptions}
+          template={template}
+          onTemplateChange={setTemplate}
+          extra={extraParam}
+          onValidChange={setValues}
+          footer={
+            <>
+              {error && <p style={errorStyle}>{error}</p>}
+              <Button type="submit" disabled={pending || !values?.valid} style={{ marginTop: 8 }}>
+                {pending ? dict.form.submitting : dict.form.submit}
+              </Button>
+            </>
+          }
+        />
       </form>
     </main>
   )
@@ -347,22 +189,6 @@ const h1: React.CSSProperties = {
   lineHeight: 1.1,
 }
 const muted: React.CSSProperties = { margin: '8px 0 0', color: 'var(--text-secondary)', lineHeight: 1.6 }
-const field: React.CSSProperties = { display: 'grid', gap: 6 }
-const lbl: React.CSSProperties = {
-  fontSize: 12,
-  textTransform: 'uppercase',
-  letterSpacing: '0.16em',
-  color: 'var(--text-muted)',
-}
-const input: React.CSSProperties = {
-  padding: '12px 14px',
-  borderRadius: 'var(--radius-md)',
-  border: '1px solid var(--border-default)',
-  fontSize: 15,
-  fontFamily: 'inherit',
-  width: '100%',
-  boxSizing: 'border-box',
-}
 const errorStyle: React.CSSProperties = {
   margin: 0,
   padding: '10px 12px',
