@@ -5,6 +5,7 @@ import { auth } from '../dictionaries/auth'
 import { onboarding } from '../dictionaries/onboarding'
 import { templates } from '../dictionaries/templates'
 import { dashboard } from '../dictionaries/dashboard'
+import { manualPay } from '../dictionaries/manualPay'
 
 function keyPaths(obj: unknown, prefix = ''): string[] {
   if (Array.isArray(obj)) {
@@ -26,6 +27,7 @@ describe('i18n dictionary parity (id ⟷ en)', () => {
     ['onboarding', onboarding],
     ['templates', templates],
     ['dashboard', dashboard],
+    ['manualPay', manualPay],
   ]
   it.each(dicts)('%s has identical id/en key paths', (_name, d) => {
     expect(keyPaths(d.en).sort()).toEqual(keyPaths(d.id).sort())
