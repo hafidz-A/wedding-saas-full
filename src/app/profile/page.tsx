@@ -5,6 +5,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { refundVerdict } from '@/lib/payments/refund-policy'
+import { getPaymentSettings } from '@/lib/payments/payment-settings'
 import { isAdminEmail } from '@/lib/admin/is-admin'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
@@ -34,13 +35,18 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('id, slug, template_id, is_paid, expires_at, config, paid_source, is_published, paid_at, used_at, published_at')
+    .select('id, slug, template_id, plan, is_paid, expires_at, config, paid_source, is_published, paid_at, used_at, published_at')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { id: string; slug: string; template_id: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null }[] | null
+    data: { id: string; slug: string; template_id: string | null; plan: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null }[] | null
   }
   const invitations = rows ?? []
+
+  // Global gateway|manual payment-mode switch — threaded to each invitation's
+  // pay/renew CTA (RenewButton) so manual mode opens the WhatsApp/Email modal.
+  const paySettings = await getPaymentSettings()
+  const manualContact = { whatsapp: paySettings.whatsapp, email: paySettings.email }
 
   // Existing review per paid invitation → drives the "Ubah Ulasan" label + status chip.
   const paidIds = invitations.filter((i) => i.is_paid).map((i) => i.id)
@@ -172,6 +178,11 @@ export default async function ProfilePage() {
                         more: p.moreActions,
                         showLess: p.showLess,
                       }}
+                      slug={inv.slug}
+                      planName={inv.plan ?? undefined}
+                      paymentMode={paySettings.mode}
+                      manualContact={manualContact}
+                      manualPayDict={t.manualPay}
                     />
                     {refundState.get(inv.id) && (
                       <ProfileRefundControl invitationId={inv.id} {...refundState.get(inv.id)!} />

@@ -6,6 +6,11 @@ import RenewButton from './RenewButton'
 import RecheckPaymentButton from './RecheckPaymentButton'
 import ReviewButton, { type ReviewExisting } from './ReviewButton'
 import styles from './profile.module.css'
+// Type-only imports — erased at compile time, so this never pulls the
+// `server-only` payment-settings module into the client bundle.
+import type { PaymentMode } from '@/lib/payments/payment-settings'
+import type { ManualContact } from '@/lib/payments/manual-pay'
+import type { Dict } from '@/lib/i18n'
 
 /**
  * Action row for one invitation card on /profile.
@@ -28,6 +33,11 @@ export default function InvitationActions({
   existingReview,
   category,
   labels,
+  slug = '',
+  planName,
+  paymentMode = 'gateway',
+  manualContact,
+  manualPayDict,
 }: {
   invitationId: string
   viewHref: string
@@ -46,6 +56,12 @@ export default function InvitationActions({
     more: string
     showLess: string
   }
+  // Manual-payment fallback — threaded straight to RenewButton (unchanged when 'gateway').
+  slug?: string
+  planName?: string
+  paymentMode?: PaymentMode
+  manualContact?: ManualContact
+  manualPayDict?: Dict['manualPay']
 }) {
   const needsAction = periodStatus === 'draft' || periodStatus === 'expired'
   const [expanded, setExpanded] = useState(false)
@@ -69,6 +85,11 @@ export default function InvitationActions({
       payNowLabel={labels.payNow}
       renewNowLabel={labels.renewNow}
       processingLabel={labels.processing}
+      slug={slug}
+      planName={planName}
+      paymentMode={paymentMode}
+      manualContact={manualContact}
+      manualPayDict={manualPayDict}
     />
   ) : null
   const reviewEl = isPaid ? (
