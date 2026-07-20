@@ -18,7 +18,9 @@ export async function GET() {
       await readFile(path.join(process.cwd(), 'public', 'images', 'brand', 'fincards-icon-512.png')),
     )
   }
-  return new NextResponse(cached as unknown as BodyInit, {
+  // Node's Uint8Array<ArrayBufferLike> vs the DOM lib's ArrayBuffer-pinned
+  // BodyInit: runtime accepts a Uint8Array fine — assert once, deliberately.
+  return new NextResponse(cached as BodyInit, {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=3600, s-maxage=604800',
