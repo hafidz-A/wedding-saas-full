@@ -29,6 +29,7 @@ export default function InvitationActions({
   dashboardHref,
   periodStatus,
   isPaid,
+  isRefunded = false,
   defaultName,
   existingReview,
   category,
@@ -44,6 +45,10 @@ export default function InvitationActions({
   dashboardHref: string
   periodStatus: 'draft' | 'active' | 'expired' | 'lifetime'
   isPaid: boolean
+  // Fully-refunded (succeeded refund of the initial purchase): the invitation is
+  // suspended/unpublished, so the pay/renew CTA and the recheck-payment fallback
+  // must not offer to pay again even if periodStatus reads 'draft'/'expired'.
+  isRefunded?: boolean
   defaultName: string
   existingReview: ReviewExisting | null
   category: string
@@ -63,7 +68,7 @@ export default function InvitationActions({
   manualContact?: ManualContact
   manualPayDict?: Dict['manualPay']
 }) {
-  const needsAction = periodStatus === 'draft' || periodStatus === 'expired'
+  const needsAction = !isRefunded && (periodStatus === 'draft' || periodStatus === 'expired')
   const [expanded, setExpanded] = useState(false)
 
   const shellRef = useRef<HTMLDivElement>(null)

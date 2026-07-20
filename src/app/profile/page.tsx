@@ -5,6 +5,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { refundVerdict } from '@/lib/payments/refund-policy'
+import { fetchRefundedMap } from '@/lib/payments/refunded'
 import { getPaymentSettings } from '@/lib/payments/payment-settings'
 import { isAdminEmail } from '@/lib/admin/is-admin'
 import { getLang } from '@/lib/i18n/getLang'
@@ -50,6 +51,9 @@ export default async function ProfilePage() {
 
   // Existing review per paid invitation → drives the "Ubah Ulasan" label + status chip.
   const paidIds = invitations.filter((i) => i.is_paid).map((i) => i.id)
+  // Fully-refunded invitations (succeeded refund of the INITIAL purchase): show a
+  // "Sudah direfund" badge instead of the period chip and suppress pay/renew/refund CTAs.
+  const refundedMap = paidIds.length ? await fetchRefundedMap(admin, paidIds) : new Map<string, string>()
   const reviewByInv = new Map<string, { rating: number; body: string; isAnonymous: boolean; isVisible: boolean }>()
   if (paidIds.length) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,13 +75,14 @@ export default async function ProfilePage() {
   // published_at signals mean no extra live guest-count query is needed here).
   const refundState = new Map<string, { paidSource: string; paidChannel: string | null; eligible: boolean; hasPending: boolean }>()
   const refundableIds = invitations.filter((i) => i.is_paid && i.paid_source !== 'comp').map((i) => i.id)
+    .filter((id) => !refundedMap.has(id))
   if (refundableIds.length) {
     const { data: pend } = (await admin.from('refund_requests')
       .select('invitation_id').in('invitation_id', refundableIds).eq('status', 'pending')) as { data: { invitation_id: string }[] | null }
     const pendingSet = new Set((pend ?? []).map((r) => r.invitation_id))
     const nowMs = Date.now()
     for (const inv of invitations) {
-      if (!inv.is_paid || inv.paid_source === 'comp') continue
+      if (!inv.is_paid || inv.paid_source === 'comp' || refundedMap.has(inv.id)) continue
       const paidMs = inv.paid_at ? Date.parse(inv.paid_at) : nowMs
       const eligible = refundVerdict({
         is_published: !!inv.is_published, guest_count: 0, rsvp_count: 0, attendance_count: 0,
@@ -153,11 +158,16 @@ export default async function ProfilePage() {
               {invitations.map((inv) => {
                 const tt = tmpl(inv.template_id)
                 const periodStatus = activePeriodStatus(inv, now).status
+                const isRefunded = refundedMap.has(inv.id)
                 return (
                   <li key={inv.slug} style={item}>
                     <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={itemSlug}>{inv.slug}</span>
-                      <span style={periodChip}>{periodLabel(inv)}</span>
+                      {isRefunded ? (
+                        <span style={refundedBadge}>Sudah direfund</span>
+                      ) : (
+                        <span style={periodChip}>{periodLabel(inv)}</span>
+                      )}
                     </span>
                     <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     <InvitationActions
@@ -166,6 +176,7 @@ export default async function ProfilePage() {
                       dashboardHref={`/${tt}/${inv.slug}/dashboard`}
                       periodStatus={periodStatus}
                       isPaid={inv.is_paid}
+                      isRefunded={isRefunded}
                       defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
                       existingReview={reviewByInv.get(inv.id) ?? null}
                       category={getCatalogEntry(inv.template_id ?? '').category}
@@ -259,6 +270,18 @@ const periodChip: React.CSSProperties = {
   fontSize: 12,
   color: 'var(--text-secondary)',
   background: 'var(--border-subtle)',
+  padding: '3px 10px',
+  borderRadius: 'var(--radius-pill)',
+  alignSelf: 'flex-start',
+  marginLeft: -10,
+}
+const refundedBadge: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  fontSize: 12,
+  fontWeight: 600,
+  color: 'var(--status-danger)',
+  background: 'var(--status-danger-soft)',
   padding: '3px 10px',
   borderRadius: 'var(--radius-pill)',
   alignSelf: 'flex-start',
