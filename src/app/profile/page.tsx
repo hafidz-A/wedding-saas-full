@@ -35,11 +35,11 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('id, slug, template_id, plan, is_paid, expires_at, config, paid_source, is_published, paid_at, used_at, published_at')
+    .select('id, slug, template_id, plan, is_paid, expires_at, config, paid_source, paid_channel, is_published, paid_at, used_at, published_at')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { id: string; slug: string; template_id: string | null; plan: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null }[] | null
+    data: { id: string; slug: string; template_id: string | null; plan: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; paid_channel: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null }[] | null
   }
   const invitations = rows ?? []
 
@@ -69,7 +69,7 @@ export default async function ProfilePage() {
   // Per-invitation refund control (paid, non-comp): pending request + sticky
   // eligibility (same refundVerdict the dashboard/admin use; the sticky used_at/
   // published_at signals mean no extra live guest-count query is needed here).
-  const refundState = new Map<string, { paidSource: string; eligible: boolean; hasPending: boolean }>()
+  const refundState = new Map<string, { paidSource: string; paidChannel: string | null; eligible: boolean; hasPending: boolean }>()
   const refundableIds = invitations.filter((i) => i.is_paid && i.paid_source !== 'comp').map((i) => i.id)
   if (refundableIds.length) {
     const { data: pend } = (await admin.from('refund_requests')
@@ -86,7 +86,7 @@ export default async function ProfilePage() {
         ever_used: !!inv.used_at,
         days_since_published: inv.published_at ? Math.max(0, Math.floor((nowMs - Date.parse(inv.published_at)) / 86_400_000)) : null,
       }).eligible
-      refundState.set(inv.id, { paidSource: inv.paid_source ?? 'midtrans', eligible, hasPending: pendingSet.has(inv.id) })
+      refundState.set(inv.id, { paidSource: inv.paid_source ?? 'midtrans', paidChannel: inv.paid_channel ?? null, eligible, hasPending: pendingSet.has(inv.id) })
     }
   }
 
