@@ -15,6 +15,7 @@ import { buildTransactions, transactionsToCsv } from '@/lib/payments/transaction
 import { PAYMENT_SETTINGS_TAG } from '@/lib/payments/payment-settings'
 import { validatePaymentPatch } from '@/lib/payments/validate-payment'
 import { sendAdminEmail } from '@/lib/email/send'
+import { refundApprovedEmail, refundRejectedEmail } from '@/lib/email/refund-emails'
 import { encryptField } from '@/lib/crypto/app'
 import { fetchLedger } from './data'
 
@@ -22,11 +23,6 @@ import { fetchLedger } from './data'
 async function notifyCouple(db: any, invitationId: string, subject: string, html: string) {
   const { data: inv } = await db.from('invitations').select('email').eq('id', invitationId).maybeSingle()
   if (inv?.email) await sendAdminEmail({ to: inv.email, subject, html })
-}
-
-/** Escape free-text before it lands in an outbound email's HTML body. */
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
 }
 
 type Result = { ok: boolean; error?: string }
@@ -333,9 +329,8 @@ export async function adminApproveRefund(requestId: string, opts: { method: 'man
   await (db.from('refund_requests') as any)
     .update({ status: 'approved', decided_by: admin.email, decision_note: opts.note ?? null, decided_at: new Date().toISOString() })
     .eq('id', requestId)
-  await notifyCouple(db, req.invitation_id,
-    'Pengembalian dana disetujui',
-    `<p>Halo,</p><p>Permintaan pengembalian dana undanganmu sudah <strong>disetujui</strong>. Dana dikembalikan ${opts.method === 'gateway' ? 'ke metode pembayaranmu (otomatis via Midtrans)' : 'ke rekening yang kamu berikan (transfer manual)'}. Undanganmu dinonaktifkan. Terima kasih.</p>`)
+  const mail = refundApprovedEmail({ method: opts.method })
+  await notifyCouple(db, req.invitation_id, mail.subject, mail.html)
   await logAdminAction(admin.email, { action: 'refund.approve', targetType: 'invitation', targetId: req.invitation_id, meta: { method: opts.method } })
   revalidateInvitation()
   return { ok: true }
@@ -351,9 +346,8 @@ export async function adminRejectRefund(requestId: string, note?: string): Promi
   await (db.from('refund_requests') as any)
     .update({ status: 'rejected', decided_by: admin.email, decision_note: note ?? null, decided_at: new Date().toISOString() })
     .eq('id', requestId)
-  await notifyCouple(db, req.invitation_id,
-    'Update permintaan pengembalian dana',
-    `<p>Halo,</p><p>Setelah kami tinjau, permintaan pengembalian dana undanganmu <strong>belum bisa kami setujui</strong>${note ? `: ${escapeHtml(note)}` : '.'} Kalau ada pertanyaan, silakan balas email ini.</p>`)
+  const mail = refundRejectedEmail({ note: note ?? null })
+  await notifyCouple(db, req.invitation_id, mail.subject, mail.html)
   await logAdminAction(admin.email, { action: 'refund.reject', targetType: 'invitation', targetId: req.invitation_id, meta: { note: note ?? null } })
   return { ok: true }
 }
