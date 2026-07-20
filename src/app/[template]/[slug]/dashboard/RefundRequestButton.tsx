@@ -3,7 +3,7 @@
 
 import { useState } from 'react'
 import { requestRefund, type RefundRequestInput } from '@/app/onboarding/actions'
-import { canApiRefund } from '@/lib/payments/refund-channels'
+import { needsRefundDestination } from '@/lib/payments/refund-channels'
 
 /**
  * Owner-facing "Ajukan pengembalian dana". Files a refund REQUEST the operator
@@ -28,7 +28,7 @@ export default function RefundRequestButton({ invitationId, paidSource, paidChan
   const [done, setDone] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  const needsDestination = paidSource === 'manual' || (paidSource === 'midtrans' && !canApiRefund(paidChannel))
+  const needsDestination = needsRefundDestination(paidSource, paidChannel)
 
   async function submit() {
     setBusy(true); setErr(null)

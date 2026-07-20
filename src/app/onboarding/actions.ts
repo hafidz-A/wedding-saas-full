@@ -12,7 +12,7 @@ import {
   QUOTA_CAP, DEFAULT_BASE_QUOTA,
 } from '@/lib/payments/quota'
 import { createSnapTransaction, getTransactionStatus, isPaidStatus, expireTransaction, mintOrderId } from '@/lib/payments/gateway'
-import { canApiRefund } from '@/lib/payments/refund-channels'
+import { needsRefundDestination } from '@/lib/payments/refund-channels'
 import { publishPaidInvitation, applyPaidUpgrade, extendActivePeriod, applyPaidQuotaAddon } from '@/lib/payments/publish'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { rateLimit } from '@/lib/security/rate-limit'
@@ -721,8 +721,7 @@ export async function requestRefund(invitationId: string, input: RefundRequestIn
     // automatically: manual/offline payments, and Midtrans channels without
     // API refund (bank transfer / VA). Collecting it now avoids a second
     // round-trip with the customer at decision time.
-    const needsDestination = inv.paid_source === 'manual' ||
-      (inv.paid_source === 'midtrans' && !canApiRefund(inv.paid_channel))
+    const needsDestination = needsRefundDestination(inv.paid_source, inv.paid_channel)
     const d = input.destination
     if (needsDestination && !(d?.bank?.trim() && d?.account_no?.trim() && d?.holder?.trim())) {
       return { ok: false, error: 'Isi bank, nomor rekening, dan nama pemilik untuk tujuan pengembalian dana.' }
