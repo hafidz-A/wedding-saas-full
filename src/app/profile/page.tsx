@@ -164,7 +164,7 @@ export default async function ProfilePage() {
                     <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={itemSlug}>{inv.slug}</span>
                       {isRefunded ? (
-                        <span style={refundedBadge}>Sudah direfund</span>
+                        <span style={refundedBadge}>{ap.refunded}</span>
                       ) : (
                         <span style={periodChip}>{periodLabel(inv)}</span>
                       )}
@@ -276,14 +276,8 @@ const periodChip: React.CSSProperties = {
   marginLeft: -10,
 }
 const refundedBadge: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  fontSize: 12,
-  fontWeight: 600,
+  ...periodChip,
   color: 'var(--status-danger)',
   background: 'var(--status-danger-soft)',
-  padding: '3px 10px',
-  borderRadius: 'var(--radius-pill)',
-  alignSelf: 'flex-start',
-  marginLeft: -10,
+  fontWeight: 600,
 }

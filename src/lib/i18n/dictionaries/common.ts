@@ -46,6 +46,7 @@ export const common = {
       renewNow: 'Perpanjang sekarang',
       unpaidBanner: 'Undangan ini belum dibayar — bayar untuk menerbitkannya.',
       processing: 'Memproses…',
+      refunded: 'Sudah direfund',
     },
     invitationNotFound: {
       kicker: 'Undangan tidak ditemukan',
@@ -107,6 +108,7 @@ export const common = {
       renewNow: 'Renew now',
       unpaidBanner: 'This invitation is not paid yet — pay to publish it.',
       processing: 'Processing…',
+      refunded: 'Refunded',
     },
     invitationNotFound: {
       kicker: 'Invitation not found',
