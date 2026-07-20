@@ -129,7 +129,10 @@ export function createFakeSupabase(script: FakeScript = {}): FakeSupabase {
           return builder
         },
         neq: () => builder,
-        in: () => builder,
+        in: (column?: string, value?: any) => {
+          calls.push({ kind: 'filter', table, column, value })
+          return builder
+        },
         is: (column?: string, value?: any) => {
           calls.push({ kind: 'filter', table, column, value })
           return builder
