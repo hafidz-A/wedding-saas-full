@@ -6,6 +6,7 @@ import { getLang } from '@/lib/i18n/getLang'
 import { getDict, type Dict, type Lang } from '@/lib/i18n'
 import { activePeriodStatus } from '@/lib/payments/active-period'
 import { refundVerdict } from '@/lib/payments/refund-policy'
+import { fetchRefundedAt } from '@/lib/payments/refunded'
 import { resolveUpgrade, planBaseQuota } from '@/lib/payments/plans'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import { effectiveQuota } from '@/lib/payments/quota'
@@ -101,6 +102,14 @@ export default async function DashboardPage({ params }: PageProps) {
       </main>
       </>
     )
+  }
+
+  // 3a-pre. Refund gate: a fully-refunded invitation is permanently closed for
+  // the owner (reverseEntitlement sets suspended_at, but the refund deserves its
+  // own honest message instead of the generic "ditangguhkan" takedown notice).
+  if (invitation.is_paid) {
+    const refundedAt = await fetchRefundedAt(admin, invitation.id)
+    if (refundedAt !== null) return <RefundedNotice slug={slug} refundedAt={refundedAt} lang={lang} />
   }
 
   // 3a. Suspend gate (admin hard takedown). Shown before the payment gate: a
@@ -337,6 +346,52 @@ function SuspendedNotice({ slug, lang }: { slug: string; lang: Lang }) {
           jadi editor tidak bisa dibuka dan undangan tidak tayang untuk sementara.
           Silakan hubungi tim FinCards untuk info lebih lanjut.
         </p>
+      </div>
+    </main>
+    </>
+  )
+}
+
+/** Refund gate notice: a fully-refunded invitation is permanently closed for
+ *  the owner (separate from SuspendedNotice's temporary-takedown message). */
+function RefundedNotice({ slug, refundedAt, lang }: { slug: string; refundedAt: string; lang: Lang }) {
+  const tanggal = refundedAt
+    ? new Date(refundedAt).toLocaleDateString('id-ID', { dateStyle: 'long', timeZone: 'Asia/Jakarta' })
+    : null
+  return (
+    <>
+    <AuthChrome lang={lang} />
+    <main style={panelStyle}>
+      <div style={cardStyle}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontStyle: 'normal', fontSize: 32, margin: '0 0 12px' }}>
+          Undangan ini sudah direfund
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 12px' }}>
+          Dana untuk undangan <code>{slug}</code> sudah dikembalikan{tanggal ? ` pada ${tanggal}` : ''}.
+          Sesuai kebijakan pengembalian dana, undangan dinonaktifkan permanen — tidak bisa
+          diedit, diterbitkan ulang, atau dibuka tamu.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, margin: '0 0 16px' }}>
+          Mau bikin undangan baru? Mulai lagi kapan saja dari halaman profil.
+        </p>
+        <a
+          href="/profile"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            height: 'var(--ctl-h)',
+            padding: '0 20px',
+            borderRadius: 'var(--radius-pill)',
+            background: 'var(--color-charcoal)',
+            color: 'var(--surface-warm)',
+            textDecoration: 'none',
+            fontSize: 12,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Kembali ke profil
+        </a>
       </div>
     </main>
     </>
