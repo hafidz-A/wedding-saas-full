@@ -1,6 +1,7 @@
 // src/app/admin/invitations/page.tsx
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { activePeriodStatus } from '@/lib/payments/active-period'
+import { fetchRefundedMap } from '@/lib/payments/refunded'
 import InvitationRow from './InvitationRow'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -23,6 +24,10 @@ export default async function AdminInvitationsPage({ searchParams }: { searchPar
     if (showArchived ? !r.archived_at : !!r.archived_at) return false
     return !q || r.slug?.toLowerCase().includes(q) || (r.email || '').toLowerCase().includes(q)
   })
+  // Fully-refunded invitations (succeeded refund of the INITIAL purchase) surface a
+  // "Refunded" badge on the row — label only, does not touch /admin/payments' own
+  // per-transaction refund view/filter.
+  const refundedMap = await fetchRefundedMap(db, rows.map((r) => r.id))
 
   return (
     <div>
@@ -56,6 +61,7 @@ export default async function AdminInvitationsPage({ searchParams }: { searchPar
               email: r.email ?? '', isPublished: r.is_published, paidSource: r.paid_source ?? null,
               statusLabel: STATUS_LABEL[st.status] ?? st.status, quotaExtra: r.guest_quota_extra ?? 0,
               isPaid: !!r.is_paid, isSuspended: !!r.suspended_at, isArchived: !!r.archived_at,
+              refundedAt: refundedMap.get(r.id) ?? null,
             }} />
           )
         })}

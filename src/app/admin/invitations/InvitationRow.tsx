@@ -16,6 +16,9 @@ interface Inv {
   id: string; slug: string; templateId: string; plan: string; email: string
   isPublished: boolean; paidSource: string | null; statusLabel: string; quotaExtra: number
   isPaid: boolean; isSuspended: boolean; isArchived: boolean
+  /** confirmed_at of a succeeded refund of the initial purchase, '' if predates the
+   *  backfill, or null/undefined when not refunded — drives the "Refunded" badge. */
+  refundedAt?: string | null
 }
 
 export default function InvitationRow({ inv }: { inv: Inv }) {
@@ -104,6 +107,16 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
           {inv.slug} <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>· {inv.templateId} · {inv.plan}</span>
           {inv.isSuspended && <span style={chip('var(--status-error)')}>diblokir</span>}
           {inv.isArchived && <span style={chip('var(--text-muted)')}>arsip</span>}
+          {inv.refundedAt != null && (
+            <span
+              title={inv.refundedAt
+                ? `Refund selesai ${new Date(inv.refundedAt).toLocaleDateString('id-ID', { dateStyle: 'medium' })}`
+                : 'Refund selesai'}
+              style={refundedChip}
+            >
+              Refunded
+            </span>
+          )}
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{inv.email} · {inv.statusLabel}{inv.paidSource ? ` · ${inv.paidSource}` : ''}{inv.quotaExtra ? ` · +${inv.quotaExtra} kuota` : ''}</div>
       </div>
@@ -138,4 +151,12 @@ const selectCtl: React.CSSProperties = { height: 36, padding: '0 12px', borderRa
 
 function chip(color: string): React.CSSProperties {
   return { marginLeft: 8, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 6px', borderRadius: 'var(--radius-sm)', border: `1px solid ${color}`, color }
+}
+
+// Filled pill (not the outline `chip()` above) to match the "Sudah direfund" badge
+// on /profile — same tokens, same look, so the state reads consistently across surfaces.
+const refundedChip: React.CSSProperties = {
+  marginLeft: 8, display: 'inline-flex', alignItems: 'center', padding: '2px 10px',
+  borderRadius: 'var(--radius-pill)', background: 'var(--status-danger-soft)', color: 'var(--status-danger)',
+  fontSize: 11.5, fontWeight: 600,
 }
