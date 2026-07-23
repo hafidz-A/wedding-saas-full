@@ -228,6 +228,59 @@
   min-width: 0;
 }
 
+/* ---------- Preview door ----------
+   The mock card is the link to the real demo invitation. This wrapper mirrors
+   PreviewMock's own box (max-width + centring, flush-left from 1024px) so the
+   badge pins to the card itself rather than to the whole grid cell. */
+.previewDoor {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: transform 0.3s var(--ease-out);
+}
+.previewDoor:hover { transform: translateY(-4px); }
+.previewDoor:active { transform: translateY(-1px); }
+.previewDoor:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* Always visible, never hover-only: hover does not exist on touch, and that is
+   where most of this audience shops — a hover-only cue would leave the original
+   discoverability problem untouched on phones. */
+.doorBadge {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--ctl-h-sm);
+  padding: 0 16px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: transform 0.3s var(--ease-out);
+}
+.previewDoor:hover .doorBadge { transform: translateX(-50%) scale(1.05); }
+
+@media (prefers-reduced-motion: reduce) {
+  .previewDoor,
+  .doorBadge { transition: none; }
+  .previewDoor:hover,
+  .previewDoor:active { transform: none; }
+  .previewDoor:hover .doorBadge { transform: translateX(-50%); }
+}
+
 /* Details column */
 .details {
   display: flex;
@@ -297,7 +350,7 @@
   min-width: 0;
 }
 
-.btnGhost,
+.btnSecondary,
 .btnPrimary {
   flex: 1 1 auto;
   justify-content: center;
@@ -317,13 +370,24 @@
   white-space: nowrap;
   transition: transform 0.2s var(--ease-out), box-shadow 0.25s ease;
 }
-.btnGhost { border: 1.5px solid; background: transparent; }
+/* Background is supplied by the live palette (a translucent accent tint) so the
+   "see it first" action carries real weight instead of reading as a hairline. */
+.btnSecondary { border: 1.5px solid; }
 .btnPrimary { border: 1.5px solid transparent; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18); }
-.btnGhost:hover,
+.btnSecondary:hover,
 .btnPrimary:hover { transform: translateY(-2px); }
 .btnPrimary:hover { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24); }
-.btnGhost:active,
+.btnSecondary:active,
 .btnPrimary:active { transform: translateY(0); }
+
+/* Reassurance line under the actions — answers "does looking cost me anything?" */
+.hint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: var(--leading-relaxed);
+  margin: 0;
+  transition: color 0.6s ease;
+}
 
 /* ---------- Responsive ---------- */
 
@@ -334,6 +398,7 @@
 
 @media (min-width: 1024px) {
   .layout { grid-template-columns: 264px 1fr; gap: clamp(36px, 4vw, 56px); }
+  .previewDoor { margin: 0; }
   .menu { grid-template-columns: 1fr; gap: var(--space-2); }
   .menuBtn { justify-content: flex-start; }
   .displayInner { grid-template-columns: 0.82fr 1.18fr; gap: clamp(32px, 3.5vw, 52px); }

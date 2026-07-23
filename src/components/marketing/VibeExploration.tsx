@@ -8,7 +8,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Dict } from '@/lib/i18n'
 import { type PlanDisplay } from '@/lib/payments/plan-display'
 import { templateCopy, type TemplateDisplay } from '@/lib/templates/display'
-import { getCatalogEntry } from '@/config/templateCatalog'
 import { useReveal } from '@/hooks/useReveal'
 import { TEMPLATE_VIBES } from './vibeData'
 import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories'
@@ -151,13 +150,10 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
     )
   }
 
-  const catalog = getCatalogEntry(template.id)
-  const displayPlans: PlanDisplay[] =
-    plans?.[template.id] ??
-    (catalog.plans ?? []).map((pl: any) => ({
-      id: pl.id, name: pl.name, price: pl.price, amountIDR: pl.amountIDR ?? 0,
-      compareAtPrice: null, features: pl.features ?? [], baseQuota: 200,
-    }))
+  // Pricing comes from `template_plans` (DB, edited at /admin/templates) only —
+  // never from a hardcoded copy. If the DB read fails we show no plan rather
+  // than a stale price the checkout would refuse to honour.
+  const displayPlans: PlanDisplay[] = plans?.[template.id] ?? []
   const previewHref = `/${template.id}/${template.demoSlug}`
   const buyHref = `/onboarding?template=${template.id}`
 
@@ -332,13 +328,37 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
               snaps; only the detail text cross-fades on palette switch. */}
           <div className={styles.display}>
             <div className={styles.displayInner}>
-              <PreviewMock
-                templateId={template.id}
-                palette={palette}
-                eyebrow={t.previewEyebrow}
-                names={t.previewNames}
-                date={t.previewDate}
-              />
+              {/* The mock card IS the door to the real demo invitation — it is the
+                  most invitation-looking thing on screen, so it has to be what opens
+                  one. The badge stays visible at all times rather than on hover:
+                  hover does not exist on touch, and that is where most of this
+                  audience shops. `color` carries the accent so the focus ring can
+                  pick it up via currentColor. */}
+              <Link
+                href={previewHref}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.previewDoor}
+                style={{ color: palette.accent }}
+                aria-label={`${t.previewOpen} — ${template.label}`}
+              >
+                <PreviewMock
+                  templateId={template.id}
+                  palette={palette}
+                  eyebrow={t.previewEyebrow}
+                  names={t.previewNames}
+                  date={t.previewDate}
+                />
+                <span
+                  className={styles.doorBadge}
+                  style={{ background: palette.accent, color: accentText }}
+                >
+                  <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" style={{ flexShrink: 0 }}>
+                    <path d="M8 5v14l11-7z" fill="currentColor" />
+                  </svg>
+                  {t.previewOpen}
+                </span>
+              </Link>
 
               <AnimatePresence mode="wait">
                 <motion.div
@@ -379,10 +399,14 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                       href={previewHref}
                       target="_blank"
                       rel="noreferrer"
-                      className={styles.btnGhost}
-                      style={{ color: palette.fg, borderColor: palette.accent }}
+                      className={styles.btnSecondary}
+                      style={{
+                        color: palette.fg,
+                        borderColor: palette.accent,
+                        background: `${palette.accent}30`,
+                      }}
                     >
-                      {t.liveReview}
+                      {t.viewLive}
                       {/* Inline SVG, not the ↗ glyph: U+2197 falls back to the
                           emoji font on many phones, breaking the elegant look. */}
                       <svg
@@ -416,6 +440,12 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                       <CinematicCtaText texts={[t.buy, t.buyAlt]} intervalMs={2250} paused={ctaHover} />
                     </button>
                   </div>
+
+                  {/* Removes the unspoken "does looking cost me anything?" pause
+                      right where the decision is made. */}
+                  <p className={styles.hint} style={{ color: palette.fgMuted }}>
+                    {t.previewHint}
+                  </p>
 
                 </motion.div>
               </AnimatePresence>
