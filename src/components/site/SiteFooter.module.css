@@ -17,3 +17,15 @@
   font-family: var(--font-body); font-size: 13px; color: var(--text-muted);
   text-align: center;
 }
+.social { display: flex; gap: var(--space-4); justify-content: center; }
+.socialLink {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: var(--ctl-h); height: var(--ctl-h);
+  border-radius: var(--radius-round);
+  color: var(--color-charcoal-light);
+  border: 1px solid rgba(42, 33, 24, 0.16);
+  background: rgba(255, 255, 255, 0.5);
+  transition: color var(--transition-default, 0.2s ease), border-color var(--transition-default, 0.2s ease), transform var(--transition-default, 0.2s ease);
+}
+.socialLink:hover { color: var(--color-coral); border-color: var(--color-coral); transform: translateY(-2px); }
+.socialIcon { width: 20px; height: 20px; display: block; }
