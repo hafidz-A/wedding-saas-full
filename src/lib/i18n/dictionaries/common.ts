@@ -1,6 +1,6 @@
 export const common = {
   id: {
-    nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan', myTemplate: 'My Template', home: 'Beranda' },
+    nav: { experience: 'Pengalaman', templates: 'Template', login: 'Masuk', cta: 'Buat Undangan', myTemplate: 'My Template', home: 'Beranda', back: 'Kembali' },
     footer: {
       templates: 'Template',
       login: 'Masuk',
@@ -62,7 +62,7 @@ export const common = {
     },
   },
   en: {
-    nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template', home: 'Home' },
+    nav: { experience: 'Experience', templates: 'Templates', login: 'Login', cta: 'Create Invitation', myTemplate: 'My Template', home: 'Home', back: 'Back' },
     footer: {
       templates: 'Templates',
       login: 'Login',

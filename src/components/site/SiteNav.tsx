@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Logo } from './Logo'
+import { NavControls } from './NavControls'
 import { LangToggle } from './LangToggle'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { Dict, Lang } from '@/lib/i18n'
@@ -92,7 +93,10 @@ export function SiteNav({ lang, t }: { lang: Lang; t: Dict['common'] }) {
   return (
     <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ''}`}>
       <div className={styles.inner}>
-        <Logo size="md" />
+        <div className={styles.brand}>
+          <Logo size="md" />
+          <NavControls lang={lang} />
+        </div>
         <div className={styles.desktop}>
           {baseLinks}
           <LangToggle lang={lang} label={t.langToggle.label} />

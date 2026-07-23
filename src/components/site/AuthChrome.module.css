@@ -23,45 +23,4 @@
   gap: 14px;
 }
 
-.home {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  height: var(--ctl-h);
-  padding: 0 var(--space-4);
-  line-height: 1;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--border-default);
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  transition: background var(--transition-default, 0.2s ease),
-    border-color var(--transition-default, 0.2s ease);
-}
-
-.home:hover {
-  background: var(--glass-bg);
-  border-color: rgba(42, 33, 24, 0.32);
-}
-
-.homeIcon {
-  width: 16px;
-  height: 16px;
-  display: block;
-  flex-shrink: 0;
-}
-
-@media (max-width: 520px) {
-  .homeLabel {
-    /* Icon-only on narrow screens; the Link keeps its aria-label for SR users. */
-    display: none;
-  }
-  .home {
-    padding: var(--space-2);
-  }
-}
 
