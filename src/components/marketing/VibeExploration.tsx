@@ -413,7 +413,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                       onMouseEnter={() => setCtaHover(true)}
                       onMouseLeave={() => setCtaHover(false)}
                     >
-                      <CinematicCtaText texts={[t.buy, t.buyAlt]} paused={ctaHover} />
+                      <CinematicCtaText texts={[t.buy, t.buyAlt]} intervalMs={1750} paused={ctaHover} />
                     </button>
                   </div>
 
