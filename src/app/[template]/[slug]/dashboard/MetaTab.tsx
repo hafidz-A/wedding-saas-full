@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
+import { uploadFile } from '@/editor/lib/uploadFile'
 import { composeTitle, parseCoupleFromTitle } from '@/lib/meta/couple'
 import ctrl from './dashboardControls.module.css'
 
@@ -58,18 +59,8 @@ export default function MetaTab({ slug, template, initial, couple, onSaved }: Pr
     setUploading(true)
     setMsg(null)
     try {
-      const form = new FormData()
-      form.append('slug', slug)
-      form.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: form })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        setMsg({ kind: 'err', text: err.error || `${t.uploadFailed} (${res.status})` })
-        fb.fail(fm.uploadFail)
-        return
-      }
-      const data = await res.json()
-      setOgImage(data.url)
+      const { url } = await uploadFile(slug, file)
+      setOgImage(url)
       fb.ok(fm.imageUploaded)
     } catch (err: any) {
       setMsg({ kind: 'err', text: err?.message || t.uploadFailed })

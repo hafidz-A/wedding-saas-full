@@ -33,6 +33,12 @@ export interface FakeStorageScript {
   upload?: FakeResult
   /** publicUrl returned by `.storage.from(b).getPublicUrl(path)`. */
   publicUrl?: string
+  /** Result of `.storage.from(b).createSignedUploadUrl(path)` — `data` is `{ signedUrl, token, path }`. */
+  signedUpload?: FakeResult
+  /** Result of `.storage.from(b).download(path)` — `data` is a Blob (or null). */
+  download?: FakeResult
+  /** Result of `.storage.from(b).remove(paths)`. */
+  remove?: FakeResult
 }
 
 export interface FakeScript {
@@ -156,6 +162,23 @@ export function createFakeSupabase(script: FakeScript = {}): FakeSupabase {
           upload: (path: string, bytes: any) => {
             calls.push({ kind: 'insert', table: `storage:${bucket}`, value: { path, size: bytes?.length } })
             return Promise.resolve(script.storage?.upload ?? { data: { path }, error: null })
+          },
+          createSignedUploadUrl: (path: string) => {
+            calls.push({ kind: 'insert', table: `storage:${bucket}`, value: { signPath: path } })
+            return Promise.resolve(
+              script.storage?.signedUpload ?? {
+                data: { signedUrl: `https://signed.test/${bucket}/${path}`, token: 'fake-token', path },
+                error: null,
+              },
+            )
+          },
+          download: (path: string) => {
+            calls.push({ kind: 'select', table: `storage:${bucket}`, value: { downloadPath: path } })
+            return Promise.resolve(script.storage?.download ?? { data: null, error: null })
+          },
+          remove: (paths: string[]) => {
+            calls.push({ kind: 'delete', table: `storage:${bucket}`, value: { paths } })
+            return Promise.resolve(script.storage?.remove ?? { data: [], error: null })
           },
           getPublicUrl: (path: string) => ({
             data: { publicUrl: script.storage?.publicUrl ?? `https://cdn.test/${bucket}/${path}` },

@@ -2,17 +2,16 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
-
-const BUCKET = 'invitation-media'
-const ALLOWED_IMAGE_MIMES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
-const ALLOWED_AUDIO_MIMES = new Set(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/x-m4a', 'audio/mp4'])
-const ALLOWED_MIMES = new Set([...ALLOWED_IMAGE_MIMES, ...ALLOWED_AUDIO_MIMES])
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB
-const MAX_AUDIO_BYTES = 12 * 1024 * 1024 // 12 MB
-// Hard per-invitation storage ceiling. Galleries cap at 30 photos (~5 MB each)
-// + audio; 300 MB leaves generous headroom while stopping a runaway upload
-// loop from ballooning the Storage bill.
-const MAX_TOTAL_BYTES = 300 * 1024 * 1024 // 300 MB
+import {
+  BUCKET,
+  ALLOWED_MIMES,
+  ALLOWED_AUDIO_MIMES,
+  MAX_IMAGE_BYTES,
+  MAX_AUDIO_BYTES,
+  MAX_TOTAL_BYTES,
+  imageSignatureMatches,
+  audioSignatureMatches,
+} from '@/lib/upload/media'
 
 /**
  * POST /api/upload (multipart)
@@ -23,6 +22,12 @@ const MAX_TOTAL_BYTES = 300 * 1024 * 1024 // 300 MB
  * Verifies the per-slug session cookie owns the invitation, resolves it to
  * an id, and uploads to invitation-media/<id>/<timestamp>-<safe-name>.<ext>.
  * Returns the public URL.
+ *
+ * DEPRECATED for the browser: this proxies the bytes THROUGH the serverless
+ * function, so it is capped at Vercel's 4.5 MB request-body limit (files
+ * 4.5–12 MB fail in production even though the app allows up to 12 MB). New
+ * client uploads go direct-to-Storage via /api/upload/sign + /api/upload/verify
+ * (see src/editor/lib/uploadFile.ts). Kept for backward-compat / small payloads.
  */
 export async function POST(req: Request) {
   const limited = await enforceRateLimit(req, 'upload', { windowMs: 60_000, max: 20 })
@@ -104,47 +109,4 @@ export async function POST(req: Request) {
 
   const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path)
   return NextResponse.json({ ok: true, url: pub.publicUrl, path })
-}
-
-/** Verify a buffer's leading bytes match the declared image MIME type. */
-function imageSignatureMatches(mime: string, b: Uint8Array): boolean {
-  const at = (i: number) => b[i]
-  switch (mime) {
-    case 'image/jpeg':
-      return at(0) === 0xff && at(1) === 0xd8 && at(2) === 0xff
-    case 'image/png':
-      return at(0) === 0x89 && at(1) === 0x50 && at(2) === 0x4e && at(3) === 0x47
-    case 'image/gif':
-      // "GIF8"
-      return at(0) === 0x47 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x38
-    case 'image/webp':
-      // "RIFF" .... "WEBP"
-      return (
-        at(0) === 0x52 && at(1) === 0x49 && at(2) === 0x46 && at(3) === 0x46 &&
-        at(8) === 0x57 && at(9) === 0x45 && at(10) === 0x42 && at(11) === 0x50
-      )
-    default:
-      return false
-  }
-}
-
-/**
- * True if the buffer starts with one of the common audio container signatures.
- * Lenient by design (matches the format family, not the exact declared MIME)
- * because browsers report m4a/aac content-types inconsistently — the goal is to
- * block non-audio binaries, not to police the exact codec.
- */
-function audioSignatureMatches(b: Uint8Array): boolean {
-  if (b.length < 12) return false
-  const ascii = (offset: number, s: string) => {
-    for (let i = 0; i < s.length; i++) if (b[offset + i] !== s.charCodeAt(i)) return false
-    return true
-  }
-  if (ascii(0, 'ID3')) return true                         // MP3 with ID3v2 tag
-  if (b[0] === 0xff && (b[1] & 0xe0) === 0xe0) return true  // MPEG / ADTS frame sync (mp3, aac)
-  if (ascii(0, 'RIFF') && ascii(8, 'WAVE')) return true     // WAV
-  if (ascii(0, 'OggS')) return true                         // OGG / Opus
-  if (ascii(4, 'ftyp')) return true                         // M4A / MP4 audio (ISO-BMFF)
-  if (ascii(0, 'ADIF')) return true                         // AAC ADIF
-  return false
 }

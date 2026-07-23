@@ -5,6 +5,7 @@ import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
+import { uploadFile } from '@/editor/lib/uploadFile'
 import { type MusicSourceKind } from '@/lib/music/source'
 import ctrl from './dashboardControls.module.css'
 
@@ -66,18 +67,8 @@ export default function MusicTab({ slug, initial, onSaved }: Props) {
     setUploading(true)
     setSaveMsg(null)
     try {
-      const form = new FormData()
-      form.append('slug', slug)
-      form.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: form })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        setSaveMsg({ kind: 'err', text: err.error || `${t.uploadFailed} (${res.status})` })
-        fb.fail(fm.uploadFail)
-        return
-      }
-      const data = await res.json()
-      update('url', data.url)
+      const { url } = await uploadFile(slug, file)
+      update('url', url)
       fb.ok(fm.musicUploaded)
     } catch (err: any) {
       setSaveMsg({ kind: 'err', text: err?.message || t.uploadFailed })

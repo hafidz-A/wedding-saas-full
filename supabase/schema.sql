@@ -154,9 +154,13 @@ create trigger trg_testimonials_updated
 --    invitation-media/<invitation_id>/<filename>
 --  Run AFTER the tables exist.
 -- ============================================================================
-insert into storage.buckets (id, name, public)
-values ('invitation-media', 'invitation-media', true)
-on conflict (id) do nothing;
+-- file_size_limit is the HARD per-file ceiling (12 MB, == MAX_AUDIO_BYTES in
+-- src/lib/upload/media.ts). Since uploads go direct-to-Storage via signed URLs,
+-- this bucket limit is the un-bypassable backstop; the app also enforces
+-- per-type limits (5 MB image / 12 MB audio) in /api/upload/verify.
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('invitation-media', 'invitation-media', true, 12582912) -- 12 * 1024 * 1024
+on conflict (id) do update set file_size_limit = excluded.file_size_limit;
 
 -- ============================================================================
 --  ROW LEVEL SECURITY (RLS)

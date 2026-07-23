@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { uploadFile } from './uploadFile'
 
 export function useUpload(slug: string) {
   const [isUploading, setIsUploading] = useState(false)
@@ -11,17 +12,8 @@ export function useUpload(slug: string) {
       setIsUploading(true)
       setError(null)
       try {
-        const form = new FormData()
-        form.append('slug', slug)
-        form.append('file', file)
-        const res = await fetch('/api/upload', { method: 'POST', body: form })
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}))
-          setError(err.error || `HTTP ${res.status}`)
-          return null
-        }
-        const data = await res.json()
-        return data.url as string
+        const { url } = await uploadFile(slug, file)
+        return url
       } catch (e: any) {
         setError(e?.message || 'Upload failed')
         return null
