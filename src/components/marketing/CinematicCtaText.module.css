@@ -1,0 +1,53 @@
+/* Departure-board 3D flip for the CTA label. Font/color/letter-spacing are
+   inherited from the parent .btnPrimary button — do not restate them here. */
+
+.flip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 540px;
+}
+
+.sizer {
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  opacity: 0;
+  transform: rotateX(-92deg);
+  transform-origin: center;
+  backface-visibility: hidden;
+  filter: blur(1.5px);
+  transition:
+    transform 0.6s var(--ease-out),
+    opacity 0.5s ease,
+    filter 0.6s ease;
+  will-change: transform, opacity;
+}
+
+.layer[data-state='current'] {
+  opacity: 1;
+  transform: rotateX(0deg);
+  filter: blur(0);
+}
+
+.layer[data-state='leaving'] {
+  opacity: 0;
+  transform: rotateX(92deg);
+  filter: blur(1.5px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer {
+    transition: none;
+    filter: none;
+  }
+}

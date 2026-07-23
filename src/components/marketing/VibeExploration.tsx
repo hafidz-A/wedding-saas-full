@@ -15,6 +15,7 @@ import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories
 import { VibeBackdrop } from './VibeBackdrop'
 import { PreviewMock } from './PreviewMock'
 import { PlansModal } from './PlansModal'
+import { CinematicCtaText } from './CinematicCtaText'
 import { readableOn } from '@/lib/color'
 import styles from './VibeExploration.module.css'
 
@@ -28,6 +29,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
   const [templateIndex, setTemplateIndex] = useState(0)
   const [paletteIndex, setPaletteIndex] = useState(0)
   const [plansOpen, setPlansOpen] = useState(false)
+  const [ctaHover, setCtaHover] = useState(false)
 
   // Pin the section and scrub its content: the user scrolls through ALL of the
   // content (however tall) while the cosmic/botanical backdrop stays put, and
@@ -406,9 +408,12 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                       style={{ background: palette.accent, color: accentText }}
                       aria-haspopup="dialog"
                       aria-expanded={plansOpen}
+                      aria-label={t.buy}
                       onClick={() => setPlansOpen(true)}
+                      onMouseEnter={() => setCtaHover(true)}
+                      onMouseLeave={() => setCtaHover(false)}
                     >
-                      {t.buy}
+                      <CinematicCtaText texts={[t.buy, t.buyAlt]} paused={ctaHover} />
                     </button>
                   </div>
 
