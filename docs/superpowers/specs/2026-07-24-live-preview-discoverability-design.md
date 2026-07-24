@@ -1,7 +1,8 @@
 # Live-preview discoverability — design
 
 **Date:** 2026-07-24
-**Status:** Phase B approved and implemented; Phase C recorded, deferred.
+**Status:** Phase B implemented (`feat/live-preview-discoverability`);
+Phase C implemented (`feat/live-preview-discoverability-part-2`).
 **Surface:** marketing landing → `VibeExploration` (section `#vibe`).
 
 ---
@@ -114,33 +115,54 @@ ring for keyboard users, and the lift suppressed under `prefers-reduced-motion`.
 
 ---
 
-## Phase C — in-page live preview (deferred, not built)
+## Phase C — in-page live preview (implemented)
 
-Recorded at the user's request so the option is not lost.
+Clicking the preview now opens the real demo invitation in a full-screen drawer over
+the landing page — `<iframe src="/{template}/{demoSlug}?embed=1">` — instead of
+switching tabs. The visitor never leaves the funnel, so see → trust → buy runs as one
+continuous motion. C builds on B rather than replacing it: the card is still the door;
+only the destination changed.
 
-**Idea.** Clicking the preview opens the real demo invitation in a full-screen in-page
-drawer — an `<iframe src={`/${template.id}/${template.demoSlug}?embed=1`}>` — instead
-of switching tabs. The visitor never leaves the funnel, so the sequence becomes
-see → trust → buy in a single continuous motion.
+### Components
 
-**Why it is attractive.** `?embed=1` already exists and is already used by
-`PhoneFrameView`, so the rendering path is proven. Removing the tab switch removes the
-main drop-off point between "curious" and "convinced".
+- `src/components/marketing/LivePreviewDrawer.tsx` + `.module.css` — the drawer.
+- `src/hooks/useOverlayLock.ts` — page-lock/restore, extracted from `PlansModal`.
+- `VibeExploration` owns the open/closed state and intercepts the trigger clicks.
 
-**Why it is deferred — the real risks.**
+### How each risk was resolved
 
-- **Lenis scroll lock.** Overlays on Lenis-scrolled marketing pages must call
-  `window.__lenis.stop()` and set `data-lenis-prevent`, or scrolling leaks to the page
-  behind the drawer.
-- **GSAP pin.** `VibeExploration` is pinned and scrubbed via `ScrollTrigger` on
-  desktop. Mounting a full-screen overlay inside a pinned, transformed subtree needs
-  care — most likely the drawer must portal out of the pinned container.
-- **Performance.** Both demos are heavy (Solary loads three.js). Mounting one inside
-  the landing page competes with the landing's own animation budget; the iframe must
-  mount lazily on open and unmount on close.
-- **Mobile.** On phones the drawer would effectively become the existing phone-frame
-  experience, so the two paths need reconciling rather than stacking.
+- **Lenis scroll lock.** `useOverlayLock` stops Lenis, sets `overflow: hidden` on both
+  `<html>` (the real scroller) and `<body>`, and pads `<html>` by the scrollbar width
+  so the page does not shift. Measured: 0px drift while open.
+- **GSAP pin.** The drawer is `createPortal`ed to `<body>`. This is not cosmetic —
+  `VibeExploration` is pinned and *transformed* by ScrollTrigger, and a
+  `position: fixed` child of a transformed ancestor positions against that ancestor
+  instead of the viewport, so an in-place overlay would be dragged along by the pin.
+- **Performance.** The drawer is mounted only while open, so closing removes the
+  iframe entirely and tears down the demo's loops (Solary boots three.js). Verified: 0
+  iframes remain in the DOM after close.
+- **Mobile.** The drawer is full-bleed at phone widths, so the invitation renders at
+  the real device width and its own mobile layout applies. `?embed=1` doubles as the
+  recursion guard on the invitation page — without it a phone UA would bounce into
+  `PhoneFrameView` and nest a frame inside a frame.
 
-**Sequencing.** Phase C should build on top of Phase B, not replace it: the card stays
-the door, and only the door's destination changes from a new tab to an in-page drawer.
-Ship B, watch how it performs, then decide whether C is worth the risk.
+### Deliberate decisions
+
+- **Chrome is fixed dark, not palette-themed.** The palette surfaces are translucent
+  (they sit on the section's own gradient); over the drawer scrim they turn muddy grey
+  and fight the invitation. Only the accent dot and the loading spinner stay themed.
+- **The trigger stays a real link.** Only an unmodified left-click is intercepted —
+  middle-click, Cmd/Ctrl and Shift still open a genuine tab, and the `href` means the
+  preview survives with JS disabled. The drawer also carries an explicit
+  "open in new tab" escape hatch for bookmarking, sharing, and as a fallback if the
+  frame fails.
+- **Focus restore uses `preventScroll`.** Without it, returning focus to the tall
+  preview card scrolls it into view and yanks the page ~180px on close. This was
+  caught in testing, not theory.
+
+### Known follow-up
+
+`ManualPayModal` and `LegalModal` still carry their own partial copies of the
+page-lock logic and should be migrated onto `useOverlayLock`. `PlansModal` — the
+original source of the pattern — still has the un-fixed `focus()` restore and would
+pick up the `preventScroll` fix for free by migrating.

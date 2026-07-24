@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { gsap } from 'gsap'
@@ -14,6 +14,7 @@ import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories
 import { VibeBackdrop } from './VibeBackdrop'
 import { PreviewMock } from './PreviewMock'
 import { PlansModal } from './PlansModal'
+import { LivePreviewDrawer } from './LivePreviewDrawer'
 import { CinematicCtaText } from './CinematicCtaText'
 import { readableOn } from '@/lib/color'
 import styles from './VibeExploration.module.css'
@@ -28,6 +29,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
   const [templateIndex, setTemplateIndex] = useState(0)
   const [paletteIndex, setPaletteIndex] = useState(0)
   const [plansOpen, setPlansOpen] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [ctaHover, setCtaHover] = useState(false)
 
   // Pin the section and scrub its content: the user scrolls through ALL of the
@@ -127,6 +129,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
     setTemplateIndex(((next % len) + len) % len)
     setPaletteIndex(0)
     setPlansOpen(false)
+    setPreviewOpen(false)
   }
 
   const switchCategory = (id: string) => {
@@ -135,6 +138,19 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
     setTemplateIndex(0)
     setPaletteIndex(0)
     setPlansOpen(false)
+    setPreviewOpen(false)
+  }
+
+  /**
+   * Plain left-click opens the invitation in the in-page drawer. Every genuine
+   * "new tab" intent — middle-click, Cmd/Ctrl, Shift — is handed back to the
+   * browser untouched, and the trigger stays a real `href`, so the preview still
+   * works if JS never runs.
+   */
+  const openPreview = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+    e.preventDefault()
+    setPreviewOpen(true)
   }
 
   const accentText = useMemo(() => readableOn(palette?.accent ?? '#E8553E'), [palette?.accent])
@@ -341,6 +357,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                 className={styles.previewDoor}
                 style={{ color: palette.accent }}
                 aria-label={`${t.previewOpen} — ${template.label}`}
+                onClick={openPreview}
               >
                 <PreviewMock
                   templateId={template.id}
@@ -405,6 +422,7 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                         borderColor: palette.accent,
                         background: `${palette.accent}30`,
                       }}
+                      onClick={openPreview}
                     >
                       {t.viewLive}
                       {/* Inline SVG, not the ↗ glyph: U+2197 falls back to the
@@ -453,6 +471,21 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
           </div>
         </div>
       </div>
+
+      {/* Mounted only while open, so closing tears the demo's animation loops
+          down instead of leaving them running behind the landing page. */}
+      {previewOpen && (
+        <LivePreviewDrawer
+          src={`${previewHref}?embed=1`}
+          href={previewHref}
+          templateLabel={template.label}
+          palette={palette}
+          closeLabel={t.previewClose}
+          newTabLabel={t.previewNewTab}
+          loadingLabel={t.previewLoading}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
 
       {plansOpen && (
         <PlansModal
