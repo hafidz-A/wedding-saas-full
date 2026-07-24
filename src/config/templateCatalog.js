@@ -2,6 +2,17 @@
    TEMPLATE CATALOG — static display metadata for the /templates gallery and
    the onboarding template picker. Plain data, client-safe (no component or
    Three.js imports). Keep `id` in sync with src/config/templateIndex.js.
+
+   NOT the source of truth for anything an operator edits. Pricing, plan names
+   and feature lists live in the `template_plans` table and are edited at
+   /admin/templates; display metadata (label, tags, accent, taglines, blurbs)
+   lives in the `templates` table, same editor. This file is only the code-level
+   fallback for those (see src/lib/templates/catalog.ts) plus the two fields
+   that must exist in code: `id` and `demoSlug`.
+
+   Do NOT reintroduce a `plans` array here — a second copy of prices/features
+   silently drifts from the DB and can show a customer a price checkout won't
+   honour. Removed 2026-07-24 for exactly that reason.
    ============================================================================ */
 export const templateCatalog = [
   {
@@ -14,12 +25,6 @@ export const templateCatalog = [
     thumbnail: '/images/templates/lovebirds-thumb.jpg',
     accent: '#E8553E',
     tags: ['cinematic', 'elegant', 'botanical'],
-    // PLACEHOLDER plans — edit name/price/features freely. Each template can
-    // have its own plans. Payment/DB wiring is intentionally not connected yet.
-    plans: [
-      { id: 'basic', name: 'Basic', price: 'Rp 149.000', amountIDR: 149000, features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
-      { id: 'premium', name: 'Premium', price: 'Rp 299.000', amountIDR: 299000, features: ['Galeri unlimited', 'Tanpa watermark', 'Musik'] },
-    ],
   },
   {
     id: 'solary',
@@ -31,11 +36,6 @@ export const templateCatalog = [
     thumbnail: '/images/templates/solary-thumb.jpg',
     accent: '#6B35A8',
     tags: ['futuristic', 'space', '3D'],
-    // PLACEHOLDER plans — edit freely.
-    plans: [
-      { id: 'basic', name: 'Basic', price: 'Rp 149.000', amountIDR: 149000, features: ['RSVP', 'Buku tamu', 'Galeri terbatas'] },
-      { id: 'premium', name: 'Premium', price: 'Rp 299.000', amountIDR: 299000, features: ['Galeri unlimited', 'Palette switcher', 'Musik'] },
-    ],
   },
 ]
 
