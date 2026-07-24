@@ -53,7 +53,7 @@ export default async function HomePage() {
           {/* 2. Emotional Hook */}
           <EmotionalHook t={t.landing.emotionalHook} />
 
-          {/* 3. Template + Palette Explorer (replaces the old TemplateShowcase) */}
+          {/* 3. Template + Palette Explorer */}
           <VibeExploration lang={lang} t={t.landing.vibeExploration} plans={plansByTemplate} templates={templates} />
 
           {/* 4. Invitation Feature Experience */}
