@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "../contexts/ThemeContext.jsx";
 import { PALETTES } from "../config/themeTokens.js";
 import { DEVICE_PRESETS } from "@/lib/preview/devicePresets";
+import { PaletteHint } from "@/components/preview/PaletteHint";
 
 export default function PaletteSwitcher({ hideDevices = false }) {
   const { palette, setPalette, device, setDevice } = useTheme();
@@ -69,12 +70,17 @@ export default function PaletteSwitcher({ hideDevices = false }) {
       <button
         ref={toggleRef}
         className="theme-controller-toggle"
+        data-palette-toggle
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle theme settings"
         title="Pilih Tema"
       >
         🎨
       </button>
+
+      {/* Points newcomers at the 🎨 — see PaletteHint. Lives here so it follows
+          the switcher into every context it renders in (full page + embed). */}
+      <PaletteHint />
 
       {/* Theme Selection Panel */}
       {isOpen && (

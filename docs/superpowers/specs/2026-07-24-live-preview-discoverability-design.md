@@ -188,6 +188,40 @@ Where a stored choice also exists, the URL wins: it is an explicit intent carrie
 the link the visitor just followed, whereas `sessionStorage` is a leftover from an
 earlier visit.
 
+### Coach mark on the 🎨 switcher
+
+Same discoverability failure one layer deeper: visitors reach the preview, admire it,
+and leave without ever noticing that the palette and ornaments are theirs to play
+with. The switcher is a small unlabelled emoji in a corner, competing with a
+full-screen cinematic page.
+
+`src/components/preview/PaletteHint.tsx` is a one-time coach mark that points at it.
+
+- **Template-agnostic by contract.** It finds the switcher via `data-palette-toggle`
+  and *measures* it, rather than hard-coding a corner — Lovebirds and Solary already
+  sit at different offsets (20px vs 24px) under different styling systems, so a fixed
+  position would drift. A new template only has to tag its toggle.
+- **Rendered inside each `PaletteSwitcher`**, not in the Shells. That way it follows
+  the switcher into every context it appears in (full page and embed) and can never
+  render as an arrow pointing at a button that isn't there.
+- **Anchored bottom-up.** The bubble's bottom edge aligns with the toggle's bottom
+  edge and it grows upward, with the arrow offset back to the toggle's centre.
+  Centring a ~150px bubble on a corner toggle hung it off the bottom of the viewport —
+  caught in testing.
+- **Quiet by design.** Appears after 2.4s so the hero lands first, auto-hides after
+  14s, retires the moment the switcher is opened (it has done its job), and is
+  remembered per session so it never nags.
+- Solid dark bubble rather than palette-themed, for the same reason as the drawer
+  chrome: it must stay legible over every template, palette, and background photo.
+
+The drawer's iframe now also carries `sw=1`, which keeps the switcher inside the
+frame (its device picker stays hidden in embed mode) — otherwise the palette was only
+playable in a full tab, and the coach mark would have had nothing to point at.
+
+Copy is hardcoded Indonesian, matching the surrounding template chrome
+(`PaletteSwitcher` already ships "Pilih tema", "Burung", "Kupu"). If template chrome
+is ever moved onto the i18n dictionaries, this should move with it.
+
 ### Known follow-up
 
 `ManualPayModal` and `LegalModal` still carry their own partial copies of the

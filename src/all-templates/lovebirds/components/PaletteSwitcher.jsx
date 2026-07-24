@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useTheme } from './ThemeProvider.jsx'
 import { THEME_META, THEME_GROUPS } from '../config/applyTheme.js'
 import { DEVICE_PRESETS } from '@/lib/preview/devicePresets'
+import { PaletteHint } from '@/components/preview/PaletteHint'
 import styles from './PaletteSwitcher.module.css'
 
 /**
@@ -60,10 +61,15 @@ export default function PaletteSwitcher({ hideDevices = false }) {
       <button
         ref={toggleRef}
         className={styles.toggle}
+        data-palette-toggle
         onClick={() => setOpen((v) => !v)}
         aria-label="Pilih tema"
         title="Pilih tema"
       >🎨</button>
+
+      {/* Points newcomers at the 🎨 — see PaletteHint. Lives here so it follows
+          the switcher into every context it renders in (full page + embed). */}
+      <PaletteHint />
 
       {open && (
         <div ref={panelRef} className={styles.panel} role="radiogroup" aria-label="Pilih tema" data-lenis-prevent>

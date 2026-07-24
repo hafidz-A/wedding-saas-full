@@ -184,7 +184,10 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
   // belt-and-braces path for the frame.
   const themeQuery = `theme=${encodeURIComponent(palette.key)}`
   const previewHref = `${demoHref}?${themeQuery}`
-  const previewSrc = `${demoHref}?embed=1&${themeQuery}`
+  // `sw=1` keeps the 🎨 switcher inside the frame (its device picker stays
+  // hidden in embed mode), so the palette stays playable in the drawer instead
+  // of only in a full tab.
+  const previewSrc = `${demoHref}?embed=1&sw=1&${themeQuery}`
   const themePayload =
     template.id === 'solary' ? { palette: palette.key } : { theme: palette.key }
 
