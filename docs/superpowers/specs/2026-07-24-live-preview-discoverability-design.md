@@ -160,6 +160,34 @@ only the destination changed.
   preview card scrolls it into view and yanks the page ~180px on close. This was
   caught in testing, not theory.
 
+### Palette hand-off
+
+The explorer's whole promise is "see it in *this* palette", so the palette the
+visitor picked has to survive the click. `palette.key` is already the template's own
+theme key — `vibeData` derives the marketing palettes straight from
+`lovebirds/config/applyTheme.js` (`THEME_ORDER`) and `solary/config/themeTokens.js`
+(`PALETTES`) — so there is no mapping table to keep in sync.
+
+It is carried two ways, deliberately:
+
+1. **`?theme=<key>` on every link and on the iframe `src`.** This is the primary
+   path. It makes the framed invitation correct from first paint (no flash of the
+   default palette) and, because it rides on the URL, it also survives Cmd/middle-click,
+   the drawer's new-tab escape hatch, link sharing, and JS being disabled.
+2. **`postMessage` after the frame's `ready` handshake**, using each template's existing
+   embed bridge (`{ theme }` for Lovebirds, `{ palette }` for Solary). Belt and braces
+   for the framed view.
+
+**The URL param is demo-only by construction.** Both providers read it inside their
+existing `allowGuestSwitch` branch, and `allowGuestSwitch={isDemo}` — so a guest can
+never re-theme a couple's published invitation by editing the URL. The value is also
+validated (`isThemeName` / `PALETTES[key]`) before use, so a junk param falls through
+to the normal default.
+
+Where a stored choice also exists, the URL wins: it is an explicit intent carried by
+the link the visitor just followed, whereas `sessionStorage` is a leftover from an
+earlier visit.
+
 ### Known follow-up
 
 `ManualPayModal` and `LegalModal` still carry their own partial copies of the

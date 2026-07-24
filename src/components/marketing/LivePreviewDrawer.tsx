@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'motion/react'
 import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
@@ -36,6 +36,7 @@ export function LivePreviewDrawer({
   href,
   templateLabel,
   palette,
+  themePayload,
   closeLabel,
   newTabLabel,
   loadingLabel,
@@ -45,13 +46,47 @@ export function LivePreviewDrawer({
   href: string
   templateLabel: string
   palette: Palette
+  /** Theme state to push into the frame — `{ theme }` for Lovebirds,
+   *  `{ palette }` for Solary. Shapes are set by each template's embed bridge. */
+  themePayload: Record<string, string>
   closeLabel: string
   newTabLabel: string
   loadingLabel: string
   onClose: () => void
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const [loaded, setLoaded] = useState(false)
+
+  const payloadRef = useRef(themePayload)
+  payloadRef.current = themePayload
+  const payloadKey = JSON.stringify(themePayload)
+
+  /**
+   * Carry the palette the visitor chose in the explorer into the invitation, so
+   * clicking through on "Blossom Velvet" opens a Blossom Velvet invitation
+   * rather than the template default.
+   *
+   * Handshake (defined by each template's embed bridge): the framed page posts
+   * `ready` once it mounts, and we answer with the theme. Waiting for `ready`
+   * rather than firing blind is what makes this reliable — a message sent
+   * before the bridge has attached its listener is simply lost.
+   */
+  useEffect(() => {
+    const origin = window.location.origin
+    const post = () =>
+      iframeRef.current?.contentWindow?.postMessage(
+        { source: 'fincards-preview', kind: 'theme', payload: payloadRef.current },
+        origin,
+      )
+    post()
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== origin) return
+      if (e.data?.source === 'fincards-preview' && e.data?.kind === 'ready') post()
+    }
+    window.addEventListener('message', onMsg)
+    return () => window.removeEventListener('message', onMsg)
+  }, [payloadKey])
 
   useEscapeToClose(onClose)
   useOverlayLock(panelRef)
@@ -137,10 +172,19 @@ export function LivePreviewDrawer({
             </div>
           )}
           <iframe
+            ref={iframeRef}
             className={styles.frame}
             src={src}
             title={templateLabel}
-            onLoad={() => setLoaded(true)}
+            onLoad={(e) => {
+              setLoaded(true)
+              // Belt and braces: if `ready` fired before this effect's listener
+              // was attached, this second push still lands the palette.
+              e.currentTarget.contentWindow?.postMessage(
+                { source: 'fincards-preview', kind: 'theme', payload: payloadRef.current },
+                window.location.origin,
+              )
+            }}
             data-loaded={loaded ? '' : undefined}
           />
         </div>

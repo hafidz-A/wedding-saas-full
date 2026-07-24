@@ -9,6 +9,16 @@ const DEVICE_STORAGE_KEY = "galactic:device";
 export function ThemeProvider({ defaultPalette = DEFAULT_PALETTE, options, allowGuestSwitch = true, children }) {
   const [palette, setPaletteState] = useState(() => {
     if (allowGuestSwitch) {
+      // `?theme=` lets the marketing palette explorer hand its selection to the
+      // demo, so clicking through on "Emerald Velvet" opens an Emerald Velvet
+      // invitation instead of the default. It wins over the stored choice: it is
+      // an explicit intent carried by the link the visitor just followed.
+      // Demo-only by construction — `allowGuestSwitch` is false on a published
+      // invitation, so a guest can never re-theme a couple's page via the URL.
+      try {
+        const q = new URLSearchParams(window.location.search).get("theme");
+        if (q && PALETTES[q]) return q;
+      } catch {}
       try {
         const saved = sessionStorage.getItem(STORAGE_KEY);
         if (saved && PALETTES[saved]) return saved;

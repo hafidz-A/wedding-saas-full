@@ -37,6 +37,16 @@ export default function ThemeProvider({
 
   const [theme, setThemeState] = useState(() => {
     if (allowGuestSwitch && typeof window !== 'undefined') {
+      // `?theme=` lets the marketing palette explorer hand its selection to the
+      // demo, so clicking through on "Blossom Velvet" opens a Blossom Velvet
+      // invitation instead of the default. It wins over the stored choice: it is
+      // an explicit intent carried by the link the visitor just followed.
+      // Demo-only by construction — `allowGuestSwitch` is false on a published
+      // invitation, so a guest can never re-theme a couple's page via the URL.
+      try {
+        const q = new URLSearchParams(window.location.search).get('theme')
+        if (q && isThemeName(q)) return q
+      } catch {}
       try {
         const saved = sessionStorage.getItem(STORAGE_KEY)
         if (saved && isThemeName(saved)) return saved

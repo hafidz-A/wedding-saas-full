@@ -170,8 +170,23 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
   // never from a hardcoded copy. If the DB read fails we show no plan rather
   // than a stale price the checkout would refuse to honour.
   const displayPlans: PlanDisplay[] = plans?.[template.id] ?? []
-  const previewHref = `/${template.id}/${template.demoSlug}`
+  const demoHref = `/${template.id}/${template.demoSlug}`
   const buyHref = `/onboarding?template=${template.id}`
+
+  // Carry the chosen palette into the invitation. `palette.key` IS the template's
+  // own theme key — vibeData derives these straight from the template configs
+  // (Lovebirds THEME_ORDER, Solary PALETTES), so no lookup table is needed.
+  //
+  // Both routes carry it, so every way into the invitation lands on the same
+  // palette: `?theme=` covers real navigation (Cmd/middle-click, the drawer's
+  // new-tab escape hatch, JS disabled) AND makes the framed view correct from
+  // first paint instead of flashing the default; postMessage below stays as the
+  // belt-and-braces path for the frame.
+  const themeQuery = `theme=${encodeURIComponent(palette.key)}`
+  const previewHref = `${demoHref}?${themeQuery}`
+  const previewSrc = `${demoHref}?embed=1&${themeQuery}`
+  const themePayload =
+    template.id === 'solary' ? { palette: palette.key } : { theme: palette.key }
 
   return (
     <section
@@ -476,10 +491,11 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
           down instead of leaving them running behind the landing page. */}
       {previewOpen && (
         <LivePreviewDrawer
-          src={`${previewHref}?embed=1`}
+          src={previewSrc}
           href={previewHref}
           templateLabel={template.label}
           palette={palette}
+          themePayload={themePayload}
           closeLabel={t.previewClose}
           newTabLabel={t.previewNewTab}
           loadingLabel={t.previewLoading}
