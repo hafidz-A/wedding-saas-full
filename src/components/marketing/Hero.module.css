@@ -86,6 +86,11 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Was a motion.div with initial={{opacity:0}}. That kept the hero copy —
+     the LCP element — invisible until React hydrated, measured at 6.3s LCP on
+     Slow 4G / 4x CPU. CSS runs as soon as the stylesheet lands, so the same
+     entrance no longer waits on the JS bundle. */
+  animation: hero-copy-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .kicker {
@@ -120,6 +125,8 @@
 
 .word {
   display: inline-block;
+  /* --word-delay is set per word inline, reproducing the old motion stagger. */
+  animation: hero-word-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--word-delay, 0s) both;
 }
 
 .scriptWord {
@@ -131,6 +138,9 @@
   display: inline-block;
   transform: translateY(12px) rotate(-3deg);
   text-shadow: 0 0 1px rgba(232, 85, 62, 0.05);
+  /* Separate keyframe: this word rests at an offset/rotation, so it cannot
+     share .word's land-at-zero animation. */
+  animation: hero-script-word-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) var(--word-delay, 0s) both;
 }
 
 .subtitle {
@@ -150,12 +160,38 @@
   margin-top: 40px;
 }
 
+/* Risk-reversal line under the hero CTAs — the offer is the strongest thing
+   we can say here, so it sits where the click decision is made. */
+.reassure {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-light);
+  line-height: var(--leading-relaxed);
+  color: var(--color-charcoal-light);
+  margin: var(--space-4) 0 0;
+  /* No ch-based max-width: at 13px it clamped far narrower than the copy
+     column and forced a needless wrap. The grid column is the real bound. */
+  /* Flex so each clause wraps whole — a bare <p> orphans the "·" separator. */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+}
+
+.reassureClause { white-space: nowrap; }
+/* Separator trails its clause, so a wrap leaves the dot at the end of a line
+   rather than orphaned at the start of the next one. */
+.reassureClause:not(:last-child)::after {
+  content: ' ·';
+  opacity: 0.55;
+}
+
 /* Luxury Phone Mockup */
 .visual {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  animation: hero-visual-in 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
 }
 
 .phoneGlow {
@@ -289,6 +325,7 @@
   gap: var(--space-2);
   z-index: 3;
   pointer-events: none;
+  animation: hero-scroll-pulse 2.2s ease-in-out 1.8s infinite both;
 }
 
 .scrollText {
@@ -341,4 +378,45 @@
   20% { opacity: 1; }
   80% { transform: translate(-50%, 8px); opacity: 0; }
   100% { transform: translate(-50%, 0); opacity: 0; }
+}
+
+/* Hero entrance — ported 1:1 from the motion props these elements used to
+   carry, so the timing and easing are unchanged; only the driver moved from
+   JS to CSS. See .copy for why. */
+@keyframes hero-copy-in {
+  from { opacity: 0; transform: translateY(35px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-word-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes hero-script-word-in {
+  from { transform: translateY(100%) rotate(-3deg); }
+  to { transform: translateY(12px) rotate(-3deg); }
+}
+
+@keyframes hero-visual-in {
+  from { opacity: 0; transform: scale(0.95) translateY(40px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes hero-scroll-pulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.75; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Drop the entrances entirely — every element's resting state is already
+     its visible state, so removing the animation cannot hide content. */
+  .copy,
+  .word,
+  .scriptWord,
+  .visual,
+  .scrollIndicator,
+  .wheel {
+    animation: none;
+  }
 }

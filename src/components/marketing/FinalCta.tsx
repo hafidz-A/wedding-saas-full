@@ -55,6 +55,11 @@ export function FinalCta({ t }: { t: Dict['landing']['finalCta'] }) {
               {t.cta}
               <span className={cta.arrow}>↓</span>
             </Link>
+            <p className={styles.reassure}>
+              {t.reassure.split('·').map((clause, i) => (
+                <span key={i} className={styles.reassureClause}>{clause.trim()}</span>
+              ))}
+            </p>
           </motion.div>
         </div>
       </div>

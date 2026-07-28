@@ -1,15 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { motion } from 'motion/react'
 import type { Dict } from '@/lib/i18n'
-import { Hero3dBackground } from './Hero3dBackground'
 import styles from './Hero.module.css'
 import cta from './cta.module.css'
 
-export function Hero({ t }: { t: Dict['landing']['hero'] }) {
+/* three.js is ~the largest dependency on the marketing landing and this
+   background is purely decorative. Loading it statically put all of three.js
+   in the bundle that has to hydrate before the hero copy paints — measured
+   LCP 6.3s on Slow 4G / 4x CPU. Deferred so it can never block first paint. */
+const Hero3dBackground = dynamic(
+  () => import('./Hero3dBackground').then((m) => m.Hero3dBackground),
+  { ssr: false },
+)
+
+export function Hero({ t, priceFrom }: { t: Dict['landing']['hero']; priceFrom?: string | null }) {
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
+
+  /* Decide client-side whether the decorative WebGL layer is worth its cost.
+     Because Hero3dBackground is a dynamic ssr:false import, not rendering it
+     means three.js is never even requested — phones skip the download and the
+     main-thread work entirely, not just the particles. */
+  const [showBackdrop, setShowBackdrop] = useState(false)
+  useEffect(() => {
+    const wideEnough = window.matchMedia('(min-width: 768px)').matches
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    setShowBackdrop(wideEnough && !reducedMotion)
+  }, [])
+
+  const reassureClauses = [
+    ...(priceFrom ? [t.priceFrom.replace('{price}', priceFrom)] : []),
+    ...t.reassure.split('·').map((c) => c.trim()),
+  ]
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const card = e.currentTarget
@@ -33,8 +58,8 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
 
   return (
     <section className={styles.hero}>
-      {/* 3D WebGL Background */}
-      <Hero3dBackground />
+      {/* 3D WebGL Background — desktop, motion-friendly viewers only */}
+      {showBackdrop && <Hero3dBackground />}
 
       {/* Cinematic Ambient Washes */}
       <div className={styles.washes} aria-hidden="true">
@@ -55,27 +80,22 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
       </div>
 
       <div className={styles.inner}>
-        {/* Editorial Title & Copy */}
-        <motion.div 
-          className={styles.copy}
-          initial={{ opacity: 0, y: 35 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-        >
+        {/* Editorial Title & Copy — entrance is CSS-driven on purpose: this
+            block holds the LCP element, so it must paint straight from the
+            server HTML instead of waiting for JS to hydrate. */}
+        <div className={styles.copy}>
           <span className={styles.kicker}>{t.kicker}</span>
           <h1 className={styles.title}>
             {t.title.split(' ').map((word, i) => {
               const isScript = word.toLowerCase().includes('sinematik') || word.toLowerCase().includes('cinematically')
               return (
                 <span key={i} className={styles.wordWrap}>
-                  <motion.span
+                  <span
                     className={isScript ? styles.scriptWord : styles.word}
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    transition={{ delay: i * 0.08 + 0.2, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ '--word-delay': `${(i * 0.08 + 0.2).toFixed(2)}s` } as React.CSSProperties}
                   >
                     {word}{' '}
-                  </motion.span>
+                  </span>
                 </span>
               )
             })}
@@ -87,20 +107,17 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
               {t.ctaPrimary}
               <span className={cta.arrow}>↓</span>
             </Link>
-            <Link href="/#vibe" className={cta.ctaSecondary}>
-              {t.ctaSecondary}
-            </Link>
           </div>
-        </motion.div>
+          <p className={styles.reassure}>
+            {reassureClauses.map((clause, i) => (
+              <span key={i} className={styles.reassureClause}>{clause}</span>
+            ))}
+          </p>
+        </div>
 
-        {/* 3D-Floating Phone Preview Card */}
-        <motion.div 
-          className={styles.visual}
-          initial={{ opacity: 0, scale: 0.95, y: 40 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-          aria-hidden="true"
-        >
+        {/* 3D-Floating Phone Preview Card. Entrance is CSS; the inner tilt
+            stays on motion because it is a pointer-driven enhancement. */}
+        <div className={styles.visual} aria-hidden="true">
           <div className={styles.phoneGlow} />
           <motion.div 
             className={styles.phone}
@@ -133,21 +150,16 @@ export function Hero({ t }: { t: Dict['landing']['hero'] }) {
               </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll Down Indicator */}
-      <motion.div 
-        className={styles.scrollIndicator}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 0.75, 0] }}
-        transition={{ delay: 1.8, repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-      >
+      <div className={styles.scrollIndicator}>
         <span className={styles.scrollText}>Scroll to begin</span>
         <div className={styles.mouse}>
           <div className={styles.wheel} />
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }

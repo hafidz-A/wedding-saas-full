@@ -117,3 +117,27 @@
   font-weight: var(--weight-light);
 }
 
+/* Mirrors the hero's risk-reversal line so the offer is restated at the
+   highest-intent moment on the page. */
+.reassure {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-light);
+  line-height: var(--leading-relaxed);
+  color: var(--color-charcoal-light);
+  margin: var(--space-4) 0 0;
+  /* Flex so each clause wraps whole — a bare <p> orphans the "·" separator. */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 var(--space-2);
+}
+
+.reassureClause { white-space: nowrap; }
+/* Separator trails its clause, so a wrap leaves the dot at the end of a line
+   rather than orphaned at the start of the next one. */
+.reassureClause:not(:last-child)::after {
+  content: ' ·';
+  opacity: 0.55;
+}
+

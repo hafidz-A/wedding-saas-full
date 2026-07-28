@@ -10,11 +10,13 @@ import { SiteNav } from '@/components/site/SiteNav'
 import { SiteFooter } from '@/components/site/SiteFooter'
 import { SmoothScroll } from '@/components/marketing/SmoothScroll'
 import { Hero } from '@/components/marketing/Hero'
+import { TrustBar } from '@/components/marketing/TrustBar'
 import { EmotionalHook } from '@/components/marketing/EmotionalHook'
 import { VibeExploration } from '@/components/marketing/VibeExploration'
 import { Features } from '@/components/marketing/Features'
 import { HowItWorks } from '@/components/marketing/HowItWorks'
 import { Testimonials } from '@/components/marketing/Testimonials'
+import { Faq } from '@/components/marketing/Faq'
 import { FinalCta } from '@/components/marketing/FinalCta'
 import stack from '@/components/marketing/StackReveal.module.css'
 
@@ -25,6 +27,12 @@ export default async function HomePage() {
   const [rawPlans, templates] = await Promise.all([getAllTemplatePlans(), getTemplates()])
   const plansByTemplate: Record<string, PlanDisplay[]> = {}
   for (const tid of Object.keys(rawPlans)) plansByTemplate[tid] = rawPlans[tid].map(toPlanDisplay)
+
+  // Cheapest live plan across every template — the hero's "starting at" anchor.
+  // Stays null when plans are unavailable, so the hero simply omits the clause.
+  const cheapestPlan = Object.values(plansByTemplate)
+    .flat()
+    .reduce<PlanDisplay | null>((min, p) => (min === null || p.amountIDR < min.amountIDR ? p : min), null)
 
   // Approved (visible) customer testimonials. Safe-empty when Supabase is off.
   let testimonials: PublicTestimonial[] = []
@@ -45,7 +53,10 @@ export default async function HomePage() {
       <SmoothScroll />
       <main style={{ backgroundColor: 'var(--color-cream)' }}>
         {/* 1. Cinematic Hero */}
-        <Hero t={t.landing.hero} />
+        <Hero t={t.landing.hero} priceFrom={cheapestPlan?.price ?? null} />
+
+        {/* 1b. Trust strip — answers "is this legit?" before the stack pins. */}
+        <TrustBar t={t.landing.trustBar} />
 
         {/* 2-4. Cover-stack: EmotionalHook → Explorer → Features pin and the
             next section scrolls up to cover the previous (desktop only). */}
@@ -66,7 +77,10 @@ export default async function HomePage() {
         {/* 7. Testimonials / Social Proof */}
         <Testimonials t={t.landing.testimonials} items={testimonials} />
 
-        {/* 8. Final Emotional CTA */}
+        {/* 8. FAQ — clears the last objections right before the ask. */}
+        <Faq t={t.landing.faq} />
+
+        {/* 9. Final Emotional CTA */}
         <FinalCta t={t.landing.finalCta} />
       </main>
       <SiteFooter lang={lang} t={t.common} />
