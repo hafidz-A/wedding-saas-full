@@ -1,3 +1,37 @@
+> # ⛔ STOP — BACA SEBELUM MEMAKAI DOKUMEN INI
+>
+> **Dokumen ini dibangun di atas USP yang TIDAK ADA di produk.**
+>
+> Klaim "gratis merancang & preview, bayar hanya saat menerbitkan" / "rancang gratis,
+> bayar saat terbit" / "bikin dulu, bayar belakangan" — **SEMUANYA SALAH.**
+>
+> Yang benar, terverifikasi di `src/app/[template]/[slug]/dashboard/page.tsx`:
+> **FinCards bayar dulu.** Pemilik yang belum bayar kena `PaymentGate` ("Bayar Dulu")
+> dan **tidak bisa masuk editor sama sekali** — hanya bisa *melihat* undangannya yang
+> belum terbit. Tidak ada uji coba gratis.
+>
+> Satu-satunya yang gratis: **demo publik di landing** (slug `demo-*`), tanpa daftar.
+>
+> **Konsekuensinya:** setiap hook, brief, caption, dan baris tabel di bawah yang
+> memakai sudut "gratis/bayar-belakangan" **batal** — termasuk hook **C3 "Bikin dulu,
+> bayar belakangan"** beserta brief kreatifnya. Jangan tayangkan. Mengiklankan uji coba
+> yang tidak ada berisiko hukum dan memicu tuntutan refund.
+>
+> **Sudut pengganti yang sah** (lihat `ADS-LANDING.md`):
+> *"Undangannya kamu yang pegang. Bukan nunggu admin bales chat."* — kendali penuh +
+> revisi tanpa batas, ditambah demo lengkap tanpa daftar sebagai penurun risiko.
+>
+> Dokumen ini butuh **penulisan ulang**, bukan cari-ganti — beberapa brief runtuh
+> seluruhnya tanpa premis palsu itu.
+>
+> **Harga di dokumen ini juga salah.** Tertulis Basic Rp 149.000 / Premium Rp 299.000.
+> Harga sebenarnya (dibaca dari `template_plans`, 28 Juli 2026): Solary Basic
+> **Rp 149.999** · Lovebirds Basic **Rp 199.999** · Premium **Rp 249.999** (keduanya,
+> seumur hidup). Selalu cek `/admin/templates` sebelum tayang.
+>
+> ➡️ **Pengganti untuk hook: lihat `ADS-HOOKS-v2.md`** — 20 hook baru, semua klaim
+> sudah diverifikasi ke kode & DB. Direvisi 2026-07-28.
+
 # Hook Penghenti Scroll: wedding-saas-next
 > Dibuat 24 Juni 2026 | Sumber: produk lokal (undangan pernikahan digital sinematik)
 > Total hook: 20 | Angle: 5 (Pain · Curiosity · Social Proof · Contrarian · Urgency)

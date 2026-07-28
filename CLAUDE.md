@@ -20,8 +20,14 @@ for premium digital wedding invitations. Many couples, **several cinematic templ
 one row in `invitations` with its own slug, owner account, editor dashboard, RSVP / gift / guest
 databases, and buku-tamu (guest-book) ledger.
 
-Business model: **self-serve, one-time payment**. Couple signs up → picks a template → fills basic
-data → edits a live preview for free → **pays once (via Midtrans) to publish**. Plans are DB-driven per
+Business model: **self-serve, one-time payment — PAY FIRST**. Couple signs up → picks a template +
+plan → fills basic data → **pays once (via Midtrans)** → *only then* does the editor dashboard unlock →
+publishes → shares the link. **There is no free trial and no build-it-first-pay-later.** An unpaid
+`draft` owner hits `PaymentGate` ("Bayar Dulu") instead of the editor and can only *view* their own
+unpublished invitation — they cannot edit it (`src/app/[template]/[slug]/dashboard/page.tsx`, the
+`period.status === 'draft' || 'expired'` branch). The only genuinely free thing is the **public demo**
+on the marketing landing (`demo-*` slugs), which needs no signup. Never write "coba gratis" / "rancang
+gratis" / "bayar saat siap sebar" copy — it is false advertising. Plans are DB-driven per
 template (`basic` / `premium`); Premium unlocks the buku-tamu attendance ledger + QR check-in. Add-ons:
 extra guest quota (50-guest blocks), pay-the-difference upgrade to Premium, renewal when the active
 period expires. Phase: **go-to-market** (see the marketing assets in `docs/marketing/`).
