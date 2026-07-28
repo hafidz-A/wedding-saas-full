@@ -15,19 +15,26 @@ export const onboarding = {
       language: 'Bahasa dashboard',
       languageHint: 'Bahasa tampilan dashboard & editor. Bisa diganti kapan saja — tidak memengaruhi isi undangan.',
       bride: 'Nama mempelai perempuan',
-      bridePlaceholder: 'Apan Teh',
+      bridePlaceholder: 'Rani',
       groom: 'Nama mempelai pria',
-      groomPlaceholder: 'Apin Toh',
+      groomPlaceholder: 'Adi',
       date: 'Tanggal & jam acara',
       venue: 'Lokasi / venue',
       venuePlaceholder: 'Mason Pine, Bandung',
+      /* Shown under the date + venue fields. Both are editable later via the
+         hero section schema (`src/editor/schemas/hero.ts` — weddingDate, venue),
+         so this promise is safe to make. */
+      editableLater: 'Belum fix? Bisa diubah kapan saja lewat dashboard.',
       url: 'URL undangan kamu',
       urlPlaceholder: 'apan-apin',
       checking: 'Mengecek ketersediaan…',
       available: '✓ URL ini tersedia',
       urlHelp: 'Huruf kecil, angka, dan tanda hubung. Contoh: apan-apin',
-      submit: 'Buat undangan & preview',
-      submitting: 'Membuat undangan…',
+      /* Says what the click actually does: completeOnboarding() creates the
+         draft, then startCheckout() redirects straight to the Midtrans invoice.
+         The old "…& preview" label promised a preview that never came. */
+      submit: 'Lanjut ke Pembayaran',
+      submitting: 'Menyiapkan pembayaran…',
       errFail: 'Gagal membuat undangan',
     },
     done: {
@@ -62,19 +69,26 @@ export const onboarding = {
       language: 'Dashboard language',
       languageHint: 'Display language for the dashboard & editor. Switchable anytime — it does not affect the invitation content.',
       bride: 'Bride’s name',
-      bridePlaceholder: 'Apan Teh',
+      bridePlaceholder: 'Rani',
       groom: 'Groom’s name',
-      groomPlaceholder: 'Apin Toh',
+      groomPlaceholder: 'Adi',
       date: 'Event date & time',
       venue: 'Location / venue',
       venuePlaceholder: 'Mason Pine, Bandung',
+      /* Shown under the date + venue fields. Both are editable later via the
+         hero section schema (`src/editor/schemas/hero.ts` — weddingDate, venue),
+         so this promise is safe to make. */
+      editableLater: 'Not final yet? This can be changed any time from the dashboard.',
       url: 'Your invitation URL',
       urlPlaceholder: 'apan-apin',
       checking: 'Checking availability…',
       available: '✓ This URL is available',
       urlHelp: 'Lowercase letters, numbers, and hyphens. Example: apan-apin',
-      submit: 'Create invitation & preview',
-      submitting: 'Creating invitation…',
+      /* Says what the click actually does: completeOnboarding() creates the
+         draft, then startCheckout() redirects straight to the Midtrans invoice.
+         The old "…& preview" label promised a preview that never came. */
+      submit: 'Continue to Payment',
+      submitting: 'Preparing payment…',
       errFail: 'Failed to create invitation',
     },
     done: {

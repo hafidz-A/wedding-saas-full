@@ -228,6 +228,7 @@ export default function InvitationDetailsForm({
           required
           style={input}
         />
+        <span style={hint}>{dict.form.editableLater}</span>
       </label>
 
       <label style={field}>
@@ -239,6 +240,7 @@ export default function InvitationDetailsForm({
           required
           style={input}
         />
+        <span style={hint}>{dict.form.editableLater}</span>
       </label>
 
       <label style={field}>
@@ -313,6 +315,14 @@ const lbl: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.16em',
   color: 'var(--text-muted)',
+}
+/* Reassurance line under the date + venue fields. Both are required to create
+   the invitation, but neither is locked afterwards — saying so here stops a
+   couple who hasn't confirmed the venue from abandoning the purchase. */
+const hint: React.CSSProperties = {
+  fontSize: 12,
+  color: 'var(--color-charcoal-light)',
+  lineHeight: 1.5,
 }
 const input: React.CSSProperties = {
   padding: '12px 14px',
