@@ -59,6 +59,9 @@
 | lib/auth/pwnedPassword (HIBP k-anon) | ❌ | network → L2 (mock fetch) |
 | solary normalizeConfig | ✅ | ada |
 | editor reducer / max-items / templatePolicy / schema-registry | ✅ | 5 test |
+| templatePolicy: mandatoryTypes dihapus (RSVP/Gift jadi section biasa); saturn tetap position+type locked tapi bisa di-on/off | ✅ | templatePolicy.test.ts + template-policy.test.ts, 44 test |
+| solary normalizeConfig: saturnRing nonaktif tetap MEMESAN planet Saturn (journey lompat uranus → jupiter, bukan digeser) | ✅ | normalizeConfig.test.js |
+| needsDisableConfirm (persis 4 tipe: rsvp/weddingGift/rsvpPlanet/giftPlanet) + reducer `TOGGLE_SECTION_ENABLED` (enabled:undefined → false, bukan no-op) | ✅ | templatePolicy.test.ts + editor-reducer.test.ts |
 | lovebirds GalleryMasonry distribute | ✅ | ada |
 
 ## L2 — Integrasi (server actions + API routes) — test-double `src/__test-stubs__/supabaseFake.ts`
@@ -117,7 +120,7 @@
 | edit field → save → reload persist | 🟡 | save = config PUT route (L2 ✅); E2E mutasi di-skip (read-only) |
 | publish toggle | 🟡 | publish route L2 ✅; E2E read-only |
 | upload image + quota | 🟡 | upload route L2 ✅ (magic-byte+413); E2E read-only |
-| aturan lock/swap section (templatePolicy) | ✅ | unit L1 (templatePolicy 17+6 test) |
+| aturan lock/swap section (templatePolicy) | ✅ | unit L1 (templatePolicy.test.ts + template-policy.test.ts, 44 test); on/off terkunci hanya di opening+footer (lovebirds hero/footer, solary intro/sun) — mandatoryTypes sudah dihapus; solary saturn tetap terkunci posisi+tipe tapi bisa di-on/off |
 | RSVP list / gifts / guestbook view | 🟡 | dashboard render setelah login (read-only); tab-spesifik bisa disusul |
 | guestbook v2 / tutorial tab | 🟡 | logika di L1/L2; E2E render read-only |
 

@@ -15,12 +15,23 @@ describe('getTemplatePolicy', () => {
   it('returns null for templates without a policy', () => {
     expect(getTemplatePolicy('nonexistent')).toBeNull()
   })
-  it('locks intro, saturn, sun for solary', () => {
+  it('locks intro, saturn and sun for solary — but saturn stays switchable off', () => {
     const p = getTemplatePolicy('solary')!
     expect(p.fixedSections).toBe(true)
-    expect(p.locks.saturn).toEqual({ lockType: true, lockPosition: true, lockDisable: true })
+    expect(Object.keys(p.locks).sort()).toEqual(['intro', 'saturn', 'sun'])
     expect(p.locks.intro.lockType).toBe(true)
     expect(p.locks.sun.lockType).toBe(true)
+    // The photo ring is parented to the Saturn group in the 3D scene, so the
+    // slot cannot move or change type...
+    expect(p.locks.saturn.lockPosition).toBe(true)
+    expect(p.locks.saturn.lockType).toBe(true)
+    // ...but it is NOT disable-locked: the gallery can still be switched off.
+    expect(p.locks.saturn.lockDisable).toBeUndefined()
+    expect(p.locks.intro.lockDisable).toBe(true)
+    expect(p.locks.sun.lockDisable).toBe(true)
+    // saturnRing stays OUT of the pool while the slot is type-locked. Lifting
+    // that lock without adding it here is a one-way door: nothing could ever
+    // swap back in, destroying the gallery slot permanently.
     expect(p.swappablePool).not.toContain('saturnRing')
     expect(p.swappablePool).toContain('faqPlanet')
   })
@@ -32,16 +43,20 @@ describe('computeSafeOrder', () => {
     const next = computeSafeOrder(ids, 'venus', 'jupiter', p)
     expect(next).toEqual(['intro','neptune','uranus','saturn','venus','jupiter','mars','earth','mercury','sun'])
   })
-  it('refuses to move a locked-position slot (saturn)', () => {
+  it('refuses to move a locked-position slot (intro)', () => {
+    expect(computeSafeOrder(ids, 'intro', 'neptune', p)).toBeNull()
+  })
+  it('refuses to move the saturn slot (photo ring is parented to the planet)', () => {
     expect(computeSafeOrder(ids, 'saturn', 'neptune', p)).toBeNull()
   })
-  it('keeps pinned anchors fixed (intro first, sun last, saturn at index 3)', () => {
-    const next = computeSafeOrder(ids, 'mercury', 'sun', p)
-    if (next) {
-      expect(next[0]).toBe('intro')
-      expect(next[next.length - 1]).toBe('sun')
-      expect(next[3]).toBe('saturn')
-    }
+  it('refuses a move that would shift saturn off its index', () => {
+    expect(computeSafeOrder(ids, 'neptune', 'jupiter', p)).toBeNull()
+  })
+  it('keeps pinned anchors fixed (intro first, sun last) on an interior move', () => {
+    const next = computeSafeOrder(ids, 'earth', 'venus', p)
+    expect(next).not.toBeNull()
+    expect(next![0]).toBe('intro')
+    expect(next![next!.length - 1]).toBe('sun')
   })
 })
 
@@ -149,8 +164,8 @@ describe('section count locking', () => {
 })
 
 describe('validateSectionsAgainstPolicy (server-side config guard)', () => {
-  // A realistic lovebirds saved config: hero + footer (locked types),
-  // rsvp + weddingGift (mandatory), plus a couple of swappable sections.
+  // A realistic lovebirds saved config: hero + footer (locked types), plus
+  // rsvp + weddingGift and a couple of other now-unlocked swappable sections.
   const lovebirdsPrev = [
     { id: 'hero-1', type: 'hero' },
     { id: 'story-1', type: 'ourStory' },
@@ -158,8 +173,8 @@ describe('validateSectionsAgainstPolicy (server-side config guard)', () => {
     { id: 'gift-1', type: 'weddingGift' },
     { id: 'footer-1', type: 'footer' },
   ]
-  // A realistic solary saved config: locked-by-id intro/saturn/sun + mandatory
-  // rsvpPlanet/giftPlanet + a swappable planet.
+  // A realistic solary saved config: locked-by-id intro/sun, plus a
+  // now-unlocked rsvpPlanet/giftPlanet/saturn and a swappable planet.
   const solaryPrev = [
     { id: 'intro', type: 'intro' },
     { id: 'venus', type: 'storyPlanet' },
@@ -180,34 +195,55 @@ describe('validateSectionsAgainstPolicy (server-side config guard)', () => {
     expect(validateSectionsAgainstPolicy('solary', solReordered, solaryPrev)).toBeNull()
   })
 
-  it('rejects dropping a mandatory section (lovebirds rsvp / weddingGift)', () => {
+  // rsvp/weddingGift and rsvpPlanet/giftPlanet are no longer "mandatory" —
+  // dropping them is still rejected, but only because BOTH templates keep a
+  // fixed section count (lockSectionCount / fixedSections), same as dropping
+  // any other section.
+  it('rejects dropping rsvp/weddingGift (lovebirds) — the fixed section count guard still catches it', () => {
     const noRsvp = lovebirdsPrev.filter((s) => s.type !== 'rsvp')
     const v = validateSectionsAgainstPolicy('lovebirds', noRsvp, lovebirdsPrev)
-    expect(v?.code).toBe('missing_mandatory')
+    expect(v?.code).toBe('count_changed')
   })
 
-  it('rejects dropping a mandatory planet (solary giftPlanet)', () => {
+  it('rejects dropping giftPlanet (solary) — the fixed section count guard still catches it', () => {
     const noGift = solaryPrev.filter((s) => s.type !== 'giftPlanet')
     const v = validateSectionsAgainstPolicy('solary', noGift, solaryPrev)
-    expect(v?.code).toBe('missing_mandatory')
+    expect(v?.code).toBe('count_changed')
   })
 
   it('rejects dropping a locked-by-type anchor (lovebirds hero/footer)', () => {
-    // Keep mandatory present so the locked-type check is what trips.
     const noFooter = lovebirdsPrev.filter((s) => s.type !== 'footer')
     const v = validateSectionsAgainstPolicy('lovebirds', noFooter, lovebirdsPrev)
     expect(['missing_locked_type', 'count_changed']).toContain(v?.code)
+    const noHero = lovebirdsPrev.filter((s) => s.type !== 'hero')
+    const v2 = validateSectionsAgainstPolicy('lovebirds', noHero, lovebirdsPrev)
+    expect(['missing_locked_type', 'count_changed']).toContain(v2?.code)
   })
 
-  it('rejects dropping a locked-by-id slot (solary intro)', () => {
+  it('rejects dropping a locked-by-id slot (solary intro/sun)', () => {
     const noIntro = solaryPrev.filter((s) => s.id !== 'intro')
     const v = validateSectionsAgainstPolicy('solary', noIntro, solaryPrev)
     expect(['missing_locked_slot', 'count_changed']).toContain(v?.code)
+    const noSun = solaryPrev.filter((s) => s.id !== 'sun')
+    const v2 = validateSectionsAgainstPolicy('solary', noSun, solaryPrev)
+    expect(['missing_locked_slot', 'count_changed']).toContain(v2?.code)
+  })
+
+  it('rejects dropping the saturn slot — it is locked by id like intro/sun', () => {
+    const noSaturn = solaryPrev.filter((s) => s.id !== 'saturn')
+    const v = validateSectionsAgainstPolicy('solary', noSaturn, solaryPrev)
+    expect(['missing_locked_slot', 'count_changed']).toContain(v?.code)
+  })
+
+  it('accepts a config where saturn is merely DISABLED — disabling never removes it', () => {
+    const disabledSaturn = solaryPrev.map((s) =>
+      s.id === 'saturn' ? { ...s, enabled: false } : s,
+    )
+    expect(validateSectionsAgainstPolicy('solary', disabledSaturn, solaryPrev)).toBeNull()
   })
 
   it('rejects an absurd section count on a fixed-count template (the "30 sections" attack)', () => {
     const thirty = Array.from({ length: 30 }, (_, i) => ({ id: `x${i}`, type: 'ourStory' }))
-    // keep mandatory + locked present so only the count check can trip
     const attack = [...lovebirdsPrev, ...thirty]
     const v = validateSectionsAgainstPolicy('lovebirds', attack, lovebirdsPrev)
     expect(v?.code).toBe('count_changed')

@@ -118,7 +118,10 @@ Plans editor is the source of truth for prices — do not hardcode rupiah amount
 - Section schemas in `src/editor/schemas/` (hero, countdown, ourStory, eventDetails, brideGroom,
   weddingParty, gallery{Masonry,SpringCoil,Helix}, schedule, rsvp, weddingGift, accommodations, faq,
   guestbook, quote, footer, …). `templatePolicy.ts` constrains which sections/actions a template allows
-  (e.g. Lovebirds keeps exactly one gallery; couple name is a single locked source).
+  (e.g. Lovebirds keeps exactly one gallery; couple name is a single locked source). Every section can
+  be toggled on/off from the section list except the opening and the footer (Lovebirds `hero`/`footer`,
+  Solary `intro`/`sun`) — add/remove stays off for every template regardless. Disabling RSVP or Gift
+  (the two guest-data sections) prompts a confirm dialog via `confirmDisableTypes`.
 - Editor-adjacent tabs/panels: Palette, Ornament, Music, Meta (title/description/OG). Saves go through
   `/api/invitation/[slug]/config` (+ `publish`, `meta`, `music`, `theme`). Concurrency is
   **content-aware** (sections-hash, not `updated_at`); conflicts show a gentle reload banner.
@@ -184,7 +187,8 @@ Env-gated by `ADMIN_EMAILS` allowlist (`src/lib/admin/is-admin.ts` + `require-ad
     single-px radius literals, an off-scale height on a button selector, or a non-token `border-radius:
     50%` (use `--radius-round`). Run it after touching control/token CSS.
 - **Shared controls:** `src/components/ui/` — `<Button variant size>`, `<ButtonLink>` (link-as-button,
-  same variants), unified `DialogProvider` (confirm/alert/form + Escape), `useEscapeToClose`,
+  same variants), `<Switch>` (role="switch" on/off control, 44px-min tap target), unified `DialogProvider`
+  (confirm/alert/form + Escape), `useEscapeToClose`,
   `FeedbackProvider` toast (ui-level, used by both admin and dashboard), `controls.module.css`
   (.input/.iconBtn), `table.module.css` (responsive table → card collapse on mobile). New
   buttons/dialogs/tables MUST use these; do not hand-roll inline-styled controls.
@@ -246,6 +250,17 @@ supabase/                                          ← schema.sql (base) + migra
    fixed (read/write split). Be careful adding per-section sketch work.
 6. Demo Lovebirds previews render BOTH gallery styles back-to-back for comparison — real configs keep
    exactly one gallery (editor policy).
+7. **Solary's `saturn` slot is position+type locked but NOT disable-locked** — the photo ring is parented
+   to the Saturn group in the 3D scene, so the gallery may be switched off but never moved or swapped.
+   Turning it off skips that stop (uranus → jupiter) while the planet stays in the scene;
+   `normalizeConfig.js` keeps Saturn RESERVED for a disabled `saturnRing` so no other section claims it.
+   `saturnRing` is correspondingly kept OUT of `SOLARY_SWAPPABLE_POOL` — if the type lock is ever lifted,
+   it must be added there in the same change, or swapping the gallery away becomes a one-way door that
+   permanently destroys the slot.
+8. **New `.tsx` files MUST `import React` explicitly.** Next compiles JSX with the automatic runtime, but
+   `vitest.config.ts` does not set `jsx: 'automatic'` — under the classic transform a component without
+   the import throws `ReferenceError: React is not defined` as soon as a test renders it. `npm run test`
+   stays green until something actually renders it, so the omission hides until much later.
 
 ---
 

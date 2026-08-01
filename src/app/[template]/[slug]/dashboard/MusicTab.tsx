@@ -7,6 +7,7 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { uploadFile } from '@/editor/lib/uploadFile'
 import { type MusicSourceKind } from '@/lib/music/source'
+import Switch from '@/components/ui/Switch'
 import ctrl from './dashboardControls.module.css'
 
 interface MusicSettings {
@@ -263,31 +264,17 @@ function Field({
 function Toggle({
   label, checked, onChange,
 }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  // Clicking anywhere in the row (not just the switch itself) toggles — same
+  // behaviour as the old <label>-wrapped hidden checkbox. The switch stops
+  // propagation so its own click doesn't double-toggle via the row handler.
   return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-      <span
-        style={{
-          width: 38, height: 22, borderRadius: 'var(--radius-pill)',
-          background: checked ? '#2D8C4E' : 'var(--border-strong)',
-          position: 'relative', transition: 'background 0.2s ease',
-        }}
-      >
-        <span
-          style={{
-            position: 'absolute', top: 2, left: checked ? 18 : 2,
-            width: 18, height: 18, borderRadius: 'var(--radius-round)', background: 'var(--surface-raised)',
-            transition: 'left 0.2s ease', boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-          }}
-        />
-      </span>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
-      />
+    <span
+      style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+      onClick={() => onChange(!checked)}
+    >
+      <Switch checked={checked} onChange={onChange} label={label} onClick={(e) => e.stopPropagation()} />
       <span style={{ fontSize: 13, color: 'var(--text-primary)' }}>{label}</span>
-    </label>
+    </span>
   )
 }
 

@@ -220,7 +220,10 @@ export function reducer(state: State, action: Action): State {
         ...state,
         config: patchSection(state.config, action.sectionId, (s) => ({
           ...s,
-          enabled: !s.enabled,
+          // `enabled === undefined` renders as ON (see SectionRow's `isOn`), so
+          // the new value must be the inverse of THAT — not of the raw field —
+          // or the first click on an undefined section computes `true` (no-op).
+          enabled: s.enabled === false,
         })),
       }
 

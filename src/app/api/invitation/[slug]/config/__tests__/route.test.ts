@@ -184,7 +184,7 @@ describe('PUT /api/invitation/[slug]/config — server-side template policy', ()
     })
   }
 
-  it('422 when a crafted save drops a mandatory section (rsvp)', async () => {
+  it('422 when a crafted save drops a section (rsvp), changing the fixed section count', async () => {
     mockOwner.mockResolvedValue(OWNER)
     mockAdmin.mockReturnValue(fakeWith(lovebirdsPrev) as any)
     const noRsvp = { sections: lovebirdsPrev.filter((s) => s.type !== 'rsvp') }

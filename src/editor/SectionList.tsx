@@ -12,7 +12,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useEditor } from './EditorProvider'
 import { getSchemaRegistry } from './schemas'
-import { getTemplatePolicy, computeSafeOrder, computeSwapOrder, isTypeAnchored, isTypeLockedFor, isMandatoryType, canAddSections, canRemoveSectionType } from './templatePolicy'
+import { getTemplatePolicy, computeSafeOrder, computeSwapOrder, isTypeAnchored, isTypeLockedFor, needsDisableConfirm, canAddSections, canRemoveSectionType } from './templatePolicy'
 import { localizeLabel } from './schemas/types'
 import SectionRow from './SectionRow'
 import AddSectionMenu from './AddSectionMenu'
@@ -45,8 +45,8 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
     const { active, over } = e
     if (!over || active.id === over.id) return
 
-    // Swap mode: exchange the two cards. A locked/mandatory card BETWEEN them
-    // is untouched, so swap can cross an anchor that the move/insert path can't.
+    // Swap mode: exchange the two cards. A locked card BETWEEN them is
+    // untouched, so swap can cross an anchor that the move/insert path can't.
     if (dragMode === 'swap') {
       if (policy) {
         const ids = config.sections.map((s) => s.id)
@@ -72,19 +72,11 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
       let to = order.findIndex((s) => s.id === over.id)
       if (from < 0 || to < 0) return
       if (isTypeAnchored(order[from].type, policy)) return
-      if (isMandatoryType(order[from].type, policy)) return
       const firstFree = order.findIndex((s) => !isTypeAnchored(s.type, policy))
       const lastFree =
         order.length - 1 - [...order].reverse().findIndex((s) => !isTypeAnchored(s.type, policy))
       to = Math.max(firstFree, Math.min(lastFree, to))
       if (from === to) return
-      const tentative = order.slice()
-      const [moved] = tentative.splice(from, 1)
-      tentative.splice(to, 0, moved)
-      const shiftsMandatory = order.some(
-        (s, i) => isMandatoryType(s.type, policy) && tentative.findIndex((t) => t.id === s.id) !== i,
-      )
-      if (shiftsMandatory) return
       reorderSections(from, to)
       return
     }
@@ -92,7 +84,7 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
     // Solary: id-based locks.
     if (policy) {
       const order = config.sections.map((s) => s.id)
-      const next = computeSafeOrder(order, String(active.id), String(over.id), policy, config.sections)
+      const next = computeSafeOrder(order, String(active.id), String(over.id), policy)
       if (next) reorderSectionsById(next)
       return
     }
@@ -130,7 +122,6 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
               const disableLocked = !!lock?.lockDisable
               const typeAnchored = policy ? isTypeAnchored(s.type, policy) : false
               const typeLocked = policy ? isTypeLockedFor(s.type, policy) : false
-              const mandatory = policy ? isMandatoryType(s.type, policy) : false
               return (
                 <SectionRow
                   key={s.id}
@@ -140,9 +131,10 @@ export default function SectionList({ slug, template, onSectionOpen }: Props) {
                   onSelect={() => { selectSection(s.id); onSectionOpen?.(s.id) }}
                   onToggleEnabled={() => toggleSectionEnabled(s.id)}
                   onRemove={() => { removeSection(s.id); fb.ok(fm.sectionRemoved) }}
-                  draggable={!posLocked && !typeAnchored && !mandatory}
+                  draggable={!posLocked && !typeAnchored}
                   canRemove={canRemoveSectionType(s.type, policy)}
-                  canDisable={!disableLocked && !typeLocked && !mandatory}
+                  canDisable={!disableLocked && !typeLocked}
+                  confirmDisable={needsDisableConfirm(s.type, policy)}
                 />
               )
             })}

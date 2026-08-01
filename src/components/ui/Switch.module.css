@@ -1,0 +1,60 @@
+/* Shared on/off switch (src/components/ui). Promoted out of the dashboard's
+   hand-rolled MusicTab toggle so every on/off control in the product shares
+   one look + one tap-target contract. */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--interactive-primary-soft), 0 0 0 1.5px var(--interactive-primary);
+  border-radius: var(--radius-pill);
+}
+
+.track {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  transition: background 0.2s ease;
+}
+.track[data-checked='true'] {
+  background: var(--color-emerald);
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-round);
+  background: var(--surface-raised);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: left 0.2s ease;
+}
+.knob[data-checked='true'] {
+  left: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .knob {
+    transition: none;
+  }
+}

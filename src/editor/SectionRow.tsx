@@ -7,6 +7,7 @@ import type { SectionEntry } from './EditorProvider'
 import { useEditor } from './EditorProvider'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
+import Switch from '@/components/ui/Switch'
 import styles from './EditorRoot.module.css'
 
 interface Props {
@@ -19,9 +20,12 @@ interface Props {
   draggable?: boolean
   canRemove?: boolean
   canDisable?: boolean
+  /** True for types that collect guest data (RSVP/Gift) — disabling them
+   *  prompts a confirm dialog so nobody hides a live form by accident. */
+  confirmDisable?: boolean
 }
 
-export default function SectionRow({ section, label, isSelected, onSelect, onToggleEnabled, onRemove, draggable = true, canRemove = true, canDisable = true }: Props) {
+export default function SectionRow({ section, label, isSelected, onSelect, onToggleEnabled, onRemove, draggable = true, canRemove = true, canDisable = true, confirmDisable = false }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id })
   const { renameSectionNav } = useEditor()
   const t = useDashboardDict().editor
@@ -44,6 +48,17 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
 
   const displayLabel = section.navLabel || label
   const wordCount = draft.trim() ? draft.trim().split(/\s+/).slice(0, 4).length : 0
+  // undefined means enabled — never compare with `=== true`.
+  const isOn = section.enabled !== false
+
+  async function handleToggle() {
+    // Turning ON never confirms — only OFF, and only for data-collecting types.
+    if (isOn && confirmDisable) {
+      const ok = await confirmDialog({ message: t.disableDataConfirm, tone: 'danger' })
+      if (!ok) return
+    }
+    onToggleEnabled()
+  }
 
   function commit() {
     renameSectionNav(section.id, draft)
@@ -133,31 +148,17 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
           ✏️
         </button>
       )}
-      {canDisable && (
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onToggleEnabled() }}
-          title={section.enabled === false ? t.enableTitle : t.disableTitle}
-          aria-label={section.enabled === false ? t.enableTitle : t.disableTitle}
-          // The visible status is a 12px dot, but the tap area is a 24px-wide
-          // box stretched to the row height so it clears the WCAG 2.5.8 (AA)
-          // 24px minimum — a 12px dot alone was too small to tap on mobile.
-          style={{
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-            width: 24, minWidth: 24, alignSelf: 'stretch', padding: 0,
-            border: 'none', background: 'transparent', cursor: 'pointer',
-            flexShrink: 0,
-          }}
-        >
-          <span
-            aria-hidden="true"
-            style={{
-              width: 12, height: 12, borderRadius: 'var(--radius-pill)',
-              background: section.enabled === false ? 'rgba(42,33,24,0.18)' : 'var(--color-emerald)',
-            }}
-          />
-        </button>
-      )}
+      <span style={isOn ? statusLabelOn : statusLabelOff} onClick={(e) => e.stopPropagation()}>
+        {isOn ? t.statusOn : t.statusOff}
+      </span>
+      <Switch
+        checked={isOn}
+        onChange={handleToggle}
+        onClick={(e) => e.stopPropagation()}
+        disabled={!canDisable}
+        label={canDisable ? (isOn ? t.disableTitle : t.enableTitle) : t.lockedAlwaysOn}
+        title={canDisable ? (isOn ? t.disableTitle : t.enableTitle) : t.lockedAlwaysOn}
+      />
       {canRemove && (
         <button
           type="button"
@@ -206,3 +207,19 @@ const iconBtn: React.CSSProperties = {
   opacity: 0.55,
   flexShrink: 0,
 }
+
+// Fixed minWidth so every row's switch lines up in a column regardless of
+// whether the label reads "on" or "off". --color-emerald measures under the
+// 4.5:1 AA floor as TEXT (it was designed as a fill) — --status-success-text
+// is the darker variant made for on-surface text; the switch track keeps
+// --color-emerald.
+const statusLabelBase: React.CSSProperties = {
+  fontSize: 11,
+  textTransform: 'uppercase',
+  letterSpacing: '0.1em',
+  textAlign: 'right',
+  flexShrink: 0,
+  minWidth: 58,
+}
+const statusLabelOn: React.CSSProperties = { ...statusLabelBase, color: 'var(--status-success-text)' }
+const statusLabelOff: React.CSSProperties = { ...statusLabelBase, color: 'var(--text-muted)' }

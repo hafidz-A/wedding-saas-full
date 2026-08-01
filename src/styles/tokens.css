@@ -216,6 +216,11 @@
   --status-success-soft:     rgba(45, 140, 78, 0.12);
   --status-success-border:   rgba(45, 140, 78, 0.20);
   --status-success-surface:  #E0F2E5;
+  /* --color-emerald measures ~4.2:1 as TEXT on a light surface — just under the
+     4.5:1 AA floor for small text (it was designed as a FILL, e.g. the old
+     status dot / the Switch track). Use this darker variant for on-surface
+     success TEXT (~6.5:1); keep --color-emerald for fills/tracks/badges. */
+  --status-success-text:     #1F6B3C;
   --status-error:            var(--interactive-primary); /* #E8553E */
   --status-error-dark:       #B23A28;
   --status-error-soft:       var(--interactive-primary-soft);

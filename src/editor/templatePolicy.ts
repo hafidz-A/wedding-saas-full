@@ -14,11 +14,16 @@ export interface TemplatePolicy {
   anchorFirstType?: string      // section TYPE pinned to index 0 (lovebirds: 'hero')
   anchorLastType?: string       // section TYPE pinned to the last index (lovebirds: 'footer')
   lockedTypes?: string[]        // types that can't be removed or type-changed
-  mandatoryTypes?: string[]     // types that must always exist: no remove/disable/type-change, position-locked
   swapGroups?: Record<string, string[]> // type -> the only types it may swap with (incl. itself)
   lockSectionCount?: boolean    // fixed section count: no add + no remove (lovebirds). drag/edit/swap still allowed
+  confirmDisableTypes?: string[] // types whose disable prompts a confirm (they collect guest data)
 }
 
+// saturnRing is deliberately ABSENT from this pool: the Saturn slot is type-locked
+// (see `locks.saturn`), so nothing swaps into or out of it. If that type lock is
+// ever lifted, saturnRing MUST be added here in the same change — otherwise
+// swapping the gallery away becomes a one-way door that permanently destroys the
+// Solary gallery slot, since nothing could ever swap back into it.
 const SOLARY_SWAPPABLE_POOL = [
   'welcomePlanet',
   'storyPlanet',
@@ -39,11 +44,16 @@ const solaryPolicy: TemplatePolicy = {
   pinnedLastId: 'sun',
   locks: {
     intro:  { lockType: true, lockPosition: true, lockDisable: true },
-    saturn: { lockType: true, lockPosition: true, lockDisable: true },
+    // The Saturn gallery's photo ring is parented to the Saturn group in the 3D
+    // scene, so the slot stays position- AND type-locked — moving or swapping it
+    // would orbit the photos off-camera. Deliberately NO lockDisable: couples may
+    // switch the gallery off, which skips Saturn on the journey (uranus → jupiter)
+    // while the planet itself stays in the solar system.
+    saturn: { lockType: true, lockPosition: true },
     sun:    { lockType: true, lockPosition: true, lockDisable: true },
   },
   swappablePool: SOLARY_SWAPPABLE_POOL,
-  mandatoryTypes: ['rsvpPlanet', 'giftPlanet'],
+  confirmDisableTypes: ['rsvpPlanet', 'giftPlanet'],
 }
 
 // Lovebirds: solary-style constrained model but lighter — add/remove allowed,
@@ -64,7 +74,6 @@ const lovebirdsPolicy: TemplatePolicy = {
   anchorFirstType: 'hero',
   anchorLastType: 'footer',
   lockedTypes: ['hero', 'footer'],
-  mandatoryTypes: ['rsvp', 'weddingGift'],
   swapGroups: {
     galleryMasonry: ['galleryMasonry', 'gallerySpringCoil'],
     gallerySpringCoil: ['galleryMasonry', 'gallerySpringCoil'],
@@ -72,6 +81,7 @@ const lovebirdsPolicy: TemplatePolicy = {
   // Fixed section set: couples may reorder, edit, swap the gallery, and
   // enable/disable, but never add or remove sections.
   lockSectionCount: true,
+  confirmDisableTypes: ['rsvp', 'weddingGift'],
 }
 
 const policies: Record<string, TemplatePolicy> = {
@@ -93,9 +103,10 @@ export function isTypeLockedFor(type: string, policy: TemplatePolicy): boolean {
   return !!policy.lockedTypes?.includes(type)
 }
 
-/** True for a type that must always be present and stays put (RSVP / Gift). */
-export function isMandatoryType(type: string, policy: TemplatePolicy): boolean {
-  return !!policy.mandatoryTypes?.includes(type)
+/** True for a type whose disable action should prompt a confirm dialog
+ *  because it collects guest data (RSVP / Gift). */
+export function needsDisableConfirm(type: string, policy: TemplatePolicy | null): boolean {
+  return !!policy?.confirmDisableTypes?.includes(type)
 }
 
 /** Whether the "Add section" affordance should be offered at all. */
@@ -108,7 +119,6 @@ export function canRemoveSectionType(type: string, policy: TemplatePolicy | null
   if (!policy) return true
   if (policy.fixedSections || policy.lockSectionCount) return false
   if (isTypeLockedFor(type, policy)) return false
-  if (isMandatoryType(type, policy)) return false
   return true
 }
 
@@ -161,25 +171,24 @@ export function availableSwapTypes(
   // so a gallery can still swap to its sibling.
   if (group) for (const sib of group) usedElsewhere.delete(sib)
   const pool = group ?? policy?.swappablePool ?? Object.keys(registry)
-  const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t) && !policy?.mandatoryTypes?.includes(t))
+  const rest = pool.filter((t) => !!registry[t] && t !== currentType && !usedElsewhere.has(t))
   return [currentType, ...rest]
 }
 
 export interface PolicyViolation {
-  code: 'missing_mandatory' | 'missing_locked_type' | 'missing_locked_slot' | 'too_many' | 'count_changed'
+  code: 'missing_locked_type' | 'missing_locked_slot' | 'too_many' | 'count_changed'
   message: string
 }
 
 /**
  * Server-side guard that mirrors the editor's structural constraints. The editor
  * UI already enforces these, but the PUT /config route must NOT trust the client:
- * a crafted request could otherwise drop a mandatory RSVP/Gift section, blow past
- * the section cap, or delete a locked anchor (hero/footer, intro/sun). Returns the
- * FIRST violation found, or null when `nextSections` satisfies the policy.
+ * a crafted request could otherwise blow past the section cap or delete a locked
+ * anchor (hero/footer, intro/sun). Returns the FIRST violation found, or null
+ * when `nextSections` satisfies the policy.
  *
- *   - mandatory types (rsvp/gift) must all survive
  *   - locked-by-type anchors (lovebirds hero/footer) must survive
- *   - position-locked slots by id (solary intro/saturn/sun) must survive
+ *   - position-locked slots by id (solary intro/sun) must survive
  *   - fixed-count templates (fixedSections / lockSectionCount): the section count
  *     may not change relative to the previously-saved config (no add/remove)
  *   - cap-only templates (maxSections without a fixed count): never exceed the cap
@@ -194,11 +203,6 @@ export function validateSectionsAgainstPolicy(
   const policy = template ? getTemplatePolicy(template) : null
   if (!policy) return null
 
-  for (const t of policy.mandatoryTypes ?? []) {
-    if (!nextSections.some((s) => s.type === t)) {
-      return { code: 'missing_mandatory', message: `Section wajib "${t}" tidak boleh dihapus.` }
-    }
-  }
   for (const t of policy.lockedTypes ?? []) {
     if (!nextSections.some((s) => s.type === t)) {
       return { code: 'missing_locked_type', message: `Section terkunci "${t}" tidak boleh dihapus.` }
@@ -243,14 +247,9 @@ export function computeSafeOrder(
   activeId: string,
   overId: string,
   policy: TemplatePolicy,
-  sections?: { id: string; type: string }[],
 ): string[] | null {
   if (activeId === overId) return null
   if (isPositionLocked(activeId, policy)) return null
-
-  const typeOf = (id: string) => sections?.find((s) => s.id === id)?.type
-  const activeType = typeOf(activeId)
-  if (activeType && isMandatoryType(activeType, policy)) return null
 
   const from = order.indexOf(activeId)
   const to = order.indexOf(overId)
@@ -265,19 +264,13 @@ export function computeSafeOrder(
     if (!lock.lockPosition) continue
     if (order.indexOf(id) !== next.indexOf(id)) return null
   }
-  if (sections) {
-    for (const s of sections) {
-      if (!isMandatoryType(s.type, policy)) continue
-      if (order.indexOf(s.id) !== next.indexOf(s.id)) return null
-    }
-  }
   return next
 }
 
 /**
- * A slot that cannot take part in a swap: position-locked by id, anchored by
- * type (lovebirds hero/footer), or mandatory by type (rsvp/gift). This is
- * exactly the inverse of SectionRow's `draggable` gate.
+ * A slot that cannot take part in a swap: position-locked by id, or anchored
+ * by type (lovebirds hero/footer). This is exactly the inverse of
+ * SectionRow's `draggable` gate.
  */
 export function isSlotFixed(
   section: { id: string; type: string },
@@ -285,15 +278,14 @@ export function isSlotFixed(
 ): boolean {
   if (isPositionLocked(section.id, policy)) return true
   if (isTypeAnchored(section.type, policy)) return true
-  if (isMandatoryType(section.type, policy)) return true
   return false
 }
 
 /**
  * Swap two slots by id. Returns the new id order, or null if the swap is
  * illegal: active === over, an id is missing, or EITHER endpoint is a fixed
- * slot. Because only the two endpoints move, any locked/mandatory card BETWEEN
- * them stays at its index — which is what lets a swap cross a locked anchor.
+ * slot. Because only the two endpoints move, any locked card BETWEEN them
+ * stays at its index — which is what lets a swap cross a locked anchor.
  */
 export function computeSwapOrder(
   order: string[],

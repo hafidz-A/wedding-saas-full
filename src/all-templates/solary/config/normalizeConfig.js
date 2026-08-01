@@ -73,16 +73,24 @@ export function normalizeSolaryConfig(config) {
   //   an empty sky while the photos orbit off-camera.
   // • Disabled sections are skipped entirely (they don't render, so they must
   //   not consume a planet from the pool and shift everything after them).
+  // • A DISABLED saturnRing still reserves Saturn, so switching the gallery off
+  //   skips that stop (uranus → jupiter) rather than parking another section on
+  //   Saturn — the couple turned the gallery off, not moved everything over.
   // • If more middle sections exist than pool planets, the pool CYCLES —
   //   revisiting a planet beats falling back to 'andromeda', which fades the
   //   whole solar system out (activeKey 'andromeda' → opacity 0).
   const sections = config.sections;
   const enabled = sections.filter((s) => s.enabled !== false);
   const lastEnabledIdx = enabled.length - 1;
-  const hasSaturnRing = enabled.some(
+  const ringPinsSaturn = enabled.some(
     (s, i) => s.type === 'saturnRing' && i !== 0 && i !== lastEnabledIdx,
   );
-  const pool = hasSaturnRing ? PLANET_POOL.filter((k) => k !== 'saturn') : PLANET_POOL;
+  // Saturn stays RESERVED even when the gallery is switched off, so the journey
+  // simply skips the planet (uranus → jupiter) instead of handing Saturn to
+  // whatever section follows. The planet never leaves the 3D scene either way.
+  const ringDisabled = sections.some((s) => s.type === 'saturnRing' && s.enabled === false);
+  const pool =
+    ringPinsSaturn || ringDisabled ? PLANET_POOL.filter((k) => k !== 'saturn') : PLANET_POOL;
 
   let poolIdx = 0;
   const planetByEnabledIdx = new Map();

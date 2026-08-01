@@ -56,6 +56,35 @@ describe('CHANGE_SECTION_TYPE — gallery photo preservation', () => {
   })
 })
 
+describe('TOGGLE_SECTION_ENABLED', () => {
+  it('undefined (renders as ON) flips to false on the first click, not true', () => {
+    const withUndefinedEnabled = {
+      config: { sections: [
+        { id: 'venus', type: 'teamPlanet', props: {} },
+      ] },
+      initialConfig: { sections: [] }, selectedSectionId: 'venus',
+      isSaving: false, saveError: null, lastSavedAt: null,
+    } as any
+    expect(withUndefinedEnabled.config.sections[0].enabled).toBeUndefined()
+    const next = reducer(withUndefinedEnabled, { type: 'TOGGLE_SECTION_ENABLED', sectionId: 'venus' })
+    expect(next.config.sections[0].enabled).toBe(false)
+  })
+
+  it('false -> true -> false round trip', () => {
+    const withDisabled = {
+      config: { sections: [
+        { id: 'venus', type: 'teamPlanet', props: {}, enabled: false },
+      ] },
+      initialConfig: { sections: [] }, selectedSectionId: 'venus',
+      isSaving: false, saveError: null, lastSavedAt: null,
+    } as any
+    const on = reducer(withDisabled, { type: 'TOGGLE_SECTION_ENABLED', sectionId: 'venus' })
+    expect(on.config.sections[0].enabled).toBe(true)
+    const off = reducer(on, { type: 'TOGGLE_SECTION_ENABLED', sectionId: 'venus' })
+    expect(off.config.sections[0].enabled).toBe(false)
+  })
+})
+
 describe('REORDER_SECTIONS_BY_ID', () => {
   it('reorders to match the id order', () => {
     const next = reducer(base, { type: 'REORDER_SECTIONS_BY_ID', order: ['mars', 'venus'] })

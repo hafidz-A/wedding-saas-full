@@ -51,6 +51,23 @@ describe('normalizeSolaryConfig — positional planets', () => {
     expect(story.props.planetKey).toBe('neptune') // first pool slot, not shifted by the disabled welcome
   })
 
+  it('a DISABLED saturnRing still reserves Saturn — the journey skips it (uranus → jupiter)', () => {
+    const c = { sections: [
+      { id: 'a', type: 'openingGate', props: {} },
+      { id: 'w', type: 'welcomePlanet', props: {} },
+      { id: 's', type: 'storyPlanet', props: {} },
+      { id: 'g', type: 'saturnRing', enabled: false, props: {} },
+      { id: 'c', type: 'countdownPlanet', props: {} },
+      { id: 'z', type: 'footerPlanet', props: {} },
+    ] }
+    const keys = normalizeSolaryConfig(c).sections.map((s) => s.props.planetKey)
+    // welcome=neptune, story=uranus, [saturn reserved & skipped], countdown=jupiter
+    expect(keys[2]).toBe('uranus')
+    expect(keys[4]).toBe('jupiter')
+    // nothing else may claim Saturn just because the gallery is off
+    expect(keys.filter((k) => k === 'saturn')).toEqual([])
+  })
+
   it('cycles the pool instead of falling back to andromeda when sections exceed pool size', () => {
     const middles = [
       'welcomePlanet', 'storyPlanet', 'countdownPlanet', 'detailsPlanet', 'rsvpPlanet',

@@ -78,8 +78,9 @@ export async function PUT(req: Request, { params }: Ctx) {
   }
 
   // Re-enforce the template's structural policy server-side. The editor UI
-  // already blocks these, but a crafted PUT must not be able to drop a mandatory
-  // RSVP/Gift section, exceed the section cap, or remove a locked anchor.
+  // already blocks these, but a crafted PUT must not be able to change the
+  // fixed section count, exceed the section cap, or remove a locked anchor
+  // (hero/footer, intro/sun).
   const violation = validateSectionsAgainstPolicy(
     existing?.template_id,
     config.sections,
