@@ -66,13 +66,30 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Names the four route families that actually consult a user session, rather
+  // than trying to describe "everything except assets" — the old inverted form
+  // silently matched nearly the whole site (see the matcher regression test for
+  // the `(.json)?` parsing collision) and its folder-exclusion list had drifted
+  // out of date with public/ anyway.
+  //
+  // Each :param carries an explicit inline pattern or a modifier. That is
+  // load-bearing: a BARE trailing :param absorbs the `(.json)?` that Next
+  // appends at build time and turns its own segment optional.
+  //
+  // NOTE: template ids are hardcoded because Next statically analyses this
+  // export at build time — templateIndex.js cannot be imported here. Adding a
+  // third template requires editing this list too (see tutorial-multi.md).
   matcher: [
     '/profile',
     '/onboarding',
-    '/:template/:slug/dashboard/:path*',
-    // Public invitation pages — needed so the supabase server client can
-    // refresh the auth session and the owner-preview bypass works.
-    // Negative lookahead excludes the API, Next internals, and static assets.
-    '/((?!api|_next|images|audio|fonts|favicon).+)/:slug',
+    // Admin keeps middleware on purpose: the idle-timeout auto-logout lives
+    // ONLY here, and /admin can suspend invitations, issue refunds and delete
+    // user data. That protection is worth the duplicate getUser() that
+    // requireAdmin() in admin/layout.tsx also performs.
+    '/admin/:path*',
+    '/:template(lovebirds|solary)/:slug/dashboard/:path*',
+    // Public invitation page — needed so the Supabase server client can refresh
+    // the session and the owner-preview bypass works.
+    '/:template(lovebirds|solary)/:slug([^/]+)',
   ],
 }

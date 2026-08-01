@@ -306,7 +306,7 @@ Catatan:
 
 ## 10. RESEP: menambah template baru
 
-Misal bikin template **"garden"**. 4 langkah:
+Misal bikin template **"garden"**. 5 langkah:
 
 ### Langkah 1 — Buat folder + 3 file inti
 ```
@@ -339,7 +339,15 @@ const GardenShell = dynamic(() => import('@/all-templates/garden/Shell.jsx'), { 
 if (templateId === 'garden') return <GardenShell config={config} slug={slug} />
 ```
 
-Selesai. URL `/garden/<slug>` & `/garden/demo-garden` otomatis jalan. **Auth, dashboard, DB, API tidak perlu disentuh** — semuanya sudah otomatis dukung template baru.
+### Langkah 5 — Daftarkan di `src/middleware.ts`
+
+- **`src/middleware.ts`** — add the new template id to both matcher entries'
+  `:template(lovebirds|solary)` alternation. Next statically analyses
+  `config.matcher` at build time, so it cannot import `templateIndex.js`; a
+  template missing from this list silently loses Supabase session refresh on
+  its public page, which breaks owner-preview of unpublished invitations.
+
+Selesai. URL `/garden/<slug>` & `/garden/demo-garden` otomatis jalan. **Auth, dashboard, DB, API tidak perlu disentuh** (kecuali `src/middleware.ts` di Langkah 5 di atas) — sisanya sudah otomatis dukung template baru.
 
 > Bila template berasal dari project lain (mis. project Vite), lihat bagian 11 & 12.
 
