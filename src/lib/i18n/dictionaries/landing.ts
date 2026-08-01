@@ -31,7 +31,10 @@ export const landing = {
       ambienceLabel: 'Ambience',
       viewLive: 'Lihat Undangan Asli',
       previewOpen: 'Buka undangan lengkap',
-      previewHint: 'Gratis, tanpa perlu daftar.',
+      /* Rides inside the "Lihat Undangan Asli" pill as a chip, so the price
+         question is answered on the control itself instead of a line below. */
+      previewHint: 'Gratis',
+      previewHintFull: 'Gratis, tanpa perlu daftar',
       previewClose: 'Tutup pratinjau',
       previewNewTab: 'Buka di tab baru',
       previewLoading: 'Menyiapkan undangan…',
@@ -157,7 +160,8 @@ export const landing = {
       ambienceLabel: 'Ambience',
       viewLive: 'See the Real Invitation',
       previewOpen: 'Open the full invitation',
-      previewHint: 'Free, no signup needed.',
+      previewHint: 'Free',
+      previewHintFull: 'Free, no signup needed',
       previewClose: 'Close preview',
       previewNewTab: 'Open in new tab',
       previewLoading: 'Preparing the invitation…',

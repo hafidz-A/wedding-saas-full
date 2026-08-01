@@ -440,6 +440,9 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                         borderColor: palette.accent,
                         background: `${palette.accent}30`,
                       }}
+                      /* The chip reads as one word visually; screen readers get
+                         the whole reassurance sentence instead. */
+                      aria-label={`${t.viewLive} — ${t.previewHintFull}`}
                       onClick={openPreview}
                     >
                       {t.viewLive}
@@ -461,6 +464,14 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                           strokeLinejoin="round"
                         />
                       </svg>
+                      {/* Answers "does looking cost me anything?" on the control
+                          itself, so the answer can't be scrolled past. */}
+                      <span
+                        className={styles.freeChip}
+                        style={{ background: `${palette.accent}38`, color: palette.fg }}
+                      >
+                        {t.previewHint}
+                      </span>
                     </Link>
                     <button
                       type="button"
@@ -476,12 +487,6 @@ export function VibeExploration({ lang, t, plans, templates }: { lang: 'id' | 'e
                       <CinematicCtaText texts={[t.buy, t.buyAlt]} intervalMs={2250} paused={ctaHover} />
                     </button>
                   </div>
-
-                  {/* Removes the unspoken "does looking cost me anything?" pause
-                      right where the decision is made. */}
-                  <p className={styles.hint} style={{ color: palette.fgMuted }}>
-                    {t.previewHint}
-                  </p>
 
                 </motion.div>
               </AnimatePresence>

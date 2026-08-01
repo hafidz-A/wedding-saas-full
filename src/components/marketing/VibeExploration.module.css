@@ -372,7 +372,9 @@
 }
 /* Background is supplied by the live palette (a translucent accent tint) so the
    "see it first" action carries real weight instead of reading as a hairline. */
-.btnSecondary { border: 1.5px solid; }
+/* Tighter on the right so the chip sits inside the pill instead of pushing
+   against a full 20px of padding. */
+.btnSecondary { border: 1.5px solid; padding-right: 8px; }
 .btnPrimary { border: 1.5px solid transparent; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18); }
 .btnSecondary:hover,
 .btnPrimary:hover { transform: translateY(-2px); }
@@ -380,16 +382,37 @@
 .btnSecondary:active,
 .btnPrimary:active { transform: translateY(0); }
 
-/* Reassurance line under the actions — answers "does looking cost me anything?" */
-.hint {
+/* Reassurance chip riding inside the "see it live" pill — answers "does looking
+   cost me anything?" on the control itself, where the decision is made. Sized by
+   padding, not a fixed height, so it stays centred inside the 44px pill. */
+.freeChip {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-body);
-  font-size: 12px;
-  line-height: var(--leading-relaxed);
-  margin: 0;
-  transition: color 0.6s ease;
+  font-size: 11px;
+  font-weight: var(--weight-regular);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: none;
+  transition: background 0.6s ease, color 0.6s ease;
 }
 
 /* ---------- Responsive ---------- */
+
+/* Narrow phones: the label + chip must stay on one line inside the pill, so
+   trade letter-spacing and side padding rather than let the chip wrap out. */
+@media (max-width: 379.98px) {
+  .btnSecondary {
+    padding-left: 14px;
+    padding-right: 6px;
+    gap: 6px;
+    letter-spacing: 0.04em;
+  }
+  .freeChip { padding: 6px 8px; }
+}
 
 /* Tablet: palette in 2 cols, display stacks card over details. */
 @media (min-width: 768px) and (max-width: 1023.98px) {
