@@ -5,6 +5,7 @@ import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { broadcastEditorSave } from '@/editor/lib/editorSync'
 import { uploadFile } from '@/editor/lib/uploadFile'
+import { OG_IMAGE_MAX_LONG_EDGE } from '@/lib/upload/compress'
 import { composeTitle, parseCoupleFromTitle } from '@/lib/meta/couple'
 import ctrl from './dashboardControls.module.css'
 
@@ -59,7 +60,25 @@ export default function MetaTab({ slug, template, initial, couple, onSaved }: Pr
     setUploading(true)
     setMsg(null)
     try {
-      const { url } = await uploadFile(slug, file)
+      // og:image is consumed by WhatsApp/Facebook's link-preview crawlers when
+      // a guest shares the invitation link — NOT just a browser <img> tag.
+      // Those crawlers have unreliable-to-absent WebP support, so a WebP
+      // og:image risks the share preview rendering with NO image at all,
+      // breaking the single most important sharing moment in the product
+      // (see CLAUDE.md: WhatsApp is the primary distribution channel). Force
+      // JPEG here instead of the editor's default WebP — do not "optimise"
+      // this back, the size saving is not worth a broken share preview.
+      const { url } = await uploadFile(slug, file, {
+        outputMime: 'image/jpeg',
+        // og:image's de-facto ideal size is ~1200x630 (Open Graph / Twitter
+        // Card convention) — much smaller than the general gallery-photo cap,
+        // since this image is never viewed at full gallery resolution.
+        maxLongEdge: OG_IMAGE_MAX_LONG_EDGE,
+        // Re-encode even if the picked file is already small/within the cap:
+        // the point here is guaranteeing the STORED FORMAT is JPEG (never
+        // WebP/PNG), not just shaving bytes off an already-small file.
+        forceReencode: true,
+      })
       setOgImage(url)
       fb.ok(fm.imageUploaded)
     } catch (err: any) {
