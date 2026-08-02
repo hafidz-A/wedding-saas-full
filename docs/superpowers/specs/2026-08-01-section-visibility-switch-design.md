@@ -170,10 +170,55 @@ uses `--status-success-text` (text, newly compliant); the "off" label uses the e
 
 ## Row layout
 
-`SectionRow.tsx` renders, left to right: `[drag handle] [name] [pencil/rename] [status label] [switch]
-[×/remove]`. A locked section (opening/footer) still renders the label and a `disabled` switch — with an
-"always visible" tooltip (`t.lockedAlwaysOn`) — rather than omitting the control, so the column of
-switches stays vertically aligned regardless of which rows are locked.
+`SectionRow.tsx` renders two lines inside the name column:
+
+```
+[drag handle] [ name                    ] [pencil] [switch] [×]
+              [ STATUS · (subtitle)     ]
+```
+
+Line 1 is the section name; line 2 carries the status word (`TAMPIL`/`SEMBUNYI`) and, when the couple
+has renamed the section, the schema label in parentheses. A locked section (opening/footer) still
+renders the status and a `disabled` switch — with an "always visible" tooltip (`t.lockedAlwaysOn`) —
+rather than omitting the control, so the switch column stays aligned regardless of which rows are
+locked. While the rename input is open, line 2 shows only the word-count hint, unchanged.
+
+See D6 for why the status moved off line 1.
+
+## D6 — revision: the label was starving the section name
+
+Shipping D1's single-line layout (`[drag] [name] [pencil] [STATUS] [switch] [×]`) regressed the panel
+badly. `.sectionList` was a fixed `280px` (`220px` at the tablet breakpoint), and the status label
+(`minWidth: 58`, `flex-shrink: 0`) plus the 44px switch are both non-shrinking — the name was the only
+flexible column, so it collapsed to roughly 60px and rendered as "Kut…", "Ran…", "RS…". The panel
+became unusable for its primary job: telling you which section you're looking at.
+
+Two changes, both taken:
+
+1. **Status moved to line 2** (above). Considered and rejected: hiding the label below a width
+   threshold (keeps rows compact, but the state word then disappears exactly when the panel is
+   smallest), and dropping the label entirely (reverts D1). Line 2 costs ~14px of row height and keeps
+   the word visible at every width. Every row is now uniformly two lines, which also stops the renamed
+   Gallery row from standing out as taller than its neighbours.
+2. **The panel became resizable and remembers its width** — `src/editor/lib/sectionListWidth.ts`
+   (`DEFAULT 300`, `MIN 240`, `MAX 520`, key `fincards.editor.sectionListWidth`), with a
+   `role="separator"` handle supporting pointer drag, arrow keys (±16), Home/End, and double-click to
+   reset. The base CSS width moved `280 → 300` and the tablet breakpoint `220 → 260`.
+
+Two implementation constraints worth keeping:
+
+- **No `localStorage` read during render.** This is the first `localStorage` use in `src/`; reading it
+  in a lazy `useState` initialiser would desync from server-rendered markup and trip a hydration
+  mismatch. It is read in a mount effect instead, and every read/write is wrapped in `try/catch`
+  because Safari private mode throws.
+- **The stored width is fitted to the viewport, not applied verbatim.** `fitSectionListWidth` caps the
+  panel at 45% of the viewport (never below `MIN`), applied on mount and on window resize. Without it a
+  520px width chosen on a wide monitor would be restored on a 768px laptop and leave the field editor
+  about 190px to work in. The *stored* value stays the user's original choice, so returning to the wide
+  screen restores it; only the displayed width is capped.
+
+The subtitle `({label})` also gained `overflow/ellipsis/nowrap` here — it previously had none, so
+`(Galeri (Masonry))` wrapped to four lines and made that one row triple height.
 
 ## Verification
 

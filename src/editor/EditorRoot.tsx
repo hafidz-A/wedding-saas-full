@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { EditorProvider, type PageConfig } from './EditorProvider'
 import CouplePanel from './CouplePanel'
 import SectionList from './SectionList'
@@ -12,6 +12,15 @@ import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 import { deriveCoupleFromConfig } from '@/lib/meta/couple'
 import { hashSections } from './lib/sectionsHash'
+import {
+  SECTION_LIST_WIDTH_DEFAULT,
+  SECTION_LIST_WIDTH_MIN,
+  SECTION_LIST_WIDTH_MAX,
+  SECTION_LIST_WIDTH_KEY,
+  clampSectionListWidth,
+  fitSectionListWidth,
+  parseStoredWidth,
+} from './lib/sectionListWidth'
 import styles from './EditorRoot.module.css'
 
 interface Props {
@@ -49,6 +58,98 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   const isMobile = useIsMobile()
   const t = useDashboardDict().editor
 
+  // Resizable section-list panel. Starts at the default on every render (server
+  // and first client paint must match — reading localStorage during render
+  // would desync from the server-rendered markup and trip a hydration
+  // mismatch), then a mount-only effect swaps in the saved width if any.
+  const [listWidth, setListWidth] = useState(SECTION_LIST_WIDTH_DEFAULT)
+  const [resizing, setResizing] = useState(false)
+  // Mirrors `listWidth` synchronously so the pointerup/keydown handlers can
+  // persist the just-committed value without depending on a stale closure.
+  const widthRef = useRef(SECTION_LIST_WIDTH_DEFAULT)
+  // The width the user actually chose. Kept separate from the displayed width
+  // because a value picked on a wide monitor is capped for display on a narrow
+  // one (fitSectionListWidth) but must NOT be overwritten in storage — going
+  // back to the wide screen should restore the original choice.
+  const preferredRef = useRef(SECTION_LIST_WIDTH_DEFAULT)
+  const dragStartRef = useRef<{ x: number; width: number } | null>(null)
+
+  useEffect(() => {
+    try {
+      const stored = parseStoredWidth(localStorage.getItem(SECTION_LIST_WIDTH_KEY))
+      if (stored !== null) preferredRef.current = stored
+    } catch {
+      // Storage unavailable (Safari private mode, etc.) — keep the default.
+    }
+    // Fit the (possibly foreign-monitor) preference to this viewport, and keep
+    // refitting it while the window is resized.
+    function applyFit() {
+      const fitted = fitSectionListWidth(preferredRef.current, window.innerWidth)
+      widthRef.current = fitted
+      setListWidth(fitted)
+    }
+    applyFit()
+    window.addEventListener('resize', applyFit)
+    return () => window.removeEventListener('resize', applyFit)
+  }, [])
+
+  function persistWidth(width: number) {
+    try {
+      localStorage.setItem(SECTION_LIST_WIDTH_KEY, String(width))
+    } catch {
+      // Storage unavailable — the width just won't survive a reload.
+    }
+  }
+
+  // A width the user picks HERE is fitted to this viewport first, so dragging
+  // can never push the field editor into an unusable sliver — and the fitted
+  // value is what gets stored, since it reflects the screen they chose it on.
+  function updateWidth(next: number) {
+    const fitted = fitSectionListWidth(clampSectionListWidth(next), window.innerWidth)
+    widthRef.current = fitted
+    preferredRef.current = fitted
+    setListWidth(fitted)
+    return fitted
+  }
+
+  function handleResizePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    dragStartRef.current = { x: e.clientX, width: listWidth }
+    setResizing(true)
+  }
+
+  function handleResizePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!dragStartRef.current) return
+    updateWidth(dragStartRef.current.width + (e.clientX - dragStartRef.current.x))
+  }
+
+  function endResizeDrag(e: React.PointerEvent<HTMLDivElement>) {
+    if (!dragStartRef.current) return
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    dragStartRef.current = null
+    setResizing(false)
+    persistWidth(widthRef.current)
+  }
+
+  function handleResizeKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    let next: number | null = null
+    if (e.key === 'ArrowLeft') next = listWidth - 16
+    else if (e.key === 'ArrowRight') next = listWidth + 16
+    else if (e.key === 'Home') next = SECTION_LIST_WIDTH_MIN
+    else if (e.key === 'End') next = SECTION_LIST_WIDTH_MAX
+    if (next === null) return
+    e.preventDefault()
+    const clamped = updateWidth(next)
+    persistWidth(clamped)
+  }
+
+  function handleResizeDoubleClick() {
+    const clamped = updateWidth(SECTION_LIST_WIDTH_DEFAULT)
+    persistWidth(clamped)
+  }
+
   return (
     <EditorProvider slug={slug} initialConfig={safeConfig} initialUpdatedAt={initialUpdatedAt} initialSectionsHash={initialSectionsHash} initialIsPublished={initialIsPublished} liveUpdatedAt={liveUpdatedAt} onSaved={onSaved}>
       <RemoteChangeBanner />
@@ -66,14 +167,32 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
           <SaveBar />
         </div>
 
-        <div className={styles.editorRow}>
-          <div className={styles.sectionList}>
+        <div className={styles.editorRow} style={resizing ? { userSelect: 'none' } : undefined}>
+          <div className={styles.sectionList} style={!isMobile ? { width: listWidth } : undefined}>
             <SectionList
               slug={slug}
               template={template}
               onSectionOpen={() => setSheetOpen(true)}
             />
           </div>
+          {!isMobile && (
+            <div
+              className={styles.resizeHandle}
+              role="separator"
+              aria-orientation="vertical"
+              tabIndex={0}
+              aria-label={t.resizeSectionList}
+              aria-valuenow={listWidth}
+              aria-valuemin={SECTION_LIST_WIDTH_MIN}
+              aria-valuemax={SECTION_LIST_WIDTH_MAX}
+              onPointerDown={handleResizePointerDown}
+              onPointerMove={handleResizePointerMove}
+              onPointerUp={endResizeDrag}
+              onPointerCancel={endResizeDrag}
+              onKeyDown={handleResizeKeyDown}
+              onDoubleClick={handleResizeDoubleClick}
+            />
+          )}
           <main className={styles.fieldPane}>
             {!isMobile && <FieldEditor slug={slug} template={template} />}
           </main>

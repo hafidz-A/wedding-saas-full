@@ -58,7 +58,12 @@
 }
 
 .sectionList {
-  width: 280px;
+  /* Paired with SECTION_LIST_WIDTH_DEFAULT in src/editor/lib/sectionListWidth.ts —
+     keep them equal. On desktop this is only the initial paint; EditorRoot
+     applies an inline `width` from state (persisted/resizable) that overrides
+     this as soon as React hydrates. Mobile never sets the inline style, so the
+     100% below (in the max-width: 767.98px block) always wins there. */
+  width: 300px;
   flex-shrink: 0;
   border-right: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.55);
@@ -88,9 +93,44 @@
   max-height: calc(100vh - 24px);
 }
 
+/* Drag-to-resize handle between .sectionList and .fieldPane, desktop/tablet
+   only. Sticky + capped height like its two neighbors so its line only spans
+   the viewport-pinned area, not the full (possibly much taller) row. The 8px
+   width is the hit area; the visible 1px line is centred inside it via
+   ::before so the hit target stays generous without looking heavy. */
+.resizeHandle {
+  width: 8px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  position: sticky;
+  align-self: flex-start;
+  top: 12px;
+  max-height: calc(100vh - 24px);
+  background: transparent;
+}
+.resizeHandle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--border-subtle);
+  transition: background var(--duration-base) var(--ease-out);
+}
+.resizeHandle:hover::before,
+.resizeHandle:focus-visible::before {
+  background: var(--interactive-primary);
+}
+.resizeHandle:focus-visible {
+  outline: none;
+}
+
 @media (max-width: 1023.98px) {
   .sectionList {
-    width: 220px;
+    /* 220px cannot fit the row's fixed chrome (drag + pencil + switch + gaps). */
+    width: 260px;
   }
 }
 
@@ -132,6 +172,10 @@
   }
   /* On mobile the inline pane is replaced by the tap-to-open sheet. */
   .fieldPane {
+    display: none;
+  }
+  /* Resizing only makes sense in the desktop/tablet side-by-side layout. */
+  .resizeHandle {
     display: none;
   }
 

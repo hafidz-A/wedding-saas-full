@@ -21,7 +21,14 @@ npm run dev
 Login: email fixture + password `DemoTutorial123!`. Editor ada di
 `/<template>/<slug>/dashboard` → tab **Editor** → panel kiri **BAGIAN**.
 
-Baris section sekarang: `[geser/🔒] [nama] [✏️] [TAMPIL|SEMBUNYI] [switch]`.
+Baris section sekarang dua baris — nama di atas, status (+ subjudul bila di-rename) di bawahnya:
+
+```
+[geser/🔒] [ nama section          ] [✏️] [switch]
+           [ TAMPIL · (subjudul)   ]
+```
+
+Panel bisa ditarik lebarnya lewat garis pemisah di kanannya.
 
 Section Lovebirds: Pembuka · Kutipan · Kisah Kami · Detail Acara · Mempelai · Gallery ·
 Rangkaian Acara · RSVP · Gift · Footer.
@@ -38,13 +45,40 @@ Section Solary: Intro · 8 planet tengah (termasuk **Saturn = Gallery**) · Sun 
 | SW-3 | Baris aktif | Label `TAMPIL` hijau + switch ke kanan ✅ |
 | SW-4 | Baris nonaktif | Label `SEMBUNYI` abu + switch ke kiri ✅ |
 | SW-5 | Baris Pembuka & Footer | Label + switch tetap tampil tapi switch **redup & tidak bisa diklik**; tooltip "Bagian ini selalu tampil dan tidak bisa dimatikan." ✅ |
-| SW-6 | Zoom 200% / layar sempit (panel mobile) | Nama section terpotong elipsis, label & switch **tidak** ikut terdorong keluar ✅ |
+| SW-6 | Zoom 200% / layar sempit | Nama section terpotong elipsis, switch tidak terdorong keluar ✅ |
 | SW-7 | Keyboard: Tab ke switch, tekan Space/Enter | Fokus terlihat (ring), status berubah ✅ 🤖 (`Switch.test.tsx` menutup peran & aria) |
 | SW-8 | Screen reader / inspect | `role="switch"`, `aria-checked` ikut status ✅ 🤖 |
 | SW-9 | Klik area switch | Hanya switch yang bereaksi — baris **tidak** ikut terpilih ✅ 🤖 |
 | SW-10 | Klik nama section (bukan switch) | Baris terpilih, panel edit terbuka, status switch **tidak** berubah ✅ |
 | SW-11 | Kontras label `TAMPIL` di layar terang | Terbaca jelas (pakai `--status-success-text`, bukan `--color-emerald` yang gagal AA sebagai teks) 👁️ |
 | SW-12 | OS "reduce motion" aktif | Switch berpindah tanpa animasi ✅ |
+| SW-13 | Lebar panel bawaan (300px) — baca semua nama section | **Nama utuh**, tidak ada "Kut…"/"Ran…". Status ada di baris kedua ✅ |
+| SW-14 | Baris Gallery (punya subjudul) | `TAMPIL (Galeri (Masonry))` satu baris berelipsis — **bukan** membungkus jadi 4 baris ✅ |
+| SW-15 | Semua baris | Tinggi seragam 2 baris; baris Gallery tidak lagi jauh lebih tinggi ✅ |
+| SW-16 | Klik ✏️ (rename) | Baris kedua berubah jadi penghitung kata saja — status & subjudul sembunyi selama mengetik ✅ |
+
+### A2. Panel bisa ditarik (♻️)
+
+| ID | Langkah | Harapan |
+|---|---|---|
+| RZ-1 | Arahkan kursor ke garis pemisah antara panel & area isian | Kursor jadi `col-resize`, garis menyala ✅ |
+| RZ-2 | Tarik ke kanan | Panel melebar mengikuti kursor, nama section makin panjang terlihat ✅ |
+| RZ-3 | Tarik jauh ke kiri | Berhenti di 240px, tidak bisa lebih sempit ✅ 🤖 |
+| RZ-4 | Tarik jauh ke kanan | Berhenti di 520px **atau** 45% lebar layar, mana yang lebih kecil ✅ 🤖 |
+| RZ-5 | ♻️ Lepas → reload halaman | Lebar terakhir dipakai lagi, tidak balik ke 300px ✅ |
+| RZ-6 | Klik pemisah lalu tekan ← / → | Lebar berubah 16px per tekan, halaman **tidak** ikut ter-scroll ✅ |
+| RZ-7 | Tekan Home / End | Langsung ke 240px / maksimum ✅ |
+| RZ-8 | ♻️ Klik ganda pemisah | Kembali ke 300px, dan tersimpan ✅ |
+| RZ-9 | Tarik sambil lewat di atas teks | Tidak ada teks ter-blok/ter-seleksi ✅ |
+| RZ-10 | Tarik lalu lepas di luar jendela browser | Drag berhenti bersih, panel tidak "nyangkut" ikut kursor ✅ |
+| RZ-11 | Tab sampai fokus ke pemisah | Ada indikator fokus yang terlihat ✅ |
+| RZ-12 | Inspect elemen pemisah | `role="separator"`, `aria-orientation`, `aria-valuenow/min/max` terisi ✅ |
+| RZ-13 | Lebarkan ke maksimum di monitor besar → buka di laptop kecil | Panel **otomatis mengecil** agar area isian tetap layak; kembali ke monitor besar → lebar semula pulih ✅ 🤖 |
+| RZ-14 | Kecilkan jendela browser sambil panel terbuka | Panel ikut menyesuaikan saat jendela mengecil ✅ |
+| RZ-15 | Buka editor di HP | **Tidak ada** pemisah; panel selebar layar seperti sebelumnya ✅ |
+| RZ-16 | Safari mode private / storage diblokir | Editor tetap jalan, panel pakai 300px, tidak ada error ✅ |
+| RZ-17 | Set `localStorage` key ke `"abc"` / `"-5"` / kosong lewat devtools → reload | Jatuh ke nilai aman, editor tidak rusak ✅ 🤖 |
+| RZ-18 | Muat pertama kali (perhatikan konsol) | Tidak ada peringatan hydration mismatch ✅ |
 
 ---
 
@@ -236,11 +270,12 @@ Sesudah perubahan ini 🔒 hanya di **Pembuka, Footer** (Lovebirds) dan **Intro,
 | Peta planet Solary | `normalizeConfig.test.js` — 9 test | ST-6 (planet tetap di scene) |
 | Reducer toggle | `editor-reducer.test.ts` | — |
 | Komponen `<Switch>` | `Switch.test.tsx` — 4 test | SW-1..SW-6, SW-11, RG-2 |
+| Lebar panel (clamp/parse/fit) | `sectionListWidth.test.ts` — 16 test | RZ-1..RZ-2, RZ-5..RZ-16, RZ-18 |
 | Guard server config | `config/__tests__/route.test.ts` | NG-9, NG-10 |
 | i18n | dict-parity | I18-1..I18-6 |
 
 Gerbang otomatis: `npm run typecheck` · `npm run test` · `npm run check:tokens` — semuanya hijau
-pada `03c8240` (109 file / 785 test).
+pada revisi lebar panel (110 file / 801 test).
 
 **Belum diverifikasi sama sekali:** seluruh kolom 👁️ — perlu dijalankan di aplikasi berjalan
 dengan fixture di bagian 0.

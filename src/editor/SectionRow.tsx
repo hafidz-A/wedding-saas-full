@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { SectionEntry } from './EditorProvider'
@@ -128,13 +128,16 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
         ) : (
           <span style={nameStyle} title={displayLabel}>{displayLabel}</span>
         )}
-        <span style={typeStyle}>
-          {editing
-            ? `${wordCount}${t.renameHint}`
-            : section.navLabel
-              ? <span style={{ color: 'rgba(42,33,24,0.45)' }}>({label})</span>
-              : null}
-        </span>
+        {editing ? (
+          <span style={typeStyle}>{`${wordCount}${t.renameHint}`}</span>
+        ) : (
+          <span style={line2Style}>
+            <span style={isOn ? statusOnStyle : statusOffStyle}>{isOn ? t.statusOn : t.statusOff}</span>
+            {section.navLabel && (
+              <span style={subtitleStyle} title={`(${label})`}>({label})</span>
+            )}
+          </span>
+        )}
       </div>
 
       {!editing && (
@@ -148,9 +151,6 @@ export default function SectionRow({ section, label, isSelected, onSelect, onTog
           ✏️
         </button>
       )}
-      <span style={isOn ? statusLabelOn : statusLabelOff} onClick={(e) => e.stopPropagation()}>
-        {isOn ? t.statusOn : t.statusOff}
-      </span>
       <Switch
         checked={isOn}
         onChange={handleToggle}
@@ -208,18 +208,35 @@ const iconBtn: React.CSSProperties = {
   flexShrink: 0,
 }
 
-// Fixed minWidth so every row's switch lines up in a column regardless of
-// whether the label reads "on" or "off". --color-emerald measures under the
-// 4.5:1 AA floor as TEXT (it was designed as a fill) — --status-success-text
-// is the darker variant made for on-surface text; the switch track keeps
-// --color-emerald.
-const statusLabelBase: React.CSSProperties = {
-  fontSize: 11,
+// Line 2 of the name grid: on/off status + (optional) navLabel subtitle,
+// side by side so a long row still fits in two lines total.
+const line2Style: React.CSSProperties = {
+  display: 'flex',
+  gap: 6,
+  alignItems: 'baseline',
+}
+
+// --color-emerald measures under the 4.5:1 AA floor as TEXT (it was designed
+// as a fill) — --status-success-text is the darker variant made for
+// on-surface text; the switch track keeps --color-emerald.
+const statusBase: React.CSSProperties = {
+  fontSize: 10,
   textTransform: 'uppercase',
   letterSpacing: '0.1em',
-  textAlign: 'right',
   flexShrink: 0,
-  minWidth: 58,
 }
-const statusLabelOn: React.CSSProperties = { ...statusLabelBase, color: 'var(--status-success-text)' }
-const statusLabelOff: React.CSSProperties = { ...statusLabelBase, color: 'var(--text-muted)' }
+const statusOnStyle: React.CSSProperties = { ...statusBase, color: 'var(--status-success-text)' }
+const statusOffStyle: React.CSSProperties = { ...statusBase, color: 'var(--text-muted)' }
+
+// The navLabel subtitle takes whatever space the status label leaves and
+// ellipsizes instead of wrapping — a long custom label used to push this row
+// to triple height.
+const subtitleStyle: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  display: 'block',
+  color: 'rgba(42,33,24,0.45)',
+}
