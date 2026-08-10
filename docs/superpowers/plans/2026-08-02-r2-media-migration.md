@@ -53,6 +53,8 @@
 
 ### Task 1: DNS to Cloudflare — **owner-performed, no code**
 
+> 📖 **Show the owner [2026-08-02-r2-owner-runbook.md](2026-08-02-r2-owner-runbook.md) instead of this task.** It carries the same steps written for a non-expert, in Bahasa, with the live DNS values and the copy-paste verification commands. This task is the engineering-side record; the runbook is what the human actually follows.
+
 **Files:** none.
 
 **Interfaces:**
