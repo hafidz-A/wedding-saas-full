@@ -53,16 +53,15 @@ npm install
 
 ### 3. Resend (email reset password / notifikasi)
 
-Sign up di [resend.com](https://resend.com) → API Keys → Create. (Opsional untuk dev — lihat catatan di
-`.env.local.example`.)
+Sign up di [resend.com](https://resend.com) → API Keys → Create. Opsional untuk dev: kalau
+`RESEND_API_KEY` kosong, `sendAdminEmail` mengembalikan `false` tanpa melempar error — email tidak
+terkirim, sisanya tetap jalan.
 
 ### 4. `.env.local`
 
-```powershell
-cp .env.local.example .env.local
-```
-
-Isi (lihat komentar di file example untuk cara dapat tiap nilai):
+Buat file `.env.local` di root project. **Tidak ada file contoh yang di-commit** — sengaja, supaya
+tidak ada berkas berbau env di repo sama sekali (`.gitignore` memblokir semua `.env*`). Daftar
+lengkapnya ada di bawah:
 
 ```env
 # Supabase
@@ -152,7 +151,7 @@ QR check-in (Premium), reset password sendiri via **/forgot-password**, kelola a
   → Refund requests (operator yang memutuskan, bukan otomatis). Takedown cepat: `/admin` set
   `suspended_at` (sembunyikan halaman dari semua orang).
 - **"Perpanjang / upgrade / tambah kuota tamu"** → dari dashboard pasangan sendiri (checkout Midtrans
-  terpisah: renewal, upgrade pay-the-difference ke Premium, add-on kuota per blok 50 tamu).
+  terpisah: renewal, upgrade pay-the-difference ke Premium, add-on kuota per blok 100 tamu).
 
 ### E. Data & monitoring (SQL cepat)
 

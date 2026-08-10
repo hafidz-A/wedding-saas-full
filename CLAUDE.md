@@ -29,8 +29,9 @@ unpublished invitation — they cannot edit it (`src/app/[template]/[slug]/dashb
 on the marketing landing (`demo-*` slugs), which needs no signup. Never write "coba gratis" / "rancang
 gratis" / "bayar saat siap sebar" copy — it is false advertising. Plans are DB-driven per
 template (`basic` / `premium`); Premium unlocks the buku-tamu attendance ledger + QR check-in. Add-ons:
-extra guest quota (50-guest blocks), pay-the-difference upgrade to Premium, renewal when the active
-period expires. Phase: **go-to-market** (see the marketing assets in `docs/marketing/`).
+extra guest quota (50-guest blocks at Rp10k; base 400 Basic / 500 Premium), pay-the-difference
+upgrade to Premium, renewal when the active period expires. A 100-guest block was trialled and
+dropped — `BLOCK_SIZE` in `src/lib/payments/quota.ts` is the only place that number lives. Phase: **go-to-market** (see the marketing assets in `docs/marketing/`).
 
 **Origin:** scaffolded long ago from a Vite + React cinematic template. The **Lovebirds** template has
 since diverged substantially (play-once hero, ornament system, folded registry, config migrations) — do
@@ -268,7 +269,8 @@ supabase/                                          ← schema.sql (base) + migra
 
 ```powershell
 npm install
-# Fill .env.local (see .env.local.example): Supabase x3, NEXT_PUBLIC_SITE_URL,
+# Fill .env.local by hand — no example file is committed (.gitignore blocks every
+# .env*). Full list + how to get each value: README §4. Needs: Supabase x3, NEXT_PUBLIC_SITE_URL,
 # APP_ENCRYPTION_KEY, GUESTS_ENCRYPTION_KEY, MIDTRANS_SERVER_KEY, MIDTRANS_IS_PRODUCTION,
 # ADMIN_EMAILS, RESEND_API_KEY/FROM. Apply supabase/schema.sql + all migrations first.
 npm run dev
