@@ -14,10 +14,16 @@ dist/
 *.tsbuildinfo
 next-env.d.ts
 
-# Environment — NEVER commit real keys
-.env
-.env.local
-.env*.local
+# Environment — NEVER commit real keys.
+# Catch-all: anything starting with .env is ignored, whatever the suffix, so a
+# .env.production / .env.staging / .env.backup / .env.old can't slip through the
+# way a hand-listed set would. Only *.example templates are allowed through, and
+# those must carry placeholders — never a real value.
+.env*
+!.env*.example
+# Same rule for env files parked anywhere else in the tree.
+**/.env*
+!**/.env*.example
 
 # Logs
 npm-debug.log*
@@ -55,3 +61,7 @@ Thumbs.db
 
 # Template capture artefacts (screenshots / frames / walkthrough videos)
 /captures/
+
+# Knowledge-graph output — regenerated on demand, and it indexes the whole tree
+# (env var NAMES show up in it), so keep it out of the repo.
+/graphify-out/
