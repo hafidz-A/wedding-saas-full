@@ -11,6 +11,7 @@ import { useAdminConfirm, useAdminForm } from '@/components/admin/AdminDialogPro
 import { useFeedback } from '@/components/ui/FeedbackProvider'
 import { Button } from '@/components/ui/Button'
 import ui from '@/components/ui/controls.module.css'
+import { BLOCK_SIZE } from '@/lib/payments/quota'
 
 interface Inv {
   id: string; slug: string; templateId: string; plan: string; email: string
@@ -49,8 +50,8 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
   }
 
   async function onAddQuota() {
-    const ok = await confirm({ title: 'Tambah 50 kuota?', message: `Tambah 50 kuota tamu GRATIS untuk "${inv.slug}".`, confirmLabel: 'Tambah 50' })
-    if (ok) run(() => adminAddQuota(inv.id, 50))
+    const ok = await confirm({ title: `Tambah ${BLOCK_SIZE} kuota?`, message: `Tambah ${BLOCK_SIZE} kuota tamu GRATIS untuk "${inv.slug}".`, confirmLabel: `Tambah ${BLOCK_SIZE}` })
+    if (ok) run(() => adminAddQuota(inv.id, BLOCK_SIZE))
   }
 
   async function onSuspend() {
@@ -133,7 +134,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         }} style={selectCtl}>
           <option value="basic">basic</option><option value="premium">premium</option>
         </select>
-        <Button size="sm" variant="ghost" disabled={busy} onClick={onAddQuota}>+50 kuota</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={onAddQuota}>+{BLOCK_SIZE} kuota</Button>
         <Button size="sm" variant={inv.isSuspended ? 'ghost' : 'ghostDanger'} disabled={busy} onClick={onSuspend}>{inv.isSuspended ? 'Buka blokir' : 'Blokir'}</Button>
         {inv.isPaid
           ? <Button size="sm" variant="ghost" disabled={busy} onClick={onArchive}>{inv.isArchived ? 'Keluarkan arsip' : 'Arsipkan'}</Button>

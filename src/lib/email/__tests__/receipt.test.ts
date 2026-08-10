@@ -68,12 +68,12 @@ describe('sendPaymentReceipt', () => {
   })
 
   it('addon: reads amount + qty from the latest paid quota_addons row', async () => {
-    const db = fakeDb({ invitations: INV, quota_addons: { amount_idr: 50000, qty_guests: 50 } })
+    const db = fakeDb({ invitations: INV, quota_addons: { amount_idr: 50000, qty_guests: 500 } })
     await sendPaymentReceipt(db as any, 'inv-1', 'addon')
     expect(mockSend).toHaveBeenCalledOnce()
     const mail = mockSend.mock.calls[0][0]
     expect(mail.html).toContain('50.000')
-    expect(mail.html).toContain('50 tamu')
+    expect(mail.html).toContain('500 tamu')
   })
 
   it('upgrade: skips (never sends Rp 0) when no paid plan_upgrades row is found', async () => {

@@ -55,7 +55,7 @@ export function planHasGuestbook(planCode: string): boolean {
 export function planBaseQuota(plans: TemplatePlanRow[], planCode: string): number {
   const row = plans.find((p) => p.plan_code === planCode)
   if (row && typeof row.base_guest_quota === 'number') return row.base_guest_quota
-  return DEFAULT_BASE_QUOTA[planCode] ?? 200
+  return DEFAULT_BASE_QUOTA[planCode] ?? 400
 }
 
 /**

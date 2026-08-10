@@ -7,7 +7,7 @@ export const QUOTA_CAP = 5000
 
 /** Plan-derived base quota included in the plan price. DB (`template_plans`) is
  *  the real source of truth; this is the client-safe fallback. */
-export const DEFAULT_BASE_QUOTA: Record<string, number> = { basic: 200, premium: 300 }
+export const DEFAULT_BASE_QUOTA: Record<string, number> = { basic: 400, premium: 500 }
 
 /** Number of 50-guest blocks in a guest count (rounded UP, never negative —
  *  a partial block is a whole paid block). */
@@ -16,7 +16,7 @@ export function blocks(n: number): number {
   return Math.ceil(n / BLOCK_SIZE)
 }
 
-/** Rupiah for buying `qtyGuests` extra (blocks × Rp10k). */
+/** Rupiah for buying `qtyGuests` extra (blocks of 50 × Rp10k). */
 export function quotaAddonAmount(qtyGuests: number): number {
   return blocks(qtyGuests) * BLOCK_PRICE_IDR
 }

@@ -21,7 +21,7 @@ import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import QuotaStepper from '@/components/dashboard/QuotaStepper'
 import { startQuotaAddonCheckout, recheckQuotaAddon } from '@/app/onboarding/actions'
-import { quotaAddonAmount, QUOTA_CAP, formatIDR } from '@/lib/payments/quota'
+import { quotaAddonAmount, QUOTA_CAP, BLOCK_SIZE, formatIDR } from '@/lib/payments/quota'
 import type { Dict } from '@/lib/i18n'
 // Type-only import — erased at compile time, so this never pulls the
 // `server-only` payment-settings module into the client bundle.
@@ -81,7 +81,7 @@ export default function GuestsTab({
   const isFull = usedLive >= quota.effective
   const roomLeft = Math.max(0, QUOTA_CAP - quota.effective) // how much more quota is buyable
   const [showQuota, setShowQuota] = useState(false)
-  const [quotaQty, setQuotaQty] = useState(50)
+  const [quotaQty, setQuotaQty] = useState(BLOCK_SIZE)
   const [quotaPending, setQuotaPending] = useState(false)
   const [showManualPay, setShowManualPay] = useState(false)
   const manualReady = paymentMode === 'manual' && !!manualContact && !!manualPayDict

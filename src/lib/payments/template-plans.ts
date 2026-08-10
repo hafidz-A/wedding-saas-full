@@ -34,7 +34,7 @@ function mapRow(r: any): TemplatePlanRow {
     duration_days: r.duration_days == null ? null : Number(r.duration_days),
     features: Array.isArray(r.features) ? (r.features as string[]) : [],
     sort_order: Number(r.sort_order),
-    base_guest_quota: r.base_guest_quota == null ? 200 : Number(r.base_guest_quota),
+    base_guest_quota: r.base_guest_quota == null ? 400 : Number(r.base_guest_quota),
     compare_at_price_idr: r.compare_at_price_idr == null ? null : Number(r.compare_at_price_idr),
   }
 }

@@ -119,7 +119,7 @@ describe('completeOnboarding', () => {
       tables: { invitations: { select: [{ data: null }, { count: 0 }], insert: { data: { id: 'inv-9' } } } },
     })
     mockAdmin.mockReturnValue(fake as any)
-    // premium base 300; 137 -> ceil to 150, within [0, 5000-300].
+    // premium base 500; 137 -> ceil to 150, within [0, 5000-500].
     await completeOnboarding(input({ guestQuotaExtra: 137 } as any))
     const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'invitations')!
     expect(ins.value.guest_quota_extra).toBe(150)

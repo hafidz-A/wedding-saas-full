@@ -9,7 +9,7 @@ import { resolvePlan, resolveUpgrade, planBaseQuota } from '@/lib/payments/plans
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import {
   initialPurchaseAmount, clampQuotaExtra, quotaAddonAmount, effectiveQuota,
-  QUOTA_CAP, DEFAULT_BASE_QUOTA,
+  QUOTA_CAP, DEFAULT_BASE_QUOTA, BLOCK_SIZE,
 } from '@/lib/payments/quota'
 import { createSnapTransaction, getTransactionStatus, isPaidStatus, expireTransaction, mintOrderId } from '@/lib/payments/gateway'
 import { needsRefundDestination } from '@/lib/payments/refund-channels'
@@ -592,7 +592,7 @@ export async function startQuotaAddonCheckout(invitationId: string, qtyGuests: n
 
     // Snap UP to a clean block; 0 base means "treat the raw qty as the add-on".
     const qty = clampQuotaExtra(0, Number(qtyGuests))
-    if (qty <= 0) return { ok: false, error: 'Jumlah tambahan minimal 50 tamu' }
+    if (qty <= 0) return { ok: false, error: `Jumlah tambahan minimal ${BLOCK_SIZE} tamu` }
 
     const plans = await getTemplatePlans(inv.template_id)
     const base = planBaseQuota(plans, inv.plan)

@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { snapQuotaToBlock, BLOCK_SIZE } from '@/lib/payments/quota'
 
 /**
- * "− [editable number] +" control. The buttons step by 50; a free-typed value
- * snaps UP to the next 50 on commit (blur / Enter). Always emits a clamped,
+ * "− [editable number] +" control. The buttons step by BLOCK_SIZE; a free-typed
+ * value snaps UP to the next block on commit (blur / Enter). Always emits a clamped,
  * valid value via onChange. The snap is UX only — callers must still validate
  * server-side.
  */

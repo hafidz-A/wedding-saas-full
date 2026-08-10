@@ -4,7 +4,7 @@ import { validatePlanPatch } from '../validate'
 
 const base = {
   display_name: 'Basic', price_idr: 149000, compare_at_price_idr: null,
-  base_guest_quota: 200, duration_days: 365, features: ['RSVP'],
+  base_guest_quota: 400, duration_days: 365, features: ['RSVP'],
 }
 
 describe('validatePlanPatch', () => {
@@ -26,6 +26,7 @@ describe('validatePlanPatch', () => {
     expect(validatePlanPatch({ ...base, base_guest_quota: 0 }).ok).toBe(false)
     expect(validatePlanPatch({ ...base, base_guest_quota: 5050 }).ok).toBe(false)
     expect(validatePlanPatch({ ...base, base_guest_quota: 250 }).ok).toBe(true)
+    expect(validatePlanPatch({ ...base, base_guest_quota: 500 }).ok).toBe(true)
   })
   it('rejects bad duration / empty features / empty name', () => {
     expect(validatePlanPatch({ ...base, duration_days: 0 }).ok).toBe(false)

@@ -76,7 +76,7 @@ export async function adminChangePlan(id: string, plan: string): Promise<Result>
   return { ok: true }
 }
 
-/** Grant extra guest quota for free (multiple of 50, within cap). */
+/** Grant extra guest quota for free (multiple of BLOCK_SIZE, within cap). */
 export async function adminAddQuota(id: string, qtyGuests: number): Promise<Result> {
   const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
   const qty = Math.round(qtyGuests)
@@ -222,7 +222,7 @@ export async function adminCreateInvitationForClient(input: CreateForClientInput
 
   // 2. Resolve plan + clamp quota against the plan base.
   const plan = (await resolvePlan(template, input.plan)) ? input.plan : 'basic'
-  const baseForPlan = DEFAULT_BASE_QUOTA[plan] ?? 200
+  const baseForPlan = DEFAULT_BASE_QUOTA[plan] ?? 400
   const guestQuotaExtra = clampQuotaExtra(baseForPlan, Number(input.guestQuotaExtra ?? 0))
 
   // 3. Slug availability.

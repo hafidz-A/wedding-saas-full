@@ -65,9 +65,9 @@ describe('planBaseQuota', () => {
     expect(planBaseQuota(rows, 'basic')).toBe(200)
     expect(planBaseQuota(rows, 'premium')).toBe(300)
   })
-  it('falls back to DEFAULT_BASE_QUOTA then 200 for unknown plans', () => {
-    expect(planBaseQuota([], 'premium')).toBe(300)
-    expect(planBaseQuota([], 'free')).toBe(200)
+  it('falls back to DEFAULT_BASE_QUOTA then the basic default for unknown plans', () => {
+    expect(planBaseQuota([], 'premium')).toBe(500)
+    expect(planBaseQuota([], 'free')).toBe(400)
   })
 })
 

@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { updatePlan } from './actions'
 import type { PlanPatch } from './validate'
-import { formatIDR } from '@/lib/payments/quota'
+import { formatIDR, BLOCK_SIZE } from '@/lib/payments/quota'
 import { Button } from '@/components/ui/Button'
 import { useFeedback } from '@/components/ui/FeedbackProvider'
 
@@ -43,7 +43,7 @@ export default function PlansEditor({ templateId, plan }: { templateId: string; 
       <Field label={`Harga coret (opsional) — ${compareAt ? formatIDR(Number(compareAt.replace(/\D/g, '')) || 0) : 'kosong'}`}>
         <input value={compareAt} onChange={(e) => setCompareAt(e.target.value)} inputMode="numeric" placeholder="kosongkan jika tak ada" style={inp} />
       </Field>
-      <Field label="Kuota tamu (kelipatan 50)"><input value={quota} onChange={(e) => setQuota(e.target.value)} inputMode="numeric" style={inp} /></Field>
+      <Field label={`Kuota tamu (kelipatan ${BLOCK_SIZE})`}><input value={quota} onChange={(e) => setQuota(e.target.value)} inputMode="numeric" style={inp} /></Field>
       <Field label="Masa aktif (hari, kosong = seumur hidup)"><input value={duration} onChange={(e) => setDuration(e.target.value)} inputMode="numeric" style={inp} /></Field>
       <Field label="Fitur (satu per baris)"><textarea value={features} onChange={(e) => setFeatures(e.target.value)} rows={4} style={{ ...inp, resize: 'vertical' }} /></Field>
       <Button size="sm" onClick={save} disabled={busy} style={{ marginTop: 4 }}>{busy ? 'Menyimpan…' : 'Simpan'}</Button>

@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { adminCreateInvitationForClient, type CreateForClientResult } from '../actions'
 import { Button } from '@/components/ui/Button'
+import { BLOCK_SIZE } from '@/lib/payments/quota'
 
 const TEMPLATES = [
   { id: 'lovebirds', label: 'Lovebirds' },
@@ -113,8 +114,8 @@ export default function CreateInvitationForm() {
             <option value="premium">premium</option>
           </select>
         </Field>
-        <Field label="Kuota tambahan (kelipatan 50)">
-          <input type="number" min={0} step={50} value={quotaExtra} onChange={(e) => setQuotaExtra(parseInt(e.target.value || '0', 10) || 0)} style={input} />
+        <Field label={`Kuota tambahan (kelipatan ${BLOCK_SIZE})`}>
+          <input type="number" min={0} step={BLOCK_SIZE} value={quotaExtra} onChange={(e) => setQuotaExtra(parseInt(e.target.value || '0', 10) || 0)} style={input} />
         </Field>
       </Row>
 
