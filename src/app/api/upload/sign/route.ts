@@ -1,24 +1,23 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
 import {
-  BUCKET,
   ALLOWED_MIMES,
   MAX_TOTAL_BYTES,
   maxBytesFor,
   safeStoragePath,
 } from '@/lib/upload/media'
+import { presignPut, sumPrefixBytes } from '@/lib/upload/r2'
 
 /**
  * POST /api/upload/sign  (JSON: { slug, filename, contentType, size })
  *
  * Step 1 of the direct-to-Storage upload flow. The browser sends only the file
  * METADATA (not the bytes), we authorize it (ownership + declared mime + size +
- * per-invitation quota), then hand back a short-lived signed upload URL the
- * client PUTs the bytes to. This bypasses Vercel's 4.5 MB serverless
- * request-body cap that the legacy /api/upload proxy hit — the big file never
- * passes through this function.
+ * per-invitation quota), then hand back a short-lived presigned S3 PUT URL for
+ * Cloudflare R2 that the client PUTs the bytes to. This bypasses Vercel's 4.5 MB
+ * serverless request-body cap that the legacy /api/upload proxy hit — the big
+ * file never passes through this function.
  *
  * The bytes are validated for real (magic bytes) in /api/upload/verify AFTER
  * they land, since we never see them here.
@@ -52,17 +51,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `File too large (max ${maxMb} MB)` }, { status: 400 })
   }
 
-  const supabase = createSupabaseAdminClient()
-
   // --- per-invitation storage quota (best-effort, fails OPEN like legacy) ---
   try {
-    const { data: existingFiles } = await supabase.storage
-      .from(BUCKET)
-      .list(owner.id, { limit: 1000 })
-    const usedBytes = (existingFiles ?? []).reduce(
-      (sum, f: any) => sum + (f?.metadata?.size ?? 0),
-      0,
-    )
+    const usedBytes = await sumPrefixBytes(`${owner.id}/`)
     if (usedBytes + size > MAX_TOTAL_BYTES) {
       const maxMb = Math.round(MAX_TOTAL_BYTES / 1024 / 1024)
       return NextResponse.json(
@@ -71,16 +62,16 @@ export async function POST(req: Request) {
       )
     }
   } catch (e) {
-    console.error('[upload/sign quota] list failed (allowing):', e)
+    console.error('[upload/sign quota] R2 list failed (allowing):', e)
   }
 
-  // --- issue signed upload URL scoped to this invitation's folder ---
+  // --- issue a presigned PUT scoped to this invitation's folder ---
   const path = safeStoragePath(owner.id, filename)
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUploadUrl(path)
-  if (error || !data) {
-    console.error('[upload/sign]', error)
-    return NextResponse.json({ error: error?.message || 'Could not create upload URL' }, { status: 500 })
+  try {
+    const url = await presignPut(path, contentType, 300)
+    return NextResponse.json({ ok: true, path, url })
+  } catch (e) {
+    console.error('[upload/sign]', e)
+    return NextResponse.json({ error: 'Could not create upload URL' }, { status: 500 })
   }
-
-  return NextResponse.json({ ok: true, path: data.path, token: data.token })
 }

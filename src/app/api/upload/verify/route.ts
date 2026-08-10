@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
-import { BUCKET, sniffMediaKind, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES } from '@/lib/upload/media'
+import { sniffMediaKind, MAX_AUDIO_BYTES, MAX_IMAGE_BYTES } from '@/lib/upload/media'
+import { getObjectHead, deleteObject, publicUrl } from '@/lib/upload/r2'
 
 /**
  * POST /api/upload/verify  (JSON: { slug, path })
  *
  * Step 3 of the direct-to-Storage upload flow. The bytes never passed through
- * our serverless function (they went straight to Supabase via a signed URL), so
+ * our serverless function (they went straight to R2 via a presigned URL), so
  * this is where we do the defense-in-depth signature check the legacy proxy did
  * inline: pull the head of the stored object, confirm it really looks like an
  * allowed image/audio container, and DELETE it if it doesn't (polyglot /
@@ -36,20 +36,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid path' }, { status: 400 })
   }
 
-  const supabase = createSupabaseAdminClient()
-
-  // Pull the stored object and sniff just its head bytes.
-  const { data: blob, error: dlErr } = await supabase.storage.from(BUCKET).download(path)
-  if (dlErr || !blob) {
-    console.error('[upload/verify] download failed:', dlErr)
+  // Pull only the head bytes — a Range request, not the whole object the way the
+  // Supabase implementation had to.
+  const head = await getObjectHead(path, 32)
+  if (!head) {
     return NextResponse.json({ error: 'Uploaded file not found' }, { status: 404 })
   }
-  const head = new Uint8Array(await blob.slice(0, 32).arrayBuffer())
 
   // Trust the actual bytes, not the client-declared content-type.
-  const kind = sniffMediaKind(head)
+  const kind = sniffMediaKind(head.bytes)
   if (!kind) {
-    await supabase.storage.from(BUCKET).remove([path])
+    await deleteObject(path)
     return NextResponse.json(
       { error: 'File content does not look like a valid image or audio file' },
       { status: 400 },
@@ -61,8 +58,8 @@ export async function POST(req: Request) {
   // URL itself does not cap the payload — so this is where the 12 MB audio /
   // 5 MB image ceiling is actually enforced. Over-limit → delete + reject.
   const maxBytes = kind === 'audio' ? MAX_AUDIO_BYTES : MAX_IMAGE_BYTES
-  if (blob.size > maxBytes) {
-    await supabase.storage.from(BUCKET).remove([path])
+  if (head.size > maxBytes) {
+    await deleteObject(path)
     const maxMb = Math.round(maxBytes / 1024 / 1024)
     return NextResponse.json(
       { error: `File terlalu besar (maks ${maxMb} MB) — upload dibatalkan.` },
@@ -70,6 +67,5 @@ export async function POST(req: Request) {
     )
   }
 
-  const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return NextResponse.json({ ok: true, url: pub.publicUrl, path })
+  return NextResponse.json({ ok: true, url: publicUrl(path), path })
 }

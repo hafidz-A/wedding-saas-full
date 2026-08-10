@@ -1,9 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
 
+// Storage is R2 now, but the RATE LIMITER is still Postgres-backed (rl_hit), so
+// the Supabase admin mock has to stay — without it the 429 case can't be driven
+// and enforceRateLimit would try to build a real client.
 vi.mock('@/lib/supabase/admin', () => ({ createSupabaseAdminClient: vi.fn() }))
+vi.mock('@/lib/upload/r2', () => ({
+  presignPut: vi.fn(
+    async (key: string) => `https://acc.r2.cloudflarestorage.com/b/${key}?X-Amz-Signature=x`,
+  ),
+  sumPrefixBytes: vi.fn(async () => 0),
+}))
 vi.mock('@/editor/lib/auth', () => ({ verifyOwnership: vi.fn() }))
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { presignPut, sumPrefixBytes } from '@/lib/upload/r2'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { POST } from '../route'
 
@@ -13,8 +23,12 @@ const OWNER = { id: 'inv-1', owner_user_id: 'user-1' }
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockAdmin.mockReturnValue(createFakeSupabase() as any) // rate limit allowed, empty storage
+  mockAdmin.mockReturnValue(createFakeSupabase() as any) // rate limit allowed
   mockOwner.mockResolvedValue(OWNER)
+  vi.mocked(sumPrefixBytes).mockResolvedValue(0) // empty bucket prefix
+  vi.mocked(presignPut).mockImplementation(
+    async (key: string) => `https://acc.r2.cloudflarestorage.com/b/${key}?X-Amz-Signature=x`,
+  )
 })
 
 function signReq(body: any): Request {
@@ -63,18 +77,34 @@ describe('POST /api/upload/sign', () => {
   })
 
   it('413 when the per-invitation storage quota is exceeded', async () => {
-    mockAdmin.mockReturnValue(
-      createFakeSupabase({ storage: { list: { data: [{ metadata: { size: 300 * 1024 * 1024 } }] } } }) as any,
-    )
+    vi.mocked(sumPrefixBytes).mockResolvedValueOnce(300 * 1024 * 1024)
     expect((await POST(signReq(ok))).status).toBe(413)
   })
 
-  it('200 and returns a path scoped to the invitation folder + a token', async () => {
+  it('scopes the quota lookup to the owning invitation folder', async () => {
+    await POST(signReq(ok))
+    expect(sumPrefixBytes).toHaveBeenCalledWith('inv-1/')
+  })
+
+  it('allows the upload when the quota lookup fails', async () => {
+    vi.mocked(sumPrefixBytes).mockRejectedValueOnce(new Error('r2 down'))
+    expect((await POST(signReq(ok))).status).toBe(200)
+  })
+
+  it('200 and returns a path scoped to the invitation folder + a presigned url', async () => {
     const res = await POST(signReq(ok))
     expect(res.status).toBe(200)
     const json = await res.json()
     expect(json.ok).toBe(true)
-    expect(json.token).toBeTruthy()
     expect(json.path).toMatch(/^inv-1\//) // path lives under the owner's own folder
+    expect(json.url).toContain('X-Amz-Signature=')
+    expect(json.token).toBeUndefined() // the Supabase token is gone
+  })
+
+  it('500 when R2 cannot be signed, without leaking the internal error', async () => {
+    vi.mocked(presignPut).mockRejectedValueOnce(new Error('Missing R2_SECRET_ACCESS_KEY'))
+    const res = await POST(signReq(ok))
+    expect(res.status).toBe(500)
+    expect((await res.json()).error).not.toContain('R2_SECRET_ACCESS_KEY')
   })
 })

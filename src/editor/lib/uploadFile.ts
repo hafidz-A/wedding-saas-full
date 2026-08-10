@@ -1,7 +1,6 @@
 'use client'
 
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { BUCKET, ALLOWED_MIMES, maxBytesFor } from '@/lib/upload/media'
+import { ALLOWED_MIMES, maxBytesFor } from '@/lib/upload/media'
 import {
   compressImageForUpload,
   isAudioMime,
@@ -23,8 +22,8 @@ export interface UploadResult {
 export type UploadOptions = CompressOptions
 
 /**
- * Upload a media file for `slug` straight to Supabase Storage via a short-lived
- * signed upload URL, bypassing the Vercel 4.5 MB serverless request-body cap the
+ * Upload a media file for `slug` straight to Cloudflare R2 via a short-lived
+ * presigned PUT URL, bypassing the Vercel 4.5 MB serverless request-body cap the
  * old server-proxy route (/api/upload) hit — the bytes never touch our function.
  *
  * Flow:
@@ -38,8 +37,8 @@ export type UploadOptions = CompressOptions
  *      filename/contentType/size sent here describe the file AFTER step 0 —
  *      /sign uses them for quota accounting, so they must match what we're
  *      about to actually upload, not the original.
- *   2. uploadToSignedUrl(...)  → browser PUTs the (possibly compressed) bytes
- *      directly to Supabase.
+ *   2. fetch(url, PUT)        → browser PUTs the (possibly compressed) bytes
+ *      directly to R2 via the presigned URL.
  *   3. POST /api/upload/verify → server checks the stored file's real signature
  *      and re-enforces the size cap on the REAL stored bytes — compression
  *      is a client-side optimisation, never a substitute for that check.
@@ -110,14 +109,19 @@ export async function uploadFile(
     const e = await signRes.json().catch(() => ({}))
     throw new Error(e.error || `Gagal menyiapkan upload (${signRes.status})`)
   }
-  const { path, token } = await signRes.json()
+  const { path, url: presignedUrl } = await signRes.json()
 
-  // 2. Upload the bytes DIRECTLY to Supabase Storage (no size cap from Vercel).
-  const supabase = createSupabaseBrowserClient()
-  const { error: upErr } = await supabase.storage
-    .from(BUCKET)
-    .uploadToSignedUrl(path, token, uploadable, { contentType: contentType || undefined })
-  if (upErr) throw new Error(upErr.message || 'Upload ke penyimpanan gagal')
+  // 2. PUT the bytes DIRECTLY to R2 (no size cap from Vercel). Content-Type is
+  //    recorded by R2 but is NOT part of the presigned signature (see
+  //    lib/upload/r2.ts), so this cannot fail on a header mismatch.
+  const putRes = await fetch(presignedUrl, {
+    method: 'PUT',
+    body: uploadable,
+    headers: { 'Content-Type': contentType },
+  })
+  if (!putRes.ok) {
+    throw new Error(`Upload ke penyimpanan gagal (${putRes.status})`)
+  }
 
   // 3. Verify the stored file is really an allowed image/audio (deletes if not).
   const verifyRes = await fetch('/api/upload/verify', {

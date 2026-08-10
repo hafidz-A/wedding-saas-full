@@ -11,7 +11,11 @@
 //     styled-jsx; unavoidable without a big refactor (low risk for styles).
 //   • img/media 'https:' blob: data: → Supabase Storage, Unsplash/Picsum, canvas
 //     (three.js), and owner-supplied music URLs.
-//   • connect-src *.supabase.co + wss → Supabase Auth/REST + Realtime.
+//   • connect-src *.supabase.co + wss → Supabase Auth/REST + Realtime;
+//     *.r2.cloudflarestorage.com → the editor's direct-to-R2 media upload PUTs
+//     to a presigned S3 URL, which is a fetch() and so hits connect-src, not
+//     img-src. Harmless to omit while this header is report-only — and exactly
+//     the thing that would silently break every upload once it is enforced.
 //   • frame-src 'self' + google.com → the editor PreviewPane embeds
 //     /<slug>?preview=1, and the EventDetails section embeds a Google Maps
 //     iframe (violations were already showing up in report-only mode).
@@ -22,7 +26,7 @@ const cspReportOnly = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "media-src 'self' blob: data: https:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.r2.cloudflarestorage.com",
   "frame-src 'self' https://www.google.com https://maps.google.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
