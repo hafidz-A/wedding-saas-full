@@ -2,6 +2,15 @@
 
 Laporan suite automated test. Cakupan sel-per-sel: lihat `TEST-MATRIX.md`. Temuan: `BUG-LEDGER.md`.
 
+## Run post-R2 cleanup (2026-08-11)
+- **Konteks:** eksekusi plan `docs/superpowers/plans/2026-08-11-post-r2-cleanup.md` langsung di `main` (commits `faef30a..1304338`), menutup empat sisa dari rilis migrasi R2.
+- **Gates di head:** tsc bersih · vitest **844 test / 115 file HIJAU** (819 → 844: +5 `encryption-shape`, +7 `orphan-media`, +13 `sanitizeLegalHtml`) · `check:tokens` bersih.
+- **`npm run verify:security`** → **4/4 check RLS HIJAU** (`guests`, `rsvps`, `gift_confirmations`, `attendances` masing-masing 0 baris untuk klien anon). **At-rest TIDAK diverifikasi** — DB produksi tidak punya baris demo `dummy-lovebirds` sejak pembersihan go-live 2026-07-21, dan menyemai data palsu ke DB produksi ditolak sebagai cara "menghijaukan" cek.
+- **⚠️ Cacat yang ditemukan dan diperbaiki:** skrip ini sebelumnya `process.exit(2)` begitu `dummy-lovebirds` absen — **sebelum** bagian RLS sempat jalan. Artinya sejak 2026-07-21 verifikasi RLS **tidak pernah benar-benar dieksekusi**; keluarannya terlihat seperti masalah data, bukan cek yang mati. Sekarang bagian at-rest dilewati dengan anggun dan RLS selalu jalan, serta ringkasan akhirnya membedakan "semua lolos" dari "RLS lolos, at-rest tidak diverifikasi".
+- **Visual e2e:** `npx playwright test e2e/visual.spec.ts` → **9/9 HIJAU** terhadap baseline mobile/tablet yang baru di-commit (`b73430e`) — mengonfirmasi baseline tersebut valid, bukan sekadar diasumsikan.
+- **Playwright full-run:** dijalankan, **belum tuntas saat laporan ini ditulis**. Commit pada wave ini nol menyentuh kode runtime (`docs/`, `scripts/`, dan file test saja — `git diff --name-only origin/main..HEAD | grep ^src/ | grep -v __tests__` kosong), jadi bundle produksi tidak berubah dan hasil e2e tidak dapat dipengaruhi olehnya.
+- **Catatan proses:** rilis R2 sebelumnya (`b222076..0373921`, 86 commit) di-push setelah tsc + vitest + `check:tokens` **tanpa** `test:e2e`, padahal kontraknya `test:all`. Kesenjangan itu dicatat di sini alih-alih dibiarkan tak tertulis.
+
 ## Run design-system follow-ups (2026-07-17, wave 2)
 - **Konteks:** eksekusi plan `docs/superpowers/plans/2026-07-17-design-system-follow-ups.md` (11 task + post-review fixes; commits `3d4501b..055a228`). ButtonLink, konsolidasi CTA marketing, migrasi auth/editor ke `<Button>`, FeedbackProvider naik ke `ui/` (admin dapat toast + `router.refresh`), `ui/table.module.css` (tabel admin responsif), sweep `--radius-round` (~59 situs + rule guard baru), sweep `--space-*` equal-value (78 baris), fix kecil (BooleanField, Escape/klik-busy-guard, InvitationRow).
 - **Gates di head:** tsc bersih · vitest **657 test / 97 file HIJAU** (649 → 657: +2 ButtonLink, +2 Feedback ui, +4 token-rules radius-round) · `check:tokens` bersih (kini juga menegakkan `--radius-round`).
