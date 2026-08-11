@@ -23,6 +23,38 @@ import { siteBaseUrl } from '@/lib/site-url'
 /** Max unpaid draft invitations a single account may stack up (anti-abuse). */
 const MAX_UNPAID_DRAFTS = 10
 
+const SUSPENDED_ERROR =
+  'Undangan sedang dinonaktifkan oleh admin — pembayaran tidak bisa diproses sampai blokirnya dibuka.'
+
+/**
+ * Refuse to move money on an invitation an admin has taken down. Returns an error
+ * string to bail with, or null to proceed.
+ *
+ * Paying a suspended invitation buys nothing: `suspended_at` keeps the dashboard on
+ * its SuspendedNotice, the public page on its takedown view, and the publish API
+ * refusing — so the owner would be charged for a change nobody can see.
+ *
+ * The UI already withholds these CTAs (`invitationIsDown` in
+ * `src/lib/invitations/public-status.ts` drives /profile), but a button rendered
+ * BEFORE an admin suspended the row stays live in an open tab — no revalidation
+ * reaches it. So the server action has to refuse too, the same way the publish
+ * route does.
+ *
+ * Deliberately NOT applied to `requestRefund`: a suspended customer asking for
+ * their money back is exactly the person who most needs that path open.
+ */
+async function refuseIfSuspended(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  invitationId: string,
+): Promise<string | null> {
+  const { data } = (await admin
+    .from('invitations')
+    .select('suspended_at')
+    .eq('id', invitationId)
+    .maybeSingle()) as { data: { suspended_at: string | null } | null }
+  return data?.suspended_at ? SUSPENDED_ERROR : null
+}
+
 export interface OnboardingInput {
   slug: string
   template: string
@@ -217,6 +249,8 @@ export async function startCheckout(invitationId: string): Promise<CheckoutResul
       data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; gateway_order_id: string | null; guest_quota_extra: number | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
     if (inv.is_paid) return { ok: false, error: 'Undangan ini sudah dibayar' }
 
     const resolved = await resolvePlan(inv.template_id, inv.plan)
@@ -298,6 +332,8 @@ export async function recheckPayment(invitationId: string): Promise<RecheckResul
       } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
     if (inv.is_paid) return { ok: true, published: true, status: 'PAID' }
     if (!inv.gateway_order_id)
       return { ok: false, error: 'Belum ada transaksi pembayaran untuk undangan ini' }
@@ -354,6 +390,8 @@ export async function startRenewal(invitationId: string): Promise<CheckoutResult
       data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; expires_at: string | null; gateway_order_id: string | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
 
     const period = activePeriodStatus(inv, Date.now())
     if (period.status !== 'expired') {
@@ -412,6 +450,8 @@ export async function recheckRenewal(invitationId: string): Promise<RecheckResul
       data: { id: string; plan: string; template_id: string; owner_user_id: string; is_paid: boolean; expires_at: string | null; gateway_order_id: string | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
 
     const period = activePeriodStatus(inv, Date.now())
     if (period.status !== 'expired') return { ok: true, published: true, status: 'ACTIVE' }
@@ -466,6 +506,8 @@ export async function startUpgradeCheckout(invitationId: string): Promise<Checko
       data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
     if (!inv.is_paid) return { ok: false, error: 'Selesaikan pembayaran awal undangan dulu sebelum upgrade' }
     if (inv.plan === UPGRADE_TARGET_PLAN) return { ok: false, error: 'Undangan ini sudah Premium' }
 
@@ -524,6 +566,8 @@ export async function recheckUpgrade(invitationId: string): Promise<RecheckResul
       data: { id: string; plan: string; template_id: string; owner_user_id: string } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
     if (inv.plan === UPGRADE_TARGET_PLAN) return { ok: true, published: true, status: 'PAID' }
 
     const { data: upg } = (await admin
@@ -588,6 +632,8 @@ export async function startQuotaAddonCheckout(invitationId: string, qtyGuests: n
       data: { id: string; slug: string; plan: string; template_id: string; owner_user_id: string; email: string | null; is_paid: boolean; guest_quota_extra: number | null } | null
     }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
     if (!inv.is_paid) return { ok: false, error: 'Selesaikan pembayaran awal undangan dulu' }
 
     // Snap UP to a clean block; 0 base means "treat the raw qty as the add-on".
@@ -651,6 +697,8 @@ export async function recheckQuotaAddon(invitationId: string): Promise<RecheckRe
       .eq('id', invitationId)
       .maybeSingle()) as { data: { id: string; owner_user_id: string } | null }
     if (!inv || inv.owner_user_id !== user.id) return { ok: false, error: 'Undangan tidak ditemukan' }
+    const blocked = await refuseIfSuspended(admin, invitationId)
+    if (blocked) return { ok: false, error: blocked }
 
     const { data: addon } = (await admin
       .from('quota_addons')

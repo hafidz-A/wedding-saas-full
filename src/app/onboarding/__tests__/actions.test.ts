@@ -32,7 +32,7 @@ import { createSnapTransaction, getTransactionStatus, isPaidStatus } from '@/lib
 import { publishPaidInvitation, applyPaidUpgrade, applyPaidQuotaAddon, extendActivePeriod } from '@/lib/payments/publish'
 import {
   completeOnboarding, checkSlugAvailable, startCheckout, recheckPayment, startQuotaAddonCheckout,
-  recheckRenewal, recheckUpgrade, recheckQuotaAddon, requestRefund,
+  recheckRenewal, recheckUpgrade, recheckQuotaAddon, requestRefund, startRenewal, startUpgradeCheckout,
 } from '../actions'
 
 const mockAdmin = vi.mocked(createSupabaseAdminClient)
@@ -320,5 +320,70 @@ describe('requestRefund', () => {
     expect(r.ok).toBe(true)
     const ins = fake._calls.find((c) => c.kind === 'insert' && c.table === 'refund_requests')!
     expect(ins.value.usage_snapshot.destination).toBeNull()
+  })
+})
+
+/**
+ * Suspension is enforced server-side, not only in the UI. /profile withholds these
+ * CTAs, but a button rendered before an admin suspended the row stays live in an
+ * open tab — no revalidation reaches it — so the action itself has to refuse.
+ * Paying a suspended invitation buys nothing: the dashboard gate, the public
+ * takedown and the publish API all still fire.
+ */
+describe('suspension guard on money-moving actions', () => {
+  const SUSPENDED = {
+    id: 'inv-1', slug: 'x', plan: 'basic', template_id: 'lovebirds', owner_user_id: 'user-1',
+    email: 'e@x.com', is_paid: true, expires_at: null, gateway_order_id: null,
+    guest_quota_extra: 0, expected_amount_idr: 100000,
+    suspended_at: '2026-08-01T00:00:00.000Z',
+  }
+  const fake = () => createFakeSupabase({
+    tables: {
+      invitations: { select: { data: SUSPENDED }, update: {} },
+      plan_upgrades: { select: { data: null }, insert: {} },
+      quota_addons: { select: { data: null }, insert: {} },
+    },
+  })
+
+  // Every action that mints or settles a charge. requestRefund is deliberately absent.
+  const MONEY_ACTIONS: Array<[string, () => Promise<{ ok: boolean; error?: string }>]> = [
+    ['startCheckout', () => startCheckout('inv-1')],
+    ['recheckPayment', () => recheckPayment('inv-1')],
+    ['startRenewal', () => startRenewal('inv-1')],
+    ['recheckRenewal', () => recheckRenewal('inv-1')],
+    ['startUpgradeCheckout', () => startUpgradeCheckout('inv-1')],
+    ['recheckUpgrade', () => recheckUpgrade('inv-1')],
+    ['startQuotaAddonCheckout', () => startQuotaAddonCheckout('inv-1', 50)],
+    ['recheckQuotaAddon', () => recheckQuotaAddon('inv-1')],
+  ]
+
+  it.each(MONEY_ACTIONS)('%s refuses a suspended invitation', async (_name, run) => {
+    mockAdmin.mockReturnValue(fake() as any)
+    const r = await run()
+    expect(r.ok).toBe(false)
+    expect(r.error).toMatch(/dinonaktifkan oleh admin/i)
+  })
+
+  it('mints no transaction for any of them', async () => {
+    for (const [, run] of MONEY_ACTIONS) {
+      mockAdmin.mockReturnValue(fake() as any)
+      await run()
+    }
+    expect(mockCreateInvoice).not.toHaveBeenCalled()
+  })
+
+  // A blocked customer asking for their money back is exactly the person who most
+  // needs that path open, so requestRefund must NOT be gated on suspension.
+  it('still lets a suspended owner request a refund', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      tables: {
+        invitations: {
+          select: { data: { ...SUSPENDED, paid_source: 'midtrans', paid_channel: 'qris', paid_at: '2026-08-01T00:00:00.000Z' } },
+        },
+        refund_requests: { select: { data: [] }, insert: {} },
+      },
+    }) as any)
+    const r = await requestRefund('inv-1', { category: 'other' })
+    expect(r.ok).toBe(true)
   })
 })
