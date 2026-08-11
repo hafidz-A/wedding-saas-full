@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perbandingan Plan FinCards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0f172a;
+            --primary-light: #f1f5f9;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+            --premium-bg: #1e293b;
+            --premium-text: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2.5rem 2rem 2rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Basic Plan Column */
+        th:nth-child(2), td:nth-child(2) {
+            width: 25%;
+            text-align: center;
+            background-color: var(--primary-light);
+        }
+
+        /* Premium Plan Column */
+        th:nth-child(3), td:nth-child(3) {
+            width: 25%;
+            text-align: center;
+            background-color: var(--premium-bg);
+            color: var(--premium-text);
+        }
+
+        th:nth-child(3) {
+            border-top-right-radius: 16px;
+        }
+
+        td:nth-child(3) {
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+
+        /* Feature Column */
+        td:first-child {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .price-basic {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .price-premium {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fbbf24; /* gold */
+        }
+
+        .icon-yes {
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        td:nth-child(3) .icon-yes {
+            color: #34d399;
+        }
+
+        .icon-no {
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        td:nth-child(3) .icon-no {
+            color: rgba(255,255,255,0.3);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-basic {
+            background-color: #e2e8f0;
+            color: #475569;
+        }
+
+        .badge-premium {
+            background-color: #fbbf24;
+            color: #78350f;
+        }
+
+        .sub-text {
+            font-size: 0.85rem;
+            font-weight: normal;
+            display: block;
+            margin-top: 0.25rem;
+            color: var(--text-muted);
+        }
+        
+        td:nth-child(3) .sub-text {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .note {
+            padding: 1.5rem;
+            background: var(--card-bg);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Perbandingan Plan FinCards</h1>
+            <p>Pilih paket undangan digital yang paling sesuai untuk hari bahagiamu.</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fitur & Layanan</th>
+                    <th>
+                        <span class="badge badge-basic">BASIC</span>
+                        <div class="price-basic">Rp 149.000</div>
+                    </th>
+                    <th>
+                        <span class="badge badge-premium">PREMIUM</span>
+                        <div class="price-premium">Rp 299.000</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Masa Aktif</td>
+                    <td>1 Tahun</td>
+                    <td>Selamanya <span class="sub-text">(Lifetime)</span></td>
+                </tr>
+                <tr>
+                    <td>Template Sinematik & 3D</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Desain Gratis & Bayar Saat Terbit</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>RSVP & Manajemen Tamu Otomatis</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Amplop Digital (Transfer Langsung)</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Musik Latar Auto-play & Galeri</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Self-edit via Dashboard</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Sebar via WhatsApp (Share Link)</td>
+                    <td><span class="icon-yes">✓</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Buku Tamu (Guestbook Ledger)</td>
+                    <td><span class="icon-no">✕</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Fitur Check-in QR (Scan di Hari-H)</td>
+                    <td><span class="icon-no">✕</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Export/Print Data Tamu (CSV)</td>
+                    <td><span class="icon-no">✕</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Custom Domain</td>
+                    <td><span class="icon-no">✕</span></td>
+                    <td><span class="icon-yes">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Upgrade ke Premium</td>
+                    <td>Bisa <span class="sub-text">Bayar selisih Rp 150.000</span></td>
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <strong>Catatan Tambahan:</strong><br>
+            Buku Tamu QR adalah nilai jual utama (USP) dari plan Premium. Ini memungkinkan penerima tamu di lokasi pernikahan untuk melakukan check-in tamu secara otomatis menggunakan scan QR, melihat statistik kehadiran, dan menambahkan tamu walk-in secara langsung.
+        </div>
+    </div>
+
+</body>
+</html>

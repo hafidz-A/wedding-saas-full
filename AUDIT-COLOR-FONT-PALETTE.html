@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit: Color Palette, Font & Typography — Lovebirds Template (Warm Cream)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Biryani:wght@300;400;600;700&family=Tangerine:wght@400;700&family=Great+Vibes&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Biryani', sans-serif;
+      color: #2A2118;
+      background: #FDF6EC;
+      line-height: 1.6;
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      color: #2A2118;
+    }
+
+    h1 { font-size: 32px; margin-bottom: 8px; }
+    h2 { font-size: 22px; margin-top: 48px; margin-bottom: 16px; border-bottom: 2px solid #E8553E; padding-bottom: 8px; }
+    h3 { font-size: 18px; margin-top: 28px; margin-bottom: 12px; color: #5C4A3A; }
+    h4 { font-size: 15px; margin-top: 20px; margin-bottom: 8px; }
+
+    .subtitle {
+      font-size: 14px;
+      color: #5C4A3A;
+      margin-bottom: 32px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #E8553E;
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid rgba(42, 33, 24, 0.12);
+      padding: 10px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #2A2118;
+      color: #FDF6EC;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    tr:nth-child(even) { background: rgba(42, 33, 24, 0.03); }
+
+    .swatch {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid rgba(42, 33, 24, 0.12);
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .swatch-small {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid rgba(42, 33, 24, 0.1);
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .font-preview {
+      padding: 16px 20px;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid rgba(42, 33, 24, 0.08);
+      margin-bottom: 12px;
+    }
+
+    .theme-card {
+      display: inline-block;
+      width: calc(50% - 8px);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      margin-right: 12px;
+      vertical-align: top;
+      border: 1px solid rgba(42, 33, 24, 0.08);
+    }
+
+    .theme-card h4 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .theme-card .mini-swatches {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .note {
+      background: rgba(245, 200, 66, 0.15);
+      border-left: 3px solid #F5C842;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      margin: 16px 0;
+    }
+
+    code {
+      background: rgba(42, 33, 24, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .palette-strip {
+      display: flex;
+      border-radius: 12px;
+      overflow: hidden;
+      height: 48px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(42, 33, 24, 0.1);
+    }
+
+    .palette-strip div {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(42, 33, 24, 0.12), transparent);
+      margin: 40px 0;
+    }
+
+    @media print {
+      body { padding: 20px; font-size: 12px; }
+      h2 { page-break-before: auto; }
+      .theme-card { width: calc(50% - 8px); }
+    }
+
+    .footer-note {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(42, 33, 24, 0.12);
+      font-size: 12px;
+      color: #5C4A3A;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <span class="badge">Design Audit Document</span>
+  <h1>🎨 Lovebirds Template — Color, Font & Typography Audit</h1>
+  <p class="subtitle">Palette: <strong>Warm Cream</strong> (default) — Extracted from codebase &bull; Generated 9 Juli 2026</p>
+
+  <!-- ============================== -->
+  <!-- SECTION 1: WARM CREAM PALETTE  -->
+  <!-- ============================== -->
+
+  <h2>1. Primary Palette — Warm Cream (Default Theme)</h2>
+
+  <p>Ini adalah palette default yang dipakai landing page dan template Lovebirds. Semua warna diambil langsung dari <code>themes.js</code> dan <code>tokens.css</code>.</p>
+
+  <div class="palette-strip">
+    <div style="background:#FDF6EC; color:#2A2118;">#FDF6EC</div>
+    <div style="background:#F7EBD7; color:#2A2118;">#F7EBD7</div>
+    <div style="background:#E8553E; color:#fff;">#E8553E</div>
+    <div style="background:#F4A38F; color:#2A2118;">#F4A38F</div>
+    <div style="background:#2A2118; color:#FDF6EC;">#2A2118</div>
+    <div style="background:#5C4A3A; color:#FDF6EC;">#5C4A3A</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Swatch</th>
+        <th>Nama Token / Role</th>
+        <th>Hex Value</th>
+        <th>CSS Variable</th>
+        <th>Keterangan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="swatch" style="background:#FDF6EC;"></span></td>
+        <td><strong>Cream (Base Surface)</strong></td>
+        <td><code>#FDF6EC</code></td>
+        <td><code>--color-cream</code></td>
+        <td>Background utama page, overscroll fill</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#F7EBD7;"></span></td>
+        <td><strong>Cream Deep (Sunken Surface)</strong></td>
+        <td><code>#F7EBD7</code></td>
+        <td><code>--color-cream-deep</code></td>
+        <td>Gradient bottom, surface sunken</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#F5EFE3;"></span></td>
+        <td><strong>Surface Warm</strong></td>
+        <td><code>#F5EFE3</code></td>
+        <td><code>--surface-warm</code></td>
+        <td>Dashboard bg, card surface warm</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#E8553E;"></span></td>
+        <td><strong>Coral (Accent / Primary)</strong></td>
+        <td><code>#E8553E</code></td>
+        <td><code>--color-coral</code> / <code>--accent</code></td>
+        <td>CTA button, accent utama, focus ring, selection bg</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#F4A38F;"></span></td>
+        <td><strong>Coral Soft (Accent Soft)</strong></td>
+        <td><code>#F4A38F</code></td>
+        <td><code>--color-coral-soft</code> / <code>--accent-soft</code></td>
+        <td>Hover state, muted accent</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#F5C842;"></span></td>
+        <td><strong>Gold</strong></td>
+        <td><code>#F5C842</code></td>
+        <td><code>--color-gold</code></td>
+        <td>Ornament, badge, highlight</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#FBE3A6;"></span></td>
+        <td><strong>Gold Soft</strong></td>
+        <td><code>#FBE3A6</code></td>
+        <td><code>--color-gold-soft</code></td>
+        <td>Photo placeholder gradient</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#2D8C4E;"></span></td>
+        <td><strong>Emerald</strong></td>
+        <td><code>#2D8C4E</code></td>
+        <td><code>--color-emerald</code></td>
+        <td>Success status, secondary accent</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#8FCBA1;"></span></td>
+        <td><strong>Emerald Soft</strong></td>
+        <td><code>#8FCBA1</code></td>
+        <td><code>--color-emerald-soft</code></td>
+        <td>Soft green variant</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#6B35A8;"></span></td>
+        <td><strong>Purple</strong></td>
+        <td><code>#6B35A8</code></td>
+        <td><code>--color-purple</code></td>
+        <td>Ornament cool tone</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#BFA5DC;"></span></td>
+        <td><strong>Purple Soft</strong></td>
+        <td><code>#BFA5DC</code></td>
+        <td><code>--color-purple-soft</code></td>
+        <td>Muted purple</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#3D9BC1;"></span></td>
+        <td><strong>Sky</strong></td>
+        <td><code>#3D9BC1</code></td>
+        <td><code>--color-sky</code></td>
+        <td>Sky editorial accent</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#A8D5E3;"></span></td>
+        <td><strong>Sky Soft</strong></td>
+        <td><code>#A8D5E3</code></td>
+        <td><code>--color-sky-soft</code></td>
+        <td>Muted sky blue</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#2A2118;"></span></td>
+        <td><strong>Charcoal (Foreground)</strong></td>
+        <td><code>#2A2118</code></td>
+        <td><code>--color-charcoal</code> / <code>--fg</code></td>
+        <td>Body text, heading, ink</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#5C4A3A;"></span></td>
+        <td><strong>Charcoal Light (Muted Text)</strong></td>
+        <td><code>#5C4A3A</code></td>
+        <td><code>--color-charcoal-light</code> / <code>--fg-muted</code></td>
+        <td>Secondary text, caption, label</td>
+      </tr>
+      <tr>
+        <td><span class="swatch" style="background:#ffffff;"></span></td>
+        <td><strong>Paper / White</strong></td>
+        <td><code>#FFFFFF</code></td>
+        <td><code>--color-paper</code></td>
+        <td>Card surface, button fg</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1.1 Warm Cream — Glassmorphism</h3>
+  <table>
+    <thead>
+      <tr><th>Token</th><th>Value</th><th>Keterangan</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>--glass-bg</code></td><td><code>rgba(255, 255, 255, 0.55)</code></td><td>Glass card background</td></tr>
+      <tr><td><code>--glass-border</code></td><td><code>rgba(255, 255, 255, 0.45)</code></td><td>Glass card border</td></tr>
+      <tr><td><code>--glass-text</code></td><td><code>#2A2118</code></td><td>Text di glass card</td></tr>
+      <tr><td><code>--glass-text-muted</code></td><td><code>#5C4A3A</code></td><td>Muted text di glass card</td></tr>
+      <tr><td><code>--button-bg</code></td><td><code>#E8553E</code></td><td>CTA button background</td></tr>
+      <tr><td><code>--button-fg</code></td><td><code>#FFFFFF</code></td><td>CTA button text color</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.2 Warm Cream — Ornament Colors</h3>
+  <table>
+    <thead>
+      <tr><th>Swatch</th><th>Token</th><th>Hex</th><th>Keterangan</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="swatch-small" style="background:#E8553E;"></span></td><td>accent</td><td><code>#E8553E</code></td><td>Bird body, accent glow</td></tr>
+      <tr><td><span class="swatch-small" style="background:#F4A38F;"></span></td><td>accentSoft</td><td><code>#F4A38F</code></td><td>Soft accent fill</td></tr>
+      <tr><td><span class="swatch-small" style="background:#8B6F47;"></span></td><td>branch</td><td><code>#8B6F47</code></td><td>Branch / wood tone</td></tr>
+      <tr><td><span class="swatch-small" style="background:#5C4A3A;"></span></td><td>branchDark</td><td><code>#5C4A3A</code></td><td>Dark branch shadow</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.3 Warm Cream — Ambient Background Gradient</h3>
+  <div class="note">
+    Background page bukan solid color — melainkan layered radial gradients yang memberikan efek "warm glow":
+  </div>
+  <table>
+    <thead><tr><th>Layer</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>1 (Bottom glow)</td><td><code>radial-gradient(50% 38% at 50% 82%, rgba(232, 85, 62, 0.18), transparent 70%)</code></td></tr>
+      <tr><td>2 (Top-left)</td><td><code>radial-gradient(40% 32% at 12% 18%, rgba(245, 200, 66, 0.18), transparent 70%)</code></td></tr>
+      <tr><td>3 (Top-right)</td><td><code>radial-gradient(40% 32% at 88% 16%, rgba(45, 140, 78, 0.11), transparent 70%)</code></td></tr>
+      <tr><td>4 (Bottom-left)</td><td><code>radial-gradient(38% 28% at 8% 84%, rgba(107, 53, 168, 0.11), transparent 70%)</code></td></tr>
+      <tr><td>5 (Bottom-right)</td><td><code>radial-gradient(38% 28% at 92% 82%, rgba(61, 155, 193, 0.11), transparent 70%)</code></td></tr>
+      <tr><td>6 (Base)</td><td><code>linear-gradient(180deg, #FDF6EC 0%, #F7EBD7 100%)</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================== -->
+  <!-- SECTION 2: ALL 10 PALETTES     -->
+  <!-- ============================== -->
+
+  <h2>2. Semua 10 Palette Theme (Lovebirds Template)</h2>
+
+  <p>Template Lovebirds support 10 palette berbeda yang bisa dipilih user. Berikut ringkasan setiap palette:</p>
+
+  <h3>Light Themes</h3>
+
+  <!-- Warm Cream -->
+  <div class="theme-card" style="background:#FDF6EC;">
+    <h4 style="color:#2A2118;">🟠 Warm Cream <span style="font-weight:300; font-size:12px;">(DEFAULT)</span></h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#E8553E;" title="Accent"></span>
+      <span class="swatch-small" style="background:#F4A38F;" title="Accent Soft"></span>
+      <span class="swatch-small" style="background:#2A2118;" title="FG"></span>
+      <span class="swatch-small" style="background:#5C4A3A;" title="FG Muted"></span>
+      <span class="swatch-small" style="background:#FDF6EC;" title="BG"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#5C4A3A;">Accent: <code>#E8553E</code> &bull; FG: <code>#2A2118</code></p>
+  </div>
+
+  <!-- Emerald Garden -->
+  <div class="theme-card" style="background:#FDF6EC;">
+    <h4 style="color:#2A2118;">🟢 Emerald Garden</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#2D8C4E;"></span>
+      <span class="swatch-small" style="background:#8FCBA1;"></span>
+      <span class="swatch-small" style="background:#2A2118;"></span>
+      <span class="swatch-small" style="background:#5C4A3A;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#5C4A3A;">Accent: <code>#2D8C4E</code> &bull; FG: <code>#2A2118</code></p>
+  </div>
+
+  <!-- Sky Editorial -->
+  <div class="theme-card" style="background:#FDF6EC;">
+    <h4 style="color:#2A2118;">🔵 Sky Editorial</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#3D9BC1;"></span>
+      <span class="swatch-small" style="background:#A8D5E3;"></span>
+      <span class="swatch-small" style="background:#2A2118;"></span>
+      <span class="swatch-small" style="background:#5C4A3A;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#5C4A3A;">Accent: <code>#3D9BC1</code> &bull; FG: <code>#2A2118</code></p>
+  </div>
+
+  <!-- Blossom Velvet -->
+  <div class="theme-card" style="background:#FAF0EC;">
+    <h4 style="color:#802B43;">🌸 Blossom Velvet</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#E06B7B;"></span>
+      <span class="swatch-small" style="background:#F2B6C1;"></span>
+      <span class="swatch-small" style="background:#802B43;"></span>
+      <span class="swatch-small" style="background:#6B5A5E;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#6B5A5E;">Accent: <code>#E06B7B</code> &bull; FG: <code>#802B43</code></p>
+  </div>
+
+  <!-- Sunset Clay -->
+  <div class="theme-card" style="background:#FAF2EA;">
+    <h4 style="color:#46281A;">🏜️ Sunset Clay</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#B34E2A;"></span>
+      <span class="swatch-small" style="background:#EAD0A8;"></span>
+      <span class="swatch-small" style="background:#46281A;"></span>
+      <span class="swatch-small" style="background:#5A6B52;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#5A6B52;">Accent: <code>#B34E2A</code> &bull; FG: <code>#46281A</code></p>
+  </div>
+
+  <h3>Dark Themes</h3>
+
+  <!-- Dark Luxury -->
+  <div class="theme-card" style="background:#2A2118;">
+    <h4 style="color:#FDF6EC;">✨ Dark Luxury</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#F5C842;"></span>
+      <span class="swatch-small" style="background:#FBE3A6;"></span>
+      <span class="swatch-small" style="background:#FDF6EC;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:rgba(253,246,236,0.78);">Accent: <code style="color:#FDF6EC;">#F5C842</code> &bull; FG: <code style="color:#FDF6EC;">#FDF6EC</code></p>
+  </div>
+
+  <!-- Midnight Stardust -->
+  <div class="theme-card" style="background:#1E222D;">
+    <h4 style="color:#F5E5C9;">🌙 Midnight Stardust</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#E3C08D;"></span>
+      <span class="swatch-small" style="background:#5D9CEC;"></span>
+      <span class="swatch-small" style="background:#F5E5C9;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:rgba(245,229,201,0.75);">Accent: <code style="color:#F5E5C9;">#E3C08D</code> &bull; FG: <code style="color:#F5E5C9;">#F5E5C9</code></p>
+  </div>
+
+  <!-- Royal Plum -->
+  <div class="theme-card" style="background:#4A0E1D;">
+    <h4 style="color:#FAF0EC;">👑 Royal Plum</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#F5C842;"></span>
+      <span class="swatch-small" style="background:#E06B7B;"></span>
+      <span class="swatch-small" style="background:#FAF0EC;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#F2B6C1;">Accent: <code style="color:#FAF0EC;">#F5C842</code> &bull; FG: <code style="color:#FAF0EC;">#FAF0EC</code></p>
+  </div>
+
+  <!-- Forest Mist -->
+  <div class="theme-card" style="background:#12291B;">
+    <h4 style="color:#EAF0E9;">🌲 Forest Mist</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#9EE0B1;"></span>
+      <span class="swatch-small" style="background:#2D8C4E;"></span>
+      <span class="swatch-small" style="background:#EAF0E9;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#A4B29E;">Accent: <code style="color:#EAF0E9;">#9EE0B1</code> &bull; FG: <code style="color:#EAF0E9;">#EAF0E9</code></p>
+  </div>
+
+  <!-- Terracotta Oasis -->
+  <div class="theme-card" style="background:#8E3A21;">
+    <h4 style="color:#FAF2EA;">🏺 Terracotta Oasis</h4>
+    <div class="mini-swatches">
+      <span class="swatch-small" style="background:#FBE3A6;"></span>
+      <span class="swatch-small" style="background:#FAF2EA;"></span>
+    </div>
+    <p style="font-size:11px; margin-top:6px; color:#EAD0A8;">Accent: <code style="color:#FAF2EA;">#FBE3A6</code> &bull; FG: <code style="color:#FAF2EA;">#FAF2EA</code></p>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================== -->
+  <!-- SECTION 3: SEMANTIC COLORS     -->
+  <!-- ============================== -->
+
+  <h2>3. Semantic Color Tokens</h2>
+
+  <h3>3.1 Text Colors</h3>
+  <table>
+    <thead><tr><th>Swatch</th><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><span class="swatch-small" style="background:#2A2118;"></span></td><td><code>--text-primary</code></td><td><code>#2A2118</code> (charcoal)</td></tr>
+      <tr><td><span class="swatch-small" style="background:#5C4A3A;"></span></td><td><code>--text-secondary</code></td><td><code>#5C4A3A</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:rgba(42,33,24,0.55);"></span></td><td><code>--text-muted</code></td><td><code>rgba(42, 33, 24, 0.55)</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#FDF6EC;"></span></td><td><code>--text-on-dark</code></td><td><code>#FDF6EC</code> (cream)</td></tr>
+      <tr><td><span class="swatch-small" style="background:rgba(42,33,24,0.4);"></span></td><td><code>--text-disabled</code></td><td><code>rgba(42, 33, 24, 0.40)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 Surface Colors</h3>
+  <table>
+    <thead><tr><th>Swatch</th><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><span class="swatch-small" style="background:#FDF6EC;"></span></td><td><code>--surface-base</code></td><td><code>#FDF6EC</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#ffffff;"></span></td><td><code>--surface-raised</code></td><td><code>#FFFFFF</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#F7EBD7;"></span></td><td><code>--surface-sunken</code></td><td><code>#F7EBD7</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#F5EFE3;"></span></td><td><code>--surface-warm</code></td><td><code>#F5EFE3</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 Border Colors</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><code>--border-subtle</code></td><td><code>rgba(42, 33, 24, 0.06)</code></td></tr>
+      <tr><td><code>--border-default</code></td><td><code>rgba(42, 33, 24, 0.12)</code></td></tr>
+      <tr><td><code>--border-strong</code></td><td><code>rgba(42, 33, 24, 0.20)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.4 Interactive Colors</h3>
+  <table>
+    <thead><tr><th>Swatch</th><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><span class="swatch-small" style="background:#E8553E;"></span></td><td><code>--interactive-primary</code></td><td><code>#E8553E</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#C43F2A;"></span></td><td><code>--interactive-primary-hover</code></td><td><code>#C43F2A</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:rgba(232,85,62,0.1);"></span></td><td><code>--interactive-primary-soft</code></td><td><code>rgba(232, 85, 62, 0.10)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.5 Status Colors</h3>
+  <table>
+    <thead><tr><th>Swatch</th><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><span class="swatch-small" style="background:#2D8C4E;"></span></td><td><code>--status-success</code></td><td><code>#2D8C4E</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#E8553E;"></span></td><td><code>--status-error</code></td><td><code>#E8553E</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#B23A28;"></span></td><td><code>--status-error-dark</code></td><td><code>#B23A28</code></td></tr>
+      <tr><td><span class="swatch-small" style="background:#8A7F70;"></span></td><td><code>--status-neutral</code></td><td><code>#8A7F70</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================== -->
+  <!-- SECTION 4: FONTS               -->
+  <!-- ============================== -->
+
+  <h2>4. Font Families</h2>
+
+  <p>Project ini menggunakan <strong>4 font dari Google Fonts</strong>, di-load via <code>next/font/google</code> di <code>layout.tsx</code>:</p>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Font Name</th><th>Weights</th><th>CSS Variable</th><th>Role</th><th>Scope</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><strong>Montserrat</strong></td>
+        <td>Variable (100–900)</td>
+        <td><code>--font-montserrat</code></td>
+        <td>Semua Heading</td>
+        <td>Global (semua template + marketing + dashboard)</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><strong>Biryani</strong></td>
+        <td>300, 400, 600, 700</td>
+        <td><code>--font-biryani</code></td>
+        <td>Body text, Label, Mono fallback</td>
+        <td>Global (semua template + marketing + dashboard)</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><strong>Tangerine</strong></td>
+        <td>400, 700</td>
+        <td><code>--font-tangerine</code></td>
+        <td>Script accent / dekoratif</td>
+        <td>Hanya di dalam template (Lovebirds + Solary)</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><strong>Great Vibes</strong></td>
+        <td>400</td>
+        <td><code>--font-greatvibes</code></td>
+        <td>Nama pasangan di Hero</td>
+        <td>HANYA Lovebirds Hero couple names</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>4.1 Font Role Mapping</h3>
+  <table>
+    <thead><tr><th>CSS Token</th><th>Resolves To</th><th>Used For</th></tr></thead>
+    <tbody>
+      <tr><td><code>--font-heading</code></td><td>Montserrat, sans-serif</td><td>h1–h6 heading global</td></tr>
+      <tr><td><code>--font-body</code></td><td>Biryani, sans-serif</td><td>Body text, paragraph</td></tr>
+      <tr><td><code>--font-display</code></td><td>Montserrat, serif</td><td>Display / hero heading</td></tr>
+      <tr><td><code>--font-script</code></td><td>Tangerine, cursive</td><td>Script ornamental</td></tr>
+      <tr><td><code>--font-display-classy</code></td><td>Tangerine, cursive</td><td>Classy variation heading</td></tr>
+      <tr><td><code>--font-body-fun</code></td><td>Biryani, sans-serif</td><td>Fun variation body</td></tr>
+      <tr><td><code>--font-serif-soft</code></td><td>Montserrat, sans-serif</td><td>Serif-soft fallback</td></tr>
+      <tr><td><code>--font-label</code></td><td>Biryani, sans-serif</td><td>Labels, badges</td></tr>
+      <tr><td><code>--font-mono</code></td><td>Biryani, sans-serif</td><td>Monospace fallback (non-code)</td></tr>
+      <tr><td><code>--font-mono-code</code></td><td>ui-monospace, SFMono, Courier New</td><td>Actual code blocks</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Font Preview</h3>
+
+  <div class="font-preview">
+    <p style="font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 600; margin-bottom: 4px;">Montserrat — Heading Font</p>
+    <p style="font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 400; color: #5C4A3A;">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
+  </div>
+
+  <div class="font-preview">
+    <p style="font-family: 'Biryani', sans-serif; font-size: 20px; font-weight: 400; margin-bottom: 4px;">Biryani — Body Font</p>
+    <p style="font-family: 'Biryani', sans-serif; font-size: 14px; font-weight: 400; color: #5C4A3A;">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
+  </div>
+
+  <div class="font-preview">
+    <p style="font-family: 'Tangerine', cursive; font-size: 42px; font-weight: 400; margin-bottom: 4px;">Tangerine — Script Accent</p>
+    <p style="font-family: 'Tangerine', cursive; font-size: 28px; font-weight: 400; color: #5C4A3A;">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz</p>
+  </div>
+
+  <div class="font-preview">
+    <p style="font-family: 'Great Vibes', cursive; font-size: 42px; font-weight: 400; margin-bottom: 4px;">Great Vibes — Hero Names</p>
+    <p style="font-family: 'Great Vibes', cursive; font-size: 28px; font-weight: 400; color: #5C4A3A;">Adi & Rani</p>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================== -->
+  <!-- SECTION 5: FONT SIZES          -->
+  <!-- ============================== -->
+
+  <h2>5. Font Size Scale</h2>
+
+  <h3>5.1 Design Token Scale (dari tokens.css)</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--font-size-xs</code></td><td><strong>11px</strong></td><td>Micro labels, badges</td></tr>
+      <tr><td><code>--font-size-sm</code></td><td><strong>13px</strong></td><td>Captions, small body</td></tr>
+      <tr><td><code>--font-size-base</code></td><td><strong>15px</strong></td><td>Default body text</td></tr>
+      <tr><td><code>--font-size-md</code></td><td><strong>16px</strong></td><td>Medium body text</td></tr>
+      <tr><td><code>--font-size-lg</code></td><td><strong>18px</strong></td><td>Large body / subheading</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Type Scale (Scope C — Marketing / Dashboard / Auth)</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--type-label-xs</code></td><td><strong>11px</strong></td><td>Tiny labels</td></tr>
+      <tr><td><code>--type-label-sm</code></td><td><strong>12px</strong></td><td>Small labels</td></tr>
+      <tr><td><code>--type-body-sm</code></td><td><strong>13px</strong></td><td>Small body text</td></tr>
+      <tr><td><code>--type-body</code></td><td><strong>15px</strong></td><td>Default body text</td></tr>
+      <tr><td><code>--type-body-lg</code></td><td><strong>16px</strong></td><td>Large body text</td></tr>
+      <tr><td><code>--type-subhead</code></td><td><strong>18px</strong></td><td>Subheading</td></tr>
+      <tr><td><code>--type-title-sm</code></td><td><strong>22px</strong></td><td>Small title</td></tr>
+      <tr><td><code>--type-title-md</code></td><td><strong>28px</strong></td><td>Medium title</td></tr>
+      <tr><td><code>--type-title-lg</code></td><td><strong>clamp(28px, 4vw, 36px)</strong></td><td>Large title (responsive)</td></tr>
+      <tr><td><code>--type-display</code></td><td><strong>clamp(32px, 6vw, 52px)</strong></td><td>Hero display heading</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 Template Section Font Sizes (Fluid / Responsive)</h3>
+  <p>Sections di template pakai <code>clamp()</code> untuk responsive sizing. Berikut range yang umum dipakai:</p>
+  <table>
+    <thead><tr><th>Element</th><th>Font Size (clamp)</th><th>Keterangan</th></tr></thead>
+    <tbody>
+      <tr><td>Section Eyebrow</td><td><code>clamp(12px, 1.3vw, 15px)</code></td><td>Label atas section (ALL CAPS)</td></tr>
+      <tr><td>Section Title (Script)</td><td><code>clamp(40px, 6vw, 72px)</code></td><td>Judul utama section (Tangerine)</td></tr>
+      <tr><td>Section Subtitle</td><td><code>clamp(14px, 1.4vw, 16px)</code></td><td>Paragraf deskripsi section</td></tr>
+      <tr><td>Card Title</td><td><code>clamp(18px, 2.8vw, 26px)</code></td><td>Heading di dalam card</td></tr>
+      <tr><td>Card Subtitle</td><td><code>clamp(20px, 2vw, 24px)</code></td><td>Secondary card heading</td></tr>
+      <tr><td>Footer Couple Names</td><td><code>clamp(40px, 8vw, 88px)</code></td><td>Nama pasangan di footer (Great Vibes)</td></tr>
+      <tr><td>Footer Tagline</td><td><code>clamp(15px, 1.5vw, 17px)</code></td><td>Tagline di footer</td></tr>
+      <tr><td>Person Name (Script)</td><td><code>clamp(48px, 5.5vw, 68px)</code></td><td>Nama di BrideGroom card</td></tr>
+      <tr><td>Hero Names</td><td><code>clamp(56px, 26cqw, 170px)</code></td><td>Nama besar di Hero (container-query based)</td></tr>
+      <tr><td>FAQ Question</td><td><code>clamp(18px, 2vw, 22px)</code></td><td>Pertanyaan FAQ</td></tr>
+      <tr><td>FAQ Answer</td><td><strong>15px</strong></td><td>Jawaban FAQ (fixed)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.4 Fixed Font Sizes (Non-responsive)</h3>
+  <table>
+    <thead><tr><th>Size</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><strong>10px</strong></td><td>Map / link kecil</td></tr>
+      <tr><td><strong>11px</strong></td><td>Eyebrow labels, micro badges, button labels</td></tr>
+      <tr><td><strong>12px</strong></td><td>Small labels, tags, breadcrumb, footer credit</td></tr>
+      <tr><td><strong>13px</strong></td><td>Description, caption, detail text, buttons</td></tr>
+      <tr><td><strong>14px</strong></td><td>Info text, card body</td></tr>
+      <tr><td><strong>15px</strong></td><td>Default body text</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================== -->
+  <!-- SECTION 6: FONT WEIGHTS        -->
+  <!-- ============================== -->
+
+  <h2>6. Font Weights & Line Heights</h2>
+
+  <h3>6.1 Font Weight Scale</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--weight-light</code></td><td><strong>300</strong></td><td>Body text light variant</td></tr>
+      <tr><td><code>--weight-regular</code></td><td><strong>400</strong></td><td>Default body</td></tr>
+      <tr><td><code>--weight-medium</code></td><td><strong>500</strong></td><td>Emphasis</td></tr>
+      <tr><td><code>--weight-semibold</code></td><td><strong>600</strong></td><td>Heading, button, label (DEFAULT heading weight)</td></tr>
+      <tr><td><code>--weight-bold</code></td><td><strong>700</strong></td><td>Strong heading</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 Line Height Scale</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--leading-none</code></td><td><strong>1</strong></td><td>Hero display</td></tr>
+      <tr><td><code>--leading-tight</code></td><td><strong>1.15</strong></td><td>Heading (default untuk h1-h4)</td></tr>
+      <tr><td><code>--leading-snug</code></td><td><strong>1.3</strong></td><td>Subheading</td></tr>
+      <tr><td><code>--leading-normal</code></td><td><strong>1.55</strong></td><td>Body text (default <code>&lt;body&gt;</code>)</td></tr>
+      <tr><td><code>--leading-relaxed</code></td><td><strong>1.65</strong></td><td>Long-form / paragraph</td></tr>
+      <tr><td><code>--leading-loose</code></td><td><strong>1.8</strong></td><td>Spacious reading</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 Letter Spacing</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--tracking-tight</code></td><td><strong>-0.01em</strong></td><td>Large display headings</td></tr>
+      <tr><td><code>--tracking-wide</code></td><td><strong>0.10em</strong></td><td>Labels, badges</td></tr>
+      <tr><td><code>--tracking-widest</code></td><td><strong>0.32em</strong></td><td>Eyebrow / kicker ALL-CAPS</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================== -->
+  <!-- SECTION 7: ADDITIONAL          -->
+  <!-- ============================== -->
+
+  <h2>7. Additional Tokens</h2>
+
+  <h3>7.1 Shadow Scale</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><code>--shadow-xs</code></td><td><code>0 2px 8px rgba(42, 33, 24, 0.04)</code></td></tr>
+      <tr><td><code>--shadow-sm</code></td><td><code>0 6px 16px rgba(42, 33, 24, 0.08)</code></td></tr>
+      <tr><td><code>--shadow-md</code></td><td><code>0 12px 32px rgba(42, 33, 24, 0.12)</code></td></tr>
+      <tr><td><code>--shadow-lg</code></td><td><code>0 20px 48px rgba(42, 33, 24, 0.16)</code></td></tr>
+      <tr><td><code>--shadow-card</code></td><td><code>0 8px 32px rgba(42, 33, 24, 0.10)</code></td></tr>
+      <tr><td><code>--shadow-card-hover</code></td><td><code>0 16px 48px rgba(42, 33, 24, 0.16)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.2 Border Radius Scale</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+    <tbody>
+      <tr><td><code>--radius-xs</code></td><td><strong>4px</strong></td><td>Chips, focus ring, micro details</td></tr>
+      <tr><td><code>--radius-sm</code></td><td><strong>8px</strong></td><td>Inputs, small controls</td></tr>
+      <tr><td><code>--radius-md</code></td><td><strong>16px</strong></td><td>Standard card / panel</td></tr>
+      <tr><td><code>--radius-lg</code></td><td><strong>24px</strong></td><td>Large cards, modals, popups</td></tr>
+      <tr><td><code>--radius-pill</code></td><td><strong>999px</strong></td><td>Capsule buttons</td></tr>
+      <tr><td><code>--radius-round</code></td><td><strong>50%</strong></td><td>Circles, avatars</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Spacing Scale (8px grid)</h3>
+  <table>
+    <thead><tr><th>Token</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><code>--space-1</code></td><td><strong>4px</strong></td></tr>
+      <tr><td><code>--space-2</code></td><td><strong>8px</strong></td></tr>
+      <tr><td><code>--space-3</code></td><td><strong>12px</strong></td></tr>
+      <tr><td><code>--space-4</code></td><td><strong>16px</strong></td></tr>
+      <tr><td><code>--space-5</code></td><td><strong>24px</strong></td></tr>
+      <tr><td><code>--space-6</code></td><td><strong>32px</strong></td></tr>
+      <tr><td><code>--space-7</code></td><td><strong>48px</strong></td></tr>
+      <tr><td><code>--space-8</code></td><td><strong>64px</strong></td></tr>
+      <tr><td><code>--spacing-section</code></td><td><strong>clamp(64px, 9vw, 120px)</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-divider"></div>
+
+  <h2>8. Source Files Reference</h2>
+  <table>
+    <thead><tr><th>File</th><th>Contains</th></tr></thead>
+    <tbody>
+      <tr><td><code>src/styles/tokens.css</code></td><td>Global design tokens (colors, fonts, spacing, shadows, radii)</td></tr>
+      <tr><td><code>src/styles/global.css</code></td><td>Reset, base typography, utilities</td></tr>
+      <tr><td><code>src/all-templates/lovebirds/config/themes.js</code></td><td>All 10 palette definitions (CSS variable objects)</td></tr>
+      <tr><td><code>src/all-templates/lovebirds/config/applyTheme.js</code></td><td>Theme metadata, labels, groups, apply/clear functions</td></tr>
+      <tr><td><code>src/all-templates/lovebirds/config/ornamentThemes.js</code></td><td>Per-palette ornament accent/branch colors</td></tr>
+      <tr><td><code>src/all-templates/lovebirds/styles/theme.css</code></td><td>Template-scoped vars, glass, buttons, card variants</td></tr>
+      <tr><td><code>src/app/layout.tsx</code></td><td>Font loading (next/font/google), CSS variable injection</td></tr>
+    </tbody>
+  </table>
+
+  <div class="footer-note">
+    <p>📄 Dokumen ini bisa dibuka di browser, di-print sebagai PDF, atau dibuka di Microsoft Word (File → Open → pilih file .html ini)</p>
+    <p>Generated from codebase: <strong>wedding-saas-next</strong> — Lovebirds Template — 9 Juli 2026</p>
+  </div>
+
+</body>
+</html>
