@@ -58,10 +58,31 @@ test.describe('a11y — LangToggle contrast fix (regression guard)', () => {
       .locator('[class*="LangToggle_pill"]')
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundColor)
-    expect(color).toBe('rgb(255, 255, 255)')
-    expect(pillBg).toBe('rgb(199, 64, 43)') // #C7402B
+
+    // Assert the PROPERTY, not a specific colour. The original guard pinned
+    // rgb(199,64,43) and started failing the moment the pill was legitimately
+    // moved onto --interactive-primary-hover (#C43F2A) by the design-system
+    // work — a change that took contrast from 5.00:1 to 5.13:1. A guard that
+    // cries wolf on an improvement teaches people to ignore it; this one only
+    // fires when the ratio actually drops below AA.
+    const ratio = contrastRatio(pillBg, color)
+    expect(ratio, `active pill ${pillBg} on ${color} = ${ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5)
   })
 })
+
+/** WCAG 2.x relative luminance / contrast, for `rgb(r, g, b)` strings. */
+function contrastRatio(a: string, b: string): number {
+  const lum = (rgb: string) => {
+    const [r, g, bl] = (rgb.match(/\d+(\.\d+)?/g) ?? ['0', '0', '0']).slice(0, 3).map(Number)
+    const ch = [r, g, bl].map((v) => {
+      const s = v / 255
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+    })
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+  }
+  const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x)
+  return (hi + 0.05) / (lo + 0.05)
+}
 
 test.describe('a11y — invitation pages (no critical)', () => {
   for (const [name, url] of [
