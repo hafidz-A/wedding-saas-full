@@ -115,6 +115,48 @@ export function parseSizesFromListXml(xml: string): number {
   return total
 }
 
+/** Every `<Key>` in a ListObjectsV2 response. Exported for unit testing. */
+export function parseKeysFromListXml(xml: string): string[] {
+  return [...xml.matchAll(/<Key>([\s\S]*?)<\/Key>/g)].map((m) => m[1])
+}
+
+/**
+ * Delete every object under a key prefix, returning how many were removed.
+ *
+ * This is the R2 half of erasing an invitation's media. Deletion paths must hit
+ * BOTH stores while the Supabase originals are still kept as the migration
+ * rollback: removing only one leaves the customer's photos live on the other,
+ * which for a PDP erasure request is a compliance failure, not just clutter.
+ *
+ * Callers pass `<invitation_id>/`. A prefix without the trailing slash would
+ * also match a different invitation whose id merely starts with the same
+ * characters, so the caller's slash is load-bearing.
+ */
+export async function deletePrefix(prefix: string): Promise<number> {
+  let removed = 0
+  let token: string | null = null
+  do {
+    const url = new URL(`${endpoint()}/${env('R2_BUCKET')}`)
+    url.searchParams.set('list-type', '2')
+    url.searchParams.set('prefix', prefix)
+    url.searchParams.set('max-keys', '1000')
+    if (token) url.searchParams.set('continuation-token', token)
+    const res = await r2().fetch(url.toString(), { method: 'GET' })
+    if (!res.ok) throw new Error(`R2 list failed: ${res.status}`)
+    const xml = await res.text()
+
+    for (const key of parseKeysFromListXml(xml)) {
+      await deleteObject(key)
+      removed++
+    }
+
+    token = /<IsTruncated>\s*true\s*<\/IsTruncated>/i.test(xml)
+      ? (/<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/.exec(xml)?.[1] ?? null)
+      : null
+  } while (token)
+  return removed
+}
+
 /** Total bytes stored under a key prefix — used for the per-invitation quota. */
 export async function sumPrefixBytes(prefix: string): Promise<number> {
   const url = new URL(`${endpoint()}/${env('R2_BUCKET')}`)

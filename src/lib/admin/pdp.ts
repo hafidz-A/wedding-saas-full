@@ -5,6 +5,7 @@ import 'server-only'
 import { decryptField as decGuest } from '@/lib/guests/crypto'
 import { decryptField as decApp } from '@/lib/crypto/app'
 import { decryptConfig } from '@/lib/crypto/config'
+import { deletePrefix } from '@/lib/upload/r2'
 
 const MEDIA_BUCKET = 'invitation-media'
 // PII child tables — deleted when anonymizing a paid invitation. plan_upgrades /
@@ -30,9 +31,33 @@ export function anonymizedInvitationPatch(id: string, nowIso: string): Record<st
   }
 }
 
+/**
+ * Erase an invitation's media from BOTH stores.
+ *
+ * R2 is where the files are actually served from since the media migration;
+ * Supabase still holds the pre-migration originals, kept as the rollback. An
+ * erasure that cleared only one would leave the customer's photos reachable on
+ * the other — and for a paid invitation the row is anonymized rather than
+ * deleted, so the orphan-purge script would never catch the leftovers either.
+ *
+ * Best-effort per store: a failure on one must not abort the erasure of the
+ * other, or a transient R2 blip would silently skip the Supabase cleanup too.
+ */
 async function removeStorage(db: any, invitationId: string): Promise<void> {
-  const { data: files } = await db.storage.from(MEDIA_BUCKET).list(invitationId, { limit: 1000 })
-  if (files && files.length) await db.storage.from(MEDIA_BUCKET).remove(files.map((f: any) => `${invitationId}/${f.name}`))
+  try {
+    const { data: files } = await db.storage.from(MEDIA_BUCKET).list(invitationId, { limit: 1000 })
+    if (files && files.length) {
+      await db.storage.from(MEDIA_BUCKET).remove(files.map((f: any) => `${invitationId}/${f.name}`))
+    }
+  } catch (e) {
+    console.error(`[pdp] Supabase media cleanup failed for ${invitationId}:`, e)
+  }
+
+  try {
+    await deletePrefix(`${invitationId}/`)
+  } catch (e) {
+    console.error(`[pdp] R2 media cleanup failed for ${invitationId}:`, e)
+  }
 }
 
 /**

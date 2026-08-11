@@ -41,6 +41,22 @@ describe('parseSizesFromListXml', () => {
   })
 })
 
+describe('parseKeysFromListXml', () => {
+  it('reads every key in the listing', async () => {
+    const { parseKeysFromListXml } = await import('../r2')
+    const xml = `<?xml version="1.0"?><ListBucketResult>
+      <Contents><Key>inv-1/a.webp</Key><Size>1000</Size></Contents>
+      <Contents><Key>inv-1/b.mp3</Key><Size>2500</Size></Contents>
+    </ListBucketResult>`
+    expect(parseKeysFromListXml(xml)).toEqual(['inv-1/a.webp', 'inv-1/b.mp3'])
+  })
+
+  it('returns an empty array for an empty listing', async () => {
+    const { parseKeysFromListXml } = await import('../r2')
+    expect(parseKeysFromListXml('<?xml version="1.0"?><ListBucketResult></ListBucketResult>')).toEqual([])
+  })
+})
+
 describe('presignPut', () => {
   it('produces a signed query URL for the right bucket and key, with an expiry', async () => {
     const { presignPut } = await import('../r2')

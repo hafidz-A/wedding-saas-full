@@ -12,6 +12,7 @@ import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config
 import { sendAdminEmail } from '@/lib/email/send'
 import { siteBaseUrl } from '@/lib/site-url'
 import { compExpiry, type CompPeriod } from './period'
+import { deletePrefix } from '@/lib/upload/r2'
 
 type Result = { ok: boolean; error?: string }
 
@@ -147,10 +148,22 @@ export async function adminDeleteInvitation(id: string, confirmSlug: string): Pr
   if (!inv) return { ok: false, error: 'Undangan tidak ditemukan' }
   if (inv.is_paid) return { ok: false, error: 'Undangan berbayar tidak bisa dihapus — arsipkan saja (riwayat pembayaran harus disimpan).' }
   if ((confirmSlug || '').trim() !== inv.slug) return { ok: false, error: 'Ketik slug persis untuk konfirmasi hapus.' }
-  // Storage first — files under invitation-media/<id>/ don't cascade.
-  const { data: files } = await db.storage.from(MEDIA_BUCKET).list(id, { limit: 1000 })
-  if (files && files.length) {
-    await db.storage.from(MEDIA_BUCKET).remove(files.map((f) => `${id}/${f.name}`))
+  // Storage first — files under invitation-media/<id>/ don't cascade. Both
+  // stores: R2 serves the media today, Supabase still holds the pre-migration
+  // originals kept as the rollback. Best-effort each, so one store failing
+  // cannot skip the other or block the row delete.
+  try {
+    const { data: files } = await db.storage.from(MEDIA_BUCKET).list(id, { limit: 1000 })
+    if (files && files.length) {
+      await db.storage.from(MEDIA_BUCKET).remove(files.map((f) => `${id}/${f.name}`))
+    }
+  } catch (e) {
+    console.error(`[admin/delete] Supabase media cleanup failed for ${id}:`, e)
+  }
+  try {
+    await deletePrefix(`${id}/`)
+  } catch (e) {
+    console.error(`[admin/delete] R2 media cleanup failed for ${id}:`, e)
   }
   const { error } = await (db.from('invitations') as any).delete().eq('id', id)
   if (error) return { ok: false, error: 'Gagal menghapus' }
