@@ -48,6 +48,15 @@ export const common = {
       processing: 'Memproses…',
       refunded: 'Sudah direfund',
     },
+    invitationStatus: {
+      live: 'Tayang',
+      suspended: 'Diblokir',
+      unpublishedNote: 'Belum dipublikasikan — tamu belum bisa membuka undangan ini. Terbitkan dari dashboard.',
+      notReadyNote: 'Isi undangan masih kosong — tamu melihat halaman "Undangan belum siap".',
+      expiredNote: 'Masa aktif sudah berakhir — tamu melihat halaman kadaluarsa. Perpanjang untuk menayangkannya lagi.',
+      suspendedNote: 'Diblokir admin — tamu tidak bisa membuka undangan ini. Hubungi dukungan untuk keterangan lebih lanjut.',
+      refundedNote: 'Dana sudah dikembalikan — undangan ditutup permanen.',
+    },
     invitationNotFound: {
       kicker: 'Undangan tidak ditemukan',
       title: 'Hmm — link ini belum aktif.',
@@ -109,6 +118,15 @@ export const common = {
       unpaidBanner: 'This invitation is not paid yet — pay to publish it.',
       processing: 'Processing…',
       refunded: 'Refunded',
+    },
+    invitationStatus: {
+      live: 'Live',
+      suspended: 'Blocked',
+      unpublishedNote: 'Not published — guests can’t open this invitation yet. Publish it from the dashboard.',
+      notReadyNote: 'The content is still empty — guests see an “invitation not ready” page.',
+      expiredNote: 'The active period has ended — guests see an expired page. Renew to bring it back.',
+      suspendedNote: 'Blocked by an admin — guests can’t open this invitation. Contact support to find out more.',
+      refundedNote: 'Refunded — this invitation is permanently closed.',
     },
     invitationNotFound: {
       kicker: 'Invitation not found',
