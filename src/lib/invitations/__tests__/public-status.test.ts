@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { invitationPublicStatus } from '../public-status'
+import { invitationPublicStatus, invitationIsDown } from '../public-status'
 
 const NOW = Date.UTC(2026, 7, 11)
 const PAST = new Date(Date.UTC(2026, 0, 1)).toISOString()
@@ -90,5 +90,37 @@ describe('invitationPublicStatus', () => {
         invitationPublicStatus({ ...LIVE, is_published: false, config: {} }, NOW),
       ).toBe('unpublished')
     })
+  })
+})
+
+describe('invitationIsDown', () => {
+  it('false for a healthy invitation', () => {
+    expect(invitationIsDown(LIVE)).toBe(false)
+  })
+
+  it('true when suspended', () => {
+    expect(invitationIsDown({ ...LIVE, suspended_at: PAST })).toBe(true)
+  })
+
+  it('true when refunded', () => {
+    expect(invitationIsDown(LIVE, { isRefunded: true })).toBe(true)
+  })
+
+  it('false for an unpaid draft — paying is exactly what it needs', () => {
+    expect(invitationIsDown({ ...LIVE, is_paid: false })).toBe(false)
+  })
+
+  it('false when merely expired — renewing genuinely brings it back', () => {
+    expect(invitationIsDown({ ...LIVE, expires_at: PAST })).toBe(false)
+  })
+
+  // Regression: invitationPublicStatus collapses this pair to 'expired' (the public
+  // page checks expiry first), so a CTA gate derived from that verdict would offer
+  // "Perpanjang sekarang" on a suspended invitation. startRenewal never reads
+  // suspended_at, so the owner would pay for a renewal that lifts nothing.
+  it('true when suspended AND expired, which the public verdict reports as expired', () => {
+    const both = { ...LIVE, suspended_at: PAST, expires_at: PAST }
+    expect(invitationPublicStatus(both, NOW)).toBe('expired')
+    expect(invitationIsDown(both)).toBe(true)
   })
 })

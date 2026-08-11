@@ -11,7 +11,6 @@ import styles from './profile.module.css'
 import type { PaymentMode } from '@/lib/payments/payment-settings'
 import type { ManualContact } from '@/lib/payments/manual-pay'
 import type { Dict } from '@/lib/i18n'
-import type { PublicStatus } from '@/lib/invitations/public-status'
 
 /**
  * Action row for one invitation card on /profile.
@@ -30,7 +29,7 @@ export default function InvitationActions({
   dashboardHref,
   periodStatus,
   isPaid,
-  publicStatus,
+  isDown,
   defaultName,
   existingReview,
   category,
@@ -46,10 +45,13 @@ export default function InvitationActions({
   dashboardHref: string
   periodStatus: 'draft' | 'active' | 'expired' | 'lifetime'
   isPaid: boolean
-  // Guest-visibility verdict. 'refunded' and 'suspended' mean the invitation is
-  // permanently or administratively down, so the pay/renew CTA, the recheck-payment
-  // fallback, and the "Lihat undangan" link all lead nowhere and are withheld.
-  publicStatus: PublicStatus
+  // Suspended or refunded: the invitation is administratively or permanently down,
+  // so the pay/renew CTA, the recheck-payment fallback, and the "Lihat undangan"
+  // link all lead nowhere and are withheld. Computed by the caller via
+  // invitationIsDown() from the RAW suspended_at — deliberately not from the
+  // guest-visibility verdict, which reports a suspended-and-expired invitation as
+  // merely 'expired' and would let the renew CTA through.
+  isDown: boolean
   defaultName: string
   existingReview: ReviewExisting | null
   category: string
@@ -69,7 +71,6 @@ export default function InvitationActions({
   manualContact?: ManualContact
   manualPayDict?: Dict['manualPay']
 }) {
-  const isDown = publicStatus === 'refunded' || publicStatus === 'suspended'
   const needsAction = !isDown && (periodStatus === 'draft' || periodStatus === 'expired')
   const [expanded, setExpanded] = useState(false)
 

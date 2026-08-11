@@ -70,3 +70,23 @@ export function invitationPublicStatus(
   if (isConfigEmpty(inv.config)) return 'not_ready'
   return 'live'
 }
+
+/**
+ * Is this invitation administratively or permanently down — i.e. is every "spend
+ * money on it" and "go look at it" action a dead end?
+ *
+ * Deliberately NOT derived from invitationPublicStatus(). That verdict answers
+ * "what does a guest see", so it collapses a suspended-AND-expired invitation to
+ * 'expired' (the public page checks expiry first, so an expired page is genuinely
+ * what the guest gets). Gating the CTA on the collapsed value would offer a
+ * renewal that cannot lift the suspension: startRenewal() checks only the period
+ * and never reads suspended_at, so the owner would be charged for a renewal that
+ * changes nothing — the dashboard's suspend gate still fires and the public page
+ * still renders the takedown. Read the raw signal instead.
+ */
+export function invitationIsDown(
+  inv: PublicStatusInput,
+  opts?: { isRefunded?: boolean },
+): boolean {
+  return !!opts?.isRefunded || !!inv.suspended_at
+}

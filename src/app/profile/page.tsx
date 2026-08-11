@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { activePeriodStatus } from '@/lib/payments/active-period'
-import { invitationPublicStatus, type PublicStatus } from '@/lib/invitations/public-status'
+import { invitationPublicStatus, invitationIsDown, type PublicStatus } from '@/lib/invitations/public-status'
 import { refundVerdict } from '@/lib/payments/refund-policy'
 import { fetchRefundedMap } from '@/lib/payments/refunded'
 import { getPaymentSettings } from '@/lib/payments/payment-settings'
@@ -200,7 +200,7 @@ export default async function ProfilePage() {
                       dashboardHref={`/${tt}/${inv.slug}/dashboard`}
                       periodStatus={periodStatus}
                       isPaid={inv.is_paid}
-                      publicStatus={publicStatus}
+                      isDown={invitationIsDown(inv, { isRefunded })}
                       defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
                       existingReview={reviewByInv.get(inv.id) ?? null}
                       category={getCatalogEntry(inv.template_id ?? '').category}
