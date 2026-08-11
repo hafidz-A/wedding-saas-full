@@ -14,6 +14,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { createDecipheriv } from 'node:crypto'
+import { looksEncrypted } from './lib/encryption-shape.mjs'
 
 function loadDotEnv(file) {
   try {
@@ -50,42 +51,52 @@ function decrypt(key, payload) {
   d.setAuthTag(tag)
   return Buffer.concat([d.update(ct), d.final()]).toString('utf8')
 }
-function looksEncrypted(v) {
-  if (typeof v !== 'string' || v.length < 38) return false
-  if (!/^[A-Za-z0-9+/]+=*$/.test(v)) return false
-  return Buffer.from(v, 'base64').length >= 12 + 1 + 16
-}
-
 let failures = 0
 const ok = (name, cond) => { console.log(`  ${cond ? '✓' : '✗'} ${name}`); if (!cond) failures++ }
 
 const admin = createClient(url, serviceKey, { auth: { persistSession: false } })
 
-const { data: inv } = await admin.from('invitations').select('id').eq('slug', 'dummy-lovebirds').maybeSingle()
-if (!inv) { console.error('dummy-lovebirds invitation not found — seed it first.'); process.exit(2) }
+const { data: inv } = await admin
+  .from('invitations')
+  .select('id')
+  .eq('slug', 'dummy-lovebirds')
+  .maybeSingle()
 
-console.log('PII at-rest (dummy-lovebirds, fake demo data):')
-const { data: guests } = await admin.from('guests').select('name_enc, phone_enc').eq('invitation_id', inv.id).limit(1)
-if (guests?.length) {
-  const g = guests[0]
-  ok('guests.name_enc is AES-GCM ciphertext (base64 IV‖ct‖tag)', looksEncrypted(g.name_enc))
-  let pt = null
-  try { pt = decrypt(guestsKey, g.name_enc) } catch {}
-  ok('guests.name_enc REVERSES with GUESTS_ENCRYPTION_KEY', !!pt && pt.length > 0)
-  ok('stored value ≠ plaintext (encrypted at rest)', g.name_enc !== pt)
-} else {
-  console.log('  • no guests rows on dummy-lovebirds (skipped)')
-}
+// The at-rest half needs seeded demo rows; the RLS half below needs nothing.
+// Missing demo data must NOT disable the RLS check — that check is what proves
+// an anonymous visitor cannot read customer PII, and it is the reason this
+// script exists. Seeding fake rows into the production DB to turn this green
+// would be the wrong trade.
+let atRestChecked = false
 
-const { data: rsvps } = await admin.from('rsvps').select('guest_name_enc').eq('invitation_id', inv.id).limit(1)
-if (rsvps?.length) {
-  const r = rsvps[0]
-  ok('rsvps.guest_name_enc is AES-GCM ciphertext', looksEncrypted(r.guest_name_enc))
-  let pt = null
-  try { pt = decrypt(appKey, r.guest_name_enc) } catch {}
-  ok('rsvps.guest_name_enc REVERSES with APP_ENCRYPTION_KEY', !!pt && pt.length > 0)
+if (inv) {
+  atRestChecked = true
+  console.log('PII at-rest (dummy-lovebirds, fake demo data):')
+  const { data: guests } = await admin.from('guests').select('name_enc, phone_enc').eq('invitation_id', inv.id).limit(1)
+  if (guests?.length) {
+    const g = guests[0]
+    ok('guests.name_enc is AES-GCM ciphertext (base64 IV‖ct‖tag)', looksEncrypted(g.name_enc))
+    let pt = null
+    try { pt = decrypt(guestsKey, g.name_enc) } catch {}
+    ok('guests.name_enc REVERSES with GUESTS_ENCRYPTION_KEY', !!pt && pt.length > 0)
+    ok('stored value ≠ plaintext (encrypted at rest)', g.name_enc !== pt)
+  } else {
+    console.log('  • no guests rows on dummy-lovebirds (skipped)')
+  }
+
+  const { data: rsvps } = await admin.from('rsvps').select('guest_name_enc').eq('invitation_id', inv.id).limit(1)
+  if (rsvps?.length) {
+    const r = rsvps[0]
+    ok('rsvps.guest_name_enc is AES-GCM ciphertext', looksEncrypted(r.guest_name_enc))
+    let pt = null
+    try { pt = decrypt(appKey, r.guest_name_enc) } catch {}
+    ok('rsvps.guest_name_enc REVERSES with APP_ENCRYPTION_KEY', !!pt && pt.length > 0)
+  } else {
+    console.log('  • no rsvps rows on dummy-lovebirds (skipped)')
+  }
 } else {
-  console.log('  • no rsvps rows on dummy-lovebirds (skipped)')
+  console.log('PII at-rest: SKIPPED — no dummy-lovebirds invitation in this database.')
+  console.log('  (Seed one in a NON-production database to exercise it. Do not seed production.)')
 }
 
 console.log('RLS (anonymous client must read no PII):')
@@ -95,5 +106,16 @@ for (const tbl of ['guests', 'rsvps', 'gift_confirmations', 'attendances']) {
   ok(`anon SELECT ${tbl} → 0 rows${error ? ' (blocked)' : ''}`, !data || data.length === 0)
 }
 
-console.log(failures === 0 ? '\n✅ ALL AT-REST + RLS CHECKS PASSED' : `\n❌ ${failures} CHECK(S) FAILED`)
-process.exit(failures === 0 ? 0 : 1)
+// A pass must never claim more than was actually exercised: when the at-rest
+// half was skipped for want of demo data, say so instead of printing a green
+// tick that reads as "encryption verified".
+if (failures > 0) {
+  console.log(`\n❌ ${failures} CHECK(S) FAILED`)
+  process.exitCode = 1
+} else if (atRestChecked) {
+  console.log('\n✅ ALL AT-REST + RLS CHECKS PASSED')
+} else {
+  console.log('\n✅ RLS CHECKS PASSED — at-rest NOT verified (no demo data present)')
+}
+// process.exitCode, not process.exit(): exiting outright while the Supabase
+// client still holds sockets trips a libuv assertion on Windows.
