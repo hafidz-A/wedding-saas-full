@@ -300,7 +300,7 @@ const periodChip: React.CSSProperties = {
 }
 const refundedBadge: React.CSSProperties = {
   ...periodChip,
-  color: 'var(--status-danger)',
+  color: 'var(--status-danger-text)',
   background: 'var(--status-danger-soft)',
   fontWeight: 600,
 }
@@ -317,7 +317,7 @@ const liveBadge: React.CSSProperties = {
 }
 const blockedBadge: React.CSSProperties = {
   ...periodChip,
-  color: 'var(--status-danger)',
+  color: 'var(--status-danger-text)',
   background: 'var(--status-danger-soft)',
   fontWeight: 600,
 }
@@ -335,6 +335,6 @@ const noteWarn: React.CSSProperties = {
 }
 const noteDanger: React.CSSProperties = {
   ...noteBase,
-  color: 'var(--status-danger)',
+  color: 'var(--status-danger-text)',
   background: 'var(--status-danger-soft)',
 }

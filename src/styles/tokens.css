@@ -233,6 +233,11 @@
   --status-danger-deep:      #991B1B; /* hover border */
   --status-danger-bright:    #EF4444; /* ghost/outline border */
   --status-danger-soft:      rgba(239, 68, 68, 0.08);
+  /* --status-danger measures ~4.3:1 as TEXT on --status-danger-soft — just under
+     the 4.5:1 AA floor for small text (like --color-emerald above, it was designed
+     as a FILL: the destructive button face). Use this darker variant for on-surface
+     danger TEXT (~5.8:1); keep --status-danger for fills/borders/shadows. */
+  --status-danger-text:      #B91C1C;
   --shadow-danger:           0 4px 14px rgba(220, 38, 38, 0.35);
   --shadow-danger-hover:     0 6px 18px rgba(185, 28, 28, 0.45);
   --focus-ring-danger:       0 0 0 3px rgba(239, 68, 68, 0.25), 0 0 0 1.5px #DC2626;
