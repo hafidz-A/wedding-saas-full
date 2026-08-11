@@ -200,7 +200,7 @@ export default async function ProfilePage() {
                       dashboardHref={`/${tt}/${inv.slug}/dashboard`}
                       periodStatus={periodStatus}
                       isPaid={inv.is_paid}
-                      isRefunded={isRefunded}
+                      publicStatus={publicStatus}
                       defaultName={coupleDisplay(deriveCoupleFromConfig(inv.config)) || inv.slug}
                       existingReview={reviewByInv.get(inv.id) ?? null}
                       category={getCatalogEntry(inv.template_id ?? '').category}

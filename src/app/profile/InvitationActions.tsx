@@ -11,6 +11,7 @@ import styles from './profile.module.css'
 import type { PaymentMode } from '@/lib/payments/payment-settings'
 import type { ManualContact } from '@/lib/payments/manual-pay'
 import type { Dict } from '@/lib/i18n'
+import type { PublicStatus } from '@/lib/invitations/public-status'
 
 /**
  * Action row for one invitation card on /profile.
@@ -29,7 +30,7 @@ export default function InvitationActions({
   dashboardHref,
   periodStatus,
   isPaid,
-  isRefunded = false,
+  publicStatus,
   defaultName,
   existingReview,
   category,
@@ -45,10 +46,10 @@ export default function InvitationActions({
   dashboardHref: string
   periodStatus: 'draft' | 'active' | 'expired' | 'lifetime'
   isPaid: boolean
-  // Fully-refunded (succeeded refund of the initial purchase): the invitation is
-  // suspended/unpublished, so the pay/renew CTA and the recheck-payment fallback
-  // must not offer to pay again even if periodStatus reads 'draft'/'expired'.
-  isRefunded?: boolean
+  // Guest-visibility verdict. 'refunded' and 'suspended' mean the invitation is
+  // permanently or administratively down, so the pay/renew CTA, the recheck-payment
+  // fallback, and the "Lihat undangan" link all lead nowhere and are withheld.
+  publicStatus: PublicStatus
   defaultName: string
   existingReview: ReviewExisting | null
   category: string
@@ -68,7 +69,8 @@ export default function InvitationActions({
   manualContact?: ManualContact
   manualPayDict?: Dict['manualPay']
 }) {
-  const needsAction = !isRefunded && (periodStatus === 'draft' || periodStatus === 'expired')
+  const isDown = publicStatus === 'refunded' || publicStatus === 'suspended'
+  const needsAction = !isDown && (periodStatus === 'draft' || periodStatus === 'expired')
   const [expanded, setExpanded] = useState(false)
 
   const shellRef = useRef<HTMLDivElement>(null)
@@ -107,7 +109,7 @@ export default function InvitationActions({
 
   // Full set in display order; primaries are the ones kept when collapsed.
   const all: { key: string; primary: boolean; node: React.ReactNode }[] = [
-    { key: 'view', primary: false, node: viewEl },
+    ...(isDown ? [] : [{ key: 'view', primary: false, node: viewEl }]),
     { key: 'dashboard', primary: true, node: dashboardEl },
     ...(reviewEl ? [{ key: 'review', primary: false, node: reviewEl }] : []),
     ...(renewEl ? [{ key: 'renew', primary: true, node: renewEl }] : []),
