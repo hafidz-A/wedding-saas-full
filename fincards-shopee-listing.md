@@ -177,7 +177,7 @@ Matriks harga (⚠️ placeholder, cek `/admin/templates`):
 
 ## 6. 5 Foto Produk (spec)
 
-Rasio disarankan **1:1** (persegi) sesuai standar Shopee. Pakai HANYA 8 warna official palette FinCards — jangan eyeball tint sendiri. Referensi warna & font resmi ada di file yang sudah ada di root project: `AUDIT-COLOR-FONT-PALETTE.html` dan `PALETTE-CHEATSHEET.html`. Untuk foto yang menampilkan pasangan, ikuti arahan art-direction yang sudah dipakai di aset FinCards lain: porsi pasangan 20-40%, sisanya suasana/atmosfer — kesan editorial premium, bukan foto produk generik.
+Rasio disarankan **1:1** (persegi) sesuai standar Shopee. Pakai HANYA 8 warna official palette FinCards — jangan eyeball tint sendiri. Referensi warna & font resmi ada di `docs/design/AUDIT-COLOR-FONT-PALETTE.html` dan `docs/design/PALETTE-CHEATSHEET.html`. Untuk foto yang menampilkan pasangan, ikuti arahan art-direction yang sudah dipakai di aset FinCards lain: porsi pasangan 20-40%, sisanya suasana/atmosfer — kesan editorial premium, bukan foto produk generik.
 
 | # | Isi Foto | Sumber |
 |---|---|---|
