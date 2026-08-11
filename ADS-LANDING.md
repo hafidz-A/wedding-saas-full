@@ -77,7 +77,7 @@ Turun dari 79 ke 76 setelah koreksi: sudut bebas-risiko yang tadinya menaikkan M
 > `DEMO LENGKAP, TANPA DAFTAR` · **Undangan? Ini lebih mirip film pendek.**
 > Tamu scroll, ceritamu terbuka scene demi scene — dari gerbang pembuka sampai RSVP. Buka demo lengkapnya sekarang, lihat persis apa yang kamu dapat sebelum memutuskan.
 > `[Lihat Template]`  *(satu tombol — pasangan lama sama-sama menuju `/#vibe`, jadi yang kedua tidak membeli apa pun)*
-> *Mulai Rp 149.999 · Bayar sekali, tanpa langganan bulanan*
+> *Mulai Rp 199.999 · Bayar sekali, tanpa langganan bulanan*
 
 **Kenapa lebih baik:** kicker membawa penawaran jujur yang tersedia (demo tanpa daftar) alih-alih label kategori; judul dipertahankan karena sudah kuat; CTA menjanjikan persis apa yang tombolnya lakukan — dulu "Coba Gratis Sekarang" menjanjikan uji coba yang tidak ada **dan** mengarah ke explorer, bukan pendaftaran.
 
@@ -108,7 +108,7 @@ Empat klaim di bawah hero, semuanya bisa dicek di kode: bayar sekali · pembayar
 
 ### Jangkar harga
 
-**"Mulai Rp 149.999"** sebagai klausa pertama di bawah CTA hero, diambil dari baris `template_plans` termurah lewat `page.tsx` (`cheapestPlan`) — **bukan hardcode**. Klausanya hilang sendiri kalau plan tidak tersedia.
+**"Mulai Rp 199.999"** sebagai klausa pertama di bawah CTA hero, diambil dari baris `template_plans` termurah lewat `page.tsx` (`cheapestPlan`) — **bukan hardcode**. Klausanya hilang sendiri kalau plan tidak tersedia.
 
 ### FAQ
 
@@ -154,7 +154,7 @@ Trust bar + FAQ 5 item hanya menambah **0,8 kB** ke route — hasil memilih `<de
 | 3 | **Kumpulkan testimoni asli** — untuk produk bayar-dulu, bukti sosial bukan pelengkap, melainkan pengganti uji coba yang tidak kamu miliki | Tinggi | Sedang |
 | 4 | **Pertimbangkan penurun risiko yang nyata** (di bawah) — ini keputusan produk, bukan copy | Tinggi | Tinggi |
 | 5 | **Tetapkan jendela garansi refund** — mekanismenya sudah ada, kebijakannya belum menyebut periode. Tetapkan, tulis di `/refund`, lalu tambahkan ke trust bar | Sedang | Rendah |
-| 6 | **Tinjau harga coret** — `compare_at_price_idr` aktif permanen (299.999→149.999 / 349.999→249.999). Kalau harga coret itu tidak pernah benar-benar berlaku, hapus: diskon semu berisiko ditolak platform iklan | Sedang | Rendah |
+| 6 | **Tinjau harga coret** — `compare_at_price_idr` aktif permanen (299.999→199.999 / 349.999→249.999). Kalau harga coret itu tidak pernah benar-benar berlaku, hapus: diskon semu berisiko ditolak platform iklan | Sedang | Rendah |
 
 > **Koreksi:** butir "masa aktif tidak tampil di UI paket" yang sempat tercantum di sini **salah** dan sudah dicabut. `PlanDisplay` memang tidak punya field durasi bertipe, tapi masa aktif tetap sampai ke pembeli lewat array `features` (`"Masa aktif 1 tahun"` / `"Masa aktif seumur hidup"`), yang dirender di `VibePlanCard.tsx:73`. Tidak ada yang perlu diperbaiki.
 
@@ -204,7 +204,7 @@ Diperiksa terhadap kode:
 
 - ✅ "Bayar sekali, tanpa langganan" — benar (Midtrans sekali bayar)
 - ✅ "Demo lengkap tanpa daftar" — benar (slug `demo-*` publik)
-- ✅ "Mulai Rp 149.999" — benar, dibaca dari `template_plans`
+- ✅ "Mulai Rp 199.999" — benar, dibaca dari `template_plans`
 - ✅ "Data tamu terenkripsi" — benar (AES-GCM, `GUESTS_ENCRYPTION_KEY`)
 - ✅ "Edit sendiri kapan saja setelah bayar" — benar (dashboard terbuka setelah `is_paid`)
 - ❌ **"Rancang gratis / coba gratis / bayar saat siap sebar" — SALAH.** Editor terkunci `PaymentGate` sampai dibayar

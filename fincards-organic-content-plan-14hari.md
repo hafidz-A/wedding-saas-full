@@ -1,3 +1,47 @@
+> # ⛔ STOP — BACA SEBELUM MEMAKAI DOKUMEN INI
+>
+> **Dokumen ini dibangun di atas USP yang TIDAK ADA di produk.**
+>
+> Klaim "gratis merancang & preview, bayar hanya saat menerbitkan" / "rancang gratis,
+> bayar saat terbit" / "bikin dulu, bayar belakangan" — **SEMUANYA SALAH.**
+>
+> Yang benar, terverifikasi di `src/app/[template]/[slug]/dashboard/page.tsx`:
+> **FinCards bayar dulu.** Pemilik yang belum bayar kena `PaymentGate` ("Bayar Dulu")
+> dan **tidak bisa masuk editor sama sekali** — hanya bisa *melihat* undangannya yang
+> belum terbit. Tidak ada uji coba gratis.
+>
+> Satu-satunya yang gratis: **demo publik di landing** (slug `demo-*`), tanpa daftar.
+>
+> **Konsekuensinya:** setiap hook, brief, caption, dan baris tabel di bawah yang
+> memakai sudut "gratis/bayar-belakangan" **batal** — termasuk hook **C3 "Bikin dulu,
+> bayar belakangan"** beserta brief kreatifnya. Jangan tayangkan. Mengiklankan uji coba
+> yang tidak ada berisiko hukum dan memicu tuntutan refund.
+>
+> **Sudut pengganti yang sah** (lihat `ADS-LANDING.md`):
+> *"Undangannya kamu yang pegang. Bukan nunggu admin bales chat."* — kendali penuh +
+> revisi tanpa batas, ditambah demo lengkap tanpa daftar sebagai penurun risiko.
+>
+> Dokumen ini butuh **penulisan ulang**, bukan cari-ganti — beberapa brief runtuh
+> seluruhnya tanpa premis palsu itu.
+>
+> **Harga di dokumen ini juga salah.** Tertulis Basic Rp 149.000 / Premium Rp 299.000.
+> Harga sebenarnya (dibaca langsung dari `template_plans`, **6 Agustus 2026**), sama untuk
+> Lovebirds **dan** Solary: Basic **Rp 199.999** (coret Rp 299.999) · Premium **Rp 249.999**
+> (coret Rp 349.999). Basic aktif 1 tahun, Premium seumur hidup. Solary Basic sempat
+> Rp 149.999 sampai 1 Agustus 2026 — sekarang sudah disamakan. Selalu cek
+> `/admin/templates` sebelum tayang.
+>
+> **Dua klaim fitur di dokumen ini juga over-claim:**
+> 1. **"Galeri unlimited" SALAH** — galeri dibatasi **30 foto** (`maxItems: 30` di
+>    `galleryMasonry`, `gallerySpringCoil`, dan `solary/saturnRing`; editor menampilkan
+>    penghitung n/30). Tulis "sampai 30 foto", jangan "unlimited".
+> 2. **"Ornamen" bukan fitur semua template** — tab Ornament cuma ada di Lovebirds
+>    (`editorSubTabs()` di `EditorWorkspace.tsx`; Solary pakai backdrop three.js sendiri).
+>    Fitur edit yang aman disebut lintas template: teks, foto, palet warna, musik, meta.
+>
+> ➡️ **Pengganti untuk hook: lihat `ADS-HOOKS-v2.md`** — 20 hook baru, semua klaim
+> sudah diverifikasi ke kode & DB. Direvisi 2026-07-28.
+
 # FinCards — Organic IG Content Plan (14 Hari)
 ### Chapter 1: Undangan Pernikahan · Fase 1 Go-To-Market
 
@@ -143,7 +187,7 @@ Alur yang sama tiap hari, dari brief sampai posting — centang tiap selesai:
 | 11 | Carousel | Social Proof | Breakdown paket (harga transparan) |
 | 12 | Carousel | FAQ | Harga, proses, revisi, masa aktif |
 | 13 | Reels / Story | Founder Note | Pesan personal ke calon customer |
-| 14 | Carousel | Direct CTA | "Ini semua yang kamu dapet, mulai Rp149rb" |
+| 14 | Carousel | Direct CTA | "Ini semua yang kamu dapet, mulai Rp199.999" |
 
 **Content Pillars:** Brand & Mission · Wow Factor · Problem/Agitate · Two Worlds · **Wedge (fitur andalan)** · Founder Story · Educational · Social Proof · Direct CTA.
 
@@ -237,12 +281,16 @@ bawah. Drop shadow halus di HP biar 'pop'.
 - B: "Kalau undanganmu punya 3 ciri ini, tamu skip diam-diam."
 - C: "Undangan digital yang bikin tamu males buka — cek 3 hal ini"
 
-**Brief (6 slide):**
-- Slide 2: Loading lambat & berat pas dibuka di HP
-- Slide 3: Template itu-itu aja, semua orang udah pernah lihat
-- Slide 4: Cuma nama-tanggal-lokasi — ga ada "rasa" atau cerita
-- Slide 5: "Gimana caranya bikin undangan yang gampang diakses TAPI berkesan?"
-- Slide 6 (CTA): "FinCards dirancang buat ngindarin 3 hal ini dari awal. Link di bio."
+> **⚠️ Boomerang guard (WAJIB):** JANGAN pakai red flag soal *"tanggal/lokasi harus di layar pertama"* atau *"animasi kebanyakan"* — itu bumerang: **Solary sengaja buka sinematik, tanggal & lokasi baru muncul di `detailsPlanet` setelah scroll ~5-6 planet.** (RF 02 lama "Tanggal & lokasi ketimbun animasi" diganti persis karena ini.)
+>
+> Dua red flag lain **sudah diverifikasi aman di kode**: FinCards punya link personal per tamu (Guests tab → token per tamu), dan musik **TIDAK autoplay** — ada `MusicPopup` yang minta izin dulu + `MuteButton`. Watermark juga aman: FinCards **nol watermark** di semua tier.
+
+**Brief (6 slide) — 3 red flags terverifikasi aman:**
+- Slide 2 (RF 01): **Sapaan "Bapak/Ibu/Saudara/i" tanpa nama** — satu link disebar ke semua; tamu ngerasa cuma nomor di daftar broadcast, bukan orang yang beneran diundang
+- Slide 3 (RF 02): **Watermark platform nempel** — logo layanan gratisan mejeng di undangan; momen sekali seumur hidup tapi kesannya numpang template murahan
+- Slide 4 (RF 03): **Musik autoplay kenceng tanpa izin** — dibuka di kantor atau angkot tiba-tiba bunyi, tamu panik nutup undangan sebelum sempat baca
+- Slide 5 (refleksi): "Lima detik pertama tamu buka undanganmu — kesan apa yang mereka dapat?"
+- Slide 6 (CTA): "FinCards dirancang buat ngindarin 3 hal ini." + Link di bio + tagline *designed to be remembered*
 
 **Prompt siap-tempel:**
 ```
@@ -250,12 +298,24 @@ Pakai Konteks Brand FinCards.
 Bikin carousel 4:5 (1080x1350), 6 slide, gaya editorial minimalis, background cream #FDF6EC.
 - Slide 1 (hook): teks besar Montserrat "3 red flags undangan digital yang bikin tamu
   diam-diam ilfeel". Angka "3" gede warna #E8553E. Aksen ornamen daun tipis.
-- Slide 2–4: satu poin per slide, ikon garis simpel di atas (terracotta #E8553E),
-  judul poin Montserrat, penjelasan 1 kalimat Biryani #5C4A3A. Nomor besar tipis di pojok.
-- Slide 5: pertanyaan reflektif, teks tengah, background gradient cream→#F7EBD7.
-- Slide 6 (CTA): "FinCards dirancang buat ngindarin 3 hal ini." + wordmark FinCards +
-  "Link di bio" dalam pill terracotta #E8553E teks cream.
-Konsisten, banyak white space, wordmark FinCards halus tiap slide.
+- Slide 2 (RF 01): ikon orang (garis, terracotta). Judul "Sapaan \"Bapak/Ibu/Saudara/i\" tanpa
+  nama" — body "Satu link disebar ke semua — tamu langsung ngerasa cuma nomor di daftar broadcast,
+  bukan orang yang beneran diundang."
+- Slide 3 (RF 02): ikon stempel/watermark (garis, terracotta). Judul "Watermark platform nempel
+  di undangan" — body "Logo layanan gratisan mejeng di pojok — momen sekali seumur hidup, tapi
+  kesannya numpang template murahan."
+- Slide 4 (RF 03): ikon speaker (garis, terracotta). Judul "Musik autoplay kenceng tanpa izin" —
+  body "Dibuka di kantor atau angkot, tiba-tiba bunyi — tamu panik nutup undanganmu sebelum
+  sempat baca."
+  (Semua judul Montserrat bold #2A2118, body Biryani #5C4A3A, nomor besar tipis peach di pojok
+  kanan bawah: 01 / 02 / 03. Eyebrow kiri atas "RED FLAG 01/02/03", counter kanan atas "2/6" dst.)
+- Slide 5 (refleksi): eyebrow "REFLEKSI", teks script terracotta kecil "tanya dirimu...", lalu
+  pertanyaan besar "Lima detik pertama tamu buka undanganmu — kesan apa yang mereka dapat?"
+- Slide 6 (CTA): "FinCards dirancang buat ngindarin 3 hal ini." (angka "3 hal ini" terracotta) +
+  wordmark FinCards gede script + pill terracotta "Link di bio" + di footer kanan tagline
+  "designed to be remembered" (kata "remembered" terracotta).
+JANGAN pakai red flag "detail harus di layar pertama" atau "animasi kebanyakan" (bumerang — FinCards
+sinematik & detail muncul saat scroll). Konsisten, banyak white space, wordmark halus tiap slide.
 ```
 
 **Caption:** Uraikan tiap red flag singkat, tutup: "Red flag mana yang paling relate sama pengalaman kamu cari undangan? Komen di bawah 👇"
@@ -378,7 +438,7 @@ Badge kecil terracotta: "TANPA biaya revisi". Wordmark FinCards pojok. Kesan cep
 
 **Brief (7 slide):**
 - Slide 2: RSVP real-time (tamu konfirmasi hadir, kamu lihat langsung)
-- Slide 3: Galeri foto & video
+- Slide 3: Galeri foto (dikurasi, sampai 30 foto)
 - Slide 4: Peta lokasi terintegrasi
 - Slide 5: Cepat diakses di HP (bukan yang loading lama)
 - Slide 6: Personalisasi — bukan cuma ganti nama di template orang lain
@@ -428,6 +488,8 @@ Ruang kosong di tengah-bawah buat naruh poll sticker IG. Wordmark FinCards pojok
 ### Day 9 — Carousel — ⭐ WEDGE: Buku Tamu Digital + QR Check-in
 
 > **Fitur pamungkas kamu.** Undangan FinCards ga berhenti di link — dia bantu kamu pas hari-H. Ini yang bikin beda dari "sekadar undangan cantik".
+>
+> **⚠️ Akurasi (dari DB):** buku tamu + QR check-in itu **fitur Premium (Rp 249.999)**, bukan Basic. Jadi frame post ini sebagai **keunggulan Premium / alasan upgrade**, JANGAN nyiratin semua paket dapat. Aman: "upgrade ke Premium, undangan kamu jadi buku tamu digital juga."
 
 **Hook (slide 1, pilih 1):**
 - A: "Hari-H, tamu tinggal scan QR. Daftar hadir + ucapan langsung rapi otomatis."
@@ -457,7 +519,7 @@ Bikin carousel 4:5 (1080x1350), 6 slide, background cream #FDF6EC.
 Clean, premium, warm.
 ```
 
-**Caption:** "Buku tamu kertas suka bikin drama: antri di pintu, tulisan ga kebaca, datanya ilang entah ke mana. Undangan FinCards udah termasuk **buku tamu digital + QR check-in** — tamu tinggal scan pas dateng, kamu dapet daftar hadir & ucapan yang rapi otomatis, kepantau dari dashboard. Undangan yang kerja sampai hari-H. Link di bio 💛"
+**Caption:** "Buku tamu kertas suka bikin drama: antri di pintu, tulisan ga kebaca, datanya ilang entah ke mana. Paket **Premium FinCards** udah termasuk **buku tamu digital + QR check-in** — tamu tinggal scan pas dateng, kamu dapet daftar hadir & ucapan yang rapi otomatis, kepantau dari dashboard. Undangan yang kerja sampai hari-H. Link di bio 💛"
 **CTA:** Klik link bio · DM.
 
 ---
@@ -498,24 +560,38 @@ Wordmark FinCards pojok. Minimalis, biar visual yang bicara.
 > **Shot list Versi A (buat nanti):** minta izin rekam pas customer pertama kali buka undangannya sendiri di HP — tanpa skrip, ambil reaksi & komentar spontan (10–15 detik), zoom ke ekspresi/tangan yang nunjuk layar. Overlay kutipan asli mereka sebagai teks (bukan VO). Ini yang bakal jauh lebih kuat dari Versi B begitu tersedia.
 
 **Versi B (AKTIF):** Carousel "Ini yang kamu dapet kalau mulai di FinCards sekarang" — breakdown paket:
-- Basic **Rp 149.000**: RSVP · Buku tamu digital · Galeri · aktif 1 tahun · s/d 200 tamu
-- Premium **Rp 299.000**: semua Basic + Galeri unlimited · Tanpa watermark · Musik · Palette switcher · s/d 300 tamu
-- Tambah tamu: +50 = Rp 10.000
+- Basic **Rp 199.999** (coret Rp 299.999): Edit sendiri · RSVP · Amplop digital · Galeri s/d 30 foto · Backsound bebas · aktif 1 tahun · s/d 400 tamu
+- Premium **Rp 249.999** (coret Rp 349.999): semua Basic + **seumur hidup** · **buku tamu + QR check-in** · s/d 500 tamu
+- Tambah tamu: +100 = Rp 10.000
+
+> **⚠️ Akurasi paket (WAJIB — diverifikasi 6 Agu 2026 ke DB `template_plans` + kode):**
+> **buku tamu + QR check-in itu fitur PREMIUM**, BUKAN Basic. Galeri Basic **sama persis** dengan
+> Premium tapi **dibatasi 30 foto** — tulis "s/d 30 foto", JANGAN "unlimited" (`maxItems: 30`).
+> "Tanpa watermark/Musik/Palette switcher" JANGAN dipakai sebagai pembeda Premium — watermark ga
+> ada, musik & palet udah termasuk Basic. "Ornamen" cuma ada di Lovebirds, jangan disebut sebagai
+> fitur umum. Pembeda Premium yang bener cuma: **seumur hidup + 500 tamu + buku tamu/QR**.
+> Badge: pakai **"Paling lengkap"**, JANGAN "Paling laris" — belum ada data penjualan.
 
 **Prompt siap-tempel (Versi B):**
 ```
 Pakai Konteks Brand FinCards.
 Bikin carousel perbandingan paket 4:5 (1080x1350), background cream #FDF6EC, premium & clean:
-- Slide 1: "Pilih paket yang pas buat kamu" Montserrat.
-- Slide 2: kartu "BASIC — Rp 149.000" (border tipis #5C4A3A) dengan list fitur bercentang
-  terracotta: RSVP, Buku tamu digital, Galeri, aktif 1 tahun, s/d 200 tamu.
-- Slide 3: kartu "PREMIUM — Rp 299.000" (highlight, border #E8553E, badge 'Paling Laris' gold
-  #F5C842): semua Basic + Galeri unlimited, Tanpa watermark, Musik, Palette switcher, s/d 300 tamu.
-- Slide 4: "Tambah tamu kapan aja: +50 = Rp 10.000" + CTA "Link di bio".
+- Slide 1: "Pilih paket yang pas buat kamu" Montserrat. Sub: "Dua pilihan, bayar sekali di
+  depan. Tanpa langganan bulanan, tanpa biaya revisi."
+- Slide 2: kartu "BASIC — Rp 199.999" (harga coret Rp 299.999, border tipis #5C4A3A) dengan
+  list fitur bercentang terracotta: RSVP kehadiran tamu, Amplop digital, Galeri foto sampai 30
+  foto, Musik latar bebas pilih, Edit sendiri (teks/foto/palet), Sampai 400 tamu.
+  Sub-harga: "bayar sekali · aktif 1 tahun, bisa diperpanjang".
+- Slide 3: kartu "PREMIUM — Rp 249.999" (harga coret Rp 349.999, highlight, border #E8553E,
+  badge 'Paling lengkap' gold #F5C842): semua Basic + masa aktif SEUMUR HIDUP, Buku tamu + QR
+  check-in, s/d 500 tamu. Tambahkan catatan "selisihnya cuma Rp 50.000".
+- Slide 4: "Tamunya lebih dari kuota? +100 = Rp 10.000" + CTA "Link di bio".
 Angka harga Montserrat gede #2A2118. Rapi, mahal, gampang dibaca.
 ```
 
-**Caption:** "Transparan dari awal — ga ada biaya kejutan. Mulai Rp149rb, undangan kamu udah lengkap sama RSVP & buku tamu digital. Ada pertanyaan soal paket? DM aja 💬"
+> Sudah jadi & terverifikasi di Claude Design: `templates/day-11-content/Day11Content.dc.html`.
+
+**Caption:** "Transparan dari awal — ga ada biaya kejutan. Mulai Rp199.999, undangan kamu udah lengkap sama edit-sendiri, RSVP & galeri foto. Mau buku tamu + QR check-in? Itu di Premium. Ada pertanyaan soal paket? DM aja 💬"
 **CTA:** DM buat tanya/booking.
 
 ---
@@ -525,11 +601,11 @@ Angka harga Montserrat gede #2A2118. Rapi, mahal, gampang dibaca.
 **Hook (slide 1):** "Pertanyaan yang paling sering ditanya soal FinCards, dijawab langsung"
 
 **Brief (satu Q per slide) — jawaban pakai data asli:**
-- "Harga mulai dari berapa?" → **Rp 149.000** (Basic), Premium Rp 299.000
+- "Harga mulai dari berapa?" → **Rp 199.999** (Basic, dari Rp 299.999), Premium Rp 249.999 (dari Rp 349.999)
 - "Berapa lama prosesnya?" → Langsung online begitu selesai bayar & isi data — full self-serve, ga pakai nunggu admin
 - "Bisa edit sendiri?" → Bisa, kapan aja, tanpa biaya revisi — undangan sepenuhnya kamu yang pegang
 - "Undangan aktif berapa lama?" → Basic 1 tahun · Premium **seumur hidup**
-- "Bisa buat berapa tamu?" → Basic s/d 200 · Premium s/d 300 · bisa nambah +50 (Rp10rb)
+- "Bisa buat berapa tamu?" → Basic s/d 400 · Premium s/d 500 · bisa nambah +100 (Rp10rb)
 
 **Prompt siap-tempel:**
 ```
@@ -579,7 +655,7 @@ Teks Montserrat cream #FDF6EC dengan shadow, rata kiri, tenang & personal.
 ### Day 14 — Carousel — Direct CTA (Closing Minggu Ini)
 
 **Hook (slide 1, pilih 1):**
-- A: "Ini semua yang kamu dapet, mulai Rp 149.000."
+- A: "Ini semua yang kamu dapet, mulai Rp 199.999."
 - B: "Undangan kamu bisa online hari ini juga. Ini caranya."
 - C: "Ga ada waitlist, ga ada nunggu. Pilih, isi, jadi."
 
@@ -587,7 +663,7 @@ Teks Montserrat cream #FDF6EC dengan shadow, rata kiri, tenang & personal.
 - Slide 2: Pilih template (Solary / Lovebirds)
 - Slide 3: Isi data & foto kamu — edit sendiri, kapan aja
 - Slide 4: Undangan langsung online + buku tamu digital siap hari-H
-- Slide 5: Paket & harga (Rp149rb / Rp299rb) — transparan
+- Slide 5: Paket & harga (Rp 199.999 / Rp 249.999) — transparan
 - Slide 6 (CTA): "Undangan kamu, mulai hari ini. Link di bio."
 
 **Urgency jujur (bukan scarcity palsu):** makin awal mulai, makin banyak waktu buat polish detail sebelum hari-H — bukan "slot terbatas".
@@ -597,7 +673,7 @@ Teks Montserrat cream #FDF6EC dengan shadow, rata kiri, tenang & personal.
 Pakai Konteks Brand FinCards.
 Bikin carousel CTA 4:5 (1080x1350), 6 slide, background cream #FDF6EC → gradient lembut
 ke #F5C842 di slide terakhir. Premium, closing-oriented tapi warm.
-- Slide 1 (hook): "Ini semua yang kamu dapet, mulai Rp 149.000." Montserrat, "Rp 149.000" #E8553E.
+- Slide 1 (hook): "Ini semua yang kamu dapet, mulai Rp 199.999." Montserrat, "Rp 199.999" #E8553E.
 - Slide 2–4: langkah 1-2-3 (pilih template → isi sendiri → langsung online + buku tamu QR),
   nomor besar gold #F5C842, ikon garis terracotta, teks singkat.
 - Slide 5: ringkasan paket Basic vs Premium (harga jelas).

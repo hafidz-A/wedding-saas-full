@@ -30,7 +30,7 @@ DI LOKAL — tapi BELUM ter-deploy.** Situs yang live hari ini di `fincards.land
 1. Deploy perubahan landing (lihat `ADS-LANDING.md` §"Yang sudah diperbaiki" untuk daftar lengkap).
 2. Buka `fincards.land` di HP sungguhan, verifikasi: kicker berbunyi "DEMO LENGKAP, TANPA DAFTAR",
    tombol hero berbunyi **"Lihat Template"** (satu tombol saja), trust bar tampil di bawah hero, FAQ tampil sebelum
-   CTA penutup, dan jangkar harga "Mulai Rp 149.999" (atau harga termurah hari itu) tampil di hero.
+   CTA penutup, dan jangkar harga "Mulai Rp 199.999" (atau harga termurah hari itu) tampil di hero.
 3. Jalankan sapuan kata terlarang ke situs yang sudah live (bukan cuma ke dokumen): buka tiap
    section dan pastikan nol kata "gratis" yang berdiri sendiri di luar konteks demo, nol "Anda".
 4. Baru setelah 1–3 lolos, lanjut ke §1 dan seterusnya.
@@ -83,9 +83,9 @@ kreatif dibuat DAN di hari tayang, bukan cuma sekali):**
 
 | Template | Paket | Harga | Coret | Kuota | Masa aktif |
 |---|---|---|---|---|---|
-| Solary | Basic | Rp 149.999 | Rp 299.999 | 200 tamu | 1 tahun |
-| Lovebirds | Basic | Rp 199.999 | Rp 299.999 | 200 tamu | 1 tahun |
-| Keduanya | Premium | Rp 249.999 | Rp 349.999 | 300 tamu | **seumur hidup** |
+| Solary | Basic | Rp 199.999 | Rp 299.999 | 400 tamu | 1 tahun |
+| Lovebirds | Basic | Rp 199.999 | Rp 299.999 | 400 tamu | 1 tahun |
+| Keduanya | Premium | Rp 249.999 | Rp 349.999 | 500 tamu | **seumur hidup** |
 
 ⚠️ **"Seumur hidup" hanya untuk Premium.** Jangan pernah menempelkannya ke Basic — Basic aktif 1 tahun.
 
@@ -129,11 +129,11 @@ Kampanye 3 — Retargeting "Tutup" (objective: Conversions → Purchase;
 │                                  masih terlalu kecil untuk dioptimasi)
 └── Ad Set C — Panas: pengunjung situs 14–30 hari (pixel) minus pembeli
     + pembuka demo + [kalau tersedia] mulai-checkout-belum-bayar
-    ├── R1  Story    U1   "Mulai Rp 149.999 · sekali bayar"
+    ├── R1  Story    U1   "Mulai Rp 199.999 · sekali bayar"
     ├── R2  Story    X4   "Tante nggak perlu install apa-apa"
     ├── R3  Static   U2   "Premium: seumur hidup + buku tamu QR" (label Premium wajib)
     ├── R5  Story    X3   "Dilihat ratusan orang. Sekali."
-    └── R4  Story    U4   "Kuota nambah per 50, kapan saja" — CADANGAN, lihat §5
+    └── R4  Story    U4   "Kuota nambah per 100, kapan saja" — CADANGAN, lihat §5
 ```
 
 ### Catatan lookalike — kenapa tidak dipakai siklus ini
@@ -197,11 +197,11 @@ Carousel 2–10 kartu, ≤30MB/gambar.
 | M2 | X1 | Contrarian | Static | MOFU | desain 2 kolom: bayar sekali vs langganan bulanan | H4 |
 | M3 | P3 | Pain (belum tergarap) | Static | MOFU | desain tenang, tanpa hiperbola, tanpa rekaman | H6 |
 | M4 | K3 | Kendali | Static | MOFU | 3 baris teks besar, headline-style | H9 |
-| R1 | U1 | Urgency | Story | Retargeting | desain harga + syarat, sebut Solary Rp 149.999 eksplisit | H7 |
+| R1 | U1 | Urgency | Story | Retargeting | desain harga + syarat, Basic Rp 199.999 (sama di dua template) | H7 |
 | R2 | X4 | Contrarian | Story | Retargeting | desain ringan, humor "tante nggak install app" | H7 |
 | R3 | U2 | Urgency | Static | Retargeting | perbandingan Basic vs Premium, label "Premium" wajib | H9 |
 | R5 | X3 | Contrarian | Story | Retargeting | reframe "dilihat ratusan orang, sekali" — caption-led | H12 |
-| R4 | U4 | Urgency | Story | Retargeting | kuota nambah per 50 — **cadangan**, dipakai kalau kuota jadi keberatan nyata di DM/komentar, atau sebagai materi rotasi H10+ | cadangan |
+| R4 | U4 | Urgency | Story | Retargeting | kuota nambah per 100 — **cadangan**, dipakai kalau kuota jadi keberatan nyata di DM/komentar, atau sebagai materi rotasi H10+ | cadangan |
 
 ⚠️ Setiap aset yang menampilkan **angka rupiah** (T5 tidak, tapi R1/R3 ya) wajib dicek ulang ke
 `/admin/templates` pagi hari sebelum render final — bukan cuma sekali di Hari 0. Simpan angka harga

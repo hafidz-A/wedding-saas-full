@@ -40,8 +40,8 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 **T1.2 — Sistem menolak input ngawur (validasi)**
 1. Isi **harga coret** lebih KECIL dari harga (mis. harga `149000`, coret `100000`) → Simpan.
 - **Harusnya terlihat:** pesan merah "Harga coret harus lebih besar dari harga jual…". TIDAK tersimpan.
-2. Isi **kuota** `237` (bukan kelipatan 50) → Simpan.
-- **Harusnya terlihat:** pesan merah "Kuota harus kelipatan 50…". TIDAK tersimpan.
+2. Isi **kuota** `237` (bukan kelipatan 100) → Simpan.
+- **Harusnya terlihat:** pesan merah "Kuota harus kelipatan 100…". TIDAK tersimpan.
 3. Kosongkan **nama paket** → Simpan.
 - **Harusnya terlihat:** pesan merah "Nama paket wajib diisi".
 
@@ -49,12 +49,12 @@ langkah + apa yang muncul — itu bug. Dokumen ini bertambah tiap modul baru.
 
 **T1.3 — Kartu depan menampilkan data dari editor**
 1. Di `/admin/templates`, set Basic Lovebirds: harga `149000`, **harga coret** `199000`,
-   kuota `200` → Simpan.
+   kuota `400` → Simpan.
 2. Buka beranda `/` → scroll ke bagian **"Coba Vibe-nya Langsung di Halaman Ini"** →
    pastikan template **Lovebirds** yang terpilih → klik tombol **"Beli Undangan"**.
 - **Harusnya terlihat:** kartu paket muncul. Basic menampilkan **~~Rp 199.000~~ Rp 149.000**
-  (harga coret dicoret), baris **"200 tamu undangan"**, dan daftar fitur **tanpa "Buku tamu"**.
-  Premium menampilkan **"300 tamu undangan"** dan fitur **termasuk "Buku tamu"**.
+  (harga coret dicoret), baris **"400 tamu undangan"**, dan daftar fitur **tanpa "Buku tamu"**.
+  Premium menampilkan **"500 tamu undangan"** dan fitur **termasuk "Buku tamu"**.
   *(Kalau masih harga lama, refresh sekali — ada jeda cache ±1 menit.)*
 
 **T1.4 — Rantai editor → tampilan (bukti nyambung)**

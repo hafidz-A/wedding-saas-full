@@ -40,9 +40,9 @@
 
 | Template | Paket | Harga | Coret | Kuota | Masa aktif |
 |---|---|---|---|---|---|
-| Solary | Basic | Rp 149.999 | Rp 299.999 | 200 tamu | 1 tahun |
-| Lovebirds | Basic | Rp 199.999 | Rp 299.999 | 200 tamu | 1 tahun |
-| Keduanya | Premium | Rp 249.999 | Rp 349.999 | 300 tamu | **seumur hidup** |
+| Solary | Basic | Rp 199.999 | Rp 299.999 | 400 tamu | 1 tahun |
+| Lovebirds | Basic | Rp 199.999 | Rp 299.999 | 400 tamu | 1 tahun |
+| Keduanya | Premium | Rp 249.999 | Rp 349.999 | 500 tamu | **seumur hidup** |
 
 ⚠️ Harga digerakkan DB lewat `/admin/templates`. **Jangan hardcode di materi iklan** tanpa mengecek ulang hari itu juga.
 ⚠️ Harga coret aktif permanen. Kalau tidak pernah benar-benar dijual di harga coret itu, **hapus** — diskon semu berisiko ditolak platform iklan dan melanggar aturan perlindungan konsumen.
@@ -173,11 +173,11 @@ Ini pembeda paling tajam yang benar-benar dimiliki. Banyak jasa undangan digital
 
 ⚠️ Semua hook di bawah menyebut harga. **Cek `/admin/templates` di hari penayangan.**
 
-### U1 — "Mulai Rp 149.999. Bayar sekali, undangan aktif setahun."
-**A/B:** "Rp 149.999 sekali bayar — bukan per bulan."
+### U1 — "Mulai Rp 199.999. Bayar sekali, undangan aktif setahun."
+**A/B:** "Rp 199.999 sekali bayar — bukan per bulan."
 **Karakter:** 53 · **Platform:** Google Search, Instagram Feed · **Funnel:** BOFU
 **Kenapa jalan:** Harga + kejelasan syarat. Untuk produk bayar-dulu, transparansi harga menurunkan friksi lebih besar daripada menyembunyikannya.
-**Cara pakai:** Retargeting untuk yang sudah buka demo. Sebutkan template mana yang Rp 149.999 (Solary).
+**Cara pakai:** Retargeting untuk yang sudah buka demo. Harga Basic sama di dua template (Rp 199.999), jadi tidak perlu sebut template tertentu.
 
 ### U2 — "Premium: seumur hidup, plus buku tamu QR."
 **A/B:** "Undangannya nggak hangus setahun. Premium aktif selamanya."
@@ -191,10 +191,10 @@ Ini pembeda paling tajam yang benar-benar dimiliki. Banyak jasa undangan digital
 **Kenapa jalan:** Urgensi yang **nyata dan tidak dibuat-buat** — tenggatnya memang ada, tidak perlu diskon palsu.
 **Cara pakai:** Targetkan audiens dengan tanggal pernikahan 1–3 bulan lagi.
 
-### U4 — "Kuota tamu 200. Kurang? Tambah per 50, kapan saja."
+### U4 — "Kuota tamu 400. Kurang? Tambah per 100, kapan saja."
 **A/B:** "Daftar tamu membengkak? Kuotanya ikut, tanpa bikin ulang."
 **Karakter:** 50 · **Platform:** Instagram Feed · **Funnel:** BOFU
-**Kenapa jalan:** Menghapus keberatan "nanti kalau tamunya nambah gimana". Terverifikasi: add-on kuota per blok 50.
+**Kenapa jalan:** Menghapus keberatan "nanti kalau tamunya nambah gimana". Terverifikasi: add-on kuota per blok 100.
 **Cara pakai:** Retargeting untuk yang sudah lihat harga tapi belum beli.
 
 ---
@@ -224,7 +224,7 @@ Sudut ini akan jadi yang **terkuat** begitu tersedia — justru karena modelnya 
 | 4 | **C3** Buka demo, tanpa daftar | Curiosity | Sedang–Tinggi | Semua |
 | 5 | **X1** Bayar sekali, bukan langganan | Contrarian | Sedang | Feed, Google |
 | 6 | **P3** Nomor HP keluarga disimpan di mana | Pain | Sedang (belum tergarap) | Feed, Google |
-| 7 | **U1** Mulai Rp 149.999 | Urgency | Sedang (BOFU) | Retargeting |
+| 7 | **U1** Mulai Rp 199.999 | Urgency | Sedang (BOFU) | Retargeting |
 | 8 | **K4/C4** Palette switcher | Kendali | Sedang | Reels |
 
 **Urutan uji yang disarankan:** jalankan K1 vs C1 lebih dulu — keduanya TOFU tapi menyerang motivasi berbeda (frustrasi vs kekaguman). Pemenangnya menentukan nada seluruh akun.
