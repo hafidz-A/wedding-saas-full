@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { activePeriodStatus } from '@/lib/payments/active-period'
+import { invitationPublicStatus, type PublicStatus } from '@/lib/invitations/public-status'
 import { refundVerdict } from '@/lib/payments/refund-policy'
 import { fetchRefundedMap } from '@/lib/payments/refunded'
 import { getPaymentSettings } from '@/lib/payments/payment-settings'
@@ -36,11 +37,11 @@ export default async function ProfilePage() {
   const admin = createSupabaseAdminClient()
   const { data: rows } = (await admin
     .from('invitations')
-    .select('id, slug, template_id, plan, is_paid, expires_at, config, paid_source, paid_channel, is_published, paid_at, used_at, published_at')
+    .select('id, slug, template_id, plan, is_paid, expires_at, config, paid_source, paid_channel, is_published, paid_at, used_at, published_at, suspended_at')
     .eq('owner_user_id', user.id)
     .order('created_at', { ascending: false })) as {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: { id: string; slug: string; template_id: string | null; plan: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; paid_channel: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null }[] | null
+    data: { id: string; slug: string; template_id: string | null; plan: string | null; is_paid: boolean; expires_at: string | null; config: any; paid_source: string | null; paid_channel: string | null; is_published: boolean; paid_at: string | null; used_at: string | null; published_at: string | null; suspended_at: string | null }[] | null
   }
   const invitations = rows ?? []
 
@@ -110,6 +111,21 @@ export default async function ProfilePage() {
     return ap.draft
   }
 
+  const st = t.common.invitationStatus
+
+  /** The one-line explanation for a verdict that blocks or delays guests. */
+  const statusNote = (s: PublicStatus): string | null => {
+    switch (s) {
+      case 'unpublished': return st.unpublishedNote
+      case 'not_ready':   return st.notReadyNote
+      case 'expired':     return st.expiredNote
+      case 'suspended':   return st.suspendedNote
+      case 'refunded':    return st.refundedNote
+      // 'unpaid' already has the "Draf — belum dibayar" chip and a Bayar button.
+      default: return null
+    }
+  }
+
   return (
     <>
       <SiteNav lang={lang} t={t.common} />
@@ -159,15 +175,23 @@ export default async function ProfilePage() {
                 const tt = tmpl(inv.template_id)
                 const periodStatus = activePeriodStatus(inv, now).status
                 const isRefunded = refundedMap.has(inv.id)
+                const publicStatus = invitationPublicStatus(inv, now, { isRefunded })
+                const note = statusNote(publicStatus)
+                // Refunded and suspended are terminal — the billing period is moot,
+                // and "Aktif seumur hidup" sitting next to "Diblokir" is exactly the
+                // contradiction this card exists to stop printing.
+                const terminal = publicStatus === 'refunded' || publicStatus === 'suspended'
                 return (
                   <li key={inv.slug} style={item}>
                     <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <span style={itemSlug}>{inv.slug}</span>
-                      {isRefunded ? (
-                        <span style={refundedBadge}>{ap.refunded}</span>
-                      ) : (
-                        <span style={periodChip}>{periodLabel(inv)}</span>
-                      )}
+                      <span style={chipRow}>
+                        {publicStatus === 'refunded' && <span style={refundedBadge}>{ap.refunded}</span>}
+                        {publicStatus === 'suspended' && <span style={blockedBadge}>{st.suspended}</span>}
+                        {!terminal && <span style={periodChip}>{periodLabel(inv)}</span>}
+                        {publicStatus === 'live' && <span style={liveBadge}>{st.live}</span>}
+                      </span>
+                      {note && <span style={terminal ? noteDanger : noteWarn}>{note}</span>}
                     </span>
                     <span style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                     <InvitationActions
@@ -273,11 +297,44 @@ const periodChip: React.CSSProperties = {
   padding: '3px 10px',
   borderRadius: 'var(--radius-pill)',
   alignSelf: 'flex-start',
-  marginLeft: -10,
 }
 const refundedBadge: React.CSSProperties = {
   ...periodChip,
   color: 'var(--status-danger)',
   background: 'var(--status-danger-soft)',
   fontWeight: 600,
+}
+// Chips share one row; the -10 optical inset that used to live on periodChip moves
+// here so the first chip's text still lines up with the card's content padding.
+const chipRow: React.CSSProperties = {
+  display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginLeft: -10,
+}
+const liveBadge: React.CSSProperties = {
+  ...periodChip,
+  color: 'var(--status-success-text)',
+  background: 'var(--status-success-soft)',
+  fontWeight: 600,
+}
+const blockedBadge: React.CSSProperties = {
+  ...periodChip,
+  color: 'var(--status-danger)',
+  background: 'var(--status-danger-soft)',
+  fontWeight: 600,
+}
+const noteBase: React.CSSProperties = {
+  fontSize: 13,
+  lineHeight: 1.5,
+  marginTop: 4,
+  padding: '8px 10px',
+  borderRadius: 'var(--radius-sm)',
+}
+const noteWarn: React.CSSProperties = {
+  ...noteBase,
+  color: 'var(--status-error-dark)',
+  background: 'var(--status-error-soft)',
+}
+const noteDanger: React.CSSProperties = {
+  ...noteBase,
+  color: 'var(--status-danger)',
+  background: 'var(--status-danger-soft)',
 }
