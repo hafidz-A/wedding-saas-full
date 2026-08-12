@@ -1,4 +1,5 @@
 import { test, type Page, type Locator } from '@playwright/test'
+import { requireFixture } from './support/fixtures'
 
 /**
  * Tutorial screenshot generator. Logs into the dummy dashboard for each template
@@ -41,7 +42,7 @@ test.describe.configure({ mode: 'serial', retries: 0 })
 
 async function login(page: Page, tpl: Template) {
   const { slug, email } = ACCOUNTS[tpl]
-  await page.goto(`/${tpl}/${slug}/dashboard`)
+  await requireFixture(page, `/${tpl}/${slug}/dashboard`)
   await page.locator('input[type="email"]').fill(email)
   await page.locator('input[type="password"]').fill(PASS)
   await page.locator('button[type="submit"]').click()

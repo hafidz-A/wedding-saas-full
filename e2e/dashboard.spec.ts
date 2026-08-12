@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { requireFixture } from './support/fixtures'
 
 /**
  * L3 E2E — per-slug dashboard. READ-ONLY: the owner-login test signs in with the
@@ -11,7 +12,7 @@ const DUMMY_EMAIL = 'dummy+dummy-lovebirds@example.com'
 const DUMMY_PASS = 'DemoTutorial123!'
 
 test('unauthenticated visitor hits the per-slug login gate', async ({ page }) => {
-  await page.goto(DASH)
+  await requireFixture(page, DASH)
   await expect(page.locator('input[type="email"]')).toBeVisible()
   await expect(page.locator('input[type="password"]')).toBeVisible()
   // Login is scoped to this invitation's slug.
@@ -26,7 +27,7 @@ test('wrong password is rejected at the gate (intercepted — no prod auth)', as
       body: JSON.stringify({ error: 'invalid_grant', error_description: 'Invalid login credentials' }),
     }),
   )
-  await page.goto(DASH)
+  await requireFixture(page, DASH)
   await page.locator('input[type="email"]').fill('intruder@example.com')
   await page.locator('input[type="password"]').fill('WrongPass1!')
   await page.locator('button[type="submit"]').click()
@@ -36,7 +37,7 @@ test('wrong password is rejected at the gate (intercepted — no prod auth)', as
 
 test('owner login with the dummy account opens the dashboard (read-only)', async ({ page }) => {
   test.setTimeout(60_000)
-  await page.goto(DASH)
+  await requireFixture(page, DASH)
   await page.locator('input[type="email"]').fill(DUMMY_EMAIL)
   await page.locator('input[type="password"]').fill(DUMMY_PASS)
   await page.locator('button[type="submit"]').click()

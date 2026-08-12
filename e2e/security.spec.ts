@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { requireFixture } from './support/fixtures'
 
 /**
  * L7 — multi-tenant isolation, end-to-end. A session authenticated as the owner
@@ -17,7 +18,7 @@ test('a tenant cannot open another tenant’s dashboard', async ({ page }) => {
   test.setTimeout(60_000)
 
   // 1. Sign in as the lovebirds owner.
-  await page.goto(LB_DASH)
+  await requireFixture(page, LB_DASH)
   await page.locator('input[type="email"]').fill(LB_EMAIL)
   await page.locator('input[type="password"]').fill(LB_PASS)
   await page.locator('button[type="submit"]').click()

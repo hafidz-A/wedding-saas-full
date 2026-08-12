@@ -1,5 +1,6 @@
 import { test, expect, devices, type Page } from '@playwright/test'
 import { invitationRoot } from './support/invitation-page'
+import { requireFixture } from './support/fixtures'
 
 /**
  * L6 — throttled-mobile perf probe (the "budget Android" proxy).
@@ -103,6 +104,9 @@ for (const [name, url, sel] of [
 ] as const) {
   test(`${name}: throttled mobile (4x CPU, Slow-4G) — load + FPS`, async ({ page }) => {
     test.setTimeout(180_000)
+    // Only the dummy-lovebirds row depends on a purged fixture — the demo-slug
+    // rows above/below must keep running unguarded.
+    if (url.includes('dummy-')) await requireFixture(page, url)
     const cdp = await constrain(page)
     const t0 = Date.now()
     await page.goto(url, { waitUntil: 'load', timeout: 120_000 })
