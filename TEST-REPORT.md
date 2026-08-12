@@ -2,6 +2,22 @@
 
 Laporan suite automated test. Cakupan sel-per-sel: lihat `TEST-MATRIX.md`. Temuan: `BUG-LEDGER.md`.
 
+## Run R2 follow-ups — Fase 1 (2026-08-12)
+
+- **Konteks:** eksekusi Fase 1 plan `docs/superpowers/plans/2026-08-11-r2-followups.md` di branch `chore/post-r2-followups` (commits `1de3427..e045741`), lewat subagent per task + review per task. Fase 2 (Task 7-9) sengaja **dikunci** sampai pemilik menyatakan masa jaga migrasi selesai — fase itu membuang jalan pulang.
+- **Gates di head:** tsc bersih · vitest **876 test / 116 file HIJAU** · `check:tokens` bersih · `verify:security` **RLS 4/4 HIJAU**, at-rest **TIDAK diverifikasi** (produksi tidak punya baris demo; menyemai data palsu ke DB produksi ditolak).
+- **Yang berubah:** Cache-Control `immutable` 1 tahun pada upload baru (setara objek hasil migrasi; sebelumnya 4 jam) · route proxy `/api/upload` yang mati dihapus beserta konstanta `BUCKET` · sapuan objek tak-terpakai sebagai pengganti size-cap yang R2 tidak punya · spec e2e kini menembus iframe phone-frame · spec ber-fixture jadi skip beralasan.
+- **Dua temuan Important dari review, keduanya diperbaiki:**
+  1. `referencedMediaKeys` menanam host `media.fincards.land` secara hardcode. Diarahkan ke bucket dengan `R2_PUBLIC_HOST` berbeda, **seluruh media hidup** di lingkungan itu akan masuk daftar hapus. Host kini parameter (pola `rewriteMediaHost`), tanpa fallback saat host kosong.
+  2. Setelah spec menembus iframe, pengukuran FPS justru membaca dokumen **pembungkus** — adegan yang rAF-nya mati tetap lolos. Dua spec FPS kini memakai `?noframe=1` supaya angkanya berasal dari dokumen yang beranimasi.
+- **Verifikasi mandiri controller (bukan mengandalkan laporan subagent):** ketujuh kunci di bucket R2 dicocokkan ke `invitations.config` lewat SQL — 3 yang ditandai dirujuk **0** config, 4 yang dipertahankan dirujuk tepat **1**; nol positif-palsu pada jalur yang menghapus media pelanggan. Kelima navigasi di spec FPS dipastikan membawa `noframe`. Klaim `NoSuchInvitation` di `dashboard/page.tsx:61` dicek langsung.
+- **⚠️ Playwright full-run TIDAK TUNTAS di mesin ini.** Dihentikan pada tes ke-205 setelah ±2,5 jam dengan 179 percobaan gagal — angka yang tidak masuk akal sebagai regresi dan konsisten dengan dev server yang kolaps.
+  - **Bukti bahwa penyebabnya beban, bukan kode:** `visual.spec.ts` di dalam run penuh timeout **30,4 dtk** (tablet, gagal); dijalankan **sendirian di mesin senggang → 9/9 HIJAU, 1,4–3,8 dtk per tes**. Kode identik, selisih ±20×.
+  - **Penyebab tambahan yang terlihat di log:** dev server mengulang `https://fonts.googleapis.com/css2?family=Montserrat… socket hang up — Retrying 1/3` pada kompilasi dingin. Panggilan jaringan yang menggantung saat compile menjelaskan timeout seragam 30,4 dtk di semua halaman auth.
+  - **Konsekuensi:** suite e2e ini **belum bisa dipakai sebagai gerbang rilis di mesin ini**. Butuh mesin yang tidak dipakai kerja lain, dan idealnya font di-*self-host* supaya compile tidak bergantung jaringan.
+- **Belum diselesaikan (jujur dicatat, bukan diklaim hijau):** apakah `perf-mobile` kasus Solary timeout menunggu `canvas` di project desktop karena beban atau karena `?noframe=1` — lolos di project mobile, dan spec yang sama lolos di tablet pada run penuh (`idle≈152 | wheel≈129 | touch≈135` fps). Perlu satu run di mesin senggang untuk memutuskan.
+- **Catatan proses:** Task 5 diverifikasi + di-commit langsung oleh controller (subagent-nya dua kali kembali di tengah run Playwright), bukan lewat reviewer terpisah seperti Task 1-4.
+
 ## Run post-R2 cleanup (2026-08-11)
 - **Konteks:** eksekusi plan `docs/superpowers/plans/2026-08-11-post-r2-cleanup.md` langsung di `main` (commits `faef30a..1304338`), menutup empat sisa dari rilis migrasi R2.
 - **Gates di head:** tsc bersih · vitest **844 test / 115 file HIJAU** (819 → 844: +5 `encryption-shape`, +7 `orphan-media`, +13 `sanitizeLegalHtml`) · `check:tokens` bersih.
