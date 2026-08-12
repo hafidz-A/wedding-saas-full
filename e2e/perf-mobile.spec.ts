@@ -86,10 +86,20 @@ async function loadMetrics(page: Page) {
   })
 }
 
+// This spec sets its own Pixel 5 UA (test.use above), so PhoneFrameView always
+// frames these routes. The `fps`/`startFpsCounter`/`touchScrollFps` helpers below
+// run page.evaluate() against the TOP-LEVEL document, which under a phone UA is
+// the fixed-position wrapper, not the invitation — same-origin frames share a
+// main thread, so a number would still come out even if the scene's own rAF loop
+// died while the wrapper stayed idle. That would be a vacuously-green test, the
+// exact failure this spec exists to catch. `?noframe=1` makes the invitation
+// itself the top-level document so every FPS reading here is really the scene's.
+// The phone-frame wrapper is covered elsewhere (invitation.spec.ts, a11y.spec.ts
+// under the `mobile` project) — it doesn't need re-coverage in this FPS-only spec.
 for (const [name, url, sel] of [
-  ['lovebirds-demo (2x gallery)', '/lovebirds/demo-e2e', 'h1, h2'],
-  ['lovebirds-real (1x gallery)', '/lovebirds/dummy-lovebirds', 'h1, h2'],
-  ['solary', '/solary/demo-e2e', 'canvas'],
+  ['lovebirds-demo (2x gallery)', '/lovebirds/demo-e2e?noframe=1', 'h1, h2'],
+  ['lovebirds-real (1x gallery)', '/lovebirds/dummy-lovebirds?noframe=1', 'h1, h2'],
+  ['solary', '/solary/demo-e2e?noframe=1', 'canvas'],
 ] as const) {
   test(`${name}: throttled mobile (4x CPU, Slow-4G) — load + FPS`, async ({ page }) => {
     test.setTimeout(180_000)

@@ -15,6 +15,9 @@ async function violations(page: Page, url: string, include?: string) {
   // On a phone UA, invitation pages render inside the same-origin `?embed=1`
   // iframe (PhoneFrameView) — waiting on the top-level body only proves the
   // fixed-position wrapper exists, not that the invitation content mounted.
+  // Waiting on the frame's own body instead proves the frame's document exists —
+  // strictly better than waiting on the wrapper, but still not a content-ready
+  // gate: `body` resolves long before GSAP/Three.js content actually mounts.
   // AxeBuilder itself already scans same-origin child frames, but scanning too
   // early (before the frame's content is up) makes the run vacuous.
   const root = await invitationRoot(page)
