@@ -24,7 +24,7 @@ export type UploadOptions = CompressOptions
 /**
  * Upload a media file for `slug` straight to Cloudflare R2 via a short-lived
  * presigned PUT URL, bypassing the Vercel 4.5 MB serverless request-body cap the
- * old server-proxy route (/api/upload) hit — the bytes never touch our function.
+ * old server-proxy route hit — the bytes never touch our function.
  *
  * Flow:
  *   0. compressImageForUpload(...) → browser re-encodes images (WebP, capped

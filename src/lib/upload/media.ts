@@ -2,7 +2,6 @@
  * Shared upload constants + file-signature ("magic byte") validators.
  *
  * ONE source of truth for the media rules, imported by:
- *   • the legacy server-proxy route        (src/app/api/upload/route.ts)
  *   • the signed-URL authorize step         (src/app/api/upload/sign/route.ts)
  *   • the post-upload verify step           (src/app/api/upload/verify/route.ts)
  *   • the browser upload helper (constants)  (src/editor/lib/uploadFile.ts)
@@ -11,8 +10,6 @@
  * mime/size allowlists for an instant pre-check. The authoritative check always
  * runs on the server.
  */
-
-export const BUCKET = 'invitation-media'
 
 export const ALLOWED_IMAGE_MIMES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
 export const ALLOWED_AUDIO_MIMES = new Set([
