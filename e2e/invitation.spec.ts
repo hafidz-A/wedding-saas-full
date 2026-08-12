@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { invitationRoot } from './support/invitation-page'
 
 /**
  * L3 E2E — public invitation render smoke for BOTH templates.
@@ -24,8 +25,9 @@ test('lovebirds demo invitation renders without crashing', async ({ page }) => {
   expect(resp!.status(), 'must not be 4xx/5xx').toBeLessThan(400)
 
   // Cinematic shell rendered real content (gate + sections), not an error page.
-  await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 15_000 })
-  const text = (await page.locator('body').innerText()).trim()
+  const root = await invitationRoot(page)
+  await expect(root.locator('h1, h2').first()).toBeVisible({ timeout: 15_000 })
+  const text = (await root.locator('body').innerText()).trim()
   expect(text.length, 'shell should render substantial content').toBeGreaterThan(80)
 
   await page.screenshot({ path: 'test-results/screens/lovebirds-demo.png', fullPage: false })
@@ -41,7 +43,8 @@ test('lovebirds demo RSVP submits with simulated success (no real write)', async
   })
 
   await page.goto('/lovebirds/demo-e2e')
-  const rsvp = page.locator('section[aria-label="RSVP"]')
+  const root = await invitationRoot(page)
+  const rsvp = root.locator('section[aria-label="RSVP"]')
   await expect(rsvp).toHaveCount(1)
 
   const name = rsvp.getByPlaceholder('e.g. Maya Larasati')
@@ -71,7 +74,8 @@ test('solary demo invitation boots its 3D scene without crashing', async ({ page
   expect(resp!.status(), 'must not be 4xx/5xx').toBeLessThan(400)
 
   // The Three.js renderer mounts a <canvas> once the scene boots.
-  await expect(page.locator('canvas').first()).toBeVisible({ timeout: 25_000 })
+  const root = await invitationRoot(page)
+  await expect(root.locator('canvas').first()).toBeVisible({ timeout: 25_000 })
 
   await page.screenshot({ path: 'test-results/screens/solary-demo.png', fullPage: false })
   // Tolerate benign WebGL/context warnings surfaced as pageerror in headless;

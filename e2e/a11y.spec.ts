@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import { invitationRoot } from './support/invitation-page'
 
 /**
  * L5 — accessibility scan (axe-core, WCAG 2.0/2.1 A + AA).
@@ -11,7 +12,13 @@ import AxeBuilder from '@axe-core/playwright'
  */
 async function violations(page: Page, url: string, include?: string) {
   await page.goto(url)
-  await page.locator('body').waitFor()
+  // On a phone UA, invitation pages render inside the same-origin `?embed=1`
+  // iframe (PhoneFrameView) — waiting on the top-level body only proves the
+  // fixed-position wrapper exists, not that the invitation content mounted.
+  // AxeBuilder itself already scans same-origin child frames, but scanning too
+  // early (before the frame's content is up) makes the run vacuous.
+  const root = await invitationRoot(page)
+  await root.locator('body').waitFor()
   let builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
   if (include) builder = builder.include(include)
   const { violations } = await builder.analyze()

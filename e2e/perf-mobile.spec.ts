@@ -1,4 +1,5 @@
 import { test, expect, devices, type Page } from '@playwright/test'
+import { invitationRoot } from './support/invitation-page'
 
 /**
  * L6 — throttled-mobile perf probe (the "budget Android" proxy).
@@ -96,7 +97,8 @@ for (const [name, url, sel] of [
     const t0 = Date.now()
     await page.goto(url, { waitUntil: 'load', timeout: 120_000 })
     const wallMs = Date.now() - t0
-    await page.locator(sel).first().waitFor({ timeout: 90_000 })
+    const root = await invitationRoot(page)
+    await root.locator(sel).first().waitFor({ timeout: 90_000 })
     const m = await loadMetrics(page)
     await page.waitForTimeout(4000) // let load settle
     const fIdle = await fps(page, 3) // steady-state idle
