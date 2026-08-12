@@ -111,13 +111,26 @@ export async function uploadFile(
   }
   const { path, url: presignedUrl } = await signRes.json()
 
-  // 2. PUT the bytes DIRECTLY to R2 (no size cap from Vercel). Content-Type is
-  //    recorded by R2 but is NOT part of the presigned signature (see
-  //    lib/upload/r2.ts), so this cannot fail on a header mismatch.
+  // 2. PUT the bytes DIRECTLY to R2 (no size cap from Vercel). Neither header
+  //    is part of the presigned signature (see lib/upload/r2.ts — only `host`
+  //    is signed), so this cannot fail on a signature mismatch. R2 records both
+  //    anyway: SigV4 validates the signed headers and passes the rest through.
+  //
+  //    Cache-Control is about cost, not correctness. Keys are timestamped and
+  //    never rewritten, so a year of immutable caching is safe, and it is what
+  //    makes a guest re-opening the invitation free. Without it R2 serves these
+  //    with a 4-hour TTL, making NEW photos more expensive than the ones the
+  //    migration script carried over with the same value set server-side.
+  //
+  //    REQUIRES "Cache-Control" in the bucket's CORS AllowedHeaders. Without it
+  //    the preflight 403s and every upload fails — see this task's Step 1.
   const putRes = await fetch(presignedUrl, {
     method: 'PUT',
     body: uploadable,
-    headers: { 'Content-Type': contentType },
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
   })
   if (!putRes.ok) {
     throw new Error(`Upload ke penyimpanan gagal (${putRes.status})`)
