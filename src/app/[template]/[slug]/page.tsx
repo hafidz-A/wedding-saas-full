@@ -11,7 +11,6 @@ import { decryptConfig } from '@/lib/crypto/config'
 import { decryptField } from '@/lib/crypto/app'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 import { fillEmptyImages } from '@/lib/config/fillEmptyImages'
-import { rewriteConfigMediaHosts } from '@/lib/config/mediaHost'
 import { composeTitle } from '@/lib/meta/couple'
 
 interface PageProps {
@@ -202,14 +201,6 @@ export default async function Page({ params, searchParams }: PageProps) {
   // Render-time only: blank image slots fall back to contextual demo photos.
   // Never persisted — the editor still sees the owner's real (empty) value.
   config = fillEmptyImages(config)
-
-  // Media moved to R2; stored URLs still point at Supabase. Rewriting here
-  // instead of in the database keeps the rollback to one env var — unset
-  // MEDIA_REWRITE_LEGACY and every legacy URL resolves to Supabase again.
-  config = rewriteConfigMediaHosts(
-    config,
-    process.env.MEDIA_REWRITE_LEGACY === '1' ? process.env.R2_PUBLIC_HOST : null,
-  )
 
   // DEMO ONLY: lovebirds previews show BOTH gallery styles back-to-back so
   // visitors can compare them, each with a note explaining that a real
