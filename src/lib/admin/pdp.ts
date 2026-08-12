@@ -7,7 +7,6 @@ import { decryptField as decApp } from '@/lib/crypto/app'
 import { decryptConfig } from '@/lib/crypto/config'
 import { deletePrefix } from '@/lib/upload/r2'
 
-const MEDIA_BUCKET = 'invitation-media'
 // PII child tables — deleted when anonymizing a paid invitation. plan_upgrades /
 // quota_addons / refunds are financial and intentionally KEPT.
 const PII_CHILD_TABLES = ['guests', 'rsvps', 'attendances', 'gift_confirmations', 'guestbook_notes', 'playlist_songs']
@@ -32,27 +31,17 @@ export function anonymizedInvitationPatch(id: string, nowIso: string): Record<st
 }
 
 /**
- * Erase an invitation's media from BOTH stores.
+ * Erase an invitation's media.
  *
- * R2 is where the files are actually served from since the media migration;
- * Supabase still holds the pre-migration originals, kept as the rollback. An
- * erasure that cleared only one would leave the customer's photos reachable on
- * the other — and for a paid invitation the row is anonymized rather than
- * deleted, so the orphan-purge script would never catch the leftovers either.
+ * R2 is the only store: the Supabase bucket was emptied once every object had a
+ * verified R2 twin, and nothing writes there any more. This used to sweep both.
  *
- * Best-effort per store: a failure on one must not abort the erasure of the
- * other, or a transient R2 blip would silently skip the Supabase cleanup too.
+ * Swallows its own failure on purpose — a storage blip must not abort the rest
+ * of the erasure, which still has PII rows to clear. The leftovers stay
+ * findable afterwards via `scripts/purge-orphan-media.mjs`, and the error is
+ * logged rather than lost.
  */
-async function removeStorage(db: any, invitationId: string): Promise<void> {
-  try {
-    const { data: files } = await db.storage.from(MEDIA_BUCKET).list(invitationId, { limit: 1000 })
-    if (files && files.length) {
-      await db.storage.from(MEDIA_BUCKET).remove(files.map((f: any) => `${invitationId}/${f.name}`))
-    }
-  } catch (e) {
-    console.error(`[pdp] Supabase media cleanup failed for ${invitationId}:`, e)
-  }
-
+async function removeStorage(invitationId: string): Promise<void> {
   try {
     await deletePrefix(`${invitationId}/`)
   } catch (e) {
@@ -76,7 +65,7 @@ export async function processAccountDeletion(db: any, userId: string): Promise<{
   let deleted = 0
   const nowIso = new Date().toISOString()
   for (const inv of invs ?? []) {
-    await removeStorage(db, inv.id) // storage never cascades — remove for both paths
+    await removeStorage(inv.id) // storage never cascades — remove for both paths
     if (inv.is_paid) {
       for (const t of PII_CHILD_TABLES) await db.from(t).delete().eq('invitation_id', inv.id)
       await (db.from('invitations') as any).update(anonymizedInvitationPatch(inv.id, nowIso)).eq('id', inv.id)
