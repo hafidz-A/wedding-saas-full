@@ -30,8 +30,8 @@
 | `src/app/api/upload/route.ts` | **Delete.** The dead Supabase proxy. | 2 |
 | `src/app/api/upload/__tests__/route.test.ts` | **Delete.** Its test. | 2 |
 | `src/lib/upload/media.ts` | **Modify.** Drop the now-unused `BUCKET`. | 2 |
-| `src/lib/media/referenced-keys.ts` | **Create.** Pure: which R2 keys a config actually references. | 3 |
-| `src/lib/media/__tests__/referenced-keys.test.ts` | **Create.** Tests for the above. | 3 |
+| `scripts/lib/referenced-keys.mjs` | **Create.** Pure: which R2 keys a config actually references. | 3 |
+| `scripts/lib/__tests__/referenced-keys.test.mjs` | **Create.** Tests for the above. | 3 |
 | `scripts/purge-orphan-media.mjs` | **Modify.** Also sweep unreferenced objects inside LIVE invitations. | 3 |
 | `e2e/support/invitation-page.ts` | **Create.** One helper that resolves the invitation root, frame or not. | 4 |
 | `e2e/{perf,perf-mobile,invitation,a11y,smoke}.spec.ts` | **Modify.** Use the helper. | 4 |
@@ -237,12 +237,14 @@ git commit -m "chore(media): delete the dead Supabase upload proxy"
 ### Task 3: Compensating control for the missing size ceiling
 
 **Files:**
-- Create: `src/lib/media/referenced-keys.ts`
-- Create: `src/lib/media/__tests__/referenced-keys.test.ts`
+- Create: `scripts/lib/referenced-keys.mjs`
+- Create: `scripts/lib/__tests__/referenced-keys.test.mjs`
 - Modify: `scripts/purge-orphan-media.mjs`
 
 **Interfaces:**
-- Produces: `referencedMediaKeys(config: unknown): Set<string>` — every `<invitation-id>/<file>` key a config points at, from either host.
+- Produces: `referencedMediaKeys(config)` → `Set<string>` — every `<invitation-id>/<file>` key a config points at, from either host.
+
+The helper lives in `scripts/lib/` and **nowhere else**. Only the purge script consumes it, `vitest.config.ts` already includes `scripts/**/__tests__/**/*.test.mjs`, and `scripts/lib/orphan-media.mjs` is the established precedent. A second copy under `src/` would be duplicated logic with no consumer.
 
 Supabase's bucket had `file_size_limit = 12582912`, an un-bypassable 12 MB ceiling (migration `2026-07-22`). **R2 has no per-bucket equivalent.** `/sign` only sees a client-DECLARED size, the presigned PUT caps nothing, and `/verify` — which does check the real bytes — is called by the client, so an owner who simply never calls it leaves an arbitrarily large object behind.
 
@@ -250,11 +252,11 @@ A Worker in front of the bucket would be a true cap, but that is new infrastruct
 
 - [ ] **Step 1: Write the failing test**
 
-Create `src/lib/media/__tests__/referenced-keys.test.ts`:
+Create `scripts/lib/__tests__/referenced-keys.test.mjs`:
 
-```ts
+```js
 import { describe, it, expect } from 'vitest'
-import { referencedMediaKeys } from '../referenced-keys'
+import { referencedMediaKeys } from '../referenced-keys.mjs'
 
 const R2 = 'https://media.fincards.land'
 const SB = 'https://uknpuynhixrdqgsgmynl.supabase.co/storage/v1/object/public/invitation-media'
@@ -291,14 +293,14 @@ describe('referencedMediaKeys', () => {
 
 - [ ] **Step 2: Run it to verify it fails**
 
-Run: `npx vitest run src/lib/media/__tests__/referenced-keys.test.ts`
-Expected: FAIL — `Failed to resolve import "../referenced-keys"`.
+Run: `npx vitest run scripts/lib/__tests__/referenced-keys.test.mjs`
+Expected: FAIL — `Failed to resolve import "../referenced-keys.mjs"`.
 
 - [ ] **Step 3: Implement**
 
-Create `src/lib/media/referenced-keys.ts`:
+Create `scripts/lib/referenced-keys.mjs`:
 
-```ts
+```js
 /**
  * Which media objects a stored config actually points at.
  *
@@ -314,10 +316,10 @@ Create `src/lib/media/referenced-keys.ts`:
 const MEDIA_URL =
   /^https:\/\/(?:media\.fincards\.land|[a-z0-9-]+\.supabase\.co\/storage\/v1\/object\/public\/invitation-media)\/(.+)$/
 
-export function referencedMediaKeys(config: unknown): Set<string> {
-  const keys = new Set<string>()
+export function referencedMediaKeys(config) {
+  const keys = new Set()
 
-  const walk = (value: unknown): void => {
+  const walk = (value) => {
     if (typeof value === 'string') {
       const key = MEDIA_URL.exec(value)?.[1]
       if (key) keys.add(key.split('?')[0])
@@ -328,7 +330,7 @@ export function referencedMediaKeys(config: unknown): Set<string> {
       return
     }
     if (value && typeof value === 'object') {
-      Object.values(value as Record<string, unknown>).forEach(walk)
+      Object.values(value).forEach(walk)
     }
   }
 
@@ -339,7 +341,7 @@ export function referencedMediaKeys(config: unknown): Set<string> {
 
 - [ ] **Step 4: Run it to verify it passes**
 
-Run: `npx vitest run src/lib/media/__tests__/referenced-keys.test.ts`
+Run: `npx vitest run scripts/lib/__tests__/referenced-keys.test.mjs`
 Expected: PASS, 4 tests.
 
 - [ ] **Step 5: Teach the purge script about unreferenced objects**
@@ -371,7 +373,11 @@ console.log(`Unref  : ${unreferenced.length} file(s) under live invitations, ${(
 for (const p of unreferenced) console.log(`  ~ ${p}`)
 ```
 
-Import the helper at the top. It is a `.ts` file under `src/`, which a plain `.mjs` script cannot import — so **copy the function into `scripts/lib/referenced-keys.mjs`** as a sibling, matching how `scripts/lib/orphan-media.mjs` already works, and import from there. Keep the two in sync by pointing each file's header at the other.
+Import it alongside the existing helper at the top of the script:
+
+```js
+import { referencedMediaKeys } from './lib/referenced-keys.mjs'
+```
 
 Then extend the delete loop to cover both lists:
 
@@ -396,7 +402,7 @@ Expected: `Orphan : 0`, and an `Unref` list. Two objects uploaded on 2026-08-11 
 Run: `npm run typecheck` → no output. Run: `npm run test` → all pass.
 
 ```bash
-git add src/lib/media/referenced-keys.ts "src/lib/media/__tests__/referenced-keys.test.ts" scripts/lib/referenced-keys.mjs scripts/purge-orphan-media.mjs
+git add scripts/lib/referenced-keys.mjs "scripts/lib/__tests__/referenced-keys.test.mjs" scripts/purge-orphan-media.mjs
 git commit -m "feat(media): sweep unreferenced objects, the R2 stand-in for a size cap"
 ```
 
