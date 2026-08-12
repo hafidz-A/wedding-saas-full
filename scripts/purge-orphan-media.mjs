@@ -1,11 +1,21 @@
 /**
  * purge-orphan-media.mjs — delete objects in the R2 `invitation-media` bucket
- * whose owning invitation row no longer exists.
+ * whose owning invitation row no longer exists, plus objects under a LIVE
+ * invitation that its own config does not reference.
  *
  * Keys are `<invitation-id>/<timestamp>-<filename>`, so a prefix whose id is
  * absent from `invitations` is dead weight. Live invitations are never touched —
  * the check runs fresh against the DB, not a hardcoded list. Objects sitting at
  * the bucket root are left alone entirely.
+ *
+ * The second sweep (unreferenced-under-a-live-invitation) is the compensating
+ * control for a gap R2 has and Supabase Storage didn't: no bucket-level size
+ * cap. `/api/upload/verify` enforces the real ceiling, but the client calls
+ * it, so a skipped `/verify` leaves an arbitrarily large, unreferenced object
+ * behind. IMPORTANT: a freshly uploaded photo is unreferenced until the owner
+ * saves the section it belongs to — never wire this sweep into an automatic
+ * schedule without a grace period. Run it by hand, read the `~` list, and only
+ * then `--apply`.
  *
  *   node scripts/purge-orphan-media.mjs            # dry run, lists what would go
  *   node scripts/purge-orphan-media.mjs --apply    # actually delete
@@ -18,6 +28,7 @@ import { resolve } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { AwsClient } from 'aws4fetch'
 import { parseObjectsFromListXml, nextContinuationToken, partitionOrphans } from './lib/orphan-media.mjs'
+import { referencedMediaKeys } from './lib/referenced-keys.mjs'
 
 function loadDotEnv(file) {
   try {
@@ -59,7 +70,7 @@ const ENDPOINT = `https://${need('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`
 const BUCKET = need('R2_BUCKET')
 const objectUrl = (key) => `${ENDPOINT}/${BUCKET}/${key.split('/').map(encodeURIComponent).join('/')}`
 
-const { data: live, error: liveErr } = await supabase.from('invitations').select('id, slug')
+const { data: live, error: liveErr } = await supabase.from('invitations').select('id, slug, config')
 if (liveErr) {
   console.error('Cannot read invitations:', liveErr.message)
   process.exit(1)
@@ -93,7 +104,29 @@ console.log(`Keep   : ${kept.length} file(s) belonging to live invitations`)
 console.log(`Orphan : ${doomed.length} file(s), ${(doomedBytes / 1024 / 1024).toFixed(1)} MB`)
 for (const p of doomed) console.log(`  - ${p}`)
 
-if (!doomed.length) process.exit(0)
+// Second sweep: objects under a LIVE invitation that its own config does not
+// reference. R2 has no bucket-level size cap, so an upload whose /verify step
+// was skipped survives at any size — and is, by definition, unreferenced. This
+// is the compensating control for that gap.
+const configByInv = new Map(live.map((r) => [r.id, r.config]))
+const referencedByInv = new Map()
+for (const [id, cfg] of configByInv) referencedByInv.set(id, referencedMediaKeys(cfg))
+
+const unreferenced = []
+let unreferencedBytes = 0
+for (const key of kept) {
+  const id = key.slice(0, key.indexOf('/'))
+  if (!referencedByInv.get(id)?.has(key)) {
+    unreferenced.push(key)
+    unreferencedBytes += objects.find((o) => o.key === key)?.size ?? 0
+  }
+}
+
+console.log(`Unref  : ${unreferenced.length} file(s) under live invitations, ${(unreferencedBytes / 1024 / 1024).toFixed(1)} MB`)
+for (const p of unreferenced) console.log(`  ~ ${p}`)
+
+const toDelete = [...doomed, ...unreferenced]
+if (!toDelete.length) process.exit(0)
 
 if (!apply) {
   console.log('\nDry run. Re-run with --apply to delete.')
@@ -101,7 +134,7 @@ if (!apply) {
 }
 
 let removed = 0
-for (const key of doomed) {
+for (const key of toDelete) {
   const res = await r2.fetch(objectUrl(key), { method: 'DELETE' })
   if (!res.ok && res.status !== 204 && res.status !== 404) {
     console.error(`Delete failed for ${key}: ${res.status}`)
