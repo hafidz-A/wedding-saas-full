@@ -68,6 +68,7 @@ const r2 = new AwsClient({
 })
 const ENDPOINT = `https://${need('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`
 const BUCKET = need('R2_BUCKET')
+const PUBLIC_HOST = need('R2_PUBLIC_HOST')
 const objectUrl = (key) => `${ENDPOINT}/${BUCKET}/${key.split('/').map(encodeURIComponent).join('/')}`
 
 const { data: live, error: liveErr } = await supabase.from('invitations').select('id, slug, config')
@@ -110,7 +111,7 @@ for (const p of doomed) console.log(`  - ${p}`)
 // is the compensating control for that gap.
 const configByInv = new Map(live.map((r) => [r.id, r.config]))
 const referencedByInv = new Map()
-for (const [id, cfg] of configByInv) referencedByInv.set(id, referencedMediaKeys(cfg))
+for (const [id, cfg] of configByInv) referencedByInv.set(id, referencedMediaKeys(cfg, PUBLIC_HOST))
 
 const unreferenced = []
 let unreferencedBytes = 0
