@@ -1,0 +1,56 @@
+/* Hand-rolled contentEditable rich-text editor — /admin/legal only. */
+
+.wrap {
+  border: var(--border-default-full);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-raised);
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--surface-sunken);
+  border-bottom: var(--border-default-full);
+}
+
+.divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: var(--ctl-h-sm);
+  background: var(--border-default);
+  margin: 0 var(--space-1);
+}
+
+.toolBtn {
+  width: auto;
+  min-width: var(--ctl-h-sm);
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.toolBtnActive {
+  border-color: var(--interactive-primary);
+  color: var(--interactive-primary-hover);
+  background: var(--interactive-primary-soft);
+}
+
+.editable {
+  min-height: 260px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5);
+  outline: none;
+  font-size: 15px;
+}
+
+.editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+}

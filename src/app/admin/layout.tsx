@@ -28,6 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ['/admin/templates', 'Template & Harga'],
     ['/admin/invitations', 'Undangan'],
     ['/admin/payments', 'Pembayaran'],
+    ['/admin/legal', 'Dokumen Legal'],
     ['/admin/testimonials', 'Testimoni'],
     ['/admin/users', 'Akun & Data'],
     ['/admin/activity', 'Aktivitas'],

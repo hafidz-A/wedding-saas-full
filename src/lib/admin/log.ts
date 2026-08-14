@@ -51,6 +51,8 @@ export function renderAdminAction(row: { action: string; target_id?: string | nu
     'invitation.unarchive': `Keluarkan undangan ${ref} dari arsip`,
     'invitation.delete': `Hapus undangan ${ref}`,
     'invitation.create_for_client': `Buat undangan ${ref} untuk klien${meta.createdUser ? ' (akun baru)' : ''}`,
+    'legal.update': `Ubah dokumen legal ${ref}${meta.minorFix ? ' (perbaikan kecil — tanggal tidak berubah)' : ''}`,
+    'legal.reset': `Kembalikan dokumen legal ${ref} ke bawaan`,
     'plan.update': `Ubah harga/paket ${ref}`,
     'template.update': `Ubah tampilan template ${ref}`,
     'account.delete': `Proses hapus akun ${ref}`,
