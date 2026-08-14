@@ -8,8 +8,7 @@ import type { Dict } from '@/lib/i18n'
 import type { Lang } from '@/lib/i18n/config'
 import { safeNext } from '@/lib/auth/safeNext'
 import LegalModal from '@/components/legal/LegalModal'
-import PrivacyContent from '@/components/legal/PrivacyContent'
-import RefundContent from '@/components/legal/RefundContent'
+import LegalDocBody from '@/components/legal/LegalDocBody'
 import { CONSENT_VERSION } from '@/lib/legal/consent'
 import { isPasswordValid } from '@/lib/auth/passwordPolicy'
 import { pwnedPasswordCount } from '@/lib/auth/pwnedPassword'
@@ -256,12 +255,12 @@ export default function SignupForm({
 
       {openDoc === 'privacy' && (
         <LegalModal title={dict.consentPrivacy} closeLabel={dict.modalClose} onClose={() => setOpenDoc(null)}>
-          <PrivacyContent lang={lang} />
+          <LegalDocBody doc="privacy" lang={lang} />
         </LegalModal>
       )}
       {openDoc === 'refund' && (
         <LegalModal title={dict.consentRefund} closeLabel={dict.modalClose} onClose={() => setOpenDoc(null)}>
-          <RefundContent lang={lang} />
+          <LegalDocBody doc="refund" lang={lang} />
         </LegalModal>
       )}
     </main>
