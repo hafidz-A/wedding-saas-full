@@ -141,10 +141,15 @@ Plans editor is the source of truth for prices — do not hardcode rupiah amount
 ## Admin operator console (`/admin`)
 
 Env-gated by `ADMIN_EMAILS` allowlist (`src/lib/admin/is-admin.ts` + `require-admin`). Modules:
-- **Invitations** control center (list, create comp invitations, suspend/period actions).
+- **Invitations** control center (list, create comp invitations, suspend/period actions, and
+  **appearance**: palette + ornament for any invitation, at creation or after, via
+  `adminSetAppearance` — the same `config.theme` fields the couple's own tabs write, so it sets
+  rather than locks).
 - **Payments & revenue** (transactions, reconcile, refund-requests panel).
 - **Templates** catalog + **Plans/pricing editor** (writes `template_plans`).
 - **Testimonials** moderation (publish a review to the marketing landing).
+- **Dokumen Legal** (`/admin/legal`) — hand-rolled rich-text editor for /terms, /privacy, /refund
+  in both languages. DB row = override, committed default = fallback (see gotcha 9).
 - **Users & PDP** (account data export + deletion requests — Indonesian PDP compliance).
 - **Activity** log. See the `docs/superpowers/specs/2026-07-*-admin-*` design docs for module details.
 
@@ -262,6 +267,18 @@ supabase/                                          ← schema.sql (base) + migra
    `vitest.config.ts` does not set `jsx: 'automatic'` — under the classic transform a component without
    the import throws `ReferenceError: React is not defined` as soon as a test renders it. `npm run test`
    stays green until something actually renders it, so the omission hides until much later.
+9. **Legal pages are DB-override-over-committed-default.** `/terms`, `/privacy`, `/refund` (and the
+   signup consent modal, via `GET /api/legal/[doc]`) render `getLegalDoc()`: a `legal_documents` row
+   wins, otherwise the committed HTML in `src/lib/legal/defaults.ts`. `getLegalDoc` **never throws** —
+   a missing table or any DB error serves the default, so a legal page can't blank or 500. Two
+   timestamps: `revised_at` is the PUBLIC "Terakhir diperbarui" and only moves on a normal save;
+   `updated_at` moves on every save, including a "perbaikan kecil" one. Edit the text at
+   `/admin/legal`, never by patching `defaults.ts`.
+10. **Per-template appearance lives in `src/lib/templates/appearance.ts`.** Ornament motifs per
+   template (Solary is deliberately `[]` — its three.js backdrop draws its own scene) plus a re-export
+   of the palette allowlist. The owner theme route, the dashboard's ornament sub-tab, the admin
+   appearance dialog, and the admin create form all read it — adding a template is one edit there, not
+   a hunt for `template !== 'solary'` checks.
 
 ---
 
