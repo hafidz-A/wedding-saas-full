@@ -8,16 +8,18 @@ import MusicTab from './MusicTab'
 import MetaTab from './MetaTab'
 import OrnamentTab from './OrnamentTab'
 import { coupleDisplay } from '@/lib/meta/couple'
+import { templateOrnaments } from '@/lib/templates/appearance'
 import { useDashboardDict } from './DashboardI18nProvider'
 import styles from './EditorWorkspace.module.css'
 
 export type EditorSubTab = 'section' | 'palette' | 'music' | 'meta' | 'ornament'
 
-/** Editor sub-tab keys, in nav order. Ornament is lovebirds-only (solary draws
- *  its own Three.js backdrop, so there's nothing to swap). */
+/** Editor sub-tab keys, in nav order. Ornament only appears for a template
+ *  that actually has ornament options (registry-driven — solary's three.js
+ *  backdrop draws its own scene, so there's nothing to swap). */
 export function editorSubTabs(template: string): EditorSubTab[] {
   const keys: EditorSubTab[] = ['section', 'palette', 'music', 'meta']
-  if (template !== 'solary') keys.push('ornament')
+  if (templateOrnaments(template).length > 0) keys.push('ornament')
   return keys
 }
 

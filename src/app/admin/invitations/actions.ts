@@ -9,6 +9,7 @@ import { resolvePlan } from '@/lib/payments/plans'
 import { BLOCK_SIZE, QUOTA_CAP, clampQuotaExtra, DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
 import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
 import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { isPaletteAllowedForTemplate, isOrnamentAllowedForTemplate } from '@/lib/templates/appearance'
 import { sendAdminEmail } from '@/lib/email/send'
 import { siteBaseUrl } from '@/lib/site-url'
 import { compExpiry, type CompPeriod } from './period'
@@ -73,6 +74,54 @@ export async function adminChangePlan(id: string, plan: string): Promise<Result>
   const { error } = await (db.from('invitations') as any).update({ plan }).eq('id', id)
   if (error) return { ok: false, error: 'Gagal menyimpan' }
   await logAdminAction(admin.email, { action: 'invitation.change_plan', targetType: 'invitation', targetId: id, meta: { plan } })
+  revalidateInvitation()
+  return { ok: true }
+}
+
+/**
+ * Set palette and/or ornament for ANY invitation (operator helping a client
+ * pick, or fixing a confused couple's choice) — the same `config.theme`
+ * fields the owner's own Palette/Ornament tabs write, validated against the
+ * registry for the invitation's template. Deliberately NOT ownership-scoped
+ * and deliberately NOT a lock: the couple can still change it back afterwards,
+ * so there's no new column and no read-only state to explain to a client.
+ */
+export async function adminSetAppearance(
+  id: string,
+  opts: { palette?: string; ornamentType?: string },
+): Promise<Result> {
+  const admin = await guard(); if (!admin) return { ok: false, error: 'Akses ditolak' }
+  const hasPalette = typeof opts.palette === 'string'
+  const hasOrnament = typeof opts.ornamentType === 'string'
+  if (!hasPalette && !hasOrnament) return { ok: false, error: 'Tidak ada yang diubah' }
+
+  const db = createSupabaseAdminClient()
+  const { data: row, error: fetchErr } = await (db.from('invitations') as any)
+    .select('config, template_id').eq('id', id).maybeSingle()
+  if (fetchErr || !row) return { ok: false, error: 'Undangan tidak ditemukan' }
+
+  if (hasPalette && !isPaletteAllowedForTemplate(row.template_id, opts.palette!)) {
+    return { ok: false, error: 'Palet tidak valid untuk template ini' }
+  }
+  if (hasOrnament && !isOrnamentAllowedForTemplate(row.template_id, opts.ornamentType!)) {
+    return { ok: false, error: 'Ornamen tidak valid untuk template ini' }
+  }
+
+  // Read-merge-write — same shape as the owner theme route — so no sibling
+  // config key (sections, meta, music, couple, …) is ever lost.
+  const cfg = { ...(row.config || {}) }
+  cfg.theme = { ...(cfg.theme || {}) }
+  if (hasPalette) cfg.theme.defaultPalette = opts.palette
+  if (hasOrnament) cfg.theme.ornamentType = opts.ornamentType
+
+  const { error } = await (db.from('invitations') as any)
+    .update({ config: cfg, updated_at: new Date().toISOString() }).eq('id', id)
+  if (error) return { ok: false, error: 'Gagal menyimpan' }
+
+  await logAdminAction(admin.email, {
+    action: 'invitation.set_appearance', targetType: 'invitation', targetId: id,
+    meta: { palette: opts.palette, ornamentType: opts.ornamentType },
+  })
   revalidateInvitation()
   return { ok: true }
 }
@@ -174,6 +223,9 @@ export interface CreateForClientInput {
   slug: string
   clientEmail: string
   markPaid?: { source: 'manual' | 'comp'; amountIDR: number; period: CompPeriod }
+  /** Operator-picked appearance, seeded into config.theme before insert. */
+  palette?: string
+  ornamentType?: string
 }
 
 export interface CreateForClientResult {
@@ -221,6 +273,12 @@ export async function adminCreateInvitationForClient(input: CreateForClientInput
   if (!venue) return { ok: false, error: 'Lokasi acara wajib diisi' }
   if (!input.weddingDate || isNaN(Date.parse(input.weddingDate))) return { ok: false, error: 'Tanggal acara tidak valid' }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(clientEmail)) return { ok: false, error: 'Email klien tidak valid' }
+  if (input.palette && !isPaletteAllowedForTemplate(template, input.palette)) {
+    return { ok: false, error: 'Palet tidak valid untuk template ini' }
+  }
+  if (input.ornamentType && !isOrnamentAllowedForTemplate(template, input.ornamentType)) {
+    return { ok: false, error: 'Ornamen tidak valid untuk template ini' }
+  }
 
   const db = createSupabaseAdminClient()
 
@@ -244,9 +302,17 @@ export async function adminCreateInvitationForClient(input: CreateForClientInput
   }
 
   // 5. Build the seeded config + insert the invitation (owned by the client).
-  const config = template === 'lovebirds'
+  // `getDefaultConfig` returns the template's SHARED module-level object for
+  // every non-Lovebirds template (buildSeedConfig already deep-clones its
+  // own) — clone before merging the operator's palette/ornament choice into
+  // config.theme, or writing into it would corrupt the default for every
+  // future invitation created from this template.
+  const baseConfig = template === 'lovebirds'
     ? buildSeedConfig({ brideName, groomName, weddingDate: input.weddingDate, venue })
     : getDefaultConfig(template)
+  const config = { ...baseConfig, theme: { ...(baseConfig.theme || {}) } }
+  if (input.palette) config.theme.defaultPalette = input.palette
+  if (input.ornamentType) config.theme.ornamentType = input.ornamentType
 
   const { data: inserted, error: insErr } = await (db.from('invitations') as any)
     .insert({

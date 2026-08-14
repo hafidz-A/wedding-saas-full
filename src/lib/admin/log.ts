@@ -45,6 +45,7 @@ export function renderAdminAction(row: { action: string; target_id?: string | nu
     'invitation.suspend': `Blokir (suspend) undangan ${ref}`,
     'invitation.unsuspend': `Buka blokir undangan ${ref}`,
     'invitation.change_plan': `Ganti plan undangan ${ref}${meta.plan ? ` → ${meta.plan}` : ''}`,
+    'invitation.set_appearance': `Ubah tampilan undangan ${ref}${meta.palette ? ` · palet ${meta.palette}` : ''}${meta.ornamentType ? ` · ornamen ${meta.ornamentType}` : ''}`,
     'invitation.add_quota': `Tambah kuota undangan ${ref}${meta.qty ? ` (+${meta.qty})` : ''}`,
     'invitation.archive': `Arsipkan undangan ${ref}`,
     'invitation.unarchive': `Keluarkan undangan ${ref} dari arsip`,

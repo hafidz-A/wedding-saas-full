@@ -12,6 +12,7 @@ import { useFeedback } from '@/components/ui/FeedbackProvider'
 import { Button } from '@/components/ui/Button'
 import ui from '@/components/ui/controls.module.css'
 import { BLOCK_SIZE } from '@/lib/payments/quota'
+import AppearanceDialog from './AppearanceDialog'
 
 interface Inv {
   id: string; slug: string; templateId: string; plan: string; email: string
@@ -20,11 +21,16 @@ interface Inv {
   /** confirmed_at of a succeeded refund of the initial purchase, '' if predates the
    *  backfill, or null/undefined when not refunded — drives the "Refunded" badge. */
   refundedAt?: string | null
+  /** Current config.theme values (JSON-path select from the list query) — seed
+   *  the "Tampilan" dialog so it opens on what's actually saved. */
+  palette?: string
+  ornamentType?: string
 }
 
 export default function InvitationRow({ inv }: { inv: Inv }) {
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
   const confirm = useAdminConfirm()
   const formDialog = useAdminForm()
   const fb = useFeedback()
@@ -126,6 +132,7 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
         <Button size="sm" variant="ghost" disabled={busy} onClick={onTogglePublish}>{inv.isPublished ? 'Sembunyikan' : 'Terbitkan'}</Button>
         <Button size="sm" variant="ghost" disabled={busy} onClick={onComp}>Comp (gratis)</Button>
         <Button size="sm" variant="ghost" disabled={busy} onClick={onLunasManual}>Lunas manual</Button>
+        <Button size="sm" variant="ghost" disabled={busy} onClick={() => setAppearanceOpen(true)}>Tampilan</Button>
         <select disabled={busy} value={inv.plan} onChange={async (e) => {
           const next = e.target.value
           if (next === inv.plan) return
@@ -141,6 +148,16 @@ export default function InvitationRow({ inv }: { inv: Inv }) {
           : <Button size="sm" variant="ghostDanger" disabled={busy} onClick={onDelete}>Hapus</Button>}
       </div>
       {msg && <span style={{ fontSize: 12, color: 'var(--status-error)', width: '100%' }}>{msg}</span>}
+      {appearanceOpen && (
+        <AppearanceDialog
+          invitationId={inv.id}
+          slug={inv.slug}
+          templateId={inv.templateId}
+          initialPalette={inv.palette}
+          initialOrnamentType={inv.ornamentType}
+          onClose={() => setAppearanceOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { isPaletteAllowedForTemplate } from '@/lib/config/palette-allowlist'
+import { isOrnamentAllowedForTemplate } from '@/lib/templates/appearance'
 
 interface Ctx { params: { slug: string } }
-
-const ORNAMENT_TYPES = ['birds', 'butterflies', 'perched'] as const
 
 /**
  * PUT /api/invitation/[slug]/theme
@@ -30,9 +29,6 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (!hasPalette && !hasOrnament) {
     return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
   }
-  if (ornamentType !== undefined && !(ORNAMENT_TYPES as readonly string[]).includes(ornamentType)) {
-    return NextResponse.json({ error: 'Invalid ornamentType' }, { status: 400 })
-  }
 
   const supabase = createSupabaseAdminClient()
   const { data: row, error: fetchErr } = await (supabase.from('invitations') as any)
@@ -41,6 +37,12 @@ export async function PUT(req: Request, { params }: Ctx) {
 
   if (hasPalette && !isPaletteAllowedForTemplate(row.template_id, palette)) {
     return NextResponse.json({ error: 'Invalid palette' }, { status: 400 })
+  }
+  // Ornament validation needs the template id, so it moves below the row
+  // fetch — this closes a real hole: without it, Solary could be handed
+  // ornamentType: 'birds' and would silently store it.
+  if (hasOrnament && !isOrnamentAllowedForTemplate(row.template_id, ornamentType)) {
+    return NextResponse.json({ error: 'Invalid ornamentType' }, { status: 400 })
   }
 
   const cfg = { ...(row.config || {}) }

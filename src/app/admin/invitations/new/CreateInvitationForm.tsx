@@ -1,10 +1,12 @@
 // src/app/admin/invitations/new/CreateInvitationForm.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { adminCreateInvitationForClient, type CreateForClientResult } from '../actions'
 import { Button } from '@/components/ui/Button'
 import { BLOCK_SIZE } from '@/lib/payments/quota'
+import { TEMPLATE_VIBES } from '@/components/marketing/vibeData'
+import { templateOrnaments } from '@/lib/templates/appearance'
 
 const TEMPLATES = [
   { id: 'lovebirds', label: 'Lovebirds' },
@@ -18,6 +20,21 @@ export default function CreateInvitationForm() {
   const [template, setTemplate] = useState('lovebirds')
   const [plan, setPlan] = useState('basic')
   const [quotaExtra, setQuotaExtra] = useState(0)
+
+  // Appearance — palette always offered, ornament only when the selected
+  // template actually has ornament options (registry-driven, e.g. Solary
+  // has none). Both reset when the template changes so a stale key from the
+  // previous template can never be submitted.
+  const vibe = TEMPLATE_VIBES.find((v) => v.id === template) ?? TEMPLATE_VIBES[0]
+  const palettes = vibe.palettes
+  const ornaments = templateOrnaments(template)
+  const [palette, setPalette] = useState(palettes[0]?.key ?? '')
+  const [ornamentType, setOrnamentType] = useState(ornaments[0]?.key ?? '')
+  useEffect(() => {
+    const nextVibe = TEMPLATE_VIBES.find((v) => v.id === template) ?? TEMPLATE_VIBES[0]
+    setPalette(nextVibe.palettes[0]?.key ?? '')
+    setOrnamentType(templateOrnaments(template)[0]?.key ?? '')
+  }, [template])
   const [brideName, setBrideName] = useState('')
   const [groomName, setGroomName] = useState('')
   const [weddingDate, setWeddingDate] = useState('')
@@ -44,6 +61,8 @@ export default function CreateInvitationForm() {
     const res = await adminCreateInvitationForClient({
       template, plan, guestQuotaExtra: quotaExtra,
       brideName, groomName, weddingDate, venue, slug, clientEmail, markPaid,
+      palette: palette || undefined,
+      ornamentType: ornaments.length > 0 ? (ornamentType || undefined) : undefined,
     })
     setResult(res)
     setBusy(false)
@@ -117,6 +136,21 @@ export default function CreateInvitationForm() {
         <Field label={`Kuota tambahan (kelipatan ${BLOCK_SIZE})`}>
           <input type="number" min={0} step={BLOCK_SIZE} value={quotaExtra} onChange={(e) => setQuotaExtra(parseInt(e.target.value || '0', 10) || 0)} style={input} />
         </Field>
+      </Row>
+
+      <Row>
+        <Field label="Palet">
+          <select value={palette} onChange={(e) => setPalette(e.target.value)} style={input}>
+            {palettes.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}
+          </select>
+        </Field>
+        {ornaments.length > 0 && (
+          <Field label="Ornamen">
+            <select value={ornamentType} onChange={(e) => setOrnamentType(e.target.value)} style={input}>
+              {ornaments.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+            </select>
+          </Field>
+        )}
       </Row>
 
       <Row>

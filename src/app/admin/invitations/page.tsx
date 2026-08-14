@@ -15,7 +15,7 @@ export default async function AdminInvitationsPage({ searchParams }: { searchPar
   const q = (searchParams.q || '').trim().toLowerCase()
   const showArchived = searchParams.archived === '1'
   const { data } = (await (db.from('invitations') as any)
-    .select('id, slug, template_id, plan, is_paid, is_published, expires_at, email, paid_source, guest_quota_extra, suspended_at, archived_at, created_at')
+    .select('id, slug, template_id, plan, is_paid, is_published, expires_at, email, paid_source, guest_quota_extra, suspended_at, archived_at, created_at, theme:config->theme')
     .order('created_at', { ascending: false })
     .limit(500)) as { data: any[] | null }
   const rows = (data ?? []).filter((r) => {
@@ -62,6 +62,8 @@ export default async function AdminInvitationsPage({ searchParams }: { searchPar
               statusLabel: STATUS_LABEL[st.status] ?? st.status, quotaExtra: r.guest_quota_extra ?? 0,
               isPaid: !!r.is_paid, isSuspended: !!r.suspended_at, isArchived: !!r.archived_at,
               refundedAt: refundedMap.get(r.id) ?? null,
+              palette: r.theme?.defaultPalette ?? undefined,
+              ornamentType: r.theme?.ornamentType ?? undefined,
             }} />
           )
         })}
