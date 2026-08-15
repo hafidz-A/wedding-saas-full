@@ -10,6 +10,7 @@ import SaveBar, { RemoteChangeBanner } from './SaveBar'
 import PreviewPane from './PreviewPane'
 import { useDashboardDict } from '@/app/[template]/[slug]/dashboard/DashboardI18nProvider'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
+import { upgradeLegacyDemoImageUrls } from '@/lib/config/legacy-demo-urls'
 import { deriveCoupleFromConfig } from '@/lib/meta/couple'
 import { hashSections } from './lib/sectionsHash'
 import {
@@ -45,8 +46,11 @@ export default function EditorRoot({ slug, template, initialConfig, initialIsPub
   const initialSectionsHash = hashSections(initialConfig?.sections)
 
   // Lovebirds: fold registry→weddingGift + strip guestbook/countdown on load.
-  const migrated =
-    template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig
+  // Then repoint demo photos seeded before 2026-08-15, whose .jpg files are gone
+  // — otherwise the editor previews (and saves back) dead image URLs.
+  const migrated = upgradeLegacyDemoImageUrls(
+    template === 'lovebirds' ? migrateLovebirdsConfig(initialConfig) : initialConfig,
+  )
   const safeConfig: PageConfig = {
     meta: migrated?.meta ?? {},
     couple: deriveCoupleFromConfig(migrated),

@@ -11,6 +11,7 @@ import { decryptConfig } from '@/lib/crypto/config'
 import { decryptField } from '@/lib/crypto/app'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 import { fillEmptyImages } from '@/lib/config/fillEmptyImages'
+import { upgradeLegacyDemoImageUrls } from '@/lib/config/legacy-demo-urls'
 import { composeTitle } from '@/lib/meta/couple'
 
 interface PageProps {
@@ -197,6 +198,11 @@ export default async function Page({ params, searchParams }: PageProps) {
   // Lovebirds: fold registry→weddingGift + strip guestbook/countdown so old/
   // unsaved configs don't render dropped sections. No-op for other templates.
   if (templateId === 'lovebirds') config = migrateLovebirdsConfig(config)
+
+  // Configs seeded before 2026-08-15 have the demo photos' old `.jpg` paths
+  // baked into the stored JSON, and those files no longer exist. Both templates
+  // share that folder, so this runs for all of them.
+  config = upgradeLegacyDemoImageUrls(config)
 
   // Render-time only: blank image slots fall back to contextual demo photos.
   // Never persisted — the editor still sees the owner's real (empty) value.
