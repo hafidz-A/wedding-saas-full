@@ -279,6 +279,20 @@ supabase/                                          ← schema.sql (base) + migra
    of the palette allowlist. The owner theme route, the dashboard's ornament sub-tab, the admin
    appearance dialog, and the admin create form all read it — adding a template is one edit there, not
    a hunt for `template !== 'solary'` checks.
+11. **Committed images are `.webp` and can be served from R2.** `src/lib/assets/staticAsset.js` returns
+   the local `public/` path by default and `https://<host>/static/<path>` when
+   `NEXT_PUBLIC_STATIC_ASSET_HOST` is set — that env var is the whole switch, and unset means today's
+   behaviour. Consumers: both templates' `demoImages.js` (`BASE`), `TutorialTab` (`SHOT_BASE`), and the
+   landing watermark. Push assets with `scripts/upload-static-assets.mjs`; re-compress with
+   `scripts/optimize-static-assets.mjs`; measure the result with `scripts/measure-egress.mjs`.
+   Three traps: (a) `RESERVED_PREFIXES = ['static']` in `scripts/lib/orphan-media.mjs` is **load-bearing**
+   — without it the media purge reads `static` as a dead invitation id and deletes every site asset;
+   (b) the `Cache-Control` in `next.config.js` is 30-day + `stale-while-revalidate`, deliberately NOT
+   `immutable`, because these filenames carry no content hash — **replacing an image means renaming it**;
+   (c) when changing this asset set, grep for scripts that *write* the files
+   (`apply-lovebirds-illustrations.mjs`, `gen-lovebirds-gallery-thumbs.mjs`), not just those that read
+   them — and watch for literal extension matching like `toThumb()` in `[slug]/page.tsx`, which fails
+   silently rather than 404ing.
 
 ---
 

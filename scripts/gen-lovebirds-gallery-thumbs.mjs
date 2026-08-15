@@ -1,7 +1,7 @@
 /* ============================================================
    gen-lovebirds-gallery-thumbs.mjs
 
-   Generates lightweight card-sized thumbnails (<key>-sm.jpg) for
+   Generates lightweight card-sized thumbnails (<key>-sm.webp) for
    the Lovebirds demo gallery photos. The Spring Coil gallery renders
    each photo inside a ~150px card but the originals are 1000-1800px
    tall — decoding 16+ of those full-resolution bitmaps into tiny
@@ -27,8 +27,11 @@ const THUMB_QUALITY = 72
 
 async function main() {
   const files = await readdir(DEMO_DIR)
+  // The demo set moved from .jpg to .webp on 2026-08-15 (see
+  // scripts/optimize-static-assets.mjs). Both are accepted so this stays
+  // runnable against an older checkout; output is always .webp.
   const sources = files.filter(
-    (f) => f.endsWith('.jpg') && !f.endsWith('-sm.jpg'),
+    (f) => /\.(jpe?g|webp)$/i.test(f) && !/-sm\.(jpe?g|webp)$/i.test(f),
   )
 
   let totalBefore = 0
@@ -36,12 +39,12 @@ async function main() {
 
   for (const file of sources) {
     const src = join(DEMO_DIR, file)
-    const out = join(DEMO_DIR, file.replace(/\.jpg$/, '-sm.jpg'))
+    const out = join(DEMO_DIR, file.replace(/\.(jpe?g|webp)$/i, '-sm.webp'))
 
     const before = (await stat(src)).size
     await sharp(src)
       .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
-      .jpeg({ quality: THUMB_QUALITY, mozjpeg: true })
+      .webp({ quality: THUMB_QUALITY, effort: 6 })
       .toFile(out)
     const after = (await stat(out)).size
 

@@ -13,44 +13,47 @@
    the local files are pre-sized on download (hero ~1600px,
    story/portrait ~1100-1200px, gallery ~900px).
 
-   Assets live in public/templates/lovebirds/demo/<key>.jpg and are
+   Assets live in public/templates/lovebirds/demo/<key>.webp and are
    verified by `node scripts/check-lovebirds-images.mjs`.
    Provenance + licensing: public/templates/lovebirds/demo/CREDITS.md
    ============================================================ */
 
-const BASE = '/templates/lovebirds/demo'
+import { staticAsset } from '../../lib/assets/staticAsset.js'
+
+// Local path by default; the R2 host when NEXT_PUBLIC_STATIC_ASSET_HOST is set.
+const BASE = staticAsset('/templates/lovebirds/demo')
 
 // Every slot Lovebirds references (hero gate + blast, ourStory,
 // brideGroom, galleryMasonry, footer). Filename === slot key.
 export const LOVEBIRDS_PHOTOS = {
   // — couple & portraits (anchor couple) —
-  coupleGate: 'coupleGate.jpg',
-  bridePortrait: 'bridePortrait.jpg',
-  groomPortrait: 'groomPortrait.jpg',
-  coupleClassic: 'coupleClassic.jpg',
-  coupleCasual: 'coupleCasual.jpg',
+  coupleGate: 'coupleGate.webp',
+  bridePortrait: 'bridePortrait.webp',
+  groomPortrait: 'groomPortrait.webp',
+  coupleClassic: 'coupleClassic.webp',
+  coupleCasual: 'coupleCasual.webp',
 
   // — story moments (anchor couple) —
-  storyFirstMeet: 'storyFirstMeet.jpg',
-  storyFirstDate: 'storyFirstDate.jpg',
-  storyHoliday: 'storyHoliday.jpg',
-  storyProposal: 'storyProposal.jpg',
-  storyWedding: 'storyWedding.jpg',
+  storyFirstMeet: 'storyFirstMeet.webp',
+  storyFirstDate: 'storyFirstDate.webp',
+  storyHoliday: 'storyHoliday.webp',
+  storyProposal: 'storyProposal.webp',
+  storyWedding: 'storyWedding.webp',
 
   // — gallery moments (anchor couple) —
-  gallerySunsetWalk: 'gallerySunsetWalk.jpg',
-  galleryFirstDance: 'galleryFirstDance.jpg',
-  galleryBeach: 'galleryBeach.jpg',
-  galleryRoadTrip: 'galleryRoadTrip.jpg',
-  galleryCityLights: 'galleryCityLights.jpg',
-  galleryFamilyDinner: 'galleryFamilyDinner.jpg',
-  galleryBirthday: 'galleryBirthday.jpg',
+  gallerySunsetWalk: 'gallerySunsetWalk.webp',
+  galleryFirstDance: 'galleryFirstDance.webp',
+  galleryBeach: 'galleryBeach.webp',
+  galleryRoadTrip: 'galleryRoadTrip.webp',
+  galleryCityLights: 'galleryCityLights.webp',
+  galleryFamilyDinner: 'galleryFamilyDinner.webp',
+  galleryBirthday: 'galleryBirthday.webp',
 
   // — gallery details (people-free, tone-matched) —
-  galleryCoffee: 'galleryCoffee.jpg',
-  galleryCooking: 'galleryCooking.jpg',
-  gallerySunrise: 'gallerySunrise.jpg',
-  galleryRings: 'galleryRings.jpg',
+  galleryCoffee: 'galleryCoffee.webp',
+  galleryCooking: 'galleryCooking.webp',
+  gallerySunrise: 'gallerySunrise.webp',
+  galleryRings: 'galleryRings.webp',
 }
 
 /** Build a local path for a Lovebirds demo slot. `width` is ignored. */

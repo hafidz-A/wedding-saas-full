@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { parseObjectsFromListXml, nextContinuationToken, partitionOrphans } from '../orphan-media.mjs'
+import {
+  parseObjectsFromListXml,
+  nextContinuationToken,
+  partitionOrphans,
+  RESERVED_PREFIXES,
+} from '../orphan-media.mjs'
 
 const LIVE = 'aaaaaaaa-1111-2222-3333-444444444444'
 const DEAD = 'bbbbbbbb-5555-6666-7777-888888888888'
@@ -8,6 +13,16 @@ const XML = `<?xml version="1.0"?><ListBucketResult>
   <Contents><Key>${LIVE}/1784-track1.mp3</Key><Size>1000</Size></Contents>
   <Contents><Key>${DEAD}/1785-foto.webp</Key><Size>2500</Size></Contents>
   <Contents><Key>smoke-test.txt</Key><Size>7</Size></Contents>
+</ListBucketResult>`
+
+// The site's own committed assets (demo photos, tutorial screenshots) live in
+// the same bucket under `static/`. Their first path segment is not — and never
+// will be — an invitation id, so without an explicit reservation the purge
+// would classify every one of them as an orphan and delete them.
+const STATIC_XML = `<?xml version="1.0"?><ListBucketResult>
+  <Contents><Key>static/templates/lovebirds/demo/coupleGate.webp</Key><Size>90000</Size></Contents>
+  <Contents><Key>static/tutorial/solary/editor-list.webp</Key><Size>30000</Size></Contents>
+  <Contents><Key>${DEAD}/1785-foto.webp</Key><Size>2500</Size></Contents>
 </ListBucketResult>`
 
 describe('parseObjectsFromListXml', () => {
@@ -57,5 +72,20 @@ describe('partitionOrphans', () => {
     const { doomed, doomedBytes } = partitionOrphans(objects, new Set())
     expect(doomed).toEqual([`${LIVE}/1784-track1.mp3`, `${DEAD}/1785-foto.webp`])
     expect(doomedBytes).toBe(3500)
+  })
+
+  it('NEVER dooms the site’s own static assets, even with zero live invitations', () => {
+    const { doomed, doomedBytes } = partitionOrphans(parseObjectsFromListXml(STATIC_XML), new Set())
+    expect(doomed).toEqual([`${DEAD}/1785-foto.webp`])
+    expect(doomedBytes).toBe(2500)
+  })
+
+  it('does not count a reserved prefix as kept either — it is simply not judged', () => {
+    const { kept } = partitionOrphans(parseObjectsFromListXml(STATIC_XML), new Set(['static']))
+    expect(kept).toEqual([])
+  })
+
+  it('reserves `static/` — the prefix the upload script writes to', () => {
+    expect(RESERVED_PREFIXES).toContain('static')
   })
 })

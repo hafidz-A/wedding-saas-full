@@ -56,6 +56,26 @@ const nextConfig = {
   // report-only mode before enforcing.
   async headers() {
     return [
+      // Committed images under public/. Next serves that directory with
+      // `Cache-Control: public, max-age=0, must-revalidate`, so a returning
+      // guest re-validates every single file — ~22 extra Edge Requests per
+      // re-opened invitation, which is the metered resource that binds first on
+      // this project (measured 2026-08-15).
+      //
+      // 30 days, NOT `immutable`: these filenames are not content-hashed, so a
+      // replaced photo keeps its URL. `stale-while-revalidate` lets the CDN
+      // serve the old bytes once while it fetches the new ones, and the 30-day
+      // ceiling bounds how long a stale copy can survive. If you ever need an
+      // instant swap, rename the file — that is the only reliable buster here.
+      ...['/templates', '/tutorial', '/images', '/solary'].map((dir) => ({
+        source: `${dir}/:path*`,
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=604800',
+          },
+        ],
+      })),
       {
         source: '/:path*',
         headers: [

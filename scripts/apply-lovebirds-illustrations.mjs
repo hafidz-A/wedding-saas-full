@@ -3,8 +3,8 @@
 
    One-shot: apply the Phase-4 APPROVED Lovebirds illustrations into the
    demo slots. Converts each generated PNG -> public/templates/lovebirds/
-   demo/<key>.jpg at a slot-appropriate width, overwriting the previous
-   stock photos. demoImages.js keeps pointing at the same .jpg names, so
+   demo/<key>.webp at a slot-appropriate width, overwriting the previous
+   stock photos. demoImages.js keeps pointing at the same .webp names, so
    no wiring changes are needed.
 
    Widths/quality are tuned LIGHT (web delivery) so the invitation opens fast
@@ -58,11 +58,11 @@ let totalKb = 0
 const total = Object.keys(MAP).length
 for (const [file, [key, width]] of Object.entries(MAP)) {
   const src = path.join(SRC, file)
-  const out = path.join(DEST, `${key}.jpg`)
+  const out = path.join(DEST, `${key}.webp`)
   await sharp(src)
     .flatten({ background: '#FDF6EC' })
     .resize({ width, withoutEnlargement: true })
-    .jpeg({ quality: QUALITY, mozjpeg: true, progressive: true })
+    .webp({ quality: QUALITY, effort: 6 })
     .toFile(out)
   const kb = statSync(out).size / 1024
   totalKb += kb

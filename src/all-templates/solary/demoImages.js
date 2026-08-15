@@ -23,42 +23,45 @@
    ignored (the files are pre-sized); for the Unsplash fallback it is
    forwarded to demoImg.
 
-   Local assets live in public/templates/lovebirds/demo/<file>.jpg and
+   Local assets live in public/templates/lovebirds/demo/<file>.webp and
    are verified by `node scripts/check-solary-images.mjs`.
    ============================================================ */
 
 import { demoImg } from '../../lib/demoImages.js'
 
-const BASE = '/templates/lovebirds/demo'
+import { staticAsset } from '../../lib/assets/staticAsset.js'
+
+// Local path by default; the R2 host when NEXT_PUBLIC_STATIC_ASSET_HOST is set.
+const BASE = staticAsset('/templates/lovebirds/demo')
 
 // Solary slot key → Lovebirds local filename. Keys NOT listed here
 // fall through to the shared Unsplash registry (see solaryImg below).
 export const SOLARY_LOCAL = {
   // — direct matches (slot exists in the Lovebirds set) —
-  coupleGate: 'coupleGate.jpg',          // hero couple shot (used in the Saturn ring)
-  groomPortrait: 'groomPortrait.jpg',    // groom solo (used in the Saturn ring)
-  coupleClassic: 'coupleClassic.jpg',
-  coupleCasual: 'coupleCasual.jpg',
-  galleryBirthday: 'galleryBirthday.jpg',
-  gallerySunsetWalk: 'gallerySunsetWalk.jpg',
-  galleryCoffee: 'galleryCoffee.jpg',
-  storyProposal: 'storyProposal.jpg',
-  storyWedding: 'storyWedding.jpg',
-  galleryRoadTrip: 'galleryRoadTrip.jpg',
-  gallerySunrise: 'gallerySunrise.jpg',
-  galleryRings: 'galleryRings.jpg',
+  coupleGate: 'coupleGate.webp',          // hero couple shot (used in the Saturn ring)
+  groomPortrait: 'groomPortrait.webp',    // groom solo (used in the Saturn ring)
+  coupleClassic: 'coupleClassic.webp',
+  coupleCasual: 'coupleCasual.webp',
+  galleryBirthday: 'galleryBirthday.webp',
+  gallerySunsetWalk: 'gallerySunsetWalk.webp',
+  galleryCoffee: 'galleryCoffee.webp',
+  storyProposal: 'storyProposal.webp',
+  storyWedding: 'storyWedding.webp',
+  galleryRoadTrip: 'galleryRoadTrip.webp',
+  gallerySunrise: 'gallerySunrise.webp',
+  galleryRings: 'galleryRings.webp',
 
   // — tone-matched (no exact Lovebirds slot; reuse a senada photo) —
-  coupleSunset: 'gallerySunsetWalk.jpg',     // sunset couple silhouette
-  galleryHiking: 'galleryBeach.jpg',         // outdoor / adventure
-  galleryMovieNight: 'galleryCityLights.jpg',// night / evening
-  galleryAnniversary: 'galleryFamilyDinner.jpg', // intimate dinner
-  galleryCelebration: 'galleryFirstDance.jpg',   // party / celebration
-  galleryVenue: 'storyHoliday.jpg',          // scenic getaway
-  galleryDressFitting: 'bridePortrait.jpg',  // bride solo
-  galleryCakeTasting: 'galleryCooking.jpg',  // food / home
-  galleryPreWedShoot: 'storyFirstDate.jpg',  // posed couple moment
-  galleryBrunch: 'storyFirstMeet.jpg',       // candid couple moment
+  coupleSunset: 'gallerySunsetWalk.webp',     // sunset couple silhouette
+  galleryHiking: 'galleryBeach.webp',         // outdoor / adventure
+  galleryMovieNight: 'galleryCityLights.webp',// night / evening
+  galleryAnniversary: 'galleryFamilyDinner.webp', // intimate dinner
+  galleryCelebration: 'galleryFirstDance.webp',   // party / celebration
+  galleryVenue: 'storyHoliday.webp',          // scenic getaway
+  galleryDressFitting: 'bridePortrait.webp',  // bride solo
+  galleryCakeTasting: 'galleryCooking.webp',  // food / home
+  galleryPreWedShoot: 'storyFirstDate.webp',  // posed couple moment
+  galleryBrunch: 'storyFirstMeet.webp',       // candid couple moment
 }
 
 /**

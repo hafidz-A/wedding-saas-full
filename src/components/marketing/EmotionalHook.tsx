@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'motion/react'
 import type { Dict } from '@/lib/i18n'
 import { useReveal } from '@/hooks/useReveal'
+import { staticAsset } from '@/lib/assets/staticAsset.js'
 import styles from './EmotionalHook.module.css'
 
 export function EmotionalHook({ t }: { t: Dict['landing']['emotionalHook'] }) {
@@ -27,7 +28,7 @@ export function EmotionalHook({ t }: { t: Dict['landing']['emotionalHook'] }) {
         style={{ y: watermarkY, opacity: revealed ? 0.08 : 0 }}
         aria-hidden="true"
       >
-        <img src="/images/couple_silhouette.png" alt="" />
+        <img src={staticAsset('/images/couple_silhouette.webp')} alt="" />
       </motion.div>
 
       <div className={`${styles.inner} ${revealed ? styles.revealed : ''}`}>

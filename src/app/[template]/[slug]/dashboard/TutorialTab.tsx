@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { getTutorialCategories, TUTORIAL_GROUPS, type TutorialCategory } from './tutorial/content'
+import { staticAsset } from '@/lib/assets/staticAsset.js'
 import styles from './TutorialTab.module.css'
 
 export default function TutorialTab({
@@ -16,8 +17,9 @@ export default function TutorialTab({
 }) {
   const dict = useDashboardDict()
   const isSolary = template === 'solary'
-  // Screenshots live at public/tutorial/<template>/<key>.png.
-  const SHOT_BASE = `/tutorial/${template}`
+  // Screenshots live at public/tutorial/<template>/<key>.webp — served from R2
+  // when NEXT_PUBLIC_STATIC_ASSET_HOST is set, else straight out of public/.
+  const SHOT_BASE = staticAsset(`/tutorial/${template}`)
   // Solary keeps its own copy under tutorial.solary.*, with headings/groups/navTitle shared.
   const root = (dict.tabs as any).tutorial
   const t = isSolary && root.solary ? { ...root, ...root.solary } : root
@@ -197,7 +199,7 @@ function Shot({ cat, c, index, base }: { cat: TutorialCategory; c: any; index: n
   return (
     <figure className={styles.shot}>
       <img
-        src={`${base}/${shot.key}.png`}
+        src={`${base}/${shot.key}.webp`}
         alt={caption ?? ''}
         loading="lazy"
         onError={(e) => {

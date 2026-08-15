@@ -23,7 +23,7 @@ const FALLBACK_KEYS = [
 let failed = 0
 
 for (const key of Object.keys(SOLARY_LOCAL)) {
-  const urlPath = solaryImg(key, 800) // e.g. /templates/lovebirds/demo/x.jpg
+  const urlPath = solaryImg(key, 800) // e.g. /templates/lovebirds/demo/x.webp
   const filePath = path.join(ROOT, 'public', urlPath)
   try {
     const { size } = statSync(filePath)

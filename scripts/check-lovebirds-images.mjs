@@ -11,7 +11,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 let failed = 0
 for (const key of Object.keys(LOVEBIRDS_PHOTOS)) {
-  const urlPath = lovebirdsImg(key, 800) // e.g. /templates/lovebirds/demo/x.jpg
+  const urlPath = lovebirdsImg(key, 800) // e.g. /templates/lovebirds/demo/x.webp
   const filePath = path.join(ROOT, 'public', urlPath)
   try {
     const { size } = statSync(filePath)

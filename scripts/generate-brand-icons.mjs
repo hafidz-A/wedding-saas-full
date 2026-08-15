@@ -8,7 +8,10 @@ import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs'
 const SRC = process.argv[2] ?? 'C:/Users/arifi/Downloads/Gemini_Generated_Image_huk37hhuk37hhuk3.png'
 mkdirSync('public/images/brand', { recursive: true })
 
-const MASTER = 'public/images/brand/fincards-logo.png'
+// Kept OUTSIDE public/ on purpose: this is a ~5.7 MB design master, and
+// anything under public/ is publicly fetchable over HTTP and billed as Vercel
+// egress. Only the derived, right-sized files below belong in the served tree.
+const MASTER = 'assets/brand/fincards-logo.png'
 copyFileSync(SRC, MASTER)
 
 await sharp(MASTER).resize({ width: 480 }).png().toFile('public/images/brand/fincards-logo-email.png')
