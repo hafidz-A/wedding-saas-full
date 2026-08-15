@@ -1,5 +1,58 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { upgradeLegacyDemoImageUrls } from '../legacy-demo-urls'
+
+const ENV = 'NEXT_PUBLIC_STATIC_ASSET_HOST'
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
+
+/**
+ * Stored configs name the bundled demo photos as a resolved, absolute-ish
+ * string. That means BOTH halves of the URL go stale independently: the
+ * extension (the .jpg -> .webp re-encode) and the host (public/ -> R2). A real
+ * invitation kept serving 21 images off Vercel after the R2 switch because only
+ * the extension was being repointed.
+ */
+describe('upgradeLegacyDemoImageUrls — host normalisation', () => {
+  it('repoints a stored local demo path at R2 when a host is configured', () => {
+    vi.stubEnv(ENV, 'https://media.fincards.land')
+    expect(upgradeLegacyDemoImageUrls({ a: '/templates/lovebirds/demo/coupleGate.webp' })).toEqual({
+      a: 'https://media.fincards.land/static/templates/lovebirds/demo/coupleGate.webp',
+    })
+  })
+
+  it('repoints a stale .jpg and the host in one pass', () => {
+    vi.stubEnv(ENV, 'https://media.fincards.land')
+    expect(upgradeLegacyDemoImageUrls({ a: '/templates/lovebirds/demo/storyHoliday.jpg' })).toEqual({
+      a: 'https://media.fincards.land/static/templates/lovebirds/demo/storyHoliday.webp',
+    })
+  })
+
+  it('brings stored R2 URLs BACK to local paths when the host is unset (clean rollback)', () => {
+    vi.stubEnv(ENV, '')
+    expect(
+      upgradeLegacyDemoImageUrls({
+        a: 'https://media.fincards.land/static/templates/lovebirds/demo/coupleGate.webp',
+      }),
+    ).toEqual({ a: '/templates/lovebirds/demo/coupleGate.webp' })
+  })
+
+  it('follows a CHANGED host rather than pinning the old one', () => {
+    vi.stubEnv(ENV, 'https://cdn2.example.com')
+    expect(
+      upgradeLegacyDemoImageUrls({
+        a: 'https://media.fincards.land/static/templates/lovebirds/demo/coupleGate.webp',
+      }),
+    ).toEqual({ a: 'https://cdn2.example.com/static/templates/lovebirds/demo/coupleGate.webp' })
+  })
+
+  it('still never touches a customer’s own uploaded photo', () => {
+    vi.stubEnv(ENV, 'https://media.fincards.land')
+    const url = 'https://media.fincards.land/abc-123/1785638875393-hutan-sungai.png.webp'
+    expect(upgradeLegacyDemoImageUrls({ a: url })).toEqual({ a: url })
+  })
+})
 
 /**
  * The bundled demo photos moved from .jpg to .webp on 2026-08-15 and the .jpg
@@ -33,7 +86,8 @@ describe('upgradeLegacyDemoImageUrls', () => {
     expect(out.sections[0].props.photos[0].src).toBe('/templates/lovebirds/demo/galleryRings.webp')
   })
 
-  it('also handles the absolute CDN form', () => {
+  it('also handles the absolute CDN form, keeping the host when it is the configured one', () => {
+    vi.stubEnv(ENV, 'https://media.fincards.land')
     const cfg = { a: 'https://media.fincards.land/static/templates/lovebirds/demo/coupleGate.jpg' }
     expect(upgradeLegacyDemoImageUrls(cfg)).toEqual({
       a: 'https://media.fincards.land/static/templates/lovebirds/demo/coupleGate.webp',

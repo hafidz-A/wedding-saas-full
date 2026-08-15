@@ -1,44 +1,51 @@
+import { staticAsset } from '@/lib/assets/staticAsset.js'
+
 /**
- * Rewrites bundled demo photo URLs that still name the retired `.jpg` files.
+ * Repoints bundled demo photo URLs that a stored config froze in place.
  *
- * The demo set under public/templates/lovebirds/demo/ was re-encoded to .webp
- * on 2026-08-15 and the .jpg originals were deleted. Live code resolves those
- * paths through `demoImages.js`, so it followed the rename automatically — but
- * a stored `config` does not: onboarding bakes the resolved path into the JSON
- * at seed time, so every invitation created before that date carries dead
- * `.jpg` URLs in the database. Shipping the rename without this produced 46
- * image 404s on a live invitation.
+ * Onboarding bakes the RESOLVED path of each demo photo into the config JSON,
+ * so unlike live code — which goes through `demoImages.js` + `staticAsset()` on
+ * every render — a stored row keeps whatever was true the day it was seeded.
+ * Two independent things go stale that way:
  *
- * Applied at READ time (render + editor load), never written back, matching how
- * `migrateLovebirdsConfig` and `fillEmptyImages` already keep old configs
- * renderable. That means it also covers rows nobody has re-saved, and rows
- * restored from an old backup.
+ *   • the extension — the demo set was re-encoded .jpg → .webp on 2026-08-15
+ *     and the originals deleted (this shipped first and 404'd 46 images on a
+ *     live invitation);
+ *   • the host — those files then moved to R2, and a config still naming
+ *     `/templates/...` keeps pulling them from Vercel, which is the metered
+ *     host this whole change exists to get off (21 images per guest view).
+ *
+ * Both are fixed here, in one pass, by re-deriving the URL from the CURRENT
+ * `staticAsset()` — so this also follows a future host change, and rewrites
+ * stored R2 URLs back to local paths if the host is ever unset. Applied at READ
+ * time (render + editor load), never written back, matching how
+ * `migrateLovebirdsConfig` and `fillEmptyImages` keep old configs renderable.
  *
  * Scope is deliberately narrow: only the bundled demo folder, which we own and
- * renamed. A customer's uploaded `.jpg` is untouched — those live under an
- * invitation-id prefix and were never part of the re-encode.
+ * moved. A customer's uploaded file lives under an invitation-id prefix and is
+ * never matched — a test pins that.
  */
 
-// `/templates/lovebirds/demo/<name>.jpg` — with or without a host in front, and
-// with or without the `static/` prefix the R2 copy carries.
-const LEGACY_DEMO_JPG = /(\/templates\/lovebirds\/demo\/[^"'\s?]+)\.jpe?g\b/gi
+/** The bundled demo folder, in every shape a stored config may name it:
+ *  bare path, with the R2 `static/` prefix, and with or without a host. */
+const DEMO_URL =
+  /(?:https?:\/\/[^/\s"']+)?(?:\/static)?\/templates\/lovebirds\/demo\/([^"'\s?/]+?)\.(?:jpe?g|webp)\b/gi
 
-/** True when the string names a bundled demo photo with the retired extension. */
-export function isLegacyDemoUrl(value: string): boolean {
-  LEGACY_DEMO_JPG.lastIndex = 0
-  return LEGACY_DEMO_JPG.test(value)
+/** Rewrites one string's demo URLs to the current host + extension. */
+export function repointDemoUrls(value: string): string {
+  return value.replace(DEMO_URL, (_match, name: string) =>
+    staticAsset(`/templates/lovebirds/demo/${name}.webp`),
+  )
 }
 
 /**
- * Deep-copies `config`, rewriting every legacy demo `.jpg` URL to `.webp`.
- * Returns the input unchanged for null/undefined/primitives so callers can pipe
- * it unconditionally.
+ * Deep-copies `config`, repointing every bundled demo photo URL. Returns the
+ * input unchanged for null/undefined/primitives so callers can pipe it
+ * unconditionally.
  */
 export function upgradeLegacyDemoImageUrls<T>(config: T): T {
   if (config === null || config === undefined) return config
-  if (typeof config === 'string') {
-    return config.replace(LEGACY_DEMO_JPG, '$1.webp') as unknown as T
-  }
+  if (typeof config === 'string') return repointDemoUrls(config) as unknown as T
   if (Array.isArray(config)) {
     return config.map((v) => upgradeLegacyDemoImageUrls(v)) as unknown as T
   }
