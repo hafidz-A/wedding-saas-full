@@ -1,0 +1,298 @@
+/* ============================================================================
+   Songket — global layer. Everything is scoped under `.songket-root` or
+   `body.songket-route` so nothing leaks to other templates (tutorial-multi §12).
+   Palette values are tokens; sections only ever read var(--sk-*).
+   ============================================================================ */
+
+[data-sk-palette='merahLak'] {
+  --sk-bg: #5e1020;
+  --sk-bg-deep: #3f0a15;
+  --sk-surface: #731a2b;
+  --sk-line: rgba(212, 175, 55, 0.35);
+  --sk-gold: #d4af37;
+  --sk-gold-soft: #ecd27e;
+  --sk-text: #f6ebd3;
+  --sk-muted: #e6d3b1;
+  --sk-accent: #1a1210;
+  --sk-on-gold: #2a1408;
+  --sk-door: #4a0c17;
+}
+
+[data-sk-palette='hitamLak'] {
+  --sk-bg: #17100e;
+  --sk-bg-deep: #0d0908;
+  --sk-surface: #251a17;
+  --sk-line: rgba(212, 175, 55, 0.3);
+  --sk-gold: #d4af37;
+  --sk-gold-soft: #ecd27e;
+  --sk-text: #f3e7cf;
+  --sk-muted: #d3c2a3;
+  --sk-accent: #8b1e2d;
+  --sk-on-gold: #1a1210;
+  --sk-door: #2a0e10;
+}
+
+[data-sk-palette='gadingSongket'] {
+  --sk-bg: #f4e9d2;
+  --sk-bg-deep: #e8d7b5;
+  --sk-surface: #fbf4e4;
+  --sk-line: rgba(122, 22, 38, 0.25);
+  /* Darker than the dark palettes' gold: on cream it carries small text (≥ 4.5:1). */
+  --sk-gold: #6e5310;
+  --sk-gold-soft: #7a1626;
+  --sk-text: #2a1a12;
+  --sk-muted: #5c4433;
+  --sk-accent: #7a1626;
+  --sk-on-gold: #fbf4e4;
+  --sk-door: #6e1423;
+}
+
+[data-sk-palette='hijauLimas'] {
+  --sk-bg: #1f3b2d;
+  --sk-bg-deep: #142a1f;
+  --sk-surface: #284a39;
+  --sk-line: rgba(212, 175, 55, 0.32);
+  --sk-gold: #d4af37;
+  --sk-gold-soft: #ecd27e;
+  --sk-text: #f3ead3;
+  --sk-muted: #d6cbad;
+  --sk-accent: #6e1423;
+  --sk-on-gold: #1a1210;
+  --sk-door: #4a0c17;
+}
+
+body.songket-route {
+  background: var(--sk-bg) !important;
+  color: var(--sk-text) !important;
+}
+
+.songket-root {
+  --sk-font-heading: var(--font-cinzel), 'Cinzel', Georgia, serif;
+  --sk-font-body: var(--font-biryani), 'Biryani', system-ui, sans-serif;
+  --sk-font-script: var(--font-greatvibes), 'Great Vibes', cursive;
+  position: relative;
+  min-height: 100vh;
+  background: var(--sk-bg);
+  color: var(--sk-text);
+  font-family: var(--sk-font-body);
+  overflow-x: clip;
+}
+
+/* :where() keeps these element defaults at zero class specificity, so any
+   section module class (.names, .personName, …) overrides them without !important. */
+:where(.songket-root) h1,
+:where(.songket-root) h2,
+:where(.songket-root) h3,
+:where(.songket-root) h4 {
+  color: var(--sk-text);
+  font-family: var(--sk-font-heading);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+:where(.songket-root) p {
+  margin: 0;
+}
+
+/* ── Shared section primitives ───────────────────────────────────────────── */
+
+.songket-root .sk-section {
+  position: relative;
+  padding: clamp(72px, 12vw, 128px) 20px;
+  isolation: isolate;
+}
+
+.songket-root .sk-section--alt {
+  background: var(--sk-bg-deep);
+}
+
+/* Songket texture: SVG tile used as a mask so it takes the palette's gold. */
+.songket-root .sk-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--sk-gold);
+  opacity: 0.07;
+  -webkit-mask: url('/songket/patterns/tabur.svg') repeat 0 0 / 56px 56px;
+  mask: url('/songket/patterns/tabur.svg') repeat 0 0 / 56px 56px;
+  pointer-events: none;
+}
+
+.songket-root .sk-texture--lepus::before {
+  -webkit-mask: url('/songket/patterns/lepus.svg') repeat 0 0 / 28px 28px;
+  mask: url('/songket/patterns/lepus.svg') repeat 0 0 / 28px 28px;
+  opacity: 0.09;
+}
+
+/* Pucuk rebung (tumpal) border — top of a section; add --bottom to flip. */
+.songket-root .sk-rebung {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26px;
+  background-color: var(--sk-gold);
+  opacity: 0.75;
+  -webkit-mask: url('/songket/patterns/pucuk-rebung.svg') repeat-x 0 0 / 24px 26px;
+  mask: url('/songket/patterns/pucuk-rebung.svg') repeat-x 0 0 / 24px 26px;
+  transform: scaleY(-1);
+  pointer-events: none;
+}
+
+.songket-root .sk-rebung--bottom {
+  top: auto;
+  bottom: 0;
+  transform: none;
+}
+
+.songket-root .sk-inner {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.songket-root .sk-head {
+  text-align: center;
+  margin-bottom: clamp(32px, 6vw, 56px);
+}
+
+.songket-root .sk-eyebrow {
+  font-family: var(--sk-font-body);
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--sk-gold-soft);
+  margin-bottom: 12px;
+}
+
+.songket-root .sk-title {
+  font-size: clamp(28px, 5.4vw, 44px);
+  line-height: 1.15;
+}
+
+.songket-root .sk-subtitle {
+  margin-top: 12px;
+  color: var(--sk-muted);
+  line-height: 1.7;
+}
+
+.songket-root .sk-divider {
+  display: block;
+  width: min(280px, 70%);
+  height: auto;
+  margin: 18px auto 0;
+  color: var(--sk-gold);
+}
+
+/* Lacquer card with gold hairline + carved corners. */
+.songket-root .sk-card {
+  position: relative;
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-line);
+  border-radius: var(--radius-sm);
+  padding: clamp(24px, 4vw, 36px);
+}
+
+.songket-root .sk-corner {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  color: var(--sk-gold);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.songket-root .sk-corner--tl { top: 6px; left: 6px; }
+.songket-root .sk-corner--tr { top: 6px; right: 6px; transform: scaleX(-1); }
+.songket-root .sk-corner--bl { bottom: 6px; left: 6px; transform: scaleY(-1); }
+.songket-root .sk-corner--br { bottom: 6px; right: 6px; transform: scale(-1, -1); }
+
+.songket-root .sk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--ctl-h);
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--sk-gold);
+  background: var(--sk-gold);
+  color: var(--sk-on-gold);
+  font-family: var(--sk-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 200ms ease, background 200ms ease, color 200ms ease;
+}
+
+.songket-root .sk-btn:hover { transform: translateY(-1px); }
+.songket-root .sk-btn:focus-visible { outline: 2px solid var(--sk-text); outline-offset: 3px; }
+.songket-root .sk-btn:disabled { opacity: 0.6; cursor: progress; }
+
+.songket-root .sk-btn--ghost {
+  background: transparent;
+  color: var(--sk-gold-soft);
+}
+
+.songket-root .sk-btn--sm {
+  height: var(--ctl-h-sm);
+  padding: 0 16px;
+  font-size: 11px;
+}
+
+.songket-root .sk-input {
+  width: 100%;
+  min-height: var(--ctl-h);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--sk-line);
+  background: var(--sk-bg);
+  color: var(--sk-text);
+  font: inherit;
+}
+
+.songket-root .sk-input::placeholder { color: var(--sk-muted); opacity: 0.7; }
+.songket-root .sk-input:focus { outline: 2px solid var(--sk-gold); outline-offset: 1px; }
+
+.songket-root .sk-label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sk-muted);
+  margin-bottom: 6px;
+}
+
+.songket-root .sk-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--sk-gold-soft);
+}
+
+/* Reveal-on-scroll */
+.songket-root .sk-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 900ms ease, transform 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.songket-root .sk-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .songket-root .sk-reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Gate open → scroll unlocks. Set by the hero while the lawang is closed. */
+html.sk-locked,
+html.sk-locked body {
+  overflow: hidden !important;
+}

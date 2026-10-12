@@ -16,6 +16,9 @@ const LovebirdsShell = dynamic(() => import('@/all-templates/lovebirds/Shell.jsx
 const SolaryShell = dynamic(() => import('@/all-templates/solary/Shell.jsx'), {
   ssr: false,
 })
+const SongketShell = dynamic(() => import('@/all-templates/songket/Shell.jsx'), {
+  ssr: true,
+})
 
 export default function InvitationView({
   config, slug, templateId, isDemo = false, embed = false, embedSwitcher = false,
@@ -30,6 +33,9 @@ export default function InvitationView({
 }) {
   if (templateId === 'solary') {
     return <SolaryShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
+  }
+  if (templateId === 'songket') {
+    return <SongketShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
   }
   return <LovebirdsShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
 }

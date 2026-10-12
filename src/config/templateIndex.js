@@ -10,10 +10,15 @@
    ============================================================================ */
 import { defaultConfig as lovebirdsConfig } from '../all-templates/lovebirds/defaultConfig.js'
 import { defaultConfig as solaryConfig } from '../all-templates/solary/defaultConfig.js'
+import { defaultConfig as songketConfig } from '../all-templates/songket/defaultConfig.js'
 
 export const templates = {
   lovebirds: { label: 'Lovebirds', config: lovebirdsConfig },
   solary: { label: 'Solary', config: solaryConfig },
+  // UJI COBA (adat Palembang): renders at /songket/demo-songket, but is NOT in
+  // templateCatalog.js / the DB `templates` table / template_plans — so it is
+  // neither listed nor purchasable until it is released.
+  songket: { label: 'Songket', config: songketConfig },
 }
 
 export const TEMPLATE_IDS = Object.keys(templates)

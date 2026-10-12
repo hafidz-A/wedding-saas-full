@@ -84,9 +84,29 @@ const lovebirdsPolicy: TemplatePolicy = {
   confirmDisableTypes: ['rsvp', 'weddingGift'],
 }
 
+// Songket (uji coba): the Lovebirds model on a fixed set — one gallery style
+// only (Songket has no spring-coil), hero/footer anchored by type.
+const SONGKET_POOL = [
+  'quote', 'brideGroom', 'ourStory', 'eventDetails', 'schedule',
+  'galleryMasonry', 'weddingGift', 'rsvp',
+]
+
+const songketPolicy: TemplatePolicy = {
+  fixedSections: false,
+  locks: {},
+  swappablePool: SONGKET_POOL,
+  maxSections: 10,
+  anchorFirstType: 'hero',
+  anchorLastType: 'footer',
+  lockedTypes: ['hero', 'footer'],
+  lockSectionCount: true,
+  confirmDisableTypes: ['rsvp', 'weddingGift'],
+}
+
 const policies: Record<string, TemplatePolicy> = {
   solary: solaryPolicy,
   lovebirds: lovebirdsPolicy,
+  songket: songketPolicy,
 }
 
 export function getTemplatePolicy(template: string): TemplatePolicy | null {

@@ -34,7 +34,9 @@ describe('middleware config.matcher', () => {
     '/admin/invitations/new',
     '/lovebirds/adi-rani',
     '/solary/demo-solary',
+    '/songket/demo-songket',
     '/lovebirds/adi-rani/dashboard',
+    '/songket/demo-songket/dashboard',
     '/lovebirds/adi-rani/dashboard/guests',
   ])('runs middleware on %s', (p) => {
     expect(matches(p)).toBe(true)

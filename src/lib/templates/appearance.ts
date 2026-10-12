@@ -24,6 +24,12 @@ export const TEMPLATE_ORNAMENTS: Record<string, readonly OrnamentOption[]> = {
   ],
   // three.js backdrop draws its own scene — no ornament layer to swap.
   solary: [],
+  // Keys must match songket/config/theme.js ORNAMENTS.
+  songket: [
+    { key: 'melati', label: 'Hujan melati' },
+    { key: 'kilauEmas', label: 'Kilau benang emas' },
+    { key: 'kunang', label: 'Kunang-kunang Musi' },
+  ],
 }
 
 const ALL_ORNAMENTS: readonly OrnamentOption[] = Object.values(TEMPLATE_ORNAMENTS).flat()

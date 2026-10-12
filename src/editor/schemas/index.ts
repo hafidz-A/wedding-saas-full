@@ -17,6 +17,7 @@ import { faqSchema } from './faq'
 import { guestbookSchema } from './guestbook'
 import { footerSchema } from './footer'
 import { quoteSchema } from './quote'
+import { SONGKET_SECTION_TYPES } from '@/all-templates/songket/config/sectionTypes'
 
 export const schemaRegistry: Record<string, SectionSchema> = {
   hero:              heroSchema,
@@ -48,9 +49,32 @@ const lovebirdsSchemaRegistry: Record<string, SectionSchema> = Object.fromEntrie
   Object.entries(schemaRegistry).filter(([type]) => !LOVEBIRDS_EXCLUDED.has(type)),
 )
 
+// Songket (uji coba) renders the Lovebirds section types with new visuals, so it
+// reuses the shared schemas — narrowed to the types it can render — plus one
+// Songket-only field: Aesan Gede silhouette vs an uploaded photo in Mempelai.
+const songketBrideGroomSchema: SectionSchema = {
+  ...brideGroomSchema,
+  fields: [
+    {
+      key: 'portraitStyle',
+      label: { id: 'Tampilan potret', en: 'Portrait style' },
+      type: 'select',
+      options: [
+        { value: 'siluet', label: { id: 'Siluet Aesan Gede', en: 'Aesan Gede silhouette' } },
+        { value: 'foto', label: { id: 'Foto unggahan', en: 'Uploaded photo' } },
+      ],
+    },
+    ...brideGroomSchema.fields,
+  ],
+}
+const songketSchemaRegistry: Record<string, SectionSchema> = Object.fromEntries(
+  SONGKET_SECTION_TYPES.map((type) => [type, type === 'brideGroom' ? songketBrideGroomSchema : schemaRegistry[type]]),
+)
+
 const registriesByTemplate: Record<string, Record<string, SectionSchema>> = {
   lovebirds: lovebirdsSchemaRegistry,
   solary: solarySchemaRegistry,
+  songket: songketSchemaRegistry,
 }
 
 export function getSchemaRegistry(template: string): Record<string, SectionSchema> {

@@ -1,6 +1,7 @@
 /** Allowed theme/palette keys per template. Used by the theme API to validate
  *  owner theme saves. Keep in sync with each template's theme definitions
- *  (solary: config/themeTokens.js PALETTES; lovebirds: config/themes.js). */
+ *  (solary: config/themeTokens.js PALETTES; lovebirds: config/themes.js;
+ *  songket: config/theme.js PALETTES). */
 export const TEMPLATE_PALETTES: Record<string, readonly string[]> = {
   solary: [
     'cosmicDark', 'nebulaDark', 'roseDark', 'emeraldDark',
@@ -11,6 +12,7 @@ export const TEMPLATE_PALETTES: Record<string, readonly string[]> = {
     'sunsetClay', 'darkLuxury', 'midnightStardust',
     'royalPlum', 'forestMist', 'terracottaOasis',
   ],
+  songket: ['merahLak', 'hitamLak', 'gadingSongket', 'hijauLimas'],
 }
 
 const UNION = new Set(Object.values(TEMPLATE_PALETTES).flat())
