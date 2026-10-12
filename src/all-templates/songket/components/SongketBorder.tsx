@@ -103,7 +103,7 @@ function drawPath(d: string, key: string, strokeWidth = 0.82) {
 function drawCurl(curl: Curl, key: string) {
   const sy = curl.flip ? -1 : 1
   return (
-    <g key={key} transform={`translate(60 ${curl.y.toFixed(1)}) scale(${curl.scale.toFixed(2)} ${(sy * curl.scale).toFixed(2)})`}>
+    <g key={key} transform={`translate(68 ${curl.y.toFixed(1)}) scale(${curl.scale.toFixed(2)} ${(sy * curl.scale).toFixed(2)})`}>
       {drawPath('M0 0 C20 -10 40 -4 44 14 C47 28 34 34 28 26 C23 19 30 13 35 18', `${key}-c`, 0.9)}
       {drawPath('M12 -2 C10 -16 24 -24 32 -20 C28 -10 20 -4 12 -2', `${key}-l`, 0.8)}
       {drawPath('M20 6 C26 18 22 30 14 34', `${key}-t`, 0.7)}
@@ -132,18 +132,19 @@ function SongketSvg({ id, curls, sideStyle }: { id: string; curls: Curl[]; sideS
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {drawPath('M10 0 V900', 'rail-a', 1.3)}
-      {drawPath('M18 0 V900', 'rail-b', 0.7)}
+      {/* x 0–26 is left to the static woven selvedge (.sk-anyaman-side) */}
+      {drawPath('M28 0 V900', 'rail-a', 1.3)}
+      {drawPath('M34 0 V900', 'rail-b', 0.7)}
       {rows.map((y) => (
         <g key={`t-${y}`}>
-          {drawPath(`M18 ${y} L46 ${y + 20} L18 ${y + 40}`, `t-${y}-o`, 0.9)}
-          {drawPath(`M18 ${y + 10} L33 ${y + 20} L18 ${y + 30}`, `t-${y}-i`, 0.6)}
+          {drawPath(`M34 ${y} L56 ${y + 20} L34 ${y + 40}`, `t-${y}-o`, 0.9)}
+          {drawPath(`M34 ${y + 10} L46 ${y + 20} L34 ${y + 30}`, `t-${y}-i`, 0.6)}
         </g>
       ))}
       {knots.map((y, i) => (
         <g key={`k-${y}`}>
-          {drawPath(`M60 ${y - 8} L66 ${y} L60 ${y + 8} L54 ${y} Z`, `k-${y}-d`, 0.9)}
-          {i < knots.length - 1 && drawPath(`M60 ${y + 8} V${y + 52}`, `k-${y}-l`, 0.5)}
+          {drawPath(`M68 ${y - 8} L74 ${y} L68 ${y + 8} L62 ${y} Z`, `k-${y}-d`, 0.9)}
+          {i < knots.length - 1 && drawPath(`M68 ${y + 8} V${y + 52}`, `k-${y}-l`, 0.5)}
         </g>
       ))}
       {curls.map((c, i) => drawCurl(c, `curl-${i}`))}
@@ -573,6 +574,10 @@ export const SongketBorder = React.memo(() => {
 
   return (
     <>
+      {/* Woven selvedge (anyaman) down both outer edges — static, under the
+          animated rails/curls. Mask tile from scripts/gen-songket-motifs.mjs. */}
+      <div className="sk-anyaman sk-anyaman-side sk-anyaman-side--l" aria-hidden="true" />
+      <div className="sk-anyaman sk-anyaman-side sk-anyaman-side--r" aria-hidden="true" />
       {layers.map((layer, index) => {
         const isTopLayer = index === layers.length - 1 && !layer.leaving
 

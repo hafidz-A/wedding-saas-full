@@ -41,6 +41,7 @@ function flatLabel(text) {
 
 const DEFAULT_LABELS = {
   hero: 'Awal',
+  quote: 'Ayat',
   countdown: 'Hitung Mundur',
   ourStory: 'Kisah',
   eventDetails: 'Acara',

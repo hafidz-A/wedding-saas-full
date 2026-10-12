@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import { randomBytes } from 'node:crypto'
+import { readFileSync, existsSync } from 'node:fs'
 import { defaultConfig } from '../defaultConfig.js'
 import { sectionRegistry } from '../registry.js'
 import { sectionRegistry as lovebirdsRegistry } from '../../lovebirds/registry.js'
@@ -114,6 +115,20 @@ describe('songket palettes meet WCAG AA for text', () => {
     ]
     for (const [name, fg, bg] of pairs) {
       expect(ratio(fg, bg), `${key} ${name}`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+})
+
+describe('songket motif tiles', () => {
+  // Static assets carry no content hash (CLAUDE.md gotcha 11b), so a changed
+  // tile gets a new -vN name; this catches a CSS reference left on a name that
+  // no longer exists (a silent blank motif, not a 404 anyone would notice).
+  it('every motif tile the theme references exists in public/', () => {
+    const css = readFileSync(new URL('../styles/theme.css', import.meta.url), 'utf8')
+    const refs = [...new Set([...css.matchAll(/url\('(\/songket\/motifs\/[^']+)'\)/g)].map((m) => m[1]))]
+    expect(refs.length).toBeGreaterThanOrEqual(4)
+    for (const ref of refs) {
+      expect(existsSync(new URL(`../../../../public${ref}`, import.meta.url)), ref).toBe(true)
     }
   })
 })

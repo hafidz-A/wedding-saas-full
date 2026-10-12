@@ -26,6 +26,9 @@ export default function GlobalBackground() {
 
   return (
     <div className={styles.canvas} aria-hidden="true">
+      {/* ── Lepus cloth: the songket body motif woven across the whole page ── */}
+      <div className={`${styles.fabric} sk-fabric`} />
+
       {/* ── Ambient colour washes ── */}
       <div className={styles.washes}>
         <div className={`${styles.wash} ${styles.wash1}`} />
@@ -96,11 +99,11 @@ const PETAL_LAYOUT = [
   { shape: 'kembang', position: { top: '6%',   left: '2%'  }, rotate: -18,  delay: 0,    opacity: 0.6  },
   { shape: 'melati',  position: { top: '4%',   right: '4%' }, rotate: 22,   delay: 1.2,  opacity: 0.55 },
   { shape: 'sirih',   position: { top: '22%',  right: '1%' }, rotate: -8,   delay: 2.4,  opacity: 0.4  },
-  { shape: 'bintang', position: { top: '35%',  left: '1%'  }, rotate: 14,   delay: 0.6,  opacity: 0.45 },
-  { shape: 'tanjung', position: { top: '50%',  right: '2%' }, rotate: -30,  delay: 3.0,  opacity: 0.45 },
+  { shape: 'tabur',   position: { top: '35%',  left: '1%'  }, rotate: 14,   delay: 0.6,  opacity: 0.45 },
+  { shape: 'roset',   position: { top: '50%',  right: '2%' }, rotate: -30,  delay: 3.0,  opacity: 0.45 },
   { shape: 'melati',  position: { top: '55%',  left: '3%'  }, rotate: 26,   delay: 1.8,  opacity: 0.5  },
   { shape: 'sirih',   position: { top: '70%',  left: '1%'  }, rotate: -12,  delay: 4.2,  opacity: 0.4  },
   { shape: 'kembang', position: { top: '68%',  right: '3%' }, rotate: 18,   delay: 2.0,  opacity: 0.45 },
-  { shape: 'bintang', position: { top: '85%',  left: '4%'  }, rotate: -24,  delay: 3.6,  opacity: 0.5  },
+  { shape: 'rebung',  position: { top: '85%',  left: '4%'  }, rotate: -24,  delay: 3.6,  opacity: 0.5  },
   { shape: 'melati',  position: { top: '88%',  right: '2%' }, rotate: 10,   delay: 0.8,  opacity: 0.45 },
 ]

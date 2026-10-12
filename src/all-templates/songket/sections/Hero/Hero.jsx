@@ -293,6 +293,12 @@ export default function Hero(props) {
       <div className={styles.stage}>
         <div className={styles.revealBg} ref={revealBgRef} aria-hidden="true" />
 
+        {/* Songket cloth behind the gate, framed top and bottom by the kepala
+            kain (pucuk rebung hanging from a woven edge), as on the cloth itself. */}
+        <div className={`${styles.gateFabric} sk-fabric`} aria-hidden="true" />
+        <div className={`${styles.kainTop} sk-kepala-kain`} aria-hidden="true" />
+        <div className={`${styles.kainBottom} sk-kepala-kain sk-kepala-kain--up`} aria-hidden="true" />
+
         {/* Rumah Limas standing quietly behind the photo blast. */}
         <RumahLimas className={styles.limas} />
 

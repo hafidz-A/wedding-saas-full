@@ -39,11 +39,11 @@ body.sk-gallery-active .songket-ornament-root {
   100% { transform: translate3d(-14px, 112vh, 0) rotate(360deg); }
 }
 
-/* Kilau benang emas — songket stars glint in place. */
+/* Kilau benang emas — woven rosettes glint in place. */
 .sk-orn-twinkle {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 26px;
+  height: 26px;
   color: var(--accent, #d4af37);
   opacity: 0;
   animation-name: sk-orn-twinkle;

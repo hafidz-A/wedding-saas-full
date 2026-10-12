@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import './Ornaments.css'
 import { useTheme } from './ThemeProvider.jsx'
+import { pixelRosette } from './adat/motifGeometry.mjs'
 
 /* Adat ornament motifs (64×64 viewBox, inner SVG markup). Exported so other
    layers (SceneFrame's side columns) reuse the couple's chosen motif — the same
@@ -13,10 +14,9 @@ export const SHAPES = {
   melati: [0, 72, 144, 216, 288]
     .map((r) => `<ellipse cx="32" cy="19" rx="8" ry="13" transform="rotate(${r} 32 32)" fill="currentColor" />`)
     .join('') + '<circle cx="32" cy="32" r="5.5" fill="var(--accent-soft, #ECD27E)" />',
-  // Kilau benang emas: an eight-point songket star.
-  kilauEmas:
-    '<path d="M32 4 L37 24 L58 18 L42 32 L58 46 L37 40 L32 60 L27 40 L6 46 L22 32 L6 18 L27 24 Z" fill="currentColor" />' +
-    '<circle cx="32" cy="32" r="4" fill="var(--accent-soft, #ECD27E)" />',
+  // Kilau benang emas: the woven eight-point rosette of the cloth (benang emas
+  // on a weave grid), glinting in place.
+  kilauEmas: pixelRosette({ size: 64, n: 17 }),
   // Kunang-kunang: a small glowing body with two soft wings.
   kunang:
     '<ellipse cx="22" cy="26" rx="10" ry="6" transform="rotate(-25 22 26)" fill="currentColor" opacity="0.45" />' +

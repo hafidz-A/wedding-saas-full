@@ -98,6 +98,9 @@ export default function Rsvp(props) {
       className={`${styles.section} ${isVisible ? styles.visible : ''}`}
       aria-label="RSVP"
     >
+      {/* Songket: this section is the gold cloth, so its lepus motif is woven
+          in the contrast colour — gold kain with marun thread. */}
+      <div className={`${styles.cloth} sk-fabric`} aria-hidden="true" />
       <SceneFrame />
       <div className={styles.inner}>
         <header className={styles.header}>

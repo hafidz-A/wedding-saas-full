@@ -60,7 +60,7 @@ export const defaultConfig = {
           demoImg('galleryFamilyDinner', 500),
         ],
         // Adat petals (components/adat/AdatPetals.jsx).
-        petals: ['kembang', 'melati', 'bintang', 'sirih', 'tanjung', 'melati', 'kembang', 'bintang'],
+        petals: ['tabur', 'melati', 'roset', 'sirih', 'tabur', 'melati', 'kembang', 'roset'],
       },
     },
 

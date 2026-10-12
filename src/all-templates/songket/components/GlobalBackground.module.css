@@ -292,3 +292,9 @@
     opacity: 0.5;
   }
 }
+
+/* Songket: lepus cloth texture (mask + gold thread, see styles/theme.css). */
+.fabric {
+  position: absolute;
+  inset: 0;
+}

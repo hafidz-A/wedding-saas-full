@@ -18,6 +18,8 @@ import { injectCoupleProps } from '@/lib/meta/couple'
  *      every section inherits it (legacy per-section `theme:` fields are inert).
  *   4. Suspends until the lazy section component is loaded
  */
+const SEAM_STYLE = { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 3 }
+
 export default function SectionRenderer({ config, slug, registry = songketRegistry }) {
   const sections = useMemo(() => {
     return (config?.sections || []).filter((s) => s && s.enabled !== false)
@@ -35,7 +37,11 @@ export default function SectionRenderer({ config, slug, registry = songketRegist
         }
 
         const backgroundCss = resolveBackground(section.background)
-        const wrapStyle = backgroundCss ? { background: backgroundCss } : undefined
+        const wrapStyle = { position: 'relative', ...(backgroundCss ? { background: backgroundCss } : null) }
+        // Songket: every section after the hero opens with a kepala kain border
+        // hanging from its top edge — the seam between two "cloths". Skipped on
+        // the hero (it frames itself) and on the pinned Spring Coil gallery.
+        const seam = section.type !== 'hero' && section.type !== 'gallerySpringCoil'
 
         return (
           <div
@@ -56,6 +62,7 @@ export default function SectionRenderer({ config, slug, registry = songketRegist
                 layout={section.layout}
               />
             </Suspense>
+            {seam && <div className="sk-kepala-kain" style={SEAM_STYLE} aria-hidden="true" />}
           </div>
         )
       })}

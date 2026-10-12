@@ -11,11 +11,15 @@
      bintang  → eight-point songket star
      sirih    → betel leaf (daun sirih, the tepak sirih offering)
      tanjung  → bunga tanjung, a small star-flower of the ukiran repertoire
+     tabur    → bunga tabur, the eight-petal flower of the lepus cloth
+     roset    → woven eight-point rosette (benang emas on the weave grid)
+     rebung   → a small pucuk rebung (tumpal) bud
 
    Unknown names (e.g. Lovebirds petal names in an old config) fall back to
    `kembang`, so a stale `petals` array never renders blank.
    ============================================================================ */
 import React from 'react'
+import { bungaTabur, pixelRosette, pucukRebung } from './motifGeometry.mjs'
 
 const GOLD = 'var(--accent, #D4AF37)'
 const SOFT = 'var(--accent-soft, #ECD27E)'
@@ -61,6 +65,15 @@ const MOTIFS = {
     </g>
   ),
 }
+
+// Songket-cloth motifs from the shared geometry (also used by the mask tiles).
+// Painted with --accent via `color`.
+const raw = (markup, transform) => (
+  <g transform={transform} style={{ color: GOLD }} dangerouslySetInnerHTML={{ __html: markup }} />
+)
+MOTIFS.tabur = raw(bungaTabur({ r: 42 }), 'translate(50 50)')
+MOTIFS.roset = raw(pixelRosette({ size: 88, n: 17 }), 'translate(6 6)')
+MOTIFS.rebung = raw(pucukRebung({ height: 86 }), 'translate(50 94)')
 
 export const ADAT_PETAL_NAMES = Object.keys(MOTIFS)
 

@@ -205,3 +205,12 @@
 @media (prefers-reduced-motion: reduce) {
   .perahu { animation: none; left: 62%; }
 }
+
+/* Songket: inverse cloth — lepus motif in the contrast colour over the gold. */
+.cloth {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  --thread: var(--button-fg, #2A1408);
+  opacity: 0.1 !important;
+}

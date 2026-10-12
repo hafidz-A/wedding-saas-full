@@ -599,3 +599,23 @@
   pointer-events: none;
   --sk-bg: var(--band, #3F0A15);
 }
+
+/* Songket: cloth + kepala kain frame on the gate. */
+.gateFabric {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: calc(var(--fabric-opacity, 0.09) * 1.6) !important;
+}
+
+.kainTop,
+.kainBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  height: clamp(56px, 9vw, 92px) !important;
+}
+
+.kainTop { top: 0; }
+.kainBottom { bottom: 0; }

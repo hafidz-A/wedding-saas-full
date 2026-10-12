@@ -79,6 +79,8 @@ export default function Footer(props) {
       className={`${styles.section} ${isVisible ? styles.visible : ''}`}
       aria-label="Penutup"
     >
+      {/* Songket: gold cloth woven with the lepus motif in the contrast colour. */}
+      <div className={`${styles.cloth} sk-fabric`} aria-hidden="true" />
       <SceneFrame />
       <div className={styles.inner}>
         {couplePhotos.length > 0 && (

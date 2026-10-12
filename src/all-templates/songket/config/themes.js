@@ -9,6 +9,9 @@
  *                 be transparent (e.g. the verse band) — replaces Lovebirds'
  *                 per-theme hex rows in Quote.module.css.
  *   --glass-*     the "lak" cards: tinted glass with a gold hairline.
+ *   --thread      the gold-thread gradient every songket motif is painted with
+ *                 (motif tiles are CSS masks, see styles/theme.css).
+ *   --fabric-opacity  strength of the lepus cloth texture behind the page.
  *
  * Keys must match src/lib/config/palette-allowlist.ts (songket).
  * Text pairs are pinned ≥ 4.5:1 by __tests__/songket.test.ts.
@@ -16,6 +19,8 @@
 
 export const themes = {
   merahLak: {
+    '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
+    '--fabric-opacity': '0.09',
     '--bg': '#5E1020',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),' +
@@ -35,6 +40,8 @@ export const themes = {
   },
 
   hitamLak: {
+    '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
+    '--fabric-opacity': '0.09',
     '--bg': '#17100E',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.14), transparent 75%),' +
@@ -54,6 +61,8 @@ export const themes = {
   },
 
   gadingSongket: {
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.13',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -73,6 +82,8 @@ export const themes = {
   },
 
   hijauLimas: {
+    '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
+    '--fabric-opacity': '0.09',
     '--bg': '#1F3B2D',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.16), transparent 75%),' +
