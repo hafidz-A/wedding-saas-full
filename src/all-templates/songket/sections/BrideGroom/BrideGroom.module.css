@@ -1,0 +1,428 @@
+/* Bride & Groom — cinematic GSAP ScrollTrigger 3D editorial section. */
+
+.section {
+  position: relative;
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
+  min-height: 160vh;
+  padding: 0 var(--container-pad);
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.inner {
+  position: sticky;
+  top: 0;
+  /* svh = the *small* (stable) viewport height. On mobile the address bar
+     collapsing changes 100vh mid-scroll, which would re-pin the sticky inner
+     and clip the cards; svh stays put. Falls back to vh where unsupported. */
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 2;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 56px) 0;
+}
+
+/* ---------- Cinematic glow ---------- */
+.glowLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowOrb1 {
+  position: absolute;
+  top: 15%; left: 10%;
+  width: clamp(200px, 35vw, 500px);
+  height: clamp(200px, 35vw, 500px);
+  border-radius: var(--radius-round);
+  background: radial-gradient(circle, rgba(232, 85, 62, 0.08) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: glowPulse 10s ease-in-out infinite;
+}
+
+.glowOrb2 {
+  position: absolute;
+  bottom: 20%; right: 8%;
+  width: clamp(180px, 30vw, 450px);
+  height: clamp(180px, 30vw, 450px);
+  border-radius: var(--radius-round);
+  background: radial-gradient(circle, rgba(107, 53, 168, 0.07) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: glowPulse 12s ease-in-out infinite 3s;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.1); }
+}
+
+/* ---------- Header ---------- */
+.header { text-align: center; margin-bottom: clamp(28px, 4.5vw, 60px); }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 6vw, 72px);
+  color: var(--fg, var(--color-charcoal));
+  margin: 0;
+}
+
+/* ---------- Stage ---------- */
+.stage {
+  display: grid;
+  /* Each column = the card width, capped three ways so the pair always fits
+     the pinned viewport on every device:
+       • 46vw    → stops two cards overflowing the width on wide screens
+       • 100svh  → uses the *small* (stable) viewport height so a collapsing
+                   mobile address bar can never clip the 4:5 card top/bottom
+       • max(220px → a floor so a short / landscape viewport can't shrink the
+                   cards toward 0 (the old `100vh − 320px` calc could go
+                   negative on short screens and make the cards vanish)
+     Tune 46vw (size on wide screens) and 300px (header+padding budget). */
+  grid-template-columns: repeat(2, max(220px, min(46vw, calc((100svh - 300px) * 0.8))));
+  justify-content: center;
+  gap: clamp(28px, 4vw, 80px);
+  align-items: start;
+  max-width: 100%;
+  perspective: 2000px;
+  perspective-origin: 50% 35%;
+  transform-style: preserve-3d;
+}
+
+.slot { position: relative; transform-style: preserve-3d; }
+.slot-bride { margin-top: 0; }
+.slot-groom { margin-top: clamp(12px, 3vw, 48px); }
+
+/* ---------- Cinematic Card ---------- */
+/* opacity:1 is the safe baseline — the GSAP entrance overrides it to 0 then
+   scrubs back to 1. If GSAP never runs (init error, very old browser) the card
+   stays visible instead of being stuck invisible. */
+.cinematicCard { position: relative; z-index: 2; opacity: 1; }
+
+.idleFloat { animation: idleCardFloat 7s ease-in-out infinite; }
+
+@keyframes idleCardFloat {
+  0%, 100% { transform: translateY(0) rotateX(0) rotateZ(0); }
+  25%      { transform: translateY(-8px) rotateX(-1.2deg) rotateZ(0.6deg); }
+  50%      { transform: translateY(-4px) rotateX(0.8deg) rotateZ(-0.4deg); }
+  75%      { transform: translateY(-10px) rotateX(-0.5deg) rotateZ(0.8deg); }
+}
+
+/* ---------- Depth Shadow ---------- */
+.cardShadow {
+  position: absolute;
+  inset: 14px 18px -8px 18px;
+  border-radius: clamp(16px, 1.6vw, 22px);
+  background: radial-gradient(ellipse at 50% 50%, rgba(42,33,24,0.20) 0%, rgba(42,33,24,0.06) 60%, transparent 100%);
+  filter: blur(26px);
+  transform: translateZ(-50px) translateY(22px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ---------- Dummy Cards ---------- */
+.dummyLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.dummyCard {
+  position: absolute;
+  inset: 4%;
+  border-radius: clamp(16px, 1.6vw, 22px);
+  border: 1px solid rgba(42, 33, 24, 0.06);
+  box-shadow: 0 12px 30px rgba(42,33,24,0.08), inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+
+.dummy-bride {
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, color-mix(in srgb, var(--color-coral-soft) 18%, rgba(255,255,255,0.7)) 100%);
+}
+
+.dummy-groom {
+  background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, color-mix(in srgb, var(--color-sky-soft) 22%, rgba(255,255,255,0.7)) 100%);
+}
+
+/* ---------- Card ---------- */
+.card {
+  position: relative;
+  transform-style: preserve-3d;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.cardFront {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: clamp(16px, 1.6vw, 22px);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-glass);
+  transform-style: preserve-3d;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.card-bride .cardFront {
+  background: linear-gradient(180deg, var(--glass-bg) 0%, color-mix(in srgb, var(--color-coral-soft) 12%, var(--glass-bg)) 100%);
+}
+
+.card-groom .cardFront {
+  background: linear-gradient(180deg, var(--glass-bg) 0%, color-mix(in srgb, var(--color-sky-soft) 15%, var(--glass-bg)) 100%);
+}
+
+.card:hover .cardFront {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+.cardBack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg);
+  border-radius: clamp(16px, 1.6vw, 22px);
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(135deg, var(--color-cream-deep) 0%, var(--color-cream) 100%);
+  box-shadow: var(--shadow-glass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.cardBackInner {
+  width: 100%;
+  height: 100%;
+  border: 2px double var(--gold-metallic);
+  border-radius: clamp(12px, 1.2vw, 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 30px rgba(196, 144, 16, 0.12);
+}
+
+.monogramBorder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.monogramText {
+  font-family: var(--font-script, var(--font-display));
+  font-size: clamp(48px, 5.5vw, 68px);
+  font-style: normal;
+  font-weight: 400;
+  color: var(--accent, var(--color-coral));
+  line-height: 1;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8), 2px 2px 0px var(--color-gold);
+}
+
+.monogramDivider {
+  width: 48px;
+  height: 1px;
+  background: var(--gold-metallic);
+  margin: 6px 0;
+  opacity: 0.6;
+}
+
+.monogramDate {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* Backface is always a cream paper card, so keep the date dark on every
+     palette (theme --fg-muted goes light in dark themes = invisible here). */
+  color: var(--color-charcoal-light, #6B5B4A);
+  font-weight: 500;
+}
+
+/* ---------- Photo (full-bleed editorial) ---------- */
+.photoFull {
+  position: absolute;
+  inset: 0;
+  background: var(--color-cream-deep);
+  /* Container so the caption text scales with the CARD/PHOTO width (cqw),
+     not the viewport — keeps text proportional to the photo at every size. */
+  container-type: inline-size;
+}
+
+.photo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+
+.photoFallback {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-style: italic;
+  font-size: clamp(56px, 26cqw, 170px); color: #fff;
+  background: linear-gradient(135deg, var(--color-coral), var(--color-gold));
+}
+
+.card-groom .photoFallback { background: linear-gradient(135deg, var(--color-sky), var(--color-purple)); }
+
+/* Dark gradient so the caption stays legible over any photo. */
+.scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(18, 12, 8, 0.88) 0%,
+    rgba(18, 12, 8, 0.66) 20%,
+    rgba(18, 12, 8, 0.18) 44%,
+    transparent 66%
+  );
+}
+
+/* ---------- Caption overlay ---------- */
+.caption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: clamp(16px, 5cqw, 38px) clamp(14px, 4.5cqw, 32px) clamp(18px, 5.5cqw, 40px);
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; color: #fff;
+}
+
+.role {
+  font-family: var(--font-body);
+  font-size: clamp(9px, 2.6cqw, 16px); letter-spacing: 0.28em; text-transform: uppercase;
+  margin: 0 0 clamp(5px, 1.7cqw, 9px); font-weight: 500;
+  color: var(--color-coral-soft, #ffd9cf);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.card-groom .role { color: var(--color-sky-soft, #cfe6ff); }
+
+.name {
+  font-family: var(--font-script, var(--font-display)); font-style: normal; font-weight: 400;
+  font-size: clamp(24px, 8.5cqw, 64px); color: #fff;
+  margin: 0; line-height: 1.05;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+
+.parents {
+  font-family: var(--font-body); font-size: clamp(10px, 2.7cqw, 15px); letter-spacing: 0.10em;
+  text-transform: uppercase; color: rgba(255, 255, 255, 0.85); margin: clamp(7px, 2.2cqw, 12px) 0 0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.bio {
+  font-family: var(--font-body); font-size: clamp(12px, 3.1cqw, 17px);
+  line-height: 1.6; color: rgba(255, 255, 255, 0.82);
+  max-width: 38ch; margin: clamp(8px, 2.6cqw, 14px) auto 0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.handle {
+  /* inline-flex + min-height floors the tap target at 44px (WCAG 2.5.5) even when
+     the cqw-driven font/padding bottom out in a narrow card; padding still sets the
+     visual size, min-height only guarantees the vertical hit area. */
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--tap-target);
+  font-family: var(--font-body); font-size: clamp(10px, 2.6cqw, 14px);
+  letter-spacing: 0.10em; padding: clamp(7px, 2cqw, 10px) clamp(14px, 4cqw, 22px); margin-top: clamp(10px, 3.4cqw, 18px);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.55); color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.card-bride .handle:hover { background: var(--color-coral); border-color: var(--color-coral); color: #fff; transform: translateY(-2px); }
+.card-groom .handle:hover { background: var(--color-sky); border-color: var(--color-sky); color: #fff; transform: translateY(-2px); }
+
+.decor { position: absolute; pointer-events: none; z-index: 1; }
+
+/* Responsive */
+
+@media (min-width: 1440px) {
+  .stage { perspective: 2500px; gap: clamp(48px, 4vw, 96px); }
+  .section { min-height: 170vh; }
+  .slot-groom { margin-top: clamp(16px, 2.5vw, 56px); }
+}
+
+@media (max-width: 1023.98px) {
+  .stage {
+    perspective: 1400px;
+    gap: clamp(24px, 4vw, 60px);
+    /* Tighter width cap (42vw) so two cards + gap always fit a tablet, with
+       the same svh height budget + floor so neither portrait nor landscape
+       clips or squishes the cards. */
+    grid-template-columns: repeat(2, max(200px, min(42vw, calc((100svh - 260px) * 0.8))));
+  }
+  .section { min-height: 150vh; }
+}
+
+@media (max-width: 767.98px) {
+  .stage {
+    grid-template-columns: 1fr; gap: clamp(48px, 8vw, 80px);
+    perspective: 1000px; perspective-origin: 50% 40%;
+  }
+  /* No sticky pin on phones. The pin (tall section + sticky inner) holds the
+     view while you keep scrolling — on a phone, where the two stacked cards
+     can't both fit on screen anyway, that just reads as "scroll is frozen /
+     laggy". Drop it: the section flows normally and each card spins in via its
+     own trigger (CinematicCard selfTrigger) as it scrolls into view. */
+  .inner { position: static; min-height: 0; padding: clamp(48px, 13vw, 88px) 0; }
+  .section { min-height: auto; }
+  .slot-bride, .slot-groom { margin-top: 0; }
+  /* DEFINITE width, not max-width. `margin:auto` on a grid item cancels the
+     default stretch and makes it shrink-to-fit its content — and since the
+     full-bleed photo is position:absolute (no intrinsic width), shrink-to-fit
+     collapses the slot to ~0px and the card vanishes. A definite width keeps
+     the auto margins purely for centering. */
+  .slot { width: min(380px, 100%); max-width: none; margin-left: auto; margin-right: auto; }
+  .dummyCard { display: none; }
+  .cardShadow { filter: blur(18px); transform: translateZ(-30px) translateY(16px); }
+  .idleFloat { animation-duration: 8s; }
+}
+
+@media (max-width: 480px) {
+  .decor { opacity: 0.6; }
+  .header { margin-bottom: clamp(36px, 8vw, 56px); }
+  .stage { gap: 48px; perspective: 800px; }
+  .slot { width: min(340px, 100%); }
+}
+
+@media (max-width: 380px) {
+  .stage { perspective: 600px; gap: 40px; }
+  .cardFront { border-radius: var(--radius-md); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idleFloat { animation: none; }
+  .glowOrb1, .glowOrb2 { animation: none; opacity: 0.5; }
+}

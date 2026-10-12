@@ -212,7 +212,9 @@ export default async function Page({ params, searchParams }: PageProps) {
   // visitors can compare them, each with a note explaining that a real
   // invitation picks one. Real configs are untouched — the editor policy
   // still allows exactly one gallery.
-  if (isDemoSlug && templateId === 'lovebirds') config = addDemoSecondGallery(config)
+  // Songket is a Lovebirds fork with the same two gallery styles, so its demo
+  // gets the same side-by-side comparison.
+  if (isDemoSlug && (templateId === 'lovebirds' || templateId === 'songket')) config = addDemoSecondGallery(config)
 
   // No DB-backed row (demo slug / local fallback): drop the slug so the
   // RSVP / gift / guestbook sections use their simulated-success mode

@@ -1,0 +1,354 @@
+.section {
+  position: relative;
+  /* Palette-driven: the section paints itself with the couple's chosen accent
+     (--button-bg) and its matching contrast colour (--button-fg), both balanced
+     per palette in themes.js, so the RSVP never clashes with the rest of the
+     invitation regardless of which palette is saved. Fallbacks keep the
+     original coral look when no theme vars are present. */
+  --rsvp-bg: var(--button-bg, var(--color-coral));
+  --rsvp-fg: var(--button-fg, #fff);
+  --rsvp-fg-soft: color-mix(in srgb, var(--rsvp-fg) 85%, transparent);
+  --rsvp-fg-faint: color-mix(in srgb, var(--rsvp-fg) 68%, transparent);
+  --rsvp-surface: color-mix(in srgb, var(--rsvp-fg) 14%, transparent);
+  --rsvp-surface-border: color-mix(in srgb, var(--rsvp-fg) 32%, transparent);
+  position: relative;
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--accent-soft, #F5C842) 42%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--rsvp-bg) 0%, color-mix(in srgb, var(--rsvp-bg) 70%, #2A2118) 100%);
+  color: var(--rsvp-fg);
+  padding: var(--spacing-section) var(--container-pad);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: var(--transition-slow);
+  isolation: isolate;
+  overflow: hidden;
+}
+.section.visible { opacity: 1; transform: translateY(0); }
+
+.inner {
+  /* Narrower than the section so the SceneFrame ornaments breathe at the
+     left/right edges; lifted above the decorative scene + haze. */
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.header { text-align: center; margin-bottom: clamp(28px, 5vw, 48px); }
+
+.eyebrow {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 12px;
+  color: var(--rsvp-fg-soft);
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(40px, 6vw, 72px);
+  color: var(--rsvp-fg);
+  margin-bottom: 14px;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.4vw, 16px);
+  color: var(--rsvp-fg-soft);
+}
+
+.formCard {
+  background: var(--rsvp-surface);
+  border: 1px solid var(--rsvp-surface-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-md);
+  padding: clamp(24px, 4vw, 40px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform-style: preserve-3d;
+}
+.formCard form {
+  display: grid;
+  gap: 20px;
+}
+
+.row {}
+.field { display: grid; gap: 8px; }
+
+/* The "Will you attend?" + "How many of you?" groups are <fieldset>s. Replace
+   the faint default browser border (a grey/blue that clashed with the palette)
+   with a deliberate, palette-matched frame so each group reads as one tidy unit. */
+fieldset.field {
+  border: 1px solid color-mix(in srgb, var(--rsvp-fg) 38%, transparent);
+  border-radius: var(--radius-md);
+  padding: 12px 16px 16px;
+}
+fieldset.field > .label {
+  padding: 0 8px;
+  margin-left: -4px;
+}
+
+.label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--rsvp-fg-soft);
+}
+
+.input, .textarea, .select {
+  background: rgba(255,255,255,0.92);
+  color: var(--color-charcoal);
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  width: 100%;
+  outline: 0;
+  transition: var(--transition-default);
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.65);
+  background: #fff;
+}
+
+.textarea { resize: vertical; min-height: 120px; }
+
+.selectWrap { position: relative; }
+.select { appearance: none; padding-right: 40px; }
+.selectChevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-charcoal);
+  font-size: 12px;
+}
+
+.error {
+  font-family: var(--font-body);
+  color: var(--rsvp-fg);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.hint {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.65;
+  margin-top: 4px;
+}
+
+/* ---------- Toggle ---------- */
+.toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--rsvp-surface);
+  padding: 6px;
+  border-radius: var(--radius-pill);
+}
+.toggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 16px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--rsvp-fg-soft);
+  transition: var(--transition-default);
+}
+.toggleActive {
+  background: var(--rsvp-fg);
+  color: var(--rsvp-bg);
+  box-shadow: var(--shadow-soft);
+  font-weight: 500;
+}
+
+/* ---------- Stepper ---------- */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--rsvp-surface);
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  width: max-content;
+}
+.stepBtn {
+  width: var(--ctl-h);
+  height: var(--ctl-h);
+  border-radius: var(--radius-round);
+  background: var(--rsvp-fg);
+  color: var(--rsvp-bg);
+  font-size: 20px;
+  font-weight: 600;
+  transition: var(--transition-default);
+}
+.stepBtn:hover { background: color-mix(in srgb, var(--rsvp-fg) 86%, #000); }
+.stepValue {
+  min-width: 24px;
+  text-align: center;
+  /* Plain body type so the count reads as a normal digit — the Great Vibes
+     display font turned "1" into a slash-like squiggle. */
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--rsvp-fg);
+}
+.stepHint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rsvp-fg-faint);
+  padding: 0 12px;
+}
+
+/* ---------- Submit ---------- */
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  height: var(--ctl-h);
+  padding: 0 28px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  /* Inverts the section pair so the CTA stays high-contrast on every palette:
+     a chip in the contrast colour with accent-coloured label. */
+  background: var(--rsvp-fg);
+  color: var(--rsvp-bg);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  box-shadow: var(--shadow-button-3d);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease, background-color 0.25s ease;
+  cursor: pointer;
+}
+.submit:hover {
+  background: color-mix(in srgb, var(--rsvp-fg) 86%, #000);
+  transform: translate3d(0, -3px, 0);
+  box-shadow: var(--shadow-button-3d-hover);
+}
+.submit:active {
+  transform: translate3d(0, 2px, 0);
+  box-shadow: var(--shadow-button-3d-active);
+}
+.submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- Success ---------- */
+.successCard {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--color-charcoal);
+  border-radius: var(--radius-md);
+  padding: clamp(32px, 5vw, 56px);
+  text-align: center;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass-hover);
+  animation: successPop 0.55s var(--ease-out);
+  transform-style: preserve-3d;
+}
+
+.successInner {
+  transform: translateZ(10px);
+}
+
+@keyframes successPop {
+  from { transform: scale(0.94); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.successIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-round);
+  background: var(--rsvp-bg, var(--color-coral));
+  color: var(--rsvp-fg, #fff);
+  font-size: 28px;
+  margin-bottom: 18px;
+  animation: heartBeat 1.6s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  20%, 60% { transform: scale(1.12); }
+  40%, 80% { transform: scale(0.96); }
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.successText {
+  font-family: var(--font-body);
+  color: var(--color-charcoal-light);
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+/* "RSVP for another guest" — neutral outline button that reads on the white
+   success card; brings the empty form back for the next code on a shared link. */
+.another {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 24px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-charcoal);
+  border: 1px solid rgba(42, 33, 24, 0.25);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-default);
+}
+.another:hover {
+  background: rgba(42, 33, 24, 0.06);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 767.98px) {
+  .stepper { width: 100%; justify-content: space-between; }
+  .stepBtn { width: var(--ctl-h); height: var(--ctl-h); font-size: 22px; }
+  .toggle { gap: 6px; }
+  .submit { width: 100%; text-align: center; }
+}
+
+/* Phones: cap the form card so a clear gutter frames it (it spanned ~89vw and
+   read edge-to-edge inside the phone view / 🎨 device frames). */
+@media (max-width: 480px) {
+  .formCard {
+    max-width: calc(100vw - 52px);
+    margin-inline: auto;
+  }
+}

@@ -1,15 +1,27 @@
 'use client'
 
-import React, { Suspense, useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
+import { sectionRegistry as songketRegistry } from '../registry.js'
+import { resolveBackground } from '../config/themes.js'
+import SectionSkeleton from '../components/SectionSkeleton.jsx'
 import { injectCoupleProps } from '@/lib/meta/couple'
 
-/** Render config.sections through the Songket registry (same contract as the
- *  Lovebirds renderer: skip disabled/unknown, anchor each by its id). */
-export default function SectionRenderer({ config, slug, registry }) {
-  const sections = useMemo(
-    () => (config?.sections || []).filter((s) => s && s.enabled !== false),
-    [config],
-  )
+/**
+ * Render the page from config.sections, using the supplied `registry`
+ * (type → component map). Defaults to the Lovebirds registry.
+ *
+ * For every entry it:
+ *   1. Skips if `enabled` is false
+ *   2. Skips if `type` isn't in the registry (logs warning in dev)
+ *   3. Wraps in a div with an optional per-section background override. The
+ *      colour theme is GLOBAL now — applied to <body> by ThemeProvider, so
+ *      every section inherits it (legacy per-section `theme:` fields are inert).
+ *   4. Suspends until the lazy section component is loaded
+ */
+export default function SectionRenderer({ config, slug, registry = songketRegistry }) {
+  const sections = useMemo(() => {
+    return (config?.sections || []).filter((s) => s && s.enabled !== false)
+  }, [config])
 
   return (
     <main style={{ position: 'relative', zIndex: 1 }}>
@@ -17,14 +29,32 @@ export default function SectionRenderer({ config, slug, registry }) {
         const Component = registry[section.type]
         if (!Component) {
           if (process.env.NODE_ENV !== 'production') {
-            console.warn(`[songket] Unknown section type "${section.type}"`)
+            console.warn(`[SectionRenderer] Unknown section type "${section.type}"`)
           }
           return null
         }
+
+        const backgroundCss = resolveBackground(section.background)
+        const wrapStyle = backgroundCss ? { background: backgroundCss } : undefined
+
         return (
-          <div key={section.id} id={section.id} data-section={section.id} data-section-type={section.type}>
-            <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
-              <Component {...injectCoupleProps(section, config?.couple)} id={section.id} slug={slug} />
+          <div
+            key={section.id}
+            id={section.id}                           /* anchor target for FloatingNavbar */
+            data-section={section.id}
+            data-section-type={section.type}
+            data-section-theme={section.theme}
+            style={wrapStyle}
+          >
+            <Suspense fallback={<SectionSkeleton label={section.id} />}>
+              <Component
+                {...injectCoupleProps(section, config?.couple)}
+                id={section.id}
+                slug={slug}
+                blocks={section.blocks}
+                decorativeLayers={section.decorativeLayers}
+                layout={section.layout}
+              />
             </Suspense>
           </div>
         )

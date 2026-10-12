@@ -1,0 +1,207 @@
+.section {
+  position: relative;
+  /* Palette-driven: paints with the couple's accent (--button-bg) blended to
+     its soft accent, with the matching contrast colour (--button-fg) for text,
+     so the footer matches whatever palette is saved instead of fixed coral/gold.
+     Fallbacks preserve the original coral→gold look without theme vars. */
+  --ftr-bg: var(--button-bg, var(--color-coral));
+  --ftr-fg: var(--button-fg, var(--color-cream));
+  /* Identical to the RSVP section background so the two read as one palette:
+     accent base darkened toward the bottom, with the same soft-accent top glow. */
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--accent-soft, #F5C842) 42%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--ftr-bg) 0%, color-mix(in srgb, var(--ftr-bg) 70%, #2A2118) 100%);
+  color: var(--ftr-fg);
+  padding: clamp(80px, 10vw, 140px) var(--container-pad) 48px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: var(--transition-slow);
+  overflow: hidden;
+}
+.section.visible { opacity: 1; transform: translateY(0); }
+
+.inner {
+  /* Lifted above the SceneFrame scene + haze, and narrowed so the side
+     ornaments stay visible at the edges. */
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+  margin: 0 auto;
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+/* ── Couple photos (two tilted polaroids) ── */
+.couplePhotos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin: 4px 0 6px;
+}
+
+.photoCard {
+  flex: 0 0 auto;
+  width: clamp(116px, 30vw, 188px);
+  padding: 6px 6px 14px;            /* white polaroid frame, deeper bottom lip */
+  background: #fff;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 16px 36px rgba(60, 30, 10, 0.30), 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform-origin: bottom center;
+  /* Pre-reveal state: lifted, shrunk, flat (no tilt yet). */
+  opacity: 0;
+  transform: translateY(36px) scale(0.82) rotate(0deg);
+  transition: opacity 0.7s ease, transform 0.95s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+
+.photoCard img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-xs);
+}
+
+/* Slight overlap so the pair reads as one stacked memento. */
+.photoLeft  { margin-right: -22px; z-index: 2; }
+.photoRight { margin-left: -22px;  z-index: 1; }
+
+/* Reveal: rise + pop + fan out into their tilt, staggered left→right.
+   Driven by the section's .visible class (IntersectionObserver), so it works
+   identically on desktop, tablet and phone — no scroll-scrub dependency. */
+.section.visible .photoLeft {
+  opacity: 1;
+  transform: translateY(0) scale(1) rotate(-8deg);
+  transition-delay: 0.18s;
+}
+.section.visible .photoRight {
+  opacity: 1;
+  transform: translateY(0) scale(1) rotate(8deg);
+  transition-delay: 0.34s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photoCard { transition: opacity 0.4s ease; }
+  .section.visible .photoLeft  { transform: rotate(-8deg); }
+  .section.visible .photoRight { transform: rotate(8deg); }
+}
+
+.hashtag {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(40px, 8vw, 88px);
+  font-weight: 500;
+  color: var(--ftr-fg);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  /* Always one line — a long hashtag (#RaniAndAdi) used to wrap. The
+     font-size is auto-fitted down in JS when the single line would overflow,
+     so it stays on one line at every viewport without ever clipping. */
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.message {
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.5vw, 17px);
+  color: color-mix(in srgb, var(--ftr-fg) 90%, transparent);
+  max-width: 38ch;
+  line-height: 1.7;
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--ctl-h);
+  padding: 0 18px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--ftr-fg) 16%, transparent);
+  color: var(--ftr-fg);
+  border: 1px solid color-mix(in srgb, var(--ftr-fg) 30%, transparent);
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: var(--transition-default);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.socialLink:hover {
+  background: color-mix(in srgb, var(--ftr-fg) 30%, transparent);
+  transform: translateY(-2px);
+}
+
+.signoff {
+  font-family: var(--font-script, var(--font-display));
+  font-style: normal;
+  font-size: clamp(26px, 4.5vw, 38px);
+  margin-top: 16px;
+}
+
+.coupleName {
+  font-weight: 500;
+  color: var(--ftr-fg);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ftr-fg) 50%, transparent);
+  text-underline-offset: 4px;
+}
+
+.fineprint {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ftr-fg) 76%, transparent);
+  margin-top: 24px;
+}
+
+/* ── Songket: Ampera scene at the foot of the closing section ── */
+.ampera {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: clamp(24px, 5vw, 48px) auto 0;
+  color: var(--ftr-fg);
+  opacity: 0.32;
+  /* AdatShapes cut-outs (the crescent moon) paint with --sk-bg. */
+  --sk-bg: var(--ftr-bg);
+  overflow: hidden;
+}
+
+.ampera > svg:first-child {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.perahu {
+  position: absolute;
+  bottom: 9%;
+  left: -12%;
+  width: clamp(44px, 8vw, 72px);
+  height: auto;
+  animation: sk-sail 28s linear infinite;
+}
+
+@keyframes sk-sail {
+  from { transform: translateX(0); }
+  to { transform: translateX(1300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .perahu { animation: none; left: 62%; }
+}

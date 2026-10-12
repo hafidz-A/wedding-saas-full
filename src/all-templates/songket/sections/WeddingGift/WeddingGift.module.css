@@ -1,0 +1,719 @@
+/* Wedding Gift — bank accounts + confirmation form; theme-aware CSS variables. */
+
+.section {
+  /* File-local tokens — hoisted from ~26 repeated literals (audit 2026-07-16).
+     Gradient endpoint stops below stay literal: unique decorative values. */
+  --wg-ink: var(--color-charcoal, #2A2118);
+  --wg-on-accent: #fff;
+  --wg-mono: 'Courier New', Courier, monospace;
+  position: relative;
+  padding: clamp(64px, 9vw, 120px) clamp(20px, 4vw, 48px);
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  isolation: isolate;
+  overflow: hidden;
+}
+.section.visible { opacity: 1; transform: translateY(0); }
+
+.inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ---------- Header ---------- */
+.header { text-align: center; margin-bottom: clamp(40px, 5vw, 64px); }
+
+.eyebrow {
+  font-family: var(--font-body, sans-serif);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
+  margin: 0 0 10px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--fg, var(--color-charcoal));
+  margin: 0 0 14px;
+}
+
+.subtitle {
+  font-family: var(--font-body, sans-serif);
+  font-size: clamp(13px, 1.3vw, 15px);
+  line-height: 1.55;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  margin: 0 auto 14px;
+  max-width: 56ch;
+}
+
+.intro {
+  font-family: var(--font-body, sans-serif);
+  font-size: clamp(14px, 1.3vw, 16px);
+  line-height: 1.65;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  margin: 14px auto 0;
+  max-width: 62ch;
+}
+
+/* ---------- Account grid ---------- */
+.accountGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(16px, 2vw, 24px);
+  margin-bottom: clamp(40px, 5vw, 56px);
+}
+/* A lone account card would otherwise stretch across the full container and
+   look like a giant banner. Cap it at a natural card width and center it. */
+.accountGrid:has(> :only-child) {
+  grid-template-columns: minmax(0, 420px);
+  justify-content: center;
+}
+
+.cardWrapper {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  display: flex; /* stretch the inner card to the (equal) grid-row height */
+}
+
+.cardInner {
+  position: relative;
+  flex: 1; /* fill cardWrapper so all cards are the same height */
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--wg-on-accent);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 16px 36px rgba(42, 33, 24, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform-style: preserve-3d;
+  overflow: hidden;
+  transition: box-shadow 0.35s ease;
+}
+
+/* Card finishes per account accent — lacquer + prada (adat Palembang). The
+   accent keys stay Lovebirds' names because configs store them. */
+.accent-coral {            /* merah lak */
+  background: linear-gradient(135deg, #8B1E2D 0%, #6E1423 50%, #3F0A15 100%);
+  --card-accent: #D4AF37;
+}
+.accent-emerald {          /* hijau limas */
+  background: linear-gradient(135deg, #2F5B44 0%, #1F3B2D 50%, #0F1F17 100%);
+  --card-accent: #D4AF37;
+}
+.accent-gold {             /* prada emas */
+  background: linear-gradient(135deg, #F4E1A1 0%, #D4AF37 50%, #8A6A14 100%);
+  color: var(--wg-ink) !important;
+  --card-accent: #6E1423;
+  border-color: rgba(42, 33, 24, 0.2) !important;
+}
+.accent-purple {           /* hitam lak */
+  background: linear-gradient(135deg, #3A2A24 0%, #1D1411 50%, #0D0908 100%);
+  --card-accent: #D4AF37;
+}
+.accent-sky {              /* songket marun-emas */
+  background: linear-gradient(135deg, #7A1626 0%, #5E1020 55%, #8A6A14 100%);
+  --card-accent: #ECD27E;
+}
+
+.accent-gold .cardKind,
+.accent-gold .cardName,
+.accent-gold .cardLabel,
+.accent-gold .cardNumber,
+.accent-gold .cardHolder {
+  color: var(--wg-ink) !important;
+}
+
+/* Metallic chip reflection */
+.cardGlowOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.12) 48%, rgba(255, 255, 255, 0.24) 52%, rgba(255, 255, 255, 0.12) 56%, transparent 64%);
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.5s ease;
+}
+
+/* Card hover effect removed — the gift cards are intentionally static now;
+   only their buttons react on hover. */
+
+/* Realistic Golden Card Chip */
+.cardChip {
+  width: 42px;
+  height: 32px;
+  background: linear-gradient(135deg, #FFEAA8 0%, #D8A51D 50%, #A27B08 100%);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  margin-left: 4px;
+}
+
+.chipLine {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.25);
+}
+.chipLine:nth-child(1) { top: 50%; left: 0; right: 0; height: 1px; }
+.chipLine:nth-child(2) { left: 33%; top: 0; bottom: 0; width: 1px; }
+.chipLine:nth-child(3) { left: 66%; top: 0; bottom: 0; width: 1px; }
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cardIcon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-round);
+  background: color-mix(in srgb, var(--card-accent) 14%, transparent);
+  color: var(--card-accent);
+  flex-shrink: 0;
+}
+
+.cardHeaderText { display: flex; flex-direction: column; gap: 2px; }
+
+.cardKind {
+  font-family: var(--font-body, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 2;
+}
+
+.cardName {
+  font-family: var(--font-body, sans-serif);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-size: clamp(19px, 2vw, 23px);
+  line-height: 1.1;
+  color: var(--wg-on-accent);
+  margin: 0;
+  z-index: 2;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  z-index: 2;
+}
+
+.cardLabel {
+  font-family: var(--font-body, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cardNumberRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.cardNumber {
+  font-family: var(--wg-mono) !important;
+  font-size: clamp(16px, 1.8vw, 20px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  color: var(--wg-on-accent);
+  text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.35), 1px 1px 1px rgba(255, 255, 255, 0.22);
+  word-break: break-all;
+}
+
+.cardHolder {
+  font-family: var(--wg-mono) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  color: var(--wg-on-accent);
+  text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.35), 1px 1px 1px rgba(255, 255, 255, 0.22);
+}
+
+.copyBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--ctl-h);
+  padding: 0 14px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--wg-on-accent);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+.copyBtn:hover {
+  background: var(--wg-on-accent);
+  color: var(--wg-ink);
+  border-color: var(--wg-on-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+.copyBtnDone {
+  background: var(--wg-on-accent);
+  color: var(--wg-ink);
+  border-color: var(--wg-on-accent);
+}
+
+.useBtn {
+  margin-top: auto; /* pin to the bottom so equal-height cards line up */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 16px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--wg-on-accent);
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 2;
+}
+.useBtn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.accent-gold .copyBtn {
+  background: rgba(42, 33, 24, 0.1);
+  color: var(--wg-ink);
+  border-color: rgba(42, 33, 24, 0.2);
+}
+
+.accent-gold .copyBtn:hover {
+  background: var(--wg-ink);
+  color: var(--wg-on-accent);
+  border-color: var(--wg-ink);
+}
+
+.accent-gold .useBtn {
+  background: rgba(42, 33, 24, 0.08);
+  border-color: rgba(42, 33, 24, 0.2);
+  color: var(--wg-ink);
+}
+
+.accent-gold .useBtn:hover {
+  background: rgba(42, 33, 24, 0.16);
+  border-color: rgba(42, 33, 24, 0.35);
+}
+
+/* ---------- Physical address card ---------- */
+.addressCard {
+  margin: 0 auto clamp(40px, 5vw, 56px);
+  max-width: 640px;
+  text-align: center;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.7));
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.1));
+  border-radius: clamp(14px, 1.4vw, 18px);
+  padding: clamp(20px, 2.5vw, 32px);
+}
+
+.addressLabel {
+  font-family: var(--font-body, sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 11px;
+  color: var(--accent, var(--color-coral));
+  margin-bottom: 10px;
+  display: block;
+}
+
+.addressText {
+  font-family: var(--font-body, sans-serif);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--fg, var(--color-charcoal));
+  margin: 0;
+}
+
+/* ---------- Gift registry (folded from the standalone registry section) ---------- */
+.registry {
+  max-width: 760px;
+  margin: 0 auto clamp(40px, 5vw, 56px);
+  text-align: center;
+}
+.registryTitle {
+  font-family: var(--font-body, sans-serif);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-size: clamp(22px, 2.6vw, 30px);
+  color: var(--fg, var(--color-charcoal));
+  margin: 0 0 8px;
+}
+.registryMessage {
+  font-family: var(--font-body, sans-serif);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--fg-muted, rgba(42, 33, 24, 0.7));
+  margin: 0 auto clamp(20px, 3vw, 28px);
+  max-width: 52ch;
+}
+.registryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(12px, 1.6vw, 18px);
+}
+/* Same guard for a single wishlist item — center it at a tidy width. */
+.registryGrid:has(> :only-child) {
+  grid-template-columns: minmax(0, 320px);
+  justify-content: center;
+}
+.registryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  text-decoration: none;
+  padding: clamp(14px, 1.6vw, 18px);
+  border-radius: clamp(14px, 1.4vw, 18px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.7));
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.1));
+  border-left: 3px solid var(--accent, var(--color-coral));
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+/* Only the linkable cards lift on hover. */
+a.registryCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(42, 33, 24, 0.12);
+}
+.registryImg {
+  width: 100%;
+  height: clamp(120px, 16vw, 160px);
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  display: block;
+}
+.registryName {
+  font-family: var(--font-body, sans-serif);
+  font-weight: 600;
+  font-size: clamp(16px, 1.7vw, 19px);
+  color: var(--fg, var(--color-charcoal));
+}
+.registryDesc {
+  font-family: var(--font-body, sans-serif);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-muted, rgba(42, 33, 24, 0.65));
+}
+.registryArrow {
+  color: var(--accent, var(--color-coral));
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* ---------- Confirmation form ---------- */
+.confirmWrap {
+  max-width: 680px;
+  margin: 0 auto;
+  scroll-margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.openFormBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  height: var(--ctl-h);
+  padding: 0 32px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  background: var(--button-bg, var(--fg, var(--color-charcoal)));
+  color: var(--button-fg, var(--color-cream));
+  font-family: var(--font-body, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  box-shadow: 0 12px 28px rgba(42, 33, 24, 0.18);
+}
+.openFormBtn:hover {
+  transform: translateY(-2px);
+  background: #000;
+  box-shadow: 0 18px 38px rgba(42, 33, 24, 0.24);
+}
+
+.form {
+  width: 100%;
+  text-align: left;
+  background: var(--glass-bg, rgba(255, 255, 255, 0.82));
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.08));
+  border-radius: clamp(16px, 1.8vw, 22px);
+  padding: clamp(24px, 3vw, 40px);
+  display: grid;
+  gap: 18px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 24px 48px rgba(42, 33, 24, 0.08);
+}
+
+.formIntro {
+  font-family: var(--font-body, sans-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+.row {}
+.rowSplit {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+}
+.field { display: grid; gap: 7px; }
+
+.label {
+  font-family: var(--font-body, sans-serif);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--fg-muted, var(--color-charcoal-light));
+}
+
+.input, .textarea, .select {
+  /* Always a light field with dark text so it stays legible on every palette
+     (dark themes otherwise gave light text on a white focus bg = invisible). */
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--wg-ink);
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.12));
+  border-radius: var(--radius-sm);
+  padding: 13px 16px;
+  font-family: var(--font-body, sans-serif);
+  font-size: 15px;
+  width: 100%;
+  outline: 0;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.input::placeholder, .textarea::placeholder {
+  color: rgba(42, 33, 24, 0.5);
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  border-color: var(--accent, var(--color-coral));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--color-coral)) 18%, transparent);
+  background: var(--wg-on-accent);
+  color: var(--wg-ink);
+}
+
+.textarea { resize: vertical; min-height: 110px; }
+
+.selectWrap { position: relative; }
+.select { appearance: none; padding-right: 40px; }
+.selectChevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-charcoal-light, rgba(42, 33, 24, 0.6));
+  font-size: 12px;
+}
+
+.error {
+  font-family: var(--font-body, sans-serif);
+  color: var(--accent, #D4AF37);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 24px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.2));
+  color: var(--fg, var(--color-charcoal));
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.cancelBtn:hover { background: rgba(42, 33, 24, 0.06); }
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 26px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  /* Use the theme's button token PAIR so the label always contrasts its fill.
+     The old `color: var(--bg)` resolved to `transparent` on light palettes
+     (themes set --bg: transparent) → invisible text on the button. */
+  background: var(--button-bg, var(--fg, var(--color-charcoal)));
+  color: var(--button-fg, var(--color-cream));
+  font-family: var(--font-body, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.submit:hover {
+  /* darken the fill toward black while keeping fg/bg contrast on every theme */
+  background: color-mix(in srgb, var(--button-bg, var(--fg, var(--wg-ink))) 82%, #000);
+  transform: translateY(-2px);
+}
+.submit:disabled { opacity: 0.55; cursor: progress; transform: none; }
+
+/* ---------- Success ---------- */
+.success {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.96));
+  color: var(--fg, var(--color-charcoal));
+  border-radius: clamp(16px, 1.8vw, 22px);
+  padding: clamp(32px, 5vw, 56px);
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(42, 33, 24, 0.12);
+}
+
+.successIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-round);
+  background: var(--accent, var(--color-coral));
+  color: var(--wg-on-accent);
+  font-size: 28px;
+  margin-bottom: 18px;
+  animation: heartBeat 1.6s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  20%, 60% { transform: scale(1.12); }
+  40%, 80% { transform: scale(0.96); }
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(32px, 4vw, 44px);
+  margin-bottom: 8px;
+}
+
+.successText {
+  font-family: var(--font-body, sans-serif);
+  color: var(--fg-muted, var(--color-charcoal-light));
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.resetBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 22px;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--fg, var(--color-charcoal));
+  background: transparent;
+  color: var(--fg, var(--color-charcoal));
+  font-family: var(--font-body, sans-serif);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.resetBtn:hover { background: var(--fg, var(--color-charcoal)); color: var(--wg-on-accent); }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 767.98px) {
+  .accountGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .rowSplit { grid-template-columns: 1fr; gap: 14px; }
+  .actions { flex-direction: column-reverse; }
+  .actions > * { width: 100%; }
+  .cardNumberRow { flex-wrap: wrap; }
+}
+
+/* Phones: cap the ATM cards so a clear gutter frames them (they spanned ~89vw
+   and read edge-to-edge inside the phone view / 🎨 device frames). */
+@media (max-width: 480px) {
+  .cardWrapper {
+    max-width: calc(100vw - 52px);
+    margin-inline: auto;
+    width: 100%;
+  }
+}
+
+/* Songket: tenong above the gift header. */
+.tenong {
+  display: block;
+  width: clamp(72px, 12vw, 104px);
+  height: auto;
+  margin: 0 auto 14px;
+  color: var(--accent, #D4AF37);
+  --sk-bg: var(--band, #4A0C17);
+}

@@ -1,0 +1,111 @@
+'use client'
+
+import { SHAPES } from './Ornaments.jsx'
+import { useTheme } from './ThemeProvider.jsx'
+
+/**
+ * SceneFrame — turns a full-width section into a gently illustrated scene that
+ * the content card floats above, instead of a wide empty container.
+ *
+ * Layer order (back → front):
+ *   1. the section's own full-width background (untouched)
+ *   2. the couple's saved ornament motif clustered down the LEFT & RIGHT edges,
+ *      tinted to the palette accent — so the sides read as intentional artwork
+ *   3. a soft central haze/mist that fades the ornaments out before they reach
+ *      the content, so the card never collides with the artwork (no hard edge)
+ *
+ * Drop it as the FIRST child of a `position: relative; overflow: hidden`
+ * section, then give the content wrapper `position: relative; z-index: 2`.
+ * Purely decorative (aria-hidden, pointer-events none).
+ *
+ * Responsive: artwork is clearly visible on desktop, narrows on tablet, and
+ * softens right down on phones so it stays atmospheric without cluttering.
+ */
+export default function SceneFrame() {
+  const { ornamentType } = useTheme()
+  const shape = SHAPES[ornamentType] || SHAPES.melati
+
+  // Three motifs staggered down each edge column (160×360 viewBox), largest at
+  // the reading band — a calm vertical drift rather than a busy flock.
+  const motifs = [
+    { x: 34, y: 54, s: 1.6, o: 0.46, delay: '0s' },
+    { x: 2, y: 150, s: 1.1, o: 0.32, delay: '1.4s' },
+    { x: 66, y: 252, s: 0.82, o: 0.22, delay: '2.4s' },
+  ]
+
+  const Side = ({ side }) => (
+    <div className={`sk-scene__side sk-scene__side--${side}`}>
+      <svg viewBox="0 0 160 360" preserveAspectRatio="xMidYMid meet" aria-hidden>
+        {motifs.map((m, i) => (
+          <g key={i} className="sk-scene__motif" style={{ opacity: m.o, animationDelay: m.delay }}>
+            <g transform={`translate(${m.x} ${m.y}) scale(${m.s})`} dangerouslySetInnerHTML={{ __html: shape }} />
+          </g>
+        ))}
+      </svg>
+    </div>
+  )
+
+  return (
+    <div className="sk-scene" aria-hidden="true">
+      <style dangerouslySetInnerHTML={{ __html: SCENE_CSS }} />
+      <Side side="left" />
+      <Side side="right" />
+      <div className="sk-scene__haze" />
+    </div>
+  )
+}
+
+const SCENE_CSS = `
+.sk-scene { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+.sk-scene__side {
+  position: absolute;
+  top: 50%;
+  height: min(88%, 540px);
+  width: clamp(120px, 19vw, 280px);
+  transform: translateY(-50%);
+}
+.sk-scene__side--left  { left: 0; }
+.sk-scene__side--right { right: 0; transform: translateY(-50%) scaleX(-1); }
+.sk-scene__side svg {
+  width: 100%; height: 100%; display: block;
+  /* Contrast colour vs the section's accent background (--button-bg) so the
+     ornaments read as deliberate silhouettes instead of blending into the
+     same accent (nyaru). */
+  fill: var(--button-fg, #2A2118);
+  color: var(--button-fg, #2A2118);
+}
+.sk-scene__motif {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sk-scene-bob 6.5s ease-in-out infinite;
+}
+@keyframes sk-scene-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+
+/* Central mist: brightest where the card sits, fading to nothing before the
+   edge artwork, so the card floats on a soft halo with no hard boundary. */
+.sk-scene__haze {
+  position: absolute; inset: 0;
+  background: radial-gradient(
+    ellipse 58% 76% at 50% 48%,
+    color-mix(in srgb, var(--button-fg, #ffffff) 16%, transparent) 0%,
+    transparent 60%
+  );
+}
+
+@media (max-width: 900px) {
+  .sk-scene__side { width: clamp(82px, 15vw, 160px); }
+  .sk-scene__motif { animation: none; }
+}
+@media (max-width: 600px) {
+  .sk-scene__side { width: 78px; opacity: 0.42; }
+  .sk-scene__haze {
+    background: radial-gradient(
+      ellipse 82% 70% at 50% 46%,
+      color-mix(in srgb, var(--button-fg, #ffffff) 12%, transparent) 0%,
+      transparent 66%
+    );
+  }
+}
+@media (prefers-reduced-motion: reduce) { .sk-scene__motif { animation: none; } }
+`

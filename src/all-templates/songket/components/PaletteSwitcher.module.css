@@ -1,0 +1,82 @@
+.toggle {
+  position: fixed;
+  bottom: 20px; left: 20px;
+  z-index: 95;
+  width: var(--ctl-h); height: var(--ctl-h);
+  border-radius: var(--radius-round);
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  background: rgba(253, 246, 236, 0.92);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  box-shadow: 0 10px 28px rgba(42, 33, 24, 0.18);
+  font-size: 20px; line-height: 1; cursor: pointer;
+}
+.panel {
+  position: fixed;
+  bottom: 80px; left: 20px;
+  z-index: 96;
+  width: 248px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(42, 33, 24, 0.10);
+  background: rgba(253, 246, 236, 0.97);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 18px 48px rgba(42, 33, 24, 0.22);
+  display: grid; gap: 10px;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  /* Keep the wheel inside the panel: stops the scroll from chaining to the
+     page once the panel hits its top/bottom. Paired with data-lenis-prevent
+     on the element so Lenis (which hijacks window wheel) lets the panel scroll
+     natively instead of scrolling the template behind it. */
+  overscroll-behavior: contain;
+}
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  /* --font-display now resolves to Montserrat (design cleanup). */
+  font-family: var(--font-display);
+  font-style: normal; font-size: 20px;
+  color: var(--color-charcoal);
+}
+.close { background: none; border: 0; font-size: 20px; cursor: pointer; color: rgba(42, 33, 24, 0.55); line-height: 1; }
+.groupTitle {
+  font-family: var(--font-body);
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(42, 33, 24, 0.55); font-weight: 600; margin-top: 4px;
+}
+.buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.swatchBtn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  background: #fff; cursor: pointer;
+  font-family: var(--font-body); font-size: 12px; color: var(--color-charcoal);
+  text-align: left;
+}
+.swatchBtn.active { border-color: var(--color-charcoal); outline: 2px solid var(--color-charcoal); }
+.dot { width: 16px; height: 16px; border-radius: var(--radius-round); flex-shrink: 0; border: 1px solid rgba(42, 33, 24, 0.15); }
+
+/* Ornament type chooser (Birds / Butterflies / Perched) */
+.divider { height: 1px; background: rgba(42, 33, 24, 0.10); margin: 4px 0 2px; }
+.ornamentRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ornamentBtn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  background: #fff; cursor: pointer;
+  font-family: var(--font-body); font-size: 10px; color: var(--color-charcoal);
+}
+.ornamentBtn .emoji { font-size: 18px; line-height: 1; }
+.ornamentBtn.active { border-color: var(--color-charcoal); outline: 2px solid var(--color-charcoal); }
+
+/* Display / device chooser (Desktop / iPhone / iPad / Galaxy …) */
+.deviceRow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.deviceBtn {
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  background: #fff; cursor: pointer;
+  font-family: var(--font-body); font-size: 11px; color: var(--color-charcoal);
+  text-align: center;
+}
+.deviceBtn.active { border-color: var(--color-charcoal); outline: 2px solid var(--color-charcoal); }

@@ -1,0 +1,273 @@
+/* ============================================================================
+   EVENT DETAILS — pinned scrollytelling
+
+   pinnedMode (>880px):
+     section is tall (height set inline = SECTION_HEIGHT_VH)
+     .pinned is position: sticky, height 100vh — visually pinned for the
+     entire scroll of the section. Cards slide in from the left one by one
+     (scroll-coupled stagger), map reveals last via top-down coin wipe.
+     All elements fade out simultaneously near the end of the scroll.
+
+   stackedMode (≤880px):
+     section is auto-height, no sticky. Each card / map reveals via
+     whileInView with the same visual motion (slide from left + clip wipe).
+   ============================================================================ */
+
+.section {
+  position: relative;
+  background: transparent;
+  overflow: visible;
+}
+
+.section.stackedMode {
+  padding: var(--spacing-section) var(--container-pad);
+}
+
+/* ---------- Pinned wrapper (desktop / large tablet) ---------- */
+.pinned {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+
+.pinnedMode .inner {
+  padding: clamp(48px, 7vh, 80px) var(--container-pad);
+  display: grid;
+  gap: clamp(24px, 4vh, 48px);
+  max-height: 100vh;
+}
+
+/* ---------- Header ---------- */
+.header { text-align: center; }
+.stackedMode .header { margin-bottom: clamp(40px, 6vw, 64px); }
+.pinnedMode .header  { margin-bottom: 0; }
+
+.eyebrow {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 12px;
+  color: var(--accent, var(--color-coral));
+  margin-bottom: 14px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(40px, 6vw, 72px);
+  color: var(--fg, var(--color-charcoal));
+  margin-bottom: 10px;
+}
+
+/* Pinned mode tightens the header so events/map have room below within 100vh */
+.pinnedMode .title { font-size: clamp(36px, 5vw, 56px); margin-bottom: 8px; }
+.pinnedMode .eyebrow { margin-bottom: 10px; }
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.4vw, 16px);
+  color: var(--fg-muted, var(--color-charcoal-light));
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* ---------- 2fr / 1fr layout ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: clamp(20px, 3vw, 40px);
+  align-items: start;
+}
+
+.events { display: grid; gap: clamp(12px, 1.4vw, 18px); }
+
+/* ---------- Event card ----------
+   IMPORTANT: motion controls `transform` per frame for the scroll-driven
+   slide-in/out. We must NOT put a CSS transition on transform — it'd lag.
+   Hover only animates box-shadow. */
+.eventCardWrapper {
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+}
+
+.eventCardInner {
+  border-radius: var(--radius-md);
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--shadow-glass);
+  border-left: 4px solid var(--accent, var(--color-coral)) !important;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.eventCardInner:hover,
+.eventCardInner:active {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+.eventHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.iconWrap {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-round);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent, var(--color-coral)) 12%, transparent);
+  color: var(--accent, var(--color-coral));
+  flex-shrink: 0;
+}
+
+.eventHeading { display: grid; gap: 2px; }
+
+.eventName {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(20px, 2vw, 24px);
+  color: var(--fg, var(--color-charcoal));
+  line-height: 1.1;
+}
+
+.eventDate {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  font-weight: 500;
+}
+
+.eventTime {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--fg, var(--color-charcoal));
+  margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.eventTimeLabel {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  font-weight: 500;
+}
+
+.eventLocation {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--fg, var(--color-charcoal));
+  line-height: 1.5;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(42, 33, 24, 0.14);
+}
+
+/* ---------- Accent variants ---------- */
+.accent-coral   { --accent: var(--color-coral); }
+.accent-emerald { --accent: var(--color-emerald); }
+.accent-gold    { --accent: var(--color-gold); }
+.accent-purple  { --accent: var(--color-purple); }
+.accent-sky     { --accent: var(--color-sky); }
+
+/* ---------- Map sidebar ----------
+   IMPORTANT: motion controls `clip-path` + `transform` + `opacity` here,
+   so the CSS transition is removed for those props. The card still has
+   the gradient + shadow look. */
+.mapCardWrapper {
+  will-change: clip-path, transform, opacity;
+  transform-style: preserve-3d;
+}
+
+.mapCardInner {
+  border-radius: var(--radius-md);
+  padding: clamp(18px, 2.2vw, 26px);
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-gold-soft) 24%, rgba(255,255,255,0.75)) 0%, rgba(255,255,255,0.6) 100%);
+  backdrop-filter: var(--glass-backdrop-filter);
+  -webkit-backdrop-filter: var(--glass-backdrop-filter);
+  box-shadow: var(--shadow-glass);
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.mapCardInner:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-gold-soft) 30%, rgba(255,255,255,0.85)) 0%, rgba(255,255,255,0.7) 100%);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+.mapTitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(20px, 2vw, 24px);
+  color: var(--fg, var(--color-charcoal));
+  margin-bottom: 14px;
+}
+
+.mapWrap {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #ddd;
+}
+
+/* Tighter map aspect in pinned mode so it sits nicely in the 100vh window */
+.pinnedMode .mapWrap { aspect-ratio: 1 / 1; }
+
+.map { width: 100%; height: 100%; border: 0; display: block; }
+
+.mapHint {
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted, var(--color-charcoal-light));
+  text-align: center;
+}
+
+/* ---------- Responsive ---------- */
+
+/* Stacked-mode breakpoint (the JS also flips to stacked motion variants here) */
+@media (max-width: 880px) {
+  .layout { grid-template-columns: 1fr; }
+  .mapCard { position: static; }
+  .mapWrap { aspect-ratio: 4 / 3; }
+}
+
+/* Tighter inner padding on tablets where pinned mode is still active */
+@media (min-width: 881px) and (max-width: 1100px) {
+  .pinnedMode .inner { padding: clamp(40px, 5vh, 64px) var(--container-pad); }
+  .pinnedMode .title { font-size: clamp(32px, 4.4vw, 48px); }
+}

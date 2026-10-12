@@ -1,0 +1,425 @@
+/* Songket theme (adat Palembang; forked from Lovebirds) — scoped to
+   body.songket-route (set by Shell) so it never leaks to other templates. */
+body.songket-route {
+  /* Default (merahLak) ambient. applyTheme() overrides --page-bg at runtime
+     with the selected palette's own gradient. */
+  --page-bg:
+    radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),
+    linear-gradient(180deg, #6A1426 0%, #3F0A15 100%);
+  background: var(--page-bg) !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+
+  /* ---------- Adat remap of the shared brand accents ----------
+     Sections inherited from Lovebirds pick per-item accents from the global
+     --color-coral / -emerald / -gold / -sky / -purple tokens (event cards,
+     schedule rail, RSVP/footer fallbacks). Re-pointing them here, on the
+     route only, turns every one of those into prada / lak tones without
+     touching each section. Mid-light values so they read on the dark lak
+     palettes. */
+  --color-coral:   #E2A33B; /* amber prada */
+  --color-emerald: #7FB08E; /* hijau limas muda */
+  --color-gold:    #D4AF37; /* emas */
+  --color-sky:     #ECD27E; /* emas muda */
+  --color-purple:  #C98A6B; /* tembaga */
+
+  /* ---------- Combined UI/UX Redesign Variables ---------- */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.70);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-border-hover: rgba(255, 255, 255, 0.75);
+  --glass-backdrop-filter: blur(16px) saturate(120%);
+  
+  --gold-gradient: linear-gradient(135deg, #FFEAB0 0%, #EAA220 50%, #C49010 100%);
+  --gold-metallic: #C49010;
+  
+  --shadow-glass: 0 16px 36px rgba(42, 33, 24, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-glass-hover: 0 24px 50px rgba(42, 33, 24, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  
+  --shadow-button-3d: 0 4px 0 var(--color-charcoal-light), 0 8px 20px rgba(42, 33, 24, 0.12);
+  --shadow-button-3d-hover: 0 6px 0 var(--color-charcoal-light), 0 12px 24px rgba(42, 33, 24, 0.18);
+  --shadow-button-3d-active: 0 1px 0 var(--color-charcoal-light), 0 2px 8px rgba(42, 33, 24, 0.1);
+
+  /* ---------- Fonts — scoped to the invitation card only ----------
+       heading → Cinzel (prasasti feel; loaded by Shell via config/fonts.js,
+                 whose variable class is put on <body>)
+       body    → Biryani · script accent → Tangerine
+       couple names → Great Vibes (--songket-font-names) */
+  /* Each var() carries a fallback: an undefined font var would otherwise
+     invalidate the whole declaration and drop to the inherited family. */
+  --font-display:    var(--font-cinzel, 'Cinzel'), Georgia, serif;
+  --font-body:       var(--font-biryani, 'Biryani'), system-ui, sans-serif;
+  --font-script:     var(--font-tangerine, 'Tangerine'), cursive;
+  --font-serif-soft: var(--font-cinzel, 'Cinzel'), Georgia, serif;
+  --songket-font-names: var(--font-greatvibes, 'Great Vibes'), cursive;
+
+  /* ─── Ornament opacity standard (inherited from Lovebirds) ───
+     Standard opacities for STATIC decorative ornaments. NOTE: the existing
+     Lovebirds ornaments (petals, lovebirds, sparkles, botanical border) are
+     ANIMATION-DRIVEN — their opacity lives in @keyframes fades (and a few
+     prefers-reduced-motion fallbacks) that are intentional motion/storytelling
+     tuning, so they were deliberately NOT rewired here. Apply these to a
+     specific ornament only after a visual review. */
+  --ornament-ring-opacity:      0.14;
+  --ornament-star-opacity:      0.20;
+  --ornament-petal-opacity:     0.16;
+  --ornament-botanical-opacity: 0.12;
+  --ornament-sparkle-opacity:   0.18;
+  --ornament-glow-opacity:      0.10;
+}
+
+/* Component variations */
+
+/* 1. Iridescent Champagne Glass Card */
+.glass-iridescent {
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(135deg, rgba(255, 245, 230, 0.6) 0%, rgba(250, 220, 235, 0.5) 100%);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 
+    0 16px 36px rgba(42, 33, 24, 0.08), 
+    0 0 20px rgba(244, 163, 143, 0.15), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: var(--transition-default);
+}
+.glass-iridescent:hover {
+  border-color: rgba(255, 255, 255, 0.85);
+  background: linear-gradient(135deg, rgba(255, 245, 230, 0.75) 0%, rgba(250, 220, 235, 0.65) 100%);
+  box-shadow: 
+    0 24px 48px rgba(42, 33, 24, 0.14), 
+    0 0 30px rgba(244, 163, 143, 0.25), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+/* 2. Fine Art Arch Frame */
+.polaroid-arch {
+  border-radius: 120px 120px 16px 16px;
+  border: 2.5px solid var(--accent, #D4AF37);
+  padding: 12px;
+  background: var(--color-paper, #ffffff);
+  box-shadow: var(--shadow-polaroid);
+  transition: var(--transition-default);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  max-width: 190px;
+}
+.polaroid-arch::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 116px 116px 12px 12px;
+  border: 1px solid rgba(42, 33, 24, 0.12);
+  pointer-events: none;
+}
+.polaroid-arch .photo-inner {
+  border-radius: 110px 110px 8px 8px;
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: linear-gradient(135deg, var(--accent-soft, var(--color-coral-soft)), var(--color-gold-soft));
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display-classy, var(--font-display));
+  font-style: italic;
+  font-size: 40px;
+  color: var(--color-charcoal);
+}
+
+/* 3. Stamp / Ticket Frame */
+.polaroid-stamp {
+  border-radius: var(--radius-xs);
+  background: #fff;
+  padding: 12px;
+  padding-bottom: 32px;
+  box-shadow: var(--shadow-polaroid);
+  position: relative;
+  outline: 1px solid rgba(42,33,24,0.06);
+  max-width: 190px;
+  transform: rotate(3deg);
+  transition: var(--transition-default);
+}
+.polaroid-stamp:hover {
+  transform: rotate(0deg) scale(1.03);
+}
+.polaroid-stamp::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 4px dotted #fff;
+  border-radius: var(--radius-xs);
+  pointer-events: none;
+}
+.polaroid-stamp .photo-inner {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: linear-gradient(135deg, var(--color-rose-soft, var(--color-coral-soft)), var(--color-gold-soft));
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 36px;
+  color: var(--color-charcoal);
+}
+
+/* 4. Floating Offset Button */
+.btn-offset-border {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--accent, var(--color-coral));
+  color: #fff !important;
+  font-family: var(--font-body-fun, var(--font-body));
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.25s var(--ease-out), background 0.25s var(--ease-out);
+}
+.btn-offset-border::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--accent, var(--color-coral));
+  opacity: 0.8;
+  transition: transform 0.25s var(--ease-out), opacity 0.25s var(--ease-out);
+  transform: translate(4px, 4px);
+  pointer-events: none;
+}
+.btn-offset-border:hover {
+  transform: translate(-1px, -1px);
+  background: var(--color-plum, var(--color-coral));
+}
+.btn-offset-border:hover::after {
+  transform: translate(0px, 0px);
+  opacity: 1;
+}
+.btn-offset-border:active {
+  transform: translate(2px, 2px);
+}
+.btn-offset-border:active::after {
+  transform: translate(-1px, -1px);
+}
+
+/* 5. Slide-in Text Button (magnetic slide) */
+.btn-magnetic-slide {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px;
+  border-radius: var(--radius-pill);
+  background: var(--button-bg, var(--color-coral));
+  color: var(--button-fg, #fff) !important;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(42, 33, 24, 0.12);
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.btn-magnetic-slide span {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.btn-magnetic-slide::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  transform: translateY(200%);
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.btn-magnetic-slide:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(42, 33, 24, 0.18);
+}
+.btn-magnetic-slide:hover span {
+  transform: translateY(-200%);
+}
+.btn-magnetic-slide:hover::after {
+  transform: translateY(0);
+}
+
+/* 6. Iridescent Glass Button */
+.btn-iridescent-glass {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: var(--fg) !important;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.4);
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.btn-iridescent-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+.btn-iridescent-glass:hover {
+  border-color: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(244, 163, 143, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.btn-iridescent-glass:hover::before {
+  transform: translateX(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-magnetic-slide span,
+  .btn-magnetic-slide::after { transition: none; }
+}
+
+/* 7. Magnetic Morphing Button */
+.btn-morphing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  background: var(--color-charcoal, #2A2118);
+  color: var(--color-cream, #FDF6EC) !important;
+  font-family: var(--font-body-fun, var(--font-body));
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-radius 0.4s var(--ease-out), transform 0.25s var(--ease-out), background 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  box-shadow: 0 6px 16px rgba(42,33,24,0.15);
+}
+.btn-morphing:hover {
+  border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+  transform: scale(1.05) rotate(1deg);
+  background: var(--accent, var(--color-coral));
+  box-shadow: 0 10px 24px rgba(42,33,24,0.22);
+}
+.btn-morphing:active {
+  transform: scale(0.98);
+}
+
+/* 6. Arched Portal Person Card */
+.person-arch-portal {
+  text-align: center;
+  position: relative;
+}
+.person-arch-portal .photo-outer {
+  position: relative;
+  width: 140px;
+  height: 180px;
+  margin: 0 auto 22px;
+}
+.person-arch-portal .photo-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 70px 70px 16px 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-rose-soft, var(--color-coral-soft)), var(--color-gold-soft));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 46px;
+  box-shadow: 0 16px 40px rgba(42, 33, 24, 0.18), inset 0 0 0 3px #fff;
+  transition: transform 0.5s var(--ease-out);
+}
+.person-arch-portal:hover .photo-frame {
+  transform: scale(1.03);
+}
+.person-arch-portal .photo-outline {
+  position: absolute;
+  inset: -8px;
+  border-radius: 78px 78px 24px 24px;
+  border: 1px solid var(--accent, var(--color-coral));
+  opacity: 0.6;
+  animation: archPulse 3s infinite ease-in-out;
+  pointer-events: none;
+}
+@keyframes archPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.04); opacity: 0.8; }
+}
+.person-arch-portal .role {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  font-family: var(--font-body-fun, var(--font-body));
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-charcoal);
+  box-shadow: 0 6px 16px rgba(42, 33, 24, 0.12);
+  border: 1px solid rgba(42,33,24,0.08);
+}
+.person-arch-portal .pname {
+  font-family: var(--font-script);
+  font-size: 38px;
+  color: var(--color-charcoal);
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Custom helper utilities for Classy, Elegant & Fun variations */
+.variant-classy-fun {
+  font-family: var(--font-body-fun, var(--font-body)) !important;
+}
+.variant-classy-fun h1, 
+.variant-classy-fun h2, 
+.variant-classy-fun h3, 
+.variant-classy-fun .section-title,
+.variant-classy-fun .block-title {
+  font-family: var(--font-display-classy, var(--font-display)) !important;
+}
+.variant-classy-fun .script,
+.variant-classy-fun .pname {
+  font-family: var(--font-script) !important;
+}
+.variant-classy-fun .eyebrow,
+.variant-classy-fun .eyebrow-demo {
+  font-family: var(--font-body-fun, var(--font-body)) !important;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+}
+

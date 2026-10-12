@@ -1,0 +1,177 @@
+/* GalleryMasonry — vertical conveyor belt gallery */
+
+.section {
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
+  padding: 80px 0 0;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 0 var(--container-pad) clamp(32px, 5vw, 52px);
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-coral));
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 6vw, 72px);
+  color: var(--fg, var(--color-charcoal));
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.4vw, 16px);
+  color: var(--fg-muted, var(--color-charcoal-light));
+  margin: 0;
+}
+
+/* ── Scroll stage ──
+   Mobile-first defaults: 2 columns, fluid height, tight gutter. The
+   responsive block below progressively adds columns (3/4/5) and lifts the
+   height as the viewport grows. Belts 3/4/5 stay `display: none` by default
+   so a phone never paints + animates DOM it can't show. */
+.stage {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 0 var(--container-pad);
+  height: clamp(720px, 110vw, 1080px);
+  overflow: hidden;
+  /* Soft fade at top and bottom */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
+/* ── Belt (one column) ── */
+.belt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  will-change: transform;
+}
+
+/*
+  Seamless loop:
+  - Each belt contains photos TWICE (original + clone).
+  - beltUp:   translateY(0 → -50%)  — when CSS resets to 0, clone is
+    visually where the original was → zero jump.
+  - beltDown: translateY(-50% → 0)  — same principle, reversed.
+  - Duration set via --spd CSS custom property on the element.
+*/
+.beltUp {
+  animation: beltUp var(--spd, 20s) linear infinite;
+}
+
+.beltDown {
+  animation: beltDown var(--spd, 20s) linear infinite;
+}
+
+@keyframes beltUp {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+@keyframes beltDown {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+
+/* ── Photo cell ── */
+/*
+  aspect-ratio is set inline per cell so heights are deterministic
+  from first render — CSS knows exactly what -50% means before
+  images finish loading.
+*/
+.cell {
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  /* Soft placeholder shown when a photo URL is broken (img is hidden on error)
+     so the masonry rhythm holds instead of leaving a blank gap. */
+  background: linear-gradient(135deg, rgba(42, 33, 24, 0.06), rgba(42, 33, 24, 0.02));
+}
+
+.cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.85);
+}
+
+/* ── Responsive — mobile-first ──
+   Belts 3/4/5 default to `display: none; animation: none` so the phone
+   skips their layout + animation cost. Each min-width breakpoint then
+   "unhides" the next belt and bumps the column count. Re-asserting
+   `animation` keeps the CSS keyframes restarting cleanly when the
+   viewport widens past the threshold (animation: none → unset on flip). */
+/* Hidden until their breakpoint unlocks them. Toggle ONLY `display` here — not
+   `animation`. display:none already stops the animation and its paint cost, and
+   leaving the base .beltUp/.beltDown rule intact matters: it carries the
+   CSS-Modules-SCOPED @keyframes name. (A previous version re-set
+   `animation: var(--belt-anim, beltUp)` in the unlock media queries below, but
+   CSS Modules can't rewrite a keyframe name inside var() — it stayed the raw,
+   non-existent `beltUp`, so columns 3 & 5 silently never moved.) */
+.belt:nth-child(3),
+.belt:nth-child(4),
+.belt:nth-child(5) {
+  display: none;
+}
+
+/* Small phone → larger phone (≥480px): same 2-col layout, looser gutter. */
+@media (min-width: 480px) {
+  .stage { gap: 10px; }
+}
+
+/* Tablet (≥768px): unlock 3rd column. Just reveal it — the base .beltUp/
+   .beltDown rule (scoped keyframe) animates it, restarting cleanly from
+   display:none → flex. */
+@media (min-width: 768px) {
+  .stage {
+    grid-template-columns: repeat(3, 1fr);
+    height: clamp(840px, 100vw, 1080px);
+  }
+  .belt:nth-child(3) { display: flex; }
+}
+
+/* Desktop (≥1024px): unlock 4th column. */
+@media (min-width: 1024px) {
+  .stage {
+    grid-template-columns: repeat(4, 1fr);
+    height: 1080px;
+  }
+  .belt:nth-child(4) { display: flex; }
+}
+
+/* Wide desktop (≥1280px): full 5-column wall. */
+@media (min-width: 1280px) {
+  .stage { grid-template-columns: repeat(5, 1fr); }
+  .belt:nth-child(5) { display: flex; }
+}

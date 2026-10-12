@@ -1,0 +1,264 @@
+/* ============================================================================
+   SCHEDULE — pinned scroll-hijacking timeline
+
+   pinnedMode (≥768px):
+     Section is tall (height set inline). Inner `.pinned` is sticky,
+     keeping the timeline visible while user scrolls. Each event card
+     slides in from the LEFT one by one (scroll-coupled stagger).
+     All events fade out together at end.
+
+   stackedMode (<768px):
+     Section is auto-height. Each event uses whileInView for natural
+     reveal as it enters the viewport.
+   ============================================================================ */
+
+.section {
+  position: relative;
+  /* Transparent so global ornaments show through (see OurStory note). */
+  background: transparent;
+  overflow: visible;
+}
+
+.section.stackedMode {
+  padding: var(--spacing-section) var(--container-pad);
+}
+
+/* ---------- Pinned wrapper (desktop) ---------- */
+.pinned {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.pinnedMode .inner {
+  /* Tighter padding so 7+ events fit within 100vh */
+  padding: clamp(20px, 3.5vh, 36px) var(--container-pad);
+  display: grid;
+  gap: clamp(14px, 2vh, 24px);
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+.header { text-align: center; }
+.stackedMode .header { margin-bottom: clamp(40px, 6vw, 64px); }
+.pinnedMode .header  { margin-bottom: 0; }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: clamp(12px, 1.3vw, 15px);
+  color: var(--accent, var(--color-emerald));
+  margin-bottom: 14px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(40px, 6vw, 72px);
+  color: var(--fg, var(--color-charcoal));
+  margin-bottom: 12px;
+}
+
+/* Aggressively tighter header in pinned mode so 7 events fit within 100vh */
+.pinnedMode .title { font-size: clamp(26px, 3.6vw, 40px); margin-bottom: 4px; }
+.pinnedMode .eyebrow { margin-bottom: 6px; }
+.pinnedMode .subtitle { font-size: clamp(12px, 1.2vw, 14px); }
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.4vw, 16px);
+  color: var(--fg-muted, var(--color-charcoal-light));
+}
+
+/* ---------- Timeline ---------- */
+.timeline {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.pinnedMode .timeline { gap: clamp(4px, 0.8vh, 10px); }
+
+/* Real DOM element instead of ::before — so motion can animate
+   clipPath + opacity on it for the "draws as cards reveal" effect. */
+.timelineLine {
+  position: absolute;
+  left: 78px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-coral), var(--color-gold), var(--color-emerald), var(--color-sky), var(--color-purple));
+  border-radius: var(--radius-xs);
+  z-index: 0;
+  pointer-events: none;
+  will-change: clip-path, opacity;
+}
+
+.event {
+  position: relative;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: center;
+  gap: 28px;
+  will-change: transform, opacity;
+}
+
+.timeBadge {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 22px);
+  color: var(--fg, var(--color-charcoal));
+  font-weight: 400;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  /* Keep the time (e.g. "15:30") on a single line at every viewport — the
+     80px grid column was clipping wide digits into "15:3" + "0". */
+  white-space: nowrap;
+  /* Push digits inward from the right edge of the 80px column so they
+     don't visually touch the coloured timeline dot (positioned at
+     left: -34px from the card, so its halo lands near the column edge).
+     Scales with viewport: ~18px on tablet, ~28px on wide desktop. */
+  padding-right: clamp(18px, 2vw, 28px);
+}
+
+/* Compact time badge in pinned mode (fits 7 events in 100vh) */
+.pinnedMode .timeBadge { font-size: clamp(14px, 1.6vw, 18px); }
+
+/* ---------- Card ----------
+   IMPORTANT: motion controls `transform` per frame for the slide-in.
+   We must NOT set CSS transition on `transform` or it will lag behind
+   scroll. Only animate box-shadow (for hover lift). */
+.card {
+  position: relative;
+  background: var(--glass-bg, #ffffff);
+  border: 1px solid var(--glass-border, rgba(42, 33, 24, 0.08));
+  border-radius: var(--radius-md);
+  padding: clamp(14px, 2vh, 20px) clamp(18px, 2.4vw, 24px);
+  box-shadow: var(--shadow-glass);
+  border-left: 4px solid var(--accent, var(--color-coral)) !important;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 18px;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Compact cards in pinned mode (fits 7 events in 100vh) */
+.pinnedMode .card {
+  padding: clamp(8px, 1.2vh, 14px) clamp(14px, 2vw, 20px);
+  gap: clamp(10px, 1.4vw, 14px);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  left: -34px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-round);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--bg, var(--color-cream, #fff));
+}
+
+.card:hover,
+.card:active {
+  box-shadow: var(--shadow-glass-hover);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
+
+.iconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-round);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Smaller icon in pinned mode */
+.pinnedMode .iconWrap { width: 34px; height: 34px; }
+.pinnedMode .iconWrap svg { width: 16px; height: 16px; }
+
+.eventTitle {
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  font-size: clamp(16px, 1.7vw, 19px);
+  color: var(--fg, var(--color-charcoal));
+  margin-bottom: 4px;
+}
+
+.eventDescription {
+  font-family: var(--font-body);
+  font-size: clamp(13px, 1.3vw, 14px);
+  color: var(--fg-muted, var(--color-charcoal-light));
+  line-height: 1.55;
+}
+
+/* Compact typography in pinned mode */
+.pinnedMode .eventTitle {
+  font-size: clamp(15px, 1.6vw, 18px);
+  margin-bottom: 2px;
+}
+.pinnedMode .eventDescription {
+  font-size: clamp(11.5px, 1.1vw, 13px);
+  line-height: 1.4;
+}
+
+/* ---------- Accent variants ---------- */
+.accent-coral   { --accent: var(--color-coral); }
+.accent-gold    { --accent: var(--color-gold); }
+.accent-emerald { --accent: var(--color-emerald); }
+.accent-sky     { --accent: var(--color-sky); }
+.accent-purple  { --accent: var(--color-purple); }
+
+/* ---------- Responsive ---------- */
+/* Phones keep the DESKTOP composition — time rail on the left of the cards —
+   just compacted (56px time column, 13px badge). The old mobile layout
+   stacked the time above each card, losing the timeline read the desktop
+   version is loved for. Animations untouched: only the grid geometry moves. */
+@media (max-width: 767.98px) {
+  .timelineLine { left: 56px; }
+  .event { grid-template-columns: 56px 1fr; gap: 22px; }
+  .timeBadge { text-align: right; font-size: 13px; padding-right: 12px; }
+  .card { grid-template-columns: auto 1fr; gap: 10px; }
+  .card::before {
+    left: -28px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Tighter spacing at tablet width while still pinned (768–1023px) */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .pinnedMode .inner { padding: clamp(32px, 5vh, 48px) var(--container-pad); }
+  .pinnedMode .timeline { gap: clamp(6px, 1.2vh, 12px); }
+}

@@ -1,0 +1,22 @@
+.quote {
+  /* Solid band per palette (--band, set by applyTheme) so the verse stays
+     readable on both the light and the dark palettes. */
+  background: var(--band, #4A0C17);
+  padding: clamp(64px, 12vw, 140px) var(--container-pad, 24px);
+}
+
+.inner {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Tepak sirih — the betel box offered to honoured guests. */
+.tepak {
+  display: block;
+  width: clamp(80px, 14vw, 120px);
+  height: auto;
+  margin: 0 auto 20px;
+  color: var(--accent, #D4AF37);
+  --sk-bg: var(--band, #4A0C17);
+}

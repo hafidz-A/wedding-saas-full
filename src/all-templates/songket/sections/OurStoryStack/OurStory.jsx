@@ -1,0 +1,252 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import styles from './OurStory.module.css'
+import { songketImg as demoImg } from '../../demoImages.js'
+
+gsap.registerPlugin(ScrollTrigger)
+
+/* Our Story — scroll-stacking card deck driven by GSAP ScrollTrigger. */
+
+const DEFAULT_STORIES = [
+  { id: 1, year: '2019', date: 'Januari 2019',  title: 'The First Meeting', description: 'Pertemuan pertama di sebuah kafe kecil — dua cangkir kopi dan tawa yang langsung terasa seperti rumah.', image: demoImg('storyFirstMeet', 1400) },
+  { id: 2, year: '2020', date: 'Februari 2020', title: 'Our First Date',    description: 'Langkah pelan menyusuri galeri seni — bicara tentang apa saja, tak ingin sore itu berakhir.', image: demoImg('storyFirstDate', 1400) },
+  { id: 3, year: '2022', date: 'Desember 2022', title: 'A Trip Together',   description: 'Sebuah perjalanan yang membuat kami yakin bisa melewati apapun bersama.', image: demoImg('storyHoliday', 1400) },
+  { id: 4, year: '2024', date: 'Maret 2024',    title: 'The Proposal',      description: 'Pertanyaan tenang di hari Minggu yang biasa, dijawab dengan satu kata: ya.', image: demoImg('storyProposal', 1400) },
+  { id: 5, year: '2025', date: 'November 2025', title: 'The Wedding Day',   description: 'Dan inilah kami — siap memulai bab berikutnya dari cerita kami.', image: demoImg('storyWedding', 1400) },
+]
+
+const ACCENT_GRADIENTS = [
+  // Lacquer + prada finishes (adat Palembang) instead of Lovebirds' brights.
+  'linear-gradient(135deg, #6E1423 0%, #D4AF37 100%)',
+  'linear-gradient(135deg, #1F3B2D 0%, #D4AF37 100%)',
+  'linear-gradient(135deg, #1D1411 0%, #8A6A14 100%)',
+  'linear-gradient(135deg, #8A6A14 0%, #ECD27E 100%)',
+  'linear-gradient(135deg, #3F0A15 0%, #8B1E2D 100%)',
+]
+
+// Uniform timing — every card transition uses the same values
+const STEP_DURATION = 1
+const STEP_EASE     = 'power3.out'
+const SCRUB_LAG     = 1
+
+const DEPTH_SCALE_STEP = 0.04
+const DEPTH_Y_STEP     = 16
+const MIN_SCALE        = 0.62
+
+export default function OurStory({
+  stories,
+  cards,
+  title = 'Our Story',
+  subtitle = '',
+  eyebrow = 'Perjalanan kami',
+  scrollPerCardPx = 400,
+  ariaLabel = 'Our Story',
+}) {
+  /* CRITICAL: memoize data so useEffect doesn't re-run every render.
+     Without this, every parent re-render rebuilds the entire ScrollTrigger
+     pin + timeline, which can fight other pinned sections and (in the
+     worst case) leave the page with content hidden because pin spacers
+     get computed during a torn-down state. */
+  const data = useMemo(
+    () => normalizeStories(stories || cards || DEFAULT_STORIES),
+    [stories, cards],
+  )
+
+  const sectionRef = useRef(null)
+  const stageRef = useRef(null)
+  const cardRefs = useRef([])
+  const descPanelRef = useRef(null)
+  const activeIndexRef = useRef(0)
+
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  const setCardRef = (idx) => (el) => {
+    if (el) cardRefs.current[idx] = el
+  }
+
+  useEffect(() => {
+    const sectionEl = sectionRef.current
+    const cardEls = cardRefs.current.filter(Boolean)
+    const total = cardEls.length
+
+    // Defensive: bail safely if anything's missing — but still render content
+    if (!sectionEl || total === 0) return undefined
+
+    const ROTATIONS = [-3.5, 2.2, -1.8, 3.5, -2.2, 1.8]
+
+    // ── INITIAL STATE — set BEFORE any ScrollTrigger so cards are visible
+    cardEls.forEach((card, i) => {
+      if (i === 0) {
+        gsap.set(card, {
+          y: 0,
+          x: 0,
+          rotate: ROTATIONS[0],
+          opacity: 1,
+          scale: 1,
+          zIndex: 10,
+          willChange: 'transform, opacity',
+        })
+      } else {
+        gsap.set(card, {
+          y: '125%',
+          x: 40,
+          rotate: ROTATIONS[i % ROTATIONS.length] * 2.5,
+          opacity: 0,
+          scale: 1,
+          zIndex: 10 + i,
+          willChange: 'transform, opacity',
+        })
+      }
+    })
+    activeIndexRef.current = 0
+
+    const swapDescription = (newIdx) => {
+      const panel = descPanelRef.current
+      if (!panel) {
+        setActiveIndex(newIdx)
+        return
+      }
+      gsap.to(panel, {
+        opacity: 0,
+        y: -10,
+        duration: 0.25,
+        ease: 'power2.in',
+        overwrite: 'auto',
+        onComplete: () => {
+          setActiveIndex(newIdx)
+          gsap.to(panel, {
+            opacity: 1,
+            y: 0,
+            duration: 0.35,
+            ease: 'power2.out',
+          })
+        },
+      })
+    }
+
+    // Pass the actual DOM element to gsap.context (not the ref object)
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionEl,
+          start: 'top top',
+          end: `+=${(total - 1) * scrollPerCardPx}`,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          scrub: SCRUB_LAG,
+          onUpdate: (self) => {
+            const idx = Math.min(
+              total - 1,
+              Math.round(self.progress * (total - 1)),
+            )
+            if (idx !== activeIndexRef.current) {
+              activeIndexRef.current = idx
+              swapDescription(idx)
+            }
+          },
+        },
+      })
+
+      for (let i = 1; i < total; i++) {
+        const stepStart = i - 1
+
+        tl.to(
+          cardEls[i],
+          {
+            y: 0,
+            x: 0,
+            rotate: ROTATIONS[i % ROTATIONS.length],
+            opacity: 1,
+            duration: STEP_DURATION,
+            ease: STEP_EASE,
+          },
+          stepStart,
+        )
+      }
+    }, sectionEl)
+
+    // Refresh ScrollTrigger once after images may have loaded — fixes
+    // pin-spacer height when lazy-loaded images change layout
+    const refreshId = window.setTimeout(() => ScrollTrigger.refresh(), 300)
+
+    return () => {
+      window.clearTimeout(refreshId)
+      ctx.revert()
+    }
+  }, [data, scrollPerCardPx])
+
+  const current = data[activeIndex] || data[0]
+
+  return (
+    <section ref={sectionRef} className={styles.section} aria-label={ariaLabel}>
+      {(title || subtitle || eyebrow) && (
+        <header className={styles.sectionHeader}>
+          {eyebrow && <p className={styles.sectionEyebrow}>{eyebrow}</p>}
+          {title && <h2 className={styles.sectionTitle}>{title}</h2>}
+          {subtitle && <p className={styles.sectionSubtitle}>{subtitle}</p>}
+        </header>
+      )}
+
+      <div className={styles.container}>
+        <div ref={stageRef} className={styles.stage}>
+          {data.map((s, i) => (
+            <div
+              key={s.id ?? i}
+              ref={setCardRef(i)}
+              className={styles.card}
+              style={{
+                background: ACCENT_GRADIENTS[i % ACCENT_GRADIENTS.length],
+              }}
+              aria-hidden="true"
+            >
+              {s.image && (
+                <img
+                  src={s.image}
+                  alt=""
+                  className={styles.cardImage}
+                  loading="lazy"
+                />
+              )}
+              <span className={styles.cardOverlay} />
+              <span className={styles.cardNumber}>
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <span className={styles.cardPattern} />
+              <span className={styles.cardCorner} />
+            </div>
+          ))}
+        </div>
+
+        <div ref={descPanelRef} className={styles.descPanel}>
+          {current?.year && <span className={styles.descYear}>{current.year}</span>}
+          {current?.date && <span className={styles.descDate}>{current.date}</span>}
+          {current?.title && <h2 className={styles.descTitle}>{current.title}</h2>}
+          {current?.description && (
+            <p className={styles.descText}>{current.description}</p>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function normalizeStories(arr) {
+  return arr.map((s, i) => ({
+    id: s.id ?? i,
+    year: s.year || (s.date ? extractYear(s.date) : ''),
+    date: s.date || '',
+    title: s.title || '',
+    description: s.description || '',
+    image: s.image || '',
+  }))
+}
+
+function extractYear(dateStr) {
+  const match = String(dateStr).match(/\b(19|20)\d{2}\b/)
+  return match ? match[0] : ''
+}
