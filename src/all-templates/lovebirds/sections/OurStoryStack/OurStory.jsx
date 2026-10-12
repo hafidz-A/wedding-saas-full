@@ -201,20 +201,26 @@ export default function OurStory({
       stage.style.height = ''
       panel.style.maxHeight = ''
       panel.style.overflowY = ''
+      panel.classList.remove(styles.descCompact)
       if (!mq.matches) return
       const sc = getComputedStyle(section)
       const inner = window.innerHeight - px(sc.paddingTop) - px(sc.paddingBottom)
       const header = headerRef.current
       const headerH = header ? header.offsetHeight + px(getComputedStyle(header).marginBottom) : 0
       const gap = px(getComputedStyle(container).rowGap)
-      const descH = Math.ceil(panel.getBoundingClientRect().height)
       const maxW = Math.min(320, window.innerWidth * 0.82)
       const maxH = Math.min(window.innerHeight * 0.5, maxW / 0.8)
       const minH = Math.min(maxH, 140)
-      let h = inner - headerH - gap - descH
+      const room = () => inner - headerH - gap - Math.ceil(panel.getBoundingClientRect().height)
+      let h = room()
       if (h < minH) {
+        // Step 1: slightly smaller story text.
+        panel.classList.add(styles.descCompact)
+        h = room()
+      }
+      if (h < minH) {
+        // Step 2 (very long story on a tiny phone): scroll inside the panel.
         h = minH
-        // Last resort (very long story on a short phone): scroll inside.
         panel.style.maxHeight = `${Math.max(80, inner - headerH - gap - h)}px`
         panel.style.overflowY = 'auto'
       }

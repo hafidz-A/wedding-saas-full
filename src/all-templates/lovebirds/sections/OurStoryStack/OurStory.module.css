@@ -249,6 +249,9 @@
   .descDate   { margin-bottom: 4px; }
   .descTitle  { font-size: clamp(26px, 7.5vw, 36px); }
   .descText   { font-size: 15px; line-height: 1.6; margin-top: 8px; }
+  /* Set by OurStory.jsx only when the story doesn't fit at the normal size. */
+  .descCompact .descTitle { font-size: clamp(24px, 7vw, 32px); }
+  .descCompact .descText  { font-size: 14px; line-height: 1.5; margin-top: 6px; }
 }
 
 @media (max-width: 480px) {
