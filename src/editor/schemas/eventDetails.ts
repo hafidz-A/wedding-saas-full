@@ -29,7 +29,11 @@ export const eventDetailsSchema: SectionSchema = {
         { key: 'accent',   label: { id: 'Warna aksen', en: 'Accent' }, type: 'select', options: ACCENTS },
       ],
     },
-    { key: 'mapEmbed', label: { id: 'URL embed peta', en: 'Map embed URL' }, type: 'textarea', rows: 3 },
+    { key: 'mapEmbed', label: { id: 'Link Google Maps', en: 'Google Maps link' }, type: 'textarea', rows: 3,
+      help: {
+        id: 'Tempel link dari tombol "Bagikan" di Google Maps (maps.app.goo.gl/…) — otomatis diubah jadi peta. Kode "Sematkan peta" juga bisa. Kosongkan untuk menyembunyikan peta.',
+        en: 'Paste the link from Google Maps\' "Share" button (maps.app.goo.gl/…) — it is converted to a map automatically. The "Embed a map" code works too. Leave empty to hide the map.',
+      } },
   ],
   defaults: {
     title: 'Event Details',

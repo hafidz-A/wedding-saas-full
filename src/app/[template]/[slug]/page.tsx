@@ -11,6 +11,7 @@ import { decryptConfig } from '@/lib/crypto/config'
 import { decryptField } from '@/lib/crypto/app'
 import { migrateLovebirdsConfig } from '@/lib/config/migrate-lovebirds'
 import { fillEmptyImages } from '@/lib/config/fillEmptyImages'
+import { resolveConfigMapEmbeds } from '@/lib/maps/embed'
 import { upgradeLegacyDemoImageUrls } from '@/lib/config/legacy-demo-urls'
 import { composeTitle } from '@/lib/meta/couple'
 
@@ -207,6 +208,11 @@ export default async function Page({ params, searchParams }: PageProps) {
   // Render-time only: blank image slots fall back to contextual demo photos.
   // Never persisted — the editor still sees the owner's real (empty) value.
   config = fillEmptyImages(config)
+
+  // Render-time only: whatever the couple pasted as the map (a "Bagikan" short
+  // link, a browser-bar place URL, the <iframe> snippet) becomes a frameable
+  // embed URL — Google refuses to be framed on share links (grey box).
+  config = await resolveConfigMapEmbeds(config)
 
   // DEMO ONLY: lovebirds previews show BOTH gallery styles back-to-back so
   // visitors can compare them, each with a note explaining that a real
