@@ -295,6 +295,7 @@ export default function Hero(props) {
 
         {/* Songket cloth behind the gate, framed top and bottom by the kepala
             kain (pucuk rebung hanging from a woven edge), as on the cloth itself. */}
+        <div className={`${styles.gateFabricAlt} sk-fabric-alt`} aria-hidden="true" />
         <div className={`${styles.gateFabric} sk-fabric`} aria-hidden="true" />
         <div className={`${styles.kainTop} sk-kepala-kain`} aria-hidden="true" />
         <div className={`${styles.kainBottom} sk-kepala-kain sk-kepala-kain--up`} aria-hidden="true" />

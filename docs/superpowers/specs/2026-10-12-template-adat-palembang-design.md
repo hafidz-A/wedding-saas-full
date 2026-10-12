@@ -28,6 +28,29 @@ editor **identik**; yang diganti hanya lapisan visual:
 | — | **motif songket dari referensi pemilik** (`components/adat/motifGeometry.mjs` → `scripts/gen-songket-motifs.mjs` → `public/songket/motifs/*-v1.svg`): kain lepus di latar, kepala kain di hero & tiap section, pita anyaman di tepi, roset anyaman untuk kilau emas, kain emas bermotif marun di RSVP & penutup |
 | Foto demo mempelai | potret siluet Aesan Gede (`public/songket/demo/*.svg`); foto demo lain masih placeholder Lovebirds |
 
+### Ragam motif kain (paralel, dipilih lewat 🎨 → "Motif Kain")
+
+Permintaan pemilik: motif yang sudah ada **ditetapkan** (tidak dihapus) sebagai **Motif Awal**, lalu
+enam ragam songket dibuat **berdampingan** supaya bisa dibandingkan. Teknisnya: `config/motifs.js`
+→ `body[data-sk-motif]` → aturan CSS di `styles/theme.css`; ubin dari `scripts/gen-songket-motifs.mjs`.
+Saat ini hanya bisa dipilih di demo (panel 🎨); `config.theme.motif` sudah dibaca sebagai default,
+tetapi belum ada kontrol di dashboard/admin untuk menyimpannya.
+
+| Ragam | Ciri yang diterapkan | Badan kain | Kepala kain |
+|---|---|---|---|
+| **Motif Awal** | set pertama (dari gambar referensi pemilik) | tumpal bertombak + bunga tabur | pucuk rebung bersulur |
+| **Lepus** | benang emas menutupi hampir seluruh kain | sel nampan perak rapat dalam kisi belah ketupat | tumpal rapat |
+| **Tabur** | motif kecil ditabur berjarak, dasar kain terlihat | bunga tabur + bintang kecil berselang | bunga tabur kecil (bingkai tipis) |
+| **Bunga-Bunga** | motif bunga naturalis | sulur diagonal: mawar, bunga kecil, daun | sulur bergelombang dengan mawar |
+| **Limar** (Bunga Cogan) | songket berpadu tenun ikat pakan | bidang ikat berwarna `--limar` berujung lembut + Bunga Cogan emas | zigzag + bunga cogan |
+| **Tretes Mender** | badan polos, motif hanya di pinggir & ujung | — (polos) | tumpal besar + deret tumpal kecil (paling kaya) |
+| **Rumpak** | motif berbaris, berselang jalur polos | baris petak bergeser setengah langkah | deret petak |
+
+⚠️ **Perlu dicek ke sumber adat** (teman konsultan/perias/penenun): ciri di atas disusun dari
+pengetahuan umum. Yang paling tidak pasti: bentuk **Bunga Cogan**, dan apakah **Rumpak** memang
+"berbaris/berpetak berselang polos". Lepus, Tabur, Limar (ikat), dan Tretes Mender (badan polos,
+motif di pinggir) relatif lebih pasti.
+
 **Sengaja BELUM (supaya tidak bisa dibeli selama uji coba):** `templateCatalog.js`, tabel DB
 `templates` + `template_plans`, form admin create, galeri marketing (`vibeData.ts`), tutorial
 dashboard. Konsekuensinya: tab Palet di dashboard masih membaca `vibeData.ts`, jadi untuk undangan

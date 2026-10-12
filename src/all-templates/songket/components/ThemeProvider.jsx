@@ -3,11 +3,13 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { applyTheme, clearTheme, isThemeName, DEFAULT_THEME_NAME, THEME_ORDER } from '../config/applyTheme.js'
 import { DEFAULT_DEVICE, isDeviceId } from '@/lib/preview/devicePresets'
+import { DEFAULT_MOTIF, isMotif } from '../config/motifs.js'
 
 const ThemeContext = createContext(null)
 const STORAGE_KEY = 'songket:theme'
 const ORNAMENT_STORAGE_KEY = 'songket:ornament'
 const DEVICE_STORAGE_KEY = 'songket:device'
+const MOTIF_STORAGE_KEY = 'songket:motif'
 
 // Keys must match components/Ornaments.jsx SHAPES + src/lib/templates/appearance.ts.
 const ORNAMENT_TYPES = ['melati', 'kilauEmas', 'kunang']
@@ -30,6 +32,7 @@ const isOrnamentType = (t) => ORNAMENT_TYPES.includes(t)
 export default function ThemeProvider({
   defaultPalette = DEFAULT_THEME_NAME,
   defaultOrnament = DEFAULT_ORNAMENT,
+  defaultMotif = DEFAULT_MOTIF,
   allowGuestSwitch = false,
   children,
 }) {
@@ -69,6 +72,28 @@ export default function ThemeProvider({
       const saved = sessionStorage.getItem(ORNAMENT_STORAGE_KEY)
       if (isOrnamentType(saved)) setOrnamentState(saved)
     } catch {}
+  }, [allowGuestSwitch])
+
+  // Cloth motif set (Songket-only). Same pattern as the ornament: couple's
+  // default on first render, the demo guest's saved pick restored after mount.
+  const initialMotif = isMotif(defaultMotif) ? defaultMotif : DEFAULT_MOTIF
+  const [motif, setMotifState] = useState(initialMotif)
+  useEffect(() => {
+    if (!allowGuestSwitch || typeof window === 'undefined') return
+    try {
+      const saved = sessionStorage.getItem(MOTIF_STORAGE_KEY)
+      if (isMotif(saved)) setMotifState(saved)
+    } catch {}
+  }, [allowGuestSwitch])
+  useEffect(() => {
+    if (!allowGuestSwitch) setMotifState(initialMotif)
+  }, [allowGuestSwitch, initialMotif])
+  const setMotif = useCallback((m) => {
+    if (!isMotif(m)) return
+    setMotifState(m)
+    if (allowGuestSwitch) {
+      try { sessionStorage.setItem(MOTIF_STORAGE_KEY, m) } catch {}
+    }
   }, [allowGuestSwitch])
 
   // Live-preview device frame (demo only). Starts 'desktop' on BOTH server and
@@ -130,7 +155,7 @@ export default function ThemeProvider({
     }
   }, [allowGuestSwitch])
 
-  const value = { theme, setTheme, ornamentType, setOrnamentType, device, setDevice, options: THEME_ORDER }
+  const value = { theme, setTheme, ornamentType, setOrnamentType, motif, setMotif, device, setDevice, options: THEME_ORDER }
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
@@ -141,6 +166,8 @@ export function useTheme() {
       setTheme: () => {},
       ornamentType: DEFAULT_ORNAMENT,
       setOrnamentType: () => {},
+      motif: DEFAULT_MOTIF,
+      setMotif: () => {},
       device: DEFAULT_DEVICE,
       setDevice: () => {},
       options: THEME_ORDER,

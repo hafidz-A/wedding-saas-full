@@ -27,6 +27,7 @@ export default function GlobalBackground() {
   return (
     <div className={styles.canvas} aria-hidden="true">
       {/* ── Lepus cloth: the songket body motif woven across the whole page ── */}
+      <div className={`${styles.fabric} sk-fabric-alt`} />
       <div className={`${styles.fabric} sk-fabric`} />
 
       {/* ── Ambient colour washes ── */}

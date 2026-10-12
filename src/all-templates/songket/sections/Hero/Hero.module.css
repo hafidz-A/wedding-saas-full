@@ -605,7 +605,13 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: calc(var(--fabric-opacity, 0.09) * 1.6) !important;
+  opacity: calc(var(--fabric-opacity, 0.09) * 1.6 * var(--motif-strength, 1)) !important;
+}
+
+.gateFabricAlt {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 }
 
 .kainTop,
@@ -614,7 +620,7 @@
   left: 0;
   right: 0;
   z-index: 1;
-  height: clamp(56px, 9vw, 92px) !important;
+  height: calc(clamp(56px, 9vw, 92px) * var(--kepala-scale, 1)) !important;
 }
 
 .kainTop { top: 0; }

@@ -12,6 +12,7 @@
  *   --thread      the gold-thread gradient every songket motif is painted with
  *                 (motif tiles are CSS masks, see styles/theme.css).
  *   --fabric-opacity  strength of the lepus cloth texture behind the page.
+ *   --limar       the ikat colour of the Limar motif set (a counter-colour to the cloth).
  *
  * Keys must match src/lib/config/palette-allowlist.ts (songket).
  * Text pairs are pinned ≥ 4.5:1 by __tests__/songket.test.ts.
@@ -20,6 +21,7 @@
 export const themes = {
   // Merah emas — the classic red-and-gold songket.
   merahLak: {
+    '--limar': '#2F7A57',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
     '--fabric-opacity': '0.09',
     '--bg': '#5E1020',
@@ -41,6 +43,7 @@ export const themes = {
   },
 
   hitamLak: {
+    '--limar': '#8B1E2D',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
     '--fabric-opacity': '0.09',
     '--bg': '#17100E',
@@ -62,6 +65,7 @@ export const themes = {
   },
 
   gadingSongket: {
+    '--limar': '#2F6B4A',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
     '--fabric-opacity': '0.13',
     '--bg': 'transparent',
@@ -84,6 +88,7 @@ export const themes = {
 
   // Hijau zamrud — emerald songket with gold thread.
   hijauZamrud: {
+    '--limar': '#B8323F',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
     '--fabric-opacity': '0.09',
     '--bg': '#0E4A35',
@@ -106,6 +111,7 @@ export const themes = {
 
   // Ungu royal — the royal purple songket with gold thread.
   unguRoyal: {
+    '--limar': '#C2477A',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
     '--fabric-opacity': '0.1',
     '--bg': '#3B1D5A',

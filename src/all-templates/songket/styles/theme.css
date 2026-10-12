@@ -445,7 +445,7 @@ body.songket-route .sk-roset {
 body.songket-route .sk-fabric {
   -webkit-mask: url('/songket/motifs/lepus-v1.svg') repeat center top / 280px 128px;
   mask: url('/songket/motifs/lepus-v1.svg') repeat center top / 280px 128px;
-  opacity: var(--fabric-opacity, 0.09);
+  opacity: calc(var(--fabric-opacity, 0.09) * var(--motif-strength, 1));
 }
 
 body.songket-route .sk-roset {
@@ -455,7 +455,7 @@ body.songket-route .sk-roset {
 
 /* Hangs DOWN from its top edge; add .sk-kepala-kain--up for a bottom border. */
 body.songket-route .sk-kepala-kain {
-  height: 64px;
+  height: calc(64px * var(--kepala-scale, 1));
   -webkit-mask: url('/songket/motifs/kepala-kain-v1.svg') repeat-x center top / auto 100%;
   mask: url('/songket/motifs/kepala-kain-v1.svg') repeat-x center top / auto 100%;
 }
@@ -468,7 +468,7 @@ body.songket-route .sk-anyaman {
 }
 
 @media (max-width: 600px) {
-  body.songket-route .sk-kepala-kain { height: 44px; }
+  body.songket-route .sk-kepala-kain { height: calc(44px * var(--kepala-scale, 1)); }
   body.songket-route .sk-anyaman { width: 12px; }
 }
 
@@ -488,3 +488,78 @@ body.songket-route .sk-anyaman-side--r { right: 4px; }
 }
 /* The Spring Coil gallery is a full-screen pinned view; keep its photo clear. */
 body.sk-gallery-active .sk-anyaman-side { display: none; }
+
+/* ============================================================================
+   Ragam motif kain — six songket types in PARALLEL with the original set.
+   Shell writes body[data-sk-motif]; `awal` (or no attribute) = the rules
+   above. Each type swaps the body texture (.sk-fabric), the end border
+   (.sk-kepala-kain) and their strength/size. Keys: config/motifs.js.
+   ⚠️ Interpretations — see the design doc §0 "Ragam motif kain".
+   ============================================================================ */
+
+/* Second cloth layer, only Limar uses it (the ikat colour fields). */
+body.songket-route .sk-fabric-alt { display: none; pointer-events: none; }
+
+/* LEPUS — gold covers almost the whole cloth. */
+body.songket-route[data-sk-motif='lepus'] { --motif-strength: 1.8; }
+body.songket-route[data-sk-motif='lepus'] .sk-fabric {
+  -webkit-mask-image: url('/songket/motifs/lepus-padat-v1.svg'); mask-image: url('/songket/motifs/lepus-padat-v1.svg');
+  -webkit-mask-size: 48px 48px; mask-size: 48px 48px;
+}
+body.songket-route[data-sk-motif='lepus'] .sk-kepala-kain {
+  -webkit-mask-image: url('/songket/motifs/kepala-lepus-v1.svg'); mask-image: url('/songket/motifs/kepala-lepus-v1.svg');
+}
+
+/* TABUR — small motifs sown with space between. */
+body.songket-route[data-sk-motif='tabur'] { --motif-strength: 1.9; --kepala-scale: 0.7; }
+body.songket-route[data-sk-motif='tabur'] .sk-fabric {
+  -webkit-mask-image: url('/songket/motifs/tabur-v1.svg'); mask-image: url('/songket/motifs/tabur-v1.svg');
+  -webkit-mask-size: 96px 96px; mask-size: 96px 96px;
+}
+body.songket-route[data-sk-motif='tabur'] .sk-kepala-kain {
+  -webkit-mask-image: url('/songket/motifs/kepala-tabur-v1.svg'); mask-image: url('/songket/motifs/kepala-tabur-v1.svg');
+}
+
+/* BUNGA-BUNGA — running floral vine. */
+body.songket-route[data-sk-motif='bunga'] { --motif-strength: 1.7; --kepala-scale: 0.9; }
+body.songket-route[data-sk-motif='bunga'] .sk-fabric {
+  -webkit-mask-image: url('/songket/motifs/bunga-v1.svg'); mask-image: url('/songket/motifs/bunga-v1.svg');
+  -webkit-mask-size: 160px 160px; mask-size: 160px 160px;
+}
+body.songket-route[data-sk-motif='bunga'] .sk-kepala-kain {
+  -webkit-mask-image: url('/songket/motifs/kepala-bunga-v1.svg'); mask-image: url('/songket/motifs/kepala-bunga-v1.svg');
+}
+
+/* LIMAR — soft ikat fields in --limar under gold Bunga Cogan. */
+body.songket-route[data-sk-motif='limar'] { --motif-strength: 1.6; --kepala-scale: 0.85; }
+body.songket-route[data-sk-motif='limar'] .sk-fabric {
+  -webkit-mask-image: url('/songket/motifs/limar-cogan-v1.svg'); mask-image: url('/songket/motifs/limar-cogan-v1.svg');
+  -webkit-mask-size: 120px 80px; mask-size: 120px 80px;
+}
+body.songket-route[data-sk-motif='limar'] .sk-fabric-alt {
+  display: block;
+  background: var(--limar, #2F7A57);
+  opacity: calc(var(--fabric-opacity, 0.09) * 3);
+  -webkit-mask: url('/songket/motifs/limar-ikat-v1.svg') repeat center top / 120px 80px;
+  mask: url('/songket/motifs/limar-ikat-v1.svg') repeat center top / 120px 80px;
+}
+body.songket-route[data-sk-motif='limar'] .sk-kepala-kain {
+  -webkit-mask-image: url('/songket/motifs/kepala-limar-v1.svg'); mask-image: url('/songket/motifs/kepala-limar-v1.svg');
+}
+
+/* TRETES MENDER — plain body; the gold lives on the edges and the ends. */
+body.songket-route[data-sk-motif='tretes'] { --motif-strength: 0; --kepala-scale: 1.7; }
+body.songket-route[data-sk-motif='tretes'] .sk-kepala-kain {
+  -webkit-mask-image: url('/songket/motifs/kepala-tretes-v1.svg'); mask-image: url('/songket/motifs/kepala-tretes-v1.svg');
+}
+body.songket-route[data-sk-motif='tretes'] .sk-anyaman-side { opacity: 0.9; }
+
+/* RUMPAK — rows of framed blocks alternating with plain stripes. */
+body.songket-route[data-sk-motif='rumpak'] { --motif-strength: 1.7; --kepala-scale: 0.7; }
+body.songket-route[data-sk-motif='rumpak'] .sk-fabric {
+  -webkit-mask-image: url('/songket/motifs/rumpak-v1.svg'); mask-image: url('/songket/motifs/rumpak-v1.svg');
+  -webkit-mask-size: 96px 96px; mask-size: 96px 96px;
+}
+body.songket-route[data-sk-motif='rumpak'] .sk-kepala-kain {
+  -webkit-mask-image: url('/songket/motifs/kepala-rumpak-v1.svg'); mask-image: url('/songket/motifs/kepala-rumpak-v1.svg');
+}

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTheme } from './ThemeProvider.jsx'
 import { THEME_META, THEME_GROUPS } from '../config/applyTheme.js'
+import { MOTIFS } from '../config/motifs.js'
 import { DEVICE_PRESETS } from '@/lib/preview/devicePresets'
 import { PaletteHint } from '@/components/preview/PaletteHint'
 import styles from './PaletteSwitcher.module.css'
@@ -19,7 +20,7 @@ const ORNAMENTS = [
 ]
 
 export default function PaletteSwitcher({ hideDevices = false }) {
-  const { theme, setTheme, ornamentType, setOrnamentType, device, setDevice } = useTheme()
+  const { theme, setTheme, ornamentType, setOrnamentType, motif, setMotif, device, setDevice } = useTheme()
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
   const toggleRef = useRef(null)
@@ -79,6 +80,23 @@ export default function PaletteSwitcher({ hideDevices = false }) {
           </div>
           <Group title="Terang" keys={THEME_GROUPS.light} />
           <Group title="Gelap" keys={THEME_GROUPS.dark} />
+
+          <div className={styles.divider} />
+          <div className={styles.groupTitle}>Motif Kain</div>
+          <div className={styles.ornamentRow}>
+            {MOTIFS.map((m) => (
+              <button
+                key={m.key}
+                type="button"
+                title={m.hint}
+                className={`${styles.ornamentBtn} ${motif === m.key ? styles.active : ''}`}
+                onClick={() => setMotif(m.key)}
+                aria-pressed={motif === m.key}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
 
           <div className={styles.divider} />
           <div className={styles.groupTitle}>Ornamen</div>

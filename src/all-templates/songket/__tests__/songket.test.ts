@@ -7,6 +7,7 @@ import { sectionRegistry as lovebirdsRegistry } from '../../lovebirds/registry.j
 import { themes } from '../config/themes.js'
 import { THEME_META, DEFAULT_THEME_NAME } from '../config/applyTheme.js'
 import { SHAPES } from '../components/Ornaments.jsx'
+import { MOTIFS, DEFAULT_MOTIF, isMotif } from '../config/motifs.js'
 import { encryptConfig, decryptConfig } from '@/lib/crypto/config'
 import { TEMPLATE_PALETTES, isPaletteAllowedForTemplate } from '@/lib/config/palette-allowlist'
 import { TEMPLATE_ORNAMENTS, isOrnamentAllowedForTemplate } from '@/lib/templates/appearance'
@@ -129,6 +130,27 @@ describe('songket motif tiles', () => {
     expect(refs.length).toBeGreaterThanOrEqual(4)
     for (const ref of refs) {
       expect(existsSync(new URL(`../../../../public${ref}`, import.meta.url)), ref).toBe(true)
+    }
+  })
+})
+
+describe('songket ragam motif kain', () => {
+  const css = readFileSync(new URL('../styles/theme.css', import.meta.url), 'utf8')
+  const styled = new Set([...css.matchAll(/data-sk-motif='(\w+)'/g)].map((m) => m[1]))
+
+  it('keeps the original set (awal) as the default, beside six songket types', () => {
+    expect(DEFAULT_MOTIF).toBe('awal')
+    expect(MOTIFS.map((m) => m.key)).toEqual(['awal', 'lepus', 'tabur', 'bunga', 'limar', 'tretes', 'rumpak'])
+  })
+
+  it('every motif set has CSS, and the CSS styles no unknown set', () => {
+    for (const { key } of MOTIFS) if (key !== 'awal') expect(styled.has(key), key).toBe(true)
+    for (const key of styled) expect(isMotif(key), key).toBe(true)
+  })
+
+  it('Limar paints its ikat layer with a --limar colour on every palette', () => {
+    for (const [key, t] of Object.entries(themes as Record<string, Record<string, string>>)) {
+      expect(t['--limar'], key).toMatch(/^#[0-9A-F]{6}$/i)
     }
   })
 })

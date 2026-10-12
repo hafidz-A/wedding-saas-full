@@ -54,6 +54,7 @@ export default function Shell({ config, slug, isDemo = false, embed = false, emb
     <ThemeProvider
       defaultPalette={config?.theme?.defaultPalette}
       defaultOrnament={config?.theme?.ornamentType}
+      defaultMotif={config?.theme?.motif}
       allowGuestSwitch={isDemo}
     >
       <SongketBody
@@ -76,7 +77,13 @@ export default function Shell({ config, slug, isDemo = false, embed = false, emb
  * the invitation framed inside a device bezel (iframe) over a themed backdrop.
  */
 function SongketBody({ config, slug, sections, music, musicActive, isDemo, embed, embedSwitcher }) {
-  const { theme, ornamentType, device } = useTheme()
+  const { theme, ornamentType, motif, device } = useTheme()
+
+  // The cloth motif set is pure CSS (styles/theme.css keys off this attribute).
+  useEffect(() => {
+    document.body.dataset.skMotif = motif
+    return () => { delete document.body.dataset.skMotif }
+  }, [motif])
 
   const body = (
     <>
@@ -123,7 +130,7 @@ function SongketBody({ config, slug, sections, music, musicActive, isDemo, embed
         <>
           {/* Static themed backdrop (palette colour + ornaments) behind the frame. */}
           <GlobalBackground />
-          <DeviceStage device={preset} payload={{ theme, ornament: ornamentType }} />
+          <DeviceStage device={preset} payload={{ theme, ornament: ornamentType, motif }} />
         </>
       ) : (
         body
@@ -139,7 +146,7 @@ function SongketBody({ config, slug, sections, music, musicActive, isDemo, embed
  * "ready" on mount so the parent sends the current selection immediately.
  */
 function EmbedThemeBridge() {
-  const { setTheme, setOrnamentType } = useTheme()
+  const { setTheme, setOrnamentType, setMotif } = useTheme()
   useEffect(() => {
     const onMsg = (e) => {
       if (e.origin !== window.location.origin) return
@@ -147,6 +154,7 @@ function EmbedThemeBridge() {
       if (d?.source === 'fincards-preview' && d?.kind === 'theme') {
         if (d.payload?.theme) setTheme(d.payload.theme)
         if (d.payload?.ornament) setOrnamentType(d.payload.ornament)
+        if (d.payload?.motif) setMotif(d.payload.motif)
       }
     }
     window.addEventListener('message', onMsg)
@@ -154,6 +162,6 @@ function EmbedThemeBridge() {
       window.parent?.postMessage({ source: 'fincards-preview', kind: 'ready' }, window.location.origin)
     } catch {}
     return () => window.removeEventListener('message', onMsg)
-  }, [setTheme, setOrnamentType])
+  }, [setTheme, setOrnamentType, setMotif])
   return null
 }
