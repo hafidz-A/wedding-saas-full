@@ -16,7 +16,7 @@ editor **identik**; yang diganti hanya lapisan visual:
 
 | Lapisan Lovebirds | Versi Songket |
 |---|---|
-| 10 palet (warmCream…) | 4 palet adat: Merah Lak, Hitam Lak, Gading Songket, Hijau Limas (`config/themes.js`) |
+| 10 palet (warmCream…) | 5 palet adat (usulan pemilik: merah-emas, hijau zamrud, ungu royal): **Merah Emas, Hijau Zamrud, Ungu Royal, Hitam Lak, Gading Songket** (`config/themes.js`) |
 | Ornamen burung / kupu-kupu / bertengger | melati (jatuh), kilau emas (bintang songket), kunang-kunang (`components/Ornaments.jsx`) |
 | BotanicalBorder (sketsa bunga di tepi) | SongketBorder: rel ganda, tumpal pucuk rebung, rantai bintang berantai, sulur simbar — tetap dengan animasi "tergambar" |
 | Bunga & kelopak warna-warni (hero, latar, mempelai) | kembang goyang, melati, bintang, daun sirih, tanjung (`components/adat/AdatPetals.jsx`) |
@@ -25,6 +25,7 @@ editor **identik**; yang diganti hanya lapisan visual:
 | Font judul Montserrat | Cinzel |
 | Teks UI Inggris | Bahasa Indonesia |
 | — | tambahan: Rumah Limas di hero, tepak sirih di ayat, tenong di hadiah, Ampera + perahu di penutup |
+| — | **motif songket dari referensi pemilik** (`components/adat/motifGeometry.mjs` → `scripts/gen-songket-motifs.mjs` → `public/songket/motifs/*-v1.svg`): kain lepus di latar, kepala kain di hero & tiap section, pita anyaman di tepi, roset anyaman untuk kilau emas, kain emas bermotif marun di RSVP & penutup |
 | Foto demo mempelai | potret siluet Aesan Gede (`public/songket/demo/*.svg`); foto demo lain masih placeholder Lovebirds |
 
 **Sengaja BELUM (supaya tidak bisa dibeli selama uji coba):** `templateCatalog.js`, tabel DB

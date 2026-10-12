@@ -18,6 +18,7 @@
  */
 
 export const themes = {
+  // Merah emas — the classic red-and-gold songket.
   merahLak: {
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
     '--fabric-opacity': '0.09',
@@ -81,25 +82,48 @@ export const themes = {
     '--button-fg': '#FBF4E4',
   },
 
-  hijauLimas: {
+  // Hijau zamrud — emerald songket with gold thread.
+  hijauZamrud: {
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
     '--fabric-opacity': '0.09',
-    '--bg': '#1F3B2D',
+    '--bg': '#0E4A35',
     '--bg-image':
-      'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.16), transparent 75%),' +
-      'radial-gradient(45% 40% at 10% 88%, rgba(110, 20, 35, 0.18), transparent 70%),' +
-      'linear-gradient(180deg, #23432F 0%, #142A1F 100%)',
-    '--band': '#142A1F',
+      'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),' +
+      'radial-gradient(45% 40% at 10% 88%, rgba(20, 110, 78, 0.35), transparent 70%),' +
+      'linear-gradient(180deg, #125C42 0%, #08301F 100%)',
+    '--band': '#0A3A29',
     '--fg': '#F3EAD3',
-    '--fg-muted': '#D6CBAD',
+    '--fg-muted': '#D8D9C2',
     '--accent': '#D4AF37',
     '--accent-soft': '#ECD27E',
-    '--glass-bg': 'rgba(20, 42, 31, 0.58)',
+    '--glass-bg': 'rgba(8, 48, 31, 0.58)',
     '--glass-border': 'rgba(212, 175, 55, 0.34)',
     '--glass-text': '#F3EAD3',
-    '--glass-text-muted': '#D6CBAD',
+    '--glass-text-muted': '#D8D9C2',
     '--button-bg': '#D4AF37',
-    '--button-fg': '#1A1210',
+    '--button-fg': '#0A2A1C',
+  },
+
+  // Ungu royal — the royal purple songket with gold thread.
+  unguRoyal: {
+    '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
+    '--fabric-opacity': '0.1',
+    '--bg': '#3B1D5A',
+    '--bg-image':
+      'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),' +
+      'radial-gradient(45% 40% at 88% 85%, rgba(120, 60, 160, 0.30), transparent 70%),' +
+      'linear-gradient(180deg, #4A2470 0%, #24103A 100%)',
+    '--band': '#2C1545',
+    '--fg': '#F4EBDD',
+    '--fg-muted': '#DCCFE6',
+    '--accent': '#D4AF37',
+    '--accent-soft': '#ECD27E',
+    '--glass-bg': 'rgba(36, 16, 58, 0.58)',
+    '--glass-border': 'rgba(212, 175, 55, 0.34)',
+    '--glass-text': '#F4EBDD',
+    '--glass-text-muted': '#DCCFE6',
+    '--button-bg': '#D4AF37',
+    '--button-fg': '#24103A',
   },
 }
 
