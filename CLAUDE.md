@@ -76,7 +76,10 @@ Modules + CSS variables. `import.meta.env` is Vite — use `process.env` in Next
 ```
 
 Key facts:
-- **Templates live in `src/all-templates/<id>/`** (currently `lovebirds`, `solary`) — NOT `src/templates/`.
+- **Templates live in `src/all-templates/<id>/`** (currently `lovebirds`, `solary`, and `songket` — the adat
+  Palembang template, **uji coba**: renders at `/songket/demo-songket` but is deliberately absent from
+  `templateCatalog.js`, the DB `templates` table and `template_plans`, so it is neither listed nor
+  purchasable; spec `docs/superpowers/specs/2026-10-12-template-adat-palembang-design.md`) — NOT `src/templates/`.
   The master registry is `src/config/templateIndex.js` (server-safe: imports only plain `defaultConfig`
   data). Per-template render *Shells* are client components, dynamic-imported in
   `src/app/[template]/[slug]/InvitationView.tsx`.

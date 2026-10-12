@@ -1,6 +1,34 @@
 # Design — Template adat Palembang (Sumatera Selatan)
 
-Status: **DRAFT, butuh keputusan pemilik** (lihat §9) · Tanggal: 2026-10-12
+Status: **UJI COBA — Fase 2 selesai di branch `claude/vibrant-newton-esdvox`, belum di `main`** · Tanggal: 2026-10-12
+
+## 0. Status & keputusan (diperbarui 2026-10-12)
+
+**Keputusan pemilik:** nama **Songket** (id `songket`), busana default **Aesan Gede**, ornamen awal
+berupa **siluet** buatan sendiri, konsultan = teman pemilik, musik dan harga diputuskan di akhir.
+Jangan masuk `main` dulu.
+
+**Sudah jadi (Fase 2 + sebagian Fase 3, placeholder):**
+- `src/all-templates/songket/` — Shell, 10 section (lawang → kato pembuko → mempelai → perjalanan →
+  akad & resepsi → susunan acara → galeri → tenong → RSVP → Ampera), 4 palet, 3 ornamen animasi,
+  panel 🎨 khusus demo
+- Ornamen SVG di `components/ornaments.jsx`: ukiran sudut simbar, bintang berantai, nampan perak,
+  daun pintu lawang, Rumah Limas, Ampera + perahu, **siluet pasangan Aesan Gede** (Karsuhun + kembang
+  goyang; kopiah cuplak + keris + pending), tepak sirih, tenong, payung pengantin, melati; pola songket
+  (`public/songket/patterns/`: tabur, lepus, pucuk rebung). Semuanya `currentColor`, jadi ikut palet.
+- Wiring: templateIndex, InvitationView, middleware, appearance.ts, palette-allowlist, skema editor
+  (+ field Songket `portraitStyle`: siluet/foto), templatePolicy
+- Test `src/all-templates/songket/__tests__/songket.test.ts`: enkripsi rekening, allowlist palet dan
+  ornamen, registry ↔ skema ↔ policy, kontras AA keempat palet, belum masuk katalog
+
+**Sengaja BELUM (supaya tidak bisa dibeli selama uji coba):** `templateCatalog.js`, tabel DB
+`templates` + `template_plans`, form admin create, galeri marketing (`vibeData.ts`), tutorial
+dashboard. Konsekuensinya: tab Palet di dashboard masih membaca `vibeData.ts`, jadi untuk undangan
+Songket sungguhan (comp) tab itu belum menampilkan palet Songket. Ini bagian Fase 4.
+
+**Cara melihat:** `npm run dev`, lalu buka `/songket/demo-songket` (tambahkan `?to=Nama` untuk sapaan
+tamu, `?noframe=1` di desktop yang meniru HP).
+
 
 Template ketiga FinCards dan template **adat** pertama. Tujuannya: undangan yang terasa seperti
 masuk ke Rumah Limas saat *munggah*. Warnanya merah lak, emas prada, dan songket, tapi tetap
@@ -42,7 +70,7 @@ mudah dikembangkan menjadi katalog per daerah. **Keputusan ada di pemilik.** Dok
 |---|---|---|---|---|
 | **Merah Lak** (default) | merah marun `#6E1423` | emas prada `#C9A227` | krem gading `#F6EBD3` | klasik Aesan Gede |
 | Hitam Lak | hitam lak `#1A1210` | emas `#D4AF37` + merah `#8B1E2D` | gading | malam, mewah |
-| Gading Songket | gading `#F4E9D2` | emas tua `#9C7A1E` + marun | coklat tua `#2A1A12` | terang, untuk siang/akad |
+| Gading Songket | gading `#F4E9D2` | emas tua `#6E5310` + marun `#7A1626` | coklat tua `#2A1A12` | terang, untuk siang/akad (emas digelapkan supaya lolos AA) |
 | Hijau Limas | hijau tua `#1F3B2D` | emas | gading | alternatif, nuansa kayu dan daun |
 
 ⚠️ **Aksesibilitas:** teks emas di atas merah biasanya **gagal** kontras WCAG AA. Emas dipakai untuk
@@ -287,6 +315,23 @@ Sebelum rilis: `npm run build` dan uji visual demo.
 | Konten agama dipaksakan | ayat/masjid bersifat opsional, default netral |
 
 ---
+
+## 8b. Rekomendasi mencari ilustrator
+
+1. **Cari yang lokal Sumsel dulu.** Detail Aesan Gede, songket, dan ukiran lebih aman di tangan orang
+   yang melihatnya langsung. Cari di Instagram/Behance dengan kata kunci "ilustrator Palembang",
+   "vector ornamen songket", "ilustrasi pengantin Palembang", atau lewat mahasiswa/alumni DKV kampus
+   di Palembang.
+2. **Kalau belum ketemu:** marketplace freelance Indonesia (Projects.co.id, Sribulancer, Fastwork)
+   dengan brief §7 + foto rujukan.
+3. **Uji kecil berbayar dulu** (mis. 1 ukiran sudut + 1 siluet pasangan) sebelum kontrak paket P0.
+   Minta 2–3 penawaran harga karena tarif freelance sangat bervariasi.
+4. **Kontrak:** penyerahan hak cipta penuh, file vektor sumber (SVG/AI), revisi terbatas yang jelas.
+5. **AI image generator:** boleh untuk moodboard, **jangan** untuk aset final (akurasi adat sering
+   salah dan status hak ciptanya tidak jelas).
+
+Komponen di `components/ornaments.jsx` sudah berupa slot. Aset final cukup menggantikan isi
+komponen; section tidak perlu disentuh.
 
 ## 9. Keputusan yang dibutuhkan dari pemilik
 

@@ -347,6 +347,22 @@ if (templateId === 'garden') return <GardenShell config={config} slug={slug} />
   template missing from this list silently loses Supabase session refresh on
   its public page, which breaks owner-preview of unpublished invitations.
 
+### Langkah 6 — Daftarkan tampilan & editor (WAJIB, sering terlewat)
+
+- **`src/lib/templates/appearance.ts`** — `TEMPLATE_ORNAMENTS[<id>]` (pakai `[]` kalau template
+  tidak punya pemilih ornamen). Template yang **tidak terdaftar** dianggap "legacy" dan menerima
+  semua ornamen template lain (mis. burung Lovebirds).
+- **`src/lib/config/palette-allowlist.ts`** — daftar key palet, sama dengan yang dipakai Shell.
+- **`src/editor/schemas/index.ts`** — registry skema untuk `<id>`, dipersempit ke tipe section
+  yang bisa dirender template itu.
+- **`src/editor/templatePolicy.ts`** — policy (anchor hero/footer, pool swap, jumlah section).
+- **Bentuk data rekening hadiah** — `src/lib/crypto/config.ts` mengenali rekening dari nama key
+  (`accountNumber`/`accountHolder` = bentuk Lovebirds, `bank`/`number`/`name` = bentuk Solary).
+  Pakai salah satu bentuk itu, atau nomor rekening tersimpan **tanpa enkripsi**. Tulis test-nya.
+
+Contoh lengkap semua langkah + test-nya: `src/all-templates/songket/` dan
+`src/all-templates/songket/__tests__/songket.test.ts`.
+
 Selesai. URL `/garden/<slug>` & `/garden/demo-garden` otomatis jalan. **Auth, dashboard, DB, API tidak perlu disentuh** (kecuali `src/middleware.ts` di Langkah 5 di atas) — sisanya sudah otomatis dukung template baru.
 
 > Bila template berasal dari project lain (mis. project Vite), lihat bagian 11 & 12.
@@ -427,6 +443,10 @@ Saat menambah template, update `create-invitation.mjs` agar `--template=<id>` me
 - [ ] Daftar di `templateIndex.js` (`templates[<id>] = { label, config }`)
 - [ ] Daftar di `templateCatalog.js` (untuk galeri)
 - [ ] Tambah branch + `dynamic()` di `InvitationView.tsx` (`ssr:false` bila pakai Three.js/WebGL)
+- [ ] `src/middleware.ts` — id ditambahkan ke kedua alternasi `:template(...)`
+- [ ] `appearance.ts` (ornamen) + `palette-allowlist.ts` (palet) terdaftar
+- [ ] Skema editor (`editor/schemas/index.ts`) + policy (`editor/templatePolicy.ts`) terdaftar
+- [ ] Rekening hadiah memakai bentuk data Lovebirds/Solary + test enkripsi
 - [ ] Library tambahan ter-`npm install` (mis. `three`, `lenis`)
 - [ ] CSS template di-scope (lihat bagian 12) — uji background, warna teks, font
 - [ ] `npm run build` clean
