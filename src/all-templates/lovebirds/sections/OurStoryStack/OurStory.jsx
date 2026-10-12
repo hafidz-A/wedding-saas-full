@@ -58,6 +58,8 @@ export default function OurStory({
   const stageRef = useRef(null)
   const cardRefs = useRef([])
   const descPanelRef = useRef(null)
+  const headerRef = useRef(null)
+  const containerRef = useRef(null)
   const activeIndexRef = useRef(0)
 
   const [activeIndex, setActiveIndex] = useState(0)
@@ -179,19 +181,89 @@ export default function OurStory({
     }
   }, [data, scrollPerCardPx])
 
-  const current = data[activeIndex] || data[0]
+  /* Phones: the section is pinned at exactly one viewport with overflow
+     hidden, so a long story description used to fall off the bottom. Size
+     the polaroid stage to the space left after the header and the TALLEST
+     description (all descriptions share one grid cell, so the panel is
+     always that tall — no jump when cards swap). If even a minimum-size
+     photo leaves too little room, the description scrolls inside itself. */
+  useEffect(() => {
+    const section = sectionRef.current
+    const stage = stageRef.current
+    const panel = descPanelRef.current
+    const container = containerRef.current
+    if (!section || !stage || !panel || !container) return undefined
+    const mq = window.matchMedia('(max-width: 767px)')
+    const px = (v) => parseFloat(v) || 0
+
+    const fit = () => {
+      stage.style.width = ''
+      stage.style.height = ''
+      panel.style.maxHeight = ''
+      panel.style.overflowY = ''
+      if (!mq.matches) return
+      const sc = getComputedStyle(section)
+      const inner = window.innerHeight - px(sc.paddingTop) - px(sc.paddingBottom)
+      const header = headerRef.current
+      const headerH = header ? header.offsetHeight + px(getComputedStyle(header).marginBottom) : 0
+      const gap = px(getComputedStyle(container).rowGap)
+      const descH = Math.ceil(panel.getBoundingClientRect().height)
+      const maxW = Math.min(320, window.innerWidth * 0.82)
+      const maxH = Math.min(window.innerHeight * 0.5, maxW / 0.8)
+      const minH = Math.min(maxH, 140)
+      let h = inner - headerH - gap - descH
+      if (h < minH) {
+        h = minH
+        // Last resort (very long story on a short phone): scroll inside.
+        panel.style.maxHeight = `${Math.max(80, inner - headerH - gap - h)}px`
+        panel.style.overflowY = 'auto'
+      }
+      h = Math.floor(Math.min(h, maxH))
+      stage.style.height = `${h}px`
+      stage.style.width = `${Math.floor(h * 0.8)}px`
+    }
+
+    const refit = () => {
+      fit()
+      ScrollTrigger.refresh()
+    }
+    fit()
+    // The display font loads after first paint and changes text height.
+    document.fonts?.ready?.then(refit).catch(() => {})
+    let t = 0
+    let lastW = window.innerWidth
+    let lastH = window.innerHeight
+    const onResize = () => {
+      // Ignore the mobile URL bar showing/hiding mid-scroll (small height-only
+      // change) — refreshing ScrollTrigger then would jolt the pinned deck.
+      const w = window.innerWidth
+      const hh = window.innerHeight
+      if (w === lastW && Math.abs(hh - lastH) < 120) return
+      lastW = w
+      lastH = hh
+      clearTimeout(t)
+      t = setTimeout(refit, 150)
+    }
+    window.addEventListener('resize', onResize)
+    mq.addEventListener?.('change', refit)
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('resize', onResize)
+      mq.removeEventListener?.('change', refit)
+    }
+  }, [data])
 
   return (
     <section ref={sectionRef} className={styles.section} aria-label={ariaLabel}>
       {(title || subtitle || eyebrow) && (
-        <header className={styles.sectionHeader}>
+        <header ref={headerRef} className={styles.sectionHeader}>
           {eyebrow && <p className={styles.sectionEyebrow}>{eyebrow}</p>}
           {title && <h2 className={styles.sectionTitle}>{title}</h2>}
           {subtitle && <p className={styles.sectionSubtitle}>{subtitle}</p>}
         </header>
       )}
 
-      <div className={styles.container}>
+      <div ref={containerRef} className={styles.container}>
         <div ref={stageRef} className={styles.stage}>
           {data.map((s, i) => (
             <div
@@ -221,13 +293,26 @@ export default function OurStory({
           ))}
         </div>
 
+        {/* Every description is rendered into the same grid cell (only the
+            active one visible), so the panel's height is the tallest story's
+            and stays put while cards swap. */}
         <div ref={descPanelRef} className={styles.descPanel}>
-          {current?.year && <span className={styles.descYear}>{current.year}</span>}
-          {current?.date && <span className={styles.descDate}>{current.date}</span>}
-          {current?.title && <h2 className={styles.descTitle}>{current.title}</h2>}
-          {current?.description && (
-            <p className={styles.descText}>{current.description}</p>
-          )}
+          {data.map((s, i) => (
+            <div
+              key={s.id ?? i}
+              className={`${styles.descItem} ${i === activeIndex ? styles.descItemActive : ''}`}
+              aria-hidden={i === activeIndex ? undefined : 'true'}
+            >
+              {s.year && (
+                <span className={`${styles.descYear} ${s.date.includes(s.year) ? styles.descYearDup : ''}`}>
+                  {s.year}
+                </span>
+              )}
+              {s.date && <span className={styles.descDate}>{s.date}</span>}
+              {s.title && <h2 className={styles.descTitle}>{s.title}</h2>}
+              {s.description && <p className={styles.descText}>{s.description}</p>}
+            </div>
+          ))}
         </div>
       </div>
     </section>
