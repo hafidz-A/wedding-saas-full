@@ -41,7 +41,7 @@ const greatVibes = Great_Vibes({
 })
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
-const DESCRIPTION = `${BRAND} — ${BRAND_TAGLINE} Undangan digital yang terasa seperti film pendek. Rancang dulu sampai puas, bayar saat mau diterbitkan, sebar link-nya lewat WhatsApp.`
+const DESCRIPTION = `${BRAND} — ${BRAND_TAGLINE} Undangan digital yang terasa seperti film pendek. Lihat demonya tanpa daftar, pilih paket, bayar sekali tanpa langganan, lalu sebar link-nya lewat WhatsApp.`
 
 export const metadata: Metadata = {
   // metadataBase makes relative OG/twitter image URLs resolve to absolute ones
