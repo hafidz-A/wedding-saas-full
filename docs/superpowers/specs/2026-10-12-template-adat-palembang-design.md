@@ -16,7 +16,7 @@ editor **identik**; yang diganti hanya lapisan visual:
 
 | Lapisan Lovebirds | Versi Songket |
 |---|---|
-| 10 palet (warmCream…) | 5 palet adat (usulan pemilik: merah-emas, hijau zamrud, ungu royal): **Merah Emas, Hijau Zamrud, Ungu Royal, Hitam Lak, Gading Songket** (`config/themes.js`) |
+| 10 palet (warmCream…) | 5 palet adat (usulan pemilik: merah-emas, hijau zamrud, ungu royal): **Merah Emas, Hijau Zamrud, Ungu Royal, Hitam Lak, Gading Songket**, ditambah 6 palet terang atas permintaan pemilik: **Emas Pagi, Merah Jambu, Hijau Pupus, Ungu Lembut, Biru Musi, Jingga Senja** (`config/themes.js`; semua lolos tes kontras AA) |
 | Ornamen burung / kupu-kupu / bertengger | melati (jatuh), kilau emas (bintang songket), kunang-kunang (`components/Ornaments.jsx`) |
 | BotanicalBorder (sketsa bunga di tepi) | SongketBorder: rel ganda, tumpal pucuk rebung, rantai bintang berantai, sulur simbar — tetap dengan animasi "tergambar" |
 | Bunga & kelopak warna-warni (hero, latar, mempelai) | kembang goyang, melati, bintang, daun sirih, tanjung (`components/adat/AdatPetals.jsx`) |

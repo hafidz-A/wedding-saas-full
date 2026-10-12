@@ -131,6 +131,144 @@ export const themes = {
     '--button-bg': '#D4AF37',
     '--button-fg': '#24103A',
   },
+
+  // Emas Pagi (terang) — krem keemasan + coklat emas tua; gold thread on a light cloth.
+  emasPagi: {
+    '--limar': '#7A1626',
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.14',
+    '--bg': 'transparent',
+    '--bg-image':
+      'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
+      'radial-gradient(45% 40% at 90% 88%, rgba(201, 162, 39, 0.22), transparent 70%),' +
+      'linear-gradient(180deg, #FBF3DF 0%, #F1E0B8 100%)',
+    '--band': '#F6EACB',
+    '--fg': '#2E2010',
+    '--fg-muted': '#5E4A2C',
+    '--accent': '#7A5410',
+    '--accent-soft': '#C9A227',
+    '--glass-bg': 'rgba(255, 255, 255, 0.6)',
+    '--glass-border': 'rgba(122, 84, 16, 0.24)',
+    '--glass-text': '#2E2010',
+    '--glass-text-muted': '#5E4A2C',
+    '--button-bg': '#7A5410',
+    '--button-fg': '#FFF8E8',
+  },
+
+  // Merah Jambu (terang) — merah muda lembut + merah anggur; gold thread on a light cloth.
+  merahJambu: {
+    '--limar': '#2F6B4A',
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.14',
+    '--bg': 'transparent',
+    '--bg-image':
+      'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
+      'radial-gradient(45% 40% at 90% 88%, rgba(142, 35, 64, 0.14), transparent 70%),' +
+      'linear-gradient(180deg, #FBEDEC 0%, #F2D3D3 100%)',
+    '--band': '#F7E1E0',
+    '--fg': '#3A1A1F',
+    '--fg-muted': '#6B3E45',
+    '--accent': '#8E2340',
+    '--accent-soft': '#C9A227',
+    '--glass-bg': 'rgba(255, 255, 255, 0.6)',
+    '--glass-border': 'rgba(142, 35, 64, 0.24)',
+    '--glass-text': '#3A1A1F',
+    '--glass-text-muted': '#6B3E45',
+    '--button-bg': '#8E2340',
+    '--button-fg': '#FFF5F6',
+  },
+
+  // Hijau Pupus (terang) — hijau daun muda + hijau tua; gold thread on a light cloth.
+  hijauPupus: {
+    '--limar': '#8E2340',
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.14',
+    '--bg': 'transparent',
+    '--bg-image':
+      'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
+      'radial-gradient(45% 40% at 90% 88%, rgba(31, 94, 64, 0.14), transparent 70%),' +
+      'linear-gradient(180deg, #EEF4EA 0%, #D9E6D2 100%)',
+    '--band': '#E4EEDD',
+    '--fg': '#1C2E22',
+    '--fg-muted': '#3F5545',
+    '--accent': '#1F5E40',
+    '--accent-soft': '#B8912A',
+    '--glass-bg': 'rgba(255, 255, 255, 0.6)',
+    '--glass-border': 'rgba(31, 94, 64, 0.24)',
+    '--glass-text': '#1C2E22',
+    '--glass-text-muted': '#3F5545',
+    '--button-bg': '#1F5E40',
+    '--button-fg': '#F4FAF2',
+  },
+
+  // Ungu Lembut (terang) — lavender + ungu royal; gold thread on a light cloth.
+  unguLembut: {
+    '--limar': '#C2477A',
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.14',
+    '--bg': 'transparent',
+    '--bg-image':
+      'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
+      'radial-gradient(45% 40% at 90% 88%, rgba(91, 45, 138, 0.14), transparent 70%),' +
+      'linear-gradient(180deg, #F3EEF8 0%, #E2D6EE 100%)',
+    '--band': '#EBE2F3',
+    '--fg': '#2A1A3A',
+    '--fg-muted': '#54426A',
+    '--accent': '#5B2D8A',
+    '--accent-soft': '#B8912A',
+    '--glass-bg': 'rgba(255, 255, 255, 0.6)',
+    '--glass-border': 'rgba(91, 45, 138, 0.24)',
+    '--glass-text': '#2A1A3A',
+    '--glass-text-muted': '#54426A',
+    '--button-bg': '#5B2D8A',
+    '--button-fg': '#FAF6FF',
+  },
+
+  // Biru Musi (terang) — biru muda + biru tua; gold thread on a light cloth.
+  biruMusi: {
+    '--limar': '#B8323F',
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.14',
+    '--bg': 'transparent',
+    '--bg-image':
+      'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
+      'radial-gradient(45% 40% at 90% 88%, rgba(30, 78, 121, 0.14), transparent 70%),' +
+      'linear-gradient(180deg, #EDF3F8 0%, #D5E3EE 100%)',
+    '--band': '#E2ECF4',
+    '--fg': '#14273A',
+    '--fg-muted': '#3A5068',
+    '--accent': '#1E4E79',
+    '--accent-soft': '#B8912A',
+    '--glass-bg': 'rgba(255, 255, 255, 0.6)',
+    '--glass-border': 'rgba(30, 78, 121, 0.24)',
+    '--glass-text': '#14273A',
+    '--glass-text-muted': '#3A5068',
+    '--button-bg': '#1E4E79',
+    '--button-fg': '#F3F8FC',
+  },
+
+  // Jingga Senja (terang) — peach + jingga bata; gold thread on a light cloth.
+  jinggaSenja: {
+    '--limar': '#1F5E40',
+    '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
+    '--fabric-opacity': '0.14',
+    '--bg': 'transparent',
+    '--bg-image':
+      'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
+      'radial-gradient(45% 40% at 90% 88%, rgba(154, 63, 18, 0.14), transparent 70%),' +
+      'linear-gradient(180deg, #FCF0E6 0%, #F5D9C2 100%)',
+    '--band': '#F9E6D5',
+    '--fg': '#35200F',
+    '--fg-muted': '#6A4528',
+    '--accent': '#9A3F12',
+    '--accent-soft': '#C9A227',
+    '--glass-bg': 'rgba(255, 255, 255, 0.6)',
+    '--glass-border': 'rgba(154, 63, 18, 0.24)',
+    '--glass-text': '#35200F',
+    '--glass-text-muted': '#6A4528',
+    '--button-bg': '#9A3F12',
+    '--button-fg': '#FFF6EE',
+  },
 }
 
 /** Resolve a theme name → flat CSS variable object (falls back to merahLak). */

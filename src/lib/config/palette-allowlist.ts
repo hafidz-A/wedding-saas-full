@@ -12,7 +12,10 @@ export const TEMPLATE_PALETTES: Record<string, readonly string[]> = {
     'sunsetClay', 'darkLuxury', 'midnightStardust',
     'royalPlum', 'forestMist', 'terracottaOasis',
   ],
-  songket: ['merahLak', 'hijauZamrud', 'unguRoyal', 'hitamLak', 'gadingSongket'],
+  songket: [
+    'merahLak', 'hijauZamrud', 'unguRoyal', 'hitamLak',
+    'gadingSongket', 'emasPagi', 'merahJambu', 'hijauPupus', 'unguLembut', 'biruMusi', 'jinggaSenja',
+  ],
 }
 
 const UNION = new Set(Object.values(TEMPLATE_PALETTES).flat())

@@ -8,6 +8,12 @@ export const DEFAULT_THEME_NAME = 'merahLak'
    Swatches are each palette's signature colour. */
 export const THEME_META = {
   gadingSongket: { label: 'Gading Songket', group: 'light', swatch: '#7A1626' },
+  emasPagi:      { label: 'Emas Pagi',      group: 'light', swatch: '#7A5410' },
+  merahJambu:    { label: 'Merah Jambu',    group: 'light', swatch: '#8E2340' },
+  hijauPupus:    { label: 'Hijau Pupus',    group: 'light', swatch: '#1F5E40' },
+  unguLembut:    { label: 'Ungu Lembut',    group: 'light', swatch: '#5B2D8A' },
+  biruMusi:      { label: 'Biru Musi',      group: 'light', swatch: '#1E4E79' },
+  jinggaSenja:   { label: 'Jingga Senja',   group: 'light', swatch: '#9A3F12' },
   // Swatch = the palette's cloth colour (every dark palette shares the gold).
   merahLak:      { label: 'Merah Emas',     group: 'dark',  swatch: '#8B1E2D' },
   hijauZamrud:   { label: 'Hijau Zamrud',   group: 'dark',  swatch: '#127A55' },
