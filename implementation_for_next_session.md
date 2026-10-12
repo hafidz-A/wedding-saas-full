@@ -1,5 +1,10 @@
 # Implementation Plan: Multi-Template Restructure
 
+> ⚠️ **USANG / ARSIP.** Dokumen ini menjelaskan rencana lama berbasis `src/templates/` dan
+> `SectionRenderer`. Arsitektur yang berlaku sekarang: template di `src/all-templates/<id>/`, daftar di
+> `src/config/templateIndex.js`, Shell per template di-dynamic-import dari `InvitationView.tsx`.
+> Panduan yang benar dan terkini: **[tutorial-multi.md](tutorial-multi.md)** + [CLAUDE.md](CLAUDE.md).
+
 > Dokumen ini adalah instruksi lengkap untuk Claude session berikutnya.
 > Baca CLAUDE.md dan TEMPLATES.md untuk context arsitektur.
 > JANGAN mulai sebelum memastikan working directory sudah benar (sudah di folder multi-template).

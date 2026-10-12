@@ -2,8 +2,9 @@
 
 Multi-tenant SaaS undangan pernikahan digital. **Beberapa** template cinematic, banyak pasangan — tiap
 pasangan punya URL slug, akun pemilik, dashboard editor, dan database RSVP / Gift / Tamu sendiri.
-Model bisnis: **self-serve, bayar sekali** (couple daftar → pilih template → edit preview gratis →
-bayar via Midtrans untuk terbit).
+Model bisnis: **self-serve, bayar sekali — BAYAR DULU** (couple daftar → pilih template + plan → isi
+data dasar → bayar via Midtrans → baru editor terbuka → terbitkan). Tidak ada free trial; yang gratis
+cuma demo publik (`demo-*`) di landing, tanpa daftar.
 
 ```
 fincards.land/                          ← marketing
@@ -22,7 +23,8 @@ fincards.land/admin                     ← konsol operator (allowlist email)
 | Framework | Next.js 14 (App Router) + React 18 + TypeScript |
 | UI | CSS Modules + CSS variables (tanpa Tailwind/UI library) |
 | Animasi | motion 12 + GSAP 3.15 + lenis; Solary + three.js |
-| Backend | Supabase (Postgres + Storage + RLS) |
+| Backend | Supabase (Postgres + Auth + RLS) |
+| Media | Cloudflare R2 (upload pasangan + aset statis situs) |
 | Auth | Supabase Auth (email+password, verifikasi email, reset password, MFA TOTP opsional) |
 | Payments | Midtrans (Snap redirect + notification webhook) |
 | Email | Resend |
@@ -48,7 +50,7 @@ npm install
    `supabase/migrations/` **berurutan sesuai tanggal**. (Base saja tidak cukup — kolom seperti
    `owner_user_id`, `is_paid`, `gateway_*` (payment), kolom `*_enc`, tabel `guests`/`attendances`/`template_plans`/
    `refund_requests` semuanya datang dari migration.)
-3. **Storage** → pastikan bucket `invitation-media` ada + public (dibuat oleh `schema.sql`).
+3. **Media tidak lagi di Supabase Storage** — upload foto/musik masuk ke Cloudflare R2 (lihat langkah 3b).
 4. Isi harga tiap template di tabel `template_plans` (atau lewat `/admin` → Templates → Plans).
 
 ### 3. Resend (email reset password / notifikasi)
@@ -56,6 +58,12 @@ npm install
 Sign up di [resend.com](https://resend.com) → API Keys → Create. Opsional untuk dev: kalau
 `RESEND_API_KEY` kosong, `sendAdminEmail` mengembalikan `false` tanpa melempar error — email tidak
 terkirim, sisanya tetap jalan.
+
+### 3b. Cloudflare R2 (media)
+
+Buat bucket R2 + API token (Object Read & Write) di dashboard Cloudflare, lalu sambungkan custom
+domain publik (produksi: `media.fincards.land`). Isi `R2_*` di `.env.local` (langkah 4). Tanpa ini,
+upload di dashboard gagal dengan error `Missing R2_...`.
 
 ### 4. `.env.local`
 
@@ -79,6 +87,15 @@ GUESTS_ENCRYPTION_KEY=...     # 32-byte hex, untuk tabel guests + token RSVP
 # Pembayaran (Midtrans)
 MIDTRANS_SERVER_KEY=...           # Dashboard → Settings → Access Keys
 MIDTRANS_IS_PRODUCTION=false      # 'true' = API production, selain itu sandbox
+
+# Media (Cloudflare R2) — server-only, kecuali NEXT_PUBLIC_STATIC_ASSET_HOST
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET=...
+R2_PUBLIC_HOST=https://media.fincards.land   # pakai skema https://
+# Opsional: sajikan gambar statis situs dari R2. Kosong = dari public/ (lihat CLAUDE.md gotcha 11)
+NEXT_PUBLIC_STATIC_ASSET_HOST=
 
 # Konsol admin — email yang boleh buka /admin (pisahkan koma)
 ADMIN_EMAILS=you@example.com
@@ -110,7 +127,8 @@ Ini jalur utama — **Anda tidak perlu melakukan apa-apa** untuk onboarding bias
 1. Pasangan **/signup** (buat akun, verifikasi email).
 2. **/onboarding** — pilih template, slug, isi nama + tanggal + venue, pilih plan (+ kuota tamu ekstra).
    Sistem membuat **draft belum bayar**.
-3. Mereka edit preview gratis di dashboard, lalu **bayar via Midtrans** untuk menerbitkan.
+3. Mereka **bayar via Midtrans** dulu. Selama belum bayar, dashboard menampilkan `PaymentGate`
+   ("Bayar Dulu") — pemilik hanya bisa *melihat* draft-nya, belum bisa mengedit.
 4. Webhook notifikasi Midtrans otomatis mem-*publish*. (Kalau webhook telat, tombol "Saya sudah bayar —
    cek ulang" di dashboard memaksa verifikasi ulang.)
 
@@ -133,7 +151,7 @@ Untuk kasus khusus (giveaway, testing, bantu customer non-teknis), pakai salah s
 
 ### C. Yang bisa dilakukan pasangan sendiri (tanpa Anda)
 
-Edit semua teks & foto (upload ke Supabase Storage), reorder section (drag-drop), atur palette/ornament/
+Edit semua teks & foto (upload ke Cloudflare R2), reorder section (drag-drop), atur palette/ornament/
 musik/meta, kelola tamu (import CSV, kirim link WhatsApp), lihat RSVP/Gift + export CSV, buku tamu +
 QR check-in (Premium), reset password sendiri via **/forgot-password**, kelola akun & data di **/profile**.
 
@@ -144,14 +162,14 @@ QR check-in (Premium), reset password sendiri via **/forgot-password**, kelola a
 - **"Save gagal di dashboard"** → DevTools → Network → cek `PUT /api/invitation/<slug>/config`:
   401/403 = sesi login habis (login ulang); 409 = ada tab lain menyimpan (banner reload muncul); 500 =
   cek log server / Vercel.
-- **"Upload foto gagal"** → file < 5 MB, format JPG/PNG/GIF/WEBP, bucket `invitation-media` masih ada +
-  public, quota Storage belum penuh.
+- **"Upload foto gagal"** → foto < 5 MB setelah kompresi (musik < 12 MB), format JPG/PNG/GIF/WEBP;
+  cek env `R2_*` lengkap di Vercel dan bucket R2 + domain publiknya masih aktif.
 - **"Ganti email pemilik"** → Supabase → Auth (user) + kolom `invitations.email`.
 - **"Refund / batal"** → pasangan ajukan lewat dashboard/`/refund`; Anda putuskan di `/admin` → Payments
   → Refund requests (operator yang memutuskan, bukan otomatis). Takedown cepat: `/admin` set
   `suspended_at` (sembunyikan halaman dari semua orang).
 - **"Perpanjang / upgrade / tambah kuota tamu"** → dari dashboard pasangan sendiri (checkout Midtrans
-  terpisah: renewal, upgrade pay-the-difference ke Premium, add-on kuota per blok 100 tamu).
+  terpisah: renewal, upgrade pay-the-difference ke Premium, add-on kuota per blok 50 tamu @ Rp10rb).
 
 ### E. Data & monitoring (SQL cepat)
 

@@ -24,6 +24,9 @@ Practical steps to take the app + the admin console to production on
 | `RESEND_API_KEY` | resend.com → API Keys | secret |
 | `RESEND_FROM` | e.g. `undangan@fincards.land` | **must be a verified fincards.land sender**, not `resend.dev` |
 | `ADMIN_EMAILS` | `fincardsland@gmail.com` | who can enter `/admin` |
+| `R2_ACCOUNT_ID` · `R2_ACCESS_KEY_ID` · `R2_SECRET_ACCESS_KEY` · `R2_BUCKET` | Cloudflare → R2 → bucket + API token (Object Read & Write) | secret — without them every dashboard upload fails |
+| `R2_PUBLIC_HOST` | `https://media.fincards.land` | public media domain, **with** `https://` |
+| `NEXT_PUBLIC_STATIC_ASSET_HOST` | optional, e.g. `https://media.fincards.land` | serves committed site images from R2; unset = from `public/` |
 
 Rule: anything secret must **NOT** start with `NEXT_PUBLIC_` (that prefix ships the
 value to the browser).

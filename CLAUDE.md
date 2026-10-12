@@ -31,7 +31,7 @@ gratis" / "bayar saat siap sebar" copy — it is false advertising. Plans are DB
 template (`basic` / `premium`); Premium unlocks the buku-tamu attendance ledger + QR check-in. Add-ons:
 extra guest quota (50-guest blocks at Rp10k; base 400 Basic / 500 Premium), pay-the-difference
 upgrade to Premium, renewal when the active period expires. A 100-guest block was trialled and
-dropped — `BLOCK_SIZE` in `src/lib/payments/quota.ts` is the only place that number lives. Phase: **go-to-market** (see the marketing assets in `docs/marketing/`).
+dropped — `BLOCK_SIZE` in `src/lib/payments/quota.ts` is the only place that number lives. Phase: **go-to-market** (the marketing assets — `ADS-*.md`, `fincards-*.md`, `1-7-day-plan-instagram-ads.md` — live in the repo root).
 
 **Origin:** scaffolded long ago from a Vite + React cinematic template. The **Lovebirds** template has
 since diverged substantially (play-once hero, ornament system, folded registry, config migrations) — do
@@ -45,7 +45,8 @@ since diverged substantially (play-once hero, ornament system, folded registry, 
 |---|---|
 | Framework | Next.js 14 (App Router), React 18.3.1, TypeScript |
 | Animation | motion 12 + GSAP 3.15 + lenis (smooth scroll); Solary adds three.js |
-| Backend | Supabase (Postgres + Storage + RLS) |
+| Backend | Supabase (Postgres + RLS) |
+| Media | **Cloudflare R2** — couple uploads (`src/lib/upload/r2.ts`) + optional static-asset host; Supabase Storage is retired |
 | Auth | **Supabase Auth** (email+password accounts, email verify, password reset, optional TOTP MFA) |
 | Payments | **Midtrans** Snap (redirect) + notification webhook |
 | Forms | react-hook-form 7.55 + zod |
@@ -303,7 +304,8 @@ npm install
 # Fill .env.local by hand — no example file is committed (.gitignore blocks every
 # .env*). Full list + how to get each value: README §4. Needs: Supabase x3, NEXT_PUBLIC_SITE_URL,
 # APP_ENCRYPTION_KEY, GUESTS_ENCRYPTION_KEY, MIDTRANS_SERVER_KEY, MIDTRANS_IS_PRODUCTION,
-# ADMIN_EMAILS, RESEND_API_KEY/FROM. Apply supabase/schema.sql + all migrations first.
+# ADMIN_EMAILS, RESEND_API_KEY/FROM, R2_ACCOUNT_ID/ACCESS_KEY_ID/SECRET_ACCESS_KEY/BUCKET/PUBLIC_HOST.
+# Apply supabase/schema.sql + all migrations first.
 npm run dev
 ```
 

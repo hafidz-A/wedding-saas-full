@@ -1,5 +1,10 @@
 # Multi-Template Architecture
 
+> ⚠️ **USANG / ARSIP.** Dokumen ini menjelaskan rencana lama berbasis `src/templates/` dan
+> `SectionRenderer`. Arsitektur yang berlaku sekarang: template di `src/all-templates/<id>/`, daftar di
+> `src/config/templateIndex.js`, Shell per template di-dynamic-import dari `InvitationView.tsx`.
+> Panduan yang benar dan terkini: **[tutorial-multi.md](tutorial-multi.md)** + [CLAUDE.md](CLAUDE.md).
+
 ## Konsep
 
 Project ini 1 app, 1 database, 1 deploy — tapi bisa punya **unlimited template undangan**. Setiap template = 1 folder di `src/templates/`. Template sharing auth, dashboard, guests, RSVP, gifts — yang beda cuma **visual rendering** (sections + CSS + animasi).
