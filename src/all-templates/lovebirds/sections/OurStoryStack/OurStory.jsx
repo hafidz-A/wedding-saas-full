@@ -196,9 +196,11 @@ export default function OurStory({
     const mq = window.matchMedia('(max-width: 767px)')
     const px = (v) => parseFloat(v) || 0
 
+    const FRAME_VARS = ['--frame-side', '--frame-bottom', '--num-size']
     const fit = () => {
       stage.style.width = ''
       stage.style.height = ''
+      FRAME_VARS.forEach((v) => stage.style.removeProperty(v))
       panel.style.maxHeight = ''
       panel.style.overflowY = ''
       panel.classList.remove(styles.descCompact)
@@ -227,6 +229,11 @@ export default function OurStory({
       h = Math.floor(Math.min(h, maxH))
       stage.style.height = `${h}px`
       stage.style.width = `${Math.floor(h * 0.8)}px`
+      // Scale the polaroid frame + number with the card, not the viewport —
+      // otherwise a small card is mostly white border and a giant "03".
+      stage.style.setProperty('--frame-side', `${Math.max(6, Math.round(h * 0.035))}px`)
+      stage.style.setProperty('--frame-bottom', `${Math.max(20, Math.round(h * 0.15))}px`)
+      stage.style.setProperty('--num-size', `${Math.round(h * 0.3)}px`)
     }
 
     const refit = () => {
