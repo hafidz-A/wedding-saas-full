@@ -21,9 +21,11 @@ export const scheduleSchema: SectionSchema = {
       itemLabelKey: 'title',
       newItem: { id: '', time: '', title: '', description: '', accent: 'coral', icon: '' },
       itemFields: [
-        { key: 'time',        label: { id: 'Waktu', en: 'Time' },        type: 'text' },
+        { key: 'time',        label: { id: 'Waktu', en: 'Time' },        type: 'text',
+          help: { id: 'Bebas, mis. "07.30 - 10.00" atau "11.00 - selesai".', en: 'Free text, e.g. "07:30 - 10:00" or "11:00 - late".' } },
         { key: 'title',       label: { id: 'Judul', en: 'Title' },       type: 'text' },
-        { key: 'description', label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 2 },
+        { key: 'description', label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 3,
+          help: { id: 'Untuk beberapa poin, tulis tiap poin di baris baru (Enter) atau pisahkan dengan •.', en: 'For several points, put each on a new line (Enter) or separate them with •.' } },
         { key: 'accent',      label: { id: 'Warna aksen', en: 'Accent' }, type: 'select', options: ACCENTS },
         { key: 'icon',        label: { id: 'Ikon', en: 'Icon' },         type: 'text' },
       ],

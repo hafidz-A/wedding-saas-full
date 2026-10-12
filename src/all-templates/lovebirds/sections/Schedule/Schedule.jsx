@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform } from 'motion/react'
 import styles from './Schedule.module.css'
+import { splitPoints } from '../../utils/splitPoints.js'
 
 const DEFAULTS = { title: 'Schedule', subtitle: '', events: [] }
 
@@ -68,9 +69,39 @@ export default function Schedule(props) {
   const { title, subtitle, events } = { ...DEFAULTS, ...props }
   const sectionRef = useRef(null)
 
+  const innerRef = useRef(null)
+
   const isCompact = useMatchMedia(COMPACT_BREAKPOINT)
   const reducedMotion = useMatchMedia('(prefers-reduced-motion: reduce)')
-  const useStacked = isCompact || reducedMotion
+  // The pinned layout is a fixed 100vh box with overflow hidden: long
+  // descriptions or many items would be clipped. When the content doesn't
+  // fit, fall back to the stacked (natural-height) layout instead.
+  const [tooTall, setTooTall] = useState(false)
+  const useStacked = isCompact || reducedMotion || tooTall
+
+  useEffect(() => {
+    if (isCompact || reducedMotion) return undefined
+    const check = () => {
+      const el = innerRef.current
+      if (el && el.scrollHeight > el.clientHeight + 1) setTooTall(true)
+    }
+    if (!tooTall) {
+      check()
+      // The display font loads after first paint and changes line heights.
+      document.fonts?.ready?.then(check).catch(() => {})
+    }
+    // A resize may make it fit again: retry pinned, the check above re-runs.
+    let t = 0
+    const onResize = () => {
+      clearTimeout(t)
+      t = setTimeout(() => setTooTall(false), 200)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      clearTimeout(t)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [isCompact, reducedMotion, tooTall, events])
 
   // Manual rAF-throttled scroll progress
   const progress = useMotionValue(0)
@@ -108,7 +139,7 @@ export default function Schedule(props) {
     : { height: `${SECTION_HEIGHT_VH}vh` }
 
   const content = (
-    <div className={styles.inner}>
+    <div ref={innerRef} className={styles.inner}>
       <motion.header
         className={styles.header}
         initial={{ opacity: 0, y: 30 }}
@@ -122,14 +153,6 @@ export default function Schedule(props) {
       </motion.header>
 
       <ol className={styles.timeline}>
-        {/* The vertical gradient line — draws from top to bottom as
-            cards reveal (pinned mode), or always visible (stacked). */}
-        {useStacked ? (
-          <div className={styles.timelineLine} aria-hidden="true" />
-        ) : (
-          <TimelineLine progress={progress} />
-        )}
-
         {events.map((ev, idx) =>
           useStacked ? (
             <EventStacked key={ev.id || idx} event={ev} index={idx} />
@@ -161,49 +184,6 @@ export default function Schedule(props) {
 
 /* ──────────────────────── Pinned variants ─────────────────────── */
 
-/**
- * The vertical timeline line.
- *   Entry:  draws top-down (bottom inset 100% → 0%) in sync with card fade-ins.
- *   Exit:   un-draws top-down (top inset 0% → 100%) in sync with card fade-outs.
- * Both phases cascade in the SAME direction so the line "writes" then "erases"
- * itself from top to bottom, mirroring the events visually.
- */
-function TimelineLine({ progress }) {
-  // Bottom inset: 100% → 0% during entry (line draws from top down)
-  const bottomInset = useTransform(
-    progress,
-    [CARDS_ENTER_START, CARDS_ENTER_END],
-    [100, 0],
-    { clamp: true },
-  )
-  // Top inset: 0% → 100% during exit (line erases from top down)
-  const topInset = useTransform(
-    progress,
-    [EXIT_RANGE_START, EXIT_RANGE_END],
-    [0, 100],
-    { clamp: true },
-  )
-  const clipPath = useTransform(
-    [topInset, bottomInset],
-    ([t, b]) => `inset(${t}% 0 ${b}% 0)`,
-  )
-  // Opacity: fade in just before drawing; clipPath handles the exit
-  const opacity = useTransform(
-    progress,
-    [0, CARDS_ENTER_START],
-    [0, 1],
-    { clamp: true },
-  )
-
-  return (
-    <motion.div
-      className={styles.timelineLine}
-      style={{ clipPath, opacity }}
-      aria-hidden="true"
-    />
-  )
-}
-
 function EventPinned({ event, index, total, progress }) {
   // ── Entry stagger ── (top → bottom)
   const enterRange = CARDS_ENTER_END - CARDS_ENTER_START
@@ -220,8 +200,8 @@ function EventPinned({ event, index, total, progress }) {
   const exitStart = EXIT_RANGE_START + index * exitStagger
   const exitEnd = exitStart + CARD_EXIT_DURATION
 
-  // Pure opacity fade — all elements (time badge, line dot, card content)
-  // share this opacity since they're all inside the motion.li.
+  // Pure opacity fade — the whole card (time chip included) shares this
+  // opacity since it's all inside the motion.li.
   const opacity = useTransform(
     progress,
     [enterStart, enterEnd, exitStart, exitEnd],
@@ -264,17 +244,42 @@ function EventStacked({ event, index = 0 }) {
 
 /* ───────────────────── Shared inner content ──────────────────── */
 
+/* The time lives INSIDE the card (not in a fixed-width rail column): couples
+   write ranges like "07.30 - 10.00" or "11.00 - sd selesai", which overflowed
+   the old 80px column onto the timeline line. */
 function EventContent({ event }) {
   return (
-    <>
-      <div className={styles.timeBadge}>{event.time}</div>
-      <div className={styles.card}>
-        <div className={styles.iconWrap}><Icon name={event.icon} /></div>
-        <div>
-          <h3 className={styles.eventTitle}>{event.title}</h3>
-          <p className={styles.eventDescription}>{event.description}</p>
-        </div>
+    <div className={styles.card}>
+      <div className={styles.iconWrap}><Icon name={event.icon} /></div>
+      <div className={styles.body}>
+        {event.time && (
+          <p className={styles.timeChip}>
+            <ClockIcon />
+            <span>{event.time}</span>
+          </p>
+        )}
+        <h3 className={styles.eventTitle}>{event.title}</h3>
+        <Description text={event.description} />
       </div>
-    </>
+    </div>
+  )
+}
+
+function ClockIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+    </svg>
+  )
+}
+
+function Description({ text }) {
+  const points = splitPoints(text)
+  if (points.length === 0) return null
+  if (points.length === 1) return <p className={styles.eventDescription}>{points[0]}</p>
+  return (
+    <ul className={`${styles.eventDescription} ${styles.points}`}>
+      {points.map((pt, i) => <li key={i}>{pt}</li>)}
+    </ul>
   )
 }
