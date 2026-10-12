@@ -191,14 +191,6 @@
   line-height: 1.55;
 }
 
-.points {
-  margin: 0;
-  padding-left: 1.1em;
-  list-style: disc;
-}
-.points li + li { margin-top: 2px; }
-.points li::marker { color: var(--accent); }
-
 /* Compact typography in pinned mode */
 .pinnedMode .eventTitle {
   font-size: clamp(15px, 1.6vw, 18px);

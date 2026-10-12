@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform } from 'motion/react'
 import styles from './Schedule.module.css'
-import { splitPoints } from '../../utils/splitPoints.js'
 
 const DEFAULTS = { title: 'Schedule', subtitle: '', events: [] }
 
@@ -259,7 +258,7 @@ function EventContent({ event }) {
           </p>
         )}
         <h3 className={styles.eventTitle}>{event.title}</h3>
-        <Description text={event.description} />
+        <p className={styles.eventDescription}>{event.description}</p>
       </div>
     </div>
   )
@@ -270,16 +269,5 @@ function ClockIcon() {
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
     </svg>
-  )
-}
-
-function Description({ text }) {
-  const points = splitPoints(text)
-  if (points.length === 0) return null
-  if (points.length === 1) return <p className={styles.eventDescription}>{points[0]}</p>
-  return (
-    <ul className={`${styles.eventDescription} ${styles.points}`}>
-      {points.map((pt, i) => <li key={i}>{pt}</li>)}
-    </ul>
   )
 }
