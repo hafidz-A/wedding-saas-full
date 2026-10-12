@@ -8,18 +8,24 @@ Status: **UJI COBA — Fase 2 selesai di branch `claude/vibrant-newton-esdvox`, 
 berupa **siluet** buatan sendiri, konsultan = teman pemilik, musik dan harga diputuskan di akhir.
 Jangan masuk `main` dulu.
 
-**Sudah jadi (Fase 2 + sebagian Fase 3, placeholder):**
-- `src/all-templates/songket/` — Shell, 10 section (lawang → kato pembuko → mempelai → perjalanan →
-  akad & resepsi → susunan acara → galeri → tenong → RSVP → Ampera), 4 palet, 3 ornamen animasi,
-  panel 🎨 khusus demo
-- Ornamen SVG di `components/ornaments.jsx`: ukiran sudut simbar, bintang berantai, nampan perak,
-  daun pintu lawang, Rumah Limas, Ampera + perahu, **siluet pasangan Aesan Gede** (Karsuhun + kembang
-  goyang; kopiah cuplak + keris + pending), tepak sirih, tenong, payung pengantin, melati; pola songket
-  (`public/songket/patterns/`: tabur, lepus, pucuk rebung). Semuanya `currentColor`, jadi ikut palet.
-- Wiring: templateIndex, InvitationView, middleware, appearance.ts, palette-allowlist, skema editor
-  (+ field Songket `portraitStyle`: siluet/foto), templatePolicy
-- Test `src/all-templates/songket/__tests__/songket.test.ts`: enkripsi rekening, allowlist palet dan
-  ornamen, registry ↔ skema ↔ policy, kontras AA keempat palet, belum masuk katalog
+**Arah diubah pemilik (2026-10-12): "konsepnya sama kaya Lovebirds, cuma ornamen, background, dll
+dibuat adat Sumsel".** Versi pertama (section buatan sendiri: gerbang lawang, tenong buka-tutup, dst.)
+diganti. Songket sekarang **fork dari Lovebirds**: alur, section, animasi (hero play-once + photo
+blast, kartu cerita bertumpuk, dua gaya galeri, navbar, musik, panel 🎨, device preview) dan kontrak
+editor **identik**; yang diganti hanya lapisan visual:
+
+| Lapisan Lovebirds | Versi Songket |
+|---|---|
+| 10 palet (warmCream…) | 4 palet adat: Merah Lak, Hitam Lak, Gading Songket, Hijau Limas (`config/themes.js`) |
+| Ornamen burung / kupu-kupu / bertengger | melati (jatuh), kilau emas (bintang songket), kunang-kunang (`components/Ornaments.jsx`) |
+| BotanicalBorder (sketsa bunga di tepi) | SongketBorder: rel ganda, tumpal pucuk rebung, rantai bintang berantai, sulur simbar — tetap dengan animasi "tergambar" |
+| Bunga & kelopak warna-warni (hero, latar, mempelai) | kembang goyang, melati, bintang, daun sirih, tanjung (`components/adat/AdatPetals.jsx`) |
+| Sudut lengkung warna-warni | sudut ukiran simbar |
+| Accent coral/emerald/purple/sky | dipetakan ulang ke amber prada / hijau limas / tembaga khusus di route Songket |
+| Font judul Montserrat | Cinzel |
+| Teks UI Inggris | Bahasa Indonesia |
+| — | tambahan: Rumah Limas di hero, tepak sirih di ayat, tenong di hadiah, Ampera + perahu di penutup |
+| Foto demo mempelai | potret siluet Aesan Gede (`public/songket/demo/*.svg`); foto demo lain masih placeholder Lovebirds |
 
 **Sengaja BELUM (supaya tidak bisa dibeli selama uji coba):** `templateCatalog.js`, tabel DB
 `templates` + `template_plans`, form admin create, galeri marketing (`vibeData.ts`), tutorial

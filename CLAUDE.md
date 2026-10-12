@@ -80,6 +80,10 @@ Key facts:
   Palembang template, **uji coba**: renders at `/songket/demo-songket` but is deliberately absent from
   `templateCatalog.js`, the DB `templates` table and `template_plans`, so it is neither listed nor
   purchasable; spec `docs/superpowers/specs/2026-10-12-template-adat-palembang-design.md`) — NOT `src/templates/`.
+  **Songket is a fork of Lovebirds**: same sections, props, editor schemas and policy (it reuses the
+  Lovebirds registry/policy objects); only the visual layer differs (adat palettes, ornaments
+  `melati|kilauEmas|kunang`, `SongketBorder`, `components/adat/*`). A Lovebirds behaviour fix does NOT
+  reach Songket automatically — port it.
   The master registry is `src/config/templateIndex.js` (server-safe: imports only plain `defaultConfig`
   data). Per-template render *Shells* are client components, dynamic-imported in
   `src/app/[template]/[slug]/InvitationView.tsx`.
