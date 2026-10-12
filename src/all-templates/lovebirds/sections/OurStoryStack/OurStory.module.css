@@ -171,11 +171,18 @@
 .descPanel {
   position: relative;
   z-index: 1;
+  display: grid;
+  padding: clamp(8px, 1.5vw, 24px) 0;
+}
+
+.descItem {
+  grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: clamp(8px, 1.5vw, 24px) 0;
+  visibility: hidden;
 }
+.descItemActive { visibility: visible; }
 
 .descYear {
   font-family: var(--font-body, sans-serif);
@@ -217,13 +224,15 @@
 
 /* ---------- Mobile (<768px): stack on top, description below ---------- */
 @media (max-width: 767px) {
-  .section { min-height: 100vh; padding: clamp(40px, 8vw, 64px) 20px; }
-  .sectionHeader  { margin-bottom: clamp(28px, 7vw, 44px); }
-  .sectionTitle   { font-size: clamp(40px, 13vw, 64px); }
-  .sectionEyebrow { font-size: 11px; letter-spacing: 0.30em; }
+  /* Pinned at exactly one viewport: every px of chrome here is a px taken
+     from the photo (OurStory.jsx sizes the stage to what's left). */
+  .section { min-height: 100vh; padding: clamp(20px, 5vw, 32px) 20px; }
+  .sectionHeader  { margin-bottom: clamp(12px, 3vw, 20px); }
+  .sectionTitle   { font-size: clamp(34px, 10vw, 48px); }
+  .sectionEyebrow { font-size: 11px; letter-spacing: 0.30em; margin-bottom: 4px; }
   .container {
     grid-template-columns: 1fr;
-    row-gap: clamp(32px, 6vw, 48px);
+    row-gap: clamp(16px, 4vw, 24px);
     column-gap: 0;
     align-items: start;
     min-height: 0;
@@ -232,16 +241,28 @@
      (the rotated corners of the white border used to reach ~94vw and felt
      edge-to-edge). Width only — the GSAP stack animation is untouched. */
   .stage     { aspect-ratio: 4 / 5; max-height: 50vh; max-width: min(320px, 82vw); }
-  .cardNumber { font-size: clamp(80px, 22vw, 120px); }
+  .cardNumber { font-size: var(--num-size, clamp(80px, 22vw, 120px)); }
+  /* --frame-* / --num-size are set by OurStory.jsx from the fitted card size. */
+  .card {
+    border-width: var(--frame-side, 10px);
+    border-bottom-width: var(--frame-bottom, 48px);
+  }
   .descPanel  { padding: 0; text-align: left; }
-  .descTitle  { font-size: clamp(28px, 8vw, 40px); }
-  .descText   { font-size: 15px; margin-top: 14px; }
+  .descItem   { gap: 4px; }
+  /* "2022" above "15 December 2022" says the year twice — drop it on phones. */
+  .descYearDup { display: none; }
+  .descDate   { margin-bottom: 4px; }
+  .descTitle  { font-size: clamp(26px, 7.5vw, 36px); }
+  .descText   { font-size: 15px; line-height: 1.6; margin-top: 8px; }
+  /* Set by OurStory.jsx only when the story doesn't fit at the normal size. */
+  .descCompact .descTitle { font-size: clamp(24px, 7vw, 32px); }
+  .descCompact .descText  { font-size: 14px; line-height: 1.5; margin-top: 6px; }
 }
 
 @media (max-width: 480px) {
   .stage     { max-height: 44vh; }
   .descYear  { letter-spacing: 0.28em; }
-  .cardNumber { font-size: clamp(72px, 26vw, 110px); }
+  .cardNumber { font-size: var(--num-size, clamp(72px, 26vw, 110px)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
