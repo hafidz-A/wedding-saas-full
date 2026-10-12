@@ -20,7 +20,7 @@ const ORNAMENTS = [
 ]
 
 export default function PaletteSwitcher({ hideDevices = false }) {
-  const { theme, setTheme, ornamentType, setOrnamentType, motif, setMotif, device, setDevice } = useTheme()
+  const { theme, setTheme, ornamentType, setOrnamentType, motif, setMotif, kepala, setKepala, device, setDevice } = useTheme()
   const [open, setOpen] = useState(false)
   const panelRef = useRef(null)
   const toggleRef = useRef(null)
@@ -82,7 +82,10 @@ export default function PaletteSwitcher({ hideDevices = false }) {
           <Group title="Gelap" keys={THEME_GROUPS.dark} />
 
           <div className={styles.divider} />
-          <div className={styles.groupTitle}>Motif Kain</div>
+          {/* Two pickers = a pair of songket: the badan (body) and the kepala
+              (end border) may come from different types. 7 × 7 pairings; the
+              kepala's "Sama" keeps the single-songket look. */}
+          <div className={styles.groupTitle}>Motif Badan Kain</div>
           <div className={styles.ornamentRow}>
             {MOTIFS.map((m) => (
               <button
@@ -92,6 +95,30 @@ export default function PaletteSwitcher({ hideDevices = false }) {
                 className={`${styles.ornamentBtn} ${motif === m.key ? styles.active : ''}`}
                 onClick={() => setMotif(m.key)}
                 aria-pressed={motif === m.key}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+          <div className={styles.groupTitle}>Motif Kepala Kain</div>
+          <div className={styles.ornamentRow}>
+            <button
+              type="button"
+              title="Kepala kain ikut motif badan"
+              className={`${styles.ornamentBtn} ${kepala == null ? styles.active : ''}`}
+              onClick={() => setKepala(null)}
+              aria-pressed={kepala == null}
+            >
+              Sama
+            </button>
+            {MOTIFS.map((m) => (
+              <button
+                key={m.key}
+                type="button"
+                title={m.hint}
+                className={`${styles.ornamentBtn} ${kepala === m.key ? styles.active : ''}`}
+                onClick={() => setKepala(m.key)}
+                aria-pressed={kepala === m.key}
               >
                 {m.label}
               </button>

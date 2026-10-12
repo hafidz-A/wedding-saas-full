@@ -148,6 +148,15 @@ describe('songket ragam motif kain', () => {
     for (const key of styled) expect(isMotif(key), key).toBe(true)
   })
 
+  // Badan and kepala are paired independently, so a kepala rule must key off
+  // data-sk-kepala — one left on data-sk-motif would follow the body instead.
+  it('every motif set has its own kepala rule, keyed off data-sk-kepala', () => {
+    const kepala = new Set([...css.matchAll(/data-sk-kepala='(\w+)'\] \.sk-kepala-kain/g)].map((m) => m[1]))
+    for (const { key } of MOTIFS) if (key !== 'awal') expect(kepala.has(key), key).toBe(true)
+    expect(css).not.toMatch(/data-sk-motif='\w+'\] \.sk-kepala-kain/)
+    expect(css).not.toMatch(/data-sk-motif='\w+'\] \{[^}]*--kepala-scale/)
+  })
+
   it('Limar paints its ikat layer with a --limar colour on every palette', () => {
     for (const [key, t] of Object.entries(themes as Record<string, Record<string, string>>)) {
       expect(t['--limar'], key).toMatch(/^#[0-9A-F]{6}$/i)

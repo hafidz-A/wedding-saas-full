@@ -28,13 +28,27 @@ editor **identik**; yang diganti hanya lapisan visual:
 | — | **motif songket dari referensi pemilik** (`components/adat/motifGeometry.mjs` → `scripts/gen-songket-motifs.mjs` → `public/songket/motifs/*-v1.svg`): kain lepus di latar, kepala kain di hero & tiap section, pita anyaman di tepi, roset anyaman untuk kilau emas, kain emas bermotif marun di RSVP & penutup |
 | Foto demo mempelai | potret siluet Aesan Gede (`public/songket/demo/*.svg`); foto demo lain masih placeholder Lovebirds |
 
-### Ragam motif kain (paralel, dipilih lewat 🎨 → "Motif Kain")
+### Ragam motif kain (paralel, dipilih lewat 🎨 → "Motif Badan Kain" + "Motif Kepala Kain")
 
 Permintaan pemilik: motif yang sudah ada **ditetapkan** (tidak dihapus) sebagai **Motif Awal**, lalu
 enam ragam songket dibuat **berdampingan** supaya bisa dibandingkan. Teknisnya: `config/motifs.js`
 → `body[data-sk-motif]` → aturan CSS di `styles/theme.css`; ubin dari `scripts/gen-songket-motifs.mjs`.
-Saat ini hanya bisa dipilih di demo (panel 🎨); `config.theme.motif` sudah dibaca sebagai default,
-tetapi belum ada kontrol di dashboard/admin untuk menyimpannya.
+Saat ini hanya bisa dipilih di demo (panel 🎨); `config.theme.motif` (badan) dan `config.theme.kepala`
+(kepala) sudah dibaca sebagai default, tetapi belum ada kontrol di dashboard/admin untuk menyimpannya.
+
+**Pasangan (kombinasi badan × kepala).** Badan kain dan kepala kain bisa diambil dari ragam yang
+berbeda, mis. badan Lepus + kepala Tretes Mender. Kepala `Sama` = satu ragam saja. Karena perannya
+berbeda (badan ≠ kepala), ini **permutasi**: 7 × 7 = 49 tampilan, 7 di antaranya ragam tunggal dan 42
+pasangan. Teknisnya `body[data-sk-motif]` (badan) + `body[data-sk-kepala]` (kepala, ikut badan bila
+`Sama`); aturan kepala wajib memakai `data-sk-kepala` (dijaga test).
+
+**Dua warna (emas + warna palet).** Tiap ubin emas punya pasangan `-isi-` (motif yang ditebalkan dan
+diisi rongganya). Ubin isi dicat `--motif-isi` (warna palet) di BAWAH benang emas, sebagai dua lapis
+terpisah, jadi emasnya tetap emas dan warna palet muncul di pinggir dan isi motif, tidak tercampur
+jadi krem pucat.
+
+**Lepus v2:** sel diperbesar 48 → 96 px dengan garis tetap halus supaya kotaknya besar dan tidak
+ramai (`lepus-padat-v2.svg`).
 
 | Ragam | Ciri yang diterapkan | Badan kain | Kepala kain |
 |---|---|---|---|

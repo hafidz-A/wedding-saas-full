@@ -55,6 +55,7 @@ export default function Shell({ config, slug, isDemo = false, embed = false, emb
       defaultPalette={config?.theme?.defaultPalette}
       defaultOrnament={config?.theme?.ornamentType}
       defaultMotif={config?.theme?.motif}
+      defaultKepala={config?.theme?.kepala}
       allowGuestSwitch={isDemo}
     >
       <SongketBody
@@ -77,13 +78,19 @@ export default function Shell({ config, slug, isDemo = false, embed = false, emb
  * the invitation framed inside a device bezel (iframe) over a themed backdrop.
  */
 function SongketBody({ config, slug, sections, music, musicActive, isDemo, embed, embedSwitcher }) {
-  const { theme, ornamentType, motif, device } = useTheme()
+  const { theme, ornamentType, motif, kepala, device } = useTheme()
 
-  // The cloth motif set is pure CSS (styles/theme.css keys off this attribute).
+  // The cloth motif is pure CSS (styles/theme.css keys off these attributes):
+  // data-sk-motif = the badan (body) set, data-sk-kepala = the end-border set,
+  // which follows the badan unless a different songket is paired with it.
   useEffect(() => {
     document.body.dataset.skMotif = motif
-    return () => { delete document.body.dataset.skMotif }
-  }, [motif])
+    document.body.dataset.skKepala = kepala ?? motif
+    return () => {
+      delete document.body.dataset.skMotif
+      delete document.body.dataset.skKepala
+    }
+  }, [motif, kepala])
 
   const body = (
     <>
@@ -130,7 +137,7 @@ function SongketBody({ config, slug, sections, music, musicActive, isDemo, embed
         <>
           {/* Static themed backdrop (palette colour + ornaments) behind the frame. */}
           <GlobalBackground />
-          <DeviceStage device={preset} payload={{ theme, ornament: ornamentType, motif }} />
+          <DeviceStage device={preset} payload={{ theme, ornament: ornamentType, motif, kepala: kepala ?? null }} />
         </>
       ) : (
         body
@@ -146,7 +153,7 @@ function SongketBody({ config, slug, sections, music, musicActive, isDemo, embed
  * "ready" on mount so the parent sends the current selection immediately.
  */
 function EmbedThemeBridge() {
-  const { setTheme, setOrnamentType, setMotif } = useTheme()
+  const { setTheme, setOrnamentType, setMotif, setKepala } = useTheme()
   useEffect(() => {
     const onMsg = (e) => {
       if (e.origin !== window.location.origin) return
@@ -155,6 +162,7 @@ function EmbedThemeBridge() {
         if (d.payload?.theme) setTheme(d.payload.theme)
         if (d.payload?.ornament) setOrnamentType(d.payload.ornament)
         if (d.payload?.motif) setMotif(d.payload.motif)
+        if (d.payload && 'kepala' in d.payload) setKepala(d.payload.kepala)
       }
     }
     window.addEventListener('message', onMsg)
@@ -162,6 +170,6 @@ function EmbedThemeBridge() {
       window.parent?.postMessage({ source: 'fincards-preview', kind: 'ready' }, window.location.origin)
     } catch {}
     return () => window.removeEventListener('message', onMsg)
-  }, [setTheme, setOrnamentType, setMotif])
+  }, [setTheme, setOrnamentType, setMotif, setKepala])
   return null
 }

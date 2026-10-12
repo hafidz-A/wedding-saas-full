@@ -1,7 +1,9 @@
 /* Ragam motif kain — the cloth-motif sets the template can wear. They run in
    PARALLEL: `awal` is the original set (lepus spear pairs + kepala kain), and
    the six songket types sit beside it. Each key drives the CSS in
-   styles/theme.css via body[data-sk-motif]; tiles come from
+   styles/theme.css via body[data-sk-motif] (badan / body) and
+   body[data-sk-kepala] (kepala / end border) — the two can come from
+   different types, so 7 × 7 pairings; tiles come from
    scripts/gen-songket-motifs.mjs.
 
    ⚠️ The six types are interpretations from general knowledge of Palembang

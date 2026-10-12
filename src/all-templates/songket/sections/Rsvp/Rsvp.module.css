@@ -359,5 +359,6 @@ fieldset.field > .label {
   inset: 0;
   z-index: 0;
   --thread: var(--button-fg, #2A1408);
+  --motif-isi: transparent;
   opacity: calc(0.1 * var(--motif-strength, 1)) !important;
 }

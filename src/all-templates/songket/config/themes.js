@@ -11,6 +11,8 @@
  *   --glass-*     the "lak" cards: tinted glass with a gold hairline.
  *   --thread      the gold-thread gradient every songket motif is painted with
  *                 (motif tiles are CSS masks, see styles/theme.css).
+ *   --motif-isi   the palette's own colour inside and around each gold motif
+ *                 (a separate mask under the gold, never blended into it).
  *   --fabric-opacity  strength of the lepus cloth texture behind the page.
  *   --limar       the ikat colour of the Limar motif set (a counter-colour to the cloth).
  *
@@ -23,7 +25,8 @@ export const themes = {
   merahLak: {
     '--limar': '#2F7A57',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
-    '--fabric-opacity': '0.09',
+    '--motif-isi': '#A3283A',
+    '--fabric-opacity': '0.16',
     '--bg': '#5E1020',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),' +
@@ -45,7 +48,8 @@ export const themes = {
   hitamLak: {
     '--limar': '#8B1E2D',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
-    '--fabric-opacity': '0.09',
+    '--motif-isi': '#7A1A28',
+    '--fabric-opacity': '0.16',
     '--bg': '#17100E',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.14), transparent 75%),' +
@@ -67,7 +71,8 @@ export const themes = {
   gadingSongket: {
     '--limar': '#2F6B4A',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.13',
+    '--motif-isi': '#7A1626',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -90,7 +95,8 @@ export const themes = {
   hijauZamrud: {
     '--limar': '#B8323F',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
-    '--fabric-opacity': '0.09',
+    '--motif-isi': '#1C8A60',
+    '--fabric-opacity': '0.16',
     '--bg': '#0E4A35',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),' +
@@ -113,7 +119,8 @@ export const themes = {
   unguRoyal: {
     '--limar': '#C2477A',
     '--thread': 'linear-gradient(180deg, #F4E1A1 0%, #D4AF37 50%, #9C7A1E 100%)',
-    '--fabric-opacity': '0.1',
+    '--motif-isi': '#7A3FB0',
+    '--fabric-opacity': '0.16',
     '--bg': '#3B1D5A',
     '--bg-image':
       'radial-gradient(60% 45% at 50% 0%, rgba(212, 175, 55, 0.18), transparent 75%),' +
@@ -136,7 +143,8 @@ export const themes = {
   emasPagi: {
     '--limar': '#7A1626',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.14',
+    '--motif-isi': '#7A5410',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -159,7 +167,8 @@ export const themes = {
   merahJambu: {
     '--limar': '#2F6B4A',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.14',
+    '--motif-isi': '#8E2340',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -182,7 +191,8 @@ export const themes = {
   hijauPupus: {
     '--limar': '#8E2340',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.14',
+    '--motif-isi': '#1F5E40',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -205,7 +215,8 @@ export const themes = {
   unguLembut: {
     '--limar': '#C2477A',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.14',
+    '--motif-isi': '#5B2D8A',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -228,7 +239,8 @@ export const themes = {
   biruMusi: {
     '--limar': '#B8323F',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.14',
+    '--motif-isi': '#1E4E79',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +
@@ -251,7 +263,8 @@ export const themes = {
   jinggaSenja: {
     '--limar': '#1F5E40',
     '--thread': 'linear-gradient(180deg, #D9B860 0%, #B8912A 55%, #7A5A10 100%)',
-    '--fabric-opacity': '0.14',
+    '--motif-isi': '#9A3F12',
+    '--fabric-opacity': '0.22',
     '--bg': 'transparent',
     '--bg-image':
       'radial-gradient(55% 40% at 50% 0%, rgba(201, 162, 39, 0.20), transparent 75%),' +

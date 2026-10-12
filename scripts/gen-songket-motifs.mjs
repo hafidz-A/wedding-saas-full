@@ -102,11 +102,15 @@ const latticeEdge = (W) => {
 const rot = (deg) => ` rotate(${deg})`
 
 /* LEPUS — gold covers almost the whole cloth: nampan-perak cells packed in a
-   diamond lattice, edge to edge. */
+   diamond lattice, edge to edge. v2: cells stretched to 96 (was 48) with a
+   fine thread, so the lattice reads as a few large boxes instead of a busy
+   mesh. */
+const LEPUS_W = 96
 const lepusBadan = () => {
-  let b = at(24, 24, lepusCell({ w: 48 }))
-  for (const [x, y] of [[0, 0], [48, 0], [0, 48], [48, 48]]) b += at(x, y, lepusCell({ w: 48 }))
-  return svg(48, 48, b)
+  const cell = () => lepusCell({ w: LEPUS_W, line: 1.15 })
+  let b = at(LEPUS_W / 2, LEPUS_W / 2, cell())
+  for (const [x, y] of [[0, 0], [LEPUS_W, 0], [0, LEPUS_W], [LEPUS_W, LEPUS_W]]) b += at(x, y, cell())
+  return svg(LEPUS_W, LEPUS_W, b)
 }
 const lepusKepala = () => {
   let b = latticeEdge(40)
@@ -213,7 +217,8 @@ const files = {
   [`anyaman-band-${VERSION}.svg`]: anyamanBandTile(),
   [`roset-anyaman-${VERSION}.svg`]: rosetteTile(),
   // ragam motif
-  [`lepus-padat-${VERSION}.svg`]: lepusBadan(),
+  // v2 out of step with VERSION: only this tile changed (gotcha 11b — rename on change).
+  ['lepus-padat-v2.svg']: lepusBadan(),
   [`kepala-lepus-${VERSION}.svg`]: lepusKepala(),
   [`tabur-${VERSION}.svg`]: taburBadan(),
   [`kepala-tabur-${VERSION}.svg`]: taburKepala(),
@@ -226,6 +231,35 @@ const files = {
   [`rumpak-${VERSION}.svg`]: rumpakBadan(),
   [`kepala-rumpak-${VERSION}.svg`]: rumpakKepala(),
 }
+/* ISI — the palette-colour companion of every gold tile. Same motif, grown
+   by a morphological closing (fills the small hollows INSIDE the motif) plus
+   a dilation (a rim AROUND each thread). The theme paints it in the palette's
+   --motif-isi under the gold, so gold and palette colour sit side by side
+   instead of one faint gold wash blended into the page.
+   The filter region is padded beyond the tile so shapes that cross the edge
+   (their copies are drawn at both sides) close and grow seamlessly. */
+const isiOf = (tile, { grow, close }) => {
+  const [, open, inner] = tile.match(/^(<svg[^>]*>)([\s\S]*)<\/svg>\n$/)
+  const [, W, H] = open.match(/viewBox="0 0 (\S+) (\S+)"/).map(Number)
+  const filter =
+    `<defs><filter id="isi" filterUnits="userSpaceOnUse" x="${-W}" y="${-H}" width="${3 * W}" height="${3 * H}">` +
+    `<feMorphology operator="dilate" radius="${grow + close}"/><feMorphology operator="erode" radius="${close}"/>` +
+    '</filter></defs>'
+  return `${open}${filter}<g filter="url(#isi)">${inner}</g></svg>\n`
+}
+// Kepala tiles are drawn larger than they render (scaled to ~44–92px tall),
+// so their rim is wider in tile units to look the same on screen.
+const ISI = {
+  badan: { grow: 2.5, close: 4 },
+  kepala: { grow: 4, close: 6 },
+}
+const noIsi = new Set([`limar-ikat-${VERSION}.svg`, `roset-anyaman-${VERSION}.svg`])
+for (const [name, content] of Object.entries(files)) {
+  if (noIsi.has(name)) continue
+  const kind = name.startsWith('kepala-') ? ISI.kepala : ISI.badan
+  files[name.replace(/-(v\d+)\.svg$/, '-isi-$1.svg')] = isiOf(content, kind)
+}
+
 for (const [name, content] of Object.entries(files)) {
   writeFileSync(join(outDir, name), content)
   console.log(`wrote public/songket/motifs/${name} (${content.length} bytes)`)

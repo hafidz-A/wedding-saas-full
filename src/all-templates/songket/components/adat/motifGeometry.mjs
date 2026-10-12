@@ -172,17 +172,20 @@ export function wovenBand({ width = 28, cols = 7, rows = 14 } = {}) {
 
 /** Lepus cell: a woven nampan-perak rosette framed by a lattice diamond —
  *  packed edge to edge, so gold covers most of the cloth. Cell w×w, centred. */
-export function lepusCell({ w = 48 } = {}) {
+export function lepusCell({ w = 48, line } = {}) {
   const h = w / 2
   const k = w / 48
+  // Line weight scales with the cell unless pinned: a big, airy cell keeps a
+  // fine thread instead of a chunky one.
+  const t = line ?? k
   const ring = []
   for (let i = 0; i < 8; i++) {
     ring.push(`<path transform="rotate(${i * 45})" d="M0 ${f(-13 * k)} L${f(3 * k)} ${f(-7 * k)} L0 ${f(-4 * k)} L${f(-3 * k)} ${f(-7 * k)} Z"/>`)
   }
   return (
-    `<g fill="none" stroke="currentColor" stroke-width="${f(3.2 * k)}" stroke-linejoin="round">` +
+    `<g fill="none" stroke="currentColor" stroke-width="${f(3.2 * t)}" stroke-linejoin="round">` +
     `<path d="M0 ${f(-h)} L${f(h)} 0 L0 ${f(h)} L${f(-h)} 0 Z"/>` +
-    `<path d="M0 ${f(-h + 7 * k)} L${f(h - 7 * k)} 0 L0 ${f(h - 7 * k)} L${f(-h + 7 * k)} 0 Z" stroke-width="${f(1.4 * k)}"/></g>` +
+    `<path d="M0 ${f(-h + 7 * k)} L${f(h - 7 * k)} 0 L0 ${f(h - 7 * k)} L${f(-h + 7 * k)} 0 Z" stroke-width="${f(1.4 * t)}"/></g>` +
     `<g fill="currentColor">${ring.join('')}<circle r="${f(3 * k)}"/>` +
     `<path d="M${f(-h)} ${f(-4 * k)} l${f(4 * k)} ${f(4 * k)} l${f(-4 * k)} ${f(4 * k)} Z"/>` +
     `<path d="M${f(h)} ${f(-4 * k)} l${f(-4 * k)} ${f(4 * k)} l${f(4 * k)} ${f(4 * k)} Z"/></g>`
