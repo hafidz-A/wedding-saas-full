@@ -184,7 +184,7 @@
   gap: var(--space-2);
   vertical-align: middle;
 }
-.actionsCell > div { margin-block: 3px; }
+.actionsCell > div { margin-block: var(--space-1); }
 .actionsCell > div + div { margin-left: var(--space-3); }
 .actionRowMain, .tokenBlock, .actionRowBtns { white-space: nowrap; }
 .altSend { display: contents; }
@@ -267,7 +267,10 @@
   }
 
   /* Actions wrap cleanly into spacious, beautifully spaced vertical sections */
-  .actionsCell {
+  /* `.table td.` prefix on purpose: `.table td { display: block }` above
+     outranks a bare `.actionsCell`, which silently dropped the flex gap and
+     left the button rows, code box and manage row touching. */
+  .table td.actionsCell {
     text-align: left;
     white-space: normal;
     margin-top: var(--space-3);
