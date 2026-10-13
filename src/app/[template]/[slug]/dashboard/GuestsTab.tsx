@@ -485,7 +485,7 @@ export default function GuestsTab({
                   {g.name}
                   {g.group_label && <span style={badge}>{g.group_label}</span>}
                 </td>
-                <td data-label={t.colPhone}>
+                <td data-label={t.colPhone} className={styles.nowrapCell}>
                   {formatPhoneDisplay(g.phone_e164) || (
                     <span style={{ color: '#aaa' }}>—</span>
                   )}
@@ -551,31 +551,36 @@ export default function GuestsTab({
                     >
                       {g.phone_e164 ? t.sendWa : t.pickContact}
                     </button>
-                    {canShare && (
+                    {/* Other platforms. A wrapper so phones can lay these two out
+                        as their own equal-width row (display: contents on desktop). */}
+                    <span className={styles.altSend}>
+                      {canShare && (
+                        <button
+                          type="button"
+                          onClick={() => handleShare(g)}
+                          disabled={pending}
+                          className={`${ctrl.btnGhostSm} ${styles.textAction}`}
+                          title={t.shareTitle}
+                        >
+                          {t.shareBtn}
+                        </button>
+                      )}
                       <button
                         type="button"
-                        onClick={() => handleShare(g)}
+                        onClick={() => handleCopy(g)}
                         disabled={pending}
                         className={`${ctrl.btnGhostSm} ${styles.textAction}`}
-                        title={t.shareTitle}
+                        title={t.copyTitle}
                       >
-                        {t.shareBtn}
+                        {t.copyBtn}
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(g)}
-                      disabled={pending}
-                      className={`${ctrl.btnGhostSm} ${styles.textAction}`}
-                      title={t.copyTitle}
-                    >
-                      {t.copyBtn}
-                    </button>
+                    </span>
                     <button
                       type="button"
                       onClick={() => setEditingGuest(g)}
-                      className={ctrl.btnGhostSm}
+                      className={`${ctrl.btnGhostSm} ${styles.iconAction}`}
                       title={t.editTitle}
+                      aria-label={t.editTitle}
                     >
                       ✎
                     </button>
@@ -591,8 +596,7 @@ export default function GuestsTab({
                   <div className={styles.actionRowBtns}>
                     <button
                       type="button"
-                      className={ctrl.btnGhostDanger}
-                      style={{ padding: '0 12px', fontSize: '0.78rem' }}
+                      className={`${ctrl.btnGhostDanger} ${styles.regenAction}`}
                       onClick={() => handleRegenerate(g)}
                       disabled={pending}
                       aria-label={t.regenerateAria.replace('{name}', g.name)}
@@ -620,8 +624,9 @@ export default function GuestsTab({
                             }
                           })
                         }}
-                        className={ctrl.btnGhostSm}
+                        className={`${ctrl.btnGhostSm} ${styles.iconAction}`}
                         title={t.unmarkTitle}
+                        aria-label={t.unmarkTitle}
                       >
                         ↶
                       </button>

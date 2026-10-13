@@ -159,21 +159,66 @@
   vertical-align: middle;
 }
 
+/* Column headings and phone numbers never break mid-word ("NOMO/R"). */
+.table th,
+.nowrapCell { white-space: nowrap; }
+
 .table tbody tr {
   border-bottom: 1px solid rgba(42, 33, 24, 0.04);
 }
 
 .actionsCell {
   text-align: right;
-  white-space: nowrap;
+  /* The three groups (send · code · manage) stay on one line when there's
+     room and wrap as whole groups when there isn't (tablet / narrow laptop),
+     instead of squeezing the name/number/status columns to one letter wide. */
+  white-space: normal;
 }
+/* Every control in the actions cell shares one size: --ctl-h-sm (36) on
+   desktop/tablet, --ctl-h (44, the global mobile tap floor) on phones. Worded
+   actions are pills, icon actions are circles of the same height, and the
+   code reads as a chip of that height too. */
 .actionRowMain, .tokenBlock, .actionRowBtns {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-2);
+  vertical-align: middle;
+}
+.actionsCell > div { margin-block: 3px; }
+.actionsCell > div + div { margin-left: var(--space-3); }
+.actionRowMain, .tokenBlock, .actionRowBtns { white-space: nowrap; }
+.altSend { display: contents; }
+
+.tokenBlock {
+  height: var(--ctl-h-sm);
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-radius: var(--radius-pill);
+  background: rgba(42, 33, 24, 0.035);
+  border: 1px solid rgba(42, 33, 24, 0.08);
   gap: 6px;
 }
-.tokenHeader { font-size: 0.85rem; opacity: 0.85; }
-.tokenValue { letter-spacing: 0.12em; font-weight: var(--weight-semibold); }
+.tokenHeader { font-size: 12px; color: var(--text-secondary); }
+.tokenValue { font-size: 13px; letter-spacing: 0.12em; font-weight: var(--weight-semibold); }
+
+/* Icon-only actions (✎ edit, ↶ undo): circles, same height as the pills. */
+.actionsCell .iconAction {
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
+  padding: 0;
+  border-radius: var(--radius-round);
+  flex: 0 0 auto;
+}
+
+/* "Buat ulang kode": keep the danger colours, but the same type as the
+   neighbouring pills (the shared danger style is uppercase + tracked). */
+.actionsCell .regenAction {
+  font-size: var(--font-size-sm);
+  letter-spacing: normal;
+  text-transform: none;
+  font-weight: inherit;
+  padding: 1px 14px 0;
+}
 
 /* ── Mobile (<768px): collapse table to stacked cards ── */
 @media (max-width: 767.98px) {
@@ -238,27 +283,64 @@
     display: none !important;
   }
 
+  .actionsCell > div,
+  .actionsCell > div + div { margin: 0; }
+
+  /* Row 1: [ Kirim WA ········ ][ ✎ ]   Row 2: [ Bagikan ][ Salin ] */
   .actionRowMain {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-2);
+    width: 100%;
+  }
+  .actionRowMain > button:first-child { grid-column: 1; grid-row: 1; }
+  .actionRowMain > .iconAction { grid-column: 2; grid-row: 1; }
+  .altSend {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    gap: var(--space-2);
+  }
+  .altSend > button { flex: 1 1 0; }
+
+  .actionRowBtns {
     display: flex;
     align-items: center;
     gap: var(--space-2);
     width: 100%;
   }
-  .actionRowMain > button:first-child {
-    flex: 1;
-    height: var(--ctl-h-sm);
+
+  /* One height for every control on phones: the 44px tap floor. */
+  .actionsCell button {
+    height: var(--ctl-h);
+    min-height: var(--ctl-h);
+    margin: 0;
+  }
+  .actionRowBtns > button:first-child {
+    flex: 1 1 auto;
+  }
+  .actionsCell .iconAction,
+  .actionsCell button[class*="btnDelete"] {
+    width: var(--ctl-h);
+    height: var(--ctl-h);
+    padding: 0;
+    flex: 0 0 auto;
+    border-radius: var(--radius-round);
+  }
+  .actionsCell button.textAction {
+    padding: 0 16px;
+    white-space: nowrap;
   }
 
   .tokenBlock {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    height: auto;
     gap: var(--space-1);
     padding: 10px 14px;
-    background: rgba(42, 33, 24, 0.035);
-    border: 1px solid rgba(42, 33, 24, 0.08);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     width: 100%;
-    box-sizing: border-box;
   }
 
   .tokenHeader {
@@ -271,52 +353,9 @@
 
   .tokenValue {
     font-size: 14px;
-    font-weight: var(--weight-semibold);
     letter-spacing: 0.14em;
     color: var(--text-primary);
   }
-
-  .actionRowBtns {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    width: 100%;
-  }
-
-  .actionRowBtns > button:first-child {
-    flex: 1;
-    height: var(--ctl-h-sm);
-  }
-
-  /* Force icon buttons on mobile to be 100% PERFECT CIRCLES (never squished/oval) */
-  .actionsCell button[class*="btnDelete"],
-  .actionsCell button[class*="btnGhostSm"] {
-    width: 36px !important;
-    height: var(--ctl-h-sm) !important;
-    min-width: 36px !important;
-    min-height: var(--ctl-h-sm) !important;
-    flex-shrink: 0 !important;
-    border-radius: var(--radius-round) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    aspect-ratio: 1 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  /* …except the worded "Bagikan" / "Salin" actions: pills sized to their label. */
-  .actionsCell button.textAction {
-    width: auto !important;
-    min-width: 0 !important;
-    aspect-ratio: auto !important;
-    padding: 0 14px !important;
-    border-radius: var(--radius-pill) !important;
-    white-space: nowrap;
-  }
-  /* Narrow phones: let the worded actions drop to a second line rather than
-     crushing the primary "Kirim WA" button. */
-  .actionRowMain { flex-wrap: wrap; }
-  .actionRowMain > button:first-child { flex: 1 1 7.5rem; }
 }
 
 /* ── Tablet portrait (768-1023): keep table but tighten padding ── */
