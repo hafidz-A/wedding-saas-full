@@ -304,6 +304,19 @@
     padding: 0 !important;
     margin: 0 !important;
   }
+  /* …except the worded "Bagikan" / "Salin" actions: pills sized to their label. */
+  .actionsCell button.textAction {
+    width: auto !important;
+    min-width: 0 !important;
+    aspect-ratio: auto !important;
+    padding: 0 14px !important;
+    border-radius: var(--radius-pill) !important;
+    white-space: nowrap;
+  }
+  /* Narrow phones: let the worded actions drop to a second line rather than
+     crushing the primary "Kirim WA" button. */
+  .actionRowMain { flex-wrap: wrap; }
+  .actionRowMain > button:first-child { flex: 1 1 7.5rem; }
 }
 
 /* ── Tablet portrait (768-1023): keep table but tighten padding ── */

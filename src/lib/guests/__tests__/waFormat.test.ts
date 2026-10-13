@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { toggleFormat, parseWaFormatting } from '../waFormat'
+import { toggleFormat, parseWaFormatting, stripWaFormatting } from '../waFormat'
 
 /** Select `needle` (first occurrence) in `text` and toggle. */
 function sel(text: string, needle: string, m: '*' | '_' | '~' = '*') {
@@ -149,5 +149,20 @@ describe('parseWaFormatting', () => {
     const r = sel('Halo {{nama}}, sampai jumpa', '{{nama}}')
     const nodes = parseWaFormatting(r.value.replace('{{nama}}', 'Ahmad Budi'))
     expect(nodes).toEqual(['Halo ', { type: 'bold', children: ['Ahmad Budi'] }, ', sampai jumpa'])
+  })
+})
+
+describe('stripWaFormatting', () => {
+  it('drops honoured markers, keeps the text', () => {
+    expect(stripWaFormatting('Halo *_Ahmad_*, ~lama~ ```kode```')).toBe('Halo Ahmad, lama kode')
+  })
+
+  it('keeps markers WhatsApp would ignore and URLs untouched', () => {
+    const s = '5 * 3 = 15\nhttps://fincards.land/lovebirds/adi_rani?to=Ahmad_Budi'
+    expect(stripWaFormatting(s)).toBe(s)
+  })
+
+  it('multi-line message', () => {
+    expect(stripWaFormatting('*Halo Ahmad*,\n\nKode: *123456*')).toBe('Halo Ahmad,\n\nKode: 123456')
   })
 })

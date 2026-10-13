@@ -212,3 +212,15 @@ export function parseWaFormatting(text: string): WaNode[] {
   flush()
   return out
 }
+
+/**
+ * Plain text without the WhatsApp markers WhatsApp would honour — for
+ * platforms that don't understand them (Instagram, Facebook, …), where
+ * "*Ahmad*" would otherwise arrive with literal asterisks. Markers WhatsApp
+ * ignores (e.g. "5 * 3") are kept as typed.
+ */
+export function stripWaFormatting(text: string): string {
+  const flat = (nodes: WaNode[]): string =>
+    nodes.map((n) => (typeof n === 'string' ? n : n.type === 'mono' ? n.text : flat(n.children))).join('')
+  return flat(parseWaFormatting(text))
+}

@@ -17,6 +17,7 @@ import { type GuestRow } from './guests/types'
 import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
 import { useWaFormat, WaFormatToolbar, WaFormattedText } from './WaFormatToolbar'
+import { stripWaFormatting } from '@/lib/guests/waFormat'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
@@ -183,20 +184,18 @@ export default function GuestsTab({
   const sentCount = localGuests.filter((g) => g.sent_at).length
   const pendingCount = localGuests.length - sentCount
 
-  const handleSend = (g: GuestRow) => {
-    // Per-guest override via notes_enc, fallback to global template.
+  // The message a given guest receives (their custom one, else the default).
+  const messageFor = (g: GuestRow) => {
     const source = g.notes && g.notes.trim() ? g.notes : template
-    const message = renderMessageTemplate(source, {
+    return renderMessageTemplate(source, {
       name: g.name,
       // Personalized link so the opening gate greets the guest by name.
       url: buildGuestLink(publicUrl, g.name),
       token: g.rsvpToken || '',
     })
-    const url = buildWhatsAppUrl({ phoneE164: g.phone_e164, message })
-    // Open WA tab immediately (browser permission is tied to user gesture
-    // — must happen synchronously inside the click handler, not awaited).
-    window.open(url, '_blank', 'noopener,noreferrer')
-    fb.ok(fm.waOpened)
+  }
+
+  const markSent = (g: GuestRow) => {
     // Optimistic: stamp sent_at locally NOW so the badge flips green
     // without waiting for the server round-trip.
     const sentAt = new Date().toISOString()
@@ -207,10 +206,63 @@ export default function GuestsTab({
       } catch (e) {
         // Roll back optimistic update on error
         console.error(e)
-        setLocalGuests((prev) => prev.map((x) => (x.id === g.id ? { ...x, sent_at: null } : x)))
+        setLocalGuests((prev) => prev.map((x) => (x.id === g.id ? { ...x, sent_at: g.sent_at } : x)))
         fb.fail(fm.waMarkFail)
       }
     })
+  }
+
+  const handleSend = (g: GuestRow) => {
+    const url = buildWhatsAppUrl({ phoneE164: g.phone_e164, message: messageFor(g) })
+    // Open WA tab immediately (browser permission is tied to user gesture
+    // — must happen synchronously inside the click handler, not awaited).
+    window.open(url, '_blank', 'noopener,noreferrer')
+    fb.ok(fm.waOpened)
+    markSent(g)
+  }
+
+  // Other platforms (IG, FB, Telegram, …) can't be deep-linked with a prefilled
+  // message, so offer the OS share sheet (where supported) and copy-to-paste.
+  // WhatsApp's *bold* markers would show as literal asterisks there — strip them.
+  const [canShare, setCanShare] = useState(false)
+  useEffect(() => {
+    setCanShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
+  }, [])
+
+  const handleShare = async (g: GuestRow) => {
+    try {
+      await navigator.share({ text: stripWaFormatting(messageFor(g)) })
+      markSent(g)
+    } catch (e) {
+      // Closing the share sheet is not an error — just don't mark it sent.
+      if ((e as Error)?.name !== 'AbortError') fb.fail(fm.shareFail)
+    }
+  }
+
+  const handleCopy = async (g: GuestRow) => {
+    const text = stripWaFormatting(messageFor(g))
+    let ok = false
+    try {
+      await navigator.clipboard.writeText(text)
+      ok = true
+    } catch {
+      // Clipboard API blocked (insecure context / old browser): legacy copy.
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.setAttribute('readonly', '')
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      try { ok = document.execCommand('copy') } catch { ok = false }
+      ta.remove()
+    }
+    if (!ok) {
+      fb.fail(fm.copyFail)
+      return
+    }
+    fb.ok(fm.messageCopied)
+    markSent(g)
   }
 
   const handleRegenerate = async (g: GuestRow) => {
@@ -498,6 +550,26 @@ export default function GuestsTab({
                       className={ctrl.btnPrimarySm}
                     >
                       {g.phone_e164 ? t.sendWa : t.pickContact}
+                    </button>
+                    {canShare && (
+                      <button
+                        type="button"
+                        onClick={() => handleShare(g)}
+                        disabled={pending}
+                        className={`${ctrl.btnGhostSm} ${styles.textAction}`}
+                        title={t.shareTitle}
+                      >
+                        {t.shareBtn}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(g)}
+                      disabled={pending}
+                      className={`${ctrl.btnGhostSm} ${styles.textAction}`}
+                      title={t.copyTitle}
+                    >
+                      {t.copyBtn}
                     </button>
                     <button
                       type="button"
