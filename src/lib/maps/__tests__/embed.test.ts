@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { normalizeMapEmbed, resolveMapEmbed, resolveConfigMapEmbeds, isMapShortLink } from '../embed'
+import { normalizeMapEmbed, resolveMapEmbed, resolveConfigMapEmbeds, isMapShortLink, mapOpenUrl } from '../embed'
 
 const EMBED = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966!2d106.8!3d-6.19'
 
@@ -90,6 +90,30 @@ describe('resolveConfigMapEmbeds', () => {
     const out = await resolveConfigMapEmbeds(cfg, vi.fn())
     expect(out.sections[0]).toBe(cfg.sections[0])
     expect(out.sections[1].props.mapEmbed).toContain('output=embed')
+    expect((out.sections[1].props as Record<string, unknown>).mapLink).toBe('https://www.google.com/maps/place/Monas/')
     expect(cfg.sections[1].props.mapEmbed).toBe('https://www.google.com/maps/place/Monas/')
+  })
+})
+
+describe('mapOpenUrl', () => {
+  it('keeps the pasted share link (opens the Maps app on phones)', () => {
+    const short = 'https://maps.app.goo.gl/kNgBpNqZoG2ep3246?g_st=ac'
+    expect(mapOpenUrl(short, 'https://maps.google.com/maps?q=-6.2%2C106.8&z=16&output=embed')).toBe(short)
+  })
+
+  it('derives a search link from a ?q= embed', () => {
+    expect(mapOpenUrl('', 'https://maps.google.com/maps?q=Masjid%20Istiqlal&z=16&output=embed'))
+      .toBe('https://www.google.com/maps/search/?api=1&query=Masjid%20Istiqlal')
+  })
+
+  it('derives lat,lng from a pb embed (pasted iframe or embed URL)', () => {
+    const src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.387!2d106.8273!3d-6.1944!2m3'
+    expect(mapOpenUrl(`<iframe src="${src}"></iframe>`, src))
+      .toBe('https://www.google.com/maps/search/?api=1&query=-6.1944%2C106.8273')
+    expect(mapOpenUrl(src, src)).toBe('https://www.google.com/maps/search/?api=1&query=-6.1944%2C106.8273')
+  })
+
+  it('no map → no link', () => {
+    expect(mapOpenUrl('https://maps.app.goo.gl/x', '')).toBe('')
   })
 })
