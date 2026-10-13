@@ -25,7 +25,7 @@ export const scheduleSchema: SectionSchema = {
           help: { id: 'Bebas, mis. "07.30 - 10.00" atau "11.00 - selesai".', en: 'Free text, e.g. "07:30 - 10:00" or "11:00 - late".' } },
         { key: 'title',       label: { id: 'Judul', en: 'Title' },       type: 'text' },
         { key: 'description', label: { id: 'Deskripsi', en: 'Description' }, type: 'textarea', rows: 3,
-          help: { id: 'Untuk beberapa poin, tulis tiap poin di baris baru (Enter) atau pisahkan dengan •.', en: 'For several points, put each on a new line (Enter) or separate them with •.' } },
+          help: { id: 'Untuk beberapa poin, tulis tiap poin di baris baru (Enter) atau pisahkan dengan •. Item tanpa Waktu & Judul otomatis jadi poin di bawah acara sebelumnya.', en: 'For several points, put each on a new line (Enter) or separate them with •. An item with no Time and Title becomes extra points under the event above it.' } },
         { key: 'accent',      label: { id: 'Warna aksen', en: 'Accent' }, type: 'select', options: ACCENTS },
         { key: 'icon',        label: { id: 'Ikon', en: 'Icon' },         type: 'text' },
       ],

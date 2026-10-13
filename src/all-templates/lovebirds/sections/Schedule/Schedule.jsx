@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform } from 'motion/react'
 import styles from './Schedule.module.css'
-import { splitPoints } from '../../utils/splitPoints.js'
+import { groupSchedule } from '../../utils/groupSchedule.js'
 
 const DEFAULTS = { title: 'Schedule', subtitle: '', events: [] }
 
@@ -67,6 +67,8 @@ function useMatchMedia(query) {
 
 export default function Schedule(props) {
   const { title, subtitle, events } = { ...DEFAULTS, ...props }
+  // Description-only items are sub-steps of the item above (see groupSchedule).
+  const groups = useMemo(() => groupSchedule(events), [events])
   const sectionRef = useRef(null)
 
   const innerRef = useRef(null)
@@ -101,7 +103,7 @@ export default function Schedule(props) {
       clearTimeout(t)
       window.removeEventListener('resize', onResize)
     }
-  }, [isCompact, reducedMotion, tooTall, events])
+  }, [isCompact, reducedMotion, tooTall, groups])
 
   // Manual rAF-throttled scroll progress
   const progress = useMotionValue(0)
@@ -153,15 +155,15 @@ export default function Schedule(props) {
       </motion.header>
 
       <ol className={styles.timeline}>
-        {events.map((ev, idx) =>
+        {groups.map((ev, idx) =>
           useStacked ? (
-            <EventStacked key={ev.id || idx} event={ev} index={idx} />
+            <EventStacked key={ev.key} event={ev} index={idx} />
           ) : (
             <EventPinned
-              key={ev.id || idx}
+              key={ev.key}
               event={ev}
               index={idx}
-              total={events.length}
+              total={groups.length}
               progress={progress}
             />
           )
@@ -258,8 +260,8 @@ function EventContent({ event }) {
             <span>{event.time}</span>
           </p>
         )}
-        <h3 className={styles.eventTitle}>{event.title}</h3>
-        <Description text={event.description} />
+        {event.title && <h3 className={styles.eventTitle}>{event.title}</h3>}
+        <Points points={event.points} />
       </div>
     </div>
   )
@@ -273,9 +275,8 @@ function ClockIcon() {
   )
 }
 
-function Description({ text }) {
-  const points = splitPoints(text)
-  if (points.length === 0) return null
+function Points({ points }) {
+  if (!points || points.length === 0) return null
   if (points.length === 1) return <p className={styles.eventDescription}>{points[0]}</p>
   return (
     <ul className={`${styles.eventDescription} ${styles.points}`}>
