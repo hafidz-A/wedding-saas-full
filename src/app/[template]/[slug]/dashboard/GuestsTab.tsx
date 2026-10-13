@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { buildWhatsAppUrl, renderMessageTemplate } from '@/lib/guests/whatsapp'
 import { buildGuestLink } from '@/lib/guests/guestLink'
@@ -16,6 +16,7 @@ import {
 import { type GuestRow } from './guests/types'
 import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
+import { useWaFormat, WaFormatToolbar, WaFormattedText } from './WaFormatToolbar'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
@@ -132,6 +133,8 @@ export default function GuestsTab({
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
   const [templateError, setTemplateError] = useState<string | null>(null)
+  const templateRef = useRef<HTMLTextAreaElement>(null)
+  const templateFormat = useWaFormat(templateRef, template, setTemplate)
 
   // Whether the template differs from the (code-ensured) baseline.
   const templateDirty = template !== initialTemplate
@@ -324,16 +327,19 @@ export default function GuestsTab({
       <div className={styles.templatePanel}>
         <h3 className={styles.templateHeading}>{t.templateHeading}</h3>
         <p className={styles.templateHint}>{t.templateHint}</p>
+        <WaFormatToolbar onFormat={templateFormat.apply} />
         <textarea
+          ref={templateRef}
           value={template}
           onChange={(e) => setTemplate(e.target.value)}
+          onKeyDown={templateFormat.onKeyDown}
           rows={5}
           className={ctrl.input}
           style={{ boxSizing: 'border-box', resize: 'vertical', minHeight: 90 }}
         />
         <div className={styles.templatePreview}>
           <span className={styles.templatePreviewLabel}>{t.templatePreviewLabel}</span>
-          <pre className={styles.templatePreviewBody}>{previewMessage}</pre>
+          <pre className={styles.templatePreviewBody}><WaFormattedText text={previewMessage} /></pre>
         </div>
         <div className={styles.templateActions}>
           {templateError && (

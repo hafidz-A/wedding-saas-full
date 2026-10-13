@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import React, { useId, useRef, useState, useTransition } from 'react'
 import { updateGuest } from './guests/actions'
 import { type GuestRow } from './guests/types'
 import { formatPhoneDisplay } from '@/lib/guests/phone'
@@ -8,6 +8,7 @@ import { useDashboardDict } from './DashboardI18nProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 import ctrl from './dashboardControls.module.css'
+import { useWaFormat, WaFormatToolbar } from './WaFormatToolbar'
 
 /**
  * Per-guest edit modal — opened from the GuestsTab "✎" button on each row.
@@ -36,6 +37,9 @@ export default function GuestEditModal({
   const [phone, setPhone] = useState(formatPhoneDisplay(guest.phone_e164))
   const [group, setGroup] = useState(guest.group_label || '')
   const [notes, setNotes] = useState(guest.notes || '')
+  const notesRef = useRef<HTMLTextAreaElement>(null)
+  const notesFormat = useWaFormat(notesRef, notes, setNotes)
+  const notesId = useId()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -93,11 +97,17 @@ export default function GuestEditModal({
           />
         </label>
 
-        <label style={field}>
-          <span style={lbl}>{t.notes}</span>
+        {/* A <div>, not a <label>: a label wrapping the B/I/S buttons would
+            make the first button its control (clicking the caption = bold). */}
+        <div style={field}>
+          <label htmlFor={notesId} style={lbl}>{t.notes}</label>
+          <WaFormatToolbar onFormat={notesFormat.apply} />
           <textarea
+            id={notesId}
+            ref={notesRef}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
+            onKeyDown={notesFormat.onKeyDown}
             rows={5}
             placeholder="
 
@@ -110,7 +120,7 @@ export default function GuestEditModal({
             style={{ ...input, fontFamily: 'inherit', resize: 'vertical', minHeight: 100 }}
           />
           <span style={hint}>{t.hint}</span>
-        </label>
+        </div>
 
         {error && <p style={errorStyle}>{error}</p>}
 
