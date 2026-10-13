@@ -239,23 +239,66 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   aspect-ratio: 4 / 5;
-  background: #ddd;
 }
 
 /* Tighter map aspect in pinned mode so it sits nicely in the 100vh window */
 .pinnedMode .mapWrap { aspect-ratio: 1 / 1; }
 
-.map { width: 100%; height: 100%; border: 0; display: block; }
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.mapLoaded { opacity: 1; }
 
-.mapHint {
-  margin-top: 10px;
+/* Shown while Google Maps loads (it's a heavy third-party page). */
+.mapPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--fg-muted, var(--color-charcoal-light));
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  background:
+    linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%) 0 0 / 250% 100%,
+    color-mix(in srgb, var(--color-gold-soft) 35%, #f3eee6);
+  animation: mapShimmer 1.6s linear infinite;
+  transition: opacity 0.5s ease;
+}
+.mapPlaceholderHidden { opacity: 0; pointer-events: none; }
+@keyframes mapShimmer { to { background-position: -250% 0, 0 0; } }
+@media (prefers-reduced-motion: reduce) { .mapPlaceholder { animation: none; } }
+
+.mapOpen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--ctl-h);
+  margin-top: var(--space-3);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--color-coral)) 45%, transparent);
+  color: var(--fg, var(--color-charcoal));
+  background: rgba(255, 255, 255, 0.55);
+  font-family: var(--font-body);
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--fg-muted, var(--color-charcoal-light));
-  text-align: center;
+  text-decoration: none;
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
+.mapOpen:hover { background: rgba(255, 255, 255, 0.85); border-color: var(--accent, var(--color-coral)); }
 
 /* ---------- Responsive ---------- */
 

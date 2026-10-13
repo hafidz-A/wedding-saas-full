@@ -130,7 +130,38 @@ export async function resolveMapEmbed(raw: unknown, fetchImpl: FetchLike = fetch
   return ''
 }
 
-/** Render-time pass over a config: rewrite every section's `mapEmbed`. */
+/**
+ * The "Open in Google Maps" link for a map. Prefers what the couple pasted
+ * when it's a normal Maps link (a maps.app.goo.gl share link opens the Maps
+ * app straight on phones); otherwise derives a search link from the embed
+ * src. '' when nothing usable.
+ */
+export function mapOpenUrl(raw: unknown, embedSrc: string): string {
+  if (!embedSrc) return ''
+  if (typeof raw === 'string') {
+    const u = parseUrl(raw)
+    const isIframe = /<iframe/i.test(raw)
+    if (u && !isIframe) {
+      const host = u.hostname.toLowerCase()
+      const isEmbed = u.pathname.startsWith('/maps/embed') || u.searchParams.get('output') === 'embed'
+      if (!isEmbed && (isMapShortLink(raw) || isGoogleHost(host))) return u.toString().replace(/^http:/, 'https:')
+    }
+  }
+  let e: URL
+  try { e = new URL(embedSrc) } catch { return '' }
+  const search = (q: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`
+  const q = e.searchParams.get('q')
+  if (q) return search(q)
+  // /maps/embed?pb=…!2d<lng>!3d<lat>…
+  const pb = e.searchParams.get('pb') || ''
+  const lng = pb.match(/!2d(-?\d+(?:\.\d+)?)/)
+  const lat = pb.match(/!3d(-?\d+(?:\.\d+)?)/)
+  if (lat && lng) return search(`${lat[1]},${lng[1]}`)
+  return ''
+}
+
+/** Render-time pass over a config: rewrite every section's `mapEmbed` into a
+ *  frameable src, and add `mapLink` (see mapOpenUrl). */
 export async function resolveConfigMapEmbeds<T>(config: T, fetchImpl?: FetchLike): Promise<T> {
   const c = config as { sections?: Array<{ props?: Record<string, unknown> }> }
   if (!c || !Array.isArray(c.sections)) return config
@@ -138,7 +169,9 @@ export async function resolveConfigMapEmbeds<T>(config: T, fetchImpl?: FetchLike
   const sections = await Promise.all(
     c.sections.map(async (s) => {
       if (!s?.props || typeof s.props.mapEmbed !== 'string' || !s.props.mapEmbed) return s
-      return { ...s, props: { ...s.props, mapEmbed: await resolveMapEmbed(s.props.mapEmbed, fetchImpl) } }
+      const raw = s.props.mapEmbed
+      const mapEmbed = await resolveMapEmbed(raw, fetchImpl)
+      return { ...s, props: { ...s.props, mapEmbed, mapLink: mapOpenUrl(raw, mapEmbed) } }
     }),
   )
   return { ...(config as object), sections } as T

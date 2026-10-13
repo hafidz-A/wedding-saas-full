@@ -5,12 +5,14 @@ import { motion, useMotionValue, useTransform } from 'motion/react'
 import SectionBackground from '../../components/SectionBackground.jsx'
 import ThreeDTilt from '../../components/ThreeDTilt.jsx'
 import styles from './EventDetails.module.css'
+import { safeExternalUrl } from '@/lib/safeUrl'
 
 const DEFAULTS = {
   title: 'Event Details',
   subtitle: '',
   events: [],
   mapEmbed: '',
+  mapLink: '',
 }
 
 /* ╔══════════════════════════════════════════════════════════════════════╗
@@ -100,8 +102,9 @@ function useMatchMedia(query) {
 }
 
 export default function EventDetails(props) {
-  const { title, subtitle, events, mapEmbed } = { ...DEFAULTS, ...props }
+  const { title, subtitle, events, mapEmbed, mapLink } = { ...DEFAULTS, ...props }
   const sectionRef = useRef(null)
+  const mapNear = useMapLoadTrigger(sectionRef, !!mapEmbed)
 
   const isCompact = useMatchMedia(COMPACT_BREAKPOINT)
   const reducedMotion = useMatchMedia('(prefers-reduced-motion: reduce)')
@@ -175,9 +178,9 @@ export default function EventDetails(props) {
 
         {mapEmbed &&
           (useStacked ? (
-            <MapCardStacked mapEmbed={mapEmbed} />
+            <MapCardStacked mapEmbed={mapEmbed} mapLink={mapLink} load={mapNear} />
           ) : (
-            <MapCardPinned mapEmbed={mapEmbed} progress={progress} />
+            <MapCardPinned mapEmbed={mapEmbed} mapLink={mapLink} load={mapNear} progress={progress} />
           ))}
       </div>
     </div>
@@ -228,7 +231,7 @@ function EventCardPinned({ event, index, total, progress }) {
   )
 }
 
-function MapCardPinned({ mapEmbed, progress }) {
+function MapCardPinned({ mapEmbed, mapLink, load, progress }) {
   // Coin wipe: bottom inset recedes 100% → 0% (image reveals top-down)
   // PLUS opacity as a safety net — even on browsers where clip-path
   // string interpolation fails (some mobile Safari builds), the opacity
@@ -269,7 +272,7 @@ function MapCardPinned({ mapEmbed, progress }) {
       style={{ clipPath, y, opacity, scale }}
     >
       <ThreeDTilt className={styles.mapCardInner} max={6} scale={1.015}>
-        <MapContent mapEmbed={mapEmbed} />
+        <MapContent mapEmbed={mapEmbed} mapLink={mapLink} load={load} />
       </ThreeDTilt>
     </motion.aside>
   )
@@ -297,7 +300,7 @@ function EventCardStacked({ event }) {
   )
 }
 
-function MapCardStacked({ mapEmbed }) {
+function MapCardStacked({ mapEmbed, mapLink, load }) {
   // NOTE: avoid clip-path on mobile. iOS Safari + several mobile browsers
   // fail to interpolate `clip-path` strings driven by motion, especially
   // when applied to an element containing an <iframe>. Result: map stays
@@ -311,7 +314,7 @@ function MapCardStacked({ mapEmbed }) {
       transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
     >
       <ThreeDTilt className={styles.mapCardInner} max={6} scale={1.015}>
-        <MapContent mapEmbed={mapEmbed} />
+        <MapContent mapEmbed={mapEmbed} mapLink={mapLink} load={load} />
       </ThreeDTilt>
     </motion.aside>
   )
@@ -344,21 +347,122 @@ function EventCardContent({ event }) {
   )
 }
 
-function MapContent({ mapEmbed }) {
+/**
+ * When to start the Google Maps iframe. The embed is a heavy third-party page
+ * (its own scripts + tiles), so a guest who waits until they reach the card
+ * watches it load. Instead:
+ *   - warm up the connection to Google as soon as the invitation mounts;
+ *   - start the map once the page has finished loading and the browser is
+ *     idle (after the hero/music, never competing with them), so it's usually
+ *     ready by the time the guest scrolls to it;
+ *   - and in any case when the section comes within two screens.
+ * Guests on Save-Data or 2G only get the last one.
+ *
+ * The observer uses root: document — phones view the invitation inside the
+ * PhoneFrameView iframe, where the implicit (top-level) root ignores
+ * rootMargin and the two-screen lead would be lost.
+ */
+const MAP_ORIGINS = ['https://www.google.com', 'https://maps.google.com', 'https://maps.gstatic.com', 'https://maps.googleapis.com']
+
+function useMapLoadTrigger(sectionRef, hasMap) {
+  const [go, setGo] = useState(false)
+  useEffect(() => {
+    if (!hasMap) return undefined
+    for (const href of MAP_ORIGINS) {
+      if (document.head.querySelector(`link[rel="preconnect"][href="${href}"]`)) continue
+      const l = document.createElement('link')
+      l.rel = 'preconnect'
+      // No crossorigin: the iframe page and its scripts are no-CORS requests,
+      // and only a matching (no-CORS) warmed connection gets reused.
+      l.href = href
+      document.head.appendChild(l)
+    }
+
+    let done = false
+    const start = () => {
+      if (done) return
+      done = true
+      setGo(true)
+      cleanup()
+    }
+
+    // 1) Near: within two screens of the section.
+    const el = sectionRef.current
+    let io = null
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      const onHit = (entries) => { if (entries.some((e) => e.isIntersecting)) start() }
+      try {
+        io = new IntersectionObserver(onHit, { root: document, rootMargin: '200% 0px' })
+      } catch {
+        io = new IntersectionObserver(onHit, { rootMargin: '200% 0px' })
+      }
+      io.observe(el)
+    } else {
+      start()
+    }
+
+    // 2) Idle preload after the page has loaded (skipped on Save-Data / 2G).
+    const conn = navigator.connection
+    const frugal = !!conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))
+    let idleId = 0
+    let timer = 0
+    const schedule = () => {
+      timer = window.setTimeout(() => {
+        if (window.requestIdleCallback) idleId = window.requestIdleCallback(start, { timeout: 3000 })
+        else start()
+      }, 1500)
+    }
+    const onLoad = () => schedule()
+    if (!frugal) {
+      if (document.readyState === 'complete') schedule()
+      else window.addEventListener('load', onLoad, { once: true })
+    }
+
+    function cleanup() {
+      io?.disconnect()
+      window.removeEventListener('load', onLoad)
+      window.clearTimeout(timer)
+      if (idleId && window.cancelIdleCallback) window.cancelIdleCallback(idleId)
+    }
+    return cleanup
+  }, [sectionRef, hasMap])
+  return go
+}
+
+function MapContent({ mapEmbed, mapLink, load }) {
+  const [loaded, setLoaded] = useState(false)
+  const href = mapLink ? safeExternalUrl(mapLink) : ''
   return (
     <>
       <h3 className={styles.mapTitle}>Venue Location</h3>
       <div className={styles.mapWrap}>
-        <iframe
-          title="Venue map"
-          src={mapEmbed}
-          loading="lazy"
-          allowFullScreen
-          referrerPolicy="no-referrer-when-downgrade"
-          className={styles.map}
-        />
+        {/* Placeholder until the map has painted — never a blank grey box. */}
+        <div className={`${styles.mapPlaceholder} ${loaded ? styles.mapPlaceholderHidden : ''}`} aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z" />
+            <circle cx="12" cy="9.5" r="2.5" />
+          </svg>
+          <span>Loading map…</span>
+        </div>
+        {load && (
+          <iframe
+            title="Venue map"
+            src={mapEmbed}
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            className={`${styles.map} ${loaded ? styles.mapLoaded : ''}`}
+            onLoad={() => setLoaded(true)}
+          />
+        )}
       </div>
-      <p className={styles.mapHint}>Tap to open in Google Maps</p>
+      {href && href !== '#' && (
+        <a className={styles.mapOpen} href={href} target="_blank" rel="noopener noreferrer">
+          Open in Google Maps
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M14 4h6v6" /><path d="M20 4l-9 9" /><path d="M19 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1h5" />
+          </svg>
+        </a>
+      )}
     </>
   )
 }
