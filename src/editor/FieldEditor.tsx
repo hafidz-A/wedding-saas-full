@@ -173,7 +173,7 @@ function renderField(
     case 'textarea':   return <TextareaField key={f.key} label={label} value={value ?? ''} rows={f.rows} onChange={(v) => onChange(v)} help={help} />
     case 'datetime':   return <DatetimeField key={f.key} label={label} value={value ?? ''} onChange={(v) => onChange(v)} help={help} />
     case 'boolean':    return <BooleanField  key={f.key} label={label} value={!!value} onChange={(v) => onChange(v)} help={help} />
-    case 'select':     return <SelectField   key={f.key} label={label} value={value ?? ''} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={(v) => onChange(v)} help={help} />
+    case 'select':     return <SelectField   key={f.key} label={label} value={value ?? f.defaultValue ?? ''} options={f.options.map((o) => ({ value: o.value, label: localizeLabel(o.label, lang) }))} onChange={(v) => onChange(v)} help={help} />
     case 'image':      return <ImageField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
     case 'audio':      return <AudioField    key={f.key} label={label} value={value ?? ''} slug={slug} onChange={(v) => onChange(v)} help={help} />
     case 'imageArray': return <ImageArrayField key={f.key} label={label} value={Array.isArray(value) ? value : []} slug={slug} onChange={(v) => onChange(v)} help={help} maxItems={f.maxItems} />
