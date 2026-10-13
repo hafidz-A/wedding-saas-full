@@ -55,6 +55,10 @@ export interface BooleanField extends BaseField {
 export interface SelectField extends BaseField {
   type: 'select'
   options: { value: string; label: LabelText }[]
+  /** What the renderer falls back to when the key is unset (older configs).
+   *  The editor shows it as selected instead of "— select —"; it is only
+   *  written to the config once the couple actually changes the select. */
+  defaultValue?: string
 }
 export interface ImageField extends BaseField {
   type: 'image'

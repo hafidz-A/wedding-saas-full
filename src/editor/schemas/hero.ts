@@ -9,6 +9,16 @@ export const heroSchema: SectionSchema = {
     { key: 'brideName',        label: { id: 'Nama mempelai wanita', en: 'Bride name' },   type: 'text', linkedGroup: 'couple' },
     { key: 'groomName',        label: { id: 'Nama mempelai pria', en: 'Groom name' },     type: 'text', linkedGroup: 'couple' },
     { key: 'weddingDate',      label: { id: 'Tanggal pernikahan', en: 'Wedding date' },   type: 'datetime' },
+    {
+      key: 'dateLang',
+      label: { id: 'Bahasa tanggal & hitung mundur', en: 'Date & countdown language' },
+      type: 'select',
+      defaultValue: 'en',
+      options: [
+        { value: 'en', label: { id: 'English — Sunday, December 20, 2026 · Days', en: 'English — Sunday, December 20, 2026 · Days' } },
+        { value: 'id', label: { id: 'Indonesia — Minggu, 20 Desember 2026 · Hari', en: 'Indonesian — Minggu, 20 Desember 2026 · Hari' } },
+      ],
+    },
     { key: 'venue',            label: { id: 'Lokasi acara', en: 'Venue' },                type: 'text' },
     { key: 'welcomeText',      label: { id: 'Teks sambutan', en: 'Welcome text' },        type: 'textarea', rows: 2 },
     { key: 'scrollHint',       label: { id: 'Petunjuk scroll', en: 'Scroll hint' },       type: 'text' },
@@ -28,6 +38,7 @@ export const heroSchema: SectionSchema = {
     welcomeText: 'Welcome, our dear guest',
     scrollHint: 'Scroll to enter',
     countdownEnabled: true,
+    dateLang: 'en',
     gateImage: demoImg('coupleGate', 2000),
     blastPhotos: [
       demoImg('bridePortrait', 500),

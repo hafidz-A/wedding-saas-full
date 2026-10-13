@@ -16,6 +16,7 @@ const DEFAULTS = {
   welcomeText: 'Welcome, our dear guest',
   scrollHint: 'Scroll to enter',
   countdownEnabled: true,
+  dateLang: 'en',
   gateImage: '',
   blastPhotos: [],
   petals: [],
@@ -36,10 +37,30 @@ function diffParts(target) {
   }
 }
 
-function formatDate(iso) {
+/* Language of the date line + countdown ("dateLang" in the editor). English
+   stays the default so existing invitations render exactly as before. */
+const DATE_TEXT = {
+  en: {
+    locale: 'en-US',
+    units: ['Days', 'Hours', 'Min', 'Sec'],
+    ended: 'Today is the day — welcome.',
+    aria: 'Countdown to the wedding day',
+  },
+  id: {
+    locale: 'id-ID',
+    units: ['Hari', 'Jam', 'Menit', 'Detik'],
+    ended: 'Hari bahagia telah tiba — selamat datang.',
+    aria: 'Hitung mundur menuju hari pernikahan',
+  },
+}
+const dateText = (lang) => DATE_TEXT[lang] || DATE_TEXT.en
+
+export function formatDate(iso, lang = 'en') {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('en-US', {
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return iso
+    return d.toLocaleDateString(dateText(lang).locale, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -250,7 +271,8 @@ function DecorCorners({ innerRef }) {
  * re-render ONLY this small subtree — not the whole Hero (8 petals, up to 13
  * blast photos, SVG filters).
  */
-function Countdown({ weddingDate }) {
+function Countdown({ weddingDate, lang }) {
+  const tx = dateText(lang)
   const [parts, setParts] = useState(() => diffParts(weddingDate))
   useEffect(() => {
     const tick = () => setParts(diffParts(weddingDate))
@@ -260,15 +282,10 @@ function Countdown({ weddingDate }) {
   }, [weddingDate])
 
   if (!parts) return null
-  if (parts.ended) return <p className={styles.ended}>Today is the day — welcome.</p>
+  if (parts.ended) return <p className={styles.ended}>{tx.ended}</p>
   return (
-    <ul className={styles.countdown} aria-label="Countdown to the wedding day">
-      {[
-        { label: 'Days', value: parts.days },
-        { label: 'Hours', value: parts.hours },
-        { label: 'Min', value: parts.minutes },
-        { label: 'Sec', value: parts.seconds },
-      ].map((c) => (
+    <ul className={styles.countdown} aria-label={tx.aria}>
+      {[parts.days, parts.hours, parts.minutes, parts.seconds].map((value, i) => ({ label: tx.units[i], value })).map((c) => (
         <li key={c.label} className={styles.countCell}>
           {/* The live value (esp. seconds) is computed from Date.now(), so the
               server-rendered number and the value at client hydration differ by
@@ -588,13 +605,13 @@ export default function Hero(props) {
             {cfg.weddingDate && (
               <p className={styles.date}>
                 <span className={styles.dot} aria-hidden="true" />
-                {formatDate(cfg.weddingDate)}
+                {formatDate(cfg.weddingDate, cfg.dateLang)}
                 <span className={styles.dot} aria-hidden="true" />
               </p>
             )}
             {cfg.venue && <p className={styles.venue}>{cfg.venue}</p>}
             {cfg.countdownEnabled && cfg.weddingDate && (
-              <Countdown weddingDate={cfg.weddingDate} />
+              <Countdown weddingDate={cfg.weddingDate} lang={cfg.dateLang} />
             )}
 
             {/* Subtle initials monogram — same source (deriveMonogram) as the
