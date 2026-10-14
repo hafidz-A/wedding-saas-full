@@ -298,13 +298,15 @@
   }
   .actionRowMain > button:first-child { grid-column: 1; grid-row: 1; }
   .actionRowMain > .iconAction { grid-column: 2; grid-row: 1; }
+  /* Up to four (DM IG · Messenger · Bagikan · Salin): two per row. */
   .altSend {
     grid-column: 1 / -1;
     grid-row: 2;
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-2);
   }
-  .altSend > button { flex: 1 1 0; }
+  .altSend > button { flex: 1 1 calc(50% - var(--space-2)); }
 
   .actionRowBtns {
     display: flex;

@@ -8,6 +8,9 @@ export interface GuestRow {
   phone_e164: string | null
   group_label: string | null
   notes: string | null
+  /** Normalised Instagram / Facebook handle (see lib/guests/social.ts). */
+  instagram: string | null
+  facebook: string | null
   rsvpToken: string | null
   tokenUsedAt: string | null
   rsvpSubmittedAt: string | null
@@ -24,6 +27,9 @@ export interface GuestRowDb {
   phone_enc: string | null
   group_label: string | null
   notes_enc: string | null
+  /** Added 2026-10-14 — absent on databases without that migration. */
+  instagram_enc?: string | null
+  facebook_enc?: string | null
   rsvp_token_enc: string | null
   token_used_at: string | null
   rsvp_submitted_at: string | null
@@ -45,6 +51,8 @@ export function fromDbRow(row: GuestRowDb): GuestRow {
     phone_e164: decryptField(row.phone_enc),
     group_label: row.group_label,
     notes: decryptField(row.notes_enc),
+    instagram: decryptField(row.instagram_enc ?? null),
+    facebook: decryptField(row.facebook_enc ?? null),
     rsvpToken: decryptField(row.rsvp_token_enc),
     tokenUsedAt: row.token_used_at,
     rsvpSubmittedAt: row.rsvp_submitted_at,

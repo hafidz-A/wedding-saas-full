@@ -19,6 +19,7 @@ import GuestEditModal from './GuestEditModal'
 import { useWaFormat, WaFormatToolbar, WaFormattedText } from './WaFormatToolbar'
 import { stripWaFormatting } from '@/lib/guests/waFormat'
 import { buildSharePayload } from '@/lib/guests/sharePayload'
+import { socialDmUrl, type SocialPlatform } from '@/lib/guests/social'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
@@ -47,6 +48,21 @@ interface Props {
   paymentMode?: PaymentMode
   manualContact?: ManualContact
   manualPayDict?: Dict['manualPay']
+}
+
+/** execCommand('copy') fallback for when the async Clipboard API is blocked. */
+function legacyCopy(text: string): boolean {
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.setAttribute('readonly', '')
+  ta.style.position = 'fixed'
+  ta.style.opacity = '0'
+  document.body.appendChild(ta)
+  ta.select()
+  let ok = false
+  try { ok = document.execCommand('copy') } catch { ok = false }
+  ta.remove()
+  return ok
 }
 
 export default function GuestsTab({
@@ -243,6 +259,26 @@ export default function GuestsTab({
     }
   }
 
+  // Instagram / Messenger can't open a DM with the text pre-filled, so copy
+  // the message and open the guest's DM thread: the couple pastes + sends.
+  // Both calls start synchronously inside the click (user gesture): the
+  // clipboard write needs the page focused, and window.open must not be
+  // deferred or popup blockers stop it.
+  const handleDm = (g: GuestRow, platform: SocialPlatform) => {
+    const handle = platform === 'instagram' ? g.instagram : g.facebook
+    if (!handle) return
+    const text = stripWaFormatting(messageFor(g))
+    let copied: Promise<boolean>
+    try {
+      copied = navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text))
+    } catch {
+      copied = Promise.resolve(legacyCopy(text))
+    }
+    window.open(socialDmUrl(handle, platform), '_blank', 'noopener,noreferrer')
+    markSent(g)
+    copied.then((ok) => (ok ? fb.ok(fm.dmCopied) : fb.fail(fm.dmCopyFail)))
+  }
+
   const handleCopy = async (g: GuestRow) => {
     const text = stripWaFormatting(messageFor(g))
     let ok = false
@@ -251,15 +287,7 @@ export default function GuestsTab({
       ok = true
     } catch {
       // Clipboard API blocked (insecure context / old browser): legacy copy.
-      const ta = document.createElement('textarea')
-      ta.value = text
-      ta.setAttribute('readonly', '')
-      ta.style.position = 'fixed'
-      ta.style.opacity = '0'
-      document.body.appendChild(ta)
-      ta.select()
-      try { ok = document.execCommand('copy') } catch { ok = false }
-      ta.remove()
+      ok = legacyCopy(text)
     }
     if (!ok) {
       fb.fail(fm.copyFail)
@@ -325,6 +353,8 @@ export default function GuestsTab({
       phone_e164: null, // will be set properly when server response arrives
       group_label: null,
       notes: null,
+      instagram: null,
+      facebook: null,
       rsvpToken: null,
       tokenUsedAt: null,
       rsvpSubmittedAt: null,
@@ -558,6 +588,28 @@ export default function GuestsTab({
                     {/* Other platforms. A wrapper so phones can lay these two out
                         as their own equal-width row (display: contents on desktop). */}
                     <span className={styles.altSend}>
+                      {g.instagram && (
+                        <button
+                          type="button"
+                          onClick={() => handleDm(g, 'instagram')}
+                          disabled={pending}
+                          className={`${ctrl.btnGhostSm} ${styles.textAction}`}
+                          title={t.dmIgTitle.replace('{handle}', g.instagram)}
+                        >
+                          {t.dmIg}
+                        </button>
+                      )}
+                      {g.facebook && (
+                        <button
+                          type="button"
+                          onClick={() => handleDm(g, 'facebook')}
+                          disabled={pending}
+                          className={`${ctrl.btnGhostSm} ${styles.textAction}`}
+                          title={t.dmFbTitle.replace('{handle}', g.facebook)}
+                        >
+                          {t.dmFb}
+                        </button>
+                      )}
                       {canShare && (
                         <button
                           type="button"

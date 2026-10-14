@@ -9,6 +9,7 @@ import { useFeedback } from '@/components/dashboard/FeedbackProvider'
 import { useEscapeToClose } from '@/components/ui/useEscapeToClose'
 import ctrl from './dashboardControls.module.css'
 import { useWaFormat, WaFormatToolbar } from './WaFormatToolbar'
+import { normalizeSocialHandle } from '@/lib/guests/social'
 
 /**
  * Per-guest edit modal — opened from the GuestsTab "✎" button on each row.
@@ -37,6 +38,8 @@ export default function GuestEditModal({
   const [phone, setPhone] = useState(formatPhoneDisplay(guest.phone_e164))
   const [group, setGroup] = useState(guest.group_label || '')
   const [notes, setNotes] = useState(guest.notes || '')
+  const [instagram, setInstagram] = useState(guest.instagram ? `@${guest.instagram}` : '')
+  const [facebook, setFacebook] = useState(guest.facebook || '')
   const notesRef = useRef<HTMLTextAreaElement>(null)
   const notesFormat = useWaFormat(notesRef, notes, setNotes)
   const notesId = useId()
@@ -45,8 +48,16 @@ export default function GuestEditModal({
 
   useEscapeToClose(onClose, !pending)
 
+  // Live validity (empty = fine; it clears the handle).
+  const igInvalid = !!instagram.trim() && !normalizeSocialHandle(instagram, 'instagram')
+  const fbInvalid = !!facebook.trim() && !normalizeSocialHandle(facebook, 'facebook')
+
   function onSave() {
     setError(null)
+    if (igInvalid || fbInvalid) {
+      setError(t.socialInvalid.replace('{platform}', igInvalid ? 'Instagram' : 'Facebook'))
+      return
+    }
     startTransition(async () => {
       try {
         await updateGuest(slug, guest.id, {
@@ -54,6 +65,8 @@ export default function GuestEditModal({
           phoneRaw: phone || null,
           groupLabel: group || null,
           notes: notes || null,
+          instagram: instagram.trim() || null,
+          facebook: facebook.trim() || null,
         })
         fb.ok(fm.guestUpdated)
         onClose()
@@ -95,6 +108,38 @@ export default function GuestEditModal({
             placeholder={t.groupPlaceholder}
             style={input}
           />
+        </label>
+
+        <label style={field}>
+          <span style={lbl}>{t.instagram}</span>
+          <input
+            value={instagram}
+            onChange={(e) => setInstagram(e.target.value)}
+            placeholder={t.instagramPlaceholder}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-invalid={igInvalid || undefined}
+            style={igInvalid ? { ...input, borderColor: 'var(--status-danger)' } : input}
+          />
+          {igInvalid && <span style={errHint}>{t.socialInvalid.replace('{platform}', 'Instagram')}</span>}
+        </label>
+
+        <label style={field}>
+          <span style={lbl}>{t.facebook}</span>
+          <input
+            value={facebook}
+            onChange={(e) => setFacebook(e.target.value)}
+            placeholder={t.facebookPlaceholder}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-invalid={fbInvalid || undefined}
+            style={fbInvalid ? { ...input, borderColor: 'var(--status-danger)' } : input}
+          />
+          {fbInvalid
+            ? <span style={errHint}>{t.socialInvalid.replace('{platform}', 'Facebook')}</span>
+            : <span style={hint}>{t.socialHint}</span>}
         </label>
 
         {/* A <div>, not a <label>: a label wrapping the B/I/S buttons would
@@ -197,6 +242,11 @@ const input: React.CSSProperties = {
 const hint: React.CSSProperties = {
   fontSize: 12,
   color: 'var(--text-secondary)',
+  lineHeight: 1.5,
+}
+const errHint: React.CSSProperties = {
+  fontSize: 12,
+  color: 'var(--status-danger)',
   lineHeight: 1.5,
 }
 const errorStyle: React.CSSProperties = {

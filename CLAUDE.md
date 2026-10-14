@@ -133,6 +133,12 @@ Plans editor is the source of truth for prices — do not hardcode rupiah amount
 
 - **Guests** tab: import (CSV/paste, `src/lib/guests/parse-import.ts`), per-guest **single-use RSVP
   token** links, and WhatsApp share text. Guest rows are **encrypted at rest** (`GUESTS_ENCRYPTION_KEY`).
+  Besides "Kirim WA" each row offers Bagikan (OS share sheet; link passed as `url` so IG/Messenger
+  appear — `sharePayload.ts`), Salin, and — when the guest has an Instagram/Facebook handle
+  (`instagram_enc`/`facebook_enc`, `2026-10-14_guests_social_handles.sql`, normalised by
+  `src/lib/guests/social.ts`) — "DM IG"/"Messenger": copies the message and opens `ig.me/m/<user>` /
+  `m.me/<user>`. Neither platform can prefill a DM, so that copy-then-paste is the ceiling. WhatsApp
+  `*bold*` markers are stripped for every non-WA path (`stripWaFormatting`).
 - **Buku Tamu v2** (Premium): `attendances` table, walk-in add, stats, printable/CSV ledger, and
   **QR check-in** at `/[template]/[slug]/checkin` (token-gated search + confirm via `/api/checkin/*`).
 

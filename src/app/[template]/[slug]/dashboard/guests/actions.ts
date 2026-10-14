@@ -7,6 +7,7 @@ import { verifyOwnership } from '@/editor/lib/auth'
 import { parseGuestImport } from '@/lib/guests/parse-import'
 import { normalizePhone } from '@/lib/guests/phone'
 import { encryptField } from '@/lib/guests/crypto'
+import { normalizeSocialHandle } from '@/lib/guests/social'
 import { generateToken, hashToken, encryptToken } from '@/lib/guests/token'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import { planBaseQuota } from '@/lib/payments/plans'
@@ -85,6 +86,9 @@ export async function updateGuest(
     phoneRaw?: string | null
     groupLabel?: string | null
     notes?: string | null
+    /** Raw input ("@user", profile link, …); '' / null clears it. */
+    instagram?: string | null
+    facebook?: string | null
   },
 ): Promise<void> {
   const invitation_id = await authorizeOwnership(slug)
@@ -97,12 +101,30 @@ export async function updateGuest(
   }
   if (patch.groupLabel !== undefined) update.group_label = patch.groupLabel?.trim() || null
   if (patch.notes !== undefined) update.notes_enc = encryptField(patch.notes?.trim() || null)
+  for (const platform of ['instagram', 'facebook'] as const) {
+    const raw = patch[platform]
+    if (raw === undefined) continue
+    let handle: string | null = null
+    if (raw && raw.trim()) {
+      handle = normalizeSocialHandle(raw, platform)
+      // The modal validates too; this is the server-side guarantee.
+      if (!handle) throw new Error(platform === 'instagram' ? 'Username Instagram tidak valid' : 'Username Facebook tidak valid')
+    }
+    update[`${platform}_enc`] = encryptField(handle)
+  }
   // Scope by invitation_id so an owner can never touch another couple's guest (IDOR).
   const { error } = await (admin.from('guests') as any)
     .update(update)
     .eq('id', id)
     .eq('invitation_id', invitation_id)
-  if (error) throw new Error(error.message)
+  if (error) {
+    // Database without the 2026-10-14 migration: say so instead of a raw
+    // "column does not exist".
+    if (/instagram_enc|facebook_enc/.test(error.message)) {
+      throw new Error('Fitur Instagram/Facebook belum aktif di server. Hubungi admin.')
+    }
+    throw new Error(error.message)
+  }
   revalidatePath('/[template]/[slug]/dashboard', 'page')
 }
 
