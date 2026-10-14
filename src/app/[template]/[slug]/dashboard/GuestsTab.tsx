@@ -18,6 +18,7 @@ import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
 import { useWaFormat, WaFormatToolbar, WaFormattedText } from './WaFormatToolbar'
 import { stripWaFormatting } from '@/lib/guests/waFormat'
+import { buildSharePayload } from '@/lib/guests/sharePayload'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
@@ -231,7 +232,10 @@ export default function GuestsTab({
 
   const handleShare = async (g: GuestRow) => {
     try {
-      await navigator.share({ text: stripWaFormatting(messageFor(g)) })
+      // The link goes in `url` so Instagram (Direct) and Messenger appear in
+      // the share sheet — they skip text-only shares (see buildSharePayload).
+      const link = buildGuestLink(publicUrl, g.name)
+      await navigator.share(buildSharePayload(stripWaFormatting(messageFor(g)), link))
       markSent(g)
     } catch (e) {
       // Closing the share sheet is not an error — just don't mark it sent.
