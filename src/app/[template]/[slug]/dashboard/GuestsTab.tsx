@@ -18,7 +18,6 @@ import GuestImportModal from './GuestImportModal'
 import GuestEditModal from './GuestEditModal'
 import { useWaFormat, WaFormatToolbar, WaFormattedText } from './WaFormatToolbar'
 import { stripWaFormatting } from '@/lib/guests/waFormat'
-import { buildSharePayload } from '@/lib/guests/sharePayload'
 import { useDashboardDict } from './DashboardI18nProvider'
 import { useConfirm } from '@/components/dashboard/DialogProvider'
 import { useFeedback } from '@/components/dashboard/FeedbackProvider'
@@ -222,27 +221,9 @@ export default function GuestsTab({
     markSent(g)
   }
 
-  // Other platforms (IG, FB, Telegram, …) can't be deep-linked with a prefilled
-  // message, so offer the OS share sheet (where supported) and copy-to-paste.
-  // WhatsApp's *bold* markers would show as literal asterisks there — strip them.
-  const [canShare, setCanShare] = useState(false)
-  useEffect(() => {
-    setCanShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
-  }, [])
-
-  const handleShare = async (g: GuestRow) => {
-    try {
-      // The link goes in `url` so Instagram (Direct) and Messenger appear in
-      // the share sheet — they skip text-only shares (see buildSharePayload).
-      const link = buildGuestLink(publicUrl, g.name)
-      await navigator.share(buildSharePayload(stripWaFormatting(messageFor(g)), link))
-      markSent(g)
-    } catch (e) {
-      // Closing the share sheet is not an error — just don't mark it sent.
-      if ((e as Error)?.name !== 'AbortError') fb.fail(fm.shareFail)
-    }
-  }
-
+  // "Salin": the guest's message, worded exactly as "Pesan WhatsApp untuk tamu"
+  // (their custom one if set), to paste into IG, FB or any other app. Only
+  // WhatsApp's *bold* markers are dropped — elsewhere they'd show as asterisks.
   const handleCopy = async (g: GuestRow) => {
     const text = stripWaFormatting(messageFor(g))
     let ok = false
@@ -555,30 +536,15 @@ export default function GuestsTab({
                     >
                       {g.phone_e164 ? t.sendWa : t.pickContact}
                     </button>
-                    {/* Other platforms. A wrapper so phones can lay these two out
-                        as their own equal-width row (display: contents on desktop). */}
-                    <span className={styles.altSend}>
-                      {canShare && (
-                        <button
-                          type="button"
-                          onClick={() => handleShare(g)}
-                          disabled={pending}
-                          className={`${ctrl.btnGhostSm} ${styles.textAction}`}
-                          title={t.shareTitle}
-                        >
-                          {t.shareBtn}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(g)}
-                        disabled={pending}
-                        className={`${ctrl.btnGhostSm} ${styles.textAction}`}
-                        title={t.copyTitle}
-                      >
-                        {t.copyBtn}
-                      </button>
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(g)}
+                      disabled={pending}
+                      className={`${ctrl.btnGhostSm} ${styles.textAction} ${styles.copyAction}`}
+                      title={t.copyTitle}
+                    >
+                      {t.copyBtn}
+                    </button>
                     <button
                       type="button"
                       onClick={() => setEditingGuest(g)}

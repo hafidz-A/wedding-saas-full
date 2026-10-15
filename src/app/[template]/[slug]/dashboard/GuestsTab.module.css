@@ -187,7 +187,6 @@
 .actionsCell > div { margin-block: var(--space-1); }
 .actionsCell > div + div { margin-left: var(--space-3); }
 .actionRowMain, .tokenBlock, .actionRowBtns { white-space: nowrap; }
-.altSend { display: contents; }
 
 .tokenBlock {
   height: var(--ctl-h-sm);
@@ -289,7 +288,7 @@
   .actionsCell > div,
   .actionsCell > div + div { margin: 0; }
 
-  /* Row 1: [ Kirim WA ········ ][ ✎ ]   Row 2: [ Bagikan ][ Salin ] */
+  /* Row 1: [ Kirim WA ········ ][ ✎ ]   Row 2: [ Salin ············ ] */
   .actionRowMain {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -298,13 +297,7 @@
   }
   .actionRowMain > button:first-child { grid-column: 1; grid-row: 1; }
   .actionRowMain > .iconAction { grid-column: 2; grid-row: 1; }
-  .altSend {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    display: flex;
-    gap: var(--space-2);
-  }
-  .altSend > button { flex: 1 1 0; }
+  .actionRowMain > .copyAction { grid-column: 1 / -1; grid-row: 2; }
 
   .actionRowBtns {
     display: flex;
