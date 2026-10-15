@@ -232,8 +232,9 @@ export default function GuestsTab({
 
   const handleShare = async (g: GuestRow) => {
     try {
-      // The link goes in `url` so Instagram (Direct) and Messenger appear in
-      // the share sheet — they skip text-only shares (see buildSharePayload).
+      // Same wording as "Kirim WA"; the link travels as `url` (so Instagram
+      // and Messenger show up) only when that keeps the text identical —
+      // see buildSharePayload.
       const link = buildGuestLink(publicUrl, g.name)
       await navigator.share(buildSharePayload(stripWaFormatting(messageFor(g)), link))
       markSent(g)
