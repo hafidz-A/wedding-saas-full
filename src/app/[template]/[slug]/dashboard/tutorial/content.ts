@@ -77,7 +77,7 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
     shots: [{ key: 'rsvps-table', captionKey: 'table' }] },
   { id: 'gifts', group: 'data', stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [{ key: 'gifts-table', captionKey: 'table' }] },
-  { id: 'guests', group: 'data', stepCount: 4, alwaysCount: 3, neverCount: 2, tipCount: 2,
+  { id: 'guests', group: 'data', stepCount: 4, alwaysCount: 3, neverCount: 2, tipCount: 3,
     shots: [{ key: 'guests-share', captionKey: 'share' }] },
   { id: 'guestbook', group: 'data', premiumOnly: true, stepCount: 4, alwaysCount: 2, neverCount: 1, tipCount: 2,
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
@@ -87,7 +87,7 @@ export const TUTORIAL_CATEGORIES: TutorialCategory[] = [
       { key: 'billing-upgrade', captionKey: 'upgrade' },
     ] },
   { id: 'faq', group: 'help', stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
-    faqCount: 13, shots: [] },
+    faqCount: 15, shots: [] },
 ]
 
 // Solary mirrors the lovebirds architecture (groups + section guides + FAQ),
@@ -128,7 +128,7 @@ export const TUTORIAL_CATEGORIES_SOLARY: TutorialCategory[] = [
     shots: [{ key: 'guestbook-ledger', captionKey: 'ledger' }] },
   { id: 'billing', group: 'help', stepCount: 4, alwaysCount: 2, neverCount: 2, tipCount: 1,
     shots: [] },
-  { id: 'faq', group: 'help', faqCount: 12, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
+  { id: 'faq', group: 'help', faqCount: 13, stepCount: 0, alwaysCount: 0, neverCount: 0, tipCount: 0,
     shots: [] },
 ]
 
