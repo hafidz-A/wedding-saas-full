@@ -5,6 +5,7 @@
    Source of truth (no hardcoded duplication — we import the live configs):
      • Lovebirds → src/all-templates/lovebirds/config/themes.js (+ THEME_META)
      • Solary    → src/all-templates/solary/config/themeTokens.js (PALETTES)
+     • Taman Bunga → src/all-templates/taman-bunga/config/palettes.js
 
    Each palette carries the exact background, accent, foreground and surface so
    the section background can morph to match whatever the running template
@@ -13,9 +14,10 @@
 import { themes } from '@/all-templates/lovebirds/config/themes.js'
 import { THEME_META, THEME_ORDER } from '@/all-templates/lovebirds/config/applyTheme.js'
 import { PALETTES } from '@/all-templates/solary/config/themeTokens.js'
+import { TAMAN_BUNGA_PALETTES, TAMAN_BUNGA_PALETTE_ORDER } from '@/all-templates/taman-bunga/config/palettes.js'
 
 export type VibeMode = 'light' | 'dark'
-export type TemplateId = 'lovebirds' | 'solary'
+export type TemplateId = 'lovebirds' | 'solary' | 'taman-bunga'
 
 export interface PaletteVibe {
   key: string
@@ -97,7 +99,27 @@ const solaryPalettes: PaletteVibe[] = SOLARY_ORDER.map((key) => {
   }
 })
 
+/* ---------- Taman Bunga ---------- */
+// The painting is the same dusk garden in every palette; only the type and
+// controls on top of it re-tint, so every palette is a dark (dusk) one.
+const tamanBungaPalettes: PaletteVibe[] = TAMAN_BUNGA_PALETTE_ORDER.map((key: string) => {
+  const p = (TAMAN_BUNGA_PALETTES as Record<string, any>)[key]
+  return {
+    key,
+    label: p.label,
+    mode: 'dark' as VibeMode,
+    background: p.preview.background,
+    accent: p.gold,
+    fg: p.ink,
+    fgMuted: p.preview.fgMuted,
+    surface: p.preview.surface,
+    surfaceBorder: p.preview.surfaceBorder,
+    swatches: [p.gold, p.blush, p.ink],
+  }
+})
+
 export const TEMPLATE_VIBES: TemplateVibe[] = [
   { id: 'lovebirds', label: 'Lovebirds', demoSlug: 'demo-lovebirds', category: 'wedding', palettes: lovebirdsPalettes },
   { id: 'solary', label: 'Solary', demoSlug: 'demo-solary', category: 'wedding', palettes: solaryPalettes },
+  { id: 'taman-bunga', label: 'Taman Bunga', demoSlug: 'demo-taman-bunga', category: 'wedding', palettes: tamanBungaPalettes },
 ]

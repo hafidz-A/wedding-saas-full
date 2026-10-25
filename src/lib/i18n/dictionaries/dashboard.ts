@@ -1,3 +1,5 @@
+import { tutorialTamanBunga } from './tutorialTamanBunga'
+
 export const dashboard = {
   id: {
     feedback: {
@@ -785,6 +787,8 @@ export const dashboard = {
           ],
           shots: {},
         },
+        // Taman Bunga overrides (see tutorialTamanBunga.ts).
+        tamanBunga: tutorialTamanBunga.id,
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
         // merges this over the lovebirds copy when template === 'solary'.
         solary: {
@@ -2049,6 +2053,8 @@ export const dashboard = {
           ],
           shots: {},
         },
+        // Taman Bunga overrides (see tutorialTamanBunga.ts).
+        tamanBunga: tutorialTamanBunga.en,
         // Solary-specific copy. Headings & navTitle are shared above; TutorialTab
         // merges this over the lovebirds copy when template === 'solary'.
         solary: {

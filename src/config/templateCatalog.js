@@ -37,6 +37,17 @@ export const templateCatalog = [
     accent: '#6B35A8',
     tags: ['futuristic', 'space', '3D'],
   },
+  {
+    id: 'taman-bunga',
+    label: 'Taman Bunga',
+    category: 'wedding',
+    description:
+      'Berjalan menyusuri taman bunga dari senja hingga malam — lukisan 2.5D, lentera di sepanjang jalan setapak, dan lampion ucapan.',
+    demoSlug: 'demo-taman-bunga',
+    thumbnail: '/templates/taman-bunga/thumb.webp',
+    accent: '#E9967D',
+    tags: ['painterly', 'garden', 'cinematic'],
+  },
 ]
 
 export function getCatalogEntry(id) {

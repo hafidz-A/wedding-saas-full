@@ -15,6 +15,7 @@ export const templates = {
     byTemplate: {
       lovebirds: 'Undangan sinematik hangat — kartu foto polaroid, animasi botanical, dan section lengkap (RSVP, gift, galeri, guestbook).',
       solary: 'Tema tata surya futuristik — planet 3D Three.js, perjalanan antar-planet saat scroll, dan palette switcher.',
+      'taman-bunga': 'Berjalan menyusuri taman bunga dari senja hingga malam — lukisan 2.5D, lentera di sepanjang jalan setapak, dan lampion ucapan dari tamu.',
     },
   },
   en: {
@@ -33,6 +34,7 @@ export const templates = {
     byTemplate: {
       lovebirds: 'A warm cinematic invitation — polaroid photo cards, botanical animation, and a full set of sections (RSVP, gift, gallery, guestbook).',
       solary: 'A futuristic solar-system theme — 3D Three.js planets, an inter-planet scroll journey, and a palette switcher.',
+      'taman-bunga': 'A walk through a flower garden from dusk into night — a 2.5D painting, lanterns along the garden path, and wish lanterns from your guests.',
     },
   },
 }

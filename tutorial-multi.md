@@ -342,7 +342,7 @@ if (templateId === 'garden') return <GardenShell config={config} slug={slug} />
 ### Langkah 5 — Daftarkan di `src/middleware.ts`
 
 - **`src/middleware.ts`** — add the new template id to both matcher entries'
-  `:template(lovebirds|solary)` alternation. Next statically analyses
+  `:template(lovebirds|solary|taman-bunga)` alternation. Next statically analyses
   `config.matcher` at build time, so it cannot import `templateIndex.js`; a
   template missing from this list silently loses Supabase session refresh on
   its public page, which breaks owner-preview of unpublished invitations.
@@ -433,6 +433,17 @@ Saat menambah template, update `create-invitation.mjs` agar `--template=<id>` me
 - [ ] Uji visual `/<id>/demo-<id>` di browser (320px / 768px / 1024px)
 - [ ] (Opsional) seed demo row + thumbnail di `public/images/templates/`
 - [ ] i18n: label schema section baru ditulis `{ id, en }` (bukan string polos); `npm test` → `dict-parity` hijau (lihat bagian 16)
+
+Titik sambung lain yang ikut disentuh saat Taman Bunga ditambahkan (2026-10-25) — cek semuanya:
+
+- [ ] `src/middleware.ts` (kedua matcher) + `src/__tests__/middleware-matcher.test.ts`
+- [ ] Editor: `src/editor/schemas/<id>/` + daftar di `src/editor/schemas/index.ts`; policy di `src/editor/templatePolicy.ts`
+- [ ] Tampilan: `src/lib/templates/appearance.ts` (ornamen, `[]` bila tidak ada) + `src/lib/config/palette-allowlist.ts`
+- [ ] Marketing: `src/components/marketing/vibeData.ts` (palet + `TemplateId`) + `VibeBackdrop.tsx`; copy di `src/lib/i18n/dictionaries/landing.ts` & `templates.ts` (`byTemplate`)
+- [ ] Onboarding & admin: `seedConfigForTemplate` di `src/lib/onboarding/seed-config.ts` (form admin membaca daftar template dari `TEMPLATE_VIBES`)
+- [ ] Tutorial dashboard: kategori di `dashboard/tutorial/content.ts` + copy override (`tutorialCopyKey`)
+- [ ] `scripts/create-invitation.mjs` (`VALID_TEMPLATES` + cara memuat config)
+- [ ] Migrasi DB: baris `templates` + `template_plans` (basic & premium) — tanpa ini template tidak muncul di landing/onboarding dan checkout menolak
 
 ---
 

@@ -44,7 +44,7 @@ since diverged substantially (play-once hero, ornament system, folded registry, 
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 14 (App Router), React 18.3.1, TypeScript |
-| Animation | motion 12 + GSAP 3.15 + lenis (smooth scroll); Solary adds three.js |
+| Animation | motion 12 + GSAP 3.15 + lenis (smooth scroll); Solary adds three.js; Taman Bunga is a hand-rolled single-canvas 2.5D engine (no extra lib) |
 | Backend | Supabase (Postgres + Storage + RLS) |
 | Auth | **Supabase Auth** (email+password accounts, email verify, password reset, optional TOTP MFA) |
 | Payments | **Midtrans** Snap (redirect) + notification webhook |
@@ -75,7 +75,7 @@ Modules + CSS variables. `import.meta.env` is Vite — use `process.env` in Next
 ```
 
 Key facts:
-- **Templates live in `src/all-templates/<id>/`** (currently `lovebirds`, `solary`) — NOT `src/templates/`.
+- **Templates live in `src/all-templates/<id>/`** (currently `lovebirds`, `solary`, `taman-bunga`) — NOT `src/templates/`.
   The master registry is `src/config/templateIndex.js` (server-safe: imports only plain `defaultConfig`
   data). Per-template render *Shells* are client components, dynamic-imported in
   `src/app/[template]/[slug]/InvitationView.tsx`.
@@ -121,7 +121,9 @@ Plans editor is the source of truth for prices — do not hardcode rupiah amount
   guestbook, quote, footer, …). `templatePolicy.ts` constrains which sections/actions a template allows
   (e.g. Lovebirds keeps exactly one gallery; couple name is a single locked source). Every section can
   be toggled on/off from the section list except the opening and the footer (Lovebirds `hero`/`footer`,
-  Solary `intro`/`sun`) — add/remove stays off for every template regardless. Disabling RSVP or Gift
+  Solary `intro`/`sun`, Taman Bunga `cover`/`closing`) — add/remove stays off for every template regardless.
+  Taman Bunga additionally locks every section's position (the walk is one choreographed scene; a
+  disabled section squeezes its stretch of the path instead of leaving a gap). Disabling RSVP or Gift
   (the two guest-data sections) prompts a confirm dialog via `confirmDisableTypes`.
 - Editor-adjacent tabs/panels: Palette, Ornament, Music, Meta (title/description/OG). Saves go through
   `/api/invitation/[slug]/config` (+ `publish`, `meta`, `music`, `theme`). Concurrency is
@@ -222,7 +224,7 @@ src/
 │   │   └── dashboard/                             ← editor + tabs + PaymentGate + guests/guestbook actions
 │   ├── admin/                                     ← operator console (invitations, payments, templates, testimonials, users, activity)
 │   └── api/                                       ← rsvp, gift, guestbook, checkin, upload, auth/*, payment/midtrans/webhook, invitation/[slug]/{config,publish,meta,music,theme}
-├── all-templates/<id>/                            ← lovebirds, solary (sections, config, renderers, styles, Shell)
+├── all-templates/<id>/                            ← lovebirds, solary, taman-bunga (sections, config, renderers, styles, Shell)
 ├── config/                                        ← templateIndex.js, templateCatalog.js, categories.js
 ├── editor/                                        ← block editor (schemas, fields, EditorRoot, templatePolicy)
 ├── lib/                                           ← supabase, auth, crypto, guests, guestbook, payments, admin, i18n, email, security, testimonials, meta, music …
@@ -275,7 +277,7 @@ supabase/                                          ← schema.sql (base) + migra
    `updated_at` moves on every save, including a "perbaikan kecil" one. Edit the text at
    `/admin/legal`, never by patching `defaults.ts`.
 10. **Per-template appearance lives in `src/lib/templates/appearance.ts`.** Ornament motifs per
-   template (Solary is deliberately `[]` — its three.js backdrop draws its own scene) plus a re-export
+   template (Solary and Taman Bunga are deliberately `[]` — each draws its own scene) plus a re-export
    of the palette allowlist. The owner theme route, the dashboard's ornament sub-tab, the admin
    appearance dialog, and the admin create form all read it — adding a template is one edit there, not
    a hunt for `template !== 'solary'` checks.
@@ -305,6 +307,17 @@ supabase/                                          ← schema.sql (base) + migra
    hardening: anon may read only `id, is_published`) — **keep it in sync** when a later migration
    changes a table's grants. Migrations are applied by hand (no CLI/CI link), so committing one
    never touches production.
+13. **Taman Bunga specifics.** (a) The canvas engine (`engine/scene.js`) flags wide layouts with the
+   `data-tb-wide` ATTRIBUTE on the Shell root, never a class — React owns that element's `className`
+   and rewrites it on every re-render (e.g. adding `tb-open`), which silently dropped a class.
+   (b) Its section timings live in `config/timeline.js`; the editor policy, the engine and the Shell
+   all assume the 11 section ids of `defaultConfig.js` — a new section means a new stretch of the walk,
+   not just a schema. (c) The closing photo is `couplePhoto`, not `photo`, so `fillEmptyImages` never
+   back-fills a stranger's stock portrait. (d) New invitations are seeded by `seedConfigForTemplate`
+   (`src/lib/onboarding/seed-config.ts`) — onboarding and the admin create form both call it.
+   (e) The `templates` + `template_plans` rows come from `supabase/migrations/2026-10-25_taman_bunga_template.sql`;
+   without them the landing/onboarding (DB-driven once any `templates` row exists) and checkout don't
+   offer the template.
 
 ---
 

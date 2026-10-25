@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
-import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { seedConfigForTemplate, validateSlug } from '@/lib/onboarding/seed-config'
+import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { resolvePlan, resolveUpgrade, planBaseQuota } from '@/lib/payments/plans'
 import { getTemplatePlans } from '@/lib/payments/template-plans'
 import {
@@ -148,18 +148,13 @@ export async function completeOnboarding(input: OnboardingInput): Promise<Onboar
       }
     }
 
-    // 5. Build the seeded config. Lovebirds substitutes the couple's data
-    //    into its 14-section cinematic config; other templates seed from
-    //    their bundled defaultConfig (couple edits content in the dashboard).
-    const config =
-      template === 'lovebirds'
-        ? buildSeedConfig({
-            brideName,
-            groomName,
-            weddingDate: input.weddingDate,
-            venue,
-          })
-        : getDefaultConfig(template)
+    // 5. Build the seeded config (per template — see seedConfigForTemplate).
+    const config = seedConfigForTemplate(template, {
+      brideName,
+      groomName,
+      weddingDate: input.weddingDate,
+      venue,
+    })
 
     // 6. Insert as an UNPAID DRAFT (is_paid=false, is_published=false). Payment
     //    publishes it via the payment webhook. Legacy NOT NULL columns (from the

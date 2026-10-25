@@ -10,7 +10,7 @@
  *   node scripts/create-invitation.mjs <slug> <password> --bride="X" --groom="Y" \
  *     --date=2026-11-15T16:00 --venue="The Grand Ballroom" \
  *     --email=couple@gmail.com [--plan=premium] \
- *     [--template=lovebirds|solary] [--full]
+ *     [--template=lovebirds|solary|taman-bunga] [--full]
  *
  * Example:
  *   node scripts/create-invitation.mjs adi-rani demo1234 \
@@ -23,7 +23,7 @@
  *     --template=lovebirds --full
  *
  * Flags:
- *   --template=lovebirds|solary  pick the visual template (default: lovebirds)
+ *   --template=lovebirds|solary|taman-bunga  pick the visual template (default: lovebirds)
  *   --full                       (lovebirds) seed the full 14-section template
  *                                instead of the 6-section starter
  *
@@ -94,7 +94,7 @@ const weddingDate = flags.date
 const venue = flags.venue || ''
 const email = flags.email
 const plan = flags.plan || 'free'
-const VALID_TEMPLATES = ['lovebirds', 'solary']
+const VALID_TEMPLATES = ['lovebirds', 'solary', 'taman-bunga']
 const template = VALID_TEMPLATES.includes(flags.template) ? flags.template : 'lovebirds'
 // --full       → seed the full 14-section cinematic template
 // --starter    → use the minimal 6-section starter (default)
@@ -115,7 +115,7 @@ if (missing.length) {
   console.error('    --venue="Venue name & address" \\')
   console.error('    --email=couple@gmail.com \\')
   console.error('    [--plan=free|basic|premium] \\')
-  console.error('    [--template=lovebirds|solary]  # default = lovebirds')
+  console.error('    [--template=lovebirds|solary|taman-bunga]  # default = lovebirds')
   console.error('    [--full]              # (lovebirds) seed full 14-section template (default = 6-section starter)')
   process.exit(1)
 }
@@ -206,6 +206,21 @@ if (template === 'solary') {
     console.log(`  loaded ${config.sections.length} planet sections`)
   } catch (e) {
     console.error('Failed to load Solary config:', e.message)
+    process.exit(1)
+  }
+}
+
+if (template === 'taman-bunga') {
+  console.log('→ Loading Taman Bunga (garden walk) template config…')
+  try {
+    // Same seed the browser onboarding uses (src/lib/onboarding/seed-config.ts).
+    const seedPath = resolve(__dirname, '../src/all-templates/taman-bunga/seed.js')
+    const { buildTamanBungaSeedConfig } = await import(pathToFileURL(seedPath).href)
+    config = buildTamanBungaSeedConfig({ brideName, groomName, weddingDate, venue })
+    config.couple = couple
+    console.log(`  loaded ${config.sections.length} garden sections`)
+  } catch (e) {
+    console.error('Failed to load Taman Bunga config:', e.message)
     process.exit(1)
   }
 }

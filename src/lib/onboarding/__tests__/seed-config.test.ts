@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { buildSeedConfig, validateSlug } from '../seed-config'
+import { buildSeedConfig, seedConfigForTemplate, validateSlug } from '../seed-config'
+import { defaultConfig as tamanBungaDefault } from '@/all-templates/taman-bunga/defaultConfig.js'
+import { defaultConfig as solaryDefault } from '@/all-templates/solary/defaultConfig.js'
 
 describe('validateSlug', () => {
   it('accepts a clean slug and returns it unchanged', () => {
@@ -72,5 +74,41 @@ describe('buildSeedConfig', () => {
     // First result must be untouched by the second call (deep clone, not shared ref).
     expect(heroA.props.coupleName).toBe('Rani & Adi')
     expect(heroB.props.coupleName).toBe('Other & Someone')
+  })
+})
+
+describe('seedConfigForTemplate', () => {
+  const input = {
+    brideName: 'Rani Sastrawijaya',
+    groomName: 'Adi Pratama',
+    weddingDate: '2026-11-15T16:00',
+    venue: 'Taman Kencana',
+  }
+  const props = (cfg: any, type: string) => cfg.sections.find((s: any) => s.type === type).props
+
+  it('seeds taman-bunga with the couple and none of the demo couple\'s personal data', () => {
+    const cfg = seedConfigForTemplate('taman-bunga', input)
+    expect(cfg.couple).toEqual({ name1: 'Rani', name2: 'Adi' })
+    expect(props(cfg, 'tbCouple').brideFullName).toBe('Rani Sastrawijaya')
+    expect(props(cfg, 'tbCouple').groomParents).toBe('')
+    expect(props(cfg, 'tbSaveDate').date).toBe('2026-11-15T16:00')
+    expect(props(cfg, 'tbEvents').venue).toBe('Taman Kencana')
+    expect(props(cfg, 'tbGift').accounts).toEqual([])
+    expect(props(cfg, 'guestbook').initialNotes).toEqual([])
+    expect(props(cfg, 'tbGallery').photos).toEqual([])
+    expect(cfg.sections.every((s: any) => s.enabled)).toBe(true)
+  })
+
+  it('never hands out the shared defaultConfig object', () => {
+    const a = seedConfigForTemplate('taman-bunga', input)
+    a.theme.defaultPalette = 'mutated'
+    expect(tamanBungaDefault.theme.defaultPalette).not.toBe('mutated')
+    const b = seedConfigForTemplate('solary', input)
+    expect(b).not.toBe(solaryDefault)
+    expect(b).toEqual(JSON.parse(JSON.stringify(solaryDefault)))
+  })
+
+  it('keeps lovebirds on buildSeedConfig', () => {
+    expect(seedConfigForTemplate('lovebirds', input)).toEqual(buildSeedConfig(input))
   })
 })

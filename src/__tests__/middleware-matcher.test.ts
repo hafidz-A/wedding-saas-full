@@ -34,6 +34,8 @@ describe('middleware config.matcher', () => {
     '/admin/invitations/new',
     '/lovebirds/adi-rani',
     '/solary/demo-solary',
+    '/taman-bunga/demo-taman-bunga',
+    '/taman-bunga/nadia-arya/dashboard',
     '/lovebirds/adi-rani/dashboard',
     '/lovebirds/adi-rani/dashboard/guests',
   ])('runs middleware on %s', (p) => {

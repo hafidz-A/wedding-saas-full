@@ -84,9 +84,36 @@ const lovebirdsPolicy: TemplatePolicy = {
   confirmDisableTypes: ['rsvp', 'weddingGift'],
 }
 
+// Taman Bunga: the walk through the garden is ONE choreographed scene — each
+// section owns a fixed stretch of the path (all-templates/taman-bunga/config/
+// timeline.js), so nothing may move, swap, be added or removed. Every section
+// but the gate and the closing can be switched off; the walk then squeezes that
+// stretch instead of leaving a gap.
+const TAMAN_BUNGA_ORDER = [
+  'cover', 'quote', 'couple', 'story', 'saveDate', 'events', 'gallery',
+  'rsvp', 'wishes', 'gift', 'closing',
+]
+
+const tamanBungaPolicy: TemplatePolicy = {
+  fixedSections: true,
+  pinnedFirstId: 'cover',
+  pinnedLastId: 'closing',
+  locks: Object.fromEntries(
+    TAMAN_BUNGA_ORDER.map((id) => [
+      id,
+      id === 'cover' || id === 'closing'
+        ? { lockType: true, lockPosition: true, lockDisable: true }
+        : { lockType: true, lockPosition: true },
+    ]),
+  ),
+  swappablePool: [],
+  confirmDisableTypes: ['tbRsvp', 'tbGift'],
+}
+
 const policies: Record<string, TemplatePolicy> = {
   solary: solaryPolicy,
   lovebirds: lovebirdsPolicy,
+  'taman-bunga': tamanBungaPolicy,
 }
 
 export function getTemplatePolicy(template: string): TemplatePolicy | null {

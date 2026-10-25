@@ -7,8 +7,8 @@ import { logAdminAction } from '@/lib/admin/log'
 import { revalidateInvitation } from '@/lib/admin/revalidate'
 import { resolvePlan } from '@/lib/payments/plans'
 import { BLOCK_SIZE, QUOTA_CAP, clampQuotaExtra, DEFAULT_BASE_QUOTA } from '@/lib/payments/quota'
-import { buildSeedConfig, validateSlug } from '@/lib/onboarding/seed-config'
-import { isValidTemplate, getDefaultConfig, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
+import { seedConfigForTemplate, validateSlug } from '@/lib/onboarding/seed-config'
+import { isValidTemplate, DEFAULT_TEMPLATE_ID } from '@/config/templateIndex'
 import { isPaletteAllowedForTemplate, isOrnamentAllowedForTemplate } from '@/lib/templates/appearance'
 import { sendAdminEmail } from '@/lib/email/send'
 import { siteBaseUrl } from '@/lib/site-url'
@@ -302,15 +302,11 @@ export async function adminCreateInvitationForClient(input: CreateForClientInput
   }
 
   // 5. Build the seeded config + insert the invitation (owned by the client).
-  // `getDefaultConfig` returns the template's SHARED module-level object for
-  // every non-Lovebirds template (buildSeedConfig already deep-clones its
-  // own) — clone before merging the operator's palette/ornament choice into
-  // config.theme, or writing into it would corrupt the default for every
-  // future invitation created from this template.
-  const baseConfig = template === 'lovebirds'
-    ? buildSeedConfig({ brideName, groomName, weddingDate: input.weddingDate, venue })
-    : getDefaultConfig(template)
-  const config = { ...baseConfig, theme: { ...(baseConfig.theme || {}) } }
+  // seedConfigForTemplate always returns a fresh object, so merging the
+  // operator's palette/ornament choice into config.theme can't corrupt the
+  // template's shared defaultConfig.
+  const config = seedConfigForTemplate(template, { brideName, groomName, weddingDate: input.weddingDate, venue })
+  config.theme = { ...(config.theme || {}) }
   if (input.palette) config.theme.defaultPalette = input.palette
   if (input.ornamentType) config.theme.ornamentType = input.ornamentType
 

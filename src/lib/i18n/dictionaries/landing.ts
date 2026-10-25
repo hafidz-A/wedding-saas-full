@@ -61,6 +61,10 @@ export const landing = {
           tagline: 'Futuristik & berani',
           blurb: 'Tata surya 3D, perjalanan antar-planet saat scroll, dan palette switcher yang hidup.',
         },
+        'taman-bunga': {
+          tagline: 'Lukisan & romantis',
+          blurb: 'Berjalan menyusuri taman bunga saat senja, lentera menyala di sepanjang jalan, dan setiap ucapan tamu menerbangkan lampion.',
+        },
       },
     },
     features: {
@@ -187,6 +191,10 @@ export const landing = {
         solary: {
           tagline: 'Futuristic & bold',
           blurb: 'A 3D solar system, an inter-planet scroll journey, and a living palette switcher.',
+        },
+        'taman-bunga': {
+          tagline: 'Painterly & romantic',
+          blurb: 'Walk a flower garden at dusk, with lanterns lighting up along the path and every guest wish sending a lantern into the sky.',
         },
       },
     },

@@ -9,6 +9,8 @@
        sketches on the left & right edges.
      • Solary    → the shared <AndromedaBackdrop> (ported Three.js Andromeda
        texture + starfield), tinted from the palette tokens.
+     • Taman Bunga → the template's own painted garden, with a palette-tinted
+       lantern glow (the painting never re-colours in the template either).
 
    Everything is `aria-hidden` and pointer-events:none; nothing writes to
    <body>, so it can't leak onto the rest of the marketing page.
@@ -16,6 +18,7 @@
 import { PerchedCanvas } from '@/all-templates/lovebirds/components/Ornaments.jsx'
 import { BotanicalSketchLayer } from '@/all-templates/lovebirds/components/BotanicalBorder'
 import { AndromedaBackdrop } from '@/components/preview/AndromedaBackdrop'
+import { SCENE } from '@/all-templates/taman-bunga/config/assets.js'
 import type { PaletteVibe, TemplateId } from './vibeData'
 import styles from './VibeBackdrop.module.css'
 
@@ -55,7 +58,21 @@ function SolaryBackdrop({ palette }: { palette: PaletteVibe }) {
   )
 }
 
+/* ---------- Taman Bunga ---------- */
+function TamanBungaBackdrop({ palette }: { palette: PaletteVibe }) {
+  return (
+    <div className={styles.tamanBunga} aria-hidden="true">
+      <div className={styles.garden} style={{ backgroundImage: `url(${SCENE.gardenWide})` }} />
+      <div
+        className={styles.glow}
+        style={{ background: `radial-gradient(50% 40% at 50% 70%, ${palette.accent}40 0%, transparent 70%)` }}
+      />
+    </div>
+  )
+}
+
 export function VibeBackdrop({ template, palette }: { template: TemplateId; palette: PaletteVibe }) {
+  if (template === 'taman-bunga') return <TamanBungaBackdrop palette={palette} />
   return template === 'solary' ? (
     <SolaryBackdrop palette={palette} />
   ) : (

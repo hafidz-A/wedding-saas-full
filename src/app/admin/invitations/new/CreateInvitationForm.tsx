@@ -8,10 +8,9 @@ import { BLOCK_SIZE } from '@/lib/payments/quota'
 import { TEMPLATE_VIBES } from '@/components/marketing/vibeData'
 import { templateOrnaments } from '@/lib/templates/appearance'
 
-const TEMPLATES = [
-  { id: 'lovebirds', label: 'Lovebirds' },
-  { id: 'solary', label: 'Solary' },
-]
+// Every template with a palette set (= every shipped template) — so a new
+// template shows up here without editing this list.
+const TEMPLATES = TEMPLATE_VIBES.map((v) => ({ id: v.id, label: v.label }))
 
 type PayMode = 'none' | 'comp' | 'manual'
 type PeriodKind = 'plan' | 'lifetime' | 'days'

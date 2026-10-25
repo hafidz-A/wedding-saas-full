@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useDashboardDict } from './DashboardI18nProvider'
-import { getTutorialCategories, TUTORIAL_GROUPS, type TutorialCategory } from './tutorial/content'
+import { getTutorialCategories, tutorialCopyKey, tutorialShotDir, TUTORIAL_GROUPS, type TutorialCategory } from './tutorial/content'
 import { staticAsset } from '@/lib/assets/staticAsset.js'
 import styles from './TutorialTab.module.css'
 
@@ -16,13 +16,14 @@ export default function TutorialTab({
   onOpenTab?: (tab: string) => void
 }) {
   const dict = useDashboardDict()
-  const isSolary = template === 'solary'
-  // Screenshots live at public/tutorial/<template>/<key>.webp — served from R2
+  // Screenshots live at public/tutorial/<dir>/<key>.webp — served from R2
   // when NEXT_PUBLIC_STATIC_ASSET_HOST is set, else straight out of public/.
-  const SHOT_BASE = staticAsset(`/tutorial/${template}`)
-  // Solary keeps its own copy under tutorial.solary.*, with headings/groups/navTitle shared.
+  const SHOT_BASE = staticAsset(`/tutorial/${tutorialShotDir(template)}`)
+  // Solary / Taman Bunga keep their own copy under tutorial.solary.* /
+  // tutorial.tamanBunga.*, with headings/groups/navTitle shared.
   const root = (dict.tabs as any).tutorial
-  const t = isSolary && root.solary ? { ...root, ...root.solary } : root
+  const copyKey = tutorialCopyKey(template)
+  const t = copyKey && root[copyKey] ? { ...root, ...root[copyKey] } : root
   const cats = getTutorialCategories(template).filter((c) => !c.premiumOnly || isPremium)
   const [active, setActive] = useState<string>(cats[0]?.id ?? 'start')
   const [query, setQuery] = useState('')

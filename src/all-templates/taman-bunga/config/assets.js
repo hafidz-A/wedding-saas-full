@@ -1,0 +1,46 @@
+/* ============================================================
+   taman-bunga/config/assets.js — every committed image the template draws.
+
+   Files live in public/templates/taman-bunga/ (painted scene layers) and
+   public/templates/taman-bunga/demo/ (the demo couple's photos). Served from
+   the local public/ folder by default, or from R2 when
+   NEXT_PUBLIC_STATIC_ASSET_HOST is set — see src/lib/assets/staticAsset.js.
+
+   Plain data, server-safe: defaultConfig.js imports the demo photo paths and
+   is itself pulled in by src/config/templateIndex.js.
+   ============================================================ */
+import { staticAsset } from '../../../lib/assets/staticAsset.js'
+
+const BASE = staticAsset('/templates/taman-bunga')
+
+/** Painted scene layers. Filenames carry no content hash, so replacing an
+ *  image means renaming it (Cache-Control is 30 days, see next.config.js). */
+export const SCENE = {
+  sky: `${BASE}/sky.webp`,
+  skyNoSun: `${BASE}/sky-nosun.webp`,
+  hills: `${BASE}/hills.webp`,
+  garden: `${BASE}/garden.webp`,
+  gardenWide: `${BASE}/garden-wide.webp`,
+  gate: `${BASE}/gate.webp`,
+  gateWide: `${BASE}/gate-wide.webp`,
+  front: `${BASE}/flowers-front.webp`,
+  frontWide: `${BASE}/flowers-front-wide.webp`,
+  doorL: `${BASE}/door-l.webp`,
+  doorR: `${BASE}/door-r.webp`,
+  lantern: `${BASE}/lantern.webp`,
+  garland: `${BASE}/garland.webp`,
+  corner: `${BASE}/corner.webp`,
+  gift: `${BASE}/gift.webp`,
+  skyLantern: `${BASE}/sky-lantern.webp`,
+  moon: `${BASE}/moon.webp`,
+  frame: `${BASE}/frame.webp`,
+  frameBack: `${BASE}/frame-back.webp`,
+}
+
+/** Demo couple photos (illustrated, not real people). */
+export const DEMO_PHOTOS = {
+  groom: `${BASE}/demo/groom.webp`,
+  bride: `${BASE}/demo/bride.webp`,
+  couple: `${BASE}/demo/couple.webp`,
+  coupleClose: `${BASE}/demo/couple-close.webp`,
+}

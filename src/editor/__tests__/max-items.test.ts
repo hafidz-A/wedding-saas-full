@@ -22,7 +22,7 @@ function collectViolations(fields: FieldDef[], path: string, out: string[]) {
 }
 
 describe('photo array fields declare maxItems', () => {
-  for (const template of ['lovebirds', 'solary']) {
+  for (const template of ['lovebirds', 'solary', 'taman-bunga']) {
     it(`${template}: every image-bearing array field has a cap`, () => {
       const registry = getSchemaRegistry(template)
       const violations: string[] = []

@@ -24,6 +24,8 @@ export const TEMPLATE_ORNAMENTS: Record<string, readonly OrnamentOption[]> = {
   ],
   // three.js backdrop draws its own scene — no ornament layer to swap.
   solary: [],
+  // the painted garden IS the decoration — no ornament layer on top of it.
+  'taman-bunga': [],
 }
 
 const ALL_ORNAMENTS: readonly OrnamentOption[] = Object.values(TEMPLATE_ORNAMENTS).flat()
