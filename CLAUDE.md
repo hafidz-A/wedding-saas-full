@@ -293,6 +293,18 @@ supabase/                                          ← schema.sql (base) + migra
    (`apply-lovebirds-illustrations.mjs`, `gen-lovebirds-gallery-thumbs.mjs`), not just those that read
    them — and watch for literal extension matching like `toThumb()` in `[slug]/page.tsx`, which fails
    silently rather than 404ing.
+12. **New tables need explicit GRANTs (Supabase change, effective 2026-10-30).** Supabase no longer
+   auto-grants Data API access (anon / authenticated / service_role) to tables created in `public`
+   after that date; without a grant supabase-js/PostgREST answers "permission denied" — and the
+   server's admin client (service_role) is affected too. Existing production tables kept theirs.
+   So: **a migration that creates a table must GRANT it in the same file** (at minimum
+   `grant select, insert, update, delete on table public.<t> to service_role;`, plus anon/authenticated
+   only if a non-admin client reads it — RLS still guards rows). Rebuilding from migrations (new
+   project, preview branch, `supabase db reset`) relies on `2026-10-25_explicit_table_grants.sql`,
+   which re-states production's per-table grants as read on that date (incl. the `invitations`
+   hardening: anon may read only `id, is_published`) — **keep it in sync** when a later migration
+   changes a table's grants. Migrations are applied by hand (no CLI/CI link), so committing one
+   never touches production.
 
 ---
 
