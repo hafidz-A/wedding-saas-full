@@ -444,6 +444,7 @@ Titik sambung lain yang ikut disentuh saat Taman Bunga ditambahkan (2026-10-25) 
 - [ ] Tutorial dashboard: kategori di `dashboard/tutorial/content.ts` + copy override (`tutorialCopyKey`)
 - [ ] `scripts/create-invitation.mjs` (`VALID_TEMPLATES` + cara memuat config)
 - [ ] Migrasi DB: baris `templates` + `template_plans` (basic & premium) — tanpa ini template tidak muncul di landing/onboarding dan checkout menolak
+- [ ] Gambar template diunggah ke R2: `node scripts/upload-static-assets.mjs` lalu `--verify` — produksi memakai `NEXT_PUBLIC_STATIC_ASSET_HOST`, jadi file yang belum diunggah = gambar hilang (404)
 
 ---
 
