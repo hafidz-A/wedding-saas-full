@@ -184,7 +184,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src].filter(Boolean).forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.front].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -340,46 +340,72 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     // hills and garden zoom about the gazebo as we walk
     const Z = A.zoom
     const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
-    // Wide set only: past the rose arch the painting cross-fades into an
-    // "inside the garden" one (A.inner), so wide screens get through the arch
-    // instead of zooming at it forever. `k` 0 → 1 over the arch phase.
-    const I = A.inner
-    const k = I ? ease(seg(J.T, 0.17, 0.25)) : 0
     const hs = 1 + 0.04 * J.settle + 0.08 * J.arch + Z.walk * 0.36 * J.c
-    if (k < 1) {
-      g.globalAlpha = 1 - k
-      xform(A.vp.x, A.vp.y, hs, tx * 0.4 + px(10), ty * 0.4 + py(10), () => draw(hillsImg, A.hills.l, A.hills.t, A.hills.w, A.hills.h))
-      g.globalAlpha = 1
-    }
-    const gs = (1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c) * (1 + 1.4 * k)
-    if (k < 1) {
-      g.globalAlpha = 1 - k
-      xform(A.vp.x, A.vp.y, gs, tx + px(20), ty + py(20), () => {
-        draw(img(A.garden), 0, 0, A.W, A.H)
-        if (J.lamps > 0) {
-          const lp = A.lamps
-          glowAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85, true)
-        }
-      })
-      g.globalAlpha = 1
-    }
-    // the inner painting grows in from a little smaller, as if stepping out of the arch
+    // (the wide set draws its treeline inside the far layer instead, below)
+    if (!A.inner) xform(A.vp.x, A.vp.y, hs, tx * 0.4 + px(10), ty * 0.4 + py(10), () => draw(hillsImg, A.hills.l, A.hills.t, A.hills.w, A.hills.h))
+
+    // Wide set: two layers, like a real 2.5D shot. The rose arch painting has
+    // its opening cut out (A.garden = garden-wide-near) and the "inside the
+    // garden" painting (A.inner) sits behind it, scaled so its gazebo lands
+    // exactly on the painted one. Passing the arch (k 0 → 1), the near layer
+    // grows much faster than the far one, so the arch slides out past the
+    // edges of the screen while the garden behind keeps coming closer — no
+    // image swap. Tall set: one painting, zoomed about the gazebo.
+    const I = A.inner
+    const k = I ? ease(seg(J.T, 0.15, 0.27)) : 0
+    const gs = I ? (1 + 0.12 * J.settle) * Math.pow(I.near.zoom, k) : 1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c
+    const gox = I ? I.near.x : A.vp.x
+    const goy = I ? I.near.y : A.vp.y
+    // far layer pose: k = 0 → glued to the painted gazebo, k = 1 → its own walk
     const itx = I ? (I.walk.tx * J.c) / 8 : 0
     const ity = I ? (I.walk.ty * J.c) / 8 + J.bob : 0
-    const is = I ? (0.86 + 0.14 * k) * (1 + I.zoom * J.c) : 1
-    if (k > 0) {
-      g.globalAlpha = k
-      xform(I.vp.x, I.vp.y, is, itx + px(20), ity + py(20), () => {
-        draw(img(I.src), 0, 0, A.W, A.H)
-        const dusk = J.night > 0 && nightOf(img(I.src))
+    const is = I ? I.scale * (1 + I.zoom * J.c) : 1
+    if (I) {
+      const nb = 1 + 0.12 * J.settle
+      const s0 = I.start.scale * nb
+      const x0 = gox + tx + nb * (I.start.x - gox) - I.vp.x
+      const y0 = goy + ty + nb * (I.start.y - goy) - I.vp.y
+      // The far layer must always fill the (fast-growing) opening, or its
+      // edges show; it reaches full size at k = 1 / I.near.catch — still
+      // slower than the arch, so the depth reads right.
+      const kf = Math.min(1, k * I.near.catch)
+      // glued to the arch painting at kf = 0, on its own walk pose at kf = 1
+      const far = (scale, wx, wy, fn) =>
+        xform(I.vp.x, I.vp.y, s0 * Math.pow(scale / s0, kf), lerp(x0, wx, kf) + px(20), lerp(y0, wy, kf) + py(20), fn)
+      const paint = (src) => {
+        draw(img(src), 0, 0, A.W, A.H)
+        const dusk = J.night > 0 && nightOf(img(src))
         if (dusk) {
-          g.globalAlpha = k * J.night * 0.85
+          g.globalAlpha = J.night * 0.85
           g.drawImage(dusk, 0, 0, A.W, A.H)
-          g.globalAlpha = k
+          g.globalAlpha = 1
         }
+      }
+      // back: treeline silhouette + the whole inner painting (its mountains).
+      // Far away, so it barely moves — the sky (moon, stars) stays in view.
+      const hk = I.hillsDepth
+      far(I.scale * (1 + I.zoom * hk * J.c), itx * hk, ity * hk, () => {
+        draw(hillsImg, I.hills.l, I.hills.t, I.hills.w, I.hills.h)
+        paint(I.src)
+      })
+      // front: garden, path and gazebo (mountains cut away) walk toward us
+      far(is, itx, ity, () => {
+        paint(I.front)
         if (J.lamps > 0) {
           const lp = I.lamps
           glowAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.7, true)
+        }
+      })
+    }
+    // the near layer fades only in its last stretch, as the arch leaves the frame
+    const nearO = I ? 1 - seg(k, 0.72, 1) : 1
+    if (nearO > 0) {
+      g.globalAlpha = nearO
+      xform(gox, goy, gs, tx + px(20), ty + py(20), () => {
+        draw(img(A.garden), 0, 0, A.W, A.H)
+        if (!I && J.lamps > 0) {
+          const lp = A.lamps
+          glowAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85, true)
         }
       })
       g.globalAlpha = 1

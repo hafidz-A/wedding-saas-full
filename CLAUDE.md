@@ -321,12 +321,16 @@ supabase/                                          ← schema.sql (base) + migra
    (e) The `templates` + `template_plans` rows come from `supabase/migrations/2026-10-25_taman_bunga_template.sql`;
    without them the landing/onboarding (DB-driven once any `templates` row exists) and checkout don't
    offer the template.
-   (f) Wide screens get through the rose arch by cross-fading (T .17–.25) from `garden-wide.webp`
-   into `garden-inner-wide.webp` (`ART.wide.inner`: its own vp, walk, zoom, hand-measured path table
-   for the lanterns, and string-light glow). The arch in the wide painting hugs the gazebo, so zoom
-   alone could never pass it on 16:9. The inner painting was painted in daylight colours, so the
-   engine cross-fades in a pre-multiplied lavender copy (`nightOf`) as night falls. The tall set
-   needs none of this — its zoom clears the arch on a phone.
+   (f) Wide screens are a 3-depth parallax, not one painting: NEAR = `garden-wide-near.webp` (the
+   rose-arch painting with its opening cut out), FAR = `garden-inner-wide-front.webp` (garden + gazebo,
+   mountains cut away) and BACK = `hills.webp` treeline + the whole `garden-inner-wide.webp` (its
+   mountains). At first the far layers are glued under the opening so the two gazebos coincide
+   (`ART.wide.inner.start`); passing the arch (T .15–.27) the near layer grows 4.5× and slides out
+   while the far ones catch up to full size, so there is no visible image swap. Then the garden
+   walks toward us and the mountains barely move (`hillsDepth`), keeping the night sky (moon,
+   stars) in view. All layout numbers are hand-measured in `config/art.js`; re-measure if a
+   painting changes. The inner paintings are daylight-coloured, so a pre-multiplied lavender copy
+   (`nightOf`) fades in at night. The tall set needs none of this — its zoom clears the arch.
 
 ---
 

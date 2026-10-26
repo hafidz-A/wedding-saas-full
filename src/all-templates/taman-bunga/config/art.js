@@ -48,10 +48,10 @@ export const ART = {
     sky: { src: SCENE.skyNoSun, l: 0, t: -668, w: 1376, h: 1188, set: 0 },
     sun: { x: 690, y: 246, d: 220, set: 230 }, // drawn, the wide sky has no sun
     skyNight: { t: -30, h: 560 },
-    moon: { l: 1040, t: 36, s: 112 },
+    moon: { l: 170, t: 4, s: 96 }, // upper left: the treeline is lowest there
     stars: { w: 1376, h: 440 },
     hills: { l: -212, t: 268, w: 1800, h: 880 },
-    garden: SCENE.gardenWide,
+    garden: SCENE.gardenWideNear, // the arch layer; `inner` shows through its opening
     vp: { x: 765, y: 382 },
     lamps: { l: 650, t: 335, w: 260, h: 90 },
     gate: { src: SCENE.gateWide, ox: 710, oy: 470 },
@@ -64,21 +64,32 @@ export const ART = {
       [700, 670, 60], [768, 682, 68],
     ],
     lantern: { K: 142, h: 3 },
-    // The wide painting's rose arch hugs the gazebo, so no zoom gets a 16:9
-    // screen through it. Past the arch the scene cross-fades into this
-    // "inside the garden" painting (same 1376×768 stage) and the walk, the
-    // lanterns and the string-light glow continue on it.
+    // The wide painting's rose arch hugs the gazebo, so no zoom alone gets a
+    // 16:9 screen through it. Instead the arch painting is the NEAR layer (its
+    // opening cut out) and this "inside the garden" painting the FAR layer
+    // behind it; the walk, lanterns and string-light glow continue on it.
     inner: {
-      src: SCENE.gardenInnerWide,
+      src: SCENE.gardenInnerWide, // back: drawn whole, for its mountains
+      front: SCENE.gardenInnerWideFront, // front: garden + gazebo, mountains cut away
+      hillsDepth: 0.15, // the mountains move this fraction of the garden's walk
       vp: { x: 845, y: 352 }, // the gazebo steps
+      // where vp sits on the arch painting, and at what scale, so the two
+      // gazebos coincide before the arch is passed
+      start: { x: 752, y: 412, scale: 0.405 },
+      // the near layer grows `zoom`× about the opening's centre while passing
+      // the arch; the far layer is full size once k reaches 1 / catch
+      near: { x: 692, y: 360, zoom: 4.5, catch: 1.5 },
+      scale: 1.04, // a touch over full size, so its edges never show
       walk: { tx: -110, ty: 60 },
-      zoom: 0.11,
+      zoom: 0.09,
       path: [
         [365, 845, 16], [380, 792, 22], [400, 752, 32], [440, 795, 40], [480, 808, 46], [520, 786, 52],
         [560, 755, 72], [600, 715, 100], [640, 678, 132], [680, 662, 168], [720, 665, 215], [768, 675, 255],
       ],
       lantern: { K: 120, h: 2.4 },
       lamps: { l: 690, t: 230, w: 380, h: 90 }, // the gazebo's string lights
+      // hills.webp, raised so its treeline peeks over the painted mountains
+      hills: { l: -80, t: 48, w: 1540, h: 752 },
     },
   },
 }
