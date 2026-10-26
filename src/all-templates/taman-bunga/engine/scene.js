@@ -243,9 +243,11 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   // A light in the painting (lamp, string lights): drawn now, and remembered so
   // it shines again over the night darkening, which would otherwise dim it too.
   const lights = []
-  function lightAt(spr, x, y, rx, ry, alpha) {
+  // `again` = how strongly it shines over the night (a big soft glow needs less,
+  // or it blooms into a white blur as the camera walks in)
+  function lightAt(spr, x, y, rx, ry, alpha, again = 1) {
     glowAt(spr, x, y, rx, ry, alpha, true)
-    if (alpha > 0.002) lights.push([g.getTransform(), spr, x, y, rx, ry, alpha])
+    if (alpha > 0.002) lights.push([g.getTransform(), spr, x, y, rx, ry, alpha * again])
   }
   // transform about an origin, the way CSS transform-origin + translate + scale would
   function xform(ox, oy, s, tx, ty, fn) {
@@ -378,6 +380,29 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   let tmy = 0
   const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0, cel: 0 }
   const lanterns = lanternDepths.map((z, i) => ({ z, side: i % 2 === 0 ? -1 : 1 }))
+  // Where each lantern stands on a painting (image coords), worked out once per
+  // art set: a lantern at depth z sits on the path row whose half width is
+  // K / (z × the painting's scale when the walk starts), alternating sides.
+  // Two more stand close by, so some are passed on the way; the farthest are
+  // left out (minHw), or they pile up in front of the gazebo.
+  const ANCHORS = new Map()
+  function anchorsFor(P) {
+    if (!ANCHORS.has(P)) {
+      const ps0 = P.lantern.startScale
+      const out = []
+      ;[1.05, 1.6, ...lanterns.map((l) => l.z)].forEach((z, i) => {
+        const hw = P.lantern.K / (z * ps0)
+        if (hw < P.lantern.minHw) return
+        const row = pathRow(P.path, hw)
+        if (!row) return
+        const side = i % 2 === 0 ? 1 : -1
+        out.push({ x: row.c + side * (row.hw * 1.25 + 10), y: row.y, hw: row.hw })
+      })
+      // far to near, so nearer lanterns are drawn over farther ones
+      ANCHORS.set(P, out.sort((a, b) => a.hw - b.hw))
+    }
+    return ANCHORS.get(P)
+  }
 
   function journey(T, a2, q, gz) {
     const c = walkDistance(T, q)
@@ -521,7 +546,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         paintGz(I.src, true)
         if (J.lamps > 0) {
           const lp = I.lamps
-          lightAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85)
+          lightAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.65, 0.4)
         }
       })
     }
@@ -534,38 +559,38 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         else paintGz(A.garden, false)
         if (!I && J.lamps > 0) {
           const lp = A.lamps
-          lightAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.95)
+          lightAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.6, 0.35)
         }
       })
       g.globalAlpha = 1
     }
 
-    // lanterns, far to near, standing on the verge of the painted path. A lantern at
-    // depth z sits on the path row whose on-screen half width is K / z, so it follows
-    // the path's bends and perspective and rides the same transform as the painting.
+    // Lanterns stand still on the verge of the painted path, like real lamp posts:
+    // each is pinned to one spot of the painting (its anchor, fixed below) and
+    // only rides the painting's own zoom and drift, so it never slides along
+    // the ground. The feeling of walking comes from the camera moving in.
     if (J.show3d > 0) {
       // lanterns only start after the arch, so on the wide set they stand on the inner path
       const P = I ? I : A
       const ps = I ? is : gs
       const gx0 = P.vp.x + (I ? itx : tx) + px(20)
       const gy0 = P.vp.y + (I ? ity : ty) + py(20)
-      for (let i = lanterns.length - 1; i >= 0; i--) {
-        const ln = lanterns[i]
-        const z = ln.z - J.c
-        if (z <= 0.42 || z >= 4.9) continue // only the next few, so the far ones don't crowd the gazebo
-        const row = pathRow(P.path, P.lantern.K / (z * ps))
-        if (!row) continue
-        const side = row.c + ln.side * (row.hw * 1.25 + 10)
-        const x = gx0 + (side - P.vp.x) * ps
-        const foot = gy0 + (row.y - P.vp.y) * ps
-        const h = P.lantern.h * row.hw * ps
+      for (const ln of anchorsFor(P)) {
+        const x = gx0 + (ln.x - P.vp.x) * ps
+        const foot = gy0 + (ln.y - P.vp.y) * ps
+        const h = P.lantern.h * ln.hw * ps
         const w = h * 0.3316
-        const o = J.show3d * (1 - seg(z, 3.6, 4.9)) * seg(z, 0.42, 0.75)
-        const glow = (0.25 + 0.75 * J.lit) * (0.35 + 0.65 * (1 - seg(z, 1.6, 3.6)))
+        // drawn in stage units; skip those fully past the bottom of the screen
+        if ((foot - h) * S + OY > sh) continue
+        // far ones are tiny: fade them in as they grow out of the distance
+        const o = J.show3d * seg(h * S, 10, 26)
+        if (o <= 0) continue
+        const near = seg(h * S, 26, 160)
+        const glow = (0.25 + 0.75 * J.lit) * (0.45 + 0.55 * near)
         if (!lite) {
           // the lamp itself, and the pool of light it throws on the path
-          lightAt(GLOW, x, foot - h * 0.74, w * 2, w * 2, o * glow)
-          lightAt(LAMP, x, foot, w * 2.6, w * 0.9, o * glow * 0.45)
+          lightAt(GLOW, x, foot - h * 0.74, w * 2, w * 2, o * glow * 0.85, 0.6)
+          lightAt(LAMP, x, foot, w * 2.6, w * 0.9, o * glow * 0.35, 0.5)
         }
         g.globalAlpha = o
         draw(lanternImg, x - w / 2, foot - h, w, h)

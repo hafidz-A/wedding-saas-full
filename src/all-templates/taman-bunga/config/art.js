@@ -10,8 +10,10 @@
      zoom    how much the garden grows about vp: `arch` while passing under the
              rose arch, `walk` per unit of walk distance (the walk ends at 8)
      path    the painted stone path, measured by hand: [image y, centre x, half width]
-     lantern a lantern at depth z stands on the path row whose on-screen half
-             width is K / z; its height is h × that half width
+     lantern a lantern at depth z stands, fixed, on the path row whose half
+             width is K / (z × startScale), startScale being the painting's
+             scale as the walk begins; its height is h × that half width.
+             Rows narrower than minHw get no lantern (they'd crowd the gazebo)
      inner   (wide only) the painting past the rose arch, with its own vp,
              walk, zoom, path, lantern and lamps — see engine/scene.js
      gazebo  the closing scene: walking up the steps into the gazebo. `painted`
@@ -45,13 +47,13 @@ export const ART = {
     doors: { l: 164, t: 522, w: 440, h: 625 },
     front: { src: SCENE.front, t: 1060, h: 315 },
     walk: { tx: -60, ty: 190 },
-    zoom: { arch: 0.56, walk: 0.09 },
+    zoom: { arch: 0.56, walk: 0.16 },
     path: [
       [700, 480, 20], [720, 465, 28], [740, 442, 37], [800, 447, 47], [850, 467, 52], [900, 430, 56],
       [950, 405, 62], [1000, 375, 75], [1050, 365, 85], [1100, 380, 90], [1200, 390, 120],
       [1300, 415, 135], [1375, 425, 150],
     ],
-    lantern: { K: 245, h: 3 },
+    lantern: { K: 245, h: 3, startScale: 1.68, minHw: 28 },
     gazebo: {
       painted: { cx: 505, floor: 738, w: 60 },
       patch: { src: SCENE.gazeboPatchTall, x: 429, y: 560, w: 162, h: 197 },
@@ -100,7 +102,7 @@ export const ART = {
       [410, 760, 20], [450, 745, 32], [500, 738, 40], [550, 707, 44], [600, 685, 48], [650, 667, 54],
       [700, 670, 60], [768, 682, 68],
     ],
-    lantern: { K: 142, h: 3 },
+    lantern: { K: 142, h: 3, startScale: 1.68, minHw: 28 },
     // The wide painting's rose arch hugs the gazebo, so no zoom alone gets a
     // 16:9 screen through it. Instead the arch painting is the NEAR layer (its
     // opening cut out) and this "inside the garden" painting the FAR layer
@@ -119,12 +121,12 @@ export const ART = {
       near: { x: 692, y: 360, zoom: 4.5, catch: 1.5 },
       scale: 1.04, // a touch over full size, so its edges never show
       walk: { tx: -110, ty: 60 },
-      zoom: 0.09,
+      zoom: 0.16,
       path: [
         [365, 845, 16], [380, 792, 22], [400, 752, 32], [440, 795, 40], [480, 808, 46], [520, 786, 52],
         [560, 755, 72], [600, 715, 100], [640, 678, 132], [680, 662, 168], [720, 665, 215], [768, 675, 255],
       ],
-      lantern: { K: 120, h: 2.4 },
+      lantern: { K: 120, h: 2.4, startScale: 1.04, minHw: 24 },
       lamps: { l: 690, t: 230, w: 380, h: 90 }, // the gazebo's string lights
       // the 3:1 mountain + treeline silhouette behind the gazebo, wider than
       // the stage on both sides so walking and mouse parallax never show an end
