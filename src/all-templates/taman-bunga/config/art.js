@@ -12,6 +12,8 @@
      path    the painted stone path, measured by hand: [image y, centre x, half width]
      lantern a lantern at depth z stands on the path row whose on-screen half
              width is K / z; its height is h × that half width
+     inner   (wide only) the painting past the rose arch, with its own vp,
+             walk, zoom, path, lantern and lamps — see engine/scene.js
    ============================================================ */
 import { SCENE } from './assets.js'
 
@@ -56,16 +58,28 @@ export const ART = {
     doors: { l: 590, t: 379, w: 240, h: 341 },
     front: { src: SCENE.frontWide, t: 520, h: 248 },
     walk: { tx: -77, ty: 120 },
-    // The wide painting's rose arch hugs the gazebo, so the same zoom as the
-    // tall set barely gets past it on a 16:9 screen. 0.2 is about the most
-    // before the 1376px painting goes soft; clearing the arch for real needs
-    // an "inside the garden" painting (see CLAUDE.md gotcha 13).
-    zoom: { arch: 0.56, walk: 0.2 },
+    zoom: { arch: 0.56, walk: 0.09 },
     path: [
       [410, 760, 20], [450, 745, 32], [500, 738, 40], [550, 707, 44], [600, 685, 48], [650, 667, 54],
       [700, 670, 60], [768, 682, 68],
     ],
     lantern: { K: 142, h: 3 },
+    // The wide painting's rose arch hugs the gazebo, so no zoom gets a 16:9
+    // screen through it. Past the arch the scene cross-fades into this
+    // "inside the garden" painting (same 1376×768 stage) and the walk, the
+    // lanterns and the string-light glow continue on it.
+    inner: {
+      src: SCENE.gardenInnerWide,
+      vp: { x: 845, y: 352 }, // the gazebo steps
+      walk: { tx: -110, ty: 60 },
+      zoom: 0.11,
+      path: [
+        [365, 845, 16], [380, 792, 22], [400, 752, 32], [440, 795, 40], [480, 808, 46], [520, 786, 52],
+        [560, 755, 72], [600, 715, 100], [640, 678, 132], [680, 662, 168], [720, 665, 215], [768, 675, 255],
+      ],
+      lantern: { K: 120, h: 2.4 },
+      lamps: { l: 690, t: 230, w: 380, h: 90 }, // the gazebo's string lights
+    },
   },
 }
 

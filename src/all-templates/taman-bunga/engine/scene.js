@@ -115,6 +115,27 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   const draw = (i, x, y, w, h) => {
     if (i.complete && i.naturalWidth) g.drawImage(i, x, y, w, h)
   }
+  // A dusk-tinted copy of a painting (multiplied with lavender, alpha kept),
+  // built once when it has loaded — cross-faded in as night falls for a
+  // layer painted in daylight colours.
+  const NIGHT = new Map()
+  const nightOf = (i) => {
+    if (!(i.complete && i.naturalWidth)) return null
+    if (!NIGHT.has(i)) {
+      const c = document.createElement('canvas')
+      c.width = i.naturalWidth
+      c.height = i.naturalHeight
+      const x = c.getContext('2d')
+      x.drawImage(i, 0, 0)
+      x.globalCompositeOperation = 'multiply'
+      x.fillStyle = '#6f5d9c'
+      x.fillRect(0, 0, c.width, c.height)
+      x.globalCompositeOperation = 'destination-in'
+      x.drawImage(i, 0, 0)
+      NIGHT.set(i, c)
+    }
+    return NIGHT.get(i)
+  }
   const hillsImg = img(SCENE.hills)
   const moonImg = img(SCENE.moon)
   const lanternImg = img(SCENE.lantern)
@@ -163,7 +184,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src].forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -318,34 +339,71 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
 
     // hills and garden zoom about the gazebo as we walk
     const Z = A.zoom
+    const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
+    // Wide set only: past the rose arch the painting cross-fades into an
+    // "inside the garden" one (A.inner), so wide screens get through the arch
+    // instead of zooming at it forever. `k` 0 → 1 over the arch phase.
+    const I = A.inner
+    const k = I ? ease(seg(J.T, 0.17, 0.25)) : 0
     const hs = 1 + 0.04 * J.settle + 0.08 * J.arch + Z.walk * 0.36 * J.c
-    xform(A.vp.x, A.vp.y, hs, tx * 0.4 + px(10), ty * 0.4 + py(10), () => draw(hillsImg, A.hills.l, A.hills.t, A.hills.w, A.hills.h))
-    const gs = 1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c
-    xform(A.vp.x, A.vp.y, gs, tx + px(20), ty + py(20), () => {
-      draw(img(A.garden), 0, 0, A.W, A.H)
-      if (J.lamps > 0) {
-        const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
-        const lp = A.lamps
-        glowAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85, true)
-      }
-    })
+    if (k < 1) {
+      g.globalAlpha = 1 - k
+      xform(A.vp.x, A.vp.y, hs, tx * 0.4 + px(10), ty * 0.4 + py(10), () => draw(hillsImg, A.hills.l, A.hills.t, A.hills.w, A.hills.h))
+      g.globalAlpha = 1
+    }
+    const gs = (1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c) * (1 + 1.4 * k)
+    if (k < 1) {
+      g.globalAlpha = 1 - k
+      xform(A.vp.x, A.vp.y, gs, tx + px(20), ty + py(20), () => {
+        draw(img(A.garden), 0, 0, A.W, A.H)
+        if (J.lamps > 0) {
+          const lp = A.lamps
+          glowAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85, true)
+        }
+      })
+      g.globalAlpha = 1
+    }
+    // the inner painting grows in from a little smaller, as if stepping out of the arch
+    const itx = I ? (I.walk.tx * J.c) / 8 : 0
+    const ity = I ? (I.walk.ty * J.c) / 8 + J.bob : 0
+    const is = I ? (0.86 + 0.14 * k) * (1 + I.zoom * J.c) : 1
+    if (k > 0) {
+      g.globalAlpha = k
+      xform(I.vp.x, I.vp.y, is, itx + px(20), ity + py(20), () => {
+        draw(img(I.src), 0, 0, A.W, A.H)
+        const dusk = J.night > 0 && nightOf(img(I.src))
+        if (dusk) {
+          g.globalAlpha = k * J.night * 0.85
+          g.drawImage(dusk, 0, 0, A.W, A.H)
+          g.globalAlpha = k
+        }
+        if (J.lamps > 0) {
+          const lp = I.lamps
+          glowAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.7, true)
+        }
+      })
+      g.globalAlpha = 1
+    }
 
     // lanterns, far to near, standing on the verge of the painted path. A lantern at
     // depth z sits on the path row whose on-screen half width is K / z, so it follows
     // the path's bends and perspective and rides the same transform as the painting.
     if (J.show3d > 0) {
-      const gx0 = A.vp.x + tx + px(20)
-      const gy0 = A.vp.y + ty + py(20)
+      // lanterns only start after the arch, so on the wide set they stand on the inner path
+      const P = I ? I : A
+      const ps = I ? is : gs
+      const gx0 = P.vp.x + (I ? itx : tx) + px(20)
+      const gy0 = P.vp.y + (I ? ity : ty) + py(20)
       for (let i = lanterns.length - 1; i >= 0; i--) {
         const ln = lanterns[i]
         const z = ln.z - J.c
         if (z <= 0.42 || z >= 4.9) continue // only the next few, so the far ones don't crowd the gazebo
-        const row = pathRow(A.path, A.lantern.K / (z * gs))
+        const row = pathRow(P.path, P.lantern.K / (z * ps))
         if (!row) continue
         const side = row.c + ln.side * (row.hw * 1.25 + 10)
-        const x = gx0 + (side - A.vp.x) * gs
-        const foot = gy0 + (row.y - A.vp.y) * gs
-        const h = A.lantern.h * row.hw * gs
+        const x = gx0 + (side - P.vp.x) * ps
+        const foot = gy0 + (row.y - P.vp.y) * ps
+        const h = P.lantern.h * row.hw * ps
         const w = h * 0.3316
         const o = J.show3d * (1 - seg(z, 3.6, 4.9)) * seg(z, 0.42, 0.75)
         const glow = (0.25 + 0.75 * J.lit) * (0.35 + 0.65 * (1 - seg(z, 1.6, 3.6)))

@@ -321,10 +321,12 @@ supabase/                                          ← schema.sql (base) + migra
    (e) The `templates` + `template_plans` rows come from `supabase/migrations/2026-10-25_taman_bunga_template.sql`;
    without them the landing/onboarding (DB-driven once any `templates` row exists) and checkout don't
    offer the template.
-   (f) Zoom amounts are per art set (`ART.<set>.zoom` in `config/art.js`). The wide painting's rose
-   arch hugs the gazebo, so on 16:9 screens the walk never fully passes the arch (it would need ~10×
-   zoom); `wide.zoom.walk` is raised to 0.2, about the limit before the 1376px painting goes soft. A
-   real fix is an extra "inside the garden" wide painting cross-faded in during the arch phase.
+   (f) Wide screens get through the rose arch by cross-fading (T .17–.25) from `garden-wide.webp`
+   into `garden-inner-wide.webp` (`ART.wide.inner`: its own vp, walk, zoom, hand-measured path table
+   for the lanterns, and string-light glow). The arch in the wide painting hugs the gazebo, so zoom
+   alone could never pass it on 16:9. The inner painting was painted in daylight colours, so the
+   engine cross-fades in a pre-multiplied lavender copy (`nightOf`) as night falls. The tall set
+   needs none of this — its zoom clears the arch on a phone.
 
 ---
 

@@ -23,6 +23,7 @@ export const SCENE = {
   hills: `${BASE}/hills.webp`,
   garden: `${BASE}/garden.webp`,
   gardenWide: `${BASE}/garden-wide.webp`,
+  gardenInnerWide: `${BASE}/garden-inner-wide.webp`,
   gate: `${BASE}/gate.webp`,
   gateWide: `${BASE}/gate-wide.webp`,
   front: `${BASE}/flowers-front.webp`,
