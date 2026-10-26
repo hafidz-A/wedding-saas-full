@@ -1,0 +1,36 @@
+# Push the site's committed images (public/templates, tutorial, images) to
+# Cloudflare R2, then read a sample back over the public host.
+#
+# Run it by hand: GitHub → Actions → "Upload static assets to R2" → Run workflow.
+# Do this BEFORE deploying code that references a new or renamed image
+# (CLAUDE.md gotcha 11). Uploading is idempotent: unchanged files are simply
+# written again.
+#
+# Needs these repository secrets (Settings → Secrets and variables → Actions):
+#   R2_ACCOUNT_ID, R2_BUCKET, R2_PUBLIC_HOST, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY
+name: Upload static assets to R2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Upload and verify
+        run: node scripts/upload-static-assets.mjs --verify
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_HOST: ${{ secrets.R2_PUBLIC_HOST }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
