@@ -189,44 +189,22 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     }
     return WARM.get(i)
   }
-  // ...and the same with its night sky cut out (navy pixels within int.sky
-  // rows): wish lanterns and fireworks are drawn between the two, so they only
-  // show through the arches. Reading pixels needs a same-origin image; if that
-  // fails (e.g. a CDN without CORS) this returns null and the sky effects are
-  // simply drawn on top, faded out once inside.
+  // ...and the same with its night sky cut out (int.sky.src: a mask, alpha =
+  // sky, measured offline down to the treeline): wish lanterns, the dawn and
+  // fireworks are drawn between the two, so they only show through the arches.
   const FORE = new Map()
-  const foreOf = (i, band) => {
+  const foreOf = (i, sky) => {
     const warm = warmOf(i)
-    if (!warm || !band) return null
+    const m = sky && img(sky.src)
+    if (!warm || !m || !loaded(m)) return null
     if (!FORE.has(i)) {
-      let c = null
-      try {
-        const raw = document.createElement('canvas')
-        raw.width = warm.width
-        raw.height = warm.height
-        const rx = raw.getContext('2d', { willReadFrequently: true })
-        rx.drawImage(i, 0, 0)
-        const src = rx.getImageData(0, 0, raw.width, raw.height).data
-        c = document.createElement('canvas')
-        c.width = warm.width
-        c.height = warm.height
-        const x = c.getContext('2d')
-        x.drawImage(warm, 0, 0)
-        const out = x.getImageData(0, 0, c.width, c.height)
-        const d = out.data
-        for (let y = Math.max(0, band.y0); y < Math.min(c.height, band.y1); y++) {
-          for (let px = 0; px < c.width; px++) {
-            const o = (y * c.width + px) * 4
-            const r = src[o]
-            const gg = src[o + 1]
-            const b = src[o + 2]
-            if (b > r + 18 && b >= gg && b < 150) d[o + 3] = 0
-          }
-        }
-        x.putImageData(out, 0, 0)
-      } catch {
-        c = null
-      }
+      const c = document.createElement('canvas')
+      c.width = warm.width
+      c.height = warm.height
+      const x = c.getContext('2d')
+      x.drawImage(warm, 0, 0)
+      x.globalCompositeOperation = 'destination-out'
+      x.drawImage(m, 0, 0, c.width, c.height)
       FORE.set(i, c)
     }
     return FORE.get(i)
@@ -279,7 +257,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src, a.gazebo?.ext.src, a.gazebo?.int.src, a.gazebo?.patch.src].filter(Boolean).forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src, a.gazebo?.ext.src, a.gazebo?.int.src, a.gazebo?.int.sky?.src, a.gazebo?.patch.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -611,22 +589,42 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     // the interior is painted at night already, so it goes over the tint;
     // lanterns and fireworks go between it and its sky-less copy, so they only
     // show through the arches
+    // Once inside, the camera breathes: a slow drift and a hint of zoom about
+    // the screen centre, so the last scene never freezes into a still.
+    const sway = G && G.full && !reduce ? seg(J.g, 0.7, 0.95) : 0
+    const t = now / 1000
+    const z = 1 + sway * (0.02 + 0.006 * Math.sin(t * 0.31))
+    const dx = sway * 2.5 * Math.sin(t * 0.53)
+    const dy = sway * 2 * Math.sin(t * 0.41 + 1)
     const inside = (fore) => {
-      g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
+      g.setTransform(dpr * z * S, 0, 0, dpr * z * S, dpr * (z * OX + (sw / 2) * (1 - z) + dx), dpr * (z * OY + (sh / 2) * (1 - z) + dy))
       const drawn = drawGazeboInside(A.gazebo, G, fore)
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       return drawn
     }
     if (G) inside(false)
     const fore = !!G && !!foreOf(img(A.gazebo.int.src), A.gazebo.int.sky)
+    // the inside's sky rows, on screen
+    const skyY = (row) => (sh / 2) * (1 - z) + dy + z * (OY + S * (G.int.y + G.int.s * row))
+    const y0 = G ? Math.max(0, skyY(A.gazebo.int.sky.y0)) : 0
+    const y1 = G ? Math.min(sh, skyY(A.gazebo.int.sky.y1)) : 0
+    // Walking in, night turns to dawn behind the arches: the first morning of
+    // a life together, and no more dark garden boxing the gazebo in.
+    const dawn = G && fore && G.full ? ease(seg(J.g, 0.68, 0.96)) : 0
+    if (dawn > 0) drawDawn(dawn, y0, y1)
     drawSkyLanterns(now, G && !fore ? 1 - seg(J.g, 0.3, 0.6) : 1)
     if (G) {
-      // the inside's sky rows, on screen: fireworks burst there
-      const N = A.gazebo.int
-      const y0 = OY + S * (G.int.y + G.int.s * N.sky.y0)
-      const y1 = OY + S * (G.int.y + G.int.s * N.sky.y1)
-      drawFireworks(now, Math.max(0, y0), Math.min(sh, y1))
+      drawFireworks(now, y0, y1)
       if (fore) inside(true)
+    }
+    if (dawn > 0) {
+      // morning light reaches inside too: lift the shadows, warm everything
+      g.globalCompositeOperation = 'soft-light'
+      g.globalAlpha = 0.4 * dawn
+      g.fillStyle = '#ffc9a0'
+      g.fillRect(0, 0, sw, sh)
+      g.globalAlpha = 1
+      g.globalCompositeOperation = 'source-over'
     }
     drawFx(now)
   }
@@ -819,6 +817,28 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.globalAlpha = 1
       g.globalCompositeOperation = 'source-over'
     }
+  }
+
+  // ---------- dawn (inside the gazebo, seen through the arches) ----------
+  // Drawn between the inside painting and its sky-less copy, so it only fills
+  // the night sky; the sun comes up just above the hedge line.
+  function drawDawn(a, y0, y1) {
+    const h = Math.max(1, y1 - y0)
+    const sky = g.createLinearGradient(0, y0, 0, y1)
+    sky.addColorStop(0, '#e7a3c3')
+    sky.addColorStop(0.45, '#f8b8a4')
+    sky.addColorStop(0.8, '#ffd49b')
+    sky.addColorStop(1, '#ffe6b2')
+    g.globalAlpha = a
+    g.fillStyle = sky
+    g.fillRect(0, y0, sw, h)
+    const sun = g.createRadialGradient(sw / 2, y1 - h * 0.1, 0, sw / 2, y1 - h * 0.1, Math.max(h, sw * 0.35))
+    sun.addColorStop(0, 'rgba(255, 242, 200, 0.95)')
+    sun.addColorStop(0.25, 'rgba(255, 220, 150, 0.55)')
+    sun.addColorStop(1, 'rgba(255, 210, 150, 0)')
+    g.fillStyle = sun
+    g.fillRect(0, y0, sw, h)
+    g.globalAlpha = 1
   }
 
   // ---------- fireworks (inside the gazebo, seen through the arches) ----------

@@ -347,10 +347,12 @@ supabase/                                          ← schema.sql (base) + migra
    tint because it is painted at night. If the front looks like a second, smaller gazebo, re-measure
    `painted.w`. The ending must read as a CELEBRATION: the bare night interior read as a funeral
    (empty pavilion, candles, a lone arched portrait), so the interior is drawn warmed (`warmOf`), and
-   from g .78 it throws a party — rose petals, confetti, fireworks. Wish lanterns and fireworks go
-   between the interior and its sky-less copy (`foreOf`, navy pixels inside `int.sky` rows), so they
-   only show through the arches; `foreOf` reads pixels, so the interior image must be same-origin
-   (or CORS-enabled once on R2) — otherwise it falls back to drawing them on top. The couple photo
+   from g .78 it throws a party — rose petals, confetti, fireworks — while night turns to DAWN
+   behind the arches (`drawDawn`, g .68–.96) and the camera breathes (slow drift + zoom). Wish
+   lanterns, dawn and fireworks go between the interior and its sky-less copy (`foreOf`: the warmed
+   interior minus `int.sky.src`, a small alpha mask of where its night sky shows, cut offline down to
+   a smoothed treeline — re-make it if an interior painting changes; no pixel reads, so no CORS
+   needed). `int.sky.y0/y1` are the rows the sky spans (dawn gradient + firework band). The couple photo
    there is a taped polaroid (`.tb-snap`, NOT `.tb-polaroid`/`data-tb-polaroid` — those are the
    gallery's, and the engine moves every `data-tb-polaroid` along the gallery string).
 
