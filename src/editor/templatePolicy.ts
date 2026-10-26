@@ -254,6 +254,38 @@ export function validateSectionsAgainstPolicy(
     return { code: 'too_many', message: `Maksimal ${policy.maxSections} section.` }
   }
 
+  // The editor also blocks moving, swapping and switching off a locked slot; a
+  // crafted PUT must not get past that either. Compared against the saved
+  // config, so only a CHANGE is refused — an old config already in that state
+  // still saves.
+  const off = (s?: { enabled?: unknown }) => s?.enabled === false
+  if (prevSections) {
+    for (const [id, lock] of Object.entries(policy.locks)) {
+      const at = nextSections.findIndex((s) => s.id === id)
+      const was = prevSections.findIndex((s) => s.id === id)
+      if (at < 0 || was < 0) continue
+      const next = nextSections[at] as { type?: string; enabled?: unknown }
+      const prev = prevSections[was] as { type?: string; enabled?: unknown }
+      if (lock.lockPosition && at !== was) {
+        return { code: 'locked_moved', message: `Section "${id}" tidak boleh dipindah.` }
+      }
+      if (lock.lockType && next.type !== prev.type) {
+        return { code: 'locked_swapped', message: `Section "${id}" tidak boleh diganti jenisnya.` }
+      }
+      if (lock.lockDisable && off(next) && !off(prev)) {
+        return { code: 'locked_disabled', message: `Section "${id}" tidak boleh dimatikan.` }
+      }
+    }
+    // Lovebirds-style anchors (locked by type): the opening and the footer stay on.
+    for (const t of policy.lockedTypes ?? []) {
+      const nowOff = nextSections.some((s) => s.type === t && off(s as { enabled?: unknown }))
+      const wasOff = prevSections.some((s) => s.type === t && off(s as { enabled?: unknown }))
+      if (nowOff && !wasOff) {
+        return { code: 'locked_disabled', message: `Section "${t}" tidak boleh dimatikan.` }
+      }
+    }
+  }
+
   return null
 }
 

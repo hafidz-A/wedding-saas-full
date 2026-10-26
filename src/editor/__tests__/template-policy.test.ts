@@ -191,8 +191,30 @@ describe('validateSectionsAgainstPolicy (server-side config guard)', () => {
   it('accepts a same-count reorder/edit (the normal editor save)', () => {
     const reordered = [...lovebirdsPrev].reverse()
     expect(validateSectionsAgainstPolicy('lovebirds', reordered, lovebirdsPrev)).toBeNull()
-    const solReordered = [...solaryPrev].reverse()
+    // swapping two unlocked planets is a normal save; intro / saturn / sun stay put
+    const solReordered = [...solaryPrev]
+    const a = solReordered.findIndex((x) => x.id === 'jupiter')
+    const b = solReordered.findIndex((x) => x.id === 'mars')
+    ;[solReordered[a], solReordered[b]] = [solReordered[b], solReordered[a]]
     expect(validateSectionsAgainstPolicy('solary', solReordered, solaryPrev)).toBeNull()
+  })
+
+  // The editor blocks these too; a crafted PUT must not get past the server.
+  it('rejects moving, swapping or switching off a locked slot (solary)', () => {
+    expect(validateSectionsAgainstPolicy('solary', [...solaryPrev].reverse(), solaryPrev)?.code).toBe('locked_moved')
+    const swapped = solaryPrev.map((x) => (x.id === 'saturn' ? { ...x, type: 'faqPlanet' } : x))
+    expect(validateSectionsAgainstPolicy('solary', swapped, solaryPrev)?.code).toBe('locked_swapped')
+    const introOff = solaryPrev.map((x) => (x.id === 'intro' ? { ...x, enabled: false } : x))
+    expect(validateSectionsAgainstPolicy('solary', introOff, solaryPrev)?.code).toBe('locked_disabled')
+    // saturn is NOT disable-locked: the gallery may be switched off
+    const saturnOff = solaryPrev.map((x) => (x.id === 'saturn' ? { ...x, enabled: false } : x))
+    expect(validateSectionsAgainstPolicy('solary', saturnOff, solaryPrev)).toBeNull()
+  })
+
+  it('rejects switching the lovebirds hero or footer off, but keeps an already-off one saveable', () => {
+    const heroOff = lovebirdsPrev.map((x) => (x.type === 'hero' ? { ...x, enabled: false } : x))
+    expect(validateSectionsAgainstPolicy('lovebirds', heroOff, lovebirdsPrev)?.code).toBe('locked_disabled')
+    expect(validateSectionsAgainstPolicy('lovebirds', heroOff, heroOff)).toBeNull()
   })
 
   // rsvp/weddingGift and rsvpPlanet/giftPlanet are no longer "mandatory" —
