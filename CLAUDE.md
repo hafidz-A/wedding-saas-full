@@ -364,7 +364,10 @@ supabase/                                          ← schema.sql (base) + migra
    (h) The glass cards (RSVP, wishes, gift — `.tb-sheet`) have no CSS border: their edge is ONE
    hand-drawn line (`components/LineFrame.jsx`) that turns into a one-line rose on one side and a
    butterfly on the other (`config/ornaments.js`, drawn for the right edge, mirrored for the left),
-   drawing itself in when the card scrolls into view. Every card has BOTH, on opposite sides, and
+   with a celestial run (`celestial()`: sparkle, dotted loop, little wings, crescent) along the rest
+   of each side, all drawing itself in when the card scrolls into view (SVG line-drawing animation:
+   stroke-dasharray/dashoffset). Keep anything that leaves the edge within ~16px inward: full-width
+   fields start 22px in. Every card has BOTH, on opposite sides, and
    the placement alternates per card (top/bottom) — keep it that way. The wide butterfly only goes
    at the bottom beside a centred button; next to full-width content use the narrow rose. Gradient
    stops use `style={{ stopColor }}`, not the attribute: SVG attributes don't read CSS variables.

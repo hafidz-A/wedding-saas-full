@@ -2,13 +2,14 @@
 
 /* The edge of a glass card as ONE hand-drawn line: straight, except where it
    turns into a one-line rose or butterfly (config/ornaments.js) on the left
-   and right edges. Two strokes start at the top centre and run down each
+   and right edges, and a celestial run (sparkle, dotted loop, wings, moon)
+   along the rest of each side. Two strokes start at the top centre and run down each
    side to the bottom centre; when the card first scrolls into view they draw
    themselves in. Rendered inside the card (position: relative); styles:
    .tb-line in styles/taman-bunga.css. */
 import React, { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
-import { ORNAMENT_HEIGHT, ORNAMENTS } from '../config/ornaments.js'
+import { celestial, ORNAMENT_HEIGHT, ORNAMENTS } from '../config/ornaments.js'
 
 const RADIUS = 16 // matches .tb-sheet's border-radius (--radius-md)
 
@@ -39,12 +40,18 @@ function side(w, h, right, orn, scale) {
   const cx = w / 2
   const sweep = right ? 1 : 0
   let d = `M${cx},${y0} H${right ? x - r : x + r} A${r},${r} 0 0 ${sweep} ${x},${y0 + r}`
+  // the rest of the side carries the celestial run (sparkle, dotted loop, wings, moon)
+  const k = right ? -1 : 1
   if (orn && ORNAMENTS[orn.kind]) {
     const room = y1 - y0 - 2 * r - 12
     const s = Math.min(scale, room / ORNAMENT_HEIGHT[orn.kind])
     const tall = ORNAMENT_HEIGHT[orn.kind] * s
     const oy = orn.at === 'bottom' ? y1 - r - 10 - tall : y0 + r + 10
-    d += ` V${oy.toFixed(1)} ` + place(ORNAMENTS[orn.kind], s, !right, x, oy)
+    const drawing = place(ORNAMENTS[orn.kind], s, !right, x, oy)
+    if (orn.at === 'bottom') d += celestial(x, k, y0 + r + 14, oy - 14) + ` V${oy.toFixed(1)} ` + drawing
+    else d += ` V${oy.toFixed(1)} ` + drawing + ` M${x},${(oy + tall).toFixed(1)}` + celestial(x, k, oy + tall + 14, y1 - r - 14)
+  } else {
+    d += celestial(x, k, y0 + r + 14, y1 - r - 14)
   }
   d += ` V${y1 - r} A${r},${r} 0 0 ${sweep} ${right ? x - r : x + r},${y1} H${cx}`
   return d
