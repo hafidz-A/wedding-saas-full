@@ -77,6 +77,9 @@ function pathRow(path, hw) {
 }
 
 const PETAL_COLORS = ['#f7b8c4', '#f4a3b5', '#fbd3d9', '#e9b6e0', '#ffd7c2']
+const CONFETTI_COLORS = ['#f2c98a', '#fff1d6', '#f6b6c8', '#d9c2f0', '#e8b36a']
+// firework bursts: [main, highlight]
+const FIREWORK_COLORS = [['#ffd98a', '#fff3d6'], ['#ffa8c2', '#ffe0ea'], ['#cdb2ff', '#f1e8ff'], ['#ffd98a', '#ffa8c2']]
 
 /**
  * @param {HTMLElement} root   the Shell's root element
@@ -158,6 +161,75 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       BARE.set(i, c)
     }
     return BARE.get(i)
+  }
+  // The inside of the gazebo, warmed: it is painted as a cool blue night, which
+  // on its own reads as an empty, solemn pavilion. A soft amber grade and a glow
+  // under the string lights make it a party at night. Built once per painting.
+  const WARM = new Map()
+  const warmOf = (i) => {
+    if (!loaded(i)) return null
+    if (!WARM.has(i)) {
+      const c = document.createElement('canvas')
+      const w = (c.width = i.naturalWidth)
+      const h = (c.height = i.naturalHeight)
+      const x = c.getContext('2d')
+      x.drawImage(i, 0, 0)
+      x.globalCompositeOperation = 'soft-light'
+      x.fillStyle = 'rgba(255, 170, 100, 0.6)'
+      x.fillRect(0, 0, w, h)
+      x.globalCompositeOperation = 'screen'
+      const glow = x.createRadialGradient(w / 2, h * 0.28, 0, w / 2, h * 0.28, Math.max(w, h) * 0.6)
+      glow.addColorStop(0, 'rgba(255, 196, 130, 0.3)')
+      glow.addColorStop(1, 'rgba(255, 196, 130, 0)')
+      x.fillStyle = glow
+      x.fillRect(0, 0, w, h)
+      x.globalCompositeOperation = 'destination-in'
+      x.drawImage(i, 0, 0)
+      WARM.set(i, c)
+    }
+    return WARM.get(i)
+  }
+  // ...and the same with its night sky cut out (navy pixels within int.sky
+  // rows): wish lanterns and fireworks are drawn between the two, so they only
+  // show through the arches. Reading pixels needs a same-origin image; if that
+  // fails (e.g. a CDN without CORS) this returns null and the sky effects are
+  // simply drawn on top, faded out once inside.
+  const FORE = new Map()
+  const foreOf = (i, band) => {
+    const warm = warmOf(i)
+    if (!warm || !band) return null
+    if (!FORE.has(i)) {
+      let c = null
+      try {
+        const raw = document.createElement('canvas')
+        raw.width = warm.width
+        raw.height = warm.height
+        const rx = raw.getContext('2d', { willReadFrequently: true })
+        rx.drawImage(i, 0, 0)
+        const src = rx.getImageData(0, 0, raw.width, raw.height).data
+        c = document.createElement('canvas')
+        c.width = warm.width
+        c.height = warm.height
+        const x = c.getContext('2d')
+        x.drawImage(warm, 0, 0)
+        const out = x.getImageData(0, 0, c.width, c.height)
+        const d = out.data
+        for (let y = Math.max(0, band.y0); y < Math.min(c.height, band.y1); y++) {
+          for (let px = 0; px < c.width; px++) {
+            const o = (y * c.width + px) * 4
+            const r = src[o]
+            const gg = src[o + 1]
+            const b = src[o + 2]
+            if (b > r + 18 && b >= gg && b < 150) d[o + 3] = 0
+          }
+        }
+        x.putImageData(out, 0, 0)
+      } catch {
+        c = null
+      }
+      FORE.set(i, c)
+    }
+    return FORE.get(i)
   }
   const hillsImg = img(SCENE.hills)
   const moonImg = img(SCENE.moon)
@@ -303,7 +375,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   let my = 0
   let tmx = 0
   let tmy = 0
-  const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0 }
+  const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0, cel: 0 }
   const lanterns = lanternDepths.map((z, i) => ({ z, side: i % 2 === 0 ? -1 : 1 }))
 
   function journey(T, a2, q, gz) {
@@ -536,13 +608,26 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.fillRect(0, 0, sw, sh)
       g.globalAlpha = 1
     }
-    // the interior is painted at night already, so it goes over the tint
-    if (G) {
+    // the interior is painted at night already, so it goes over the tint;
+    // lanterns and fireworks go between it and its sky-less copy, so they only
+    // show through the arches
+    const inside = (fore) => {
       g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
-      drawGazeboInside(A.gazebo, G)
+      const drawn = drawGazeboInside(A.gazebo, G, fore)
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      return drawn
     }
-    drawSkyLanterns(now)
+    if (G) inside(false)
+    const fore = !!G && !!foreOf(img(A.gazebo.int.src), A.gazebo.int.sky)
+    drawSkyLanterns(now, G && !fore ? 1 - seg(J.g, 0.3, 0.6) : 1)
+    if (G) {
+      // the inside's sky rows, on screen: fireworks burst there
+      const N = A.gazebo.int
+      const y0 = OY + S * (G.int.y + G.int.s * N.sky.y0)
+      const y1 = OY + S * (G.int.y + G.int.s * N.sky.y1)
+      drawFireworks(now, Math.max(0, y0), Math.min(sh, y1))
+      if (fore) inside(true)
+    }
     drawFx(now)
   }
 
@@ -620,10 +705,13 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     }
     g.restore()
   }
-  function drawGazeboInside(Gz, G) {
+  function drawGazeboInside(Gz, G, fore) {
     const E = Gz.ext
     const N = Gz.int
     const h = E.hole
+    const raw = img(N.src)
+    const im = fore ? foreOf(raw, N.sky) : warmOf(raw) || raw
+    if (!im || !loaded(im)) return false
     g.save()
     if (!G.full) {
       // only through the entrance until the entrance is bigger than the screen
@@ -634,8 +722,9 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     }
     g.translate(G.int.x, G.int.y)
     g.scale(G.int.s, G.int.s)
-    draw(img(N.src), 0, 0, N.W, N.H)
+    g.drawImage(im, 0, 0, N.W, N.H)
     g.restore()
+    return true
   }
 
   // ---------- petals + fireflies ----------
@@ -651,7 +740,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     if (reduce || lite) return
     const k = Math.min(3, (now - lastFx) / 16.7 || 1) // keep petal speed steady at 30 or 60 fps
     lastFx = now
-    if (fxState.petals > 0.02 && petals.length < 34 && Math.random() < fxState.petals * 0.35 * k) {
+    if (fxState.petals > 0.02 && petals.length < 34 + 26 * fxState.cel && Math.random() < fxState.petals * 0.35 * k) {
       petals.push({
         x: Math.random() * sw * 1.2 - sw * 0.1,
         y: -20,
@@ -685,6 +774,39 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.fill()
       g.restore()
     }
+    if (fxState.cel > 0.05 && confetti.length < 70 && Math.random() < fxState.cel * 0.45 * k) {
+      confetti.push({
+        x: Math.random() * sw,
+        y: -12,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: 0.9 + Math.random() * 1.1,
+        r: Math.random() * 6.28,
+        vr: (Math.random() - 0.5) * 0.2,
+        w: 4 + Math.random() * 3,
+        h: 7 + Math.random() * 5,
+        f: Math.random() * 6.28,
+        c: CONFETTI_COLORS[(Math.random() * CONFETTI_COLORS.length) | 0],
+      })
+    }
+    for (let i = confetti.length - 1; i >= 0; i--) {
+      const q = confetti[i]
+      q.f += 0.12 * k
+      q.x += (q.vx + Math.sin(q.f) * 0.5) * k
+      q.y += q.vy * k
+      q.r += q.vr * k
+      if (q.y > sh + 16) {
+        confetti.splice(i, 1)
+        continue
+      }
+      g.save()
+      g.translate(q.x, q.y)
+      g.rotate(q.r)
+      g.scale(1, Math.cos(q.f)) // flutter: the strip turns edge-on and back
+      g.globalAlpha = 0.95
+      g.fillStyle = q.c
+      g.fillRect(-q.w / 2, -q.h / 2, q.w, q.h)
+      g.restore()
+    }
     if (fxState.flies > 0.01) {
       const t = now / 1000
       g.globalCompositeOperation = 'lighter'
@@ -697,6 +819,90 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.globalAlpha = 1
       g.globalCompositeOperation = 'source-over'
     }
+  }
+
+  // ---------- fireworks (inside the gazebo, seen through the arches) ----------
+  const confetti = []
+  const bursts = []
+  let nextBurst = 0
+  let lastBurstT = 0
+  const polaroidEl = closingEl && closingEl.querySelector('[data-tb-snap]')
+  function drawFireworks(now, skyTop, skyBot) {
+    const dt = Math.min(0.05, (now - lastBurstT) / 1000 || 0.016)
+    lastBurstT = now
+    if (reduce || lite) return
+    const cel = fxState.cel
+    const u = Math.min(sw, sh)
+    if (cel > 0.3 && now > nextBurst && bursts.length < 4 && skyBot - skyTop > 40) {
+      // beside the polaroid, not behind it
+      let x = sw * (0.12 + Math.random() * 0.76)
+      const r = polaroidEl && polaroidEl.getBoundingClientRect()
+      if (r && r.width && x > r.left - 20 && x < r.right + 20) {
+        const left = Math.random() < 0.5
+        x = left ? Math.max(sw * 0.06, r.left - 30 - Math.random() * Math.max(10, r.left - 50)) : Math.min(sw * 0.94, r.right + 30 + Math.random() * Math.max(10, sw - r.right - 50))
+      }
+      bursts.push({
+        x,
+        y: skyTop + (skyBot - skyTop) * (0.12 + Math.random() * 0.45),
+        t: 0,
+        rise: 0.5 + Math.random() * 0.25,
+        c: FIREWORK_COLORS[(Math.random() * FIREWORK_COLORS.length) | 0],
+        sparks: null,
+      })
+      nextBurst = now + 650 + Math.random() * 900
+    }
+    g.globalCompositeOperation = 'lighter'
+    g.lineCap = 'round'
+    for (let i = bursts.length - 1; i >= 0; i--) {
+      const b = bursts[i]
+      b.t += dt
+      if (b.t < b.rise) {
+        // the rocket: a short, slowing streak up to the burst point
+        const p = b.t / b.rise
+        const y = b.y + (1 - p) * (1 - p) * sh * 0.22
+        g.globalAlpha = 0.85 * cel
+        g.strokeStyle = b.c[1]
+        g.lineWidth = 1.6
+        g.beginPath()
+        g.moveTo(b.x, y)
+        g.lineTo(b.x, y + 10 + 18 * (1 - p))
+        g.stroke()
+        continue
+      }
+      if (!b.sparks) {
+        b.sparks = Array.from({ length: 56 }, (_, j) => {
+          const a = (j / 56) * Math.PI * 2 + Math.random() * 0.12
+          const v = (0.55 + Math.random() * 0.45) * u * 0.42
+          return { x: 0, y: 0, vx: Math.cos(a) * v, vy: Math.sin(a) * v, hi: j % 3 === 0 }
+        })
+      }
+      const age = b.t - b.rise
+      const life = 1.7
+      if (age > life) {
+        bursts.splice(i, 1)
+        continue
+      }
+      const fade = 1 - age / life
+      if (age < 0.35) glowAt(GLOW, b.x, b.y, u * 0.16, u * 0.16, cel * (1 - age / 0.35), true)
+      const drag = Math.pow(0.35, dt)
+      for (const sp of b.sparks) {
+        sp.vx *= drag
+        sp.vy = sp.vy * drag + u * 0.12 * dt
+        sp.x += sp.vx * dt
+        sp.y += sp.vy * dt
+        // a short streak along its motion, the way a spark reads at night
+        g.globalAlpha = cel * fade * (0.75 + 0.25 * Math.random())
+        g.strokeStyle = age < 0.12 ? '#fffaf0' : sp.hi ? b.c[1] : b.c[0]
+        g.lineWidth = 1.2 + fade * 1.6
+        g.beginPath()
+        g.moveTo(b.x + sp.x - sp.vx * 0.05, b.y + sp.y - sp.vy * 0.05)
+        g.lineTo(b.x + sp.x, b.y + sp.y)
+        g.stroke()
+      }
+    }
+    g.globalAlpha = 1
+    g.globalCompositeOperation = 'source-over'
+    g.lineCap = 'butt'
   }
 
   // ---------- rising wish lanterns (act 2) ----------
@@ -715,10 +921,10 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   }
   for (let i = 0; i < clamp(wishCount, 6, 12); i++) addSkyLantern('', false)
   let lastSky = 0
-  function drawSkyLanterns(now) {
+  function drawSkyLanterns(now, fade = 1) {
     const dt = Math.min(0.1, (now - lastSky) / 1000)
     lastSky = now
-    if (fxState.wish <= 0 || !(skyLanternImg.complete && skyLanternImg.naturalWidth)) return
+    if (fxState.wish * fade <= 0 || !(skyLanternImg.complete && skyLanternImg.naturalWidth)) return
     const t = now / 1000
     const ar = skyLanternImg.naturalHeight / skyLanternImg.naturalWidth
     for (let i = skyLanterns.length - 1; i >= 0; i--) {
@@ -737,7 +943,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.save()
       g.translate(x, y)
       g.rotate(Math.sin(t * 0.8 + l.ph) * 0.07)
-      g.globalAlpha = fxState.wish
+      g.globalAlpha = fxState.wish * fade
       g.globalCompositeOperation = 'lighter'
       g.drawImage(skyLanternImg, -l.size / 2, 0, l.size, l.size * ar)
       g.globalCompositeOperation = 'source-over'
@@ -861,11 +1067,12 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     my += (tmy - my) * 0.05
     const T = toNominal(cur)
     const J = journey(T, a2, q, gcur)
-    fxState.petals = seg(T, 0.17, 0.21) * (1 - seg(T, 0.38, 0.42))
+    // inside the gazebo it turns into a party: petals, confetti, fireworks
+    fxState.cel = seg(gcur, 0.78, 0.95)
+    fxState.petals = Math.max(seg(T, 0.17, 0.21) * (1 - seg(T, 0.38, 0.42)), fxState.cel)
     fxState.flies = ease(seg(T, 0.72, 0.92))
     fxState.lamps = J.lamps
-    // wish lanterns fly over the garden, not over the gazebo ceiling
-    fxState.wish = clamp(a2 * 1.4, 0, 1) * (1 - seg(gcur, 0.3, 0.6))
+    fxState.wish = clamp(a2 * 1.4, 0, 1)
 
     const moved = cur !== lastP || q !== lastQ || gcur !== lastG
     const nextReveal = !opened ? 0 : reduce ? 1 : ease(clamp((now - openAt - 450) / 900, 0, 1))
@@ -892,7 +1099,10 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
 
     const pointer = Math.abs(tmx - mx) > 0.002 || Math.abs(tmy - my) > 0.002
     const doors = opened && now - openAt < 1800
-    const ambient = !reduce && !lite && (fxState.petals > 0.02 || petals.length > 0 || fxState.flies > 0.01 || fxState.lamps > 0 || fxState.wish > 0)
+    const ambient =
+      !reduce &&
+      !lite &&
+      (fxState.petals > 0.02 || petals.length > 0 || fxState.flies > 0.01 || fxState.lamps > 0 || fxState.wish > 0 || fxState.cel > 0 || confetti.length > 0 || bursts.length > 0)
     if (dirty || moved || pointer || doors || (ambient && now - lastDraw > 32)) {
       drawScene(J, now)
       lastDraw = now
@@ -903,6 +1113,8 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       closingEl.style.opacity = String(o)
       closingEl.style.transform = `translateY(${(1 - o) * 24}px)`
       closingEl.style.visibility = o > 0.01 ? 'visible' : 'hidden'
+      // the snapshot drops in (CSS transition) once the closing is mostly there
+      closingEl.toggleAttribute('data-in', o > 0.5)
     }
     lastP = cur
     lastQ = q

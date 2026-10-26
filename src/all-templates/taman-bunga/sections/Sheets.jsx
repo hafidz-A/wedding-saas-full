@@ -11,7 +11,6 @@
    ============================================================ */
 import React, { useState } from 'react'
 import { SCENE } from '../config/assets.js'
-import { Portrait } from './Journey.jsx'
 import { initials } from '../utils/invite.js'
 
 const CODE_RE = /^\d{6}$/
@@ -271,10 +270,35 @@ export function GiftSheet({ props }) {
   )
 }
 
+/** A taped-on polaroid: the closing is a celebration, not a framed portrait on an altar. */
+function Snapshot({ src, alt, fallback }) {
+  return (
+    <figure className="tb-snap" data-tb-snap>
+      <span className="tb-snap-tape" aria-hidden="true" />
+      <div className="tb-snap-shot">
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={src} alt={alt} />
+        ) : (
+          <span className="tb-initials">{fallback}</span>
+        )}
+      </div>
+      <figcaption className="tb-snap-cap" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <path
+            d="M12 20s-7-4.3-9-8.6C1.6 8.3 3.5 5 6.7 5c2 0 3.4 1.1 4.1 2.5h2.4C13.9 6.1 15.3 5 17.3 5c3.2 0 5.1 3.3 3.7 6.4C19 15.7 12 20 12 20z"
+            fill="currentColor"
+          />
+        </svg>
+      </figcaption>
+    </figure>
+  )
+}
+
 export function Closing({ props, names }) {
   return (
     <section className="tb-closing tb-shadowed" aria-label="Penutup">
-      <Portrait src={props.couplePhoto} alt={`Foto ${names.join(' dan ')}`} fallback={initials(names[0], names[1])} small />
+      <Snapshot src={props.couplePhoto} alt={`Foto ${names.join(' dan ')}`} fallback={initials(names[0], names[1])} />
       {props.label && <span className="tb-label">{props.label}</span>}
       {props.text && <p className="tb-closing-text">{props.text}</p>}
       <h2 className="tb-script tb-names-inline">

@@ -19,8 +19,9 @@
              line, width); `patch` a piece of that painting with the gazebo
              painted out (its x/y/w/h there); `ext` the close-up front painting (pillars' centre,
              floor line, outer width, the cut-out entrance `hole` and its back
-             arch); `int` the inside painting (back arch, and the inner edges of
-             its own front `pillars` if it has any). `glue` = inside px per front
+             arch); `int` the inside painting (back arch, the inner edges of
+             its own front `pillars` if it has any, and the rows where its
+             night `sky` shows — fireworks go there, behind the arches). `glue` = inside px per front
              px at the start; `pass` = how far past the screen the entrance
              grows; `catch` = how early the inside reaches full screen
    ============================================================ */
@@ -69,6 +70,7 @@ export const ART = {
         H: 1024,
         back: { x0: 184, x1: 389, top: 321 },
         pillars: { l: 79, r: 493 },
+        sky: { y0: 270, y1: 560 },
         glue: 0.85,
       },
       pass: 2.5,
@@ -146,6 +148,7 @@ export const ART = {
         W: 1024,
         H: 572,
         back: { x0: 425, x1: 606, top: 198 },
+        sky: { y0: 60, y1: 350 },
         glue: 1,
       },
       pass: 1.5,
