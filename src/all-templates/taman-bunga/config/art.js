@@ -16,7 +16,8 @@
              walk, zoom, path, lantern and lamps — see engine/scene.js
      gazebo  the closing scene: walking up the steps into the gazebo. `painted`
              is the gazebo's front bay in the garden painting (centre x, floor
-             line, width); `ext` the close-up front painting (pillars' centre,
+             line, width); `patch` a piece of that painting with the gazebo
+             painted out (its x/y/w/h there); `ext` the close-up front painting (pillars' centre,
              floor line, outer width, the cut-out entrance `hole` and its back
              arch); `int` the inside painting (back arch, and the inner edges of
              its own front `pillars` if it has any). `glue` = inside px per front
@@ -51,15 +52,16 @@ export const ART = {
     lantern: { K: 245, h: 3 },
     gazebo: {
       painted: { cx: 505, floor: 738, w: 60 },
+      patch: { src: SCENE.gazeboPatchTall, x: 429, y: 560, w: 162, h: 197 },
       ext: {
         src: SCENE.gazeboFrontTall,
         W: 572,
-        H: 1024,
+        H: 1284,
         cx: 289.5,
-        floor: 739,
+        floor: 999,
         w: 343,
-        hole: { x0: 161, y0: 214, x1: 418, y1: 643 },
-        back: { x0: 207, x1: 371, top: 364 },
+        hole: { x0: 161, y0: 474, x1: 418, y1: 903 },
+        back: { x0: 207, x1: 371, top: 624 },
       },
       int: {
         src: SCENE.gazeboInsideTall,
@@ -128,15 +130,16 @@ export const ART = {
     // painted.* is in the inside-the-garden painting (inner.src)
     gazebo: {
       painted: { cx: 867, floor: 340, w: 70 },
+      patch: { src: SCENE.gazeboPatchWide, x: 760, y: 132, w: 225, h: 225 },
       ext: {
         src: SCENE.gazeboFrontWide,
         W: 1220,
-        H: 680,
+        H: 1030,
         cx: 614,
-        floor: 535,
+        floor: 885,
         w: 312,
-        hole: { x0: 497, y0: 78, x1: 730, y1: 457 },
-        back: { x0: 541, x1: 684, top: 204 },
+        hole: { x0: 497, y0: 428, x1: 730, y1: 807 },
+        back: { x0: 541, x1: 684, top: 554 },
       },
       int: {
         src: SCENE.gazeboInsideWide,

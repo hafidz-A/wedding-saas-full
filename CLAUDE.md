@@ -334,9 +334,13 @@ supabase/                                          ← schema.sql (base) + migra
    a pre-multiplied lavender copy (`nightOf`) fades in at night. The tall set needs none of this.
    (g) The walk ends INSIDE the gazebo. After RSVP/wishes/gift, the `[data-tb-gazebo]` scroll track
    (320svh, sticky stage holding the closing) drives a progress `g` (`readScroll`). Same trick as the
-   arch: `gazebo-front-{tall,wide}.webp` (pillars + steps, entrance cut out) is glued over the painted
-   gazebo (`gazebo.painted` = its front bay: centre, floor, outer pillar-to-pillar width) and the whole
-   garden rides one camera with it (`cam(depth)`); `gazebo-inside-*.webp` shows through the entrance,
+   arch: `gazebo-front-full-{tall,wide}.webp` (pillars + steps, entrance cut out) is glued over the
+   painted gazebo (`gazebo.painted` = its front bay: centre, floor, outer pillar-to-pillar width) and the
+   whole garden rides one camera with it (`cam(depth)`). The AI sources cropped the roof, so the roof +
+   cupola in those files are rebuilt from pieces of the tall source, stretched/leaned to the painted
+   gazebo's pitch — a new front painting needs the same. As the front fades in (g 0–.14) the garden
+   painting cross-fades to a copy with its small gazebo painted out (`gazebo.patch`, built once by
+   `bareOf`), so no second, blurry roof peeks out behind. `gazebo-inside-*.webp` shows through the entrance,
    then fills the screen (`clipOff`), and the closing fades in at g .8–.94. The tall interior has its own
    front pillars — `int.pillars` enlarges it until they are off-screen. The front gets the `nightOf`
    copy only on the wide set (its painting is daylight-coloured); the interior is drawn after the screen

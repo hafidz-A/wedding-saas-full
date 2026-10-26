@@ -120,13 +120,14 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   // A dusk-tinted copy of a painting (multiplied with lavender, alpha kept),
   // built once when it has loaded — cross-faded in as night falls for a
   // layer painted in daylight colours.
+  const loaded = (i) => i instanceof HTMLCanvasElement || (i.complete && i.naturalWidth > 0)
   const NIGHT = new Map()
   const nightOf = (i) => {
-    if (!(i.complete && i.naturalWidth)) return null
+    if (!loaded(i)) return null
     if (!NIGHT.has(i)) {
       const c = document.createElement('canvas')
-      c.width = i.naturalWidth
-      c.height = i.naturalHeight
+      c.width = i.naturalWidth || i.width
+      c.height = i.naturalHeight || i.height
       const x = c.getContext('2d')
       x.drawImage(i, 0, 0)
       x.globalCompositeOperation = 'multiply'
@@ -137,6 +138,26 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       NIGHT.set(i, c)
     }
     return NIGHT.get(i)
+  }
+  // The painting with its small gazebo painted out (art.gazebo.patch), built
+  // once both have loaded. The full-size gazebo front replaces that gazebo, so
+  // keeping it would only leave a second, blurry roof peeking out behind.
+  const BARE = new Map()
+  const bareOf = (i) => {
+    const P = art.gazebo?.patch
+    const p = P && img(P.src)
+    if (!p || !loaded(i) || !loaded(p)) return null
+    if (!BARE.has(i)) {
+      const c = document.createElement('canvas')
+      c.width = i.naturalWidth
+      c.height = i.naturalHeight
+      const x = c.getContext('2d')
+      x.drawImage(i, 0, 0)
+      x.clearRect(P.x, P.y, P.w, P.h)
+      x.drawImage(p, P.x, P.y, P.w, P.h)
+      BARE.set(i, c)
+    }
+    return BARE.get(i)
   }
   const hillsImg = img(SCENE.hills)
   const moonImg = img(SCENE.moon)
@@ -186,7 +207,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src, a.gazebo?.ext.src, a.gazebo?.int.src].filter(Boolean).forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src, a.gazebo?.ext.src, a.gazebo?.int.src, a.gazebo?.patch.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -344,6 +365,27 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.scale(z, z)
       g.translate(-G.a0x, -G.a0y)
     }
+    // a painting that holds the gazebo: as the gazebo front fades in, it
+    // cross-fades to its copy without the small painted gazebo (no dip: the
+    // bare copy goes down first at full strength, the original over it)
+    const paintGz = (src, dusk) => {
+      const base = g.globalAlpha
+      const layer = (im, a) => {
+        g.globalAlpha = base * a
+        g.drawImage(im, 0, 0, A.W, A.H)
+        const n = dusk && J.night > 0 && nightOf(im)
+        if (n) {
+          g.globalAlpha = base * a * J.night * 0.85
+          g.drawImage(n, 0, 0, A.W, A.H)
+        }
+      }
+      const im = img(src)
+      if (!loaded(im)) return
+      const bare = G && bareOf(im)
+      if (bare) layer(bare, 1)
+      if (!bare || G.o < 1) layer(im, bare ? 1 - G.o : 1)
+      g.globalAlpha = base
+    }
 
     g.setTransform(1, 0, 0, 1, 0, 0)
     g.globalAlpha = 1
@@ -397,22 +439,13 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       // glued to the arch painting at kf = 0, on its own walk pose at kf = 1
       const far = (scale, wx, wy, fn) =>
         xform(I.vp.x, I.vp.y, s0 * Math.pow(scale / s0, kf), lerp(x0, wx, kf) + px(20), lerp(y0, wy, kf) + py(20), fn)
-      const paint = (src) => {
-        draw(img(src), 0, 0, A.W, A.H)
-        const dusk = J.night > 0 && nightOf(img(src))
-        if (dusk) {
-          g.globalAlpha = J.night * 0.85
-          g.drawImage(dusk, 0, 0, A.W, A.H)
-          g.globalAlpha = 1
-        }
-      }
       // back: the mountain + treeline silhouette (the same hills.webp the
       // tall set uses), far away so it barely moves and the sky stays in view
       const hk = I.hillsDepth
       far(I.scale * (1 + I.zoom * hk * J.c), itx * hk, ity * hk, () => draw(img(I.hills.src), I.hills.l, I.hills.t, I.hills.w, I.hills.h))
       // front: garden, path and gazebo (the painting's own mountains cut away) walk toward us
       far(is, itx, ity, () => {
-        paint(I.src)
+        paintGz(I.src, true)
         if (J.lamps > 0) {
           const lp = I.lamps
           glowAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.7, true)
@@ -424,7 +457,8 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     if (nearO > 0) {
       g.globalAlpha = nearO
       xform(gox, goy, gs, tx + px(20), ty + py(20), () => {
-        draw(img(A.garden), 0, 0, A.W, A.H)
+        if (I) draw(img(A.garden), 0, 0, A.W, A.H)
+        else paintGz(A.garden, false)
         if (!I && J.lamps > 0) {
           const lp = A.lamps
           glowAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85, true)
@@ -564,7 +598,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       ext: { s, x: ax - s * hcx, y: ay - s * hcy },
       int: { s: si, x: bx - si * nbx, y: by - si * N.back.top },
       // cross-fade over the painted gazebo while it is still small
-      o: seg(J.g, 0, 0.1),
+      o: ease(seg(J.g, 0, 0.14)),
       full: e >= Gz.clipOff,
     }
   }
