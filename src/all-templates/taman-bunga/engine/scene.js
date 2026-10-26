@@ -79,7 +79,16 @@ function pathRow(path, hw) {
 const PETAL_COLORS = ['#f7b8c4', '#f4a3b5', '#fbd3d9', '#e9b6e0', '#ffd7c2']
 const CONFETTI_COLORS = ['#f2c98a', '#fff1d6', '#f6b6c8', '#d9c2f0', '#e8b36a']
 // firework bursts: [main, highlight]
-const FIREWORK_COLORS = [['#ffd98a', '#fff3d6'], ['#ffa8c2', '#ffe0ea'], ['#cdb2ff', '#f1e8ff'], ['#ffd98a', '#ffa8c2']]
+const FIREWORK_COLORS = [
+  ['#ffd98a', '#fff3d6'],
+  ['#ff8fb1', '#ffe0ea'],
+  ['#c7a6ff', '#f1e8ff'],
+  ['#ffd98a', '#ff8fb1'],
+  ['#8fe3d0', '#fff3d6'],
+  ['#ff9e7a', '#ffd98a'],
+]
+// paper lanterns in the garden outside the gazebo: [body, glow]
+const LANTERN_COLORS = [['#ffb3c6', 'rgba(255, 150, 180, 0.55)'], ['#ffd9a0', 'rgba(255, 200, 120, 0.55)'], ['#fff1dc', 'rgba(255, 230, 190, 0.5)']]
 
 /**
  * @param {HTMLElement} root   the Shell's root element
@@ -610,6 +619,8 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     const y1 = G ? Math.min(sh, skyY(A.gazebo.int.sky.y1)) : 0
     drawSkyLanterns(now, G && !fore ? 1 - seg(J.g, 0.3, 0.6) : 1)
     if (G) {
+      // the garden outside is lit for the party too: no dark woods around the gazebo
+      if (fore) drawGardenLights(now, skyY(A.gazebo.int.sky.y0), skyY(A.gazebo.int.sky.y1), dx, G.o)
       drawFireworks(now, y0, y1)
       if (fore) inside(true)
     }
@@ -806,35 +817,163 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     }
   }
 
+  // ---------- party lights in the garden (seen through the arches) ----------
+  // Two swags of warm bulbs strung between the trees, round paper lanterns
+  // hanging from the upper one, and soft bokeh of more lights deeper in the
+  // garden. Laid out on the inside painting's sky rows (y0..y1 on screen, so
+  // they ride the camera); drawn behind its sky-less copy, so the pillars and
+  // the hedge stay in front.
+  const bokeh = Array.from({ length: 22 }, () => ({ x: Math.random(), y: 0.66 + Math.random() * 0.2, r: 0.6 + Math.random() * 0.8, ph: Math.random() * 6.28 }))
+  function drawGardenLights(now, y0, y1, dx, a) {
+    if (a <= 0) return
+    const t = reduce ? 0 : now / 1000
+    const h = y1 - y0
+    const u = Math.min(sw, sh)
+    const swags = [
+      { y: 0.42, sag: 0.08, span: 0.36, off: 0.1 },
+      { y: 0.6, sag: 0.05, span: 0.27, off: 0.62 },
+    ]
+    g.lineCap = 'round'
+    swags.forEach((sw8, k) => {
+      const span = Math.max(120, sw * sw8.span)
+      const yb = y0 + h * sw8.y
+      const sag = h * sw8.sag
+      const start = -span * sw8.off + dx
+      // the cord: a run of shallow arcs from post to post
+      g.globalAlpha = a * 0.55
+      g.strokeStyle = 'rgba(52, 30, 36, 0.9)'
+      g.lineWidth = 1.2
+      g.beginPath()
+      for (let x0 = start; x0 < sw + span; x0 += span) {
+        g.moveTo(x0, yb)
+        g.quadraticCurveTo(x0 + span / 2, yb + sag * 2, x0 + span, yb)
+      }
+      g.stroke()
+      // bulbs along it
+      const step = Math.max(14, u * 0.045)
+      let n = 0
+      for (let x0 = start; x0 < sw + span; x0 += span) {
+        for (let s8 = step / 2; s8 < span; s8 += step) {
+          const p = s8 / span
+          const x = x0 + s8
+          if (x < -10 || x > sw + 10) continue
+          const y = yb + sag * 4 * p * (1 - p) + 3
+          const tw = 0.7 + 0.3 * Math.sin(t * 2.2 + n * 1.7 + k)
+          glowAt(GLOW, x, y, u * 0.028, u * 0.028, a * 0.75 * tw, true)
+          g.globalAlpha = a
+          g.fillStyle = '#fff1c8'
+          g.beginPath()
+          g.arc(x, y, Math.max(1.6, u * 0.0045), 0, Math.PI * 2)
+          g.fill()
+          n++
+        }
+      }
+      // paper lanterns hang from the upper swag, one or two per run
+      if (k === 0) {
+        let m = 0
+        for (let x0 = start; x0 < sw + span; x0 += span, m++) {
+          for (const p of [0.32, 0.7]) {
+            if ((m + (p > 0.5 ? 1 : 0)) % 2) continue
+            const x = x0 + span * p
+            if (x < -30 || x > sw + 30) continue
+            const top = yb + sag * 4 * p * (1 - p)
+            const r = Math.max(9, u * 0.028)
+            const [body, glow] = LANTERN_COLORS[(m + (p > 0.5 ? 1 : 0)) % LANTERN_COLORS.length]
+            const sway = reduce ? 0 : Math.sin(t * 0.9 + m * 2.1 + p * 5) * 0.08
+            g.save()
+            g.translate(x, top)
+            g.rotate(sway)
+            g.globalAlpha = a * 0.6
+            g.strokeStyle = 'rgba(52, 30, 36, 0.9)'
+            g.lineWidth = 1
+            g.beginPath()
+            g.moveTo(0, 0)
+            g.lineTo(0, r * 0.9)
+            g.stroke()
+            const cy = r * 0.9 + r
+            g.globalCompositeOperation = 'lighter'
+            g.globalAlpha = a
+            const halo = g.createRadialGradient(0, cy, 0, 0, cy, r * 2.6)
+            halo.addColorStop(0, glow)
+            halo.addColorStop(1, 'rgba(255, 180, 150, 0)')
+            g.fillStyle = halo
+            g.fillRect(-r * 2.6, cy - r * 2.6, r * 5.2, r * 5.2)
+            g.globalCompositeOperation = 'source-over'
+            const lit = g.createRadialGradient(-r * 0.25, cy - r * 0.3, r * 0.1, 0, cy, r * 1.05)
+            lit.addColorStop(0, '#fffaf0')
+            lit.addColorStop(0.45, body)
+            lit.addColorStop(1, 'rgba(160, 80, 90, 0.95)')
+            g.fillStyle = lit
+            g.beginPath()
+            g.ellipse(0, cy, r, r * 0.92, 0, 0, Math.PI * 2)
+            g.fill()
+            // ribs and caps, so it reads as paper
+            g.globalAlpha = a * 0.35
+            g.strokeStyle = 'rgba(120, 50, 60, 0.9)'
+            g.lineWidth = 0.8
+            for (const e of [0.45, 0.85]) {
+              g.beginPath()
+              g.ellipse(0, cy, r * e, r * 0.92, 0, 0, Math.PI * 2)
+              g.stroke()
+            }
+            g.globalAlpha = a
+            g.fillStyle = '#5a3438'
+            g.fillRect(-r * 0.32, cy - r * 0.98, r * 0.64, r * 0.14)
+            g.fillRect(-r * 0.32, cy + r * 0.84, r * 0.64, r * 0.14)
+            g.restore()
+          }
+        }
+      }
+    })
+    // more lights deeper in the garden, out of focus
+    for (const b of bokeh) {
+      const tw = 0.55 + 0.45 * Math.sin(t * 1.3 + b.ph)
+      glowAt(GLOW, dx + b.x * sw, y0 + h * b.y, u * 0.035 * b.r, u * 0.035 * b.r, a * 0.6 * tw, true)
+    }
+    g.globalAlpha = 1
+    g.lineCap = 'butt'
+  }
+
   // ---------- fireworks (inside the gazebo, seen through the arches) ----------
+  // Rings and hearts in party colours; when the couple's names come up, a pair
+  // of big hearts goes off either side of the photo.
   const confetti = []
   const bursts = []
   let nextBurst = 0
   let lastBurstT = 0
+  let grandDone = false
   const polaroidEl = closingEl && closingEl.querySelector('[data-tb-snap]')
+  // a spot in the sky beside the photo, not behind it
+  function besidePhoto(side) {
+    const r = polaroidEl && polaroidEl.getBoundingClientRect()
+    if (!r || !r.width) return sw * (side < 0 ? 0.22 : side > 0 ? 0.78 : 0.12 + Math.random() * 0.76)
+    const left = side ? side < 0 : Math.random() < 0.5
+    const room = left ? r.left : sw - r.right
+    const inset = Math.min(room * 0.5, 20 + Math.random() * Math.max(10, room - 40))
+    return left ? Math.max(sw * 0.06, r.left - inset) : Math.min(sw * 0.94, r.right + inset)
+  }
+  function addBurst(x, y, shape, k, rise) {
+    bursts.push({ x, y, t: 0, rise, shape, k, c: FIREWORK_COLORS[(Math.random() * FIREWORK_COLORS.length) | 0], sparks: null })
+  }
   function drawFireworks(now, skyTop, skyBot) {
     const dt = Math.min(0.05, (now - lastBurstT) / 1000 || 0.016)
     lastBurstT = now
     if (reduce || lite) return
     const cel = fxState.cel
     const u = Math.min(sw, sh)
-    if (cel > 0.3 && now > nextBurst && bursts.length < 4 && skyBot - skyTop > 40) {
-      // beside the polaroid, not behind it
-      let x = sw * (0.12 + Math.random() * 0.76)
-      const r = polaroidEl && polaroidEl.getBoundingClientRect()
-      if (r && r.width && x > r.left - 20 && x < r.right + 20) {
-        const left = Math.random() < 0.5
-        x = left ? Math.max(sw * 0.06, r.left - 30 - Math.random() * Math.max(10, r.left - 50)) : Math.min(sw * 0.94, r.right + 30 + Math.random() * Math.max(10, sw - r.right - 50))
-      }
-      bursts.push({
-        x,
-        y: skyTop + (skyBot - skyTop) * (0.12 + Math.random() * 0.45),
-        t: 0,
-        rise: 0.5 + Math.random() * 0.25,
-        c: FIREWORK_COLORS[(Math.random() * FIREWORK_COLORS.length) | 0],
-        sparks: null,
-      })
-      nextBurst = now + 650 + Math.random() * 900
+    const roomy = skyBot - skyTop > 40
+    if (cel < 0.3) grandDone = false
+    if (roomy && !grandDone && cel > 0.97) {
+      grandDone = true
+      const y = skyTop + (skyBot - skyTop) * 0.3
+      addBurst(besidePhoto(-1), y, 'heart', 1.3, 0.55)
+      addBurst(besidePhoto(1), y, 'heart', 1.3, 0.65)
+      nextBurst = now + 1500
+    }
+    if (roomy && cel > 0.3 && now > nextBurst && bursts.length < 5) {
+      const y = skyTop + (skyBot - skyTop) * (0.12 + Math.random() * 0.45)
+      addBurst(besidePhoto(0), y, Math.random() < 0.3 ? 'heart' : 'ring', 0.85 + Math.random() * 0.35, 0.5 + Math.random() * 0.25)
+      nextBurst = now + 550 + Math.random() * 800
     }
     g.globalCompositeOperation = 'lighter'
     g.lineCap = 'round'
@@ -855,30 +994,49 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         continue
       }
       if (!b.sparks) {
-        b.sparks = Array.from({ length: 56 }, (_, j) => {
-          const a = (j / 56) * Math.PI * 2 + Math.random() * 0.12
-          const v = (0.55 + Math.random() * 0.45) * u * 0.42
-          return { x: 0, y: 0, vx: Math.cos(a) * v, vy: Math.sin(a) * v, hi: j % 3 === 0 }
+        const N = b.shape === 'heart' ? 64 : 72
+        const V = u * 0.46 * b.k
+        b.sparks = Array.from({ length: N }, (_, j) => {
+          const a = (j / N) * Math.PI * 2
+          let vx
+          let vy
+          if (b.shape === 'heart') {
+            // the classic heart curve, scaled to unit size
+            vx = (16 * Math.sin(a) ** 3) / 17
+            vy = -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) / 17
+            const f = V * (0.97 + Math.random() * 0.06)
+            vx *= f
+            vy *= f
+          } else {
+            const f = V * (0.55 + Math.random() * 0.45)
+            vx = Math.cos(a + Math.random() * 0.1) * f
+            vy = Math.sin(a + Math.random() * 0.1) * f
+          }
+          return { x: 0, y: 0, vx, vy, hi: j % 3 === 0 }
         })
       }
       const age = b.t - b.rise
-      const life = 1.7
+      const life = b.shape === 'heart' ? 2 : 1.8
       if (age > life) {
         bursts.splice(i, 1)
         continue
       }
       const fade = 1 - age / life
-      if (age < 0.35) glowAt(GLOW, b.x, b.y, u * 0.16, u * 0.16, cel * (1 - age / 0.35), true)
+      if (age < 0.35) glowAt(GLOW, b.x, b.y, u * 0.2 * b.k, u * 0.2 * b.k, cel * (1 - age / 0.35), true)
+      g.globalCompositeOperation = 'lighter' // glowAt leaves source-over behind
       const drag = Math.pow(0.35, dt)
+      // hearts barely fall, so they keep their shape
+      const grav = u * (b.shape === 'heart' ? 0.03 : 0.12) * dt
+      const glitter = age > life * 0.55
       for (const sp of b.sparks) {
         sp.vx *= drag
-        sp.vy = sp.vy * drag + u * 0.12 * dt
+        sp.vy = sp.vy * drag + grav
         sp.x += sp.vx * dt
         sp.y += sp.vy * dt
-        // a short streak along its motion, the way a spark reads at night
-        g.globalAlpha = cel * fade * (0.75 + 0.25 * Math.random())
+        // a short streak along its motion; at the end the sparks glitter out
+        g.globalAlpha = cel * fade * (glitter ? Math.random() : 0.8 + 0.2 * Math.random())
         g.strokeStyle = age < 0.12 ? '#fffaf0' : sp.hi ? b.c[1] : b.c[0]
-        g.lineWidth = 1.2 + fade * 1.6
+        g.lineWidth = (1.4 + fade * 2) * Math.min(1.4, b.k)
         g.beginPath()
         g.moveTo(b.x + sp.x - sp.vx * 0.05, b.y + sp.y - sp.vy * 0.05)
         g.lineTo(b.x + sp.x, b.y + sp.y)

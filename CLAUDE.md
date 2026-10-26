@@ -347,7 +347,9 @@ supabase/                                          ← schema.sql (base) + migra
    tint because it is painted at night. If the front looks like a second, smaller gazebo, re-measure
    `painted.w`. The ending must read as a CELEBRATION: the bare night interior read as a funeral
    (empty pavilion, candles, a lone arched portrait), so the interior is drawn warmed (`warmOf`), and
-   from g .78 it throws a party — rose petals, confetti, fireworks — and the camera breathes (slow
+   from g .78 it throws a party — rose petals, confetti, fireworks (rings + hearts, a big pair of
+   hearts when the names land), and the garden outside is lit with bulb swags, paper lanterns and
+   bokeh (`drawGardenLights`, all code-drawn) — and the camera breathes (slow
    drift + zoom). It stays NIGHT: the walk runs sunset → night, so a dawn there was tried and
    dropped as a time jump. Wish lanterns and fireworks go between the interior and its sky-less copy (`foreOf`: the warmed
    interior minus `int.sky.src`, a small alpha mask of where its night sky shows, cut offline down to
