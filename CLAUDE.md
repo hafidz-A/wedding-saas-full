@@ -322,7 +322,7 @@ supabase/                                          ← schema.sql (base) + migra
    without them the landing/onboarding (DB-driven once any `templates` row exists) and checkout don't
    offer the template.
    (f) Wide screens are a 3-depth parallax, not one painting: NEAR = `garden-wide-near.webp` (the
-   rose-arch painting with its opening cut out), FAR = `garden-inner-wide.webp` (garden + gazebo, sky
+   rose-arch painting with its opening cut out), FAR = `garden-inside-wide.webp` (garden + gazebo, sky
    keyed out, deliberately NO painted mountains) and BACK = the `hills.webp` mountain/treeline
    silhouette, the same backdrop the tall set shows behind the gazebo. At first the far layer is glued
    under the opening so the two gazebos coincide (`ART.wide.inner.start`); passing the arch
