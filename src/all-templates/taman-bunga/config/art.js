@@ -7,6 +7,8 @@
 
      vp      the gazebo: zoom origin for the walk and the path's vanishing point
      walk    how far the garden drifts (toward centre / down) by the end of the walk
+     zoom    how much the garden grows about vp: `arch` while passing under the
+             rose arch, `walk` per unit of walk distance (the walk ends at 8)
      path    the painted stone path, measured by hand: [image y, centre x, half width]
      lantern a lantern at depth z stands on the path row whose on-screen half
              width is K / z; its height is h × that half width
@@ -30,6 +32,7 @@ export const ART = {
     doors: { l: 164, t: 522, w: 440, h: 625 },
     front: { src: SCENE.front, t: 1060, h: 315 },
     walk: { tx: -60, ty: 190 },
+    zoom: { arch: 0.56, walk: 0.09 },
     path: [
       [700, 480, 20], [720, 465, 28], [740, 442, 37], [800, 447, 47], [850, 467, 52], [900, 430, 56],
       [950, 405, 62], [1000, 375, 75], [1050, 365, 85], [1100, 380, 90], [1200, 390, 120],
@@ -53,6 +56,11 @@ export const ART = {
     doors: { l: 590, t: 379, w: 240, h: 341 },
     front: { src: SCENE.frontWide, t: 520, h: 248 },
     walk: { tx: -77, ty: 120 },
+    // The wide painting's rose arch hugs the gazebo, so the same zoom as the
+    // tall set barely gets past it on a 16:9 screen. 0.2 is about the most
+    // before the 1376px painting goes soft; clearing the arch for real needs
+    // an "inside the garden" painting (see CLAUDE.md gotcha 13).
+    zoom: { arch: 0.56, walk: 0.2 },
     path: [
       [410, 760, 20], [450, 745, 32], [500, 738, 40], [550, 707, 44], [600, 685, 48], [650, 667, 54],
       [700, 670, 60], [768, 682, 68],

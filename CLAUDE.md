@@ -321,6 +321,10 @@ supabase/                                          ← schema.sql (base) + migra
    (e) The `templates` + `template_plans` rows come from `supabase/migrations/2026-10-25_taman_bunga_template.sql`;
    without them the landing/onboarding (DB-driven once any `templates` row exists) and checkout don't
    offer the template.
+   (f) Zoom amounts are per art set (`ART.<set>.zoom` in `config/art.js`). The wide painting's rose
+   arch hugs the gazebo, so on 16:9 screens the walk never fully passes the arch (it would need ~10×
+   zoom); `wide.zoom.walk` is raised to 0.2, about the limit before the 1376px painting goes soft. A
+   real fix is an extra "inside the garden" wide painting cross-faded in during the arch phase.
 
 ---
 

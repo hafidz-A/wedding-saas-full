@@ -317,9 +317,10 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     }
 
     // hills and garden zoom about the gazebo as we walk
-    const hs = 1 + 0.04 * J.settle + 0.08 * J.arch + 0.032 * J.c
+    const Z = A.zoom
+    const hs = 1 + 0.04 * J.settle + 0.08 * J.arch + Z.walk * 0.36 * J.c
     xform(A.vp.x, A.vp.y, hs, tx * 0.4 + px(10), ty * 0.4 + py(10), () => draw(hillsImg, A.hills.l, A.hills.t, A.hills.w, A.hills.h))
-    const gs = 1 + 0.12 * J.settle + 0.56 * J.arch + 0.09 * J.c
+    const gs = 1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c
     xform(A.vp.x, A.vp.y, gs, tx + px(20), ty + py(20), () => {
       draw(img(A.garden), 0, 0, A.W, A.H)
       if (J.lamps > 0) {
