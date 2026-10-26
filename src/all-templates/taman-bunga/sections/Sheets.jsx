@@ -12,6 +12,8 @@
 import React, { useState } from 'react'
 import { SCENE } from '../config/assets.js'
 import { initials } from '../utils/invite.js'
+import LineFrame from '../components/LineFrame.jsx'
+import { popHearts } from '../utils/hearts.js'
 
 const CODE_RE = /^\d{6}$/
 
@@ -32,15 +34,6 @@ async function post(url, payload) {
 }
 
 const simulate = () => new Promise((r) => setTimeout(r, 700))
-
-function Corners({ bottom = true }) {
-  return (
-    <>
-      <img className="tb-corner tb-tl" src={SCENE.corner} alt="" />
-      {bottom && <img className="tb-corner tb-br" src={SCENE.corner} alt="" />}
-    </>
-  )
-}
 
 function CodeField({ id, value, onChange }) {
   return (
@@ -95,7 +88,7 @@ export function RsvpSheet({ props, slug, simulated, guestName }) {
 
   return (
     <section className="tb-sheet" aria-labelledby="tb-rsvp-title">
-      <Corners />
+      <LineFrame left={{ kind: 'rose', at: 'top' }} right={{ kind: 'fly', at: 'bottom' }} />
       {props.label && <span className="tb-label">{props.label}</span>}
       <h2 className="tb-script tb-sheet-title" id="tb-rsvp-title">{props.title || 'Konfirmasi Kehadiran'}</h2>
       {props.subtitle && <p className="tb-sheet-sub">{props.subtitle}</p>}
@@ -115,7 +108,16 @@ export function RsvpSheet({ props, slug, simulated, guestName }) {
             <div className="tb-choices">
               {[['yes', 'Hadir'], ['no', 'Tidak hadir']].map(([v, l]) => (
                 <label className="tb-choice" key={v}>
-                  <input type="radio" name="tb-att" value={v} checked={attending === v} onChange={() => setAttending(v)} />
+                  <input
+                    type="radio"
+                    name="tb-att"
+                    value={v}
+                    checked={attending === v}
+                    onChange={(e) => {
+                      setAttending(v)
+                      popHearts(e.currentTarget.nextElementSibling, 4)
+                    }}
+                  />
                   <span>{l}</span>
                 </label>
               ))}
@@ -135,7 +137,7 @@ export function RsvpSheet({ props, slug, simulated, guestName }) {
             <label htmlFor="tb-rsvp-msg">Pesan untuk mempelai (opsional)</label>
             <textarea className="tb-input" id="tb-rsvp-msg" maxLength={500} value={message} onChange={(e) => setMessage(e.target.value)} />
           </div>
-          <button className="tb-pill-btn tb-solid" type="submit" disabled={state.busy}>
+          <button className="tb-pill-btn tb-solid" type="submit" disabled={state.busy} onClick={(e) => popHearts(e.currentTarget)}>
             {state.busy ? 'Mengirim…' : 'Kirim'}
           </button>
           <p className="tb-form-note" role="status">{state.note}</p>
@@ -177,7 +179,7 @@ export function WishesSheet({ props, notes, slug, simulated, guestName, onSent }
 
   return (
     <section className="tb-sheet" aria-labelledby="tb-wish-title">
-      <Corners />
+      <LineFrame left={{ kind: 'fly', at: 'top' }} right={{ kind: 'rose', at: 'bottom' }} />
       {props.label && <span className="tb-label">{props.label}</span>}
       <h2 className="tb-script tb-sheet-title" id="tb-wish-title">{props.title || 'Doa untuk Kami'}</h2>
       {props.subtitle && <p className="tb-sheet-sub">{props.subtitle}</p>}
@@ -191,7 +193,7 @@ export function WishesSheet({ props, notes, slug, simulated, guestName, onSent }
           <textarea className="tb-input" id="tb-wish-msg" maxLength={240} value={message} onChange={(e) => setMessage(e.target.value)} />
         </div>
         {!simulated && <CodeField id="tb-wish-code" value={code} onChange={setCode} />}
-        <button className="tb-pill-btn tb-solid" type="submit" disabled={state.busy}>
+        <button className="tb-pill-btn tb-solid" type="submit" disabled={state.busy} onClick={(e) => popHearts(e.currentTarget)}>
           {state.busy ? 'Mengirim…' : 'Kirim ucapan'}
         </button>
         <p className="tb-form-note" role="status">{state.note}</p>
@@ -231,7 +233,14 @@ function CopyButton({ text, fallbackRef }) {
     setTimeout(() => setLabel('Salin'), 1800)
   }
   return (
-    <button className={`tb-copy-btn${label === 'Tersalin' ? ' tb-done' : ''}`} type="button" onClick={copy}>
+    <button
+      className={`tb-copy-btn${label === 'Tersalin' ? ' tb-done' : ''}`}
+      type="button"
+      onClick={(e) => {
+        popHearts(e.currentTarget, 5)
+        copy()
+      }}
+    >
       {label}
     </button>
   )
@@ -255,7 +264,7 @@ export function GiftSheet({ props }) {
   const accounts = (Array.isArray(props.accounts) ? props.accounts : []).filter((a) => a && a.accountNumber)
   return (
     <section className="tb-sheet" aria-labelledby="tb-gift-title">
-      <Corners />
+      <LineFrame left={{ kind: 'rose', at: 'bottom' }} right={{ kind: 'fly', at: 'top' }} />
       <img className="tb-gift-art" src={SCENE.gift} alt="" />
       {props.label && <span className="tb-label">{props.label}</span>}
       <h2 className="tb-script tb-sheet-title" id="tb-gift-title">{props.title || 'Tanda Kasih'}</h2>

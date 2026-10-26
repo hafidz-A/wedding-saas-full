@@ -361,6 +361,14 @@ supabase/                                          ← schema.sql (base) + migra
    needed). `int.sky.y0/y1` are the rows the sky spans (the firework band). The couple photo
    there is a taped polaroid (`.tb-snap`, NOT `.tb-polaroid`/`data-tb-polaroid` — those are the
    gallery's, and the engine moves every `data-tb-polaroid` along the gallery string).
+   (h) The glass cards (RSVP, wishes, gift — `.tb-sheet`) have no CSS border: their edge is ONE
+   hand-drawn line (`components/LineFrame.jsx`) that turns into a one-line rose on one side and a
+   butterfly on the other (`config/ornaments.js`, drawn for the right edge, mirrored for the left),
+   drawing itself in when the card scrolls into view. Every card has BOTH, on opposite sides, and
+   the placement alternates per card (top/bottom) — keep it that way. The wide butterfly only goes
+   at the bottom beside a centred button; next to full-width content use the narrow rose. Gradient
+   stops use `style={{ stopColor }}`, not the attribute: SVG attributes don't read CSS variables.
+   Buttons spring + float hearts on press (`utils/hearts.js`, a fixed layer outside React).
 
 ---
 

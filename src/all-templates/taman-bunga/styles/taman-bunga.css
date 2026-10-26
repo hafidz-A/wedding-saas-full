@@ -296,6 +296,17 @@ html.tb-locked body {
   padding: 0 30px;
   font-size: 13px;
 }
+/* a little squish while pressed; utils/hearts.js springs it back */
+.tb-pill-btn,
+.tb-copy-btn,
+.tb-choice span {
+  transition: transform 0.18s cubic-bezier(0.34, 1.8, 0.64, 1);
+}
+.tb-pill-btn:active:not(:disabled),
+.tb-copy-btn:active,
+.tb-choice:active span {
+  transform: scale(0.92);
+}
 .tb-pill-btn:disabled {
   opacity: 0.6;
   cursor: progress;
@@ -655,64 +666,43 @@ html.tb-locked body {
   align-items: center;
   gap: 10px;
   text-align: center;
-  /* "Kelopak + Lentera": petal-shaped glass lit from the top like a lantern,
-     with a gold→blush→lilac rim. No backdrop-filter — a blur over the
-     always-redrawing canvas is what made older iPhones stutter. */
-  border: 1.5px solid transparent;
-  border-radius: 40px 12px 40px 12px;
+  /* Glass lit from the top like a lantern. The edge is not a border: it is one
+     hand-drawn line (components/LineFrame.jsx, .tb-line below) that turns
+     into a rose on one side and a butterfly on the other. No backdrop-filter:
+     a blur over the always-redrawing canvas made older iPhones stutter. */
+  border-radius: var(--radius-md);
   background:
-    radial-gradient(120% 50% at 50% 0%, rgba(242, 170, 90, 0.34), rgba(242, 170, 90, 0) 62%) padding-box,
-    linear-gradient(var(--tb-glass), var(--tb-glass)) padding-box,
-    linear-gradient(140deg, var(--tb-gold), var(--tb-blush) 50%, #b99be0) border-box;
+    radial-gradient(120% 50% at 50% 0%, rgba(242, 170, 90, 0.3), rgba(242, 170, 90, 0) 62%),
+    var(--tb-glass);
   background:
-    radial-gradient(120% 50% at 50% 0%, color-mix(in srgb, var(--tb-gold) 36%, transparent), transparent 62%) padding-box,
-    linear-gradient(var(--tb-glass), var(--tb-glass)) padding-box,
-    linear-gradient(140deg, var(--tb-gold), var(--tb-blush) 50%, #b99be0) border-box;
-  box-shadow: 0 0 46px rgba(242, 170, 90, 0.24), 0 22px 50px rgba(10, 4, 16, 0.45);
-  box-shadow: 0 0 46px color-mix(in srgb, var(--tb-gold) 26%, transparent), 0 22px 50px rgba(10, 4, 16, 0.45);
+    radial-gradient(120% 50% at 50% 0%, color-mix(in srgb, var(--tb-gold) 30%, transparent), transparent 62%),
+    var(--tb-glass);
+  box-shadow: 0 0 40px rgba(242, 170, 90, 0.2), 0 22px 50px rgba(10, 4, 16, 0.45);
+  box-shadow: 0 0 40px color-mix(in srgb, var(--tb-gold) 20%, transparent), 0 22px 50px rgba(10, 4, 16, 0.45);
 }
-/* two loose petals on the corners the flower art leaves free */
-.tb-sheet::before,
-.tb-sheet::after {
-  content: '';
+/* the hand-drawn edge: hidden until the card scrolls into view, then drawn in */
+.tb-line {
   position: absolute;
-  border-radius: 0 100% 0 100%;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  overflow: visible;
   pointer-events: none;
-  box-shadow: 0 4px 10px rgba(30, 0, 24, 0.35);
 }
-.tb-sheet::before {
-  top: -12px;
-  right: 34px;
-  width: 44px;
-  height: 22px;
-  background: linear-gradient(135deg, #ffe4ec, var(--tb-blush));
-  transform: rotate(-24deg);
+.tb-line path {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--len, 0) var(--len, 0);
+  stroke-dashoffset: var(--len, 0);
 }
-.tb-sheet::after {
-  bottom: -10px;
-  left: 30px;
-  width: 36px;
-  height: 18px;
-  background: linear-gradient(135deg, #e8cdf3, #c79bd8);
-  transform: rotate(18deg);
+.tb-line.tb-line-in path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 2.6s cubic-bezier(0.45, 0.05, 0.3, 1);
 }
 .tb-sheet .tb-sheet-title {
   text-shadow: 0 0 22px rgba(242, 170, 90, 0.5);
-}
-.tb-corner {
-  position: absolute;
-  width: 112px;
-  max-width: none;
-  pointer-events: none;
-}
-.tb-corner.tb-tl {
-  left: -16px;
-  top: -16px;
-}
-.tb-corner.tb-br {
-  right: -16px;
-  bottom: -16px;
-  transform: rotate(180deg);
 }
 .tb-sheet-title {
   font-size: clamp(40px, 11vw, 54px);
@@ -1136,6 +1126,10 @@ select.tb-input option {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tb-line path {
+    stroke-dashoffset: 0;
+    transition: none !important;
+  }
   .tb-snap {
     transition: none;
   }
