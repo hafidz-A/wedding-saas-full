@@ -69,9 +69,10 @@ export const ART = {
     // opening cut out) and this "inside the garden" painting the FAR layer
     // behind it; the walk, lanterns and string-light glow continue on it.
     inner: {
-      src: SCENE.gardenInnerWide, // back: drawn whole, for its mountains
-      front: SCENE.gardenInnerWideFront, // front: garden + gazebo, mountains cut away
-      hillsDepth: 0.15, // the mountains move this fraction of the garden's walk
+      // garden + gazebo; the painting's own green mountains are cut away so the
+      // hills.webp silhouette is the backdrop, matching the tall set
+      src: SCENE.gardenInnerWide,
+      hillsDepth: 0.15, // the silhouette moves this fraction of the garden's walk
       vp: { x: 845, y: 352 }, // the gazebo steps
       // where vp sits on the arch painting, and at what scale, so the two
       // gazebos coincide before the arch is passed
@@ -88,8 +89,8 @@ export const ART = {
       ],
       lantern: { K: 120, h: 2.4 },
       lamps: { l: 690, t: 230, w: 380, h: 90 }, // the gazebo's string lights
-      // hills.webp, raised so its treeline peeks over the painted mountains
-      hills: { l: -80, t: 48, w: 1540, h: 752 },
+      // hills.webp behind the gazebo: mountain ridge high, treeline below it
+      hills: { l: -80, t: 10, w: 1540, h: 752 },
     },
   },
 }

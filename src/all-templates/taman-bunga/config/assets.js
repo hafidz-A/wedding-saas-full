@@ -24,8 +24,7 @@ export const SCENE = {
   garden: `${BASE}/garden.webp`,
   gardenWide: `${BASE}/garden-wide.webp`,
   gardenWideNear: `${BASE}/garden-wide-near.webp`, // garden-wide with the arch opening cut out
-  gardenInnerWide: `${BASE}/garden-inner-wide.webp`,
-  gardenInnerWideFront: `${BASE}/garden-inner-wide-front.webp`, // the same with its mountains cut away
+  gardenInnerWide: `${BASE}/garden-inner-wide.webp`, // inside the arch: garden + gazebo, no mountains
   gate: `${BASE}/gate.webp`,
   gateWide: `${BASE}/gate-wide.webp`,
   front: `${BASE}/flowers-front.webp`,

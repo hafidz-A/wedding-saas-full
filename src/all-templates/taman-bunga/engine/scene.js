@@ -184,7 +184,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.front].filter(Boolean).forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -381,16 +381,13 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
           g.globalAlpha = 1
         }
       }
-      // back: treeline silhouette + the whole inner painting (its mountains).
-      // Far away, so it barely moves — the sky (moon, stars) stays in view.
+      // back: the mountain + treeline silhouette (the same hills.webp the
+      // tall set uses), far away so it barely moves and the sky stays in view
       const hk = I.hillsDepth
-      far(I.scale * (1 + I.zoom * hk * J.c), itx * hk, ity * hk, () => {
-        draw(hillsImg, I.hills.l, I.hills.t, I.hills.w, I.hills.h)
-        paint(I.src)
-      })
-      // front: garden, path and gazebo (mountains cut away) walk toward us
+      far(I.scale * (1 + I.zoom * hk * J.c), itx * hk, ity * hk, () => draw(hillsImg, I.hills.l, I.hills.t, I.hills.w, I.hills.h))
+      // front: garden, path and gazebo (the painting's own mountains cut away) walk toward us
       far(is, itx, ity, () => {
-        paint(I.front)
+        paint(I.src)
         if (J.lamps > 0) {
           const lp = I.lamps
           glowAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.7, true)

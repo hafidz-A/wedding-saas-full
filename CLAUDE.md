@@ -322,15 +322,15 @@ supabase/                                          ← schema.sql (base) + migra
    without them the landing/onboarding (DB-driven once any `templates` row exists) and checkout don't
    offer the template.
    (f) Wide screens are a 3-depth parallax, not one painting: NEAR = `garden-wide-near.webp` (the
-   rose-arch painting with its opening cut out), FAR = `garden-inner-wide-front.webp` (garden + gazebo,
-   mountains cut away) and BACK = `hills.webp` treeline + the whole `garden-inner-wide.webp` (its
-   mountains). At first the far layers are glued under the opening so the two gazebos coincide
-   (`ART.wide.inner.start`); passing the arch (T .15–.27) the near layer grows 4.5× and slides out
-   while the far ones catch up to full size, so there is no visible image swap. Then the garden
-   walks toward us and the mountains barely move (`hillsDepth`), keeping the night sky (moon,
-   stars) in view. All layout numbers are hand-measured in `config/art.js`; re-measure if a
-   painting changes. The inner paintings are daylight-coloured, so a pre-multiplied lavender copy
-   (`nightOf`) fades in at night. The tall set needs none of this — its zoom clears the arch.
+   rose-arch painting with its opening cut out), FAR = `garden-inner-wide.webp` (garden + gazebo, sky
+   keyed out, deliberately NO painted mountains) and BACK = the `hills.webp` mountain/treeline
+   silhouette, the same backdrop the tall set shows behind the gazebo. At first the far layer is glued
+   under the opening so the two gazebos coincide (`ART.wide.inner.start`); passing the arch
+   (T .15–.27) the near layer grows 4.5× and slides out while the far one catches up to full size, so
+   there is no visible image swap. Then the garden walks toward us and the silhouette barely moves
+   (`hillsDepth`), keeping the night sky (moon, stars) in view. All layout numbers are hand-measured
+   in `config/art.js`; re-measure if a painting changes. The inner painting is daylight-coloured, so
+   a pre-multiplied lavender copy (`nightOf`) fades in at night. The tall set needs none of this.
 
 ---
 
