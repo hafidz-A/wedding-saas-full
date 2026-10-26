@@ -4,16 +4,18 @@
    Files live in public/templates/taman-bunga/ (painted scene layers) and
    public/templates/taman-bunga/demo/ (the demo couple's photos).
 
-   TEMPORARY: always served from the local public/ folder, bypassing R2. The
-   files were never uploaded to R2, and production sets
-   NEXT_PUBLIC_STATIC_ASSET_HOST, so staticAsset() pointed every layer at a
-   404 (blank scene, broken photos). Once `node scripts/upload-static-assets.mjs
-   --verify` passes, switch BASE back to staticAsset('/templates/taman-bunga').
+   Served through staticAsset(): local public/ by default, R2
+   (media.fincards.land) in production where NEXT_PUBLIC_STATIC_ASSET_HOST is
+   set. A new or renamed file here must be uploaded to R2 BEFORE the deploy
+   that references it (GitHub Actions → "Upload static assets to R2"),
+   otherwise production draws a blank layer. CLAUDE.md gotcha 11.
 
    Plain data, server-safe: defaultConfig.js imports the demo photo paths and
    is itself pulled in by src/config/templateIndex.js.
    ============================================================ */
-const BASE = '/templates/taman-bunga'
+import { staticAsset } from '../../../lib/assets/staticAsset.js'
+
+const BASE = staticAsset('/templates/taman-bunga')
 
 /** Painted scene layers. Filenames carry no content hash, so replacing an
  *  image means renaming it (Cache-Control is 30 days, see next.config.js). */

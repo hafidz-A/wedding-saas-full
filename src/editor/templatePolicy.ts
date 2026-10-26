@@ -203,7 +203,14 @@ export function availableSwapTypes(
 }
 
 export interface PolicyViolation {
-  code: 'missing_locked_type' | 'missing_locked_slot' | 'too_many' | 'count_changed'
+  code:
+    | 'missing_locked_type'
+    | 'missing_locked_slot'
+    | 'too_many'
+    | 'count_changed'
+    | 'locked_moved'
+    | 'locked_swapped'
+    | 'locked_disabled'
   message: string
 }
 

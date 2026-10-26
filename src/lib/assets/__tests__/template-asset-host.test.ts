@@ -49,4 +49,21 @@ describe('template demo images honour the static asset host', () => {
       expect(lovebirdsImg(key)).toMatch(/\.webp$/)
     }
   })
+
+  it('Taman Bunga serves every scene layer and demo photo from R2 when the host is configured', async () => {
+    vi.stubEnv(ENV, 'https://media.fincards.land')
+    const { SCENE, DEMO_PHOTOS } = await import('@/all-templates/taman-bunga/config/assets.js')
+    for (const url of [...Object.values(SCENE), ...Object.values(DEMO_PHOTOS)]) {
+      expect(url).toMatch(/^https:\/\/media\.fincards\.land\/static\/templates\/taman-bunga\//)
+    }
+  })
+
+  it('every Taman Bunga file it references exists in public/ (so the upload carries it)', async () => {
+    vi.stubEnv(ENV, '')
+    const { existsSync } = await import('node:fs')
+    const { SCENE, DEMO_PHOTOS } = await import('@/all-templates/taman-bunga/config/assets.js')
+    for (const url of [...Object.values(SCENE), ...Object.values(DEMO_PHOTOS)]) {
+      expect(existsSync(`public${url}`), url).toBe(true)
+    }
+  })
 })

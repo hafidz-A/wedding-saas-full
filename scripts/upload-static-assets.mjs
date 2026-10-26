@@ -17,7 +17,7 @@
  *
  *   node scripts/upload-static-assets.mjs --dry     # list what would upload
  *   node scripts/upload-static-assets.mjs           # upload
- *   node scripts/upload-static-assets.mjs --verify  # re-fetch each key publicly
+ *   node scripts/upload-static-assets.mjs --verify  # upload, then re-fetch each one publicly
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join, relative, extname } from 'node:path'
@@ -112,6 +112,7 @@ const objectUrl = (key) =>
 let uploaded = 0
 let bytes = 0
 let failed = 0
+const sent = []
 
 for (const file of files) {
   const rel = relative(join(root, 'public'), file).replace(/\\/g, '/')
@@ -146,6 +147,7 @@ for (const file of files) {
   }
   uploaded++
   bytes += body.length
+  sent.push(file)
   process.stdout.write(`\ruploaded ${uploaded}/${files.length}  `)
 }
 
@@ -156,12 +158,12 @@ console.log(
 if (failed) process.exit(1)
 
 if (VERIFY && !DRY) {
-  // Fetch a sample back over the PUBLIC host — credentials prove the write
+  // Fetch every uploaded object back over the PUBLIC host — credentials prove the write
   // succeeded, but only an anonymous GET proves a guest can actually read it.
   console.log('\nVerifying over the public host…')
   let bad = 0
-  const sample = files.filter((_, i) => i % Math.ceil(files.length / 8) === 0)
-  for (const file of sample) {
+  // every file this run uploaded (not the skipped ones, e.g. CREDITS.md)
+  for (const file of sent) {
     const rel = relative(join(root, 'public'), file).replace(/\\/g, '/')
     const url = `${PUBLIC_HOST}/static/${rel}`
     const res = await fetch(url, { method: 'HEAD' })
@@ -172,8 +174,8 @@ if (VERIFY && !DRY) {
     console.log(`  ${ok ? 'OK  ' : 'BAD '} ${res.status} ${String(len).padStart(8)} B  cc="${cc}"  ${rel}`)
   }
   if (bad) {
-    console.error(`\n${bad} sample(s) failed to read back publicly.`)
+    console.error(`\n${bad} object(s) failed to read back publicly.`)
     process.exit(1)
   }
-  console.log('All sampled objects readable over the public host.')
+  console.log(`All ${sent.length} objects readable over the public host.`)
 }

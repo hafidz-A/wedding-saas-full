@@ -285,10 +285,10 @@ supabase/                                          ← schema.sql (base) + migra
    the local `public/` path by default and `https://<host>/static/<path>` when
    `NEXT_PUBLIC_STATIC_ASSET_HOST` is set — that env var is the whole switch, and unset means today's
    behaviour. Consumers: Lovebirds/Solary `demoImages.js` (`BASE`), Taman Bunga `config/assets.js` (every scene
-   layer + demo photo — TEMPORARILY hard-wired to local `public/` until its files are uploaded to R2), `TutorialTab` (`SHOT_BASE`), and the landing watermark. **New or renamed files
+   layer + demo photo), `TutorialTab` (`SHOT_BASE`), and the landing watermark. **New or renamed files
    under `public/templates|tutorial|images` must be uploaded to R2 BEFORE the deploy that references
    them** — production has the host set, so an un-uploaded file 404s (Taman Bunga shipped with a blank
-   scene and broken photos this way on 2026-10-26). Push assets with `scripts/upload-static-assets.mjs`; re-compress with
+   scene and broken photos this way on 2026-10-26). Push assets with `scripts/upload-static-assets.mjs` — or, without a laptop, GitHub Actions → "Upload static assets to R2" (`.github/workflows/upload-static-assets.yml`, reads the five `R2_*` repo secrets; the R2 bucket `invitation-media` lives in the owner's OTHER Cloudflare login, not hafidzarifin68@…); re-compress with
    `scripts/optimize-static-assets.mjs`; measure the result with `scripts/measure-egress.mjs`.
    Three traps: (a) `RESERVED_PREFIXES = ['static']` in `scripts/lib/orphan-media.mjs` is **load-bearing**
    — without it the media purge reads `static` as a dead invitation id and deletes every site asset;
