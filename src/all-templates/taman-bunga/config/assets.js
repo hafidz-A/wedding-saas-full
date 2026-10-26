@@ -2,16 +2,18 @@
    taman-bunga/config/assets.js — every committed image the template draws.
 
    Files live in public/templates/taman-bunga/ (painted scene layers) and
-   public/templates/taman-bunga/demo/ (the demo couple's photos). Served from
-   the local public/ folder by default, or from R2 when
-   NEXT_PUBLIC_STATIC_ASSET_HOST is set — see src/lib/assets/staticAsset.js.
+   public/templates/taman-bunga/demo/ (the demo couple's photos).
+
+   TEMPORARY: always served from the local public/ folder, bypassing R2. The
+   files were never uploaded to R2, and production sets
+   NEXT_PUBLIC_STATIC_ASSET_HOST, so staticAsset() pointed every layer at a
+   404 (blank scene, broken photos). Once `node scripts/upload-static-assets.mjs
+   --verify` passes, switch BASE back to staticAsset('/templates/taman-bunga').
 
    Plain data, server-safe: defaultConfig.js imports the demo photo paths and
    is itself pulled in by src/config/templateIndex.js.
    ============================================================ */
-import { staticAsset } from '../../../lib/assets/staticAsset.js'
-
-const BASE = staticAsset('/templates/taman-bunga')
+const BASE = '/templates/taman-bunga'
 
 /** Painted scene layers. Filenames carry no content hash, so replacing an
  *  image means renaming it (Cache-Control is 30 days, see next.config.js). */

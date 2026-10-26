@@ -285,7 +285,7 @@ supabase/                                          ← schema.sql (base) + migra
    the local `public/` path by default and `https://<host>/static/<path>` when
    `NEXT_PUBLIC_STATIC_ASSET_HOST` is set — that env var is the whole switch, and unset means today's
    behaviour. Consumers: Lovebirds/Solary `demoImages.js` (`BASE`), Taman Bunga `config/assets.js` (every scene
-   layer + demo photo), `TutorialTab` (`SHOT_BASE`), and the landing watermark. **New or renamed files
+   layer + demo photo — TEMPORARILY hard-wired to local `public/` until its files are uploaded to R2), `TutorialTab` (`SHOT_BASE`), and the landing watermark. **New or renamed files
    under `public/templates|tutorial|images` must be uploaded to R2 BEFORE the deploy that references
    them** — production has the host set, so an un-uploaded file 404s (Taman Bunga shipped with a blank
    scene and broken photos this way on 2026-10-26). Push assets with `scripts/upload-static-assets.mjs`; re-compress with
