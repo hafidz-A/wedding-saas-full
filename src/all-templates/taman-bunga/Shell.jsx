@@ -144,6 +144,12 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
   const rootRef = useRef(null)
   const engineRef = useRef(null)
   const notesAtMount = useRef(notes.length)
+  // the night over the painting takes the palette's colours too
+  const paletteRef = useRef(palette)
+  paletteRef.current = palette
+  useEffect(() => {
+    engineRef.current?.setNight(palette.night)
+  }, [palette])
   useEffect(() => {
     document.body.classList.add('taman-bunga-route')
     if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual'
@@ -163,6 +169,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
       wishCount: notesAtMount.current,
     })
     engineRef.current = engine
+    engine.setNight(paletteRef.current.night)
     return () => {
       engine.destroy()
       engineRef.current = null

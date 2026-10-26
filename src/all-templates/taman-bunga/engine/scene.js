@@ -133,6 +133,8 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   // built once when it has loaded — cross-faded in as night falls for a
   // layer painted in daylight colours.
   const loaded = (i) => i instanceof HTMLCanvasElement || (i.complete && i.naturalWidth > 0)
+  // the palette's night (config/palettes.js); setNight swaps it
+  let NC = { sky: ['#0f0d2c', '#231a4a', 'rgba(70, 40, 90, 0.85)'], tint: '#6f5d9c', shade: ['#5a4a8c', '#8a6a9c'] }
   const NIGHT = new Map()
   const nightOf = (i) => {
     if (!loaded(i)) return null
@@ -143,7 +145,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       const x = c.getContext('2d')
       x.drawImage(i, 0, 0)
       x.globalCompositeOperation = 'multiply'
-      x.fillStyle = '#6f5d9c'
+      x.fillStyle = NC.tint
       x.fillRect(0, 0, c.width, c.height)
       x.globalCompositeOperation = 'destination-in'
       x.drawImage(i, 0, 0)
@@ -268,12 +270,20 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     art = a
     ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src, a.gazebo?.ext.src, a.gazebo?.int.src, a.gazebo?.int.sky?.src, a.gazebo?.patch.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
-    nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
-    nightGrad.addColorStop(0, '#0f0d2c')
-    nightGrad.addColorStop(0.45, '#231a4a')
-    nightGrad.addColorStop(0.75, 'rgba(70, 40, 90, 0.85)')
-    nightGrad.addColorStop(1, 'rgba(120, 60, 90, 0)')
+    skyGrad()
     dirty = true
+  }
+  function skyGrad() {
+    nightGrad = g.createLinearGradient(0, art.skyNight.t, 0, art.skyNight.t + art.skyNight.h)
+    nightGrad.addColorStop(0, NC.sky[0])
+    nightGrad.addColorStop(0.45, NC.sky[1])
+    nightGrad.addColorStop(0.75, NC.sky[2])
+    nightGrad.addColorStop(1, 'rgba(120, 60, 90, 0)')
+  }
+  function screenGrad() {
+    duskGrad = g.createLinearGradient(0, 0, 0, sh)
+    duskGrad.addColorStop(0, NC.shade[0])
+    duskGrad.addColorStop(1, NC.shade[1])
   }
 
   // gallery geometry
@@ -311,10 +321,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     // Screens wider than the wide painting (ultrawide) lose height: crop it
     // mostly from the foreground flowers, not the sky with the moon.
     if (wide && OY < 0) OY *= 0.3
-    duskGrad = g.createLinearGradient(0, 0, 0, sh)
-    duskGrad.addColorStop(0, '#120c2e')
-    duskGrad.addColorStop(0.6, '#1d1233')
-    duskGrad.addColorStop(1, '#140a1c')
+    screenGrad()
     cw = copy.clientWidth
     ch = copy.clientHeight
     gw = Math.min(cw, 760, ch * 1.05)
@@ -589,11 +596,16 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
 
     // screen-space: night tint, wish lanterns, petals, fireflies
     g.setTransform(dpr, 0, 0, dpr, 0, 0)
+    // Night falls by MULTIPLYING the scene with the palette's shade: it
+    // darkens and tints but never lifts the blacks, so no milky haze (a
+    // translucent dark wash over the painting read as fog).
     if (J.night > 0 && !(G && G.full)) {
-      g.globalAlpha = 0.5 * J.night
+      g.globalCompositeOperation = 'multiply'
+      g.globalAlpha = 0.8 * J.night
       g.fillStyle = duskGrad
       g.fillRect(0, 0, sw, sh)
       g.globalAlpha = 1
+      g.globalCompositeOperation = 'source-over'
     }
     // the interior is painted at night already, so it goes over the tint;
     // lanterns and fireworks go between it and its sky-less copy, so they only
@@ -1283,6 +1295,15 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     rescan() {
       scanCopy()
       layout()
+    },
+    /** The palette changed: re-colour the night (palette.night). */
+    setNight(night) {
+      if (!night || night === NC) return
+      NC = night
+      NIGHT.clear()
+      if (art) skyGrad()
+      screenGrad()
+      dirty = true
     },
     /** A guest just sent a wish: release a named lantern. */
     launchLantern(label) {

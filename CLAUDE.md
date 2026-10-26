@@ -332,6 +332,9 @@ supabase/                                          ← schema.sql (base) + migra
    (`hillsDepth`), keeping the night sky (moon, stars) in view. All layout numbers are hand-measured
    in `config/art.js`; re-measure if a painting changes. The inner painting is daylight-coloured, so
    a pre-multiplied lavender copy (`nightOf`) fades in at night. The tall set needs none of this.
+   Night colours come from the palette (`palette.night`: sky, dusk `tint`, screen `shade`), pushed
+   by the Shell through `engine.setNight`. The screen-wide darkening is a MULTIPLY, never a
+   translucent dark fill — that lifted the blacks and read as fog.
    (g) The walk ends INSIDE the gazebo. After RSVP/wishes/gift, the `[data-tb-gazebo]` scroll track
    (320svh, sticky stage holding the closing) drives a progress `g` (`readScroll`). Same trick as the
    arch: `gazebo-front-full-{tall,wide}.webp` (pillars + steps, entrance cut out) is glued over the
