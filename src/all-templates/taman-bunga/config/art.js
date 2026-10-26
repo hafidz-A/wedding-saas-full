@@ -89,8 +89,9 @@ export const ART = {
       ],
       lantern: { K: 120, h: 2.4 },
       lamps: { l: 690, t: 230, w: 380, h: 90 }, // the gazebo's string lights
-      // hills.webp behind the gazebo: mountain ridge high, treeline below it
-      hills: { l: -80, t: 10, w: 1540, h: 752 },
+      // the 3:1 mountain + treeline silhouette behind the gazebo, wider than
+      // the stage on both sides so walking and mouse parallax never show an end
+      hills: { src: SCENE.hillsWide, l: -162, t: -14, w: 1700, h: 563 },
     },
   },
 }

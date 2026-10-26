@@ -21,6 +21,7 @@ export const SCENE = {
   sky: `${BASE}/sky.webp`,
   skyNoSun: `${BASE}/sky-nosun.webp`,
   hills: `${BASE}/hills.webp`,
+  hillsWide: `${BASE}/hills-wide.webp`, // the 3:1 silhouette for wide screens
   garden: `${BASE}/garden.webp`,
   gardenWide: `${BASE}/garden-wide.webp`,
   gardenWideNear: `${BASE}/garden-wide-near.webp`, // garden-wide with the arch opening cut out

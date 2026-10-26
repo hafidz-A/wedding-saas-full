@@ -323,8 +323,9 @@ supabase/                                          ← schema.sql (base) + migra
    offer the template.
    (f) Wide screens are a 3-depth parallax, not one painting: NEAR = `garden-wide-near.webp` (the
    rose-arch painting with its opening cut out), FAR = `garden-inside-wide.webp` (garden + gazebo, sky
-   keyed out, deliberately NO painted mountains) and BACK = the `hills.webp` mountain/treeline
-   silhouette, the same backdrop the tall set shows behind the gazebo. At first the far layer is glued
+   keyed out, deliberately NO painted mountains) and BACK = `hills-wide.webp`, a 3:1 version of the
+   mountain/treeline silhouette the tall set shows behind the gazebo (recoloured to the same dusk
+   mauve; wider than the stage so parallax never shows its ends). At first the far layer is glued
    under the opening so the two gazebos coincide (`ART.wide.inner.start`); passing the arch
    (T .15–.27) the near layer grows 4.5× and slides out while the far one catches up to full size, so
    there is no visible image swap. Then the garden walks toward us and the silhouette barely moves

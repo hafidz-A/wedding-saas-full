@@ -184,7 +184,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src].filter(Boolean).forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -384,7 +384,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       // back: the mountain + treeline silhouette (the same hills.webp the
       // tall set uses), far away so it barely moves and the sky stays in view
       const hk = I.hillsDepth
-      far(I.scale * (1 + I.zoom * hk * J.c), itx * hk, ity * hk, () => draw(hillsImg, I.hills.l, I.hills.t, I.hills.w, I.hills.h))
+      far(I.scale * (1 + I.zoom * hk * J.c), itx * hk, ity * hk, () => draw(img(I.hills.src), I.hills.l, I.hills.t, I.hills.w, I.hills.h))
       // front: garden, path and gazebo (the painting's own mountains cut away) walk toward us
       far(is, itx, ity, () => {
         paint(I.src)
