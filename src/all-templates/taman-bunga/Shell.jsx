@@ -17,7 +17,9 @@ import './styles/taman-bunga.css'
 import { tbSerif } from './fonts.js'
 
 import { defaultConfig } from './defaultConfig.js'
-import { tamanBungaPalette, TAMAN_BUNGA_PALETTES } from './config/palettes.js'
+import { DEFAULT_TAMAN_BUNGA_PALETTE, tamanBungaPalette, TAMAN_BUNGA_PALETTES } from './config/palettes.js'
+import { SCENE } from './config/assets.js'
+import PaletteSwitcher from './components/PaletteSwitcher.jsx'
 import { buildTimeline, lanternDepths } from './config/timeline.js'
 import { mountScene } from './engine/scene.js'
 import { formatEventDate, parseEventDate, readGuestName, readPreviewMode, readThemeParam } from './utils/invite.js'
@@ -37,9 +39,65 @@ import { Closing, Cover, GiftSheet, RsvpSheet, WishesSheet } from './sections/Sh
 import { coupleDisplay } from '@/lib/meta/couple'
 import { resolveMusicSource } from '@/lib/music/source'
 import { useYouTubePlayer } from '@/lib/music/useYouTubePlayer'
+import { DeviceStage } from '@/components/preview/DeviceStage'
+import { DEFAULT_DEVICE, getDevice } from '@/lib/preview/devicePresets'
 
-export default function Shell({ config: incoming, slug, isDemo = false, embed = false }) {
+/**
+ * Owns the palette (and, on the demo, the 🎨 switcher's device pick). A
+ * non-desktop device renders the invitation inside a bezel (DeviceStage, an
+ * iframe of this page with ?embed=1) over a painted backdrop instead of the
+ * invitation itself. `embedSwitcher` = a demo shown in the phone frame keeps
+ * the 🎨 (without the device picker).
+ */
+export default function Shell({ config: incoming, slug, isDemo = false, embed = false, embedSwitcher = false }) {
   const config = incoming && Array.isArray(incoming.sections) ? incoming : defaultConfig
+  const [paletteKey, setPaletteKey] = useState(config.theme?.defaultPalette)
+  const [device, setDevice] = useState(DEFAULT_DEVICE)
+  useEffect(() => {
+    const fromQuery = readThemeParam()
+    if (isDemo && fromQuery && TAMAN_BUNGA_PALETTES[fromQuery]) setPaletteKey(fromQuery)
+  }, [isDemo])
+  const activeKey = TAMAN_BUNGA_PALETTES[paletteKey] ? paletteKey : DEFAULT_TAMAN_BUNGA_PALETTE
+
+  const preset = getDevice(device)
+  const framed = !embed && preset.kind !== 'desktop'
+  const showSwitcher = isDemo && (!embed || embedSwitcher)
+
+  return (
+    <>
+      {framed ? (
+        <>
+          <div
+            className="tb-framed-bg"
+            style={{ backgroundImage: `url(${SCENE.gardenWide}), ${TAMAN_BUNGA_PALETTES[activeKey].preview.background}` }}
+            aria-hidden="true"
+          />
+          <DeviceStage device={preset} payload={{ palette: activeKey }} />
+        </>
+      ) : (
+        <Invitation
+          config={config}
+          slug={slug}
+          isDemo={isDemo}
+          embed={embed}
+          paletteKey={activeKey}
+          setPaletteKey={setPaletteKey}
+        />
+      )}
+      {showSwitcher && (
+        <PaletteSwitcher
+          palette={activeKey}
+          onPalette={setPaletteKey}
+          device={device}
+          onDevice={setDevice}
+          hideDevices={embed}
+        />
+      )}
+    </>
+  )
+}
+
+function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) {
   const sections = config.sections || []
   const byType = (type) => sections.find((s) => s && s.type === type) || null
   const on = (type) => {
@@ -68,13 +126,10 @@ export default function Shell({ config: incoming, slug, isDemo = false, embed = 
   // ----- guest, preview, palette -----
   const [guest, setGuest] = useState('')
   const [preview, setPreview] = useState(false)
-  const [paletteKey, setPaletteKey] = useState(config.theme?.defaultPalette)
   useEffect(() => {
     setGuest(readGuestName())
     setPreview(readPreviewMode())
-    const fromQuery = readThemeParam()
-    if (isDemo && fromQuery && TAMAN_BUNGA_PALETTES[fromQuery]) setPaletteKey(fromQuery)
-  }, [isDemo])
+  }, [])
   const palette = tamanBungaPalette(paletteKey)
   // Demo (no live row) and the dashboard preview simulate RSVP/wish submissions.
   const simulated = !slug || preview
@@ -194,7 +249,7 @@ export default function Shell({ config: incoming, slug, isDemo = false, embed = 
       /* not framed */
     }
     return () => window.removeEventListener('message', onMsg)
-  }, [embed])
+  }, [embed, setPaletteKey])
 
   // ----- lightbox -----
   const [zoom, setZoom] = useState(null)

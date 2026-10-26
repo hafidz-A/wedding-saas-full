@@ -33,7 +33,7 @@ export default function InvitationView({
   embedSwitcher?: boolean
 }) {
   if (templateId === 'taman-bunga') {
-    return <TamanBungaShell config={config} slug={slug} isDemo={isDemo} embed={embed} />
+    return <TamanBungaShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
   }
   if (templateId === 'solary') {
     return <SolaryShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
