@@ -240,6 +240,13 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     g.globalAlpha = 1
     g.globalCompositeOperation = 'source-over'
   }
+  // A light in the painting (lamp, string lights): drawn now, and remembered so
+  // it shines again over the night darkening, which would otherwise dim it too.
+  const lights = []
+  function lightAt(spr, x, y, rx, ry, alpha) {
+    glowAt(spr, x, y, rx, ry, alpha, true)
+    if (alpha > 0.002) lights.push([g.getTransform(), spr, x, y, rx, ry, alpha])
+  }
   // transform about an origin, the way CSS transform-origin + translate + scale would
   function xform(ox, oy, s, tx, ty, fn) {
     g.save()
@@ -441,7 +448,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         g.drawImage(im, 0, 0, A.W, A.H)
         const n = dusk && J.night > 0 && nightOf(im)
         if (n) {
-          g.globalAlpha = base * a * J.night * 0.85
+          g.globalAlpha = base * a * J.night * 0.7
           g.drawImage(n, 0, 0, A.W, A.H)
         }
       }
@@ -514,7 +521,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         paintGz(I.src, true)
         if (J.lamps > 0) {
           const lp = I.lamps
-          glowAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.7, true)
+          lightAt(LAMP, lp.l + lp.w * 0.5, lp.t + lp.h * 0.5, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85)
         }
       })
     }
@@ -527,7 +534,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         else paintGz(A.garden, false)
         if (!I && J.lamps > 0) {
           const lp = A.lamps
-          glowAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.85, true)
+          lightAt(LAMP, lp.l + lp.w * 0.48, lp.t + lp.h * 0.56, lp.w / 2, lp.h / 2, J.lamps * fl * 0.95)
         }
       })
       g.globalAlpha = 1
@@ -555,7 +562,11 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
         const w = h * 0.3316
         const o = J.show3d * (1 - seg(z, 3.6, 4.9)) * seg(z, 0.42, 0.75)
         const glow = (0.25 + 0.75 * J.lit) * (0.35 + 0.65 * (1 - seg(z, 1.6, 3.6)))
-        if (!lite) glowAt(GLOW, x, foot - h * 0.74, w * 1.5, w * 1.5, o * glow * 0.8, true)
+        if (!lite) {
+          // the lamp itself, and the pool of light it throws on the path
+          lightAt(GLOW, x, foot - h * 0.74, w * 2, w * 2, o * glow)
+          lightAt(LAMP, x, foot, w * 2.6, w * 0.9, o * glow * 0.45)
+        }
         g.globalAlpha = o
         draw(lanternImg, x - w / 2, foot - h, w, h)
         g.globalAlpha = 1
@@ -601,12 +612,19 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     // translucent dark wash over the painting read as fog).
     if (J.night > 0 && !(G && G.full)) {
       g.globalCompositeOperation = 'multiply'
-      g.globalAlpha = 0.8 * J.night
+      g.globalAlpha = 0.6 * J.night
       g.fillStyle = duskGrad
       g.fillRect(0, 0, sw, sh)
       g.globalAlpha = 1
       g.globalCompositeOperation = 'source-over'
+      // the lights shine through the night instead of dimming with it
+      for (const [m, spr, x, y, rx, ry, a] of lights) {
+        g.setTransform(m)
+        glowAt(spr, x, y, rx, ry, a * J.night * 0.7, true)
+      }
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
+    lights.length = 0
     // the interior is painted at night already, so it goes over the tint;
     // lanterns and fireworks go between it and its sky-less copy, so they only
     // show through the arches
@@ -708,7 +726,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     draw(im, 0, 0, E.W, E.H)
     const night = dusk && J.night > 0 && nightOf(im)
     if (night) {
-      g.globalAlpha = G.o * J.night * 0.85
+      g.globalAlpha = G.o * J.night * 0.7
       g.drawImage(night, 0, 0, E.W, E.H)
     }
     g.restore()

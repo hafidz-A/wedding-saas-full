@@ -334,7 +334,8 @@ supabase/                                          ← schema.sql (base) + migra
    a pre-multiplied lavender copy (`nightOf`) fades in at night. The tall set needs none of this.
    Night colours come from the palette (`palette.night`: sky, dusk `tint`, screen `shade`), pushed
    by the Shell through `engine.setNight`. The screen-wide darkening is a MULTIPLY, never a
-   translucent dark fill — that lifted the blacks and read as fog.
+   translucent dark fill — that lifted the blacks and read as fog. Lamps and string lights go
+   through `lightAt`, which replays them over the darkening so they shine instead of dimming.
    (g) The walk ends INSIDE the gazebo. After RSVP/wishes/gift, the `[data-tb-gazebo]` scroll track
    (320svh, sticky stage holding the closing) drives a progress `g` (`readScroll`). Same trick as the
    arch: `gazebo-front-full-{tall,wide}.webp` (pillars + steps, entrance cut out) is glued over the
