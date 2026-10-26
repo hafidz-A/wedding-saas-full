@@ -315,7 +315,16 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
           />
         )}
         {on('tbGift') && <GiftSheet props={props('tbGift')} />}
-        <Closing props={props('tbClosing')} names={names} />
+        {/* The closing is a scroll track of its own: the walk goes up the
+            gazebo steps and inside (engine/scene.js), and the closing shows
+            once we are in. The engine sets the stage's opacity. */}
+        <div className="tb-gazebo" data-tb-gazebo>
+          <div className="tb-gazebo-stage">
+            <div className="tb-gazebo-closing" data-tb-closing>
+              <Closing props={props('tbClosing')} names={names} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {source?.kind === 'audio' && <audio ref={audioRef} src={source.url} loop preload="none" />}

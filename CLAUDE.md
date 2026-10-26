@@ -332,6 +332,16 @@ supabase/                                          ← schema.sql (base) + migra
    (`hillsDepth`), keeping the night sky (moon, stars) in view. All layout numbers are hand-measured
    in `config/art.js`; re-measure if a painting changes. The inner painting is daylight-coloured, so
    a pre-multiplied lavender copy (`nightOf`) fades in at night. The tall set needs none of this.
+   (g) The walk ends INSIDE the gazebo. After RSVP/wishes/gift, the `[data-tb-gazebo]` scroll track
+   (320svh, sticky stage holding the closing) drives a progress `g` (`readScroll`). Same trick as the
+   arch: `gazebo-front-{tall,wide}.webp` (pillars + steps, entrance cut out) is glued over the painted
+   gazebo (`gazebo.painted` = its front bay: centre, floor, outer pillar-to-pillar width) and the whole
+   garden rides one camera with it (`cam(depth)`); `gazebo-inside-*.webp` shows through the entrance,
+   then fills the screen (`clipOff`), and the closing fades in at g .8–.94. The tall interior has its own
+   front pillars — `int.pillars` enlarges it until they are off-screen. The front gets the `nightOf`
+   copy only on the wide set (its painting is daylight-coloured); the interior is drawn after the screen
+   tint because it is painted at night. If the front looks like a second, smaller gazebo, re-measure
+   `painted.w`.
 
 ---
 

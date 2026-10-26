@@ -14,6 +14,14 @@
              width is K / z; its height is h × that half width
      inner   (wide only) the painting past the rose arch, with its own vp,
              walk, zoom, path, lantern and lamps — see engine/scene.js
+     gazebo  the closing scene: walking up the steps into the gazebo. `painted`
+             is the gazebo's front bay in the garden painting (centre x, floor
+             line, width); `ext` the close-up front painting (pillars' centre,
+             floor line, outer width, the cut-out entrance `hole` and its back
+             arch); `int` the inside painting (back arch, and the inner edges of
+             its own front `pillars` if it has any). `glue` = inside px per front
+             px at the start; `pass` = how far past the screen the entrance
+             grows; `catch` = how early the inside reaches full screen
    ============================================================ */
 import { SCENE } from './assets.js'
 
@@ -41,6 +49,30 @@ export const ART = {
       [1300, 415, 135], [1375, 425, 150],
     ],
     lantern: { K: 245, h: 3 },
+    gazebo: {
+      painted: { cx: 505, floor: 738, w: 60 },
+      ext: {
+        src: SCENE.gazeboFrontTall,
+        W: 572,
+        H: 1024,
+        cx: 289.5,
+        floor: 739,
+        w: 343,
+        hole: { x0: 161, y0: 214, x1: 418, y1: 643 },
+        back: { x0: 207, x1: 371, top: 364 },
+      },
+      int: {
+        src: SCENE.gazeboInsideTall,
+        W: 572,
+        H: 1024,
+        back: { x0: 184, x1: 389, top: 321 },
+        pillars: { l: 79, r: 493 },
+        glue: 0.85,
+      },
+      pass: 2.5,
+      catch: 1.6,
+      clipOff: 0.92,
+    },
   },
   wide: {
     W: 1376,
@@ -92,6 +124,30 @@ export const ART = {
       // the 3:1 mountain + treeline silhouette behind the gazebo, wider than
       // the stage on both sides so walking and mouse parallax never show an end
       hills: { src: SCENE.hillsWide, l: -162, t: -14, w: 1700, h: 563 },
+    },
+    // painted.* is in the inside-the-garden painting (inner.src)
+    gazebo: {
+      painted: { cx: 867, floor: 340, w: 70 },
+      ext: {
+        src: SCENE.gazeboFrontWide,
+        W: 1220,
+        H: 680,
+        cx: 614,
+        floor: 535,
+        w: 312,
+        hole: { x0: 497, y0: 78, x1: 730, y1: 457 },
+        back: { x0: 541, x1: 684, top: 204 },
+      },
+      int: {
+        src: SCENE.gazeboInsideWide,
+        W: 1024,
+        H: 572,
+        back: { x0: 425, x1: 606, top: 198 },
+        glue: 1,
+      },
+      pass: 1.5,
+      catch: 2.1,
+      clipOff: 0.92,
     },
   },
 }

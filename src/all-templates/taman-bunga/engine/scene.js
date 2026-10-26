@@ -92,6 +92,8 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   const copy = $('[data-tb-copy]')
   const track = $('[data-tb-track]')
   const act2 = $('[data-tb-act2]')
+  const gazeboEl = $('[data-tb-gazebo]')
+  const closingEl = $('[data-tb-closing]')
   const hint = $('[data-tb-hint]')
 
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -184,7 +186,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   function applyArt(a) {
     if (art === a) return
     art = a
-    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src].filter(Boolean).forEach(img)
+    ;[a.sky.src, a.garden, a.gate.src, a.front.src, a.inner?.src, a.inner?.hills.src, a.gazebo?.ext.src, a.gazebo?.int.src].filter(Boolean).forEach(img)
     starsCv = makeStars(a.stars.w, a.stars.h)
     nightGrad = g.createLinearGradient(0, a.skyNight.t, 0, a.skyNight.t + a.skyNight.h)
     nightGrad.addColorStop(0, '#0f0d2c')
@@ -283,10 +285,11 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0 }
   const lanterns = lanternDepths.map((z, i) => ({ z, side: i % 2 === 0 ? -1 : 1 }))
 
-  function journey(T, a2, q) {
+  function journey(T, a2, q, gz) {
     const c = walkDistance(T, q)
     return {
       T,
+      g: gz, // 0 → 1 through the closing: up the gazebo steps and inside
       through: ease(seg(T, 0.025, 0.13)),
       settle: ease(seg(T, 0.025, 0.14)),
       arch: ease(seg(T, 0.16, 0.22)),
@@ -310,6 +313,37 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     const py = (k) => -my * k * 0.5
     const tx = (A.walk.tx * J.c) / 8
     const ty = (A.walk.ty * J.c) / 8 + J.bob
+    const Z = A.zoom
+    const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
+    // Wide set: two layers, like a real 2.5D shot. The rose arch painting has
+    // its opening cut out (A.garden = garden-wide-near) and the "inside the
+    // garden" painting (A.inner) sits behind it, scaled so its gazebo lands
+    // exactly on the painted one. Passing the arch (k 0 → 1), the near layer
+    // grows much faster than the far one, so the arch slides out past the
+    // edges of the screen while the garden behind keeps coming closer — no
+    // image swap. Tall set: one painting, zoomed about the gazebo.
+    const I = A.inner
+    const k = I ? ease(seg(J.T, 0.15, 0.27)) : 0
+    const gs = I ? (1 + 0.12 * J.settle) * Math.pow(I.near.zoom, k) : 1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c
+    const gox = I ? I.near.x : A.vp.x
+    const goy = I ? I.near.y : A.vp.y
+    // far layer pose: k = 0 → glued to the painted gazebo, k = 1 → its own walk
+    const itx = I ? (I.walk.tx * J.c) / 8 : 0
+    const ity = I ? (I.walk.ty * J.c) / 8 + J.bob : 0
+    const is = I ? I.scale * (1 + I.zoom * J.c) : 1
+    // where a point of the painting that holds the gazebo lands on the stage
+    const paintTo = I
+      ? (x, y) => [I.vp.x + (x - I.vp.x) * is + itx + px(20), I.vp.y + (y - I.vp.y) * is + ity + py(20)]
+      : (x, y) => [gox + (x - gox) * gs + tx + px(20), goy + (y - goy) * gs + ty + py(20)]
+    const G = A.gazebo && J.g > 0 ? gazeboPose(A, J, paintTo, I ? is : gs) : null
+    // the whole garden rides the same camera as the gazebo front, so it stays glued to it
+    const cam = (depth) => {
+      if (!G) return
+      const z = Math.pow(G.z, depth)
+      g.translate(G.a0x + (G.ax - G.a0x) * depth, G.a0y + (G.ay - G.a0y) * depth)
+      g.scale(z, z)
+      g.translate(-G.a0x, -G.a0y)
+    }
 
     g.setTransform(1, 0, 0, 1, 0, 0)
     g.globalAlpha = 1
@@ -317,7 +351,10 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     g.fillStyle = '#3a2440'
     g.fillRect(0, 0, cv.width, cv.height)
     g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
-
+    if (!G || !G.full) drawWorld()
+    function drawWorld() {
+    g.save()
+    cam(0.15)
     // sky, sun, night sky, moon, stars
     draw(img(A.sky.src), A.sky.l + px(5), A.sky.t + A.sky.set * J.sunset + py(5), A.sky.w, A.sky.h)
     if (A.sun) glowAt(SUN, A.sun.x + px(5), A.sun.y + A.sun.set * J.sunset + py(5), A.sun.d / 2, A.sun.d / 2, 1, false)
@@ -339,30 +376,15 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.drawImage(starsCv, 0, 0)
       g.globalAlpha = 1
     }
+    g.restore()
+    g.save()
+    cam(1)
 
     // hills and garden zoom about the gazebo as we walk
-    const Z = A.zoom
-    const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
     const hs = 1 + 0.04 * J.settle + 0.08 * J.arch + Z.walk * 0.36 * J.c
     // (the wide set draws its treeline inside the far layer instead, below)
     if (!A.inner) xform(A.vp.x, A.vp.y, hs, tx * 0.4 + px(10), ty * 0.4 + py(10), () => draw(hillsImg, A.hills.l, A.hills.t, A.hills.w, A.hills.h))
 
-    // Wide set: two layers, like a real 2.5D shot. The rose arch painting has
-    // its opening cut out (A.garden = garden-wide-near) and the "inside the
-    // garden" painting (A.inner) sits behind it, scaled so its gazebo lands
-    // exactly on the painted one. Passing the arch (k 0 → 1), the near layer
-    // grows much faster than the far one, so the arch slides out past the
-    // edges of the screen while the garden behind keeps coming closer — no
-    // image swap. Tall set: one painting, zoomed about the gazebo.
-    const I = A.inner
-    const k = I ? ease(seg(J.T, 0.15, 0.27)) : 0
-    const gs = I ? (1 + 0.12 * J.settle) * Math.pow(I.near.zoom, k) : 1 + 0.12 * J.settle + Z.arch * J.arch + Z.walk * J.c
-    const gox = I ? I.near.x : A.vp.x
-    const goy = I ? I.near.y : A.vp.y
-    // far layer pose: k = 0 → glued to the painted gazebo, k = 1 → its own walk
-    const itx = I ? (I.walk.tx * J.c) / 8 : 0
-    const ity = I ? (I.walk.ty * J.c) / 8 + J.bob : 0
-    const is = I ? I.scale * (1 + I.zoom * J.c) : 1
     if (I) {
       const nb = 1 + 0.12 * J.settle
       const s0 = I.start.scale * nb
@@ -467,17 +489,119 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       xform(A.W / 2, A.front.t, 1 + 0.6 * J.fr, px(38), A.H * 0.3 * J.fr + py(38), () => draw(img(A.front.src), 0, A.front.t, A.W, A.front.h))
       g.globalAlpha = 1
     }
+    g.restore()
+    // the gazebo front, glued over the painted gazebo, its entrance cut out
+    if (G) drawGazeboFront(A.gazebo, G, J, !!I)
+    }
 
     // screen-space: night tint, wish lanterns, petals, fireflies
     g.setTransform(dpr, 0, 0, dpr, 0, 0)
-    if (J.night > 0) {
+    if (J.night > 0 && !(G && G.full)) {
       g.globalAlpha = 0.5 * J.night
       g.fillStyle = duskGrad
       g.fillRect(0, 0, sw, sh)
       g.globalAlpha = 1
     }
+    // the interior is painted at night already, so it goes over the tint
+    if (G) {
+      g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
+      drawGazeboInside(A.gazebo, G)
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
     drawSkyLanterns(now)
     drawFx(now)
+  }
+
+  // ---------- the gazebo (closing): up the steps and inside ----------
+  // Two more layers, the same trick as the rose arch. The FRONT painting
+  // (pillars, steps, roses; entrance cut out) is glued over the small painted
+  // gazebo, and the whole garden rides one camera with it, so nothing jumps.
+  // The INSIDE painting is glued behind the entrance. Walking in, the front
+  // grows past the screen edges while the inside grows a little slower (it is
+  // further away) until it fills the screen. All numbers: config/art.js.
+  function gazeboPose(A, J, paintTo, ps) {
+    const Gz = A.gazebo
+    const E = Gz.ext
+    const N = Gz.int
+    const [pcx, pfy] = paintTo(Gz.painted.cx, Gz.painted.floor)
+    const s0 = (Gz.painted.w * ps) / E.w
+    const t0x = pcx - s0 * E.cx
+    const t0y = pfy - s0 * E.floor
+    const h = E.hole
+    const hcx = (h.x0 + h.x1) / 2
+    const hcy = (h.y0 + h.y1) / 2
+    // the part of the stage this screen shows, and its centre
+    const visW = Math.min(A.W, sw / S)
+    const visH = Math.min(A.H, sh / S)
+    const vcx = (sw / 2 - OX) / S
+    const vcy = (sh / 2 - OY) / S
+    // end: the entrance is well past the screen edges, pillars gone
+    const s1 = Math.max((visW * Gz.pass) / (h.x1 - h.x0), (visH * Gz.pass) / (h.y1 - h.y0))
+    const e = ease(seg(J.g, 0, 0.8))
+    const s = s0 * Math.pow(s1 / s0, e)
+    const a0x = s0 * hcx + t0x
+    const a0y = s0 * hcy + t0y
+    const ax = lerp(a0x, vcx, e)
+    const ay = lerp(a0y, vcy, e)
+    // inside: glued under the entrance (its back arch where the front shows
+    // one), then its own pose — centred, covering the screen; a painting with
+    // its own front pillars is enlarged until they are out of view
+    const nbx = (N.back.x0 + N.back.x1) / 2
+    const ebx = (E.back.x0 + E.back.x1) / 2
+    const i0 = s0 * N.glue
+    let iF = Math.max(A.W / N.W, A.H / N.H) * 1.02
+    if (N.pillars) iF = Math.max(iF, (visW / 2 + 24) / ((N.pillars.r - N.pillars.l) / 2))
+    const ei = Math.min(1, e * Gz.catch)
+    const si = i0 * Math.pow(iF / i0, ei)
+    const bx = lerp(s0 * ebx + t0x, vcx + (nbx - N.W / 2) * iF, ei)
+    const by = lerp(s0 * E.back.top + t0y, vcy + (N.back.top - N.H / 2) * iF, ei)
+    return {
+      z: s / s0,
+      a0x,
+      a0y,
+      ax,
+      ay,
+      ext: { s, x: ax - s * hcx, y: ay - s * hcy },
+      int: { s: si, x: bx - si * nbx, y: by - si * N.back.top },
+      // cross-fade over the painted gazebo while it is still small
+      o: seg(J.g, 0, 0.1),
+      full: e >= Gz.clipOff,
+    }
+  }
+  // dusk: the wide set's inner painting is daylight-coloured and gets the
+  // lavender copy at night, so the front glued onto it must too; the tall
+  // painting gets only the screen tint, and so does the front.
+  function drawGazeboFront(Gz, G, J, dusk) {
+    const E = Gz.ext
+    const im = img(E.src)
+    g.save()
+    g.globalAlpha = G.o
+    g.translate(G.ext.x, G.ext.y)
+    g.scale(G.ext.s, G.ext.s)
+    draw(im, 0, 0, E.W, E.H)
+    const night = dusk && J.night > 0 && nightOf(im)
+    if (night) {
+      g.globalAlpha = G.o * J.night * 0.85
+      g.drawImage(night, 0, 0, E.W, E.H)
+    }
+    g.restore()
+  }
+  function drawGazeboInside(Gz, G) {
+    const E = Gz.ext
+    const N = Gz.int
+    const h = E.hole
+    g.save()
+    if (!G.full) {
+      // only through the entrance until the entrance is bigger than the screen
+      g.beginPath()
+      g.rect(G.ext.x + h.x0 * G.ext.s, G.ext.y + h.y0 * G.ext.s, (h.x1 - h.x0) * G.ext.s, (h.y1 - h.y0) * G.ext.s)
+      g.clip()
+      g.globalAlpha = G.o
+    }
+    g.translate(G.int.x, G.int.y)
+    g.scale(G.int.s, G.int.s)
+    draw(img(N.src), 0, 0, N.W, N.H)
+    g.restore()
   }
 
   // ---------- petals + fireflies ----------
@@ -657,14 +781,20 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   let a2 = 0
   let qt = 0
   let q = 0
+  let gt = 0
+  let gcur = 0
   function readScroll() {
     const top = track.getBoundingClientRect().top + window.scrollY
     const jr = track.offsetHeight - window.innerHeight
     const y = window.scrollY - top
     target = jr > 0 ? clamp(y / jr, 0, 1) : 0
     a2 = (y - jr) / window.innerHeight
-    const run = act2 ? act2.offsetHeight - window.innerHeight : 0
-    qt = run > 0 ? clamp((y - jr) / run, 0, 1) : 0
+    // the walk behind the cards ends where the gazebo track starts
+    const gzTop = gazeboEl ? gazeboEl.getBoundingClientRect().top + window.scrollY : 0
+    const run = gazeboEl ? gzTop - top - jr : act2 ? act2.offsetHeight - window.innerHeight : 0
+    qt = run > 0 ? clamp((y - jr) / run, 0, 1) : y > jr ? 1 : 0
+    const gRun = gazeboEl ? gazeboEl.offsetHeight - window.innerHeight : 0
+    gt = gRun > 0 ? clamp((window.scrollY - gzTop) / gRun, 0, 1) : 0
   }
   const onPointer = (e) => {
     tmx = (e.clientX / window.innerWidth) * 2 - 1
@@ -683,23 +813,27 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   let lastDraw = 0
   let lastP = -1
   let lastQ = -1
+  let lastG = -1
   let lastFrame = 0
   let slow = 0
   function loop(now) {
     cur = reduce ? target : cur + (target - cur) * 0.09
     q = reduce ? qt : q + (qt - q) * 0.09
+    gcur = reduce ? gt : gcur + (gt - gcur) * 0.09
     if (Math.abs(target - cur) < 0.00005) cur = target
     if (Math.abs(qt - q) < 0.00005) q = qt
+    if (Math.abs(gt - gcur) < 0.00005) gcur = gt
     mx += (tmx - mx) * 0.05
     my += (tmy - my) * 0.05
     const T = toNominal(cur)
-    const J = journey(T, a2, q)
+    const J = journey(T, a2, q, gcur)
     fxState.petals = seg(T, 0.17, 0.21) * (1 - seg(T, 0.38, 0.42))
     fxState.flies = ease(seg(T, 0.72, 0.92))
     fxState.lamps = J.lamps
-    fxState.wish = clamp(a2 * 1.4, 0, 1)
+    // wish lanterns fly over the garden, not over the gazebo ceiling
+    fxState.wish = clamp(a2 * 1.4, 0, 1) * (1 - seg(gcur, 0.3, 0.6))
 
-    const moved = cur !== lastP || q !== lastQ
+    const moved = cur !== lastP || q !== lastQ || gcur !== lastG
     const nextReveal = !opened ? 0 : reduce ? 1 : ease(clamp((now - openAt - 450) / 900, 0, 1))
     const revealing = nextReveal !== reveal
     reveal = nextReveal
@@ -730,8 +864,15 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       lastDraw = now
       dirty = false
     }
+    if (gcur !== lastG && closingEl) {
+      const o = seg(gcur, 0.8, 0.94)
+      closingEl.style.opacity = String(o)
+      closingEl.style.transform = `translateY(${(1 - o) * 24}px)`
+      closingEl.style.visibility = o > 0.01 ? 'visible' : 'hidden'
+    }
     lastP = cur
     lastQ = q
+    lastG = gcur
     raf = requestAnimationFrame(loop)
   }
 

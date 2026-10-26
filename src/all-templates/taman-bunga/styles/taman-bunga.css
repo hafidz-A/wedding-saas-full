@@ -622,9 +622,29 @@ html.tb-locked body {
   align-items: center;
   gap: 16vh;
   overflow-x: clip;
-  padding-block: 30vh 18vh;
+  padding-block: 30vh 0;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* the closing's scroll track: walking up the steps and into the gazebo */
+.tb-gazebo {
+  position: relative;
+  align-self: stretch;
+  height: 320vh;
+  height: 320svh;
+}
+.tb-gazebo-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tb-gazebo-closing {
+  opacity: 0;
+  visibility: hidden;
 }
 .tb-sheet {
   position: relative;

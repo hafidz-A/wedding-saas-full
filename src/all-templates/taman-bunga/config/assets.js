@@ -22,6 +22,11 @@ export const SCENE = {
   skyNoSun: `${BASE}/sky-nosun.webp`,
   hills: `${BASE}/hills.webp`,
   hillsWide: `${BASE}/hills-wide.webp`, // the 3:1 silhouette for wide screens
+  // closing: the gazebo up close (entrance cut out) and its inside, per art set
+  gazeboFrontTall: `${BASE}/gazebo-front-tall.webp`,
+  gazeboFrontWide: `${BASE}/gazebo-front-wide.webp`,
+  gazeboInsideTall: `${BASE}/gazebo-inside-tall.webp`,
+  gazeboInsideWide: `${BASE}/gazebo-inside-wide.webp`,
   garden: `${BASE}/garden.webp`,
   gardenWide: `${BASE}/garden-wide.webp`,
   gardenWideNear: `${BASE}/garden-wide-near.webp`, // garden-wide with the arch opening cut out
