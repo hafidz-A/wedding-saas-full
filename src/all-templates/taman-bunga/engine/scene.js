@@ -190,8 +190,8 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     return WARM.get(i)
   }
   // ...and the same with its night sky cut out (int.sky.src: a mask, alpha =
-  // sky, measured offline down to the treeline): wish lanterns, the dawn and
-  // fireworks are drawn between the two, so they only show through the arches.
+  // sky, measured offline down to the treeline): wish lanterns and fireworks
+  // are drawn between the two, so they only show through the arches.
   const FORE = new Map()
   const foreOf = (i, sky) => {
     const warm = warmOf(i)
@@ -608,23 +608,10 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     const skyY = (row) => (sh / 2) * (1 - z) + dy + z * (OY + S * (G.int.y + G.int.s * row))
     const y0 = G ? Math.max(0, skyY(A.gazebo.int.sky.y0)) : 0
     const y1 = G ? Math.min(sh, skyY(A.gazebo.int.sky.y1)) : 0
-    // Walking in, night turns to dawn behind the arches: the first morning of
-    // a life together, and no more dark garden boxing the gazebo in.
-    const dawn = G && fore && G.full ? ease(seg(J.g, 0.68, 0.96)) : 0
-    if (dawn > 0) drawDawn(dawn, y0, y1)
     drawSkyLanterns(now, G && !fore ? 1 - seg(J.g, 0.3, 0.6) : 1)
     if (G) {
       drawFireworks(now, y0, y1)
       if (fore) inside(true)
-    }
-    if (dawn > 0) {
-      // morning light reaches inside too: lift the shadows, warm everything
-      g.globalCompositeOperation = 'soft-light'
-      g.globalAlpha = 0.4 * dawn
-      g.fillStyle = '#ffc9a0'
-      g.fillRect(0, 0, sw, sh)
-      g.globalAlpha = 1
-      g.globalCompositeOperation = 'source-over'
     }
     drawFx(now)
   }
@@ -817,28 +804,6 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.globalAlpha = 1
       g.globalCompositeOperation = 'source-over'
     }
-  }
-
-  // ---------- dawn (inside the gazebo, seen through the arches) ----------
-  // Drawn between the inside painting and its sky-less copy, so it only fills
-  // the night sky; the sun comes up just above the hedge line.
-  function drawDawn(a, y0, y1) {
-    const h = Math.max(1, y1 - y0)
-    const sky = g.createLinearGradient(0, y0, 0, y1)
-    sky.addColorStop(0, '#e7a3c3')
-    sky.addColorStop(0.45, '#f8b8a4')
-    sky.addColorStop(0.8, '#ffd49b')
-    sky.addColorStop(1, '#ffe6b2')
-    g.globalAlpha = a
-    g.fillStyle = sky
-    g.fillRect(0, y0, sw, h)
-    const sun = g.createRadialGradient(sw / 2, y1 - h * 0.1, 0, sw / 2, y1 - h * 0.1, Math.max(h, sw * 0.35))
-    sun.addColorStop(0, 'rgba(255, 242, 200, 0.95)')
-    sun.addColorStop(0.25, 'rgba(255, 220, 150, 0.55)')
-    sun.addColorStop(1, 'rgba(255, 210, 150, 0)')
-    g.fillStyle = sun
-    g.fillRect(0, y0, sw, h)
-    g.globalAlpha = 1
   }
 
   // ---------- fireworks (inside the gazebo, seen through the arches) ----------

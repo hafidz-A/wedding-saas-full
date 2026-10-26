@@ -21,8 +21,8 @@
              floor line, outer width, the cut-out entrance `hole` and its back
              arch); `int` the inside painting (back arch, the inner edges of
              its own front `pillars` if it has any, and its night `sky`: a mask
-             of where it shows plus the rows it spans — dawn and fireworks
-             go there, behind the arches). `glue` = inside px per front
+             of where it shows plus the rows it spans — fireworks go there,
+             behind the arches). `glue` = inside px per front
              px at the start; `pass` = how far past the screen the entrance
              grows; `catch` = how early the inside reaches full screen
    ============================================================ */

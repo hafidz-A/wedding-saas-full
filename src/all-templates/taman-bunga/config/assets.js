@@ -30,7 +30,7 @@ export const SCENE = {
   gazeboPatchWide: `${BASE}/gazebo-patch-wide.webp`,
   gazeboInsideTall: `${BASE}/gazebo-inside-tall.webp`,
   gazeboInsideWide: `${BASE}/gazebo-inside-wide.webp`,
-  // where the inside paintings' night sky shows (alpha = sky), for the dawn + fireworks
+  // where the inside paintings' night sky shows (alpha = sky), for the fireworks
   gazeboSkyTall: `${BASE}/gazebo-inside-tall-sky.webp`,
   gazeboSkyWide: `${BASE}/gazebo-inside-wide-sky.webp`,
   garden: `${BASE}/garden.webp`,
