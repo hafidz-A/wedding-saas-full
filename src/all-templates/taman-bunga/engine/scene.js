@@ -226,6 +226,9 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     S = Math.max(sw / art.W, sh / art.H)
     OX = (sw - art.W * S) / 2
     OY = (sh - art.H * S) / 2
+    // Screens wider than the wide painting (ultrawide) lose height: crop it
+    // mostly from the foreground flowers, not the sky with the moon.
+    if (wide && OY < 0) OY *= 0.3
     duskGrad = g.createLinearGradient(0, 0, 0, sh)
     duskGrad.addColorStop(0, '#120c2e')
     duskGrad.addColorStop(0.6, '#1d1233')
