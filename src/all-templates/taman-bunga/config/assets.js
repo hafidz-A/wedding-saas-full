@@ -51,6 +51,8 @@ export const SCENE = {
   corner: `${BASE}/corner.webp`,
   gift: `${BASE}/gift.webp`,
   skyLantern: `${BASE}/sky-lantern.webp`,
+  // the same lantern with real transparency, for the ones resting in the garden
+  paperLantern: `${BASE}/paper-lantern.webp`,
   moon: `${BASE}/moon.webp`,
   frame: `${BASE}/frame.webp`,
   frameBack: `${BASE}/frame-back.webp`,

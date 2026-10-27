@@ -450,45 +450,103 @@ html.tb-locked body {
   opacity: 0;
   visibility: hidden;
 }
-.tb-garland {
-  position: absolute;
-  left: 50%;
-  top: -2%;
-  max-width: none;
-  transform: translateX(-50%);
-}
-.tb-polaroid {
+/* One wooden easel; the engine sizes and places it (transform on .tb-easel)
+   and turns the pages (rotateX on each .tb-page, about its top edge). */
+.tb-easel {
   position: absolute;
   left: 0;
   top: 0;
-  padding: 7px 7px 26px;
-  border: 0;
-  background: #fbf4ea;
-  cursor: zoom-in;
-  box-shadow: 0 10px 24px rgba(20, 6, 24, 0.45);
-  transform-origin: 50% -34px;
+  width: 300px;
+  height: 560px;
+  transform-origin: 0 0;
+  will-change: transform;
+  z-index: 1;
 }
-.tb-polaroid::before {
-  content: '';
+.tb-easel-wood {
   position: absolute;
-  left: 50%;
-  bottom: 100%;
-  width: 1px;
-  height: 34px;
-  background: rgba(255, 236, 200, 0.75);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
-.tb-polaroid img {
+.tb-easel-board {
+  position: absolute;
+  left: 30px;
+  top: 60px;
+  width: 240px;
+  height: 300px;
+  perspective: 1100px;
+  perspective-origin: 50% -10%;
+}
+.tb-easel-backing {
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(#6b4528, #4e311b);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+.tb-page {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tb-page-front,
+.tb-page-back {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: #fbf6ee;
+  box-shadow: 0 1px 2px rgba(60, 30, 10, 0.25);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.tb-page-front {
+  padding: 12px 12px 34px;
+  cursor: zoom-in;
+}
+.tb-page-front img {
+  display: block;
+  width: 100%;
+  height: 100%;
   max-width: none;
+  object-fit: cover;
+}
+.tb-page-back {
+  transform: rotateX(180deg);
+  background: #efe6d8;
+}
+.tb-page-shade {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-xs);
+  background: #2a1606;
+  opacity: 0;
+  pointer-events: none;
+}
+.tb-easel-clip {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 70px;
+  height: 24px;
+  transform: translateX(-50%);
+  border-radius: var(--radius-xs);
+  background: linear-gradient(#c9a26a, #8f6a3a);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  z-index: 100;
 }
 .tb-gallery-caption {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(9% + env(safe-area-inset-bottom, 0px));
+  top: calc(7% + env(safe-area-inset-top, 0px));
+  z-index: 2; /* over a page swinging up past the top of the board */
   display: flex;
   flex-direction: column;
   align-items: center;

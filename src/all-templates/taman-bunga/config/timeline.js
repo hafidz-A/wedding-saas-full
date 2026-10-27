@@ -60,21 +60,14 @@ export function walkDistance(T, q = 0) {
 }
 
 /**
- * Lantern depths along the path. One lantern per love-story moment, placed so
- * the guest is passing it (z ≈ 1.4) while that moment's text is on screen,
- * alternating left/right; then decorative lanterns all the way to the gazebo.
+ * Where the paper lanterns lift off: the walk distance at which the guest
+ * reaches each one. One per love-story moment, so a lantern rises while that
+ * moment's text is on screen; without a story, three along the path. Kept
+ * few on purpose — they are an accent, not a crowd.
  */
-export function lanternDepths(storyCount, storyOn) {
-  const out = []
-  if (storyOn && storyCount > 0) {
-    for (const b of storyBeats(storyCount)) out.push(walkDistance((b[1] + b[2]) / 2) + 1.4)
-  }
-  let z = out.length ? out[out.length - 1] + 0.8 : 2.2
-  while (z < 10.6) {
-    out.push(z)
-    z += 0.78
-  }
-  return out
+export function lanternStops(storyCount, storyOn) {
+  if (storyOn && storyCount > 0) return storyBeats(storyCount).map((b) => walkDistance((b[1] + b[2]) / 2))
+  return [1, 2.8, 4.6]
 }
 
 /**

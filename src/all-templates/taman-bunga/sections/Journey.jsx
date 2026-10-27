@@ -202,27 +202,52 @@ export function galleryPhotos(props) {
     .slice(0, 30)
 }
 
+/**
+ * One wooden easel standing in the garden, holding the photos as a pad of
+ * prints. The engine walks it into view and, as the guest scrolls, lifts the
+ * top print by its bottom edge, swings it over the board and drops it behind,
+ * showing the next (engine/scene.js, renderCopy). Tap a print to enlarge it.
+ */
 export function Gallery({ props, onOpen }) {
   const photos = galleryPhotos(props)
   return (
     <section className="tb-gallery tb-shadowed" data-tb-gallery data-t={t(BEATS.gallery)}>
-      <img className="tb-garland" src={SCENE.garland} alt="" data-tb-garland />
-      <div>
-        {photos.map((p, i) => (
-          <button
-            key={`${p.src}-${i}`}
-            type="button"
-            className="tb-polaroid"
-            data-tb-polaroid
-            aria-label={`Perbesar foto ${p.alt || i + 1}`}
-            onClick={() => onOpen(p)}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.src} alt={p.alt || ''} loading="lazy" />
-          </button>
-        ))}
+      <div className="tb-easel" data-tb-easel>
+        <svg className="tb-easel-wood" viewBox="0 0 300 560" aria-hidden="true">
+          <defs>
+            <linearGradient id="tb-wood" x1="0" x2="1">
+              <stop offset="0" style={{ stopColor: '#5e3a20' }} />
+              <stop offset="0.45" style={{ stopColor: '#b07a4c' }} />
+              <stop offset="1" style={{ stopColor: '#8a5a36' }} />
+            </linearGradient>
+          </defs>
+          {/* back leg, mast, front legs, cross bar, ledge */}
+          <path d="M150 70 L176 548" stroke="#4a2e18" strokeWidth="10" strokeLinecap="round" />
+          <rect x="143" y="34" width="14" height="396" rx="3" fill="url(#tb-wood)" />
+          <path d="M140 52 L38 556" stroke="url(#tb-wood)" strokeWidth="15" strokeLinecap="round" />
+          <path d="M160 52 L262 556" stroke="url(#tb-wood)" strokeWidth="15" strokeLinecap="round" />
+          <rect x="68" y="438" width="164" height="9" rx="3" fill="url(#tb-wood)" />
+          <rect x="10" y="362" width="280" height="20" rx="4" fill="url(#tb-wood)" />
+          <rect x="10" y="378" width="280" height="6" rx="2" fill="#4a2e18" opacity="0.7" />
+        </svg>
+        <div className="tb-easel-board">
+          <div className="tb-easel-backing" />
+          {photos.map((p, i) => (
+            <div key={`${p.src}-${i}`} className="tb-page" data-tb-page style={{ zIndex: photos.length - i }}>
+              <button type="button" className="tb-page-front" aria-label={`Perbesar foto ${p.alt || i + 1}`} onClick={() => onOpen(p)}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.src} alt={p.alt || ''} loading={i < 2 ? 'eager' : 'lazy'} />
+                <i className="tb-page-shade" />
+              </button>
+              <div className="tb-page-back" aria-hidden="true">
+                <i className="tb-page-shade" />
+              </div>
+            </div>
+          ))}
+          <span className="tb-easel-clip" aria-hidden="true" />
+        </div>
       </div>
-      <div className="tb-gallery-caption">
+      <div className="tb-gallery-caption" data-tb-gallery-caption>
         {props.title && <h2 className="tb-script">{props.title}</h2>}
         {props.hint && photos.length > 0 && <p>{props.hint}</p>}
       </div>

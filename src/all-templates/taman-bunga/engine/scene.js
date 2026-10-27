@@ -1,7 +1,7 @@
 /* ============================================================
    taman-bunga/engine/scene.js — the scroll-driven garden walk.
 
-   One <canvas> paints the whole scene (sky, hills, garden, lanterns, gate,
+   One <canvas> paints the whole scene (sky, hills, garden, paper lanterns, gate,
    night tint, moon, stars, petals, fireflies, rising wish lanterns). A single
    canvas keeps memory flat and predictable on phones: the earlier DOM-layer
    version (one composited layer per painting) ran out of memory on iPhone
@@ -94,10 +94,10 @@ const LANTERN_COLORS = [['#ffb3c6', 'rgba(255, 150, 180, 0.55)'], ['#ffd9a0', 'r
  * @param {HTMLElement} root   the Shell's root element
  * @param {object} opts
  * @param {(p:number)=>number} opts.toNominal  scroll progress → nominal timeline
- * @param {number[]} opts.lanternDepths
+ * @param {number[]} opts.lanternStops  walk distances at which a paper lantern lifts off
  * @param {number} opts.wishCount   wishes already on the wall (seeds the sky lanterns)
  */
-export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
+export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   const $ = (sel) => root.querySelector(sel)
   const cv = $('[data-tb-canvas]')
   const g = cv.getContext('2d', { alpha: false })
@@ -222,10 +222,10 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   }
   const hillsImg = img(SCENE.hills)
   const moonImg = img(SCENE.moon)
-  const lanternImg = img(SCENE.lantern)
   const doorL = img(SCENE.doorL)
   const doorR = img(SCENE.doorR)
   const skyLanternImg = img(SCENE.skyLantern)
+  const paperLanternImg = img(SCENE.paperLantern)
 
   const GLOW = sprite([[0, 'rgba(255, 210, 130, 0.8)'], [0.45, 'rgba(255, 170, 90, 0.28)'], [1, 'rgba(255, 170, 90, 0)']])
   const LAMP = sprite([[0, 'rgba(255, 214, 140, 0.95)'], [0.55, 'rgba(255, 170, 90, 0.35)'], [1, 'rgba(255, 170, 90, 0)']])
@@ -293,20 +293,11 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     duskGrad.addColorStop(1, NC.shade[1])
   }
 
-  // gallery geometry
-  const gallery = {
-    el: $('[data-tb-gallery]'),
-    garland: $('[data-tb-garland]'),
-    items: [...root.querySelectorAll('[data-tb-polaroid]')].map((el, i) => ({ el, i })),
-  }
-  let gw = 0
-  let gx = 0
-  let gTop = 0
-  let pw = 0
+  // gallery: one easel (300×560 in its own px, board 240 wide) and its pages
+  const gallery = { el: null, easel: null, caption: null, pages: [] }
+  let easelSc = 1
   let cw = 0
   let ch = 0
-  // centre line of the painted garland strand, in garland.webp pixels (1376×768)
-  const curveY = (u) => (520 - 480 * Math.pow(2 * u - 1, 2)) * (gw / 1376) + gTop
 
   function layout() {
     sw = window.innerWidth
@@ -329,14 +320,11 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     // mostly from the foreground flowers, not the sky with the moon.
     if (wide && OY < 0) OY *= 0.3
     screenGrad()
+    placeLanterns()
     cw = copy.clientWidth
     ch = copy.clientHeight
-    gw = Math.min(cw, 760, ch * 1.05)
-    gx = (cw - gw) / 2
-    gTop = -0.02 * ch
-    pw = Math.round(Math.min(cw * 0.44, 230, ch * 0.26))
-    if (gallery.garland) gallery.garland.style.width = `${gw}px`
-    gallery.items.forEach((it) => (it.el.style.width = `${pw}px`))
+    // the board: three quarters of a phone's width, never taller than a third of the screen
+    easelSc = Math.min(cw * 0.74, ch * 0.36, 340) / 240
     dirty = true
   }
 
@@ -353,8 +341,14 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       dim: -1,
     }))
     gallery.el = $('[data-tb-gallery]')
-    gallery.garland = $('[data-tb-garland]')
-    gallery.items = [...root.querySelectorAll('[data-tb-polaroid]')].map((el, i) => ({ el, i }))
+    gallery.easel = $('[data-tb-easel]')
+    gallery.caption = $('[data-tb-gallery-caption]')
+    gallery.pages = [...root.querySelectorAll('[data-tb-page]')].map((el) => ({
+      el,
+      shade: el.querySelector('.tb-page-front .tb-page-shade'),
+      backShade: el.querySelector('.tb-page-back .tb-page-shade'),
+      p: -1,
+    }))
     if (gallery.el) gallery.t = parseT(gallery.el)
     lastP = -1
   }
@@ -376,8 +370,50 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
   let my = 0
   let tmx = 0
   let tmy = 0
-  const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0, cel: 0 }
-  const lanterns = lanternDepths.map((z, i) => ({ z, side: i % 2 === 0 ? -1 : 1 }))
+  const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0, cel: 0, paper: 0 }
+
+  // ---------- paper lanterns along the path ----------
+  // A few lanterns rest, lit, on the verge of the painted path (alternating
+  // sides). Each is pinned to one spot of the painting, chosen so that when
+  // the walk reaches its stop it stands 80% down the screen — beside us. Then
+  // it lifts off and drifts slowly up into the sky on its own clock (not the
+  // scroll), swaying, smaller as it climbs, and is gone. Walking back past
+  // its stop sets it down again once its flight is over.
+  const LANTERN_FLIGHT = 11000 // ms from lift-off to out of sight
+  const paper = lanternStops.map((stop, i) => ({ stop, side: i % 2 === 0 ? -1 : 1, x: 0, y: 0, hw: 0, at: 0 }))
+  function pathAtY(path, y) {
+    if (y <= path[0][0]) return { c: path[0][1], hw: path[0][2] }
+    for (let i = 1; i < path.length; i++) {
+      const [y0, c0, h0] = path[i - 1]
+      const [y1, c1, h1] = path[i]
+      if (y <= y1) {
+        const t = (y - y0) / (y1 - y0)
+        return { c: lerp(c0, c1, t), hw: lerp(h0, h1, t) }
+      }
+    }
+    const [y0, c0, h0] = path[path.length - 2]
+    const [y1, c1, h1] = path[path.length - 1]
+    const t = (y - y1) / (y1 - y0)
+    return { c: c1 + (c1 - c0) * t, hw: h1 + (h1 - h0) * t }
+  }
+  // The painting the lanterns stand on (the wide set: the one past the arch),
+  // and its scale + drift once the arch is passed, at walk distance c.
+  const walkPose = (c) => {
+    const I = art.inner
+    if (I) return { P: I, s: I.scale * (1 + I.zoom * c), ty: (I.walk.ty * c) / 8 }
+    return { P: art, s: 1 + 0.12 + art.zoom.arch + art.zoom.walk * c, ty: (art.walk.ty * c) / 8 }
+  }
+  function placeLanterns() {
+    const near = (sh * 0.8 - OY) / S // stage row 80% down the screen
+    for (const l of paper) {
+      const { P, s, ty } = walkPose(l.stop)
+      l.y = P.vp.y + (near - P.vp.y - ty) / s
+      const row = pathAtY(P.path, l.y)
+      l.hw = row.hw
+      l.x = row.c + l.side * (row.hw * 1.2 + 10)
+    }
+  }
+  const airborne = [] // this frame's lanterns, in stage pixels; drawn over the night tint so they glow
 
   function journey(T, a2, q, gz) {
     const c = walkDistance(T, q)
@@ -540,38 +576,33 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.globalAlpha = 1
     }
 
-    // lanterns, far to near, standing on the verge of the painted path. A lantern at
-    // depth z sits on the path row whose on-screen half width is K / z, so it follows
-    // the path's bends and perspective and rides the same transform as the painting.
-    if (J.show3d > 0) {
-      // lanterns only start after the arch, so on the wide set they stand on the inner path
+    // paper lanterns: resting on the verge, or rising (positions only; drawn after the night tint)
+    airborne.length = 0
+    if (J.show3d > 0 && !G) {
       const P = I ? I : A
       const ps = I ? is : gs
       const gx0 = P.vp.x + (I ? itx : tx) + px(20)
       const gy0 = P.vp.y + (I ? ity : ty) + py(20)
-      for (let i = lanterns.length - 1; i >= 0; i--) {
-        const ln = lanterns[i]
-        const z = ln.z - J.c
-        if (z <= 0.42 || z >= 4.9) continue // only the next few, so the far ones don't crowd the gazebo
-        const row = pathRow(P.path, P.lantern.K / (z * ps))
-        if (!row) continue
-        const side = row.c + ln.side * (row.hw * 1.25 + 10)
-        const x = gx0 + (side - P.vp.x) * ps
-        const foot = gy0 + (row.y - P.vp.y) * ps
-        const h = P.lantern.h * row.hw * ps
-        const w = h * 0.3316
-        const o = J.show3d * (1 - seg(z, 3.6, 4.9)) * seg(z, 0.42, 0.75)
-        const glow = (0.25 + 0.75 * J.lit) * (0.35 + 0.65 * (1 - seg(z, 1.6, 3.6)))
-        if (!lite) {
-          // the lamp itself, and the pool of light it throws on the path
-          lightAt(GLOW, x, foot - h * 0.74, w * 2, w * 2, o * glow)
-          lightAt(LAMP, x, foot, w * 2.6, w * 0.9, o * glow * 0.45)
-        }
-        g.globalAlpha = o
-        draw(lanternImg, x - w / 2, foot - h, w, h)
-        g.globalAlpha = 1
+      for (const l of paper) {
+        if (!l.at && J.c >= l.stop && !reduce) l.at = now
+        const k = l.at ? clamp((now - l.at) / LANTERN_FLIGHT, 0, 1) : 0
+        if (l.at && k >= 1 && J.c < l.stop - 0.25) l.at = 0 // walked back: it rests again
+        const o = J.show3d * (1 - seg(k, 0.75, 1))
+        if (o <= 0) continue
+        const shrink = 1 / (1 + 1.4 * k) // farther away as it climbs
+        const h = 1.2 * l.hw * ps * shrink
+        const sway = (Math.sin(now / 900 + l.stop * 3) * 0.12 + l.side * 0.6 * k) * l.hw * ps * Math.min(1, k * 4)
+        airborne.push({
+          x: gx0 + (l.x - P.vp.x) * ps + sway,
+          y: gy0 + (l.y - P.vp.y) * ps - Math.pow(k, 1.7) * A.H * 0.85,
+          h,
+          o,
+          k,
+          tilt: Math.sin(now / 1300 + l.stop * 5) * 0.06 * Math.min(1, k * 5),
+        })
       }
     }
+    fxState.paper = paper.some((l) => l.at && now - l.at < LANTERN_FLIGHT) ? 1 : 0
 
     // gate with its doors, then the front flower bed
     const gateO = 1 - seg(J.T, 0.1, 0.13)
@@ -625,6 +656,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     lights.length = 0
+    drawPaperLanterns(J)
     // the interior is painted at night already, so it goes over the tint;
     // lanterns and fireworks go between it and its sky-less copy, so they only
     // show through the arches
@@ -655,6 +687,27 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       if (fore) inside(true)
     }
     drawFx(now)
+  }
+
+  function drawPaperLanterns(J) {
+    if (!airborne.length || !loaded(paperLanternImg)) return
+    const ar = paperLanternImg.naturalWidth / paperLanternImg.naturalHeight
+    g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
+    const lit = 0.2 + 0.3 * J.lit
+    for (const q of airborne) {
+      // a warm pool on the ground while it rests, a soft halo around it
+      if (q.k < 0.2) glowAt(LAMP, q.x, q.y, q.h * 0.9, q.h * 0.26, q.o * (1 - q.k / 0.2) * lit, true)
+      glowAt(GLOW, q.x, q.y - q.h * 0.5, q.h * 0.9, q.h * 0.9, q.o * lit, true)
+      g.save()
+      g.translate(q.x, q.y - q.h * 0.5)
+      g.rotate(q.tilt)
+      g.globalAlpha = q.o
+      g.drawImage(paperLanternImg, (-q.h * ar) / 2, -q.h / 2, q.h * ar, q.h)
+      g.restore()
+    }
+    g.globalAlpha = 1
+    g.globalCompositeOperation = 'source-over'
+    g.setTransform(dpr, 0, 0, dpr, 0, 0)
   }
 
   // ---------- the gazebo (closing): up the steps and inside ----------
@@ -1159,28 +1212,46 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
       }
     }
     let gOn = false
-    if (gallery.el && gallery.t) {
+    if (gallery.el && gallery.t && gallery.easel) {
       const [ga, gb, gx0, gx1] = gallery.t
       const gin = ease(seg(T, ga, gb))
       const gout = ease(seg(T, gx0, gx1))
-      const go = gin * (1 - gout)
-      show(gallery.el, go)
-      gOn = go > 0.001
+      show(gallery.el, seg(gin, 0, 0.25) * (1 - seg(gout, 0.6, 1)))
+      gOn = gin > 0 && gout < 1
       if (gOn) {
-        if (gallery.garland) gallery.garland.style.transform = `translate(-50%, ${-(1 - gin) * 60 - gout * 30}%)`
-        const n = gallery.items.length
-        const spacing = wide ? 0.34 : 0.48
-        const gg = seg(T, gb, 0.965) * Math.max(0, n - 1)
-        const tsec = now / 1000
-        for (const it of gallery.items) {
-          const u = 0.5 + (it.i - gg) * spacing
-          const edge = clamp(Math.abs(u - 0.5) / 0.48, 0, 1)
-          const x = gx + clamp(u, 0.03, 0.97) * gw
-          const y = curveY(clamp(u, 0.03, 0.97)) + 38 - (1 - gin) * 80
-          const sway = reduce ? 0 : Math.sin(tsec * 1.1 + it.i * 1.7) * 2.2
-          it.el.style.transform = `translate(${x - pw / 2}px, ${y}px) rotate(${sway}deg) scale(${1 - 0.28 * edge})`
-          it.el.style.opacity = clamp(1.25 - edge * 1.15, 0, 1)
-          it.el.style.zIndex = String(100 - Math.round(edge * 50))
+        if (gallery.caption) gallery.caption.style.opacity = String(gin * (1 - gout))
+        // The easel stands beside the path: far and off to the right as we come
+        // up to it, then in front of us; afterwards we walk past it (it slides
+        // out past our right shoulder). z = its distance, 1 = in front of us.
+        const z = gout > 0 ? lerp(1, 0.55, gout) : lerp(2.8, 1, gin)
+        const s = easelSc / z
+        const horizon = ch * 0.5
+        const foot = horizon + (ch * 0.97 - horizon) / z
+        const x = cw / 2 + (gout > 0 ? cw * 1.2 * gout : (cw * 0.55 * (z - 1)) / 1.8)
+        gallery.easel.style.transform = `translate(${x - 150 * s}px, ${foot - 560 * s}px) scale(${s})`
+        if (gallery.dim !== dim) {
+          gallery.easel.style.filter = dim < 1 ? `brightness(${dim})` : ''
+          gallery.dim = dim
+        }
+        // Each page turns over its own stretch of scroll: the bottom edge lifts
+        // toward us, swings over the top of the board and drops behind it.
+        const n = gallery.pages.length
+        const turned = seg(T, gb, 0.965) * Math.max(0, n - 1)
+        let above = 0 // how far the page above this one is lifted (it casts a shadow)
+        for (let i = 0; i < n; i++) {
+          const pg = gallery.pages[i]
+          const p = ease(clamp(turned - i, 0, 1))
+          const ang = 300 * p
+          if (pg.p !== p) {
+            pg.p = p
+            pg.el.style.transform = `rotateX(${ang.toFixed(2)}deg)`
+            pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
+            if (pg.backShade) pg.backShade.style.opacity = (0.35 * (1 - Math.abs(Math.cos((ang * Math.PI) / 180)))).toFixed(3)
+          }
+          const tilt = 0.3 * Math.sin((Math.min(ang, 90) * Math.PI) / 180)
+          const under = 0.28 * Math.sin((Math.min(above, 180) * Math.PI) / 180)
+          if (pg.shade) pg.shade.style.opacity = Math.max(tilt, under).toFixed(3)
+          above = ang
         }
       }
     }
@@ -1275,7 +1346,7 @@ export function mountScene(root, { toNominal, lanternDepths, wishCount = 0 }) {
     const ambient =
       !reduce &&
       !lite &&
-      (fxState.petals > 0.02 || petals.length > 0 || fxState.flies > 0.01 || fxState.lamps > 0 || fxState.wish > 0 || fxState.cel > 0 || confetti.length > 0 || bursts.length > 0)
+      (fxState.petals > 0.02 || petals.length > 0 || fxState.flies > 0.01 || fxState.lamps > 0 || fxState.paper > 0 || fxState.wish > 0 || fxState.cel > 0 || confetti.length > 0 || bursts.length > 0)
     if (dirty || moved || pointer || doors || (ambient && now - lastDraw > 32)) {
       drawScene(J, now)
       lastDraw = now

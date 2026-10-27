@@ -20,7 +20,7 @@ import { defaultConfig } from './defaultConfig.js'
 import { DEFAULT_TAMAN_BUNGA_PALETTE, tamanBungaPalette, TAMAN_BUNGA_PALETTES } from './config/palettes.js'
 import { SCENE } from './config/assets.js'
 import PaletteSwitcher from './components/PaletteSwitcher.jsx'
-import { buildTimeline, lanternDepths } from './config/timeline.js'
+import { buildTimeline, lanternStops } from './config/timeline.js'
 import { mountScene } from './engine/scene.js'
 import { formatEventDate, parseEventDate, readGuestName, readPreviewMode, readThemeParam } from './utils/invite.js'
 import { startMusicBox } from './utils/musicBox.js'
@@ -119,7 +119,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
     if (storyCount === 0) enabled.delete('tbStory')
     return {
       ...buildTimeline(enabled),
-      depths: lanternDepths(storyCount, enabled.has('tbStory')),
+      lanterns: lanternStops(storyCount, enabled.has('tbStory')),
     }
   }, [sections, storyCount])
 
@@ -165,7 +165,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
     if (!rootRef.current) return undefined
     const engine = mountScene(rootRef.current, {
       toNominal: timeline.toNominal,
-      lanternDepths: timeline.depths,
+      lanternStops: timeline.lanterns,
       wishCount: notesAtMount.current,
     })
     engineRef.current = engine
