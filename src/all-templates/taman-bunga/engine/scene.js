@@ -355,8 +355,10 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       // outermost (at the top of the pad) first: document order of the nested strips
       strips: [...el.querySelectorAll('[data-tb-strip]')].map((s) => ({
         el: s,
+        faces: [...s.querySelectorAll(':scope > .tb-strip-face')],
         shade: s.querySelector(':scope > .tb-strip-face:not(.tb-strip-back) > .tb-page-shade'),
         backShade: s.querySelector(':scope > .tb-strip-back > .tb-page-shade'),
+        gone: false,
       })),
       p: -1,
     }))
@@ -1299,9 +1301,12 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
           gallery.dim = dim
         }
         // Each print turns over its own stretch of scroll, like paper: its
-        // bottom edge lifts first and the rest follows, so it curls up and
-        // over the top of the pad, then falls behind it. Strip i (from the rings
-        // down) starts later the nearer it is to the rings; all end flat at 300°.
+        // bottom edge lifts first and the rest follows, so it curls tightly up
+        // and over the top of the pad, then falls behind it. Strip k (from the
+        // top down) starts later the nearer it is to the top; all end at 300°.
+        // A strip that has gone over the top (past 195°) is hidden: the pages
+        // are flattened in stacking order, so behind the pad it would still
+        // be painted over the next print.
         const n = gallery.pages.length
         const turned = seg(T, gb, 0.965) * Math.max(0, n - 1)
         for (let i = 0; i < n; i++) {
@@ -1310,15 +1315,18 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
           if (pg.p === p) continue
           pg.p = p
           pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
-          // past the top it drops behind the pad: let it go before it would show through
-          pg.el.style.opacity = String(1 - seg(p, 0.82, 0.97))
           const N = pg.strips.length
           let prev = 0
           pg.strips.forEach((st, k) => {
-            const lag = 0.3 * (1 - (k + 1) / N)
+            const lag = 0.55 * (1 - (k + 1) / N)
             const ang = 300 * ease(clamp((p - lag) / (1 - lag), 0, 1))
             st.el.style.transform = `rotateX(${(ang - prev).toFixed(2)}deg)`
             prev = ang
+            const gone = ang > 195
+            if (st.gone !== gone) {
+              st.gone = gone
+              for (const f of st.faces) f.style.visibility = gone ? 'hidden' : ''
+            }
             // light from in front: a strip darkens as it tips away from us
             const c = Math.cos((ang * Math.PI) / 180)
             if (st.shade) st.shade.style.opacity = (0.34 * (1 - Math.max(0, c))).toFixed(3)
