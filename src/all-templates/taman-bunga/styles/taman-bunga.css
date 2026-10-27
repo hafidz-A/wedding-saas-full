@@ -271,9 +271,12 @@ html.tb-locked body {
   --tb-blush: #a4505c;
   left: calc((100% - var(--parch-w)) / 2);
   right: calc((100% - var(--parch-w)) / 2);
-  top: calc(var(--parch-top) + 44px);
-  padding-left: 46px;
-  padding-right: 46px;
+  /* the sheet's box (see .tb-parchment / .tb-parch-sheet), content centred in it,
+     clear of the top rod and of the roses on the bottom rod */
+  top: calc(var(--parch-top) + 10px);
+  height: min(58%, 540px);
+  justify-content: center;
+  padding: 18px 46px 64px;
   color: var(--parch-ink);
   text-shadow: none;
 }
