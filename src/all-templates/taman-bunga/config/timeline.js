@@ -59,6 +59,23 @@ export function walkDistance(T, q = 0) {
   return 3 * seg(T, 0.36, 0.66) + 2.5 * seg(T, 0.66, 1) + 2.5 * q
 }
 
+/** Prints per gallery easel; the gallery stands as many easels as it needs. */
+export const PER_EASEL = 5
+/** How many prints each easel holds, for n photos. */
+export function easelSizes(n) {
+  const out = []
+  for (let i = 0; i < n; i += PER_EASEL) out.push(Math.min(PER_EASEL, n - i))
+  return out
+}
+/**
+ * How much scroll an easel's visit takes, in steps: turning toward it and
+ * back costs a fixed amount, each print turned one more. So an easel with
+ * two photos is a short stop and one with five a long one. The timeline
+ * (gallery length) and the engine (each easel's share of it) both read this.
+ */
+export const EASEL_TURN_STEPS = 1.6
+export const easelSteps = (prints) => EASEL_TURN_STEPS + Math.max(0, prints - 1)
+
 /**
  * Where the paper lanterns lift off: the walk distance at which the guest
  * reaches each one. One per love-story moment, so a lantern rises while that
@@ -72,17 +89,18 @@ export function lanternStops(storyCount, storyOn) {
 
 /**
  * Build the scroll mapping for a set of enabled section types (and how many
- * easels the gallery stands its photos on). Returns the track length and a
+ * scroll steps the gallery's easels take). Returns the track length and a
  * p → T mapper.
  */
-export function buildTimeline(enabledTypes, { galleryEasels = 1 } = {}) {
+export function buildTimeline(enabledTypes, { gallerySteps = 0 } = {}) {
   const weights = SEGMENTS.map((s) => {
     const len = s.to - s.from
     const on = !s.type || enabledTypes.has(s.type)
     if (!on) return len * SKIPPED_WEIGHT
-    // each easel gets 2.5 galleries' worth of scroll: walking up to it and
-    // turning its prints should feel unhurried (at least 4×, at most 16×)
-    return s.type === 'tbGallery' ? len * clamp(galleryEasels * 2.5, 4, 16) : len
+    // the gallery's scroll follows its content (easels × their prints, see
+    // easelSteps above): ~0.75 of its nominal length per
+    // step, so a few photos make a short stop and many a long one
+    return s.type === 'tbGallery' ? len * clamp(gallerySteps * 0.75, 1, 24) : len
   })
   const total = weights.reduce((a, b) => a + b, 0)
   // knots: cumulative p at each segment boundary

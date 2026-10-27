@@ -18,7 +18,7 @@
    ============================================================ */
 import { ART, isWideViewport } from '../config/art.js'
 import { SCENE } from '../config/assets.js'
-import { walkDistance } from '../config/timeline.js'
+import { EASEL_TURN_STEPS, easelSteps, walkDistance } from '../config/timeline.js'
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v))
 const seg = (p, a, b) => clamp((p - a) / (b - a), 0, 1)
@@ -364,6 +364,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       })),
     }))
     if (gallery.el) gallery.t = parseT(gallery.el)
+    gallery.windows = null
     lastP = -1
   }
 
@@ -460,23 +461,34 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   }
   const flicker = (now, l) => 0.88 + 0.12 * Math.sin(now / 110 + l.ph) * Math.sin(now / 270 + l.ph * 3)
 
-  // While we stop to look at an easel the walk pauses: within each easel's
-  // stretch of the gallery the path only moves while turning toward it and
-  // back (the first and last parts), not while its prints turn.
-  const TURN_IN = 0.3
-  const TURN_OUT = 0.84
-  function walkT(T) {
-    const K = gallery.easels.length
-    if (!K || !gallery.t) return T
+  // The gallery's stretch of the walk is shared by its easels in proportion
+  // to their steps (sections/Journey.jsx: turning to it and back, plus one per
+  // print turned), so a two-photo easel is a short stop. Within an easel's
+  // window, tin/tout bound the part where we stand at it and its prints turn.
+  function easelWindows() {
     const a = gallery.t[0]
     const b = gallery.t[3]
-    if (T <= a || T >= b) return T
-    const e = Math.min(K - 1, Math.floor(((T - a) / (b - a)) * K))
-    const w0 = lerp(a, b, e / K)
-    const w1 = lerp(a, b, (e + 1) / K)
-    const u = seg(T, w0, w1)
-    const m = (Math.min(u, TURN_IN) + Math.max(0, u - TURN_OUT)) / (TURN_IN + 1 - TURN_OUT)
-    return lerp(w0, w1, m)
+    const steps = gallery.easels.map((E) => easelSteps(E.pages.length))
+    const total = steps.reduce((x, y) => x + y, 0) || 1
+    let acc = 0
+    return steps.map((st) => {
+      const w0 = lerp(a, b, acc / total)
+      acc += st
+      const w1 = lerp(a, b, acc / total)
+      const turn = (EASEL_TURN_STEPS * 0.55) / st // turning toward it: a bit over half the turn steps
+      return { w0, w1, tin: turn, tout: 1 - (EASEL_TURN_STEPS * 0.45) / st }
+    })
+  }
+  // While we stop to look at an easel the walk pauses: the path only moves
+  // while turning toward it and back, not while its prints turn.
+  function walkT(T) {
+    if (!gallery.easels.length || !gallery.t) return T
+    if (T <= gallery.t[0] || T >= gallery.t[3]) return T
+    const W = gallery.windows || (gallery.windows = easelWindows())
+    const w = W.find((x) => T < x.w1) || W[W.length - 1]
+    const u = seg(T, w.w0, w.w1)
+    const m = (Math.min(u, w.tin) + Math.max(0, u - w.tout)) / (w.tin + 1 - w.tout)
+    return lerp(w.w0, w.w1, m)
   }
   function journey(T, a2, q, gz) {
     const c = walkDistance(walkT(T), q)
@@ -1450,13 +1462,12 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
         // another: we turn to the easel and step up to it, its prints turn,
         // then we turn back to the path (drawScene moves the camera and
         // places the easels, which stand in the painting all along).
-        const K = gallery.easels.length
         gallery.focus = null
+        const W = gallery.windows || (gallery.windows = easelWindows())
         gallery.easels.forEach((E, e) => {
-          const w0 = lerp(ga, gx1, e / K)
-          const w1 = lerp(ga, gx1, (e + 1) / K)
+          const { w0, w1, tin, tout } = W[e]
           const u = seg(T, w0, w1)
-          const v = ease(seg(u, 0, TURN_IN)) * (1 - ease(seg(u, TURN_OUT, 1)))
+          const v = ease(seg(u, 0, tin)) * (1 - ease(seg(u, tout, 1)))
           if (v > 0 && (!gallery.focus || v > gallery.focus.v)) gallery.focus = { E, v }
           // lit by the garden lights: only a touch darker at night, unlike the cards
           const lit = Math.round((1 - 0.1 * J.night) * 50) / 50
@@ -1464,7 +1475,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
             E.el.style.filter = lit < 1 ? `brightness(${lit})` : ''
             E.dim = lit
           }
-          turnPages(E, seg(u, TURN_IN + 0.02, TURN_OUT - 0.02) * Math.max(0, E.pages.length - 1))
+          turnPages(E, seg(u, tin + 0.02, tout - 0.02) * Math.max(0, E.pages.length - 1))
         })
       }
     }

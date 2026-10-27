@@ -20,7 +20,7 @@ import { defaultConfig } from './defaultConfig.js'
 import { DEFAULT_TAMAN_BUNGA_PALETTE, tamanBungaPalette, TAMAN_BUNGA_PALETTES } from './config/palettes.js'
 import { SCENE } from './config/assets.js'
 import PaletteSwitcher from './components/PaletteSwitcher.jsx'
-import { buildTimeline, lanternStops } from './config/timeline.js'
+import { buildTimeline, easelSteps, lanternStops } from './config/timeline.js'
 import { mountScene } from './engine/scene.js'
 import { formatEventDate, parseEventDate, readGuestName, readPreviewMode, readThemeParam } from './utils/invite.js'
 import { startMusicBox } from './utils/musicBox.js'
@@ -33,7 +33,7 @@ import {
   SaveDatePanel,
   StoryPanels,
   storyMoments,
-  galleryEaselCount,
+  galleryEaselSizes,
 } from './sections/Journey.jsx'
 import { Closing, Cover, GiftSheet, RsvpSheet, WishesSheet } from './sections/Sheets.jsx'
 
@@ -115,15 +115,16 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
 
   // ----- journey timeline: switched-off sections squeeze their stretch of the walk -----
   const storyCount = storyMoments(props('tbStory')).length
-  const easelCount = galleryEaselCount(props('tbGallery'))
+  // the gallery's scroll follows its content: steps over all its easels
+  const gallerySteps = galleryEaselSizes(props('tbGallery')).reduce((sum, n) => sum + easelSteps(n), 0)
   const timeline = useMemo(() => {
     const enabled = new Set(sections.filter((s) => s && s.enabled !== false).map((s) => s.type))
     if (storyCount === 0) enabled.delete('tbStory')
     return {
-      ...buildTimeline(enabled, { galleryEasels: easelCount }),
+      ...buildTimeline(enabled, { gallerySteps }),
       lanterns: lanternStops(storyCount, enabled.has('tbStory')),
     }
-  }, [sections, storyCount, easelCount])
+  }, [sections, storyCount, gallerySteps])
 
   // ----- guest, preview, palette -----
   const [guest, setGuest] = useState('')

@@ -8,7 +8,7 @@
    out from, gone] on the nominal timeline, see config/timeline.js).
    ============================================================ */
 import React, { useEffect, useState } from 'react'
-import { BEATS, storyBeats, MAX_STORY_MOMENTS } from '../config/timeline.js'
+import { BEATS, storyBeats, MAX_STORY_MOMENTS, PER_EASEL, easelSizes } from '../config/timeline.js'
 import { SCENE } from '../config/assets.js'
 import { calendarLink, formatEventDate, initials, parseEventDate, safeUrl } from '../utils/invite.js'
 
@@ -229,9 +229,7 @@ function PageStrip({ k, photo }) {
   )
 }
 
-/** Prints per easel; the gallery stands as many easels as it needs. */
-const PER_EASEL = 3
-export const galleryEaselCount = (props) => Math.ceil(galleryPhotos(props).length / PER_EASEL)
+export const galleryEaselSizes = (props) => easelSizes(galleryPhotos(props).length)
 
 /**
  * The gallery: easels standing in the garden, alternately on the right and
