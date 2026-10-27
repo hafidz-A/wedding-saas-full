@@ -451,9 +451,8 @@ html.tb-locked body {
   visibility: hidden;
 }
 /* One easel (easel-back/front.webp, 687×1024 px, the paper at 81,173
-   528×626); the engine sizes and places it (transform on .tb-easel) and turns
-   the prints: each is six nested strips (.tb-strip), each rotated a little
-   more than the one above it (rotateX), so it curls like paper. */
+   528×626); the engine sizes and places it (transform on .tb-easel) and paints
+   the pad of prints, with its paper roll along the top, on .tb-pad. */
 .tb-easel {
   position: absolute;
   left: 0;
@@ -476,16 +475,6 @@ html.tb-locked body {
 .tb-easel-front {
   z-index: 2; /* roses and ivy over the prints; taps go through to the photo */
 }
-.tb-easel-rings {
-  position: absolute;
-  left: 0;
-  top: -25px;
-  width: 100%;
-  height: 42px;
-  z-index: 100;
-  overflow: visible;
-  pointer-events: none;
-}
 .tb-easel-board {
   position: absolute;
   left: 81px;
@@ -493,74 +482,28 @@ html.tb-locked body {
   width: 528px;
   height: 626px;
   z-index: 1;
-  perspective: 2400px;
-  perspective-origin: 50% -10%;
 }
-.tb-page {
+/* the pad, a little larger than the paper so the roll on top fits */
+.tb-pad {
+  position: absolute;
+  left: -10px;
+  top: -44px;
+  width: 548px;
+  height: 670px;
+}
+.tb-pad-hit {
   position: absolute;
   inset: 0;
-  transform-style: preserve-3d;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: zoom-in;
   -webkit-tap-highlight-color: transparent;
 }
-.tb-page:focus-visible {
+.tb-pad-hit:focus-visible {
   outline: 2px solid var(--tb-gold);
   outline-offset: 4px;
-}
-.tb-strip {
-  position: absolute;
-  left: 0;
-  top: 100%; /* hangs from the bottom edge of the strip above */
-  width: 100%;
-  height: calc(626px / 6); /* px, not %: strips nest, a % would shrink each one */
-  transform-origin: 50% 0;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-.tb-page > .tb-strip {
-  top: 0;
-  transform-origin: 50% 14px; /* the ring line */
-}
-.tb-strip-face {
-  position: absolute;
-  inset: 0 0 -1px; /* overlap the next strip by a pixel: no hairline seam between them */
-  overflow: hidden;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.tb-strip-back {
-  transform: rotateX(180deg);
-}
-/* a whole print, shifted so each strip shows its own band of it; the
-   punched holes for the rings run along its top */
-.tb-page-paper {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  background:
-    radial-gradient(circle at 24px 14px, #2b1a10 0 4.5px, transparent 5px) 0 0 / 48px 30px repeat-x,
-    #fbf6ee;
-}
-.tb-page-paper-back {
-  background:
-    radial-gradient(circle at 24px 14px, #2b1a10 0 4.5px, transparent 5px) 0 0 / 48px 30px repeat-x,
-    #efe6d8;
-}
-.tb-page-photo {
-  position: absolute;
-  left: 34px;
-  right: 34px;
-  top: 34px;
-  height: 460px; /* clears the roses along the bottom of the board */
-  background-size: cover;
-  background-position: center;
-}
-.tb-page-shade {
-  position: absolute;
-  inset: 0;
-  background: #2a1606;
-  opacity: 0;
-  pointer-events: none;
 }
 .tb-gallery-caption {
   position: absolute;

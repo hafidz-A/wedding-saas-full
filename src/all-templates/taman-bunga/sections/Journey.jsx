@@ -202,41 +202,13 @@ export function galleryPhotos(props) {
     .slice(0, 30)
 }
 
-/** How many strips a print bends in as it turns (engine/scene.js reads them). */
-const PAGE_STRIPS = 6
-/** Ring binding along the top of the pad: ring centres across the 528 px board. */
-const RINGS = Array.from({ length: 11 }, (_, i) => 24 + i * 48)
-
 /**
- * One slice of a print: its band of the paper (front: photo, back: plain),
- * with the next slice hanging from its bottom edge. Nested, so each slice
- * turns a little more than the one above it and the print curls like paper.
- */
-function PageStrip({ k, photo }) {
-  const band = { top: `${-k * 100}%`, height: `${PAGE_STRIPS * 100}%` }
-  return (
-    <div className="tb-strip" data-tb-strip>
-      <div className="tb-strip-face">
-        <div className="tb-page-paper" style={band}>
-          <div className="tb-page-photo" style={{ backgroundImage: `url("${photo.src}")` }} />
-        </div>
-        <i className="tb-page-shade" />
-      </div>
-      <div className="tb-strip-face tb-strip-back">
-        <div className="tb-page-paper tb-page-paper-back" style={band} />
-        <i className="tb-page-shade" />
-      </div>
-      {k + 1 < PAGE_STRIPS && <PageStrip k={k + 1} photo={photo} />}
-    </div>
-  )
-}
-
-/**
- * One easel standing in the garden (painted; its top cut flat), holding the
- * photos as a ring-bound pad of prints; its roses and ivy sit in front of
- * them. The engine walks it into view and, as the guest scrolls, curls the
- * top print up by its bottom edge, over the rings and back behind the pad,
- * showing the next (engine/scene.js, renderCopy). Tap a print to enlarge it.
+ * One easel standing in the garden (painted; its top cut flat) holding the
+ * photos as a pad of prints; its roses and ivy sit in front of them. The
+ * engine walks it into view and, as the guest scrolls, rolls the top print
+ * up from its bottom edge into a paper roll along the top of the pad,
+ * uncovering the next one (engine/scene.js, drawPad). Tap to enlarge the
+ * print on top.
  */
 export function Gallery({ props, onOpen }) {
   const photos = galleryPhotos(props)
@@ -245,37 +217,18 @@ export function Gallery({ props, onOpen }) {
       <div className="tb-easel" data-tb-easel>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="tb-easel-back" src={SCENE.easelBack} alt="" />
-        <div className="tb-easel-board" data-tb-easel-board>
-          {photos.map((p, i) => (
-            <div
-              key={`${p.src}-${i}`}
-              className="tb-page"
-              data-tb-page
-              style={{ zIndex: photos.length - i }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Perbesar foto ${p.alt || i + 1}`}
-              onClick={() => onOpen(p)}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpen(p))}
-            >
-              <PageStrip k={0} photo={p} />
-            </div>
-          ))}
-          <svg className="tb-easel-rings" viewBox="0 0 528 42" aria-hidden="true">
-            <defs>
-              <linearGradient id="tb-ring" x1="0" x2="1">
-                <stop offset="0" style={{ stopColor: '#8f6a3a' }} />
-                <stop offset="0.5" style={{ stopColor: '#f3d9a4' }} />
-                <stop offset="1" style={{ stopColor: '#a37a42' }} />
-              </linearGradient>
-            </defs>
-            {RINGS.map((x) => (
-              <g key={x}>
-                <path d={`M${x - 4} 39 A5 25 0 0 1 ${x + 4} 39`} fill="none" stroke="rgba(40, 20, 10, 0.35)" strokeWidth="4.2" transform="translate(1 1.5)" />
-                <path d={`M${x - 4} 39 A5 25 0 0 1 ${x + 4} 39`} fill="none" stroke="url(#tb-ring)" strokeWidth="3.4" strokeLinecap="round" />
-              </g>
-            ))}
-          </svg>
+        <div className="tb-easel-board" data-tb-easel-board data-tb-photos={JSON.stringify(photos.map((p) => p.src))}>
+          <canvas className="tb-pad" data-tb-pad aria-hidden="true" />
+          {photos.length > 0 && (
+            <button
+              type="button"
+              className="tb-pad-hit"
+              data-tb-pad-hit
+              data-index="0"
+              aria-label="Perbesar foto"
+              onClick={(e) => onOpen(photos[Number(e.currentTarget.dataset.index) || 0])}
+            />
+          )}
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="tb-easel-front" src={SCENE.easelFront} alt="" />
