@@ -373,14 +373,26 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   const fxState = { petals: 0, flies: 0, lamps: 0, wish: 0, cel: 0, paper: 0 }
 
   // ---------- paper lanterns along the path ----------
-  // A few lanterns rest, lit, on the verge of the painted path (alternating
-  // sides). Each is pinned to one spot of the painting, chosen so that when
-  // the walk reaches its stop it stands 80% down the screen — beside us. Then
-  // it lifts off and drifts slowly up into the sky on its own clock (not the
-  // scroll), swaying, smaller as it climbs, and is gone. Walking back past
-  // its stop sets it down again once its flight is over.
-  const LANTERN_FLIGHT = 11000 // ms from lift-off to out of sight
-  const paper = lanternStops.map((stop, i) => ({ stop, side: i % 2 === 0 ? -1 : 1, x: 0, y: 0, hw: 0, at: 0 }))
+  // A few lanterns rest, lit, on the stones at the edge of the painted path
+  // (alternating sides). Each is pinned to one spot of the painting, chosen so
+  // that when the walk reaches its stop it stands 80% down the screen, beside
+  // us. A moment later it floats up off the stones, hangs there, then climbs
+  // on its own clock (not the scroll): slowly at first, carried by a light
+  // breeze, wandering and tilting with it, farther and smaller as it rises,
+  // its flame flickering, until it melts into the sky. Its body is painted
+  // with the garden (so dusk and night grade it too) and its light is added
+  // over the night tint. Walking back past its stop sets it down again.
+  const LANTERN_FLIGHT = 13000 // ms from lift-off to out of sight
+  const paper = lanternStops.map((stop, i) => ({
+    stop,
+    side: i % 2 === 0 ? -1 : 1,
+    x: 0,
+    y: 0,
+    hw: 0,
+    at: 0,
+    ph: i * 2.39, // phase of its wander and flicker
+    wait: 250 + ((i * 377) % 600), // ms between reaching it and lift-off
+  }))
   function pathAtY(path, y) {
     if (y <= path[0][0]) return { c: path[0][1], hw: path[0][2] }
     for (let i = 1; i < path.length; i++) {
@@ -410,10 +422,27 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       l.y = P.vp.y + (near - P.vp.y - ty) / s
       const row = pathAtY(P.path, l.y)
       l.hw = row.hw
-      l.x = row.c + l.side * (row.hw * 1.2 + 10)
+      l.x = row.c + l.side * row.hw * 0.7 // on the stones, near the edge
     }
   }
-  const airborne = [] // this frame's lanterns, in stage pixels; drawn over the night tint so they glow
+  const airborne = [] // this frame's lanterns, in stage pixels; their light goes over the night tint
+  /** Where a lantern is, t seconds after lift-off: rise and drift in stage px, tilt, flame. */
+  function flight(l, t, h0) {
+    // floats off the stones and hangs a moment...
+    const hop = ease(clamp(t / 1.8, 0, 1)) * 0.45 * h0
+    // ...then climbs, speeding up gently to a steady drift upward
+    const u = Math.max(0, t - 1.6)
+    const tau = 2.6
+    const climb = art.H * 0.075 * (u - tau * (1 - Math.exp(-u / tau)))
+    const calm = Math.min(1, t / 2.2)
+    // a light breeze carries every lantern the same way; each wanders on its own
+    const wander = Math.sin(t * 0.55 + l.ph) * 0.3 + Math.sin(t * 1.3 + l.ph * 2) * 0.12
+    const drift = (art.W * 0.01 * u + wander * h0 * 1.4) * calm
+    const tilt = (Math.cos(t * 0.55 + l.ph) * 0.09 + Math.cos(t * 1.3 + l.ph * 2) * 0.05) * calm
+    const bob = Math.sin(t * 2.1 + l.ph) * 0.04 * h0 * (1 - Math.min(1, u / 3))
+    return { rise: hop + climb + bob, drift, tilt }
+  }
+  const flicker = (now, l) => 0.88 + 0.12 * Math.sin(now / 110 + l.ph) * Math.sin(now / 270 + l.ph * 3)
 
   function journey(T, a2, q, gz) {
     const c = walkDistance(T, q)
@@ -576,31 +605,47 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       g.globalAlpha = 1
     }
 
-    // paper lanterns: resting on the verge, or rising (positions only; drawn after the night tint)
+    // paper lanterns: resting on the stones, or rising. The body is drawn
+    // here, with the garden; its light is added after the night tint.
     airborne.length = 0
-    if (J.show3d > 0 && !G) {
+    if (J.show3d > 0 && !G && loaded(paperLanternImg)) {
       const P = I ? I : A
       const ps = I ? is : gs
       const gx0 = P.vp.x + (I ? itx : tx) + px(20)
       const gy0 = P.vp.y + (I ? ity : ty) + py(20)
+      const ar = paperLanternImg.naturalWidth / paperLanternImg.naturalHeight
       for (const l of paper) {
-        if (!l.at && J.c >= l.stop && !reduce) l.at = now
-        const k = l.at ? clamp((now - l.at) / LANTERN_FLIGHT, 0, 1) : 0
-        if (l.at && k >= 1 && J.c < l.stop - 0.25) l.at = 0 // walked back: it rests again
-        const o = J.show3d * (1 - seg(k, 0.75, 1))
+        if (!l.at && J.c >= l.stop && !reduce) l.at = now + l.wait
+        const t = l.at ? Math.max(0, (now - l.at) / 1000) : 0
+        if (l.at && t * 1000 >= LANTERN_FLIGHT && J.c < l.stop - 0.25) l.at = 0 // walked back: it rests again
+        const h0 = 0.85 * l.hw * ps
+        const f = l.at ? flight(l, t, h0) : { rise: 0, drift: 0, tilt: 0 }
+        const far = 1 / (1 + f.rise / (A.H * 0.55)) // farther away as it climbs
+        const h = h0 * far
+        // far-off ones fade in out of the distance; climbing ones melt into the sky
+        const o = J.show3d * seg(h * S, 6, 20) * (1 - seg(f.rise, A.H * 0.5, A.H * 0.78))
         if (o <= 0) continue
-        const shrink = 1 / (1 + 1.4 * k) // farther away as it climbs
-        const h = 1.2 * l.hw * ps * shrink
-        const sway = (Math.sin(now / 900 + l.stop * 3) * 0.12 + l.side * 0.6 * k) * l.hw * ps * Math.min(1, k * 4)
-        airborne.push({
-          x: gx0 + (l.x - P.vp.x) * ps + sway,
-          y: gy0 + (l.y - P.vp.y) * ps - Math.pow(k, 1.7) * A.H * 0.85,
+        const q = {
+          x: gx0 + (l.x - P.vp.x) * ps + f.drift,
+          y: gy0 + (l.y - P.vp.y) * ps - f.rise,
+          foot: gy0 + (l.y - P.vp.y) * ps,
+          fx: gx0 + (l.x - P.vp.x) * ps,
           h,
+          h0,
           o,
-          k,
-          tilt: Math.sin(now / 1300 + l.stop * 5) * 0.06 * Math.min(1, k * 5),
-        })
+          rise: f.rise,
+          tilt: f.tilt,
+          fl: flicker(now, l),
+        }
+        airborne.push(q)
+        g.save()
+        g.translate(q.x, q.y - h * 0.5)
+        g.rotate(q.tilt)
+        g.globalAlpha = o
+        g.drawImage(paperLanternImg, (-h * ar) / 2, -h / 2, h * ar, h)
+        g.restore()
       }
+      g.globalAlpha = 1
     }
     fxState.paper = paper.some((l) => l.at && now - l.at < LANTERN_FLIGHT) ? 1 : 0
 
@@ -690,20 +735,26 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   }
 
   function drawPaperLanterns(J) {
-    if (!airborne.length || !loaded(paperLanternImg)) return
+    if (!airborne.length) return
     const ar = paperLanternImg.naturalWidth / paperLanternImg.naturalHeight
     g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
-    const lit = 0.2 + 0.3 * J.lit
+    const lit = 0.25 + 0.35 * J.lit
     for (const q of airborne) {
-      // a warm pool on the ground while it rests, a soft halo around it
-      if (q.k < 0.2) glowAt(LAMP, q.x, q.y, q.h * 0.9, q.h * 0.26, q.o * (1 - q.k / 0.2) * lit, true)
-      glowAt(GLOW, q.x, q.y - q.h * 0.5, q.h * 0.9, q.h * 0.9, q.o * lit, true)
-      g.save()
-      g.translate(q.x, q.y - q.h * 0.5)
-      g.rotate(q.tilt)
-      g.globalAlpha = q.o
-      g.drawImage(paperLanternImg, (-q.h * ar) / 2, -q.h / 2, q.h * ar, q.h)
-      g.restore()
+      // the warm pool it throws on the stones, fading as it leaves them
+      const pool = 1 - seg(q.rise, 0, q.h0 * 1.6)
+      if (pool > 0) glowAt(LAMP, q.fx, q.foot, q.h0 * 1.1, q.h0 * 0.3, q.o * pool * lit * q.fl, true)
+      // a soft halo, and the paper glowing from the flame inside (stronger at night)
+      glowAt(GLOW, q.x, q.y - q.h * 0.45, q.h * 0.95, q.h * 0.95, q.o * lit * q.fl, true)
+      const shine = q.o * q.fl * (0.15 + 0.4 * J.night)
+      if (shine > 0.01) {
+        g.save()
+        g.translate(q.x, q.y - q.h * 0.5)
+        g.rotate(q.tilt)
+        g.globalAlpha = shine
+        g.globalCompositeOperation = 'lighter'
+        g.drawImage(paperLanternImg, (-q.h * ar) / 2, -q.h / 2, q.h * ar, q.h)
+        g.restore()
+      }
     }
     g.globalAlpha = 1
     g.globalCompositeOperation = 'source-over'
@@ -1347,7 +1398,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       !reduce &&
       !lite &&
       (fxState.petals > 0.02 || petals.length > 0 || fxState.flies > 0.01 || fxState.lamps > 0 || fxState.paper > 0 || fxState.wish > 0 || fxState.cel > 0 || confetti.length > 0 || bursts.length > 0)
-    if (dirty || moved || pointer || doors || (ambient && now - lastDraw > 32)) {
+    // a lantern in flight gets every frame: at the ambient ~30 fps its climb looks stepped
+    if (dirty || moved || pointer || doors || fxState.paper > 0 || (ambient && now - lastDraw > 32)) {
       drawScene(J, now)
       lastDraw = now
       dirty = false
