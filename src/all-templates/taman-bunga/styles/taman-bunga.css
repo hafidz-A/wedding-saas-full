@@ -450,6 +450,14 @@ html.tb-locked body {
   opacity: 0;
   visibility: hidden;
 }
+/* the section spans the screen while its easels stand in the garden (beside
+   other panels, e.g. the events' map button): only the prints take taps */
+.tb-gallery.tb-on {
+  pointer-events: none;
+}
+.tb-gallery.tb-on .tb-page {
+  pointer-events: auto;
+}
 /* One easel (easel-back/front.webp, 687×1024 px, the paper at 81,173
    528×626); the engine sizes and places it (transform on .tb-easel) and turns
    the prints: each is six nested strips (.tb-strip), each rotated a little

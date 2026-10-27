@@ -295,7 +295,6 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
 
   // gallery: one easel board (its own px size read from the element) and its pages
   const gallery = { el: null, caption: null, easels: [], turn: 0 }
-  let easelSc = 1
   let cw = 0
   let ch = 0
 
@@ -323,15 +322,9 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     placeLanterns()
     cw = copy.clientWidth
     ch = copy.clientHeight
-    // the paper: three quarters of a phone's width, never taller than ~45% of the screen
-    // (read here, once per layout: reading them while turning pages would force a reflow each frame)
-    const first = gallery.easels[0]?.el
-    const board = first?.querySelector('[data-tb-easel-board]')
-    if (board) {
-      easelSc = Math.min(cw * 0.74, ch * 0.38, 340) / board.offsetWidth
-      gallery.ew = first.offsetWidth
-      gallery.eh = first.offsetHeight
-    }
+    const cr = copy.getBoundingClientRect()
+    gallery.cx = cr.left
+    gallery.cy = cr.top
     dirty = true
   }
 
@@ -466,8 +459,26 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   }
   const flicker = (now, l) => 0.88 + 0.12 * Math.sin(now / 110 + l.ph) * Math.sin(now / 270 + l.ph * 3)
 
+  // While we stop to look at an easel the walk pauses: within each easel's
+  // stretch of the gallery the path only moves while turning toward it and
+  // back (the first and last parts), not while its prints turn.
+  const TURN_IN = 0.25
+  const TURN_OUT = 0.8
+  function walkT(T) {
+    const K = gallery.easels.length
+    if (!K || !gallery.t) return T
+    const a = gallery.t[0]
+    const b = gallery.t[3]
+    if (T <= a || T >= b) return T
+    const e = Math.min(K - 1, Math.floor(((T - a) / (b - a)) * K))
+    const w0 = lerp(a, b, e / K)
+    const w1 = lerp(a, b, (e + 1) / K)
+    const u = seg(T, w0, w1)
+    const m = (Math.min(u, TURN_IN) + Math.max(0, u - TURN_OUT)) / (TURN_IN + 1 - TURN_OUT)
+    return lerp(w0, w1, m)
+  }
   function journey(T, a2, q, gz) {
-    const c = walkDistance(T, q)
+    const c = walkDistance(walkT(T), q)
     return {
       T,
       g: gz, // 0 → 1 through the closing: up the gazebo steps and inside
@@ -492,9 +503,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     const A = art
     const px = (k) => -mx * k
     const py = (k) => -my * k * 0.5
-    // turning to face a gallery easel (right or left) pans the garden the other way
-    const look = -gallery.turn * 36
-    const tx = (A.walk.tx * J.c) / 8 + look
+    const tx = (A.walk.tx * J.c) / 8
     const ty = (A.walk.ty * J.c) / 8 + J.bob
     const Z = A.zoom
     const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
@@ -511,7 +520,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     const gox = I ? I.near.x : A.vp.x
     const goy = I ? I.near.y : A.vp.y
     // far layer pose: k = 0 → glued to the painted gazebo, k = 1 → its own walk
-    const itx = I ? (I.walk.tx * J.c) / 8 + look : 0
+    const itx = I ? (I.walk.tx * J.c) / 8 : 0
     const ity = I ? (I.walk.ty * J.c) / 8 + J.bob : 0
     const is = I ? I.scale * (1 + I.zoom * J.c) : 1
     // where a point of the painting that holds the gazebo lands on the stage
@@ -519,6 +528,17 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       ? (x, y) => [I.vp.x + (x - I.vp.x) * is + itx + px(20), I.vp.y + (y - I.vp.y) * is + ity + py(20)]
       : (x, y) => [gox + (x - gox) * gs + tx + px(20), goy + (y - goy) * gs + ty + py(20)]
     const G = A.gazebo && J.g > 0 ? gazeboPose(A, J, paintTo, I ? is : gs) : null
+    // ---- gallery: the easels stand in the painting; to look at one, the
+    // camera turns and steps toward it (zooms about it and brings it to the
+    // middle of the screen), then back. LOOK maps a stage point through that.
+    const look = galleryLook(A, I, paintTo, I ? is : gs)
+    const lookAt = (k) => {
+      if (!look) return
+      const z = 1 + (look.z - 1) * k
+      g.translate(look.F[0] + look.T[0] * k, look.F[1] + look.T[1] * k)
+      g.scale(z, z)
+      g.translate(-look.F[0], -look.F[1])
+    }
     // the whole garden rides the same camera as the gazebo front, so it stays glued to it
     const cam = (depth) => {
       if (!G) return
@@ -559,6 +579,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     function drawWorld() {
     g.save()
     cam(0.15)
+    lookAt(0.25) // the sky is far: it barely turns
     // sky, sun, night sky, moon, stars
     draw(img(A.sky.src), A.sky.l + px(5), A.sky.t + A.sky.set * J.sunset + py(5), A.sky.w, A.sky.h)
     if (A.sun) glowAt(SUN, A.sun.x + px(5), A.sun.y + A.sun.set * J.sunset + py(5), A.sun.d / 2, A.sun.d / 2, 1, false)
@@ -583,6 +604,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     g.restore()
     g.save()
     cam(1)
+    lookAt(1)
 
     // hills and garden zoom about the gazebo as we walk
     const hs = 1 + 0.04 * J.settle + 0.08 * J.arch + Z.walk * 0.36 * J.c
@@ -759,10 +781,56 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     drawFx(now)
   }
 
+  // Where each easel stands: the art set's first pair, then pairs further
+  // along the path (toward the gazebo, so smaller), alternating left/right.
+  function easelSpot(P, e) {
+    const base = P.easels[e % 2]
+    const k = Math.pow(0.82, Math.floor(e / 2))
+    return { x: P.vp.x + (base.x - P.vp.x) * k, y: P.vp.y + (base.y - P.vp.y) * k, h: base.h * k }
+  }
+  // easel element px: 687×1024, the paper 528 wide with its middle 538 px above the feet
+  const EASEL = { w: 687, h: 1024, board: 528, mid: 538 }
+  let lastLook = null
+  function galleryLook(A, I, paintTo, ps) {
+    lastLook = null
+    const P = I ? I : A
+    if (!gallery.easels.length || !P.easels) return null
+    // stage px → px in the copy layer
+    const toCopy = (x, y) => [OX + x * S - gallery.cx, OY + y * S - gallery.cy]
+    let look = null
+    const f = gallery.focus
+    if (f) {
+      const sp = easelSpot(P, gallery.easels.indexOf(f.E))
+      const foot = paintTo(sp.x, sp.y)
+      const hh = sp.h * ps // its height on the stage
+      const F = [foot[0], foot[1] - (EASEL.mid / EASEL.h) * hh] // the middle of its paper
+      // close enough that the paper fills three quarters of a phone (as before)
+      const want = Math.min(cw * 0.74, ch * 0.38, 340) / S
+      const z = Math.max(1, want / ((EASEL.board / EASEL.h) * hh))
+      const mid = [(sw / 2 - OX) / S, (sh * 0.52 - OY) / S]
+      const v = f.v
+      look = { F, T: [(mid[0] - F[0]) * v, (mid[1] - F[1]) * v], z: 1 + (z - 1) * v }
+    }
+    const L = (p) => (look ? [look.F[0] + (p[0] - look.F[0]) * look.z + look.T[0], look.F[1] + (p[1] - look.F[1]) * look.z + look.T[1]] : p)
+    gallery.easels.forEach((E, e) => {
+      const sp = easelSpot(P, e)
+      const [x, y] = toCopy(...L(paintTo(sp.x, sp.y)))
+      const sc = (sp.h * ps * (look ? look.z : 1) * S) / EASEL.h
+      E.el.style.transform = `translate(${(x - (EASEL.w / 2) * sc).toFixed(1)}px, ${(y - EASEL.h * sc).toFixed(1)}px) scale(${sc.toFixed(4)})`
+    })
+    lastLook = look
+    return look
+  }
+
   function drawPaperLanterns(J) {
     if (!airborne.length) return
     const ar = paperLanternImg.naturalWidth / paperLanternImg.naturalHeight
     g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
+    if (lastLook) {
+      g.translate(lastLook.F[0] + lastLook.T[0], lastLook.F[1] + lastLook.T[1])
+      g.scale(lastLook.z, lastLook.z)
+      g.translate(-lastLook.F[0], -lastLook.F[1])
+    }
     const lit = 0.25 + 0.35 * J.lit
     for (const q of airborne) {
       // the warm pool it throws on the flowers, fading as it leaves them
@@ -1337,49 +1405,33 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       }
     }
     let gOn = false
-    gallery.turn = 0
     if (gallery.el && gallery.t && gallery.easels.length) {
       const [ga, gb, gx0, gx1] = gallery.t
       const gin = ease(seg(T, ga, gb))
       const gout = ease(seg(T, gx0, gx1))
-      gOn = T > ga && T < gx1
-      show(gallery.el, gOn ? 1 : 0)
+      gOn = seg(T, 0.66, 0.76) * (1 - seg(q, 0.35, 0.6)) > 0
+      // the easels stand in the garden from a little before the gallery until we walk on past them
+      const seen = seg(T, 0.66, 0.76) * (1 - seg(q, 0.35, 0.6))
+      show(gallery.el, seen)
       if (gOn) {
         if (gallery.caption) gallery.caption.style.opacity = String(gin * (1 - gout))
         // The gallery's stretch of the walk is shared by its easels, one after
-        // another. Each stands beside the path on its own side (alternating):
-        // far and off to that side as we come up to it, then in front of us as
-        // we turn to face it; afterwards we walk past it (it slides out past
-        // that shoulder). z = its distance, 1 = in front of us.
+        // another: we turn to the easel and step up to it, its prints turn,
+        // then we turn back to the path (drawScene moves the camera and
+        // places the easels, which stand in the painting all along).
         const K = gallery.easels.length
-        const { ew, eh } = gallery
-        const horizon = ch * 0.5
+        gallery.focus = null
         gallery.easels.forEach((E, e) => {
           const w0 = lerp(ga, gx1, e / K)
           const w1 = lerp(ga, gx1, (e + 1) / K)
-          const on = T > w0 && T < w1
-          if (E.shown !== on) {
-            E.shown = on
-            // 'inherit', not 'visible': a visible child would show through the hidden section
-            E.el.style.visibility = on ? 'inherit' : 'hidden'
-          }
-          if (!on) return
           const u = seg(T, w0, w1)
-          const into = ease(seg(u, 0, 0.22))
-          const away = ease(seg(u, 0.84, 1))
-          const z = away > 0 ? lerp(1, 0.55, away) : lerp(2.8, 1, into)
-          const s = easelSc / z
-          const ground = horizon + (ch * 0.84 - horizon) / z // where its legs meet the flowers
-          const x = cw / 2 + E.side * (away > 0 ? cw * 1.2 * away : (cw * 0.55 * (z - 1)) / 1.8)
-          E.el.style.opacity = String(seg(into, 0, 0.3) * (1 - seg(away, 0.6, 1)))
-          E.el.style.transform = `translate(${x - (ew / 2) * s}px, ${ground - eh * s}px) scale(${s})`
+          const v = ease(seg(u, 0, TURN_IN)) * (1 - ease(seg(u, TURN_OUT, 1)))
+          if (v > 0 && (!gallery.focus || v > gallery.focus.v)) gallery.focus = { E, v }
           if (E.dim !== dim) {
             E.el.style.filter = dim < 1 ? `brightness(${dim})` : ''
             E.dim = dim
           }
-          turnPages(E, seg(u, 0.24, 0.82) * Math.max(0, E.pages.length - 1))
-          // the view turns toward the easel we stand at (drawScene pans the garden)
-          gallery.turn += E.side * into * (1 - away)
+          turnPages(E, seg(u, TURN_IN + 0.04, TURN_OUT - 0.04) * Math.max(0, E.pages.length - 1))
         })
       }
     }

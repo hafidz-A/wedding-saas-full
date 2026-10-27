@@ -12,6 +12,9 @@
      path    the painted stone path, measured by hand: [image y, centre x, half width]
      inner   (wide only) the painting past the rose arch, with its own vp,
              walk, zoom, path and lamps — see engine/scene.js
+     easels  the gallery's first two easels (left, right): where each one's feet
+             stand in the painting and its height there; later pairs stand
+             further along, toward vp
      gazebo  the closing scene: walking up the steps into the gazebo. `painted`
              is the gazebo's front bay in the garden painting (centre x, floor
              line, width); `patch` a piece of that painting with the gazebo
@@ -39,6 +42,8 @@ export const ART = {
     garden: SCENE.garden,
     vp: { x: 507, y: 680 },
     lamps: { l: 360, t: 600, w: 320, h: 130 },
+    // the gallery easels' first pair: feet on the flower beds left and right of the path, height
+    easels: [{ x: 342, y: 905, h: 100 }, { x: 568, y: 885, h: 96 }],
     gate: { src: SCENE.gate, ox: 384, oy: 720 },
     doors: { l: 164, t: 522, w: 440, h: 625 },
     front: { src: SCENE.front, t: 1060, h: 315 },
@@ -121,6 +126,7 @@ export const ART = {
         [560, 755, 72], [600, 715, 100], [640, 678, 132], [680, 662, 168], [720, 665, 215], [768, 675, 255],
       ],
       lamps: { l: 690, t: 230, w: 380, h: 90 }, // the gazebo's string lights
+      easels: [{ x: 455, y: 487, h: 190 }, { x: 1093, y: 477, h: 190 }],
       // the 3:1 mountain + treeline silhouette behind the gazebo, wider than
       // the stage on both sides so walking and mouse parallax never show an end
       hills: { src: SCENE.hillsWide, l: -162, t: -14, w: 1700, h: 563 },
