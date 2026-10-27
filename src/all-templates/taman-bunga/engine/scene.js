@@ -293,7 +293,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     duskGrad.addColorStop(1, NC.shade[1])
   }
 
-  // gallery: one easel (300×560 in its own px, board 240 wide) and its pages
+  // gallery: one easel board (its own px size read from the element) and its pages
   const gallery = { el: null, easel: null, caption: null, pages: [] }
   let easelSc = 1
   let cw = 0
@@ -323,8 +323,14 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     placeLanterns()
     cw = copy.clientWidth
     ch = copy.clientHeight
-    // the board: three quarters of a phone's width, never taller than a third of the screen
-    easelSc = Math.min(cw * 0.74, ch * 0.36, 340) / 240
+    // the paper: three quarters of a phone's width, never taller than ~45% of the screen
+    // (read here, once per layout: reading them while turning pages would force a reflow each frame)
+    const board = gallery.easel?.querySelector('[data-tb-easel-board]')
+    if (board) {
+      easelSc = Math.min(cw * 0.74, ch * 0.38, 340) / board.offsetWidth
+      gallery.ew = gallery.easel.offsetWidth
+      gallery.eh = gallery.easel.offsetHeight
+    }
     dirty = true
   }
 
@@ -1276,10 +1282,11 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
         // out past our right shoulder). z = its distance, 1 = in front of us.
         const z = gout > 0 ? lerp(1, 0.55, gout) : lerp(2.8, 1, gin)
         const s = easelSc / z
+        const { ew, eh } = gallery
         const horizon = ch * 0.5
-        const foot = horizon + (ch * 0.97 - horizon) / z
+        const ledge = horizon + (ch * 0.84 - horizon) / z // the bottom of its ledge
         const x = cw / 2 + (gout > 0 ? cw * 1.2 * gout : (cw * 0.55 * (z - 1)) / 1.8)
-        gallery.easel.style.transform = `translate(${x - 150 * s}px, ${foot - 560 * s}px) scale(${s})`
+        gallery.easel.style.transform = `translate(${x - (ew / 2) * s}px, ${ledge - eh * s}px) scale(${s})`
         if (gallery.dim !== dim) {
           gallery.easel.style.filter = dim < 1 ? `brightness(${dim})` : ''
           gallery.dim = dim

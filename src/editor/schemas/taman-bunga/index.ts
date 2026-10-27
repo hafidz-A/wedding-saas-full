@@ -127,7 +127,7 @@ export const tbGallerySchema: SectionSchema = {
       type: 'objectArray',
       itemLabelKey: 'alt',
       newItem: { src: '', alt: '' },
-      // Photos hang on a garland strand; Journey.jsx clamps to 30.
+      // Prints on the gallery easel, turned by scroll; Journey.jsx clamps to 30.
       maxItems: 30,
       itemFields: [
         { key: 'src', label: { id: 'Foto', en: 'Photo' }, type: 'image' },

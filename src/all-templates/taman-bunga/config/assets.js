@@ -46,13 +46,15 @@ export const SCENE = {
   frontWide: `${BASE}/flowers-front-wide.webp`,
   doorL: `${BASE}/door-l.webp`,
   doorR: `${BASE}/door-r.webp`,
-  lantern: `${BASE}/lantern.webp`,
-  garland: `${BASE}/garland.webp`,
   corner: `${BASE}/corner.webp`,
   gift: `${BASE}/gift.webp`,
   skyLantern: `${BASE}/sky-lantern.webp`,
   // the same lantern with real transparency, for the ones resting in the garden
   paperLantern: `${BASE}/paper-lantern.webp`,
+  // the gallery easel (legs cropped off): the board and its wood behind the
+  // photos, and its roses, ivy, clamp and ledge (paper cut out) in front of them
+  easelBack: `${BASE}/easel-back.webp`,
+  easelFront: `${BASE}/easel-front.webp`,
   moon: `${BASE}/moon.webp`,
   frame: `${BASE}/frame.webp`,
   frameBack: `${BASE}/frame-back.webp`,
