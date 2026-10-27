@@ -43,7 +43,7 @@ export const ART = {
     vp: { x: 507, y: 680 },
     lamps: { l: 360, t: 600, w: 320, h: 130 },
     // the gallery easels' first pair: feet on the flower beds left and right of the path, height
-    easels: [{ x: 350, y: 905, h: 135 }, { x: 570, y: 885, h: 130 }],
+    easels: [{ x: 382, y: 852, h: 112 }, { x: 580, y: 836, h: 108 }],
     gate: { src: SCENE.gate, ox: 384, oy: 720 },
     doors: { l: 164, t: 522, w: 440, h: 625 },
     front: { src: SCENE.front, t: 1060, h: 315 },

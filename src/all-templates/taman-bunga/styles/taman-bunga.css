@@ -460,7 +460,7 @@ html.tb-locked body {
 }
 /* One easel (easel-back/front.webp, 687×1024 px, the paper at 81,173
    528×626); the engine sizes and places it (transform on .tb-easel) and turns
-   the prints: each is six nested strips (.tb-strip), each rotated a little
+   the prints: each is a chain of nested strips (.tb-strip), each rotated a little
    more than the one above it (rotateX), so it curls like paper. */
 .tb-easel {
   position: absolute;
@@ -540,7 +540,7 @@ html.tb-locked body {
   left: 0;
   top: 100%; /* hangs from the bottom edge of the strip above */
   width: 100%;
-  height: calc(626px / 6); /* px, not %: strips nest, a % would shrink each one */
+  /* height: set inline (626 px / PAGE_STRIPS) — px, not %: strips nest, a % would shrink each one */
   transform-origin: 50% 0;
   transform-style: preserve-3d;
   will-change: transform;

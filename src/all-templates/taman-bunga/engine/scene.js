@@ -463,8 +463,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   // While we stop to look at an easel the walk pauses: within each easel's
   // stretch of the gallery the path only moves while turning toward it and
   // back (the first and last parts), not while its prints turn.
-  const TURN_IN = 0.34
-  const TURN_OUT = 0.74
+  const TURN_IN = 0.3
+  const TURN_OUT = 0.84
   function walkT(T) {
     const K = gallery.easels.length
     if (!K || !gallery.t) return T
@@ -809,8 +809,9 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       const foot = paintTo(sp.x, sp.y)
       const hh = sp.h * ps // its height on the stage
       const F = [foot[0], foot[1] - (EASEL.mid / EASEL.h) * hh] // the middle of its paper
-      // close enough that the paper fills three quarters of a phone (as before)
-      const want = Math.min(cw * 0.74, ch * 0.38, 340) / S
+      // close enough that the paper fills most of the screen's width; a phone
+      // stops a step further back, so the easel doesn't crowd it
+      const want = Math.min(cw * (wide ? 0.74 : 0.58), ch * 0.38, 340) / S
       const z = Math.max(1, want / ((EASEL.board / EASEL.h) * hh))
       const mid = [(sw / 2 - OX) / S, (sh * 0.52 - OY) / S]
       const v = f.v
@@ -1463,7 +1464,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
             E.el.style.filter = lit < 1 ? `brightness(${lit})` : ''
             E.dim = lit
           }
-          turnPages(E, seg(u, TURN_IN + 0.04, TURN_OUT - 0.04) * Math.max(0, E.pages.length - 1))
+          turnPages(E, seg(u, TURN_IN + 0.02, TURN_OUT - 0.02) * Math.max(0, E.pages.length - 1))
         })
       }
     }

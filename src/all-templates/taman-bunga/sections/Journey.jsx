@@ -203,7 +203,7 @@ export function galleryPhotos(props) {
 }
 
 /** How many strips a print bends in as it turns (engine/scene.js reads them). */
-const PAGE_STRIPS = 6
+const PAGE_STRIPS = 18
 
 /**
  * One slice of a print: its band of the paper (front: photo, back: plain),
@@ -213,7 +213,7 @@ const PAGE_STRIPS = 6
 function PageStrip({ k, photo }) {
   const band = { top: `${-k * 100}%`, height: `${PAGE_STRIPS * 100}%` }
   return (
-    <div className="tb-strip" data-tb-strip>
+    <div className="tb-strip" data-tb-strip style={{ height: `${626 / PAGE_STRIPS}px` }}>
       <div className="tb-strip-face">
         <div className="tb-page-paper" style={band}>
           <div className="tb-page-photo" style={{ backgroundImage: `url("${photo.src}")` }} />
