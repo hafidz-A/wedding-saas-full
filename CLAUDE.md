@@ -373,6 +373,27 @@ supabase/                                          ← schema.sql (base) + migra
    at the bottom beside a centred button; next to full-width content use the narrow rose. Gradient
    stops use `style={{ stopColor }}`, not the attribute: SVG attributes don't read CSS variables.
    Buttons spring + float hearts on press (`utils/hearts.js`, a fixed layer outside React).
+   (i) No lamp posts. A few paper lanterns (`paper-lantern.webp`, one per story moment —
+   `lanternStops` in `config/timeline.js`) rest in the flower beds and float up on their own clock
+   (not the scroll) when the walk reaches them; their light goes over the night tint.
+   (j) The story, save-the-date and events are written on a PARCHMENT (`Parchment` in
+   `sections/Journey.jsx`, `.tb-parchment`): code-drawn paper + rods, rose vines/roses cut from the
+   easel art (`parchment-*.webp`). It unrolls before the story and rolls up before the gallery on its
+   own stretch of scroll (`parchmentWindow`; that is why `STORY_WINDOW` starts at 0.435 and the date
+   and events end by 0.79). Panels on it carry `.tb-on-paper` (dark ink, centred in the sheet). It sits
+   in front of the gallery easels (z-index).
+   (k) The gallery is EASELS standing in the painted garden (`easel-back/front.webp`, legs + flat top;
+   prints between the two layers), alternating left/right, up to `PER_EASEL` = 5 prints each, spots
+   per art set in `config/art.js` (`easels`). For each in turn the camera turns and steps up to it
+   (`galleryLook`), the walk pauses (`walkT`), and its prints turn like paper (18 nested strips per
+   print, each strip hidden once past the top so nothing ghosts behind the pad; a rounded fold of
+   turned paper thickens on top). Scroll follows content: `easelSteps` (turning to/back + one per print)
+   sizes both the gallery's length and each easel's share, so a print takes the same scroll anywhere.
+   (l) The cover only ever shows at the start: while it is up, any scroll/restore is put back to 0
+   (a reload mid-walk once left it over the gazebo, its button unreachable). The garden's
+   bulb swags/paper lanterns appear only once inside the gazebo. The wide set's daylight paintings
+   take only a light night copy (`NIGHT_COPY`) and less of the screen-wide multiply, or the wide
+   garden reads much darker than the tall one.
 
 ---
 

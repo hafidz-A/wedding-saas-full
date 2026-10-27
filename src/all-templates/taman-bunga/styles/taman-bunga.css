@@ -186,7 +186,9 @@ html.tb-locked body {
   --parch-top: 3%;
   --parch-ink: #4b2f22;
 }
+/* in front of the gallery easels standing in the garden behind it */
 .tb-parchment {
+  z-index: 3;
   position: absolute;
   left: calc((100% - var(--parch-w)) / 2);
   width: var(--parch-w);
@@ -277,6 +279,7 @@ html.tb-locked body {
   height: min(58%, 540px);
   justify-content: center;
   padding: 18px 46px 64px;
+  z-index: 4; /* over the parchment */
   color: var(--parch-ink);
   text-shadow: none;
 }
