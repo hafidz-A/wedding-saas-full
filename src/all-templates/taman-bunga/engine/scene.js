@@ -351,8 +351,12 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     gallery.caption = $('[data-tb-gallery-caption]')
     gallery.pages = [...root.querySelectorAll('[data-tb-page]')].map((el) => ({
       el,
-      shade: el.querySelector('.tb-page-front .tb-page-shade'),
-      backShade: el.querySelector('.tb-page-back .tb-page-shade'),
+      // outermost (at the rings) first: document order of the nested strips
+      strips: [...el.querySelectorAll('[data-tb-strip]')].map((s) => ({
+        el: s,
+        shade: s.querySelector(':scope > .tb-strip-face:not(.tb-strip-back) > .tb-page-shade'),
+        backShade: s.querySelector(':scope > .tb-strip-back > .tb-page-shade'),
+      })),
       p: -1,
     }))
     if (gallery.el) gallery.t = parseT(gallery.el)
@@ -1284,32 +1288,48 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
         const s = easelSc / z
         const { ew, eh } = gallery
         const horizon = ch * 0.5
-        const ledge = horizon + (ch * 0.84 - horizon) / z // the bottom of its ledge
+        const ground = horizon + (ch * 0.84 - horizon) / z // where its legs meet the flowers
         const x = cw / 2 + (gout > 0 ? cw * 1.2 * gout : (cw * 0.55 * (z - 1)) / 1.8)
-        gallery.easel.style.transform = `translate(${x - (ew / 2) * s}px, ${ledge - eh * s}px) scale(${s})`
+        gallery.easel.style.transform = `translate(${x - (ew / 2) * s}px, ${ground - eh * s}px) scale(${s})`
         if (gallery.dim !== dim) {
           gallery.easel.style.filter = dim < 1 ? `brightness(${dim})` : ''
           gallery.dim = dim
         }
-        // Each page turns over its own stretch of scroll: the bottom edge lifts
-        // toward us, swings over the top of the board and drops behind it.
+        // Each print turns over its own stretch of scroll, like paper: its
+        // bottom edge lifts first and the rest follows, so it curls up and
+        // over the rings, then falls behind the pad. Strip i (from the rings
+        // down) starts later the nearer it is to the rings; all end flat at 300°.
         const n = gallery.pages.length
         const turned = seg(T, gb, 0.965) * Math.max(0, n - 1)
-        let above = 0 // how far the page above this one is lifted (it casts a shadow)
         for (let i = 0; i < n; i++) {
           const pg = gallery.pages[i]
-          const p = ease(clamp(turned - i, 0, 1))
-          const ang = 300 * p
-          if (pg.p !== p) {
-            pg.p = p
-            pg.el.style.transform = `rotateX(${ang.toFixed(2)}deg)`
-            pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
-            if (pg.backShade) pg.backShade.style.opacity = (0.35 * (1 - Math.abs(Math.cos((ang * Math.PI) / 180)))).toFixed(3)
+          const p = clamp(turned - i, 0, 1)
+          if (pg.p === p) continue
+          pg.p = p
+          pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
+          // past the top it drops behind the pad: let it go before it would show through
+          pg.el.style.opacity = String(1 - seg(p, 0.82, 0.97))
+          const N = pg.strips.length
+          let prev = 0
+          pg.strips.forEach((st, k) => {
+            const lag = 0.3 * (1 - (k + 1) / N)
+            const ang = 300 * ease(clamp((p - lag) / (1 - lag), 0, 1))
+            st.el.style.transform = `rotateX(${(ang - prev).toFixed(2)}deg)`
+            prev = ang
+            // light from in front: a strip darkens as it tips away from us
+            const c = Math.cos((ang * Math.PI) / 180)
+            if (st.shade) st.shade.style.opacity = (0.34 * (1 - Math.max(0, c))).toFixed(3)
+            if (st.backShade) st.backShade.style.opacity = (0.3 * (1 - Math.max(0, -c))).toFixed(3)
+          })
+        }
+        // the print under the one being lifted lies in its shadow
+        for (let i = 1; i < n; i++) {
+          const lift = clamp(turned - (i - 1), 0, 1)
+          const sh = 0.26 * Math.sin(Math.min(1, lift * 1.6) * Math.PI)
+          const top = gallery.pages[i].strips
+          if (top.length && top[0].shade && gallery.pages[i].p <= 0) {
+            for (const st of top) if (st.shade) st.shade.style.opacity = sh.toFixed(3)
           }
-          const tilt = 0.3 * Math.sin((Math.min(ang, 90) * Math.PI) / 180)
-          const under = 0.28 * Math.sin((Math.min(above, 180) * Math.PI) / 180)
-          if (pg.shade) pg.shade.style.opacity = Math.max(tilt, under).toFixed(3)
-          above = ang
         }
       }
     }
