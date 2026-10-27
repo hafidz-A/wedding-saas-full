@@ -180,10 +180,11 @@ html.tb-locked body {
    Two wooden rods with the paper between them; the engine unrolls it (clips
    the sheet from the bottom and slides the bottom rod down with it). Its
    size: --parch-w wide, a sheet min(58%, 540px) tall (the engine assumes the
-   same height), the top rod at --parch-top. */
+   same height), the top rod at --parch-top (centred vertically). */
 .tb {
   --parch-w: min(92%, 520px);
-  --parch-top: 3%;
+  /* centred on the screen: the sheet (min(58%, 540px)) plus its rods */
+  --parch-top: calc((100% - min(58%, 540px)) / 2 - 12px);
   --parch-ink: #4b2f22;
 }
 /* in front of the gallery easels standing in the garden behind it */
