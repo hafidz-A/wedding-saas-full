@@ -294,7 +294,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   }
 
   // gallery: one easel board (its own px size read from the element) and its pages
-  const gallery = { el: null, easel: null, caption: null, pad: null }
+  const gallery = { el: null, easel: null, caption: null, pages: [] }
   let easelSc = 1
   let cw = 0
   let ch = 0
@@ -331,14 +331,6 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       gallery.ew = gallery.easel.offsetWidth
       gallery.eh = gallery.easel.offsetHeight
     }
-    const pad = gallery.pad
-    if (pad) {
-      // as sharp as the pad is on screen when the easel stands in front of us
-      pad.k = easelSc * Math.min(window.devicePixelRatio || 1, 2)
-      pad.cv.width = Math.round(PAD.W * pad.k)
-      pad.cv.height = Math.round(PAD.H * pad.k)
-      pad.drawn = -1
-    }
     dirty = true
   }
 
@@ -356,20 +348,18 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     }))
     gallery.el = $('[data-tb-gallery]')
     gallery.easel = $('[data-tb-easel]')
+    gallery.fold = $('[data-tb-fold]')
     gallery.caption = $('[data-tb-gallery-caption]')
-    const board = gallery.easel?.querySelector('[data-tb-easel-board]')
-    const padCv = board?.querySelector('[data-tb-pad]')
-    gallery.pad = padCv
-      ? {
-          cv: padCv,
-          ctx: padCv.getContext('2d'),
-          hit: board.querySelector('[data-tb-pad-hit]'),
-          srcs: JSON.parse(board.dataset.tbPhotos || '[]'),
-          imgs: null, // loaded once the easel comes into view
-          drawn: -1,
-          k: 1,
-        }
-      : null
+    gallery.pages = [...root.querySelectorAll('[data-tb-page]')].map((el) => ({
+      el,
+      // outermost (at the top of the pad) first: document order of the nested strips
+      strips: [...el.querySelectorAll('[data-tb-strip]')].map((s) => ({
+        el: s,
+        shade: s.querySelector(':scope > .tb-strip-face:not(.tb-strip-back) > .tb-page-shade'),
+        backShade: s.querySelector(':scope > .tb-strip-back > .tb-page-shade'),
+      })),
+      p: -1,
+    }))
     if (gallery.el) gallery.t = parseT(gallery.el)
     lastP = -1
   }
@@ -1260,104 +1250,6 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
 
   // ---------- DOM copy ----------
   let galleryOn = false
-  // ---------- the gallery pad: prints that roll up into a paper roll ----------
-  // Easel px: the paper is 528×626; the canvas reaches 10 px past its sides and
-  // 44 px above it, for the roll. Print i rolls away while `turned` goes i → i+1:
-  // its bottom edge curls up toward us into a roll that climbs the page,
-  // uncovering print i+1, and merges into the roll along the top of the pad,
-  // which thickens a little with every print in it. Seen straight on, a roll is
-  // a band of paper back shaded like a cylinder; the print still flat above it
-  // is drawn as it is.
-  const PAD = { W: 548, H: 670, x: 10, y: 44, w: 528, h: 626 }
-  const PAPER = '#fbf6ee'
-  const PAPER_BACK = ['#bdb1a0', '#efe6d8', '#fffaf2', '#e6dccc', '#a99c89'] // a roll's light, top to bottom
-  function drawPrint(x, img, y0, y1) {
-    // the paper with its photo, clipped to rows y0–y1 of the print
-    if (y1 <= y0) return
-    x.save()
-    x.beginPath()
-    x.rect(PAD.x, PAD.y + y0, PAD.w, y1 - y0)
-    x.clip()
-    x.fillStyle = PAPER
-    x.fillRect(PAD.x, PAD.y, PAD.w, PAD.h)
-    if (img && img.complete && img.naturalWidth) {
-      // the photo clears the roses along the bottom of the board (object-fit: cover)
-      const bx = PAD.x + 34
-      const by = PAD.y + 34
-      const bw = PAD.w - 68
-      const bh = 460
-      const r = Math.max(bw / img.naturalWidth, bh / img.naturalHeight)
-      const sw = bw / r
-      const sh = bh / r
-      x.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, bx, by, bw, bh)
-    }
-    x.restore()
-  }
-  function roll(x, yc, r, alpha = 1) {
-    // a paper roll across the pad, centred on row yc
-    const g2 = x.createLinearGradient(0, PAD.y + yc - r, 0, PAD.y + yc + r)
-    PAPER_BACK.forEach((c, i) => g2.addColorStop(i / (PAPER_BACK.length - 1), c))
-    x.globalAlpha = alpha
-    x.fillStyle = g2
-    x.beginPath()
-    x.roundRect(PAD.x - 6, PAD.y + yc - r, PAD.w + 12, r * 2, r)
-    x.fill()
-    // the sheen along its top, and the edge of the last turn of paper
-    x.fillStyle = 'rgba(255, 255, 255, 0.55)'
-    x.fillRect(PAD.x + r * 0.6, PAD.y + yc - r * 0.55, PAD.w - r * 1.2, Math.max(1, r * 0.12))
-    x.strokeStyle = 'rgba(110, 90, 70, 0.45)'
-    x.lineWidth = 1
-    x.beginPath()
-    x.moveTo(PAD.x + r * 0.6, PAD.y + yc + r * 0.35)
-    x.lineTo(PAD.x + PAD.w - r * 0.6, PAD.y + yc + r * 0.35)
-    x.stroke()
-    // the spiral of paper showing at each end
-    x.strokeStyle = 'rgba(120, 100, 80, 0.55)'
-    x.lineWidth = 1
-    for (const ex of [PAD.x - 6 + r * 0.55, PAD.x + PAD.w + 6 - r * 0.55]) {
-      x.beginPath()
-      x.ellipse(ex, PAD.y + yc, r * 0.32, r * 0.8, 0, 0, Math.PI * 2)
-      x.stroke()
-      x.beginPath()
-      x.ellipse(ex, PAD.y + yc, r * 0.16, r * 0.42, 0, 0, Math.PI * 2)
-      x.stroke()
-    }
-    x.globalAlpha = 1
-  }
-  const topRadius = (rolled) => 15 + 2.5 * Math.min(rolled, 8)
-  function drawPad(pad, turned) {
-    const x = pad.ctx
-    const n = pad.srcs.length
-    const i = Math.min(n - 1, Math.floor(turned))
-    const p = turned - i
-    x.setTransform(pad.k, 0, 0, pad.k, 0, 0)
-    x.clearRect(0, 0, PAD.W, PAD.H)
-    // a soft shadow the pad casts on the board
-    x.fillStyle = 'rgba(40, 20, 10, 0.18)'
-    x.fillRect(PAD.x + 3, PAD.y + 4, PAD.w, PAD.h)
-    const img = (k) => pad.imgs && pad.imgs[k]
-    if (p <= 0.0005) {
-      drawPrint(x, img(i), 0, PAD.h)
-      roll(x, 0, topRadius(i), i > 0 ? 1 : 0)
-      return
-    }
-    // the next print, uncovered as the roll climbs
-    drawPrint(x, img(i + 1), 0, PAD.h)
-    const e = ease(p)
-    const y = PAD.h * (1 - e) // where the roll meets the flat print
-    const r = lerp(10, topRadius(i + 1), e) // it thickens as it gathers paper
-    // what is still flat of the rolling print, and the shadow its roll casts below
-    drawPrint(x, img(i), 0, y)
-    const sh = x.createLinearGradient(0, PAD.y + y + r * 0.6, 0, PAD.y + y + r * 0.6 + 26)
-    sh.addColorStop(0, 'rgba(40, 20, 10, 0.28)')
-    sh.addColorStop(1, 'rgba(40, 20, 10, 0)')
-    x.fillStyle = sh
-    x.fillRect(PAD.x, PAD.y + y + r * 0.6, PAD.w, 26)
-    // the roll along the top, then the one climbing to it (they merge at the end)
-    roll(x, 0, topRadius(i), i > 0 ? 1 : 0)
-    roll(x, y, r)
-  }
-
   function renderCopy(T, J, now) {
     for (const { el, t } of panels) {
       const inn = seg(T, t[0], t[1])
@@ -1406,23 +1298,49 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
           gallery.easel.style.filter = dim < 1 ? `brightness(${dim})` : ''
           gallery.dim = dim
         }
-        // Each print rolls away over its own stretch of scroll.
-        const pad = gallery.pad
-        if (pad && pad.srcs.length) {
-          if (!pad.imgs) {
-            pad.imgs = pad.srcs.map((src) => {
-              const im = new Image()
-              im.decoding = 'async'
-              im.onload = () => (pad.drawn = -1)
-              im.src = src
-              return im
-            })
+        // Each print turns over its own stretch of scroll, like paper: its
+        // bottom edge lifts first and the rest follows, so it curls up and
+        // over the top of the pad, then falls behind it. Strip i (from the rings
+        // down) starts later the nearer it is to the rings; all end flat at 300°.
+        const n = gallery.pages.length
+        const turned = seg(T, gb, 0.965) * Math.max(0, n - 1)
+        for (let i = 0; i < n; i++) {
+          const pg = gallery.pages[i]
+          const p = clamp(turned - i, 0, 1)
+          if (pg.p === p) continue
+          pg.p = p
+          pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
+          // past the top it drops behind the pad: let it go before it would show through
+          pg.el.style.opacity = String(1 - seg(p, 0.82, 0.97))
+          const N = pg.strips.length
+          let prev = 0
+          pg.strips.forEach((st, k) => {
+            const lag = 0.3 * (1 - (k + 1) / N)
+            const ang = 300 * ease(clamp((p - lag) / (1 - lag), 0, 1))
+            st.el.style.transform = `rotateX(${(ang - prev).toFixed(2)}deg)`
+            prev = ang
+            // light from in front: a strip darkens as it tips away from us
+            const c = Math.cos((ang * Math.PI) / 180)
+            if (st.shade) st.shade.style.opacity = (0.34 * (1 - Math.max(0, c))).toFixed(3)
+            if (st.backShade) st.backShade.style.opacity = (0.3 * (1 - Math.max(0, -c))).toFixed(3)
+          })
+        }
+        // Turned prints hang behind the pad, folded over its top: a rounded
+        // lip of paper that thickens with every print (and as one goes over).
+        if (gallery.fold) {
+          const r = 12 + 5 * Math.min(turned, 6)
+          if (gallery.foldR !== r) {
+            gallery.foldR = r
+            gallery.fold.style.height = `${(2 * r).toFixed(1)}px`
           }
-          const turned = seg(T, gb, 0.965) * (pad.srcs.length - 1)
-          if (pad.drawn !== turned) {
-            pad.drawn = turned
-            drawPad(pad, turned)
-            if (pad.hit) pad.hit.dataset.index = String(Math.min(pad.srcs.length - 1, Math.round(turned)))
+        }
+        // the print under the one being lifted lies in its shadow
+        for (let i = 1; i < n; i++) {
+          const lift = clamp(turned - (i - 1), 0, 1)
+          const sh = 0.26 * Math.sin(Math.min(1, lift * 1.6) * Math.PI)
+          const top = gallery.pages[i].strips
+          if (top.length && top[0].shade && gallery.pages[i].p <= 0) {
+            for (const st of top) if (st.shade) st.shade.style.opacity = sh.toFixed(3)
           }
         }
       }
