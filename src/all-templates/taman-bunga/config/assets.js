@@ -72,3 +72,15 @@ export const DEMO_PHOTOS = {
   couple: `${BASE}/demo/couple.webp`,
   coupleClose: `${BASE}/demo/couple-close.webp`,
 }
+
+// More demo gallery photos, borrowed from the Lovebirds/Solary demo set (already
+// on R2), so the demo fills two easels of five. Real invitations start empty (seed.js).
+const LOVEBIRDS_DEMO = staticAsset('/templates/lovebirds/demo')
+export const DEMO_GALLERY_EXTRA = [
+  ['gallerySunsetWalk', 'Jalan sore'],
+  ['galleryFirstDance', 'Dansa pertama'],
+  ['galleryBeach', 'Di pantai'],
+  ['galleryCityLights', 'Lampu kota'],
+  ['galleryRings', 'Cincin'],
+  ['gallerySunrise', 'Matahari terbit'],
+].map(([f, alt]) => ({ src: `${LOVEBIRDS_DEMO}/${f}.webp`, alt }))

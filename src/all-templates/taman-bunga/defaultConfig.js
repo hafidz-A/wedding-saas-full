@@ -12,7 +12,7 @@
    switching a journey section off squeezes its stretch of the walk instead of
    leaving a gap (config/timeline.js).
    ============================================================ */
-import { DEMO_PHOTOS } from './config/assets.js'
+import { DEMO_GALLERY_EXTRA, DEMO_PHOTOS } from './config/assets.js'
 import { DEFAULT_TAMAN_BUNGA_PALETTE } from './config/palettes.js'
 
 // A date that is always in the future, so the demo countdown keeps counting.
@@ -133,6 +133,7 @@ export const defaultConfig = {
           { src: DEMO_PHOTOS.groom, alt: 'Arya' },
           { src: DEMO_PHOTOS.bride, alt: 'Nadia' },
           { src: DEMO_PHOTOS.coupleClose, alt: 'Nadia dan Arya, dekat' },
+          ...DEMO_GALLERY_EXTRA,
         ],
       },
     },
