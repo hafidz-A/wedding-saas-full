@@ -33,6 +33,7 @@ import {
   SaveDatePanel,
   StoryPanels,
   storyMoments,
+  galleryEaselCount,
 } from './sections/Journey.jsx'
 import { Closing, Cover, GiftSheet, RsvpSheet, WishesSheet } from './sections/Sheets.jsx'
 
@@ -114,14 +115,15 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
 
   // ----- journey timeline: switched-off sections squeeze their stretch of the walk -----
   const storyCount = storyMoments(props('tbStory')).length
+  const easelCount = galleryEaselCount(props('tbGallery'))
   const timeline = useMemo(() => {
     const enabled = new Set(sections.filter((s) => s && s.enabled !== false).map((s) => s.type))
     if (storyCount === 0) enabled.delete('tbStory')
     return {
-      ...buildTimeline(enabled),
+      ...buildTimeline(enabled, { galleryEasels: easelCount }),
       lanterns: lanternStops(storyCount, enabled.has('tbStory')),
     }
-  }, [sections, storyCount])
+  }, [sections, storyCount, easelCount])
 
   // ----- guest, preview, palette -----
   const [guest, setGuest] = useState('')

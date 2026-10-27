@@ -229,43 +229,52 @@ function PageStrip({ k, photo }) {
   )
 }
 
+/** Prints per easel; the gallery stands as many easels as it needs. */
+const PER_EASEL = 3
+export const galleryEaselCount = (props) => Math.ceil(galleryPhotos(props).length / PER_EASEL)
+
 /**
- * One easel standing in the garden (painted; its top cut flat), holding the
- * photos as a pad of prints; its roses and ivy sit in front of them. The
- * engine walks it into view and, as the guest scrolls, curls the top print up
- * by its bottom edge, over the top of the pad and back behind it, where it
- * adds to the rounded fold of turned paper along the top (engine/scene.js,
- * renderCopy). Tap a print to enlarge it.
+ * The gallery: easels standing in the garden, alternately on the right and
+ * the left of the path, each holding up to three photos as a pad of prints
+ * (painted easel, its top cut flat; its roses and ivy in front of the prints).
+ * The engine walks the guest up to each in turn, turning the view toward it,
+ * and as they scroll curls the top print up by its bottom edge, over the top
+ * of the pad and back behind it, where it adds to the rounded fold of turned
+ * paper along the top (engine/scene.js, renderCopy). Tap a print to enlarge it.
  */
 export function Gallery({ props, onOpen }) {
   const photos = galleryPhotos(props)
+  const easels = []
+  for (let i = 0; i < photos.length; i += PER_EASEL) easels.push(photos.slice(i, i + PER_EASEL))
   return (
     <section className="tb-gallery tb-shadowed" data-tb-gallery data-t={t(BEATS.gallery)}>
-      <div className="tb-easel" data-tb-easel>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="tb-easel-back" src={SCENE.easelBack} alt="" />
-        <div className="tb-easel-board" data-tb-easel-board>
-          {photos.map((p, i) => (
-            <div
-              key={`${p.src}-${i}`}
-              className="tb-page"
-              data-tb-page
-              style={{ zIndex: photos.length - i }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Perbesar foto ${p.alt || i + 1}`}
-              onClick={() => onOpen(p)}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onOpen(p))}
-            >
-              <PageStrip k={0} photo={p} />
-            </div>
-          ))}
-          {/* the turned prints, folded over the top of the pad (the engine sets its thickness) */}
-          <span className="tb-pad-fold" data-tb-fold aria-hidden="true" />
+      {easels.map((set, e) => (
+        <div key={e} className="tb-easel" data-tb-easel data-side={e % 2 === 0 ? 'right' : 'left'}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="tb-easel-back" src={SCENE.easelBack} alt="" />
+          <div className="tb-easel-board" data-tb-easel-board>
+            {set.map((p, i) => (
+              <div
+                key={`${p.src}-${i}`}
+                className="tb-page"
+                data-tb-page
+                style={{ zIndex: set.length - i }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Perbesar foto ${p.alt || e * PER_EASEL + i + 1}`}
+                onClick={() => onOpen(p)}
+                onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && (ev.preventDefault(), onOpen(p))}
+              >
+                <PageStrip k={0} photo={p} />
+              </div>
+            ))}
+            {/* the turned prints, folded over the top of the pad (the engine sets its thickness) */}
+            <span className="tb-pad-fold" data-tb-fold aria-hidden="true" />
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="tb-easel-front" src={SCENE.easelFront} alt="" />
         </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="tb-easel-front" src={SCENE.easelFront} alt="" />
-      </div>
+      ))}
       <div className="tb-gallery-caption" data-tb-gallery-caption>
         {props.title && <h2 className="tb-script">{props.title}</h2>}
         {props.hint && photos.length > 0 && <p>{props.hint}</p>}

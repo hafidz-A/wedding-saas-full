@@ -71,14 +71,17 @@ export function lanternStops(storyCount, storyOn) {
 }
 
 /**
- * Build the scroll mapping for a set of enabled section types.
- * Returns the track length and a p → T mapper.
+ * Build the scroll mapping for a set of enabled section types (and how many
+ * easels the gallery stands its photos on). Returns the track length and a
+ * p → T mapper.
  */
-export function buildTimeline(enabledTypes) {
+export function buildTimeline(enabledTypes, { galleryEasels = 1 } = {}) {
   const weights = SEGMENTS.map((s) => {
     const len = s.to - s.from
     const on = !s.type || enabledTypes.has(s.type)
-    return on ? len : len * SKIPPED_WEIGHT
+    if (!on) return len * SKIPPED_WEIGHT
+    // every easel past the second gets its own stretch of scroll (up to 4× the gallery)
+    return s.type === 'tbGallery' ? len * clamp(galleryEasels / 2, 1, 4) : len
   })
   const total = weights.reduce((a, b) => a + b, 0)
   // knots: cumulative p at each segment boundary

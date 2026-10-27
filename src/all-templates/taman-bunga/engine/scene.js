@@ -294,7 +294,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   }
 
   // gallery: one easel board (its own px size read from the element) and its pages
-  const gallery = { el: null, easel: null, caption: null, pages: [] }
+  const gallery = { el: null, caption: null, easels: [], turn: 0 }
   let easelSc = 1
   let cw = 0
   let ch = 0
@@ -325,11 +325,12 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     ch = copy.clientHeight
     // the paper: three quarters of a phone's width, never taller than ~45% of the screen
     // (read here, once per layout: reading them while turning pages would force a reflow each frame)
-    const board = gallery.easel?.querySelector('[data-tb-easel-board]')
+    const first = gallery.easels[0]?.el
+    const board = first?.querySelector('[data-tb-easel-board]')
     if (board) {
       easelSc = Math.min(cw * 0.74, ch * 0.38, 340) / board.offsetWidth
-      gallery.ew = gallery.easel.offsetWidth
-      gallery.eh = gallery.easel.offsetHeight
+      gallery.ew = first.offsetWidth
+      gallery.eh = first.offsetHeight
     }
     dirty = true
   }
@@ -347,20 +348,26 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       dim: -1,
     }))
     gallery.el = $('[data-tb-gallery]')
-    gallery.easel = $('[data-tb-easel]')
-    gallery.fold = $('[data-tb-fold]')
     gallery.caption = $('[data-tb-gallery-caption]')
-    gallery.pages = [...root.querySelectorAll('[data-tb-page]')].map((el) => ({
+    gallery.easels = [...root.querySelectorAll('[data-tb-easel]')].map((el) => ({
       el,
-      // outermost (at the top of the pad) first: document order of the nested strips
-      strips: [...el.querySelectorAll('[data-tb-strip]')].map((s) => ({
-        el: s,
-        faces: [...s.querySelectorAll(':scope > .tb-strip-face')],
-        shade: s.querySelector(':scope > .tb-strip-face:not(.tb-strip-back) > .tb-page-shade'),
-        backShade: s.querySelector(':scope > .tb-strip-back > .tb-page-shade'),
-        gone: false,
+      side: el.dataset.side === 'left' ? -1 : 1,
+      fold: el.querySelector('[data-tb-fold]'),
+      foldR: -1,
+      dim: -1,
+      shown: true,
+      pages: [...el.querySelectorAll('[data-tb-page]')].map((pg) => ({
+        el: pg,
+        // outermost (at the top of the pad) first: document order of the nested strips
+        strips: [...pg.querySelectorAll('[data-tb-strip]')].map((st) => ({
+          el: st,
+          faces: [...st.querySelectorAll(':scope > .tb-strip-face')],
+          shade: st.querySelector(':scope > .tb-strip-face:not(.tb-strip-back) > .tb-page-shade'),
+          backShade: st.querySelector(':scope > .tb-strip-back > .tb-page-shade'),
+          gone: false,
+        })),
+        p: -1,
       })),
-      p: -1,
     }))
     if (gallery.el) gallery.t = parseT(gallery.el)
     lastP = -1
@@ -485,7 +492,9 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     const A = art
     const px = (k) => -mx * k
     const py = (k) => -my * k * 0.5
-    const tx = (A.walk.tx * J.c) / 8
+    // turning to face a gallery easel (right or left) pans the garden the other way
+    const look = -gallery.turn * 36
+    const tx = (A.walk.tx * J.c) / 8 + look
     const ty = (A.walk.ty * J.c) / 8 + J.bob
     const Z = A.zoom
     const fl = reduce ? 1 : 1 + 0.09 * Math.sin(now / 520) + 0.05 * Math.sin(now / 197)
@@ -502,7 +511,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     const gox = I ? I.near.x : A.vp.x
     const goy = I ? I.near.y : A.vp.y
     // far layer pose: k = 0 → glued to the painted gazebo, k = 1 → its own walk
-    const itx = I ? (I.walk.tx * J.c) / 8 : 0
+    const itx = I ? (I.walk.tx * J.c) / 8 + look : 0
     const ity = I ? (I.walk.ty * J.c) / 8 + J.bob : 0
     const is = I ? I.scale * (1 + I.zoom * J.c) : 1
     // where a point of the painting that holds the gazebo lands on the stage
@@ -742,7 +751,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     drawSkyLanterns(now, G && !fore ? 1 - seg(J.g, 0.3, 0.6) : 1)
     if (G) {
       // the garden outside is lit for the party too: no dark woods around the gazebo
-      if (fore) drawGardenLights(now, skyY(A.gazebo.int.sky.y0), skyY(A.gazebo.int.sky.y1), dx, G.o)
+      // the party lights outside only once we are in (not across the garden on the way up)
+      if (fore) drawGardenLights(now, skyY(A.gazebo.int.sky.y0), skyY(A.gazebo.int.sky.y1), dx, G.o * seg(J.g, 0.74, 0.9))
       drawFireworks(now, y0, y1)
       if (fore) inside(true)
     }
@@ -1252,6 +1262,55 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
 
   // ---------- DOM copy ----------
   let galleryOn = false
+  // Each print turns over its own stretch of scroll, like paper: its bottom
+  // edge lifts first and the rest follows, so it curls tightly up and over the
+  // top of the pad, then falls behind it. Strip k (from the top down) starts
+  // later the nearer it is to the top; all end at 300°. A strip that has gone
+  // over the top (past 195°) is hidden: the pages are flattened in stacking
+  // order, so behind the pad it would still be painted over the next print.
+  function turnPages(E, turned) {
+    const n = E.pages.length
+    for (let i = 0; i < n; i++) {
+      const pg = E.pages[i]
+      const p = clamp(turned - i, 0, 1)
+      if (pg.p === p) continue
+      pg.p = p
+      pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
+      const N = pg.strips.length
+      let prev = 0
+      pg.strips.forEach((st, k) => {
+        const lag = 0.55 * (1 - (k + 1) / N)
+        const ang = 300 * ease(clamp((p - lag) / (1 - lag), 0, 1))
+        st.el.style.transform = `rotateX(${(ang - prev).toFixed(2)}deg)`
+        prev = ang
+        const gone = ang > 195
+        if (st.gone !== gone) {
+          st.gone = gone
+          for (const f of st.faces) f.style.visibility = gone ? 'hidden' : ''
+        }
+        // light from in front: a strip darkens as it tips away from us
+        const c = Math.cos((ang * Math.PI) / 180)
+        if (st.shade) st.shade.style.opacity = (0.34 * (1 - Math.max(0, c))).toFixed(3)
+        if (st.backShade) st.backShade.style.opacity = (0.3 * (1 - Math.max(0, -c))).toFixed(3)
+      })
+    }
+    // Turned prints hang behind the pad, folded over its top: a rounded lip of
+    // paper that thickens with every print (and as one goes over).
+    if (E.fold) {
+      const r = 12 + 5 * Math.min(turned, 6)
+      if (E.foldR !== r) {
+        E.foldR = r
+        E.fold.style.height = `${(2 * r).toFixed(1)}px`
+      }
+    }
+    // the print under the one being lifted lies in its shadow
+    for (let i = 1; i < n; i++) {
+      const lift = clamp(turned - (i - 1), 0, 1)
+      const sh = 0.26 * Math.sin(Math.min(1, lift * 1.6) * Math.PI)
+      if (E.pages[i].p <= 0) for (const st of E.pages[i].strips) if (st.shade) st.shade.style.opacity = sh.toFixed(3)
+    }
+  }
+
   function renderCopy(T, J, now) {
     for (const { el, t } of panels) {
       const inn = seg(T, t[0], t[1])
@@ -1278,79 +1337,50 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       }
     }
     let gOn = false
-    if (gallery.el && gallery.t && gallery.easel) {
+    gallery.turn = 0
+    if (gallery.el && gallery.t && gallery.easels.length) {
       const [ga, gb, gx0, gx1] = gallery.t
       const gin = ease(seg(T, ga, gb))
       const gout = ease(seg(T, gx0, gx1))
-      show(gallery.el, seg(gin, 0, 0.25) * (1 - seg(gout, 0.6, 1)))
-      gOn = gin > 0 && gout < 1
+      gOn = T > ga && T < gx1
+      show(gallery.el, gOn ? 1 : 0)
       if (gOn) {
         if (gallery.caption) gallery.caption.style.opacity = String(gin * (1 - gout))
-        // The easel stands beside the path: far and off to the right as we come
-        // up to it, then in front of us; afterwards we walk past it (it slides
-        // out past our right shoulder). z = its distance, 1 = in front of us.
-        const z = gout > 0 ? lerp(1, 0.55, gout) : lerp(2.8, 1, gin)
-        const s = easelSc / z
+        // The gallery's stretch of the walk is shared by its easels, one after
+        // another. Each stands beside the path on its own side (alternating):
+        // far and off to that side as we come up to it, then in front of us as
+        // we turn to face it; afterwards we walk past it (it slides out past
+        // that shoulder). z = its distance, 1 = in front of us.
+        const K = gallery.easels.length
         const { ew, eh } = gallery
         const horizon = ch * 0.5
-        const ground = horizon + (ch * 0.84 - horizon) / z // where its legs meet the flowers
-        const x = cw / 2 + (gout > 0 ? cw * 1.2 * gout : (cw * 0.55 * (z - 1)) / 1.8)
-        gallery.easel.style.transform = `translate(${x - (ew / 2) * s}px, ${ground - eh * s}px) scale(${s})`
-        if (gallery.dim !== dim) {
-          gallery.easel.style.filter = dim < 1 ? `brightness(${dim})` : ''
-          gallery.dim = dim
-        }
-        // Each print turns over its own stretch of scroll, like paper: its
-        // bottom edge lifts first and the rest follows, so it curls tightly up
-        // and over the top of the pad, then falls behind it. Strip k (from the
-        // top down) starts later the nearer it is to the top; all end at 300°.
-        // A strip that has gone over the top (past 195°) is hidden: the pages
-        // are flattened in stacking order, so behind the pad it would still
-        // be painted over the next print.
-        const n = gallery.pages.length
-        const turned = seg(T, gb, 0.965) * Math.max(0, n - 1)
-        for (let i = 0; i < n; i++) {
-          const pg = gallery.pages[i]
-          const p = clamp(turned - i, 0, 1)
-          if (pg.p === p) continue
-          pg.p = p
-          pg.el.style.visibility = p >= 1 ? 'hidden' : 'visible'
-          const N = pg.strips.length
-          let prev = 0
-          pg.strips.forEach((st, k) => {
-            const lag = 0.55 * (1 - (k + 1) / N)
-            const ang = 300 * ease(clamp((p - lag) / (1 - lag), 0, 1))
-            st.el.style.transform = `rotateX(${(ang - prev).toFixed(2)}deg)`
-            prev = ang
-            const gone = ang > 195
-            if (st.gone !== gone) {
-              st.gone = gone
-              for (const f of st.faces) f.style.visibility = gone ? 'hidden' : ''
-            }
-            // light from in front: a strip darkens as it tips away from us
-            const c = Math.cos((ang * Math.PI) / 180)
-            if (st.shade) st.shade.style.opacity = (0.34 * (1 - Math.max(0, c))).toFixed(3)
-            if (st.backShade) st.backShade.style.opacity = (0.3 * (1 - Math.max(0, -c))).toFixed(3)
-          })
-        }
-        // Turned prints hang behind the pad, folded over its top: a rounded
-        // lip of paper that thickens with every print (and as one goes over).
-        if (gallery.fold) {
-          const r = 12 + 5 * Math.min(turned, 6)
-          if (gallery.foldR !== r) {
-            gallery.foldR = r
-            gallery.fold.style.height = `${(2 * r).toFixed(1)}px`
+        gallery.easels.forEach((E, e) => {
+          const w0 = lerp(ga, gx1, e / K)
+          const w1 = lerp(ga, gx1, (e + 1) / K)
+          const on = T > w0 && T < w1
+          if (E.shown !== on) {
+            E.shown = on
+            // 'inherit', not 'visible': a visible child would show through the hidden section
+            E.el.style.visibility = on ? 'inherit' : 'hidden'
           }
-        }
-        // the print under the one being lifted lies in its shadow
-        for (let i = 1; i < n; i++) {
-          const lift = clamp(turned - (i - 1), 0, 1)
-          const sh = 0.26 * Math.sin(Math.min(1, lift * 1.6) * Math.PI)
-          const top = gallery.pages[i].strips
-          if (top.length && top[0].shade && gallery.pages[i].p <= 0) {
-            for (const st of top) if (st.shade) st.shade.style.opacity = sh.toFixed(3)
+          if (!on) return
+          const u = seg(T, w0, w1)
+          const into = ease(seg(u, 0, 0.22))
+          const away = ease(seg(u, 0.84, 1))
+          const z = away > 0 ? lerp(1, 0.55, away) : lerp(2.8, 1, into)
+          const s = easelSc / z
+          const ground = horizon + (ch * 0.84 - horizon) / z // where its legs meet the flowers
+          const x = cw / 2 + E.side * (away > 0 ? cw * 1.2 * away : (cw * 0.55 * (z - 1)) / 1.8)
+          E.el.style.opacity = String(seg(into, 0, 0.3) * (1 - seg(away, 0.6, 1)))
+          E.el.style.transform = `translate(${x - (ew / 2) * s}px, ${ground - eh * s}px) scale(${s})`
+          if (E.dim !== dim) {
+            E.el.style.filter = dim < 1 ? `brightness(${dim})` : ''
+            E.dim = dim
           }
-        }
+          turnPages(E, seg(u, 0.24, 0.82) * Math.max(0, E.pages.length - 1))
+          // the view turns toward the easel we stand at (drawScene pans the garden)
+          gallery.turn += E.side * into * (1 - away)
+        })
       }
     }
     if (hint) hint.style.opacity = String(1 - seg(T, 0, 0.02))
