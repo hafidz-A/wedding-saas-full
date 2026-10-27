@@ -181,10 +181,25 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
   // ----- cover: the page stays locked until the guest opens the gate -----
   const [opened, setOpened] = useState(false)
   const [hint, setHint] = useState(false)
+  // The cover belongs to the start of the walk, never over the middle of it:
+  // a reload (or the browser restoring its scroll position, which it may do
+  // after this effect runs) puts the guest back at the top while it is shown.
   useEffect(() => {
     if (opened) return undefined
     document.documentElement.classList.add('tb-locked')
-    return () => document.documentElement.classList.remove('tb-locked')
+    const toTop = () => {
+      if (window.scrollY !== 0) window.scrollTo(0, 0)
+    }
+    toTop()
+    window.addEventListener('scroll', toTop, { passive: true })
+    window.addEventListener('load', toTop)
+    window.addEventListener('pageshow', toTop)
+    return () => {
+      document.documentElement.classList.remove('tb-locked')
+      window.removeEventListener('scroll', toTop)
+      window.removeEventListener('load', toTop)
+      window.removeEventListener('pageshow', toTop)
+    }
   }, [opened])
 
   // ----- music: the couple's song (Music tab), or the music box on the demo -----
