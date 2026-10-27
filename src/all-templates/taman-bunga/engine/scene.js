@@ -331,6 +331,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
 
   // ---------- copy elements ----------
   let panels = []
+  let parch = null // the parchment the story → events are written on
   let cards = []
   function scanCopy() {
     panels = [...root.querySelectorAll('[data-tb-panel]')].map((el) => ({ el, t: parseT(el) }))
@@ -341,6 +342,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       photo: el.querySelector('[data-tb-photo]'),
       dim: -1,
     }))
+    const pe = $('[data-tb-parchment]')
+    parch = pe ? { el: pe, t: parseT(pe), sheet: pe.querySelector('[data-tb-parch-sheet]'), bottom: pe.querySelector('[data-tb-parch-bottom]'), vis: null, o: -1 } : null
     gallery.el = $('[data-tb-gallery]')
     gallery.caption = $('[data-tb-gallery-caption]')
     gallery.easels = [...root.querySelectorAll('[data-tb-easel]')].map((el) => ({
@@ -1429,6 +1432,28 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       const o = inn * (1 - out)
       show(el, o)
       if (o > 0.001) el.style.transform = `translateY(${(1 - inn) * 22 - out * 22}px)`
+    }
+    // the parchment: rods appear, the paper unrolls downward (the bottom rod
+    // slides down, revealing it), then it rolls back up and the rods go
+    if (parch) {
+      const [a, b, c, d] = parch.t
+      const vis = T > a && T < d && reveal > 0
+      if (parch.vis !== vis) {
+        parch.vis = vis
+        parch.el.style.visibility = vis ? 'visible' : 'hidden'
+      }
+      if (vis) {
+        const inn = seg(T, a, b)
+        const out = seg(T, c, d)
+        const o = ease(seg(inn, 0.3, 1)) * (1 - ease(seg(out, 0, 0.7)))
+        parch.el.style.opacity = String(seg(inn, 0, 0.3) * (1 - seg(out, 0.7, 1)) * reveal)
+        if (parch.o !== o) {
+          parch.o = o
+          const H = Math.min(ch * 0.58, 540) // = the sheet's CSS height
+          parch.sheet.style.clipPath = `inset(0 0 ${((1 - o) * 100).toFixed(2)}% 0)`
+          parch.bottom.style.transform = `translateY(${(o * H).toFixed(1)}px)`
+        }
+      }
     }
     const base = wide ? '-50%' : '0px'
     const dim = Math.round((1 - 0.3 * J.night) * 50) / 50

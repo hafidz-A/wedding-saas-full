@@ -17,8 +17,8 @@ export const SEGMENTS = [
   { key: 'quote', type: 'tbQuote', from: 0.07, to: 0.175 },
   { key: 'couple', type: 'tbCouple', from: 0.175, to: 0.395 },
   { key: 'story', type: 'tbStory', from: 0.395, to: 0.65 },
-  { key: 'saveDate', type: 'tbSaveDate', from: 0.65, to: 0.73 },
-  { key: 'events', type: 'tbEvents', from: 0.73, to: 0.84 },
+  { key: 'saveDate', type: 'tbSaveDate', from: 0.65, to: 0.712 },
+  { key: 'events', type: 'tbEvents', from: 0.712, to: 0.84 },
   { key: 'gallery', type: 'tbGallery', from: 0.84, to: 1 },
 ]
 
@@ -33,13 +33,16 @@ export const BEATS = {
   quote: [0.075, 0.1, 0.14, 0.165],
   groom: [0.19, 0.23, 0.27, 0.3],
   bride: [0.285, 0.325, 0.365, 0.395],
-  saveDate: [0.655, 0.675, 0.705, 0.725],
-  events: [0.735, 0.76, 0.82, 0.845],
+  // the date and events finish by 0.79, so the parchment they are written on
+  // has time to roll up before the gallery (parchmentWindow)
+  saveDate: [0.655, 0.67, 0.695, 0.71],
+  events: [0.715, 0.73, 0.775, 0.79],
   gallery: [0.84, 0.87, 0.975, 1],
 }
 
 /** The love-story moments share the story segment evenly. */
-const STORY_WINDOW = [0.4, 0.645]
+// (starts after the parchment has unrolled: parchmentWindow)
+const STORY_WINDOW = [0.435, 0.645]
 export const MAX_STORY_MOMENTS = 5
 
 export function storyBeats(count) {
@@ -57,6 +60,26 @@ const seg = (p, a, b) => clamp((p - a) / (b - a), 0, 1)
 /** Distance walked at nominal time T (plus act-2 progress q). Shared with the engine. */
 export function walkDistance(T, q = 0) {
   return 3 * seg(T, 0.36, 0.66) + 2.5 * seg(T, 0.66, 1) + 2.5 * q
+}
+
+/**
+ * When the parchment is out: it unrolls just before the first of the story,
+ * the date and the events (whichever are on) and rolls back up as the last
+ * one fades. [rods appear, fully open, start rolling up, gone] on T, or null.
+ */
+export function parchmentWindow(storyCount, enabledTypes) {
+  const parts = []
+  if (enabledTypes.has('tbStory') && storyCount > 0) {
+    const b = storyBeats(storyCount)
+    parts.push([b[0][0], b[b.length - 1][3]])
+  }
+  if (enabledTypes.has('tbSaveDate')) parts.push([BEATS.saveDate[0], BEATS.saveDate[3]])
+  if (enabledTypes.has('tbEvents')) parts.push([BEATS.events[0], BEATS.events[3]])
+  if (!parts.length) return null
+  const a = parts[0][0]
+  const d = parts[parts.length - 1][1]
+  // ~1.2 screens of scroll to unroll, ~0.85 to roll back up
+  return [a - 0.075, a - 0.005, d, d + 0.05]
 }
 
 /** Prints per gallery easel; the gallery stands as many easels as it needs. */

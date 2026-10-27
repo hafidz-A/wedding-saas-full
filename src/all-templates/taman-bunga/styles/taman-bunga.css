@@ -176,6 +176,117 @@ html.tb-locked body {
   pointer-events: auto;
 }
 
+/* ---------- the parchment (story → events) ----------
+   Two wooden rods with the paper between them; the engine unrolls it (clips
+   the sheet from the bottom and slides the bottom rod down with it). Its
+   size: --parch-w wide, a sheet min(58%, 540px) tall (the engine assumes the
+   same height), the top rod at --parch-top. */
+.tb {
+  --parch-w: min(92%, 520px);
+  --parch-top: 3%;
+  --parch-ink: #4b2f22;
+}
+.tb-parchment {
+  position: absolute;
+  left: calc((100% - var(--parch-w)) / 2);
+  width: var(--parch-w);
+  top: var(--parch-top);
+  height: min(58%, 540px);
+  visibility: hidden;
+  pointer-events: none;
+}
+.tb-parch-sheet {
+  position: absolute;
+  inset: 10px 0 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(255, 250, 235, 0.9), transparent 75%),
+    radial-gradient(ellipse at 15% 85%, rgba(160, 110, 50, 0.18), transparent 45%),
+    radial-gradient(ellipse at 85% 20%, rgba(160, 110, 50, 0.14), transparent 40%),
+    linear-gradient(90deg, #d8bd8a, #efdfb8 9%, #f4e7c6 50%, #efdfb8 91%, #d8bd8a);
+  box-shadow: inset 0 0 26px rgba(120, 78, 30, 0.35), 0 12px 30px rgba(20, 6, 24, 0.45);
+}
+.tb-parch-vine {
+  position: absolute;
+  top: 6%;
+  height: 56%;
+  width: auto;
+  max-width: none;
+}
+.tb-parch-vine-l {
+  left: -34px;
+}
+.tb-parch-vine-r {
+  right: -30px;
+  top: 14%;
+  height: 50%;
+}
+.tb-parch-rod {
+  position: absolute;
+  left: -16px;
+  right: -16px;
+  top: 0;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(#8a5a36, #c48c58 30%, #e3b07a 45%, #9a6a40 70%, #5e3a20);
+  box-shadow: 0 4px 8px rgba(20, 6, 24, 0.4);
+}
+/* the knobs at its ends */
+.tb-parch-rod::before,
+.tb-parch-rod::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 14px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(#5e3a20, #a8774a 40%, #5e3a20);
+}
+.tb-parch-rod::before {
+  left: -8px;
+}
+.tb-parch-rod::after {
+  right: -8px;
+}
+.tb-parch-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 4px;
+  height: 20px;
+  will-change: transform;
+}
+.tb-parch-roses {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 78%;
+  max-width: none;
+  transform: translateX(-50%);
+}
+/* the story, date and events are written on it: dark ink, no glow, inside its margins */
+.tb-panel.tb-on-paper {
+  --tb-ink: var(--parch-ink);
+  --tb-ink-soft: rgba(75, 47, 34, 0.8);
+  --tb-gold: #9a6230;
+  --tb-blush: #a4505c;
+  left: calc((100% - var(--parch-w)) / 2);
+  right: calc((100% - var(--parch-w)) / 2);
+  top: calc(var(--parch-top) + 44px);
+  padding-left: 46px;
+  padding-right: 46px;
+  color: var(--parch-ink);
+  text-shadow: none;
+}
+.tb-panel.tb-on-paper::before {
+  display: none;
+}
+.tb-on-paper .tb-pill-btn {
+  background: rgba(255, 248, 232, 0.55);
+}
+.tb-on-paper .tb-pill-btn:hover {
+  background: rgba(255, 248, 232, 0.85);
+}
+
 .tb-day {
   font-size: clamp(56px, 16vw, 78px);
 }

@@ -104,7 +104,7 @@ export function StoryPanels({ props }) {
   const moments = storyMoments(props)
   const beats = storyBeats(moments.length)
   return moments.map((m, i) => (
-    <section key={m.id || i} className="tb-panel tb-shadowed" data-tb-panel data-t={t(beats[i])} style={{ '--top': '9%' }}>
+    <section key={m.id || i} className="tb-panel tb-on-paper" data-tb-panel data-t={t(beats[i])} style={{ '--top': '9%' }}>
       {props.label && <span className="tb-label">{props.label}</span>}
       {m.year && <span className="tb-script tb-story-year">{m.year}</span>}
       {m.title && <h3 className="tb-story-title">{m.title}</h3>}
@@ -147,7 +147,7 @@ export function SaveDatePanel({ props, coupleNames, events }) {
     details: (events?.events || []).map((e) => [e.title, e.time].filter(Boolean).join(' ')).join(', '),
   })
   return (
-    <section className="tb-panel tb-shadowed" data-tb-panel data-t={t(BEATS.saveDate)} style={{ '--top': '9%' }}>
+    <section className="tb-panel tb-on-paper" data-tb-panel data-t={t(BEATS.saveDate)} style={{ '--top': '9%' }}>
       {props.label && <span className="tb-label">{props.label}</span>}
       {f.day && <h2 className="tb-script tb-day">{f.day}</h2>}
       {f.long && <p className="tb-full-date">{f.long}</p>}
@@ -169,7 +169,7 @@ export function EventsPanel({ props }) {
   const map = safeUrl(props.mapUrl)
   const live = safeUrl(props.liveUrl)
   return (
-    <section className="tb-panel tb-shadowed" data-tb-panel data-t={t(BEATS.events)} style={{ '--top': '6%' }}>
+    <section className="tb-panel tb-on-paper" data-tb-panel data-t={t(BEATS.events)} style={{ '--top': '6%' }}>
       {props.label && <span className="tb-label">{props.label}</span>}
       {list.length > 0 && (
         <div className="tb-events">
@@ -191,6 +191,33 @@ export function EventsPanel({ props }) {
         </div>
       )}
     </section>
+  )
+}
+
+/**
+ * The parchment the love story, the date and the events are written on: two
+ * wooden rods with the paper between them, rose vines down its sides and a
+ * spray of roses on the bottom rod. The engine unrolls it (the bottom rod
+ * slides down, revealing the paper) before the story and rolls it back up
+ * after the events; those panels sit on it (.tb-on-paper).
+ */
+export function Parchment({ window: w }) {
+  if (!w) return null
+  return (
+    <div className="tb-parchment" data-tb-parchment data-t={t(w)} aria-hidden="true">
+      <div className="tb-parch-sheet" data-tb-parch-sheet>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="tb-parch-vine tb-parch-vine-l" src={SCENE.parchmentVineLeft} alt="" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="tb-parch-vine tb-parch-vine-r" src={SCENE.parchmentVineRight} alt="" />
+      </div>
+      <span className="tb-parch-rod" />
+      <div className="tb-parch-bottom" data-tb-parch-bottom>
+        <span className="tb-parch-rod" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="tb-parch-roses" src={SCENE.parchmentRoses} alt="" />
+      </div>
+    </div>
   )
 }
 

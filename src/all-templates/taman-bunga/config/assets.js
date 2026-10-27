@@ -55,6 +55,11 @@ export const SCENE = {
   // photos, and its roses, ivy, clamp and ledge (paper cut out) in front of them
   easelBack: `${BASE}/easel-back.webp`,
   easelFront: `${BASE}/easel-front.webp`,
+  // the parchment the story, date and events are written on: rose vines for its
+  // sides and a spray of roses that rides its bottom rod (cut from the easel art)
+  parchmentVineLeft: `${BASE}/parchment-vine-left.webp`,
+  parchmentVineRight: `${BASE}/parchment-vine-right.webp`,
+  parchmentRoses: `${BASE}/parchment-roses.webp`,
   moon: `${BASE}/moon.webp`,
   frame: `${BASE}/frame.webp`,
   frameBack: `${BASE}/frame-back.webp`,

@@ -20,7 +20,7 @@ import { defaultConfig } from './defaultConfig.js'
 import { DEFAULT_TAMAN_BUNGA_PALETTE, tamanBungaPalette, TAMAN_BUNGA_PALETTES } from './config/palettes.js'
 import { SCENE } from './config/assets.js'
 import PaletteSwitcher from './components/PaletteSwitcher.jsx'
-import { buildTimeline, easelSteps, lanternStops } from './config/timeline.js'
+import { buildTimeline, easelSteps, lanternStops, parchmentWindow } from './config/timeline.js'
 import { mountScene } from './engine/scene.js'
 import { formatEventDate, parseEventDate, readGuestName, readPreviewMode, readThemeParam } from './utils/invite.js'
 import { startMusicBox } from './utils/musicBox.js'
@@ -29,6 +29,7 @@ import {
   EventsPanel,
   Gallery,
   OpeningPanel,
+  Parchment,
   QuotePanel,
   SaveDatePanel,
   StoryPanels,
@@ -123,6 +124,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
     return {
       ...buildTimeline(enabled, { gallerySteps }),
       lanterns: lanternStops(storyCount, enabled.has('tbStory')),
+      parchment: parchmentWindow(storyCount, enabled),
     }
   }, [sections, storyCount, gallerySteps])
 
@@ -311,6 +313,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
           <OpeningPanel names={names} eyebrow={props('tbCover').eyebrow || 'The Wedding of'} dateDots={dateDots} />
           {on('tbQuote') && <QuotePanel props={props('tbQuote')} />}
           {on('tbCouple') && <CoupleCards props={props('tbCouple')} />}
+          <Parchment window={timeline.parchment} />
           {on('tbStory') && <StoryPanels props={props('tbStory')} />}
           {on('tbSaveDate') && <SaveDatePanel props={saveDate} coupleNames={coupleNames} events={props('tbEvents')} />}
           {on('tbEvents') && <EventsPanel props={props('tbEvents')} />}
