@@ -80,8 +80,8 @@ export function buildTimeline(enabledTypes, { galleryEasels = 1 } = {}) {
     const len = s.to - s.from
     const on = !s.type || enabledTypes.has(s.type)
     if (!on) return len * SKIPPED_WEIGHT
-    // every easel past the second gets its own stretch of scroll (up to 4× the gallery)
-    return s.type === 'tbGallery' ? len * clamp(galleryEasels / 2, 1, 4) : len
+    // each easel gets a full gallery's worth of scroll (at least two, at most eight)
+    return s.type === 'tbGallery' ? len * clamp(galleryEasels, 2, 8) : len
   })
   const total = weights.reduce((a, b) => a + b, 0)
   // knots: cumulative p at each segment boundary

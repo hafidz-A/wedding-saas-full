@@ -462,8 +462,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   // While we stop to look at an easel the walk pauses: within each easel's
   // stretch of the gallery the path only moves while turning toward it and
   // back (the first and last parts), not while its prints turn.
-  const TURN_IN = 0.25
-  const TURN_OUT = 0.8
+  const TURN_IN = 0.34
+  const TURN_OUT = 0.74
   function walkT(T) {
     const K = gallery.easels.length
     if (!K || !gallery.t) return T
@@ -532,10 +532,10 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     // camera turns and steps toward it (zooms about it and brings it to the
     // middle of the screen), then back. LOOK maps a stage point through that.
     const look = galleryLook(A, I, paintTo, I ? is : gs)
-    const lookAt = (k) => {
+    const lookAt = (k, slide = 1) => {
       if (!look) return
       const z = 1 + (look.z - 1) * k
-      g.translate(look.F[0] + look.T[0] * k, look.F[1] + look.T[1] * k)
+      g.translate(look.F[0] + look.T[0] * k * slide, look.F[1] + look.T[1] * k * slide)
       g.scale(z, z)
       g.translate(-look.F[0], -look.F[1])
     }
@@ -579,7 +579,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     function drawWorld() {
     g.save()
     cam(0.15)
-    lookAt(0.25) // the sky is far: it barely turns
+    lookAt(0.25, 0) // the sky is far: it barely grows, and never slides (its edge would show)
     // sky, sun, night sky, moon, stars
     draw(img(A.sky.src), A.sky.l + px(5), A.sky.t + A.sky.set * J.sunset + py(5), A.sky.w, A.sky.h)
     if (A.sun) glowAt(SUN, A.sun.x + px(5), A.sun.y + A.sun.set * J.sunset + py(5), A.sun.d / 2, A.sun.d / 2, 1, false)
@@ -747,6 +747,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     lights.length = 0
+    drawEaselGlows(J, G)
     drawPaperLanterns(J)
     // the interior is painted at night already, so it goes over the tint;
     // lanterns and fireworks go between it and its sky-less copy, so they only
@@ -791,6 +792,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   // easel element px: 687×1024, the paper 528 wide with its middle 538 px above the feet
   const EASEL = { w: 687, h: 1024, board: 528, mid: 538 }
   let lastLook = null
+  const easelGlows = [] // [x, y, rx, ry, alpha] in stage px, this frame
   function galleryLook(A, I, paintTo, ps) {
     lastLook = null
     const P = I ? I : A
@@ -809,17 +811,42 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
       const z = Math.max(1, want / ((EASEL.board / EASEL.h) * hh))
       const mid = [(sw / 2 - OX) / S, (sh * 0.52 - OY) / S]
       const v = f.v
-      look = { F, T: [(mid[0] - F[0]) * v, (mid[1] - F[1]) * v], z: 1 + (z - 1) * v }
+      const zv = 1 + (z - 1) * v
+      const T = [(mid[0] - F[0]) * v, (mid[1] - F[1]) * v]
+      // never so far that the painting's edge comes into view: it must still
+      // reach both sides of the screen, and its bottom
+      const r0 = paintTo(0, 0)
+      const r1 = paintTo(A.W, A.H)
+      const vx0 = -OX / S
+      const vx1 = (sw - OX) / S
+      const vy1 = (sh - OY) / S
+      T[0] = clamp(T[0], vx1 - (F[0] + (r1[0] - F[0]) * zv), vx0 - (F[0] + (r0[0] - F[0]) * zv))
+      T[1] = Math.max(T[1], vy1 - (F[1] + (r1[1] - F[1]) * zv))
+      look = { F, T, z: zv }
     }
     const L = (p) => (look ? [look.F[0] + (p[0] - look.F[0]) * look.z + look.T[0], look.F[1] + (p[1] - look.F[1]) * look.z + look.T[1]] : p)
+    easelGlows.length = 0
     gallery.easels.forEach((E, e) => {
       const sp = easelSpot(P, e)
-      const [x, y] = toCopy(...L(paintTo(sp.x, sp.y)))
-      const sc = (sp.h * ps * (look ? look.z : 1) * S) / EASEL.h
+      const footS = L(paintTo(sp.x, sp.y))
+      const hS = sp.h * ps * (look ? look.z : 1)
+      // a warm light on it, stronger while we stand at it (drawn over the night tint)
+      const at = f && f.E === E ? f.v : 0
+      easelGlows.push([footS[0], footS[1] - (EASEL.mid / EASEL.h) * hS, hS * 0.62, hS * 0.55, 0.28 + 0.3 * at])
+      const [x, y] = toCopy(...footS)
+      const sc = (hS * S) / EASEL.h
       E.el.style.transform = `translate(${(x - (EASEL.w / 2) * sc).toFixed(1)}px, ${(y - EASEL.h * sc).toFixed(1)}px) scale(${sc.toFixed(4)})`
     })
     lastLook = look
     return look
+  }
+
+  function drawEaselGlows(J, G) {
+    const o = gallery.el && gallery.el.style.visibility === 'visible' ? Number(gallery.el.style.opacity) || 0 : 0
+    if (!easelGlows.length || o <= 0 || G) return
+    g.setTransform(dpr * S, 0, 0, dpr * S, dpr * OX, dpr * OY)
+    for (const [x, y, rx, ry, a] of easelGlows) glowAt(LAMP, x, y, rx, ry, a * o * (0.5 + 0.5 * J.night), true)
+    g.setTransform(dpr, 0, 0, dpr, 0, 0)
   }
 
   function drawPaperLanterns(J) {
@@ -1427,9 +1454,11 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
           const u = seg(T, w0, w1)
           const v = ease(seg(u, 0, TURN_IN)) * (1 - ease(seg(u, TURN_OUT, 1)))
           if (v > 0 && (!gallery.focus || v > gallery.focus.v)) gallery.focus = { E, v }
-          if (E.dim !== dim) {
-            E.el.style.filter = dim < 1 ? `brightness(${dim})` : ''
-            E.dim = dim
+          // lit by the garden lights: only a touch darker at night, unlike the cards
+          const lit = Math.round((1 - 0.1 * J.night) * 50) / 50
+          if (E.dim !== lit) {
+            E.el.style.filter = lit < 1 ? `brightness(${lit})` : ''
+            E.dim = lit
           }
           turnPages(E, seg(u, TURN_IN + 0.04, TURN_OUT - 0.04) * Math.max(0, E.pages.length - 1))
         })
