@@ -121,9 +121,9 @@ export function buildTimeline(enabledTypes, { gallerySteps = 0 } = {}) {
     const on = !s.type || enabledTypes.has(s.type)
     if (!on) return len * SKIPPED_WEIGHT
     // the gallery's scroll follows its content (easels × their prints, see
-    // easelSteps above): ~0.75 of its nominal length per
+    // easelSteps above): ~0.55 of its nominal length per
     // step, so a few photos make a short stop and many a long one
-    return s.type === 'tbGallery' ? len * clamp(gallerySteps * 0.75, 1, 24) : len
+    return s.type === 'tbGallery' ? len * clamp(gallerySteps * 0.55, 1, 18) : len
   })
   const total = weights.reduce((a, b) => a + b, 0)
   // knots: cumulative p at each segment boundary
