@@ -136,6 +136,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
   // the palette's night (config/palettes.js); setNight swaps it
   let NC = { sky: ['#0f0d2c', '#231a4a', 'rgba(70, 40, 90, 0.85)'], tint: '#6f5d9c', shade: ['#5a4a8c', '#8a6a9c'] }
   const NIGHT = new Map()
+  const NIGHT_COPY = 0.12 // how much of a daylight painting's night copy shows at full night
   const nightOf = (i) => {
     if (!loaded(i)) return null
     if (!NIGHT.has(i)) {
@@ -557,7 +558,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
         g.drawImage(im, 0, 0, A.W, A.H)
         const n = dusk && J.night > 0 && nightOf(im)
         if (n) {
-          g.globalAlpha = base * a * J.night * 0.7
+          // light: the screen-wide night below darkens it too (0.7 read far darker than the tall set)
+          g.globalAlpha = base * a * J.night * NIGHT_COPY
           g.drawImage(n, 0, 0, A.W, A.H)
         }
       }
@@ -734,7 +736,8 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     // translucent dark wash over the painting read as fog).
     if (J.night > 0 && !(G && G.full)) {
       g.globalCompositeOperation = 'multiply'
-      g.globalAlpha = 0.6 * J.night
+      // the wide set's paintings already take a night copy, so they get less of this
+      g.globalAlpha = (wide ? 0.36 : 0.6) * J.night
       g.fillStyle = duskGrad
       g.fillRect(0, 0, sw, sh)
       g.globalAlpha = 1
@@ -950,7 +953,7 @@ export function mountScene(root, { toNominal, lanternStops, wishCount = 0 }) {
     draw(im, 0, 0, E.W, E.H)
     const night = dusk && J.night > 0 && nightOf(im)
     if (night) {
-      g.globalAlpha = G.o * J.night * 0.7
+      g.globalAlpha = G.o * J.night * NIGHT_COPY
       g.drawImage(night, 0, 0, E.W, E.H)
     }
     g.restore()
