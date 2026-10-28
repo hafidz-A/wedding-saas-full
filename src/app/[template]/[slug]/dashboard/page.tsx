@@ -14,6 +14,7 @@ import { getPaymentSettings } from '@/lib/payments/payment-settings'
 import LoginForm from './LoginForm'
 import DashboardClient from './DashboardClient'
 import PaymentGate from './PaymentGate'
+import { fetchAllRows } from '@/lib/supabase/fetch-all'
 import { DashboardI18nProvider } from './DashboardI18nProvider'
 import { AuthChrome } from '@/components/site/AuthChrome'
 import { fromDbRow } from './guests/types'
@@ -167,26 +168,31 @@ export default async function DashboardPage({ params }: PageProps) {
     { data: guestsRaw },
     { data: attendancesRaw },
   ] = await Promise.all([
-    admin
+    // fetchAllRows: a plain select stops at Supabase's 1000-row cap.
+    fetchAllRows<any>(() => admin
       .from('rsvps')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('invitation_id', invitation.id)
-      .order('created_at', { ascending: false }),
-    admin
+      .order('created_at', { ascending: false })
+      .order('id')),
+    fetchAllRows<any>(() => admin
       .from('gift_confirmations')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('invitation_id', invitation.id)
-      .order('created_at', { ascending: false }),
-    admin
+      .order('created_at', { ascending: false })
+      .order('id')),
+    fetchAllRows<any>(() => admin
       .from('guests')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('invitation_id', invitation.id)
-      .order('created_at', { ascending: true }),
-    admin
+      .order('created_at', { ascending: true })
+      .order('id')),
+    fetchAllRows<any>(() => admin
       .from('attendances')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('invitation_id', invitation.id)
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
+      .order('id')),
   ])
 
   // Decrypt guests rows server-side — the client never sees ciphertext.

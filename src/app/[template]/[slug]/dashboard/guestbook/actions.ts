@@ -3,6 +3,7 @@
 import { randomBytes } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { fetchAllRows } from '@/lib/supabase/fetch-all'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { planHasGuestbook } from '@/lib/payments/plans'
 import { decryptField } from '@/lib/guests/crypto'
@@ -63,10 +64,11 @@ export async function searchWalkInGuests(
   if (!q) return []
 
   const admin = createSupabaseAdminClient()
-  const { data, error } = (await admin
+  const { data, error } = (await fetchAllRows(() => admin
     .from('guests')
-    .select('id, name_enc, phone_enc, group_label')
-    .eq('invitation_id', invitation_id)) as {
+    .select('id, name_enc, phone_enc, group_label', { count: 'exact' })
+    .eq('invitation_id', invitation_id)
+    .order('id'))) as {
     data:
       | { id: string; name_enc: string; phone_enc: string | null; group_label: string | null }[]
       | null
@@ -147,11 +149,18 @@ export async function addWalkInAttendance(input: {
     // RSVP row (which may predate guest-linking, so its guest_id is null). This
     // is why manually adding an RSVP'd guest updates their RSVP entry rather
     // than spawning a separate Walk-in row.
-    const { data: candidates } = (await admin
+    const { data: candidates, error: candErr } = (await fetchAllRows(() => admin
       .from('attendances')
-      .select('id, guest_id, source, name_enc')
-      .eq('invitation_id', invitation_id)) as {
+      .select('id, guest_id, source, name_enc', { count: 'exact' })
+      .eq('invitation_id', invitation_id)
+      .order('id'))) as {
       data: { id: string; guest_id: string | null; source: AttendanceRowDb['source']; name_enc: string }[] | null
+      error: unknown
+    }
+    // Without the full ledger we can't tell an update from a duplicate — refuse.
+    if (candErr) {
+      console.error('[addWalkInAttendance ledger]', candErr)
+      return { ok: false, code: 'error', error: 'Gagal memuat buku tamu. Coba lagi sebentar lagi.' }
     }
     const rows = candidates ?? []
     const target = name.trim().toLowerCase()

@@ -93,4 +93,19 @@ describe('Buku Tamu server-side Premium gate (entitlement)', () => {
     expect(res.ok).toBe(false)
     expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
   })
+
+  it('PREMIUM walk-in refuses (no insert) when the ledger cannot be read in full', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: { plan: 'premium' } } },
+        guests: { select: { data: { id: 'g1', name_enc: 'X', invitation_id: 'inv-1' } } },
+        attendances: { select: { error: { message: 'down' } }, insert: { data: attendanceRowDb } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    const res = await addWalkInAttendance({ slug: 'premium-couple', guestId: 'g1', count: 1 })
+    expect(res.ok).toBe(false)
+    expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
+  })
 })
+

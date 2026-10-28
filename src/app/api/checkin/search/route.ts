@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { fetchAllRows } from '@/lib/supabase/fetch-all'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
 import { decryptField as decryptGuest } from '@/lib/guests/crypto'
 import { decryptField as decryptApp } from '@/lib/crypto/app'
@@ -35,11 +36,14 @@ export async function POST(req: Request) {
   }
 
   const [{ data: guests, error: gErr }, { data: rsvps, error: rErr }, { data: links, error: lErr }] = (await Promise.all([
-    admin.from('guests').select('id, name_enc, group_label').eq('invitation_id', inv.id),
-    admin.from('rsvps').select('id, guest_name_enc').eq('invitation_id', inv.id),
+    // fetchAllRows: a plain select stops at 1000 rows — guest #1001 would be "not found".
+    fetchAllRows(() => admin.from('guests').select('id, name_enc, group_label', { count: 'exact' })
+      .eq('invitation_id', inv.id).order('id')),
+    fetchAllRows(() => admin.from('rsvps').select('id, guest_name_enc', { count: 'exact' })
+      .eq('invitation_id', inv.id).order('id')),
     // Ledger rows that tie an RSVP to its invited guest (written by /api/rsvp).
-    admin.from('attendances').select('rsvp_id').eq('invitation_id', inv.id)
-      .not('rsvp_id', 'is', null).not('guest_id', 'is', null),
+    fetchAllRows(() => admin.from('attendances').select('rsvp_id', { count: 'exact' }).eq('invitation_id', inv.id)
+      .not('rsvp_id', 'is', null).not('guest_id', 'is', null).order('id')),
   ])) as any
 
   if (gErr || rErr || lErr) return NextResponse.json({ error: SEARCH_FAILED }, { status: 500 })

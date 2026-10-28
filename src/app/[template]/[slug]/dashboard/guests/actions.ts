@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { fetchAllRows } from '@/lib/supabase/fetch-all'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { verifyOwnership } from '@/editor/lib/auth'
 import { parseGuestImport } from '@/lib/guests/parse-import'
@@ -144,11 +145,17 @@ export async function importGuests(
   // Existing hashes for this invitation → guarantee the batch never collides
   // with codes already issued (the unique index would otherwise reject the
   // whole insert).
-  const { data: existing } = (await admin
+  // fetchAllRows: `.limit()` can't lift Supabase's 1000-row cap — past it the
+  // collision check would miss codes and the unique index rejects the import.
+  const { data: existing, error: existingErr } = (await fetchAllRows(() => admin
     .from('guests')
-    .select('rsvp_token_hash')
+    .select('rsvp_token_hash', { count: 'exact' })
     .eq('invitation_id', invitation_id)
-    .limit(10_000)) as { data: { rsvp_token_hash: string | null }[] | null }
+    .order('id'))) as { data: { rsvp_token_hash: string | null }[] | null; error: unknown }
+  if (existingErr) {
+    console.error('[importGuests existing hashes]', existingErr)
+    throw new Error('Gagal memeriksa daftar tamu. Coba lagi sebentar lagi.')
+  }
   const usedHashes = new Set((existing || []).map((r) => r.rsvp_token_hash).filter(Boolean) as string[])
 
   const insertRows = rows.map((r) => {
