@@ -49,18 +49,18 @@ export function publicUrl(key: string): string {
 /**
  * Presigned PUT URL for a direct browser upload.
  *
- * `contentType` is attached to the request but is deliberately NOT signed:
- * aws4fetch keeps `content-type` in its UNSIGNABLE_HEADERS set, so only `host`
- * ends up in X-Amz-SignedHeaders. That is the behaviour we want — the browser's
- * PUT records whatever Content-Type it sends without having to match the
- * signature byte-for-byte, so the classic presigned-upload 403 cannot happen.
- * Signing it would buy no security anyway: a caller who can reach /sign chooses
- * the declared type there too, which is exactly why /verify sniffs the real
- * magic bytes and deletes anything that is not genuine media.
+ * `contentType` IS signed (X-Amz-SignedHeaders = content-type;host), so R2
+ * rejects a PUT whose Content-Type differs from the one /sign checked against
+ * ALLOWED_MIMES. This is a security boundary, not a nicety: R2 stores and the
+ * public media host serves whatever Content-Type the PUT carried, and /verify
+ * is a step the CLIENT chooses to call. Unsigned, any signed-in account could
+ * PUT `text/html` and get a live web page on media.fincards.land.
  *
- * Do NOT "fix" this by passing `allHeaders: true` — that would sign
- * content-length and user-agent as well, which the browser sets itself, and
- * every upload would 403.
+ * `allHeaders: true` is what makes aws4fetch sign content-type (it is in its
+ * UNSIGNABLE_HEADERS set otherwise). It does NOT drag in content-length or
+ * user-agent: the signer only sees the headers on the Request built here, and
+ * the browser-added ones are never part of it. uploadFile.ts sends the same
+ * contentType string it sent to /sign, so the signature matches.
  */
 export async function presignPut(
   key: string,
@@ -71,7 +71,7 @@ export async function presignPut(
   url.searchParams.set('X-Amz-Expires', String(expiresSeconds))
   const signed = await r2().sign(
     new Request(url, { method: 'PUT', headers: { 'Content-Type': contentType } }),
-    { aws: { signQuery: true } },
+    { aws: { signQuery: true, allHeaders: true } },
   )
   return signed.url
 }

@@ -68,16 +68,27 @@ describe('presignPut', () => {
     expect(url).not.toContain('do-not-leak-this-secret-value')
   })
 
-  it('signs ONLY the host, so the browser cannot 403 on a Content-Type mismatch', async () => {
-    // aws4fetch keeps `content-type` in its UNSIGNABLE_HEADERS set, so the value
-    // we hand it never enters the signature. This is load-bearing for the browser
-    // upload: whatever Content-Type the PUT sends is recorded by R2 but not
-    // verified against the signature, which removes the whole 403-on-mismatch
-    // failure class. If a future signer change starts signing it, this test
-    // fails first — and uploadFile.ts would then have to match it byte-for-byte.
+  it('signs content-type + host — and nothing the browser adds itself', async () => {
+    // Signing content-type is the security boundary: R2 serves whatever type the
+    // PUT carried, so an unsigned type let any account store text/html on the
+    // public media host. Only content-type and host may be signed: the browser
+    // sets content-length / user-agent itself, and signing those would 403
+    // every upload. uploadFile.ts must PUT the exact contentType it sent /sign.
     const { presignPut } = await import('../r2')
     const url = await presignPut('inv-1/123-foto.webp', 'image/webp', 300)
-    expect(new URL(url).searchParams.get('X-Amz-SignedHeaders')).toBe('host')
-    expect(url).not.toContain('content-type')
+    expect(new URL(url).searchParams.get('X-Amz-SignedHeaders')).toBe('content-type;host')
+  })
+
+  it('binds the signature to the declared type (a different type gets a different signature)', async () => {
+    const { presignPut } = await import('../r2')
+    const now = new Date('2026-10-28T00:00:00Z')
+    vi.useFakeTimers({ now })
+    try {
+      const webp = new URL(await presignPut('inv-1/x', 'image/webp', 300)).searchParams.get('X-Amz-Signature')
+      const html = new URL(await presignPut('inv-1/x', 'text/html', 300)).searchParams.get('X-Amz-Signature')
+      expect(webp).not.toBe(html)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
