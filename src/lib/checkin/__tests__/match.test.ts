@@ -20,4 +20,24 @@ describe('matchCheckinNames', () => {
     const many = Array.from({ length: 9 }, (_, i) => c('guest', String(i), `Budiman ${i}`))
     expect(matchCheckinNames('budiman', many, 5)).toHaveLength(5)
   })
+  it('keeps two invited guests who share a name, each with its own label', () => {
+    const out = matchCheckinNames('budi', [
+      { kind: 'guest', id: 'g1', name: 'Budi Santoso', label: 'Keluarga Pria' },
+      { kind: 'guest', id: 'g2', name: 'Budi Santoso', label: 'Teman Kantor' },
+      c('guest', 'g3', 'Budiman'),
+    ])
+    expect(out.map((m) => m.id)).toEqual(['g1', 'g2', 'g3'])
+    expect(out.map((m) => m.label)).toEqual(['Keluarga Pria', 'Teman Kantor', null])
+  })
+  it('an invited guest + their RSVP show once, keeping the guest label', () => {
+    const out = matchCheckinNames('budi', [
+      { kind: 'guest', id: 'g1', name: 'Budi', label: 'VIP' },
+      c('rsvp', 'r1', 'Budi'),
+    ])
+    expect(out).toEqual([{ kind: 'rsvp', id: 'r1', name: 'Budi', label: 'VIP' }])
+  })
+  it('two RSVPs under one name are two people', () => {
+    expect(matchCheckinNames('budi', [c('rsvp', 'r1', 'Budi'), c('rsvp', 'r2', 'Budi')])).toHaveLength(2)
+  })
 })
+

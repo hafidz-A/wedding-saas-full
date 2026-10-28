@@ -28,17 +28,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ matches: [] })
   }
 
-  const [{ data: guests }, { data: rsvps }] = (await Promise.all([
-    admin.from('guests').select('id, name_enc').eq('invitation_id', inv.id),
+  const [{ data: guests }, { data: rsvps }, { data: links }] = (await Promise.all([
+    admin.from('guests').select('id, name_enc, group_label').eq('invitation_id', inv.id),
     admin.from('rsvps').select('id, guest_name_enc').eq('invitation_id', inv.id),
+    // Ledger rows that tie an RSVP to its invited guest (written by /api/rsvp).
+    admin.from('attendances').select('rsvp_id').eq('invitation_id', inv.id)
+      .not('rsvp_id', 'is', null).not('guest_id', 'is', null),
   ])) as any
+
+  // An RSVP already linked to its guest is the same person: list the guest
+  // only (confirming by guest_id stamps that same ledger row), so the matcher's
+  // same-name grouping isn't fooled into showing them twice.
+  const linkedRsvp = new Set<string>((links || []).map((l: { rsvp_id: string }) => l.rsvp_id))
 
   const candidates: CheckinCandidate[] = []
   for (const g of guests || []) {
     const name = decryptGuest(g.name_enc) ?? ''
-    if (name) candidates.push({ kind: 'guest', id: g.id, name })
+    if (name) candidates.push({ kind: 'guest', id: g.id, name, label: g.group_label || null })
   }
   for (const r of rsvps || []) {
+    if (linkedRsvp.has(r.id)) continue
     const name = decryptApp(r.guest_name_enc) ?? ''
     if (name) candidates.push({ kind: 'rsvp', id: r.id, name })
   }

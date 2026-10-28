@@ -4,7 +4,7 @@ import type React from 'react'
 import { useEffect, useState } from 'react'
 import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css'
 
-interface Match { kind: 'guest' | 'rsvp'; id: string; name: string }
+interface Match { kind: 'guest' | 'rsvp'; id: string; name: string; label?: string | null }
 
 export default function CheckinForm({ slug, token }: { slug: string; token: string }) {
   const [q, setQ] = useState('')
@@ -73,7 +73,10 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
               <ul style={list}>
                 {matches.map((m) => (
                   <li key={`${m.kind}-${m.id}`}>
-                    <button type="button" style={rowBtn} onClick={() => setPicked(m)}>{m.name}</button>
+                    <button type="button" style={rowBtn} onClick={() => setPicked(m)}>
+                      {m.name}
+                      {m.label && <span style={rowLabel}>{m.label}</span>}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -82,7 +85,7 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
         </>
       ) : (
         <>
-          <p style={{ ...p, fontSize: 18, color: 'var(--text-primary)' }}>Anda <strong>{picked.name}</strong>?</p>
+          <p style={{ ...p, fontSize: 18, color: 'var(--text-primary)' }}>Anda <strong>{picked.name}</strong>{picked.label ? ` (${picked.label})` : ''}?</p>
           {error && <p style={{ ...hint, color: 'var(--interactive-primary)' }}>{error}</p>}
           <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
             <button type="button" className={ctrl.btnGhost} style={{ flex: 1, height: 44 }} onClick={() => { setPicked(null); setError(null) }} disabled={saving}>Bukan</button>
@@ -103,5 +106,6 @@ const input: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSi
 const hint: React.CSSProperties = { color: 'var(--text-muted)', fontSize: 14, margin: '4px 0' }
 const list: React.CSSProperties = { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }
 const rowBtn: React.CSSProperties = { width: '100%', padding: '14px 16px', fontSize: 16, borderRadius: 'var(--radius-md)', border: '1px solid rgba(42,33,24,0.15)', background: 'var(--surface-raised)', color: 'var(--text-primary)', cursor: 'pointer', textAlign: 'left' }
+const rowLabel: React.CSSProperties = { display: 'block', fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }
 const ghostBtn: React.CSSProperties = { flex: 1, padding: '13px', borderRadius: 'var(--radius-pill)', border: '1px solid var(--border-strong)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 15 }
 const primaryBtn: React.CSSProperties = { flex: 2, padding: '13px', borderRadius: 'var(--radius-pill)', border: 'none', background: 'var(--color-charcoal)', color: 'var(--surface-warm)', cursor: 'pointer', fontSize: 15, fontWeight: 600 }

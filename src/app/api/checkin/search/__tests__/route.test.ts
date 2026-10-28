@@ -69,4 +69,38 @@ describe('POST /api/checkin/search', () => {
     const { matches } = await (await POST(search({ slug: 'x', token: TOKEN, q: 'citra' }))).json()
     expect(matches.some((m: any) => m.id === 'r1')).toBe(true)
   })
+
+  it('two invited guests with the same name both come back, with their labels', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      rpc: { rl_hit: { data: true } },
+      tables: {
+        invitations: { select: { data: INV } },
+        guests: { select: { data: [
+          { id: 'g1', name_enc: encGuest('Budi Santoso'), group_label: 'Keluarga Pria' },
+          { id: 'g2', name_enc: encGuest('Budi Santoso'), group_label: 'Teman Kantor' },
+        ] } },
+        rsvps: { select: { data: [] } },
+      },
+    }) as any)
+    const { matches } = await (await POST(search({ slug: 'x', token: TOKEN, q: 'budi' }))).json()
+    expect(matches.map((m: any) => [m.id, m.label])).toEqual([['g1', 'Keluarga Pria'], ['g2', 'Teman Kantor']])
+  })
+
+  it('an RSVP already linked to its guest is listed once, as the guest', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      rpc: { rl_hit: { data: true } },
+      tables: {
+        invitations: { select: { data: INV } },
+        guests: { select: { data: [
+          { id: 'g1', name_enc: encGuest('Budi Santoso'), group_label: 'A' },
+          { id: 'g2', name_enc: encGuest('Budi Santoso'), group_label: 'B' },
+        ] } },
+        rsvps: { select: { data: [{ id: 'r1', guest_name_enc: encApp('Budi Santoso') }] } },
+        attendances: { select: { data: [{ rsvp_id: 'r1' }] } },
+      },
+    }) as any)
+    const { matches } = await (await POST(search({ slug: 'x', token: TOKEN, q: 'budi' }))).json()
+    expect(matches.map((m: any) => m.id)).toEqual(['g1', 'g2'])
+  })
 })
+
