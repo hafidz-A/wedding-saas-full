@@ -90,4 +90,65 @@ describe('POST /api/checkin/confirm', () => {
     expect(fake._calls.some((c) => c.kind === 'update' && c.table === 'attendances')).toBe(true)
     expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
   })
+
+  describe('never reports "tercatat" for an arrival that was not saved', () => {
+    const RSVP = { id: 'r1', invitation_id: 'inv-1', guest_name_enc: '', guest_count: 2 }
+    const base = (attendances: any) =>
+      createFakeSupabase({
+        rpc: { rl_hit: { data: true } },
+        tables: {
+          invitations: { select: { data: INV } },
+          rsvps: { select: { data: { ...RSVP, guest_name_enc: encApp('Budi Santoso') } } },
+          guests: { select: { data: { id: 'g1', invitation_id: 'inv-1', name_enc: '' } } },
+          attendances,
+        },
+      })
+
+    it('500 (no ok) when the attendance insert fails', async () => {
+      mockAdmin.mockReturnValue(base({ select: { data: null }, insert: { error: { message: 'down' } } }) as any)
+      const res = await POST(confirm({ slug: 'x', token: TOKEN, kind: 'rsvp', id: 'r1' }))
+      expect(res.status).toBe(500)
+      expect((await res.json()).ok).toBeUndefined()
+    })
+
+    it('500 when the arrival update fails', async () => {
+      mockAdmin.mockReturnValue(base({ select: { data: { id: 'a1' } }, update: { error: { message: 'down' } } }) as any)
+      expect((await POST(confirm({ slug: 'x', token: TOKEN, kind: 'rsvp', id: 'r1' }))).status).toBe(500)
+    })
+
+    it('500 when the ledger lookup fails (no blind insert)', async () => {
+      const fake = base({ select: { error: { message: 'down' } }, insert: {} })
+      mockAdmin.mockReturnValue(fake as any)
+      expect((await POST(confirm({ slug: 'x', token: TOKEN, kind: 'rsvp', id: 'r1' }))).status).toBe(500)
+      expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'attendances')).toBe(false)
+    })
+
+    it('500 when the guest lookup itself fails', async () => {
+      mockAdmin.mockReturnValue(createFakeSupabase({
+        rpc: { rl_hit: { data: true } },
+        tables: { invitations: { select: { data: INV } }, guests: { select: { error: { code: '08006', message: 'down' } } } },
+      }) as any)
+      expect((await POST(confirm({ slug: 'x', token: TOKEN, kind: 'guest', id: 'g1' }))).status).toBe(500)
+    })
+
+    it('a malformed id is 404, not an outage', async () => {
+      mockAdmin.mockReturnValue(createFakeSupabase({
+        rpc: { rl_hit: { data: true } },
+        tables: { invitations: { select: { data: INV } }, rsvps: { select: { error: { code: '22P02', message: 'bad uuid' } } } },
+      }) as any)
+      expect((await POST(confirm({ slug: 'x', token: TOKEN, kind: 'rsvp', id: 'nope' }))).status).toBe(404)
+    })
+
+    it('a concurrent confirm that inserted first (23505) is stamped, not failed', async () => {
+      const fake = base({
+        select: [{ data: null }, { data: { id: 'a1' } }],
+        insert: { error: { code: '23505', message: 'duplicate' } },
+        update: {},
+      })
+      mockAdmin.mockReturnValue(fake as any)
+      const res = await POST(confirm({ slug: 'x', token: TOKEN, kind: 'rsvp', id: 'r1' }))
+      expect(res.status).toBe(200)
+      expect(fake._calls.some((c) => c.kind === 'update' && c.table === 'attendances')).toBe(true)
+    })
+  })
 })
