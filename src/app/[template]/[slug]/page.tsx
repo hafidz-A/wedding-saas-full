@@ -4,6 +4,7 @@ import TabletFrameUpgrade from './TabletFrameUpgrade'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import InvitationView from './InvitationView'
+import { TemporaryErrorView } from '@/components/ui/TemporaryErrorView'
 import { isValidTemplate, getDefaultConfig } from '@/config/templateIndex'
 import { getLang } from '@/lib/i18n/getLang'
 import { getDict } from '@/lib/i18n'
@@ -122,6 +123,9 @@ export default async function Page({ params, searchParams }: PageProps) {
 
     if (error) {
       console.error('[invitation fetch]', error)
+      // A database outage is NOT "this invitation doesn't exist": guests get a
+      // retry notice instead of a 404 they'd read as a broken or wrong link.
+      if (!isDemoSlug) return <TemporaryErrorView />
     }
 
     const isExpired =

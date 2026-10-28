@@ -158,15 +158,14 @@ export default async function DashboardPage({ params }: PageProps) {
     )
   }
 
-  // 4. Fetch RSVPs + gifts + guests + attendances in parallel.
-  //    The attendances query degrades gracefully: if the table doesn't exist
-  //    yet (migration not applied), Supabase resolves with error + null data
-  //    rather than throwing, so the Buku Tamu tab just shows an empty list.
+  // 4. Fetch RSVPs + gifts + guests + attendances in parallel. A failed read
+  //    throws to error.tsx (a "coba lagi" notice): rendering it as an empty
+  //    tab would tell the couple their RSVPs / guests are gone.
   const [
-    { data: rsvps },
-    { data: gifts },
-    { data: guestsRaw },
-    { data: attendancesRaw },
+    { data: rsvps, error: rsvpsErr },
+    { data: gifts, error: giftsErr },
+    { data: guestsRaw, error: guestsErr },
+    { data: attendancesRaw, error: attendancesErr },
   ] = await Promise.all([
     // fetchAllRows: a plain select stops at Supabase's 1000-row cap.
     fetchAllRows<any>(() => admin
@@ -194,6 +193,12 @@ export default async function DashboardPage({ params }: PageProps) {
       .order('created_at', { ascending: false })
       .order('id')),
   ])
+
+  const loadErr = rsvpsErr || giftsErr || guestsErr || attendancesErr
+  if (loadErr) {
+    console.error('[dashboard data load]', loadErr)
+    throw new Error('Dashboard data failed to load')
+  }
 
   // Decrypt guests rows server-side — the client never sees ciphertext.
   // If the guests table doesn't exist yet (migration not applied), guestsRaw
