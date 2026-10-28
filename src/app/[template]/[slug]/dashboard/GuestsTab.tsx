@@ -558,7 +558,7 @@ export default function GuestsTab({
 
                   <div className={styles.tokenBlock}>
                     <div className={styles.tokenHeader}>
-                      {t.tokenLabel} {g.rsvpSubmittedAt ? `(${t.tokenRsvpedBadge})` : g.tokenUsedAt ? `(${t.tokenUsedBadge})` : ''}:
+                      {t.tokenLabel} {codeBadges(g, t)}:
                     </div>
                     <code className={styles.tokenValue}>{g.rsvpToken || '—'}</code>
                   </div>
@@ -713,4 +713,13 @@ const badge: React.CSSProperties = {
   borderRadius: 'var(--radius-pill)',
   fontSize: 11,
   background: 'var(--border-subtle)',
+}
+
+/** "(sudah RSVP · sudah kirim ucapan)" — one code covers one RSVP and one ucapan. */
+function codeBadges(
+  g: Pick<GuestRow, 'rsvpSubmittedAt' | 'tokenUsedAt'>,
+  t: { tokenRsvpedBadge: string; tokenUsedBadge: string },
+): string {
+  const done = [g.rsvpSubmittedAt && t.tokenRsvpedBadge, g.tokenUsedAt && t.tokenUsedBadge].filter(Boolean)
+  return done.length ? `(${done.join(' · ')})` : ''
 }

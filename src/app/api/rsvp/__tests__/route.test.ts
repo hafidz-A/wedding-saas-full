@@ -122,6 +122,20 @@ describe('POST /api/rsvp', () => {
     expect(res.status).toBe(500)
   })
 
+  it('a failed insert releases the RSVP claim so the same code can retry', async () => {
+    const fake = createFakeSupabase({
+      tables: {
+        invitations: { select: { data: LIVE } },
+        guests: { update: [{ data: { id: 'g1' } }, {}] },
+        rsvps: { insert: { data: null, error: { message: 'boom' } } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    expect((await POST(post({ slug: 'x', guest_name: 'A', attending: true, token: '123456' }))).status).toBe(500)
+    const guestUpdates = fake._calls.filter((c) => c.kind === 'update' && c.table === 'guests')
+    expect(guestUpdates.at(-1)?.value).toEqual({ rsvp_submitted_at: null })
+  })
+
   it('returns 429 when rate-limited', async () => {
     mockAdmin.mockReturnValue(createFakeSupabase({ rpc: { rl_hit: { data: false } } }) as any)
     const res = await POST(post({ slug: 'x', guest_name: 'A', attending: true }))

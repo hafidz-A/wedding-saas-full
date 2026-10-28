@@ -35,7 +35,7 @@ export const defaultConfig = {
   inviteMessageTemplate:
     'Halo {{name}},\n\nDengan penuh sukacita kami mengundang Anda untuk hadir di hari bahagia kami. ' +
     'Buka undangannya di tautan berikut:\n\n{{url}}' +
-    '\n\nKode undangan kamu: {{kode}} (sekali pakai, untuk RSVP atau ucapan)\n\nTerima kasih 🙏',
+    '\n\nKode undangan kamu: {{kode}} (untuk satu RSVP dan satu ucapan)\n\nTerima kasih 🙏',
 
   sections: [
     {

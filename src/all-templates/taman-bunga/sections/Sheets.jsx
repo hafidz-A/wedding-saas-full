@@ -49,7 +49,7 @@ function CodeField({ id, value, onChange }) {
         value={value}
         onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, 6))}
       />
-      <span className="tb-field-hint">Ada di pesan undanganmu. Satu kode hanya bisa dipakai sekali — untuk RSVP atau ucapan.</span>
+      <span className="tb-field-hint">Ada di pesan undanganmu. Satu kode berlaku untuk satu RSVP dan satu ucapan.</span>
     </div>
   )
 }

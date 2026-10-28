@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { encryptField } from '@/lib/crypto/app'
 import { enforceRateLimit } from '@/lib/security/rate-limit'
-import { consumeGuestTokenForRsvp, markGuestRsvpSubmitted } from '@/lib/guests/tokenGate'
+import { consumeGuestTokenForRsvp, releaseRsvpClaim } from '@/lib/guests/tokenGate'
 
 /**
  * POST /api/rsvp
@@ -51,11 +51,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invitation not published' }, { status: 403 })
   }
 
-  // Single-use token gate + duplicate-RSVP guard. Consume only if the code is
-  // valid, unused, AND the guest hasn't already RSVP'd. Generic 403 (no
-  // wrong-vs-used oracle); friendly 409 for a guest who already submitted (e.g.
-  // the owner regenerated their code). Preview/demo never reaches here (the
-  // form simulates).
+  // One RSVP per code (claimed atomically via rsvp_submitted_at — independent
+  // of the code's one ucapan). Generic 403 for a wrong code (no oracle);
+  // friendly 409 for a guest who already RSVP'd (also after the owner
+  // regenerated their code). Preview/demo never reaches here (the form
+  // simulates).
   let check
   try {
     check = await consumeGuestTokenForRsvp(supabase, invitation.id, String(token || ''))
@@ -92,6 +92,8 @@ export async function POST(req: Request) {
 
   if (error || !rsvp) {
     console.error('[rsvp insert]', error)
+    // Release the claim so the guest can retry with the same code.
+    await releaseRsvpClaim(supabase, check.guestId)
     return NextResponse.json({ error: 'Failed to record RSVP' }, { status: 500 })
   }
 
@@ -116,12 +118,6 @@ export async function POST(req: Request) {
       console.warn('[rsvp→attendance]', attErr.message ?? attErr)
     }
   }
-
-  // Permanent RSVP-completed marker — set AFTER the row is safely inserted so a
-  // failed insert above (which returns 500 earlier) stays recoverable via token
-  // regenerate. Blocks a duplicate RSVP even if the owner later regenerates the
-  // guest's code.
-  await markGuestRsvpSubmitted(supabase, check.guestId)
 
   return NextResponse.json({ ok: true })
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { enforceRateLimit, getClientIp } from '@/lib/security/rate-limit'
 import { encryptField, decryptField } from '@/lib/crypto/app'
-import { consumeGuestToken } from '@/lib/guests/tokenGate'
+import { consumeGuestToken, releaseGuestToken } from '@/lib/guests/tokenGate'
 
 const ALLOWED_COLORS = new Set(['gold', 'coral', 'sky', 'emerald', 'purple'])
 const RATE_LIMIT_MS = 30_000 // 30 seconds between submissions per guest (slug+IP)
@@ -75,17 +75,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Undangan tidak ditemukan' }, { status: 404 })
   }
 
-  // Single-use token gate (truly single-use: an ucapan consumes the same code
-  // an RSVP would). Generic error, atomic consume, preview never reaches here.
-  let tokenOk: boolean
+  // One ucapan per code (independent of the code's one RSVP). Generic error,
+  // atomic claim, preview never reaches here.
+  let guestId: string | null
   try {
-    tokenOk = await consumeGuestToken(supabase, invitation.id, token)
+    guestId = await consumeGuestToken(supabase, invitation.id, token)
   } catch (e) {
     console.error('[guestbook token]', e)
     return NextResponse.json({ error: 'Gagal memvalidasi kode. Coba lagi.' }, { status: 500 })
   }
-  if (!tokenOk) {
-    return NextResponse.json({ error: 'Kode tidak valid atau sudah dipakai' }, { status: 403 })
+  if (!guestId) {
+    return NextResponse.json({ error: 'Kode tidak valid, atau ucapan dengan kode ini sudah terkirim' }, { status: 403 })
   }
 
   // Insert note — auto-approved per project config (no manual moderation).
@@ -102,6 +102,8 @@ export async function POST(req: Request) {
 
   if (error || !inserted) {
     console.error('[guestbook insert]', error)
+    // Release the claim so the guest can retry with the same code.
+    await releaseGuestToken(supabase, guestId)
     return NextResponse.json({ error: 'Gagal simpan note' }, { status: 500 })
   }
 

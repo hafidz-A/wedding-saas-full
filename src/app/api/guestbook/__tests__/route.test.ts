@@ -123,4 +123,29 @@ describe('POST /api/guestbook token gate', () => {
     expect(res.status).toBe(200)
     expect(fake._calls.some((c) => c.kind === 'insert' && c.table === 'guestbook_notes')).toBe(true)
   })
+
+  it('a failed insert releases the ucapan claim so the same code can retry', async () => {
+    const fake = createFakeSupabase({
+      rpc: { rl_hit: { data: true } },
+      tables: {
+        invitations: { select: { data: { id: 'inv-1', is_published: true, is_paid: true } } },
+        guests: { update: [{ data: { id: 'g1' } }, {}] },
+        guestbook_notes: { insert: { data: null, error: { message: 'boom' } } },
+      },
+    })
+    mockAdmin.mockReturnValue(fake as any)
+    expect((await POST(post({ slug: 'x4', name: 'A', message: 'hai', token: '123456' }))).status).toBe(500)
+    const guestUpdates = fake._calls.filter((c) => c.kind === 'update' && c.table === 'guests')
+    expect(guestUpdates.at(-1)?.value).toEqual({ token_used_at: null })
+  })
+
+  it('the ucapan claim never touches the RSVP marker (a wish does not block the RSVP)', async () => {
+    const fake = liveNoteFake()
+    mockAdmin.mockReturnValue(fake as any)
+    await POST(post({ slug: 'x5', name: 'A', message: 'hai', token: '123456' }))
+    const claim = fake._calls.find((c) => c.kind === 'update' && c.table === 'guests')!
+    expect(claim.value).toHaveProperty('token_used_at')
+    expect(claim.value).not.toHaveProperty('rsvp_submitted_at')
+  })
 })
+

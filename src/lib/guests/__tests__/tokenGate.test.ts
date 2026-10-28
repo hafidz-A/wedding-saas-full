@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import { randomBytes } from 'node:crypto'
 import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
 import { hashToken } from '../token'
-import { consumeGuestToken, consumeGuestTokenForRsvp, markGuestRsvpSubmitted } from '../tokenGate'
+import { consumeGuestToken, consumeGuestTokenForRsvp, releaseGuestToken, releaseRsvpClaim } from '../tokenGate'
 
 beforeAll(() => {
   process.env.GUESTS_ENCRYPTION_KEY = randomBytes(32).toString('base64')
@@ -11,13 +11,13 @@ beforeAll(() => {
 describe('consumeGuestToken', () => {
   it('returns false for a malformed token without touching the DB', async () => {
     const fake = createFakeSupabase()
-    expect(await consumeGuestToken(fake, 'inv-1', 'abc')).toBe(false)
+    expect(await consumeGuestToken(fake, 'inv-1', 'abc')).toBeNull()
     expect(fake.lastCall('update')).toBeUndefined()
   })
 
-  it('consumes and returns true when an unused matching row exists', async () => {
+  it('claims the ucapan and returns the guest id when an unused matching row exists', async () => {
     const fake = createFakeSupabase({ tables: { guests: { update: { data: { id: 'g1' } } } } })
-    expect(await consumeGuestToken(fake, 'inv-1', '123456')).toBe(true)
+    expect(await consumeGuestToken(fake, 'inv-1', '123456')).toBe('g1')
     const upd = fake.lastCall('update')
     expect(upd?.value).toHaveProperty('token_used_at')
     const filters = fake._calls.filter((c) => c.kind === 'filter')
@@ -29,7 +29,7 @@ describe('consumeGuestToken', () => {
 
   it('returns false when no unused row matched (wrong or already-used)', async () => {
     const fake = createFakeSupabase({ tables: { guests: { update: { data: null } } } })
-    expect(await consumeGuestToken(fake, 'inv-1', '999999')).toBe(false)
+    expect(await consumeGuestToken(fake, 'inv-1', '999999')).toBeNull()
   })
 
   it('throws when the DB errors', async () => {
@@ -45,17 +45,19 @@ describe('consumeGuestTokenForRsvp', () => {
     expect(fake.lastCall('update')).toBeUndefined()
   })
 
-  it('returns ok + guestId when an unused, not-yet-rsvped row is consumed', async () => {
+  it('claims the RSVP (rsvp_submitted_at) independently of the ucapan marker', async () => {
     const fake = createFakeSupabase({ tables: { guests: { update: { data: { id: 'g1' } } } } })
     const r = await consumeGuestTokenForRsvp(fake, 'inv-1', '123456')
     expect(r).toEqual({ result: 'ok', guestId: 'g1' })
     const upd = fake.lastCall('update')
-    expect(upd?.value).toHaveProperty('token_used_at')
-    // atomic consume guards on BOTH token_used_at and rsvp_submitted_at being null
+    expect(upd?.value).toHaveProperty('rsvp_submitted_at')
+    expect(upd?.value).not.toHaveProperty('token_used_at')
+    // the atomic claim guards on rsvp_submitted_at only — a sent ucapan doesn't block the RSVP
     const filters = fake._calls.filter((c) => c.kind === 'filter')
+    expect(filters.some((f) => f.column === 'invitation_id' && f.value === 'inv-1')).toBe(true)
     expect(filters.some((f) => f.column === 'rsvp_token_hash' && f.value === hashToken('inv-1', '123456'))).toBe(true)
-    expect(filters.some((f) => f.column === 'token_used_at' && f.value === null)).toBe(true)
     expect(filters.some((f) => f.column === 'rsvp_submitted_at' && f.value === null)).toBe(true)
+    expect(filters.some((f) => f.column === 'token_used_at')).toBe(false)
   })
 
   it('returns already_rsvped when the row exists but rsvp_submitted_at is set', async () => {
@@ -70,7 +72,7 @@ describe('consumeGuestTokenForRsvp', () => {
     expect((await consumeGuestTokenForRsvp(fake, 'inv-1', '999999')).result).toBe('invalid')
   })
 
-  it('returns invalid when the row exists but rsvp_submitted_at is null (code spent on ucapan)', async () => {
+  it('returns invalid when the claim matched nothing and the row shows no RSVP', async () => {
     const fake = createFakeSupabase({ tables: { guests: { update: { data: null }, select: { data: { rsvp_submitted_at: null } } } } })
     expect((await consumeGuestTokenForRsvp(fake, 'inv-1', '123456')).result).toBe('invalid')
   })
@@ -81,13 +83,18 @@ describe('consumeGuestTokenForRsvp', () => {
   })
 })
 
-describe('markGuestRsvpSubmitted', () => {
-  it('stamps rsvp_submitted_at for the guest id (only if still null)', async () => {
-    const fake = createFakeSupabase({ tables: { guests: { update: { data: { id: 'g1' } } } } })
-    await markGuestRsvpSubmitted(fake, 'g1')
-    const upd = fake.lastCall('update')
-    expect(upd?.value).toHaveProperty('rsvp_submitted_at')
-    const filters = fake._calls.filter((c) => c.kind === 'filter')
-    expect(filters.some((f) => f.column === 'id' && f.value === 'g1')).toBe(true)
+describe('releasing a claim after a failed insert', () => {
+  it('releaseRsvpClaim clears rsvp_submitted_at for that guest', async () => {
+    const fake = createFakeSupabase({ tables: { guests: { update: {} } } })
+    await releaseRsvpClaim(fake, 'g1')
+    expect(fake.lastCall('update')?.value).toEqual({ rsvp_submitted_at: null })
+    expect(fake._calls.some((f) => f.kind === 'filter' && f.column === 'id' && f.value === 'g1')).toBe(true)
+  })
+
+  it('releaseGuestToken clears token_used_at for that guest', async () => {
+    const fake = createFakeSupabase({ tables: { guests: { update: {} } } })
+    await releaseGuestToken(fake, 'g1')
+    expect(fake.lastCall('update')?.value).toEqual({ token_used_at: null })
+    expect(fake._calls.some((f) => f.kind === 'filter' && f.column === 'id' && f.value === 'g1')).toBe(true)
   })
 })
