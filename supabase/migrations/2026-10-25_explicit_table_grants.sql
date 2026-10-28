@@ -50,10 +50,10 @@ grant select, insert, update, delete on table public.playlist_songs to authentic
 grant select, update, delete on table public.rsvps to anon;
 grant select, insert, update, delete on table public.rsvps to authenticated, service_role;
 
--- ── invitations: hardened by 2026-06-03_security_hardening ──
---    anon: only the (id, is_published) columns, read-only;
---    authenticated: read-only (owners write through the server);
+-- ── invitations: hardened by 2026-06-03_security_hardening + 2026-10-28_security_audit_fixes ──
+--    anon + authenticated: only the (id, is_published) columns, read-only
+--    (every owner read goes through the server's admin client);
 --    service_role: full CRUD (the server's admin client).
 grant select (id, is_published) on table public.invitations to anon;
-grant select on table public.invitations to authenticated;
+grant select (id, is_published) on table public.invitations to authenticated;
 grant select, insert, update, delete on table public.invitations to service_role;
