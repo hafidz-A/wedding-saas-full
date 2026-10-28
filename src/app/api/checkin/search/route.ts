@@ -6,8 +6,12 @@ import { decryptField as decryptApp } from '@/lib/crypto/app'
 import { matchCheckinNames, type CheckinCandidate } from '@/lib/checkin/match'
 import { timingSafeStrEqual } from '@/lib/security/timing'
 
+const SEARCH_FAILED = 'Gagal mencari nama. Coba lagi.'
+
 export async function POST(req: Request) {
-  const limited = await enforceRateLimit(req, 'checkin-search', { windowMs: 60_000, max: 30 })
+  // Per IP, and a whole venue on one WiFi shares one IP: sized for a rush of
+  // arrivals (each guest types a few debounced searches), not for one person.
+  const limited = await enforceRateLimit(req, 'checkin-search', { windowMs: 60_000, max: 120 })
   if (limited) return limited
 
   let body: any
@@ -18,23 +22,27 @@ export async function POST(req: Request) {
   if (!slug || !token || q.length < 3) return NextResponse.json({ matches: [] })
 
   const admin = createSupabaseAdminClient()
-  const { data: inv } = (await admin
+  const { data: inv, error: invErr } = (await admin
     .from('invitations')
     .select('id, is_published, is_paid, checkin_token')
     .eq('slug', slug)
-    .maybeSingle()) as { data: { id: string; is_published: boolean; is_paid: boolean; checkin_token: string | null } | null }
+    .maybeSingle()) as { data: { id: string; is_published: boolean; is_paid: boolean; checkin_token: string | null } | null; error: unknown }
+  // An outage must not read as "Nama tidak ditemukan" on the guest's screen.
+  if (invErr) return NextResponse.json({ error: SEARCH_FAILED }, { status: 500 })
   // Token-gate: no token match → no names, ever.
   if (!inv || !inv.is_published || !inv.is_paid || !inv.checkin_token || !timingSafeStrEqual(inv.checkin_token, token)) {
     return NextResponse.json({ matches: [] })
   }
 
-  const [{ data: guests }, { data: rsvps }, { data: links }] = (await Promise.all([
+  const [{ data: guests, error: gErr }, { data: rsvps, error: rErr }, { data: links, error: lErr }] = (await Promise.all([
     admin.from('guests').select('id, name_enc, group_label').eq('invitation_id', inv.id),
     admin.from('rsvps').select('id, guest_name_enc').eq('invitation_id', inv.id),
     // Ledger rows that tie an RSVP to its invited guest (written by /api/rsvp).
     admin.from('attendances').select('rsvp_id').eq('invitation_id', inv.id)
       .not('rsvp_id', 'is', null).not('guest_id', 'is', null),
   ])) as any
+
+  if (gErr || rErr || lErr) return NextResponse.json({ error: SEARCH_FAILED }, { status: 500 })
 
   // An RSVP already linked to its guest is the same person: list the guest
   // only (confirming by guest_id stamps that same ledger row), so the matcher's

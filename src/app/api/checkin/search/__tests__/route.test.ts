@@ -102,5 +102,28 @@ describe('POST /api/checkin/search', () => {
     const { matches } = await (await POST(search({ slug: 'x', token: TOKEN, q: 'budi' }))).json()
     expect(matches.map((m: any) => m.id)).toEqual(['g1', 'g2'])
   })
+
+  it('an outage is a 500, never an empty "not found" list', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      rpc: { rl_hit: { data: true } },
+      tables: {
+        invitations: { select: { data: INV } },
+        guests: { select: { error: { message: 'down' } } },
+        rsvps: { select: { data: [] } },
+      },
+    }) as any)
+    const res = await POST(search({ slug: 'x', token: TOKEN, q: 'budi' }))
+    expect(res.status).toBe(500)
+    expect((await res.json()).matches).toBeUndefined()
+  })
+
+  it('SECURITY: an outage response carries no names even with a valid token', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      rpc: { rl_hit: { data: true } },
+      tables: { invitations: { select: { error: { message: 'down' } } } },
+    }) as any)
+    const body = JSON.stringify(await (await POST(search({ slug: 'x', token: 'WRONG', q: 'budi' }))).json())
+    expect(body).not.toContain('Budi')
+  })
 })
 

@@ -6,10 +6,17 @@ import ctrl from '@/app/[template]/[slug]/dashboard/dashboardControls.module.css
 
 interface Match { kind: 'guest' | 'rsvp'; id: string; name: string; label?: string | null }
 
+const BUSY = 'Sedang ramai, coba lagi sebentar.'
+const FAILED = 'Gangguan jaringan, coba lagi.'
+
 export default function CheckinForm({ slug, token }: { slug: string; token: string }) {
   const [q, setQ] = useState('')
   const [matches, setMatches] = useState<Match[]>([])
   const [searching, setSearching] = useState(false)
+  // Set when the search itself failed (busy / outage / offline) — distinct from
+  // "no such name", which sends the guest to the committee desk.
+  const [searchError, setSearchError] = useState<string | null>(null)
+  const [retry, setRetry] = useState(0)
   const [picked, setPicked] = useState<Match | null>(null)
   const [saving, setSaving] = useState(false)
   const [doneName, setDoneName] = useState<string | null>(null)
@@ -18,7 +25,7 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
   useEffect(() => {
     if (picked || doneName) return
     const term = q.trim()
-    if (term.length < 3) { setMatches([]); return }
+    if (term.length < 3) { setMatches([]); setSearchError(null); return }
     setSearching(true)
     const h = setTimeout(async () => {
       try {
@@ -26,12 +33,18 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug, token, q: term }),
         })
+        if (!res.ok) {
+          setMatches([])
+          setSearchError(res.status === 429 ? BUSY : FAILED)
+          return
+        }
         const data = await res.json()
+        setSearchError(null)
         setMatches(Array.isArray(data.matches) ? data.matches : [])
-      } catch { setMatches([]) } finally { setSearching(false) }
+      } catch { setMatches([]); setSearchError(FAILED) } finally { setSearching(false) }
     }, 250)
     return () => clearTimeout(h)
-  }, [q, slug, token, picked, doneName])
+  }, [q, slug, token, picked, doneName, retry])
 
   async function confirm() {
     if (!picked) return
@@ -41,8 +54,8 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug, token, kind: picked.kind, id: picked.id }),
       })
-      const data = await res.json()
-      if (!res.ok) { setError(data.error || 'Gagal mencatat kehadiran. Coba lagi.'); setSaving(false); return }
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) { setError(res.status === 429 ? BUSY : data.error || 'Gagal mencatat kehadiran. Coba lagi.'); setSaving(false); return }
       setDoneName(data.name || picked.name)
     } catch { setError('Gangguan jaringan, coba lagi.'); setSaving(false) }
   }
@@ -67,6 +80,11 @@ export default function CheckinForm({ slug, token }: { slug: string; token: stri
           <div style={{ marginTop: 12 }}>
             {q.trim().length < 3 ? null : searching ? (
               <p style={hint}>Mencari…</p>
+            ) : searchError ? (
+              <p style={hint}>
+                {searchError}{' '}
+                <button type="button" className={ctrl.btnGhost} onClick={() => setRetry((n) => n + 1)}>Coba lagi</button>
+              </p>
             ) : matches.length === 0 ? (
               <p style={hint}>Nama tidak ditemukan — silakan ke meja panitia.</p>
             ) : (

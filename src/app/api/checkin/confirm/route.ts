@@ -51,7 +51,8 @@ async function markArrived(
 }
 
 export async function POST(req: Request) {
-  const limited = await enforceRateLimit(req, 'checkin-confirm', { windowMs: 60_000, max: 15 })
+  // Per IP — a whole venue on one WiFi shares it (see the search route).
+  const limited = await enforceRateLimit(req, 'checkin-confirm', { windowMs: 60_000, max: 60 })
   if (limited) return limited
 
   let body: any
