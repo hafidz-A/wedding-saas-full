@@ -307,9 +307,14 @@ supabase/                                          ← schema.sql (base) + migra
    only if a non-admin client reads it — RLS still guards rows). Rebuilding from migrations (new
    project, preview branch, `supabase db reset`) relies on `2026-10-25_explicit_table_grants.sql`,
    which re-states production's per-table grants as read on that date (incl. the `invitations`
-   hardening: anon may read only `id, is_published`) — **keep it in sync** when a later migration
+   hardening: anon AND authenticated may read only `id, is_published`, since
+   `2026-10-28_security_audit_fixes.sql`) — **keep it in sync** when a later migration
    changes a table's grants. Migrations are applied by hand (no CLI/CI link), so committing one
-   never touches production.
+   never touches production. **Functions are the opposite trap:** Supabase still grants EXECUTE on
+   every new `public` function to anon + authenticated, so a `SECURITY DEFINER` function is a public
+   RPC (`/rest/v1/rpc/<name>`) unless the same migration runs
+   `revoke execute on function … from public, anon, authenticated;` + `grant … to service_role;`
+   (see `rl_hit` and `increment_guest_quota_extra`, both shipped open and fixed later).
 13. **Taman Bunga specifics.** (a) The canvas engine (`engine/scene.js`) flags wide layouts with the
    `data-tb-wide` ATTRIBUTE on the Shell root, never a class — React owns that element's `className`
    and rewrites it on every re-render (e.g. adding `tb-open`), which silently dropped a class.
