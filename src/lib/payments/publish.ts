@@ -2,6 +2,19 @@ import 'server-only'
 import { resolvePlan } from './plans'
 import { sendPaymentReceipt } from '@/lib/email/receipt'
 
+/**
+ * Throw when a payment write failed. These helpers run AFTER the money moved:
+ * a silently dropped write leaves a paying couple without what they bought,
+ * and the webhook would still ACK 200 so Midtrans never resends. Throwing lets
+ * the webhook answer 500 (Midtrans retries) and the recheck buttons say so.
+ */
+function must(res: { error?: unknown } | null | undefined, what: string): void {
+  if (res?.error) {
+    console.error(`[payments] ${what} write failed`, res.error)
+    throw new Error(`Payment ${what} write failed`)
+  }
+}
+
 export interface PublishableInvitation {
   id: string
   plan: string
@@ -28,15 +41,17 @@ export async function applyPaidUpgrade(
   nowMs: number = Date.now(),
 ): Promise<void> {
   const resolved = await resolvePlan(upgrade.template_id, upgrade.to_plan)
-  await (admin.from('invitations') as any)
+  // Both writes are idempotent and the row stays 'pending' until the second
+  // lands, so a throw here is safely retried (webhook 500 → Midtrans resends).
+  must(await (admin.from('invitations') as any)
     .update({
       plan: upgrade.to_plan,
       expires_at: resolved ? resolved.expiresAt(nowMs) : null,
     })
-    .eq('id', upgrade.invitation_id)
-  await (admin.from('plan_upgrades') as any)
+    .eq('id', upgrade.invitation_id), 'upgrade invitation')
+  must(await (admin.from('plan_upgrades') as any)
     .update({ status: 'paid', paid_at: new Date(nowMs).toISOString() })
-    .eq('id', upgrade.id)
+    .eq('id', upgrade.id), 'upgrade row')
   // Receipt is best-effort — sendPaymentReceipt never throws, so a failure here
   // can never roll back the upgrade that was just applied.
   await sendPaymentReceipt(admin, upgrade.invitation_id, 'upgrade')
@@ -61,13 +76,28 @@ export async function applyPaidQuotaAddon(
   addon: PaidQuotaAddon,
   nowMs: number = Date.now(),
 ): Promise<void> {
-  await admin.rpc('increment_guest_quota_extra', {
+  // The increment is NOT idempotent, so claim the row first (pending → paid,
+  // matching only while still pending): a retried webhook, or a webhook racing
+  // a manual recheck, can then never add the same quota twice.
+  const claim = await (admin.from('quota_addons') as any)
+    .update({ status: 'paid', paid_at: new Date(nowMs).toISOString() })
+    .eq('id', addon.id)
+    .eq('status', 'pending')
+    .select('id')
+    .maybeSingle()
+  must(claim, 'addon claim')
+  if (!claim.data) return // already applied by another caller
+  const inc = await admin.rpc('increment_guest_quota_extra', {
     p_invitation_id: addon.invitation_id,
     p_qty: addon.qty_guests,
   })
-  await (admin.from('quota_addons') as any)
-    .update({ status: 'paid', paid_at: new Date(nowMs).toISOString() })
-    .eq('id', addon.id)
+  if (inc?.error) {
+    // Release the claim so the retry (webhook resend / recheck) applies it.
+    await (admin.from('quota_addons') as any)
+      .update({ status: 'pending', paid_at: null })
+      .eq('id', addon.id)
+    must(inc, 'addon increment')
+  }
   // Receipt is best-effort — sendPaymentReceipt never throws, so a failure here
   // can never roll back the quota top-up that was just applied.
   await sendPaymentReceipt(admin, addon.invitation_id, 'addon')
@@ -85,12 +115,12 @@ export async function extendActivePeriod(
   nowMs: number = Date.now(),
 ): Promise<void> {
   const resolved = await resolvePlan(inv.template_id, inv.plan)
-  await (admin.from('invitations') as any)
+  must(await (admin.from('invitations') as any)
     .update({
       is_published: true,
       expires_at: resolved ? resolved.expiresAt(nowMs) : null,
     })
-    .eq('id', inv.id)
+    .eq('id', inv.id), 'renewal')
   // Receipt is best-effort — sendPaymentReceipt never throws, so a failure here
   // can never roll back the renewal that was just applied.
   await sendPaymentReceipt(admin, inv.id, 'renewal')
@@ -129,7 +159,7 @@ export async function publishPaidInvitation(
   // depends on paid_channel being recorded here.
   if (opts.paidChannel != null) patch.paid_channel = opts.paidChannel
   if (opts.gatewayTxnId != null) patch.gateway_txn_id = opts.gatewayTxnId
-  await (admin.from('invitations') as any).update(patch).eq('id', inv.id)
+  must(await (admin.from('invitations') as any).update(patch).eq('id', inv.id), 'publish')
   // Receipt is best-effort (never throws) and only for real Midtrans payments —
   // comp/manual admin publishes (paidSource !== 'midtrans') stay silent.
   if (opts.paidSource === 'midtrans') await sendPaymentReceipt(admin, inv.id, 'initial')

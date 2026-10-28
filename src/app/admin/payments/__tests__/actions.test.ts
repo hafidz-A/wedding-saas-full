@@ -197,6 +197,24 @@ describe('ITEM 0 fix — admin recheck actions pass the DB client, not the guard
     expect(typeof mockPublish.mock.calls[0][0].from).toBe('function')
   })
 
+  it('adminRecheckPayment: a failed save is reported, not shown as applied', async () => {
+    mockAdmin.mockReturnValue(createFakeSupabase({
+      tables: { invitations: { select: { data: {
+        id: 'inv-1', plan: 'premium', template_id: 'lovebirds', is_paid: false,
+        gateway_order_id: 'inv_inv-1_1', guest_quota_extra: 0, expected_amount_idr: 100000,
+      } } } },
+    }) as any)
+    mockSnap.mockResolvedValue({
+      orderId: 'inv_inv-1_1', transactionId: 'txn-1', status: 'settlement',
+      fraudStatus: null, grossAmountIDR: 100000, paymentType: 'qris',
+    } as any)
+    mockPublish.mockRejectedValueOnce(new Error('Payment publish write failed'))
+    const r = await adminRecheckPayment('inv-1')
+    expect(r.ok).toBe(false)
+    expect((r as any).applied).toBeUndefined()
+    expect(r.error).toMatch(/gagal disimpan/)
+  })
+
   it('adminRecheckUpgrade: applyPaidUpgrade receives a real Supabase client', async () => {
     const UPG = { id: 'u1', invitation_id: 'inv-1', to_plan: 'premium', amount_idr: 50000, gateway_order_id: 'upg_inv-1_1', status: 'pending' }
     const fake = createFakeSupabase({

@@ -363,4 +363,28 @@ describe('POST /api/payment/midtrans/webhook', () => {
     expect(mockSettleRefund).not.toHaveBeenCalled()
     expect(mockSnap).not.toHaveBeenCalled()
   })
+
+  it('answers 500 (Midtrans retries) when a verified payment fails to save', async () => {
+    mockAdmin.mockReturnValue(invFake() as any)
+    mockResolve.mockResolvedValue({ amountIDR: 149000 } as any)
+    mockSnap.mockResolvedValue({
+      orderId: 'inv_inv-1_1', transactionId: 'txn-1', status: 'settlement',
+      fraudStatus: null, grossAmountIDR: 149000, paymentType: 'qris',
+    })
+    mockPublish.mockRejectedValueOnce(new Error('Payment publish write failed'))
+    const res = await post(withSig({
+      order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00',
+      transaction_status: 'settlement', transaction_id: 'txn-1', payment_type: 'qris',
+    }))
+    expect(res.status).toBe(500)
+    expect(JSON.stringify(await res.json())).not.toContain('write failed') // no internals in the reply
+  })
+
+  it('SECURITY: a forged notification is still a 401 before any apply path runs', async () => {
+    mockPublish.mockRejectedValueOnce(new Error('should not run'))
+    const res = await post({ order_id: 'inv_inv-1_1', status_code: '200', gross_amount: '149000.00', transaction_status: 'settlement', signature_key: 'forged' })
+    expect(res.status).toBe(401)
+    expect(mockPublish).not.toHaveBeenCalled()
+  })
 })
+

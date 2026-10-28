@@ -92,10 +92,19 @@ export async function POST(req: Request) {
   if (status === 'chargeback') return handleChargeback(admin, orderId)
   if (!isPaidStatus(status, body.fraud_status)) return NextResponse.json({ ok: true }) // pending/deny/cancel/expire
 
-  if (orderId.startsWith('upg_')) return handleUpgrade(admin, body)
-  if (orderId.startsWith('ren_')) return handleRenewal(admin, body)
-  if (orderId.startsWith('qta_')) return handleQuotaAddon(admin, body)
-  return handleInitial(admin, body)
+  // A verified payment whose write failed must NOT be ACKed: answering 500
+  // makes Midtrans resend the notification. Every apply path is safe to
+  // re-run (initial/upgrade skip rows already paid, the add-on claims its row
+  // before incrementing, a renewal recomputes the same expiry).
+  try {
+    if (orderId.startsWith('upg_')) return await handleUpgrade(admin, body)
+    if (orderId.startsWith('ren_')) return await handleRenewal(admin, body)
+    if (orderId.startsWith('qta_')) return await handleQuotaAddon(admin, body)
+    return await handleInitial(admin, body)
+  } catch (e) {
+    console.error('[midtrans webhook] apply failed, asking Midtrans to retry', orderId, e)
+    return NextResponse.json({ ok: false }, { status: 500 })
+  }
 }
 
 /**

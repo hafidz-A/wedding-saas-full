@@ -4,7 +4,7 @@ vi.mock('../plans', () => ({ resolvePlan: vi.fn() }))
 vi.mock('@/lib/email/receipt', () => ({ sendPaymentReceipt: vi.fn() }))
 import { resolvePlan } from '../plans'
 import { sendPaymentReceipt } from '@/lib/email/receipt'
-import { extendActivePeriod, applyPaidQuotaAddon, publishPaidInvitation } from '../publish'
+import { extendActivePeriod, applyPaidQuotaAddon, applyPaidUpgrade, publishPaidInvitation } from '../publish'
 import { createFakeSupabase } from '@/__test-stubs__/supabaseFake'
 
 function fakeAdmin() {
@@ -89,7 +89,7 @@ describe('publishPaidInvitation', () => {
 
 describe('applyPaidQuotaAddon', () => {
   it('calls the atomic increment RPC and marks the addon paid, untouching the invitation', async () => {
-    const fake = createFakeSupabase({ tables: { quota_addons: { update: {} } } })
+    const fake = createFakeSupabase({ tables: { quota_addons: { update: { data: { id: 'a1' } } } } })
     await applyPaidQuotaAddon(fake as any, { id: 'a1', invitation_id: 'inv-1', qty_guests: 100 })
 
     const rpc = fake._calls.find((c) => c.kind === 'rpc')
@@ -103,3 +103,46 @@ describe('applyPaidQuotaAddon', () => {
     expect(fake._calls.some((c) => c.kind === 'update' && c.table === 'invitations')).toBe(false)
   })
 })
+
+describe('payment writes that fail are never swallowed', () => {
+  const plan = { planId: 'basic', amountIDR: 100000, expiresAt: () => null } as any
+  const failing = () => createFakeSupabase({ default: { error: { message: 'db down' } } })
+
+  it('publishPaidInvitation throws and sends no receipt', async () => {
+    vi.mocked(resolvePlan).mockResolvedValue(plan)
+    await expect(publishPaidInvitation(failing() as any, { id: 'i', plan: 'basic', template_id: 't' }, 1, { paidSource: 'midtrans' }))
+      .rejects.toThrow()
+    expect(sendPaymentReceipt).not.toHaveBeenCalled()
+  })
+
+  it('extendActivePeriod throws', async () => {
+    vi.mocked(resolvePlan).mockResolvedValue(plan)
+    await expect(extendActivePeriod(failing() as any, { id: 'i', plan: 'basic', template_id: 't' })).rejects.toThrow()
+  })
+
+  it('applyPaidUpgrade throws', async () => {
+    vi.mocked(resolvePlan).mockResolvedValue(plan)
+    await expect(applyPaidUpgrade(failing() as any, { id: 'u', invitation_id: 'i', to_plan: 'premium', template_id: 't' }))
+      .rejects.toThrow()
+  })
+})
+
+describe('applyPaidQuotaAddon can never add the same quota twice', () => {
+  it('an addon already claimed (retry / race) does not increment again', async () => {
+    const fake = createFakeSupabase({ tables: { quota_addons: { update: { data: null } } } })
+    await applyPaidQuotaAddon(fake as any, { id: 'a1', invitation_id: 'inv-1', qty_guests: 100 })
+    expect(fake._calls.some((c) => c.kind === 'rpc')).toBe(false)
+    expect(sendPaymentReceipt).not.toHaveBeenCalled()
+  })
+
+  it('a failed increment releases the claim and throws, so the retry applies it', async () => {
+    const fake = createFakeSupabase({
+      rpc: { increment_guest_quota_extra: { error: { message: 'db down' } } },
+      tables: { quota_addons: { update: [{ data: { id: 'a1' } }, {}] } },
+    })
+    await expect(applyPaidQuotaAddon(fake as any, { id: 'a1', invitation_id: 'inv-1', qty_guests: 100 })).rejects.toThrow()
+    const updates = fake._calls.filter((c) => c.kind === 'update' && c.table === 'quota_addons')
+    expect(updates.map((u) => u.value.status)).toEqual(['paid', 'pending'])
+  })
+})
+
