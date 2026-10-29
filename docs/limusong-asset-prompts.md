@@ -1,151 +1,164 @@
 # Limusong (Songket · Limas · Musi) — Prompt Aset
 
-> Template adat Palembang / Sumatera Selatan, gaya **clean minimalist yang luwes**: latar
-> gading polos, objek cut-out melayang, bingkai bulat/lengkung, motif songket sebagai garis
-> emas tipis. Prototipe tata letak & gerak: `docs/prototypes/songket-limas-musi.html`.
->
-> Dokumen ini hanya untuk objek **cut-out** yang di-generate. Garis songket (pucuk rebung),
-> bingkai Rumah Limas versi garis, sungai, dan bulan digambar dengan kode — tidak perlu aset.
-> Foto mempelai datang dari pengantin, jadi **tidak** di-generate.
+> Template adat Palembang / Sumatera Selatan yang mengikuti alur kampanye Moooi
+> "A Life Extraordinary" (dicek dari rekaman layar, bukan ditebak). Prototipe:
+> `docs/prototypes/songket-limas-musi.html`.
+
+## Konsep (dari rekaman Moooi)
+
+- **Pembuka:** latar gelap, beberapa objek cut-out di pojok kanan atas dan kiri bawah, judul di
+  tengah, tombol "Enter". Saat ditekan, judulnya membesar menembus layar.
+- **Bab-bab berurutan, satu gulir = satu langkah.** Tiap bab:
+  1. **Gerbang motif**: satu motif kain/ornamen memenuhi layar dengan judul bab di tengahnya.
+     Cara masuk dan keluarnya beda-beda tiap bab:
+     - menutup dari tepi dengan lubang organik di tengah (Moooi "Double Bubble")
+     - pintu geser kiri-kanan (Moooi "Monster Garden")
+     - lingkaran membesar/mengecil
+     - tumbuh dari tepi lalu mengecil menjadi panel di ruangan (Moooi "Tokyo Blue")
+     - masuk lewat lubang lalu "terbang" menembusnya
+  2. **Ruang**: panggung gelap tanpa dinding. Objek cut-out berdiri di bawah sorot lampu, lampu
+     menyala satu per satu, dan motif yang sama muncul lagi sebagai panel/material di ruangan
+     itu.
+- Pembagian bab di prototipe:
+
+  | Bab | Motif | Cara buka |
+  |---|---|---|
+  | Mempelai | songket lepus | lubang organik |
+  | Acara | ukiran Palembang | pintu geser |
+  | Galeri | jumputan | lingkaran |
+  | Konfirmasi | bunga tabur | mengecil jadi panel |
+  | Penutup | riak Sungai Musi | lubang, lalu terbang menembus |
+
+Jadi asetnya ada **dua jenis**:
+- **A. Motif seamless** (tile yang bisa diulang tanpa sambungan terlihat): 5 buah.
+- **B. Objek cut-out** untuk pembuka dan ruang-ruang.
 
 ## Cara pakai
 
-1. Satu prompt = **[STYLE]** + **[BG]** (sesuai tool) + isi per aset + **[NEG]**. Tempel semua
-   blok apa adanya, dalam bahasa Inggris (hasil gambarnya biasanya lebih konsisten).
-2. **Mulai dari aset #1 (kain songket).** Kalau sudah cocok, lampirkan gambar itu sebagai
-   referensi di setiap prompt berikutnya, lalu tambahkan kalimat:
-   `Match the exact illustration style, colours and level of detail of the attached image.`
-   Cara ini yang menjaga semua aset terlihat satu keluarga.
-3. Minta 2–4 variasi, pilih satu. Ukuran: ambil resolusi paling besar yang ditawarkan.
-4. Kirim hasilnya ke chat ini (attach). Saya yang memotong latarnya, merapikan tepi, mengecilkan
-   ke `.webp`, dan memasangnya. Nama file tidak penting, cukup sebut nomornya (mis. "#5 kipas").
+1. Satu prompt = blok gaya (**[STYLE-A]** untuk motif, **[STYLE-B]** untuk objek) + **[BG]**
+   (khusus objek) + isi per aset + **[NEG]**. Tempel apa adanya dalam bahasa Inggris.
+2. Generate **A1 (songket)** dan **B1 (Rumah Limas)** dulu. Kalau sudah cocok, lampirkan
+   keduanya sebagai referensi di prompt berikutnya, lalu tambahkan kalimat:
+   `Match the exact style, colours and level of detail of the attached images.`
+3. Kirim hasilnya ke chat ini, cukup sebut nomornya (mis. "A3 jumputan"). Saya yang
+   merapikan sambungan tile, memotong latar objek, mengecilkan ke `.webp`, lalu memasangnya.
 
 ### ChatGPT atau Gemini?
 
 | | ChatGPT | Gemini |
 |---|---|---|
-| Latar transparan | **Bisa langsung** (PNG transparan) | Tidak bisa. Kalau diminta "transparent", sering menggambar **papan catur palsu**. Pakai latar hijau polos. |
-| Konsistensi gaya pakai gambar referensi | Cukup baik | **Sangat baik** |
-| Saran | Paling praktis untuk objek satuan | Bagus kalau mau gaya antar-aset benar-benar seragam |
+| Latar transparan (objek B) | **Bisa langsung** | Tidak bisa. Kalau diminta "transparent", sering menggambar **papan catur palsu**, jadi pakai latar hijau polos. |
+| Tile seamless (motif A) | Sering ada sambungan tipis | Sering ada sambungan tipis |
+| Konsistensi gaya dengan referensi | Cukup baik | **Sangat baik** |
 
-Keduanya bisa dipakai, bahkan dicampur, asalkan aset #1 dijadikan referensi gaya.
+Untuk motif, sambungan tile yang kurang rapi tidak masalah; itu saya perbaiki.
 
 ---
 
 ## Blok yang dipakai ulang
 
-**[STYLE]**
-> A single isolated object illustration for a premium South Sumatran (Palembang) wedding
-> invitation. Clean, modern, minimalist gouache-and-ink style: soft even studio light from the
-> upper left, gentle volumetric shading, fine refined detail but never busy. Palette strictly
-> limited to deep maroon (#6B1626), soft antique gold (#B48A45 to #DCC394 — never bright
-> yellow), warm ivory (#F5EEE6) and a small touch of deep green (#2E4A3F). The object is
+**[STYLE-A] — motif**
+> A flat, seamless, edge-to-edge repeating textile pattern tile, viewed straight on, filling
+> the whole square canvas. Refined and elegant, evenly spaced, no focal point, no perspective,
+> no lighting, no fabric folds. Fine gold-thread look where gold is used (soft antique gold
+> #C9A25E to #E3CC9A, never bright yellow).
+
+**[STYLE-B] — objek**
+> A single isolated object for a premium Palembang (South Sumatra) wedding invitation,
+> photographed like a luxury product on a dark stage: lit by one warm spotlight from above,
+> soft rich shadows on the object itself, refined realistic-illustrative finish. Colours:
+> deep maroon (#6B1626), antique gold, warm ivory, a little deep green. The object is
 > complete and centred, not cropped, with generous empty margin on every side.
 
-**[BG] — ChatGPT**
-> Transparent background (PNG with alpha). No floor, no cast shadow, no reflection.
+**[BG] — ChatGPT:** `Transparent background (PNG with alpha). No floor, no cast shadow on the ground.`
 
-**[BG] — Gemini**
-> Place the object on a perfectly flat, uniform pure chroma-green background (#00FF00) with
-> no gradient, texture, vignette or shadow. Do not draw a checkerboard pattern.
-
-*(Untuk aset yang ada warna hijaunya — #4 teratai dan #8 tepak sirih — ganti hijau dengan
-magenta polos `#FF00FF`.)*
+**[BG] — Gemini:** `Place the object on a perfectly flat, uniform pure chroma-green background (#00FF00), no gradient, no shadow on the ground. Do not draw a checkerboard pattern.`
+*(Untuk objek yang ada warna hijaunya — B2 tepak sirih, B6 teratai — ganti dengan magenta `#FF00FF`.)*
 
 **[NEG]**
-> Avoid: photorealistic 3D render, glossy plastic look, neon or saturated colours, bright
-> yellow gold, busy background, extra objects, people, faces, hands, text, letters, logo,
-> watermark, border or frame, drop shadow on the ground, cropped edges, blur, low resolution,
-> JPEG artifacts.
+> Avoid: text, letters, logo, watermark, border or frame, people, faces, hands, neon or
+> saturated colours, bright yellow gold, glossy plastic 3D render, blur, low resolution,
+> JPEG artifacts, cropped edges.
 
 ---
 
-## Daftar aset
+## A · Motif seamless (rasio 1:1, resolusi terbesar)
 
-Urutan = urutan prioritas. #1–#6 sudah cukup untuk versi pertama template.
+**A1 · Songket lepus** — gerbang & panel bab Mempelai
+> Palembang songket lepus: deep maroon silk ground almost entirely covered with gold-thread
+> weaving: small diamond-shaped flower motifs (bunga) in an even grid, linked by fine gold
+> lines, tiny gold dots between them.
 
-### 1 · Kain songket melambai — `songket-ribbon-a`
-Rasio **3:2 (landscape)** · dipakai di cover, di belakang foto bulat
-> A long narrow strip of Palembang songket cloth floating in the air and curving gently in a
-> soft S-shaped wave, as if lifted by a breeze. Deep maroon silk densely woven with fine
-> gold-thread motifs: small lozenge flowers across the body (songket lepus style) and a border
-> of small pucuk rebung (bamboo-shoot triangle) motifs along both long edges. A short gold
-> fringe (tretes) at one end. Light, airy, elegant drape, the fabric slightly turning to show
-> its sheen.
+**A2 · Ukiran Palembang** — pintu geser & panel bab Acara
+> Traditional Palembang lacquered wood carving (ukiran) as a flat pattern: flowing gold
+> floral vines, curling tendrils and lotus buds on deep maroon-black lacquer, carved relief
+> suggested only by subtle gold shading.
 
-### 2 · Kain songket melingkar — `songket-ribbon-b`
-Rasio **1:1** · dipakai di bagian RSVP / penutup
-> The same Palembang songket cloth as a loose, open loop that curls once around itself like a
-> ribbon in the wind, both ends free, one end with a short gold fringe. Deep maroon with fine
-> gold-thread lozenge motifs and a pucuk rebung border.
+**A3 · Jumputan** — gerbang bab Galeri
+> Palembang jumputan tie-dye cloth: a deep plum-maroon ground with small ivory dots arranged
+> in rings and diamond clusters, soft slightly irregular dye edges, a few gold-cream accents.
 
-### 3 · Melati — `melati`
-Rasio **1:1** · bunga kecil yang melayang di banyak section
-> A single fresh jasmine (melati) flower seen from the front, five to eight soft ivory-white
-> petals with a faint warm cream tint, a tiny pale gold centre, plus one closed bud on a short
-> stem beside it. Delicate and minimal.
+**A4 · Bunga tabur** — gerbang & panel bab Konfirmasi (mengecil jadi panel)
+> A scattered floral pattern of jasmine (melati), lotus and cempaka blossoms in ivory, dusty
+> rose and soft gold with slender leaves, on a deep green-black ground. Painterly, elegant,
+> generous spacing between flowers.
 
-Variasi opsional `melati-ronce`: *a short string of jasmine buds threaded together (ronce
-melati, as worn by Palembang brides), hanging in a soft curve.*
+**A5 · Riak Sungai Musi** — gerbang bab Penutup
+> Overlapping scallops of concentric arcs like stylised river ripples, in ivory-gold lines on
+> a near-black ground, rows offset by half a scallop, precise and calm.
 
-### 4 · Teratai — `teratai`
-Rasio **4:3** · bagian salam / ayat · **pakai latar magenta untuk Gemini**
-> A single lotus flower in soft dusty rose and ivory, petals gently opening, resting on one
-> flat round deep-green lily pad seen at a slight angle. Calm and minimal.
+## B · Objek cut-out
 
-### 5 · Kipas — `kipas`
-Rasio **4:3** · cover
-> A traditional Palembang hand fan, half-open, made of lacquered wooden ribs, the fan face in
-> deep maroon with fine gold songket-style motifs and a thin gold edge, a small gold tassel
-> hanging from the pivot. Shown at a slight three-quarter angle.
+**B1 · Rumah Limas** (3:2) — ruang Acara
+> A traditional Palembang Rumah Limas stilt house, seen from the front at a slight angle:
+> tiered floors (kekijing), steep pyramidal limasan roof with small curved simbar ornaments on
+> the ridge, carved maroon-and-gold wooden walls, slender pillars, a central staircase.
 
-### 6 · Tanjak — `tanjak`
-Rasio **3:2** · cover
-> A Palembang tanjak (traditional men's folded headcloth) made of maroon songket with gold
-> thread motifs, crisply folded into its characteristic peaked shape, shown on its own as an
-> object at a three-quarter front view. Empty: no head, no person, no mannequin.
+**B2 · Tepak sirih** (4:3) — ruang Konfirmasi · *Gemini: latar magenta*
+> A Palembang tepak sirih ceremonial betel box: lacquered deep maroon wood with fine gold
+> carved ornaments, a gold lid edge, a few fresh green betel leaves on top.
 
-### 7 · Tepak sirih — `tepak-sirih`
-Rasio **4:3** · bagian RSVP · **pakai latar magenta untuk Gemini**
-> A Palembang tepak sirih (betel-leaf ceremonial box): a small lacquered wooden box in deep
-> maroon with fine gold carved floral ornaments and a gold lid edge, a few fresh green betel
-> leaves resting on top. Three-quarter front view.
+**B3 · Perahu kajang** (2:1) — ruang Penutup
+> A traditional Musi river boat (perahu kajang) seen from the side: slim curved dark-maroon
+> wooden hull with a thin gold line and an arched woven-bamboo roof (kajang) in the middle.
+> No people, no water.
 
-### 8 · Siluet Rumah Limas — `limas-front`
-Rasio **16:9** · bingkai acara (di belakang garis emas yang digambar kode)
-> The front elevation of a traditional Palembang Rumah Limas stilt house: tiered floors
-> (kekijing) stepping up toward the centre, a tall steep pyramidal limasan roof with small
-> curved simbar horn ornaments along the ridge, slender wooden pillars, a central staircase.
-> Perfectly frontal, symmetrical, flat orthographic view. Rendered very softly in pale ivory
-> and antique-gold tones with only light maroon accents, so it can sit quietly behind text.
+**B4 · Lampu gantung** (1:2, tegak) — ruang Mempelai & Konfirmasi
+> A slim hanging pendant lamp inspired by Palembang brass craft: a small pierced brass shade
+> with fine floral cut-outs, glowing warm from inside, hanging on a thin dark cord from the top
+> edge of the image.
 
-### 9 · Perahu kajang — `perahu-kajang`
-Rasio **2:1** · bagian rangkaian adat & penutup (Sungai Musi)
-> A traditional Musi river boat (perahu kajang) seen from the side: a slim curved maroon hull
-> with a thin gold line along it and an arched woven-bamboo roof (kajang) in warm natural gold
-> in the middle. No people, no water, no oars.
+**B5 · Kain songket melambai** (3:2) — pembuka, pojok kanan atas
+> A long strip of maroon-and-gold Palembang songket cloth floating in the air in a soft
+> S-shaped wave, a short gold fringe (tretes) at one end.
 
-### 10 · Mahkota Aesan Gede (opsional) — `karsuhun`
-Rasio **1:1** · aksen untuk bagian mempelai
-> The golden bridal crown (karsuhun) of the Palembang Aesan Gede wedding attire, standing on
-> its own as an object: tall layered gold filigree with small gold flower picks (kembang
-> goyang) rising from it. Seen from the front, softly lit, refined. No person, no head, no
-> mannequin.
+**B6 · Teratai** (4:3) — pembuka, pojok kiri bawah · *Gemini: latar magenta*
+> A lotus flower in dusty rose and ivory on one deep-green lily pad, seen at a slight angle.
 
-*(Bentuk mahkota adat sering digambar AI kurang tepat. Cek dulu dengan foto asli Aesan Gede
-sebelum dipakai.)*
+**B7 · Kipas** (4:3) — pembuka
+> A traditional Palembang hand fan, half open, lacquered ribs, maroon fan face with fine gold
+> motifs and a thin gold edge.
 
-### 11 · Siluet Jembatan Ampera (opsional) — `ampera`
-Rasio **3:1** · cakrawala jauh di penutup
-> A minimal, soft silhouette of Palembang's Ampera Bridge seen from the side across the river:
-> the two tall towers and the long span, flat colour in muted maroon with a faint gold
-> highlight, no river, no sky, no buildings.
+**B8 · Tanjak** (3:2) — pembuka
+> A Palembang tanjak (men's folded songket headcloth), maroon with gold thread, crisply
+> folded into its peaked shape, shown alone as an object. No head, no person.
+
+**B9 · Melati** (1:1) — pembuka
+> A single fresh jasmine flower with one closed bud on a short stem, ivory petals, tiny pale
+> gold centre.
 
 ---
+
+## Belum diputuskan
+
+- **Mempelai di ruang bab Mempelai.** Di prototipe ini cut-out pengantin ber-Aesan Gede.
+  Di template asli fotonya dari pengantin, dan foto upload biasa tidak bisa otomatis jadi
+  cut-out yang rapi. Pilihannya: foto ditaruh di dalam panel lengkung (aman untuk semua
+  foto), atau pengantin diminta foto dengan latar polos.
 
 ## Catatan teknis (saat memasang)
 
-- Target: lebar maks. 1200px (objek kecil seperti melati 400px), `.webp` kualitas ~82, tepi
-  dibersihkan dari sisa warna hijau/magenta.
+- Tile motif: 1024px → dirapikan sambungannya → `.webp` ~512–768px. Objek: lebar maks. 1200px
+  (melati 400px), `.webp` kualitas ~82, tepi dibersihkan dari sisa hijau/magenta.
 - Semua file baru di `public/templates/...` harus **di-upload ke R2 sebelum deploy** yang
   memakainya (CLAUDE.md gotcha 11). Ganti gambar = ganti nama file.
