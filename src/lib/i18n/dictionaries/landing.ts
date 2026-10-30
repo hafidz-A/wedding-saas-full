@@ -65,6 +65,10 @@ export const landing = {
           tagline: 'Lukisan & romantis',
           blurb: 'Berjalan menyusuri taman bunga saat senja, lentera menyala di sepanjang jalan, dan setiap ucapan tamu menerbangkan lampion.',
         },
+        musi: {
+          tagline: 'Palembang & sinematik',
+          blurb: 'Dari Rumah Limas, menyusuri Sungai Musi melewati Ampera yang dibangun di depan mata, sampai kembang api di langit Palembang.',
+        },
       },
     },
     features: {
@@ -195,6 +199,10 @@ export const landing = {
         'taman-bunga': {
           tagline: 'Painterly & romantic',
           blurb: 'Walk a flower garden at dusk, with lanterns lighting up along the path and every guest wish sending a lantern into the sky.',
+        },
+        musi: {
+          tagline: 'Palembang & cinematic',
+          blurb: 'From a Rumah Limas, down the Musi river past an Ampera bridge that builds itself, to fireworks over Palembang.',
         },
       },
     },

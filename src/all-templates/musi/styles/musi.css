@@ -1,0 +1,1072 @@
+/* ============================================================
+   Musi — template styles.
+
+   Everything is scoped under .mu (the Shell root) or body.musi-route, so
+   nothing leaks onto other routes. Palette colours come in as --mu-*
+   variables set by the Shell (config/palettes.js). Radius and control heights
+   use the shared tokens (src/styles/tokens.css).
+
+   Layout: a fixed frame (WebGL canvas + floating glass cards) over a tall
+   scroll track (act 1), then ordinary-scroll cards (act 2) and the closing
+   track. Phones: every card sits at the bottom, one column, max 88vw. Wide
+   screens: a card sits opposite its landmark (data-side).
+
+   Glass: white 14–22% over a thin dark layer (--mu-tint) so text reads over
+   day, dusk and night alike, blur 20px, a 25% white border. The lowest
+   quality tier ([data-mu-q='low']) drops the blur for a solid tint.
+   ============================================================ */
+
+body.musi-route {
+  background: #0e1630 !important;
+  color: #fff6e6;
+}
+html.mu-locked,
+html.mu-locked body {
+  overflow: hidden;
+}
+
+.mu {
+  --mu-gold: #f0c96a;
+  --mu-blush: #f6d9a8;
+  --mu-ink: #fff6e6;
+  --mu-tint: rgba(52, 14, 18, 0.42);
+  --mu-on-gold: #3a0d10;
+  --mu-ink-soft: rgba(255, 246, 230, 0.82);
+  --mu-serif: var(--mu-font-serif), 'Iowan Old Style', Georgia, serif;
+  --mu-sans: var(--font-montserrat), 'Avenir Next', 'Segoe UI', sans-serif;
+  color: var(--mu-ink);
+  font-family: var(--mu-sans);
+}
+.mu *,
+.mu *::before,
+.mu *::after {
+  box-sizing: border-box;
+}
+.mu h1,
+.mu h2,
+.mu h3,
+.mu p {
+  margin: 0;
+}
+
+/* ---------- fixed frame ---------- */
+.mu-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  /* clip, not hidden: an overflow:hidden box is still a scroll container, and
+     focusing or clicking a card button scrolled the whole scene up inside it */
+  overflow: hidden;
+  overflow: clip;
+  background: #0e1630;
+}
+.mu-scene,
+.mu-copy {
+  position: absolute;
+  inset: 0;
+}
+.mu-copy {
+  pointer-events: none;
+}
+.mu-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.mu-nogl-bg {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: var(--mu-nogl);
+}
+.mu[data-mu-nogl] .mu-canvas {
+  display: none;
+}
+.mu[data-mu-nogl] .mu-nogl-bg {
+  display: block;
+}
+.mu-cover-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+  background: linear-gradient(rgba(20, 8, 10, 0.5), rgba(20, 8, 10, 0.05) 32%, rgba(20, 8, 10, 0.05) 55%, rgba(20, 8, 10, 0.72));
+}
+.mu-open .mu-cover-veil {
+  opacity: 0;
+}
+.mu-flash,
+.mu-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.mu-flash {
+  background: radial-gradient(circle at 50% 50%, #fffdf6 0%, #fff1cc 45%, #f6cf7a 100%);
+}
+.mu-fade {
+  background: linear-gradient(#f4f7fb, #e8eef4);
+}
+.mu-pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.mu-pin b {
+  display: inline-block;
+  transform: translate(-50%, -260%);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(20, 12, 10, 0.72);
+  border: 1px solid rgba(240, 201, 106, 0.6);
+  color: var(--mu-gold);
+  font-family: var(--mu-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.mu-track {
+  position: relative;
+}
+
+/* ---------- type ---------- */
+.mu-label {
+  font-family: var(--mu-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--mu-blush);
+}
+.mu-names {
+  font-family: var(--mu-serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(46px, 13vw, 78px);
+  line-height: 1;
+  color: var(--mu-gold);
+}
+.mu-amp {
+  display: block;
+  font-size: 0.5em;
+  color: var(--mu-ink);
+  margin: 4px 0;
+}
+.mu-names-inline .mu-amp {
+  display: inline;
+  margin: 0 0.2em;
+}
+.mu-date-line {
+  font-size: 13px;
+  letter-spacing: 0.4em;
+}
+.mu-title {
+  font-family: var(--mu-serif);
+  font-weight: 600;
+  font-size: clamp(26px, 7vw, 34px);
+  line-height: 1.1;
+  color: var(--mu-gold);
+}
+.mu-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--mu-ink-soft);
+}
+.mu-quote {
+  font-family: var(--mu-serif);
+  font-style: italic;
+  font-size: clamp(18px, 4.8vw, 21px);
+  line-height: 1.45;
+  max-width: 32ch;
+  text-wrap: balance;
+}
+.mu-cite {
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  color: var(--mu-blush);
+}
+.mu-shadowed {
+  text-shadow: 0 2px 18px rgba(10, 4, 6, 0.65), 0 1px 3px rgba(10, 4, 6, 0.6);
+}
+
+/* ---------- glass ---------- */
+.mu-glass {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow: 0 18px 50px rgba(8, 4, 10, 0.35);
+}
+.mu-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--mu-tint);
+}
+.mu[data-mu-q='low'] .mu-glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(24, 14, 14, 0.82);
+}
+
+/* ---------- journey cards ---------- */
+.mu-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px 16px calc(84px + env(safe-area-inset-bottom));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none !important;
+  will-change: opacity, transform;
+}
+.mu-card {
+  pointer-events: auto;
+  width: min(88vw, 440px);
+  max-height: 70svh;
+  overflow: auto;
+  padding: 22px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.mu-side-center {
+  align-items: flex-start;
+  padding-top: calc(72px + env(safe-area-inset-top));
+}
+.mu-opening {
+  align-items: flex-start;
+  padding-top: 18svh;
+}
+/* the names panel belongs to the ride, not under the cover */
+.mu:not(.mu-open) .mu-opening {
+  visibility: hidden !important;
+}
+.mu-opening-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+@media (min-width: 900px) {
+  .mu-panel {
+    align-items: center;
+    padding: 72px 7vw;
+  }
+  .mu-side-right {
+    justify-content: flex-end;
+  }
+  .mu-side-left {
+    justify-content: flex-start;
+  }
+  .mu-side-center {
+    align-items: flex-start;
+    padding-top: 12vh;
+  }
+  .mu-card {
+    width: min(36vw, 460px);
+    max-height: 78vh;
+  }
+}
+
+.mu-person {
+  gap: 8px;
+}
+.mu-portrait {
+  width: 132px;
+  aspect-ratio: 3 / 4;
+  border-radius: 999em 999em var(--radius-md) var(--radius-md);
+  overflow: hidden;
+  border: 2px solid var(--mu-gold);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.25);
+  display: grid;
+  place-items: center;
+}
+.mu-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mu-initials {
+  font-family: var(--mu-serif);
+  font-size: 30px;
+  color: var(--mu-gold);
+}
+.mu-person-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+.mu-person-full {
+  font-family: var(--mu-serif);
+  font-size: 19px;
+  font-weight: 500;
+}
+@media (max-height: 640px) {
+  .mu-portrait {
+    width: 92px;
+  }
+}
+
+.mu-count {
+  letter-spacing: 0.12em;
+}
+.mu-year,
+.mu-day {
+  font-family: var(--mu-serif);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--mu-ink);
+}
+.mu-countdown {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+.mu-cd {
+  min-width: 58px;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mu-cd b {
+  font-family: var(--mu-serif);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--mu-gold);
+}
+.mu-cd i {
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mu-ink-soft);
+}
+.mu-event-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mu-event-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.mu-event-title {
+  font-family: var(--mu-serif);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--mu-gold);
+}
+.mu-event-time {
+  font-size: 13px;
+  align-self: center;
+}
+.mu-venue {
+  font-family: var(--mu-serif);
+  font-size: 20px;
+  font-weight: 600;
+}
+.mu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+/* gallery carousel */
+.mu-gallery {
+  gap: 12px;
+}
+.mu-strip {
+  width: 100%;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: var(--radius-sm);
+  scrollbar-width: none;
+}
+.mu-strip::-webkit-scrollbar {
+  display: none;
+}
+.mu-shot {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: zoom-in;
+}
+.mu-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mu-strip-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mu-dots {
+  display: flex;
+  gap: 6px;
+}
+.mu-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-round);
+  background: rgba(255, 255, 255, 0.35);
+}
+.mu-dots i.mu-on {
+  background: var(--mu-gold);
+}
+.mu-hint-text {
+  font-size: 12px;
+  color: var(--mu-ink-soft);
+}
+
+/* ---------- controls ---------- */
+.mu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ctl-h);
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  font-family: var(--mu-sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid var(--mu-gold);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+.mu-btn:active {
+  transform: scale(0.97);
+}
+.mu-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.mu-btn.mu-solid {
+  background: var(--mu-gold);
+  color: var(--mu-on-gold);
+}
+.mu-btn.mu-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--mu-gold);
+}
+.mu-btn.mu-sm {
+  height: var(--ctl-h-sm);
+  padding: 0 14px;
+  font-size: 12px;
+}
+.mu-btn.mu-lg {
+  height: var(--ctl-h-lg);
+  padding: 0 34px;
+  font-size: 14px;
+}
+.mu-btn.mu-done {
+  background: var(--mu-gold);
+  color: var(--mu-on-gold);
+}
+.mu-icon-btn {
+  width: var(--ctl-h);
+  height: var(--ctl-h);
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-round);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(20, 12, 14, 0.5);
+  color: var(--mu-gold);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.mu-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.mu-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.mu-music-btn[aria-pressed='true'] {
+  background: var(--mu-gold);
+  color: var(--mu-on-gold);
+}
+
+/* ---------- cover ---------- */
+.mu-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  /* a short screen (a phone held sideways) scrolls the cover itself, so the
+     button can always be reached — the page is locked until it is pressed */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(60px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+  text-align: center;
+  pointer-events: auto;
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.mu-open .mu-cover {
+  opacity: 0;
+  transform: translateY(-14px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.9s ease, transform 0.9s ease, visibility 0s linear 0.9s;
+}
+.mu-cover-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.mu-cover-bottom {
+  margin-top: auto;
+  flex: 0 0 auto;
+  width: min(88vw, 400px);
+  padding: 20px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.mu-to {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--mu-ink-soft);
+}
+.mu-guest {
+  font-family: var(--mu-serif);
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+@media (max-height: 560px) {
+  .mu-cover {
+    padding-top: calc(14px + env(safe-area-inset-top));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .mu-cover .mu-names {
+    font-size: clamp(30px, 9vh, 52px);
+  }
+  .mu-cover-bottom {
+    padding: 12px 16px 14px;
+  }
+  .mu-guest {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+}
+
+/* ---------- rail, hint, badges, controls ---------- */
+.mu-rail {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.mu-open .mu-rail {
+  opacity: 1;
+}
+.mu-rail-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--mu-blush);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+.mu-rail-track {
+  position: relative;
+  width: 2px;
+  height: 30vh;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+.mu-rail-track i {
+  position: absolute;
+  inset: 0;
+  background: var(--mu-gold);
+  transform-origin: top;
+  transform: scaleY(0);
+}
+.mu-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.mu-hint[hidden] {
+  display: none;
+}
+.mu-hint i {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(var(--mu-gold), transparent);
+}
+.mu-badge,
+.mu-fps {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(14, 10, 12, 0.55);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.mu-badge {
+  left: 12px;
+}
+.mu-fps {
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0;
+}
+.mu-controls {
+  position: fixed;
+  z-index: 3;
+  right: 12px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 899px) {
+  .mu-controls {
+    top: calc(10px + env(safe-area-inset-top));
+    bottom: auto;
+  }
+}
+
+/* ---------- act 2: ordinary-scroll cards over the night city ---------- */
+.mu-act2 {
+  position: relative;
+  z-index: 2;
+  padding: 30vh 16px 0;
+}
+.mu-act2-slot {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 38vh;
+  scroll-margin-top: 10vh;
+}
+.mu-sheet {
+  width: min(92vw, 520px);
+  padding: 26px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+}
+.mu-sheet form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  margin-top: 6px;
+}
+.mu-sheet .mu-btn {
+  align-self: center;
+}
+.mu-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mu-field label,
+.mu-fieldset legend {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--mu-blush);
+}
+.mu-input {
+  width: 100%;
+  min-height: var(--ctl-h);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(10, 6, 8, 0.35);
+  color: var(--mu-ink);
+  font: inherit;
+  font-size: 15px;
+}
+.mu-input:focus {
+  outline: 2px solid var(--mu-gold);
+  outline-offset: 1px;
+}
+textarea.mu-input {
+  min-height: 88px;
+  resize: vertical;
+}
+select.mu-input option {
+  color: #1a1012;
+}
+.mu-field-hint,
+.mu-form-note {
+  font-size: 12px;
+  color: var(--mu-ink-soft);
+}
+.mu-form-note:empty {
+  display: none;
+}
+.mu-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.mu-choices {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.mu-choice {
+  flex: 1;
+  position: relative;
+}
+.mu-choice input {
+  position: absolute;
+  opacity: 0;
+}
+.mu-choice span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ctl-h);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+}
+.mu-choice input:checked + span {
+  background: var(--mu-gold);
+  color: var(--mu-on-gold);
+  border-color: var(--mu-gold);
+  font-weight: 600;
+}
+.mu-choice input:focus-visible + span {
+  outline: 2px solid var(--mu-gold);
+  outline-offset: 2px;
+}
+.mu-thanks {
+  font-family: var(--mu-serif);
+  font-size: 20px;
+  color: var(--mu-gold);
+}
+.mu-wish-count {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mu-blush);
+  margin-top: 6px;
+}
+.mu-wish-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 300px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.mu-wish {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+}
+.mu-wish-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--mu-gold);
+}
+.mu-wish-msg {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.mu-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.mu-account {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: left;
+}
+.mu-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mu-bank {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mu-blush);
+}
+.mu-acc-no {
+  font-family: var(--mu-serif);
+  font-size: 20px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.mu-acc-name {
+  font-size: 12px;
+  color: var(--mu-ink-soft);
+}
+
+/* ---------- finale ---------- */
+.mu-finale {
+  position: relative;
+  height: 260svh;
+}
+.mu-finale-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.mu-finale-closing {
+  opacity: 0;
+  visibility: hidden;
+}
+.mu-closing {
+  width: min(92vw, 480px);
+  padding: 24px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.mu-snap {
+  width: 116px;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  overflow: hidden;
+  border: 2px solid var(--mu-gold);
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.1), 0 0 40px rgba(240, 201, 106, 0.35);
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+.mu-snap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mu-closing-text {
+  max-width: 36ch;
+}
+.mu-closing .mu-names {
+  font-size: clamp(38px, 10vw, 56px);
+}
+.mu-credit {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mu-ink-soft);
+  margin-top: 6px;
+}
+
+/* ---------- lightbox ---------- */
+.mu-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(8, 6, 10, 0.88);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.mu-lightbox img {
+  max-width: 100%;
+  max-height: 86svh;
+  border-radius: var(--radius-sm);
+}
+.mu-lb-close {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top));
+  right: 14px;
+}
+
+/* ---------- framed device preview + demo switcher (outside .mu) ---------- */
+.mu-framed-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.mu-sw-toggle {
+  position: fixed;
+  z-index: 60;
+  left: 14px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: var(--ctl-h);
+  height: var(--ctl-h);
+  border-radius: var(--radius-round);
+  border: 1px solid rgba(240, 201, 106, 0.6);
+  background: rgba(20, 12, 14, 0.7);
+  font-size: 20px;
+  cursor: pointer;
+}
+.mu-sw-panel {
+  position: fixed;
+  z-index: 61;
+  left: 14px;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  width: min(92vw, 320px);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(20, 12, 14, 0.94);
+  border: 1px solid rgba(240, 201, 106, 0.4);
+  color: #fff6e6;
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: 13px;
+}
+.mu-sw-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.mu-sw-close {
+  width: var(--ctl-h-sm);
+  height: var(--ctl-h-sm);
+  border-radius: var(--radius-round);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+.mu-sw-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mu-sw-option,
+.mu-sw-device {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--ctl-h-sm);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.mu-sw-option[aria-pressed='true'],
+.mu-sw-device[aria-pressed='true'] {
+  border-color: #f0c96a;
+  background: rgba(240, 201, 106, 0.14);
+}
+.mu-sw-dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-round);
+  flex: 0 0 auto;
+}
+.mu-sw-dot i {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+.mu-sw-sub {
+  margin: 12px 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.mu-sw-devices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mu-cover,
+  .mu-cover-veil,
+  .mu-rail,
+  .mu-btn {
+    transition: none;
+  }
+}

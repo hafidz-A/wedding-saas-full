@@ -12,6 +12,7 @@
 // defaultConfig.js is plain ESM and works as-is from TS at runtime.
 import { defaultConfig as pageConfig } from '@/all-templates/lovebirds/defaultConfig'
 import { buildTamanBungaSeedConfig } from '@/all-templates/taman-bunga/seed.js'
+import { buildMusiSeedConfig } from '@/all-templates/musi/seed.js'
 import { getDefaultConfig } from '@/config/templateIndex'
 
 export interface CoupleSeedInput {
@@ -139,7 +140,7 @@ export function buildSeedConfig(input: CoupleSeedInput): Record<string, any> {
 
 /**
  * The starting config for a new invitation of `template`, as a fresh object the
- * caller may mutate. Lovebirds and Taman Bunga substitute the couple's data;
+ * caller may mutate. Lovebirds, Taman Bunga and Musi substitute the couple's data;
  * other templates start from a deep clone of their bundled defaultConfig (the
  * couple edits content in the dashboard). Shared by onboarding and the admin
  * "create for client" flow so both seed every template the same way.
@@ -147,6 +148,7 @@ export function buildSeedConfig(input: CoupleSeedInput): Record<string, any> {
 export function seedConfigForTemplate(template: string, input: CoupleSeedInput): Record<string, any> {
   if (template === 'lovebirds') return buildSeedConfig(input)
   if (template === 'taman-bunga') return buildTamanBungaSeedConfig(input)
+  if (template === 'musi') return buildMusiSeedConfig(input)
   return JSON.parse(JSON.stringify(getDefaultConfig(template))) as Record<string, any>
 }
 

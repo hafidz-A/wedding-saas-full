@@ -1,6 +1,7 @@
 import type { SectionSchema } from './types'
 import { solarySchemaRegistry } from './solary'
 import { tamanBungaSchemaRegistry } from './taman-bunga'
+import { musiSchemaRegistry } from './musi'
 import { heroSchema } from './hero'
 import { countdownSchema } from './countdown'
 import { ourStorySchema } from './ourStory'
@@ -53,6 +54,7 @@ const registriesByTemplate: Record<string, Record<string, SectionSchema>> = {
   lovebirds: lovebirdsSchemaRegistry,
   solary: solarySchemaRegistry,
   'taman-bunga': tamanBungaSchemaRegistry,
+  musi: musiSchemaRegistry,
 }
 
 export function getSchemaRegistry(template: string): Record<string, SectionSchema> {

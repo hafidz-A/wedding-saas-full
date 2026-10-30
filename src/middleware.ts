@@ -87,9 +87,9 @@ export const config = {
     // user data. That protection is worth the duplicate getUser() that
     // requireAdmin() in admin/layout.tsx also performs.
     '/admin/:path*',
-    '/:template(lovebirds|solary|taman-bunga)/:slug/dashboard/:path*',
+    '/:template(lovebirds|solary|taman-bunga|musi)/:slug/dashboard/:path*',
     // Public invitation page — needed so the Supabase server client can refresh
     // the session and the owner-preview bypass works.
-    '/:template(lovebirds|solary|taman-bunga)/:slug([^/]+)',
+    '/:template(lovebirds|solary|taman-bunga|musi)/:slug([^/]+)',
   ],
 }

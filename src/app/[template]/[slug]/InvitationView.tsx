@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic'
  * Shells are dynamic-imported so a route only ships the bundle for the
  * template it renders. Solary uses `ssr: false` because its shell boots a
  * Three.js scene + Lenis that need `window`; Taman Bunga likewise, for its
- * canvas scene engine.
+ * canvas scene engine, and Musi for its three.js journey.
  */
 const LovebirdsShell = dynamic(() => import('@/all-templates/lovebirds/Shell.jsx'), {
   ssr: true,
@@ -18,6 +18,9 @@ const SolaryShell = dynamic(() => import('@/all-templates/solary/Shell.jsx'), {
   ssr: false,
 })
 const TamanBungaShell = dynamic(() => import('@/all-templates/taman-bunga/Shell.jsx'), {
+  ssr: false,
+})
+const MusiShell = dynamic(() => import('@/all-templates/musi/Shell.jsx'), {
   ssr: false,
 })
 
@@ -32,6 +35,9 @@ export default function InvitationView({
   /** Phone-frame embeds of DEMO slugs keep the 🎨 switcher inside the frame. */
   embedSwitcher?: boolean
 }) {
+  if (templateId === 'musi') {
+    return <MusiShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
+  }
   if (templateId === 'taman-bunga') {
     return <TamanBungaShell config={config} slug={slug} isDemo={isDemo} embed={embed} embedSwitcher={embedSwitcher} />
   }

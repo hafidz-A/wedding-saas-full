@@ -44,7 +44,7 @@ since diverged substantially (play-once hero, ornament system, folded registry, 
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 14 (App Router), React 18.3.1, TypeScript |
-| Animation | motion 12 + GSAP 3.15 + lenis (smooth scroll); Solary adds three.js; Taman Bunga is a hand-rolled single-canvas 2.5D engine (no extra lib) |
+| Animation | motion 12 + GSAP 3.15 + lenis (smooth scroll); Solary and Musi add three.js; Taman Bunga is a hand-rolled single-canvas 2.5D engine (no extra lib) |
 | Backend | Supabase (Postgres + Storage + RLS) |
 | Auth | **Supabase Auth** (email+password accounts, email verify, password reset, optional TOTP MFA) |
 | Payments | **Midtrans** Snap (redirect) + notification webhook |
@@ -75,7 +75,7 @@ Modules + CSS variables. `import.meta.env` is Vite — use `process.env` in Next
 ```
 
 Key facts:
-- **Templates live in `src/all-templates/<id>/`** (currently `lovebirds`, `solary`, `taman-bunga`) — NOT `src/templates/`.
+- **Templates live in `src/all-templates/<id>/`** (currently `lovebirds`, `solary`, `taman-bunga`, `musi`) — NOT `src/templates/`.
   The master registry is `src/config/templateIndex.js` (server-safe: imports only plain `defaultConfig`
   data). Per-template render *Shells* are client components, dynamic-imported in
   `src/app/[template]/[slug]/InvitationView.tsx`.
@@ -121,8 +121,8 @@ Plans editor is the source of truth for prices — do not hardcode rupiah amount
   guestbook, quote, footer, …). `templatePolicy.ts` constrains which sections/actions a template allows
   (e.g. Lovebirds keeps exactly one gallery; couple name is a single locked source). Every section can
   be toggled on/off from the section list except the opening and the footer (Lovebirds `hero`/`footer`,
-  Solary `intro`/`sun`, Taman Bunga `cover`/`closing`) — add/remove stays off for every template regardless.
-  Taman Bunga additionally locks every section's position (the walk is one choreographed scene; a
+  Solary `intro`/`sun`, Taman Bunga and Musi `cover`/`closing`) — add/remove stays off for every template regardless.
+  Taman Bunga and Musi additionally lock every section's position (the walk is one choreographed scene; a
   disabled section squeezes its stretch of the path instead of leaving a gap). Disabling RSVP or Gift
   (the two guest-data sections) prompts a confirm dialog via `confirmDisableTypes`.
 - Editor-adjacent tabs/panels: Palette, Ornament, Music, Meta (title/description/OG). Saves go through
@@ -399,6 +399,28 @@ supabase/                                          ← schema.sql (base) + migra
    bulb swags/paper lanterns appear only once inside the gazebo. The wide set's daylight paintings
    take only a light night copy (`NIGHT_COPY`) and less of the screen-wide multiply, or the wide
    garden reads much darker than the tall one.
+14. **Musi specifics** (`src/all-templates/musi/`, spec + build prompts in
+   `docs/musi-3d-scroll-prompts.md`). A three.js journey built entirely in code — NO image files of
+   its own (demo photos reuse the Lovebirds set), so nothing to upload to R2. Rumah Limas → flash →
+   map of South Sumatra (`config/geo.js`, hand-simplified coastlines) → cloud dive → boat ride down
+   the Musi → camera rises over the night city → fireworks. (a) **The owner's order at every
+   landmark is fixed: the boat rides in and frames it → the landmark pops up out of the ground →
+   that section's glass card shows → ride on.** The numbers live in `config/timeline.js`
+   (`RIVER_STOPS` = where each fast run ends, `APPEAR` = pop-up moments, `BEATS` = cards) and
+   `__tests__/timeline.test.js` locks the order — move them together. (b) The pop-up is a firm jelly
+   (time-based spring, ~20% overshoot) triggered when scroll passes `APPEAR`; scrolling back sinks it.
+   Jembatan Ampera is the exception: towers rise, then the deck grows from BOTH banks and the halves
+   meet (each half is pivoted at its bank end in `engine/city.js`). Wide landmarks (Limas row, LRT,
+   kampung) bounce vertically only — a sideways squash would visibly slide them. (c) No Pulau Kemaro
+   pagoda, anywhere (owner's call). (d) Static geometry is merged per material role (`engine/kit.js`
+   `Kit`) and moving things are instanced, to stay well under ~150 draw calls; a palette recolours
+   the merged materials in place (`setPalette`), no rebuild. (e) The Shell hands the engine a
+   timeline *proxy* (a ref), so editing the config in the dashboard preview never rebuilds the
+   scene. (f) `.mu-frame` is `overflow: clip`, not `hidden`: a hidden box is still a scroll
+   container and focusing/clicking a card button scrolled the whole scene up inside it. The cover
+   scrolls itself on short screens so its button stays reachable while the page is locked.
+   (g) Quality tiers high/medium/low (`?q=` forces one; `?fps=1` shows FPS) step down on their own
+   when frames run slow; headless Chromium uses software WebGL, so its FPS says nothing about phones.
 
 ---
 

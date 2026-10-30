@@ -11,11 +11,13 @@
 import { defaultConfig as lovebirdsConfig } from '../all-templates/lovebirds/defaultConfig.js'
 import { defaultConfig as solaryConfig } from '../all-templates/solary/defaultConfig.js'
 import { defaultConfig as tamanBungaConfig } from '../all-templates/taman-bunga/defaultConfig.js'
+import { defaultConfig as musiConfig } from '../all-templates/musi/defaultConfig.js'
 
 export const templates = {
   lovebirds: { label: 'Lovebirds', config: lovebirdsConfig },
   solary: { label: 'Solary', config: solaryConfig },
   'taman-bunga': { label: 'Taman Bunga', config: tamanBungaConfig },
+  musi: { label: 'Musi', config: musiConfig },
 }
 
 export const TEMPLATE_IDS = Object.keys(templates)

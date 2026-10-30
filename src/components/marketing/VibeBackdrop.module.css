@@ -1,7 +1,8 @@
 /* Shared: a full-bleed, non-interactive backdrop layer inside the section. */
 .lovebirds,
 .solary,
-.tamanBunga {
+.tamanBunga,
+.musi {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -79,4 +80,17 @@
   opacity: 0.32;
   mask-image: linear-gradient(180deg, transparent 0%, transparent 25%, #000 80%);
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 25%, #000 80%);
+}
+
+/* ---------- Musi ---------- */
+.skyline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 60%;
+  opacity: 0.55;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 35%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%);
 }

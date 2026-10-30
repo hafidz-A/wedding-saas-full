@@ -26,6 +26,8 @@ export const TEMPLATE_ORNAMENTS: Record<string, readonly OrnamentOption[]> = {
   solary: [],
   // the painted garden IS the decoration — no ornament layer on top of it.
   'taman-bunga': [],
+  // the three.js journey draws its own scene (and the palette recolours it).
+  musi: [],
 }
 
 const ALL_ORNAMENTS: readonly OrnamentOption[] = Object.values(TEMPLATE_ORNAMENTS).flat()

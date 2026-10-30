@@ -156,17 +156,41 @@ export const TUTORIAL_CATEGORIES_TAMAN_BUNGA: TutorialCategory[] = TUTORIAL_CATE
 /** Category ids whose Taman Bunga copy lives under tutorial.tamanBunga. */
 export const TAMAN_BUNGA_COPY_IDS = Object.keys(TAMAN_BUNGA_OVERRIDES) as TutorialCategoryId[]
 
-/** Category list for a template's tutorial. Solary and Taman Bunga drop the ornament category. */
+// Musi has the same shape as Taman Bunga (a fixed journey, no ornament layer,
+// wishes + gift cards, no gift-confirmation form), so it overrides the same
+// categories. Copy: dashboard.tabs.tutorial.musi.<categoryId>.
+const MUSI_OVERRIDES: Partial<Record<TutorialCategoryId, Partial<TutorialCategory>>> = {
+  checklist:  { stepCount: 8, alwaysCount: 2, neverCount: 2, tipCount: 2, shots: [] },
+  experience: { stepCount: 6, alwaysCount: 0, neverCount: 0, tipCount: 2, shots: [] },
+  editor:     { stepCount: 6, alwaysCount: 3, neverCount: 3, tipCount: 3, shots: [] },
+  sections:   { stepCount: 0, alwaysCount: 2, neverCount: 1, tipCount: 1, sectionGuideCount: 11, shots: [] },
+  photos:     { stepCount: 5, alwaysCount: 2, neverCount: 2, tipCount: 2, shots: [] },
+  palette:    { stepCount: 3, alwaysCount: 2, neverCount: 1, tipCount: 1, shots: [] },
+  music:      { stepCount: 3, alwaysCount: 2, neverCount: 2, tipCount: 1, shots: [] },
+  gifts:      { stepCount: 2, alwaysCount: 2, neverCount: 1, tipCount: 1, shots: [] },
+  faq:        { faqCount: 8, shots: [] },
+}
+
+export const TUTORIAL_CATEGORIES_MUSI: TutorialCategory[] = TUTORIAL_CATEGORIES
+  .filter((c) => c.id !== 'ornament')
+  .map((c) => ({ ...c, ...MUSI_OVERRIDES[c.id] }))
+
+/** Category ids whose Musi copy lives under tutorial.musi. */
+export const MUSI_COPY_IDS = Object.keys(MUSI_OVERRIDES) as TutorialCategoryId[]
+
+/** Category list for a template's tutorial. Solary, Taman Bunga and Musi drop the ornament category. */
 export function getTutorialCategories(template: string): TutorialCategory[] {
   if (template === 'solary') return TUTORIAL_CATEGORIES_SOLARY
   if (template === 'taman-bunga') return TUTORIAL_CATEGORIES_TAMAN_BUNGA
+  if (template === 'musi') return TUTORIAL_CATEGORIES_MUSI
   return TUTORIAL_CATEGORIES
 }
 
 /** Which dict block overrides the lovebirds tutorial copy for a template. */
-export function tutorialCopyKey(template: string): 'solary' | 'tamanBunga' | null {
+export function tutorialCopyKey(template: string): 'solary' | 'tamanBunga' | 'musi' | null {
   if (template === 'solary') return 'solary'
   if (template === 'taman-bunga') return 'tamanBunga'
+  if (template === 'musi') return 'musi'
   return null
 }
 

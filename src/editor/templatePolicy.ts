@@ -110,10 +110,37 @@ const tamanBungaPolicy: TemplatePolicy = {
   confirmDisableTypes: ['tbRsvp', 'tbGift'],
 }
 
+// Musi: the journey is ONE choreographed scene like Taman Bunga — each section
+// owns a fixed stretch of the boat ride and its landmark pops up there
+// (all-templates/musi/config/timeline.js), so nothing may move, swap, be
+// added or removed. Every section but the cover and the closing can be
+// switched off; the ride then squeezes that stretch instead of leaving a gap.
+const MUSI_ORDER = [
+  'cover', 'quote', 'couple', 'story', 'saveDate', 'events', 'gallery',
+  'rsvp', 'wishes', 'gift', 'closing',
+]
+
+const musiPolicy: TemplatePolicy = {
+  fixedSections: true,
+  pinnedFirstId: 'cover',
+  pinnedLastId: 'closing',
+  locks: Object.fromEntries(
+    MUSI_ORDER.map((id) => [
+      id,
+      id === 'cover' || id === 'closing'
+        ? { lockType: true, lockPosition: true, lockDisable: true }
+        : { lockType: true, lockPosition: true },
+    ]),
+  ),
+  swappablePool: [],
+  confirmDisableTypes: ['musiRsvp', 'musiGift'],
+}
+
 const policies: Record<string, TemplatePolicy> = {
   solary: solaryPolicy,
   lovebirds: lovebirdsPolicy,
   'taman-bunga': tamanBungaPolicy,
+  musi: musiPolicy,
 }
 
 export function getTemplatePolicy(template: string): TemplatePolicy | null {

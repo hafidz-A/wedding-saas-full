@@ -27,6 +27,7 @@ Dibangun dalam dua tahap:
 | "Bab 1 jalan otomatis" | Tombol menggulir halus ke progres 0,04 | Kamera tidak boleh dua sumber (auto + scroll) — bisa lompat. |
 | Tombol musik sendiri | Pakai sistem musik FinCards (`config.music`) | Sudah ada, termasuk sumber YouTube. |
 | "kota Sumatera Selatan" | "kota Palembang" | Sumsel itu provinsi. |
+| Landmark sudah berdiri sejak awal | Perahu masuk frame → landmark pop-up dari tanah (Ampera dibangun dari dua sisi) → kartu kaca → landmark berikutnya | Permintaan owner: tiap landmark "datang" saat perahu tiba, baru kartunya tampil. |
 | `three@0.160` | V1: `three@0.168.0` via importmap; V2: paket npm repo | Repo sudah memakai `three@^0.168` (Solary). |
 
 ## Keputusan sebelum membangun
@@ -143,6 +144,23 @@ Landmark berurutan dan section yang muncul di dekatnya:
   - Deretan Rumah Limas + rumah rakit                                    → events
   - LRT layang, warung pempek, kampung adat                              → gallery
 Landmark tidak harus di tepi sungai; kamera boleh menoleh lembut ke landmark saat dekat.
+
+URUTAN WAJIB DI SETIAP LANDMARK (penting, jangan diubah):
+  1. Perahu masuk frame: perahu melaju sampai landmark terbingkai di layar
+     (landmark BELUM ada — tanahnya kosong).
+  2. Landmark MUNCUL dari tanah: pop-up lucu seperti jeli jatuh — memantul sekali
+     (overshoot ±20%) lalu cepat mantap, JANGAN terlalu letoy/bergoyang lama.
+     KECUALI Jembatan Ampera: Ampera DIBANGUN — kedua menara naik dari sungai, lalu
+     dek jembatan memanjang dari tepi kanan dan tepi kiri, bertemu di tengah, dan
+     menyambung menjadi Ampera utuh (sedikit getar jeli saat menyambung).
+  3. Kartu kaca section itu tampil sampai selesai, sementara perahu melambat.
+  4. Perahu lanjut ke landmark berikutnya → ulangi 1–3.
+  ... → akhir: kamera naik dan memperlihatkan kota Palembang dari atas dengan kembang api.
+Pop-up dipicu saat scroll melewati titiknya (animasinya berjalan dengan waktu, bukan
+di-scrub scroll); scroll mundur melewati titik itu → landmark tenggelam lagi.
+Satu segmen dengan beberapa landmark (Limas + rakit; LRT + pempek + kampung)
+memunculkannya berurutan.
+
 Saat sebuah kartu tampil, perahu MELAMBAT/BERHENTI (progres perjalanan diam sementara
 scroll tetap jalan) supaya kartu bisa dibaca. Jatah scroll tiap kartu sebanding dengan
 isinya: story dapat jatah per momen, gallery per foto.
@@ -174,7 +192,9 @@ jeda acak. Closing punya tombol "Kembali ke awal".
 
 === VERIFIKASI (wajib sebelum selesai) ===
 Playwright: klik "Buka Undangan", lalu set progres 0, 0,1, 0,2, 0,3, 0,45, 0,6, 0,8,
-0,95, 1,0 dan screenshot di desktop 1280x800 dan HP 390x844.
+0,95, 1,0 dan screenshot di desktop 1280x800 dan HP 390x844. Tambah satu rekaman
+beruntun (frame tiap ~150ms) saat melewati titik Ampera dan satu landmark lain untuk
+membuktikan urutan: kosong → muncul (Ampera: menara lalu dek dari dua sisi) → kartu.
 Cek: console bersih, semua kartu terbaca, kamera tidak menembus bangunan, sambungan
 antar-bab mulus, section enabled:false (coba matikan story dan gallery) tidak
 meninggalkan celah, tidak ada Pulau Kemaro.
@@ -325,6 +345,13 @@ unggah ke R2 DULU sebelum deploy (CLAUDE.md gotcha 11).
 ```
 
 ---
+
+## Status implementasi
+
+Sudah dibangun langsung di repo (tanpa tahap V1 HTML terpisah, atas permintaan owner):
+`src/all-templates/musi/` — engine three.js di `engine/`, timeline + titik pop-up di
+`config/timeline.js` (`RIVER_STOPS`, `LANDMARKS`, `APPEAR`, `BEATS`). Prompt A dan B di
+atas tetap jadi spesifikasi acuannya.
 
 ## Cara memakai
 
