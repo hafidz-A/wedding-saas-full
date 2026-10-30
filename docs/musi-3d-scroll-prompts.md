@@ -27,6 +27,7 @@ Dibangun dalam dua tahap:
 | "Bab 1 jalan otomatis" | Tombol menggulir halus ke progres 0,04 | Kamera tidak boleh dua sumber (auto + scroll) — bisa lompat. |
 | Tombol musik sendiri | Pakai sistem musik FinCards (`config.music`) | Sudah ada, termasuk sumber YouTube. |
 | "kota Sumatera Selatan" | "kota Palembang" | Sumsel itu provinsi. |
+| Pintu Limas langsung jadi flash | Jelajah isi rumah: garang → lawang kipas → kekijing → gegajah → pangkeng → dapur → pelaminan, dengan kartu adat tiap ruang | Permintaan owner: sebelum peta, tamu melihat isi Rumah Limas dan keunikan adatnya. |
 | Landmark sudah berdiri sejak awal | Perahu masuk frame → landmark pop-up dari tanah (Ampera dibangun dari dua sisi) → kartu kaca → landmark berikutnya | Permintaan owner: tiap landmark "datang" saat perahu tiba, baru kartunya tampil. |
 | `three@0.160` | V1: `three@0.168.0` via importmap; V2: paket npm repo | Repo sudah memakai `three@^0.168` (Solary). |
 
@@ -114,17 +115,36 @@ Rumah Limas megah di tengah: rumah panggung, atap limas bertingkat marun, lantai
 bertingkat (kekijing), lis dan ukiran emas, tangga depan, tiang kayu, pagar, lampion,
 melati, kain songket, tenda pelaminan. Halaman ramai: tamu berbusana adat (jumlah
 sesuai level kualitas: 80 / 45 / 20), musisi, anak-anak, sebagian bergerak pelan
-(bobbing, berjalan ke rumah). Dua mempelai kecil berbusana Aesan Gede (merah marun +
-emas, songket) di pelaminan teras. Siang hangat, kamera rendah menghadap fasad,
-parallax kecil mengikuti pointer/gyro.
+(bobbing, berjalan ke rumah). Dua tangga di kiri dan kanan garang; dinding depan
+tertutup (lawang kipas). Siang hangat, kamera rendah menghadap fasad, parallax kecil
+mengikuti pointer/gyro.
 UI kaca: eyebrow + nama pasangan, greeting + nama tamu, tombol openLabel.
 Selama cover tampil, scroll TERKUNCI dan posisi scroll selalu dipaksa ke 0 (termasuk
 saat reload/restore). Tombol ditekan → cover memudar, scroll dibuka, halaman digulir
 halus ke progres 0,04 (kamera mulai maju), musik mulai.
 
+=== BAB 0,5: MENJELAJAHI RUMAH LIMAS (sebelum peta) ===
+Tamu masuk dan menjelajahi isi rumah, ruang demi ruang, dengan jatah scroll panjang
+(boleh luas, seakan-akan bereksplorasi). Tiap ruang punya kartu kecil yang menjelaskan
+nama dan makna adatnya. Urutan:
+  1. Garang — naik lewat salah satu dari DUA tangga (kiri/kanan) ke teras depan
+     berpagar kayu berukir; tamu duduk santai di sini. Rumah panggung 1,5–2 m di atas
+     tiang; kolongnya dulu untuk menyimpan perahu.
+  2. Lawang kipas — dinding depan terlipat ke atas lalu ditopang seperti kipas;
+     rumah terbuka menjadi satu aula besar.
+  3. Kekijing — lantai berundak (3 undakan + gegajah), makin ke dalam makin tinggi.
+     Undakan bawah: tamu umum & anak muda; makin atas: tetua, alim ulama. Semua
+     lesehan di atas tikar/permadani, hampir tanpa kursi.
+  4. Gegajah — ruang utama, lantai tertinggi: ukiran prada merah-hitam-emas (motif
+     bunga), lemari ukir berisi keramik & songket, tepak sirih, lampu gantung, amben
+     tempat tetua. Pelaminan dengan kedua mempelai (Aesan Gede) dipasang di sini.
+  5. Pangkeng — kamera melirik ke bilik di sisi kiri/kanan, bersekat kayu berukir.
+  6. Dapur — kamera melirik ke belakang: lantai turun lagi, dapur dengan tungku dan
+     tangga belakang sendiri.
+  7. Pelaminan — kamera menghadap mempelai, lalu flash putih-emas → peta.
+
 === BAB 1: LIMAS KE PETA — section quote (progres 0,00–0,20) ===
-Kamera maju ke pintu Limas yang terbuka (cahaya hangat dari dalam). Melewati ambang:
-flash putih-emas singkat, lalu kamera naik cepat, Limas mengecil, awan tipis lewat.
+Dari pelaminan: flash putih-emas singkat, lalu kamera naik cepat, Limas mengecil, awan tipis lewat.
 Tampak Pulau Sumatera dari ketinggian (laut biru, Jawa dan Bangka-Belitung terlihat
 di tepi). Garis pantai: data koordinat sederhana inline (cukup ~150 titik per pulau,
 mis. disederhanakan dari Natural Earth yang berlisensi public domain), di-extrude

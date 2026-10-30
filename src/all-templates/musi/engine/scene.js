@@ -45,8 +45,14 @@ const QUALITIES = ['high', 'medium', 'low']
 
 /** Where the camera holds for each stretch when motion is reduced. */
 const STATIONS = [
-  [0.05, 0.02],
-  [0.105, 0.08],
+  [0.03, 0.012],
+  [0.045, 0.04],
+  [0.056, 0.054],
+  [0.072, 0.066],
+  [0.08, 0.077],
+  [0.088, 0.085],
+  [0.096, 0.093],
+  [0.105, 0.1],
   [0.2, 0.165],
   [0.38, 0.3],
   [0.56, 0.5],
@@ -153,7 +159,7 @@ export function mountScene(root, { timeline, palette }) {
       s.pointerEvents = o > 0.6 ? 'auto' : 'none'
     }
     if (flashEl) {
-      const f = T < 0.105 ? smooth(0.088, 0.105, T) : 1 - smooth(0.105, 0.124, T)
+      const f = T < 0.105 ? smooth(0.0995, 0.105, T) : 1 - smooth(0.105, 0.124, T)
       flashEl.style.opacity = (act > 0 ? 0 : f).toFixed(3)
     }
     if (fadeEl) {
@@ -271,7 +277,7 @@ export function mountScene(root, { timeline, palette }) {
   const city = createCity(mats, quality, river)
   const fw = createFireworks(quality, 0.15)
   fw.setPalette(palette.scene.trim)
-  scene.add(sky.group, limas.group, map.group, city.group, fw.group, limas.doorLight)
+  scene.add(sky.group, limas.group, map.group, city.group, fw.group, limas.doorLight, limas.hallLight)
 
   // ---------- quality ----------
   function applyQuality(qq) {
@@ -290,12 +296,25 @@ export function mountScene(root, { timeline, palette }) {
   applyQuality(quality)
 
   // ---------- camera paths ----------
+  // the house tour: across the yard, up the right-hand stair onto the garang,
+  // in through the folded-up lawang kipas, up the kekijing to the gegajah,
+  // a glance left into a pangkeng and right down to the dapur, then the
+  // pelaminan (eye height = floor + 1.6, see HOUSE in limas.js)
   const limasPath = keyPath([
     [0, V(0, 3.3, 34), V(0, 4.8, 0)],
-    [0.05, V(0, 3.1, 22.5), V(0, 4.4, 0)],
-    [0.085, V(0, 3.7, 14.5), V(0, 4.0, 0)],
-    [0.1, V(0, 3.95, 8.6), V(0, 3.9, -6)],
-    [0.112, V(0, 3.95, 4.6), V(0, 3.9, -8)],
+    [0.03, V(3.4, 3.0, 22), V(4.5, 3.4, 6)],
+    [0.037, V(6.3, 2.0, 14.6), V(6.3, 3.0, 9.5)],
+    [0.044, V(6.3, 3.6, 9.0), V(2, 4.0, 6)],
+    [0.05, V(2.4, 3.6, 8.6), V(0, 4.2, 5)],
+    [0.056, V(0.3, 3.65, 7.6), V(0, 4.2, 0)],
+    [0.064, V(0, 4.0, 3.6), V(0, 4.5, -6)],
+    [0.068, V(0, 4.35, 0.2), V(0, 4.8, -8)],
+    [0.072, V(0, 4.7, -3.2), V(0, 4.95, -9)],
+    [0.078, V(0, 5.05, -5.8), V(0, 4.9, -11)],
+    [0.084, V(-0.6, 5.05, -6.6), V(-5, 4.6, -7.6)],
+    [0.092, V(1.8, 5.05, -7.6), V(7.9, 3.6, -15.4)],
+    [0.099, V(0.2, 5.0, -7.4), V(0, 4.75, -11.8)],
+    [0.106, V(0, 4.9, -8.3), V(0, 4.75, -12)],
   ])
   const mapPath = keyPath([
     [0.105, V(-26, 128, 74), V(-14, 0, -12)],
@@ -507,7 +526,7 @@ export function mountScene(root, { timeline, palette }) {
       if (!reduce) {
         mx += (tmx - mx) * (1 - Math.exp(-dt * 3))
         my += (tmy - my) * (1 - Math.exp(-dt * 3))
-        const free = 1 - smooth(0.04, 0.08, T)
+        const free = 1 - smooth(0.012, 0.03, T)
         camPos.x += mx * 1.4 * free + Math.sin(t * 0.3) * 0.25 * free
         camPos.y -= my * 0.4 * free
       }
@@ -539,7 +558,8 @@ export function mountScene(root, { timeline, palette }) {
     map.group.visible = chapter === 'map'
     city.group.visible = chapter === 'river' || chapter === 'city'
     fw.group.visible = chapter === 'city'
-    limas.doorLight.intensity = chapter === 'limas' ? 14 : 0
+    limas.doorLight.intensity = chapter === 'limas' ? 10 : 0
+    limas.hallLight.intensity = chapter === 'limas' ? 22 : 0
 
     // time of day + fog per world
     if (chapter === 'limas') {
@@ -562,7 +582,10 @@ export function mountScene(root, { timeline, palette }) {
     sun.target.updateMatrixWorld()
 
     // ambient life
-    if (chapter === 'limas') limas.update(dt, t, reduce)
+    if (chapter === 'limas') {
+      limas.update(dt, t, reduce)
+      limas.setOpen(smooth(0.0465, 0.054, T))
+    }
     if (chapter === 'map') {
       map.update(dt, t, smooth(0.124, 0.15, T), smooth(0.14, 0.156, T), reduce, smooth(0.178, 0.192, T))
       if (pinEl) {

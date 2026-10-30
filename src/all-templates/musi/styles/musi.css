@@ -288,6 +288,15 @@ html.mu-locked body {
 .mu-person {
   gap: 8px;
 }
+/* the house tour: smaller cards, the room is the show */
+.mu-tour {
+  width: min(88vw, 380px);
+  padding: 18px 20px;
+  gap: 6px;
+}
+.mu-tour .mu-title {
+  font-size: clamp(24px, 6vw, 30px);
+}
 .mu-portrait {
   width: 132px;
   aspect-ratio: 3 / 4;

@@ -3,8 +3,12 @@
 
    Act 1 (cover → gallery) is written against a NOMINAL timeline T ∈ [0, 1]:
 
-     0.00–0.05  opening   the Rumah Limas courtyard, names on screen
-     0.05–0.11  door      the camera climbs the steps and goes through the door
+     0.00–0.03  opening   the Rumah Limas courtyard, names on screen
+     0.03–0.11  the house — the guest walks in, room by room (HOUSE_TOUR):
+                garang (up the right-hand stair) → lawang kipas (the front
+                wall folds up) → kekijing (the stepped floors) → gegajah (the
+                main hall; a glance into the pangkeng and down to the dapur)
+                → the pelaminan, where a flash of light lifts the camera
      0.11–0.20  quote     flash → high over Sumatra, South Sumatra lights up,
                           the camera dives through the clouds to Palembang
      0.20–1.00  river     the boat ride down the Musi, one landmark per section
@@ -21,9 +25,15 @@
    ============================================================ */
 
 /** Journey segments in ride order. `type` is the section that owns it. */
+// `scroll` stretches a segment's share of the scroll without moving its beats:
+// the house is short on T but long to scroll, so it reads as a place to explore
 export const SEGMENTS = [
-  { key: 'opening', type: null, from: 0, to: 0.05 },
-  { key: 'door', type: null, from: 0.05, to: 0.11 },
+  { key: 'opening', type: null, from: 0, to: 0.03, scroll: 1.2 },
+  { key: 'garang', type: null, from: 0.03, to: 0.045, scroll: 2.4 },
+  { key: 'lawangKipas', type: null, from: 0.045, to: 0.056, scroll: 2.2 },
+  { key: 'kekijing', type: null, from: 0.056, to: 0.072, scroll: 2.6 },
+  { key: 'gegajah', type: null, from: 0.072, to: 0.098, scroll: 4.4 },
+  { key: 'pelaminan', type: null, from: 0.098, to: 0.11, scroll: 1.6 },
   // the map flight keeps most of its length even without the quote: it is the
   // bridge between the house and the river and must stay watchable
   { key: 'quote', type: 'musiQuote', from: 0.11, to: 0.2, keep: 0.6 },
@@ -41,13 +51,27 @@ const FULL_TRACK_VH = 1500
 
 /** Text windows on T: [fade in from, fully in, fade out from, gone]. */
 export const BEATS = {
-  opening: [-1, 0, 0.03, 0.045],
+  opening: [-1, 0, 0.02, 0.028],
   quote: [0.142, 0.152, 0.178, 0.187],
   groom: [0.272, 0.284, 0.31, 0.32],
   bride: [0.325, 0.337, 0.367, 0.378],
   saveDate: [0.602, 0.612, 0.637, 0.647],
   events: [0.705, 0.716, 0.765, 0.777],
   gallery: [0.858, 0.87, 0.982, 0.998],
+}
+
+/**
+ * The house tour: one small card per room, in the order the camera meets
+ * them (copy in config/limasTour.js). Same [in, full, out, gone] windows.
+ */
+export const HOUSE_TOUR = {
+  garang: [0.0335, 0.0365, 0.042, 0.0445],
+  lawangKipas: [0.0465, 0.049, 0.0535, 0.0556],
+  kekijing: [0.0575, 0.0605, 0.069, 0.0715],
+  gegajah: [0.0735, 0.0755, 0.0795, 0.0815],
+  pangkeng: [0.0825, 0.0845, 0.0875, 0.0893],
+  dapur: [0.0903, 0.0921, 0.0952, 0.0968],
+  pelaminan: [0.0978, 0.0992, 0.1016, 0.1032],
 }
 
 /** Story moments share one window of the story segment. */
@@ -129,6 +153,10 @@ export const APPEAR = {
 /** Chapter labels for the progress rail, keyed by where they start on T. */
 export const CHAPTERS = [
   { from: 0, label: 'Rumah Limas' },
+  { from: 0.03, label: 'Garang' },
+  { from: 0.045, label: 'Lawang Kipas' },
+  { from: 0.056, label: 'Kekijing' },
+  { from: 0.072, label: 'Gegajah' },
   { from: 0.105, label: 'Bumi Sriwijaya' },
   { from: 0.2, label: 'Sungai Musi' },
 ]
@@ -146,6 +174,7 @@ export function buildTimeline(enabledTypes, { storyCount = 3, photoCount = 6 } =
     const len = s.to - s.from
     const on = !s.type || enabledTypes.has(s.type)
     if (!on) return len * (s.keep ?? SKIPPED_WEIGHT)
+    if (s.scroll) return len * s.scroll
     if (s.type === 'musiStory') return len * clamp(0.55 + storyCount * 0.15, 0.7, 1.3)
     if (s.type === 'musiGallery') return len * clamp(0.6 + photoCount * 0.06, 0.7, 1.3)
     return len

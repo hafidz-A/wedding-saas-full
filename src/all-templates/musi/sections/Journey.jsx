@@ -13,7 +13,8 @@
    card sits at the bottom of the screen.
    ============================================================ */
 import React, { useEffect, useRef, useState } from 'react'
-import { BEATS, MAX_GALLERY_PHOTOS, MAX_STORY_MOMENTS, storyBeats } from '../config/timeline.js'
+import { BEATS, HOUSE_TOUR, MAX_GALLERY_PHOTOS, MAX_STORY_MOMENTS, storyBeats } from '../config/timeline.js'
+import { LIMAS_TOUR } from '../config/limasTour.js'
 import { calendarLink, formatEventDate, initials, parseEventDate, safeUrl } from '../utils/invite.js'
 
 const t = (beat) => beat.join(',')
@@ -52,6 +53,23 @@ export function OpeningPanel({ names, eyebrow, dateDots }) {
         {dateDots && <span className="mu-date-line">{dateDots}</span>}
       </div>
     </section>
+  )
+}
+
+/** The walk through the Rumah Limas: one small card per room, explaining its adat. */
+export function HouseTour({ coupleNames }) {
+  return (
+    <>
+      {LIMAS_TOUR.map((room, i) => (
+        <Panel key={room.key} beat={HOUSE_TOUR[room.key]} side="left" className="mu-tour" label={room.title}>
+          <span className="mu-label">
+            Rumah Limas <span className="mu-count">· {i + 1}/{LIMAS_TOUR.length}</span>
+          </span>
+          <h2 className="mu-title">{room.title}</h2>
+          <p className="mu-body">{room.body.replace('{names}', coupleNames || 'kedua mempelai')}</p>
+        </Panel>
+      ))}
+    </>
   )
 }
 

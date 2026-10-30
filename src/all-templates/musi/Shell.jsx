@@ -32,6 +32,7 @@ import {
   CoupleCards,
   EventsPanel,
   GalleryPanel,
+  HouseTour,
   OpeningPanel,
   QuotePanel,
   SaveDatePanel,
@@ -258,7 +259,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
       document.documentElement.classList.remove('mu-locked')
       setHint(true)
       // a short glide forward, so the journey visibly starts
-      engineRef.current?.scrollToNominal(0.04, true)
+      engineRef.current?.scrollToNominal(0.012, true)
     }, delay)
   }
 
@@ -330,6 +331,7 @@ function Invitation({ config, slug, isDemo, embed, paletteKey, setPaletteKey }) 
         <div className="mu-copy" data-mu-copy>
           <Cover props={props('musiCover')} names={names} dateDots={dateDots} guest={guest} onOpen={openInvitation} />
           <OpeningPanel names={names} eyebrow={props('musiCover').eyebrow || 'Pernikahan'} dateDots={dateDots} />
+          <HouseTour coupleNames={coupleNames} />
           {on('musiQuote') && <QuotePanel props={props('musiQuote')} />}
           {on('musiCouple') && <CoupleCards props={props('musiCouple')} />}
           {on('musiStory') && <StoryPanels props={props('musiStory')} />}

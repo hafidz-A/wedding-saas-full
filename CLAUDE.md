@@ -401,7 +401,12 @@ supabase/                                          ← schema.sql (base) + migra
    garden reads much darker than the tall one.
 14. **Musi specifics** (`src/all-templates/musi/`, spec + build prompts in
    `docs/musi-3d-scroll-prompts.md`). A three.js journey built entirely in code — NO image files of
-   its own (demo photos reuse the Lovebirds set), so nothing to upload to R2. Rumah Limas → flash →
+   its own (demo photos reuse the Lovebirds set), so nothing to upload to R2. Rumah Limas (walked
+   INTO, room by room: garang via the right-hand stair → lawang kipas folds up → kekijing → gegajah
+   → glances into a pangkeng and down to the dapur → the pelaminan; one adat card per room from
+   `config/limasTour.js`, windows `HOUSE_TOUR`; the house segments carry a `scroll` multiplier so
+   they are long to scroll without moving any later beat; `HOUSE` in `engine/limas.js` is the floor
+   plan the camera keys in `scene.js` assume) → flash →
    map of South Sumatra (`config/geo.js`, hand-simplified coastlines) → cloud dive → boat ride down
    the Musi → camera rises over the night city → fireworks. (a) **The owner's order at every
    landmark is fixed: the boat rides in and frames it → the landmark pops up out of the ground →

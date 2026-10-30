@@ -45,6 +45,9 @@ const FIXED = {
   awningA: '#c8443a',
   train: '#e9ecef',
   skin: '#c58c5f',
+  lacquer: '#1d1416', // the black of red-black-gold prada carving
+  ceramic: '#3d6fb0',
+  tikar: '#c9ad78', // pandan floor mats
 }
 
 /** Roles whose colour comes from the palette (`scene` block of config/palettes.js). */
@@ -56,6 +59,7 @@ const GLOW = {
   lamp: { key: 'light', day: 0.05, night: 2.2 },
   window: { key: 'light', day: 0.0, night: 1.4 },
   led: { key: 'trim', day: 0.0, night: 2.6 },
+  // lamp-lit insides (the Limas door glow, its chandelier and lamps): lit day and night
   door: { key: 'light', day: 1.6, night: 1.8, always: true },
 }
 
@@ -76,6 +80,8 @@ export function createMaterials(palette) {
   // reads as water next to the dark land
   mats.water = std('#8f7148', { roughness: 0.22, metalness: 0.3, emissive: new THREE.Color('#1c2a52'), emissiveIntensity: 0 })
   mats.sea = std('#2f7fae', { roughness: 0.3, metalness: 0.1 })
+  // window panes of the Rumah Limas, seen from inside on a bright day
+  mats.daylight = std('#e6eef4', { emissive: new THREE.Color('#e6eef4'), emissiveIntensity: 0.85 })
 
   return {
     get: (role) => mats[role] || mats.wood,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   APPEAR,
   BEATS,
+  HOUSE_TOUR,
   LANDMARKS,
   RIVER_STOPS,
   SEGMENTS,
@@ -10,6 +11,7 @@ import {
   storyBeats,
 } from '../config/timeline.js'
 import { buildMusiSeedConfig } from '../seed.js'
+import { LIMAS_TOUR } from '../config/limasTour.js'
 import { defaultConfig } from '../defaultConfig.js'
 import { MUSI_PALETTE_ORDER, MUSI_PALETTES } from '../config/palettes.js'
 import { TEMPLATE_PALETTES } from '@/lib/config/palette-allowlist'
@@ -78,6 +80,26 @@ describe('musi timeline', () => {
   it('builds the Ampera before the boat goes under it', () => {
     expect(riverAt(seg('couple').to)).toBeLessThan(LANDMARKS.ampera)
     expect(riverAt(APPEAR.ampera)).toBeLessThan(LANDMARKS.ampera)
+  })
+
+  it('walks through the Rumah Limas room by room before the flight', () => {
+    // garang → lawang kipas → kekijing → gegajah → pangkeng → dapur → pelaminan
+    const order = LIMAS_TOUR.map((r) => r.key)
+    expect(order).toEqual(['garang', 'lawangKipas', 'kekijing', 'gegajah', 'pangkeng', 'dapur', 'pelaminan'])
+    let prev = BEATS.opening[3]
+    for (const key of order) {
+      const [a, b, c, d] = HOUSE_TOUR[key]
+      expect(a, key).toBeGreaterThanOrEqual(prev)
+      expect(a < b && b < c && c < d, key).toBe(true)
+      prev = d
+    }
+    // the flash to the map (T 0.105) comes after the last room's card
+    expect(prev).toBeLessThan(0.105)
+  })
+
+  it('gives the house a long stretch of scroll to explore', () => {
+    const tl = buildTimeline(ALL)
+    expect(tl.toProgress(0.105)).toBeGreaterThan(0.18)
   })
 
   it('never shows Pulau Kemaro', () => {
