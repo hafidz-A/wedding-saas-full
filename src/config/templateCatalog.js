@@ -48,6 +48,17 @@ export const templateCatalog = [
     accent: '#E9967D',
     tags: ['painterly', 'garden', 'cinematic'],
   },
+  {
+    id: 'musi',
+    label: 'Musi',
+    category: 'wedding',
+    description:
+      'Dari Rumah Limas, menyusuri Musi, sampai kembang api di langit Palembang — perjalanan 3D Three.js, landmark yang muncul satu per satu, dan kartu kaca.',
+    demoSlug: 'demo-musi',
+    thumbnail: '/templates/musi/thumb.webp',
+    accent: '#8F1D21',
+    tags: ['3D', 'palembang', 'cinematic'],
+  },
 ]
 
 export function getCatalogEntry(id) {

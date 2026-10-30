@@ -6,6 +6,7 @@
      • Lovebirds → src/all-templates/lovebirds/config/themes.js (+ THEME_META)
      • Solary    → src/all-templates/solary/config/themeTokens.js (PALETTES)
      • Taman Bunga → src/all-templates/taman-bunga/config/palettes.js
+     • Musi        → src/all-templates/musi/config/palettes.js
 
    Each palette carries the exact background, accent, foreground and surface so
    the section background can morph to match whatever the running template
@@ -15,9 +16,10 @@ import { themes } from '@/all-templates/lovebirds/config/themes.js'
 import { THEME_META, THEME_ORDER } from '@/all-templates/lovebirds/config/applyTheme.js'
 import { PALETTES } from '@/all-templates/solary/config/themeTokens.js'
 import { TAMAN_BUNGA_PALETTES, TAMAN_BUNGA_PALETTE_ORDER } from '@/all-templates/taman-bunga/config/palettes.js'
+import { MUSI_PALETTES, MUSI_PALETTE_ORDER } from '@/all-templates/musi/config/palettes.js'
 
 export type VibeMode = 'light' | 'dark'
-export type TemplateId = 'lovebirds' | 'solary' | 'taman-bunga'
+export type TemplateId = 'lovebirds' | 'solary' | 'taman-bunga' | 'musi'
 
 export interface PaletteVibe {
   key: string
@@ -118,8 +120,28 @@ const tamanBungaPalettes: PaletteVibe[] = TAMAN_BUNGA_PALETTE_ORDER.map((key: st
   }
 })
 
+/* ---------- Musi ---------- */
+// The journey ends at night over the city, so every palette previews as a
+// dark one; the palette recolours the roofs, gold trim and the cards.
+const musiPalettes: PaletteVibe[] = MUSI_PALETTE_ORDER.map((key: string) => {
+  const p = (MUSI_PALETTES as Record<string, any>)[key]
+  return {
+    key,
+    label: p.label,
+    mode: 'dark' as VibeMode,
+    background: p.preview.background,
+    accent: p.gold,
+    fg: p.ink,
+    fgMuted: p.preview.fgMuted,
+    surface: p.preview.surface,
+    surfaceBorder: p.preview.surfaceBorder,
+    swatches: [p.gold, p.scene.roof, p.ink],
+  }
+})
+
 export const TEMPLATE_VIBES: TemplateVibe[] = [
   { id: 'lovebirds', label: 'Lovebirds', demoSlug: 'demo-lovebirds', category: 'wedding', palettes: lovebirdsPalettes },
   { id: 'solary', label: 'Solary', demoSlug: 'demo-solary', category: 'wedding', palettes: solaryPalettes },
   { id: 'taman-bunga', label: 'Taman Bunga', demoSlug: 'demo-taman-bunga', category: 'wedding', palettes: tamanBungaPalettes },
+  { id: 'musi', label: 'Musi', demoSlug: 'demo-musi', category: 'wedding', palettes: musiPalettes },
 ]
