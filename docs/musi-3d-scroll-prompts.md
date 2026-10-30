@@ -1,14 +1,17 @@
-# Prompt Undangan 3D Scroll: Limas ke Sungai Musi (revisi untuk FinCards)
+# Template Musi — prompt undangan 3D scroll: Limas ke Sungai Musi
 
 Undangan pernikahan 3D yang digerakkan scroll: Rumah Limas → peta Sumatera Selatan →
 menyusuri Sungai Musi → naik ke langit Palembang dengan kembang api.
+
+Nama template: **Musi** (ID `musi`). Tagline galeri: *"Dari Rumah Limas, menyusuri Musi,
+sampai kembang api di langit Palembang."*
 
 Dibangun dalam dua tahap:
 
 - **Prompt A (V1)** — prototipe satu file HTML untuk mencari tampilan dan gerak kamera.
   Datanya **sudah berbentuk config FinCards**, jadi port ke V2 tinggal mekanis.
 - **Prompt B (V2)** — masuk ke repo `wedding-saas-full` sebagai template baru
-  `src/all-templates/palembang/`, bisa diedit pasangan di dashboard dan dijual lewat checkout.
+  `src/all-templates/musi/`, bisa diedit pasangan di dashboard dan dijual lewat checkout.
 
 ## Yang berubah dari versi sebelumnya
 
@@ -28,7 +31,9 @@ Dibangun dalam dua tahap:
 
 ## Keputusan sebelum membangun
 
-- **ID template**: `palembang` (dipakai di URL `/palembang/<slug>` dan DB `template_id`). Ganti bila mau nama lain, mis. `musi`.
+- **Nama & ID template**: label **Musi**, ID `musi` (URL `/musi/<slug>`, DB `template_id`,
+  folder `src/all-templates/musi/`, tipe section berawalan `musi*`). ID tidak bisa diganti
+  lagi setelah ada baris di DB, jadi kunci sekarang.
 - **Transisi Limas → peta**: pintu terbuka + flash putih-emas (dipertahankan).
 - **Musik**: ikut sistem musik FinCards; default mati sampai tamu menekan "Buka Undangan".
 - **HP kelas bawah**: tiga level kualitas otomatis (lihat Prompt A, bagian Performa).
@@ -78,18 +83,18 @@ yang di-hardcode di kode scene.
 const CONFIG = {
   couple: { name1: 'Nama Wanita', name2: 'Nama Pria' },   // name1 = wanita, name2 = pria
   sections: [
-    { id: 'cover',    type: 'plCover',    enabled: true, props: { eyebrow, greeting, guestFallback, openLabel } },
-    { id: 'quote',    type: 'plQuote',    enabled: true, props: { label, text, source } },
-    { id: 'couple',   type: 'plCouple',   enabled: true, props: { groomLabel, groomNickname, groomFullName, groomParents, groomPhoto,
+    { id: 'cover',    type: 'musiCover',    enabled: true, props: { eyebrow, greeting, guestFallback, openLabel } },
+    { id: 'quote',    type: 'musiQuote',    enabled: true, props: { label, text, source } },
+    { id: 'couple',   type: 'musiCouple',   enabled: true, props: { groomLabel, groomNickname, groomFullName, groomParents, groomPhoto,
                                                                    brideLabel, brideNickname, brideFullName, brideParents, bridePhoto } },
-    { id: 'story',    type: 'plStory',    enabled: true, props: { label, moments: [{ id, year, title, body }] } },
-    { id: 'saveDate', type: 'plSaveDate', enabled: true, props: { label, date /* 'YYYY-MM-DDTHH:mm' */, timezone, showCountdown, calendarLabel } },
-    { id: 'events',   type: 'plEvents',   enabled: true, props: { label, events: [{ id, title, time }], venue, address, mapUrl, mapLabel, liveUrl, liveLabel } },
-    { id: 'gallery',  type: 'plGallery',  enabled: true, props: { title, hint, photos: [{ src, alt }] } },
-    { id: 'rsvp',     type: 'plRsvp',     enabled: true, props: { label, title, subtitle, maxGuests } },
-    { id: 'wishes',   type: 'guestbook',  enabled: true, props: { label, title, subtitle, initialNotes: [{ id, name, message, color }] } },
-    { id: 'gift',     type: 'plGift',     enabled: true, props: { label, title, intro, accounts: [{ id, type /* bank|ewallet */, name, accountNumber, accountHolder }], giftAddress } },
-    { id: 'closing',  type: 'plClosing',  enabled: true, props: { label, text, couplePhoto } },
+    { id: 'story',    type: 'musiStory',    enabled: true, props: { label, moments: [{ id, year, title, body }] } },
+    { id: 'saveDate', type: 'musiSaveDate', enabled: true, props: { label, date /* 'YYYY-MM-DDTHH:mm' */, timezone, showCountdown, calendarLabel } },
+    { id: 'events',   type: 'musiEvents',   enabled: true, props: { label, events: [{ id, title, time }], venue, address, mapUrl, mapLabel, liveUrl, liveLabel } },
+    { id: 'gallery',  type: 'musiGallery',  enabled: true, props: { title, hint, photos: [{ src, alt }] } },
+    { id: 'rsvp',     type: 'musiRsvp',     enabled: true, props: { label, title, subtitle, maxGuests } },
+    { id: 'wishes',   type: 'guestbook',    enabled: true, props: { label, title, subtitle, initialNotes: [{ id, name, message, color }] } },
+    { id: 'gift',     type: 'musiGift',     enabled: true, props: { label, title, intro, accounts: [{ id, type /* bank|ewallet */, name, accountNumber, accountHolder }], giftAddress } },
+    { id: 'closing',  type: 'musiClosing',  enabled: true, props: { label, text, couplePhoto } },
   ],
 }
 
@@ -191,7 +196,7 @@ Repo: wedding-saas-full (FinCards). Baca dulu CLAUDE.md lalu tutorial-multi.md
 (terutama §10 Resep, §11 Template 3D ssr:false, §12 Jebakan CSS global, §14 Checklist,
 §16 i18n).
 
-Tambahkan template baru `palembang` dari prototipe V1 (file HTML terlampir). Pakai
+Tambahkan template baru `musi` dari prototipe V1 (file HTML terlampir). Pakai
 src/all-templates/taman-bunga sebagai acuan UTAMA — strukturnya paling mirip (satu
 adegan terkoreografi, urutan section dikunci, kartu RSVP/ucapan/amplop). Pakai
 src/all-templates/solary sebagai acuan cara memakai three.js di Next.
@@ -206,7 +211,7 @@ a) Waktu & jatah scroll — config/timeline.js
      SKIPPED_WEIGHT (0,2) dari panjangnya, tidak dihapus → kamera tidak lompat.
    - BEATS: jendela teks [mulai muncul, penuh, mulai hilang, hilang] per kartu.
    - storyBeats(count) dan easelSteps(prints): jatah scroll ikut jumlah isi.
-   → Buat versi Palembang dengan segmen per landmark (Ampera, BKB, Masjid Agung, ...).
+   → Buat versi Musi dengan segmen per landmark (Ampera, BKB, Masjid Agung, ...).
 
 b) Kunci cover & scroll — Shell.jsx (sekitar baris 160 dan 194)
    - history.scrollRestoration = 'manual' + scrollTo(0, 0) saat mount.
@@ -217,7 +222,7 @@ c) Kartu RSVP / ucapan / amplop — sections/Sheets.jsx
      kode undangan 6 digit (CODE_RE, CodeField).
    - Prop `simulated` (Shell: `simulated = !slug || preview`): demo dan pratinjau
      dashboard pura-pura sukses, kode tamu tidak terpakai.
-   - WishesSheet onSent → memicu efek di scene (di sini lampion; di Palembang kembang api).
+   - WishesSheet onSent → memicu efek di scene (di sini lampion; di Musi kembang api).
    - GiftSheet: daftar accounts + tombol salin + giftAddress.
 
 d) Bentuk data — defaultConfig.js + seed.js
@@ -228,12 +233,12 @@ d) Bentuk data — defaultConfig.js + seed.js
    - Foto penutup bernama couplePhoto, BUKAN photo (fillEmptyImages; gotcha 13c).
    - seed.js (buildTamanBungaSeedConfig): salin demo, isi nama/tanggal/tempat pasangan,
      KOSONGKAN data pasangan demo (orang tua, kisah, rekening, foto). Buat
-     buildPalembangSeedConfig yang sama dan daftarkan di src/lib/onboarding/seed-config.ts.
+     buildMusiSeedConfig yang sama dan daftarkan di src/lib/onboarding/seed-config.ts.
 
 e) Utilitas tamu & tanggal — utils/invite.js
    - readGuestName (?to=), readPreviewMode, readThemeParam, parseEventDate /
      formatEventDate (WIB/WITA/WIT), calendarLink, safeUrl, initials.
-   - Boleh disalin ke palembang/utils/ (template self-contained, jangan import silang).
+   - Boleh disalin ke musi/utils/ (template self-contained, jangan import silang).
 
 f) Shell & integrasi dashboard — Shell.jsx
    - Signature: Shell({ config, slug, isDemo, embed, embedSwitcher }).
@@ -243,7 +248,7 @@ f) Shell & integrasi dashboard — Shell.jsx
      getDevice (@/lib/preview/devicePresets) untuk bingkai perangkat.
    - visibilitychange: musik di-pause saat tab tersembunyi, lanjut saat kembali.
      (Engine TB tidak mem-pause render secara eksplisit — rAF browser yang berhenti
-     sendiri. Untuk Palembang, engine three.js WAJIB pause loop-nya sendiri.)
+     sendiri. Untuk Musi, engine three.js WAJIB pause loop-nya sendiri.)
    - Ucapan terkirim: onWishSent menambah catatan ke daftar lalu memanggil
      engineRef.current.launchLantern(nama) — pola yang sama untuk kembang api.
    - Badge "Contoh undangan" di demo.
@@ -251,7 +256,7 @@ f) Shell & integrasi dashboard — Shell.jsx
 g) Palet — config/palettes.js
    - Beberapa palet bernama + PALETTE_ORDER + DEFAULT_*_PALETTE + fungsi getter.
    - Warna malam per palet (palette.night) dikirim Shell ke engine (engine.setNight).
-   → Palembang: palet default marun-emas + 2–3 alternatif; daftarkan di
+   → Musi: palet default marun-emas + 2–3 alternatif; daftarkan di
      palette-allowlist.ts dan appearance.ts.
 
 h) Engine — engine/scene.js (POLANYA saja)
@@ -275,7 +280,7 @@ warmOf/bareOf, parchment, easel galeri, gazebo, LineFrame/ornaments.js, atribut
 data-tb-*. Untuk scene 3D-nya, acuan adalah solary (three/galacticScene.js, Shell
 yang di-dynamic import dengan ssr:false).
 
-1. Folder src/all-templates/palembang/: Shell.jsx, registry.js, defaultConfig.js,
+1. Folder src/all-templates/musi/: Shell.jsx, registry.js, defaultConfig.js,
    config/{timeline,palettes}.js, engine/ (scene three.js), sections/, styles/.
    - defaultConfig.js = CONFIG dari V1, plain data saja (tidak import three/komponen).
    - Semua file client diawali 'use client'; file .tsx/.jsx baru import React eksplisit.
@@ -288,27 +293,29 @@ yang di-dynamic import dengan ssr:false).
      taman-bunga/sections/Sheets.jsx). Di preview/demo, pakai mode simulasi yang sama.
    - Ucapan tersimpan disuntik server ke section `guestbook` (initialNotes) — sudah
      otomatis lewat page.tsx selama type-nya `guestbook`.
-   - Rekening di plGift memakai bentuk accounts yang sama, jadi otomatis terenkripsi.
+   - Rekening di musiGift memakai bentuk accounts yang sama, jadi otomatis terenkripsi.
    - Nama tamu: readGuestName (?to=) seperti Taman Bunga.
    - Musik: resolveMusicSource + useYouTubePlayer seperti Shell Taman Bunga.
    - Pratinjau editor: DeviceStage / embed seperti Taman Bunga.
 3. Daftarkan di semua titik sambung (checklist §14 tutorial-multi.md), termasuk:
-   templateIndex.js, templateCatalog.js, InvitationView.tsx (dynamic, ssr:false),
-   src/middleware.ts (kedua matcher + test-nya), src/editor/schemas/palembang/ +
+   templateIndex.js (label 'Musi'), templateCatalog.js (label 'Musi', tagline
+   "Dari Rumah Limas, menyusuri Musi, sampai kembang api di langit Palembang." +
+   versi EN), InvitationView.tsx (dynamic, ssr:false),
+   src/middleware.ts (kedua matcher + test-nya), src/editor/schemas/musi/ +
    index.ts, templatePolicy.ts (urutan dikunci seperti tamanBungaPolicy; cover dan
-   closing tidak bisa dimatikan; confirmDisableTypes: ['plRsvp', 'plGift']),
+   closing tidak bisa dimatikan; confirmDisableTypes: ['musiRsvp', 'musiGift']),
    src/lib/templates/appearance.ts (ornamen []), palette-allowlist.ts, vibeData.ts +
    VibeBackdrop.tsx, dictionaries landing.ts & templates.ts, seedConfigForTemplate,
    tutorial dashboard, scripts/create-invitation.mjs.
 4. Label schema editor ditulis { id, en }; dict-parity harus hijau.
-5. Migrasi baru supabase/migrations/<tanggal>_palembang_template.sql: baris `templates`
+5. Migrasi baru supabase/migrations/<tanggal>_musi_template.sql: baris `templates`
    + `template_plans` (basic & premium). Harga diisi dari /admin, jangan di-hardcode di
    komponen. Migrasi ini hanya INSERT ke tabel yang sudah ada — tidak perlu GRANT baru.
    (Migrasi dijalankan manual oleh owner; commit tidak menyentuh produksi.)
-6. CSS di-scope ke body.palembang-route; token radius/tinggi kontrol ikut tokens.css;
+6. CSS di-scope ke body.musi-route; token radius/tinggi kontrol ikut tokens.css;
    jalankan npm run check:tokens.
 7. Verifikasi: npm run typecheck, npm run test, npm run check:tokens, npm run build;
-   buka /palembang/demo-palembang di 390px / 768px / 1280px, console bersih, ulangi
+   buka /musi/demo-musi di 390px / 768px / 1280px, console bersih, ulangi
    screenshot progres seperti V1. Coba juga dari dashboard: matikan story/gallery,
    ganti palet, simpan, pratinjau.
 
