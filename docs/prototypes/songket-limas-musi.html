@@ -52,6 +52,7 @@ p { margin: 0; }
 .floor { position: absolute; left: 50%; transform: translateX(-50%); border-radius: var(--radius-round);
   background: radial-gradient(closest-side, rgba(227, 204, 154, .22), rgba(227, 204, 154, 0)); }
 .cut { position: absolute; }
+.cut img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 18px rgba(0,0,0,.55)); }
 .cut svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 18px 18px rgba(0,0,0,.55)); }
 .panel { position: absolute; border-radius: 50cqw 50cqw 0 0; box-shadow: inset 0 0 0 1px rgba(227,204,154,.35); }
 .panel::after { content: ""; position: absolute; inset: 0; border-radius: inherit;
@@ -82,6 +83,12 @@ p { margin: 0; }
 .lamp b { position: absolute; left: 50%; bottom: -10px; width: 16px; height: 16px; margin-left: -8px; border-radius: var(--radius-round);
   background: #3A2A22; transition: background .5s, box-shadow .6s; }
 .lamp.on b { background: #FFF1D6; box-shadow: 0 0 18px 6px var(--glow), 0 0 70px 24px rgba(255,214,150,.18); }
+.pendant { position: absolute; top: 0; transform: translateX(-50%); z-index: 1; }
+.pendant img { display: block; height: 100%; width: auto; filter: brightness(.35) saturate(.6); transition: filter .7s; }
+.pendant.on img { filter: brightness(1.08) drop-shadow(0 0 10px rgba(255,214,150,.55)); }
+.pendant::after { content: ""; position: absolute; left: 50%; bottom: -9cqw; width: 26cqw; height: 18cqw; transform: translateX(-50%);
+  border-radius: var(--radius-round); background: radial-gradient(closest-side, rgba(255,214,150,.32), rgba(255,214,150,0)); opacity: 0; transition: opacity .9s; pointer-events: none; }
+.pendant.on::after { opacity: 1; }
 .spot { position: absolute; top: 0; opacity: 0; transition: opacity .9s; pointer-events: none;
   background: linear-gradient(to bottom, rgba(255,225,170,.16), rgba(255,225,170,0)); clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%); }
 .room.lit .spot { opacity: 1; }
@@ -182,56 +189,6 @@ form { display: grid; gap: 16px; }
       <path d="M9 6.5 L11.5 9 L9 11.5 L6.5 9 Z" fill="#C9A25E"/>
     </pattern>
     <linearGradient id="goldfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3CC9A"/><stop offset="1" stop-color="#8E6A34"/></linearGradient>
-    <symbol id="melati" viewBox="0 0 100 100">
-      <g fill="#FFFCF7" stroke="#DCC394" stroke-width="1.5">
-        <ellipse cx="50" cy="27" rx="12" ry="22"/><ellipse cx="50" cy="27" rx="12" ry="22" transform="rotate(72 50 50)"/>
-        <ellipse cx="50" cy="27" rx="12" ry="22" transform="rotate(144 50 50)"/><ellipse cx="50" cy="27" rx="12" ry="22" transform="rotate(216 50 50)"/>
-        <ellipse cx="50" cy="27" rx="12" ry="22" transform="rotate(288 50 50)"/>
-      </g><circle cx="50" cy="50" r="7" fill="#C9A25E"/>
-    </symbol>
-    <symbol id="kipas" viewBox="0 0 120 92">
-      <path d="M60 86 L8 34 A74 74 0 0 1 112 34 Z" fill="url(#songket)"/>
-      <g stroke="#DCC394" stroke-width="1.2" opacity=".85"><path d="M60 86 L23 22.6"/><path d="M60 86 L40.9 15.2"/><path d="M60 86 L60 12.7"/><path d="M60 86 L79.1 15.2"/><path d="M60 86 L97 22.6"/></g>
-      <path d="M8 34 A74 74 0 0 1 112 34" fill="none" stroke="#C9A25E" stroke-width="5"/>
-      <path d="M55 84 L65 84 L63 91 L57 91 Z" fill="#B48A45"/>
-    </symbol>
-    <symbol id="teratai" viewBox="0 0 120 84">
-      <ellipse cx="60" cy="72" rx="48" ry="7" fill="#2E4A3F"/>
-      <path d="M60 68 Q30 62 12 38 Q44 40 60 68Z" fill="#D9A49C"/><path d="M60 68 Q90 62 108 38 Q76 40 60 68Z" fill="#D9A49C"/>
-      <path d="M60 68 Q40 48 34 20 Q58 36 60 68Z" fill="#E7C4BC"/><path d="M60 68 Q80 48 86 20 Q62 36 60 68Z" fill="#E7C4BC"/>
-      <path d="M60 68 Q45 38 60 8 Q75 38 60 68Z" fill="#F3DDD6"/>
-    </symbol>
-    <symbol id="tanjak" viewBox="0 0 120 80">
-      <path d="M8 66 Q20 30 60 8 Q100 30 112 66 Q60 54 8 66 Z" fill="url(#songket)" stroke="#B48A45" stroke-width="2"/>
-      <path d="M15 58 Q60 46 105 58" fill="none" stroke="#C9A25E" stroke-width="3"/>
-    </symbol>
-    <symbol id="ribbon" viewBox="0 0 340 140">
-      <path d="M0 70 C70 10 130 14 170 56 C210 98 270 120 320 62 L320 96 C270 150 210 134 160 94 C110 54 50 60 0 104 Z" fill="url(#songket)"/>
-      <path d="M0 70 C70 10 130 14 170 56 C210 98 270 120 320 62" fill="none" stroke="#C9A25E" stroke-width="3"/>
-      <path d="M0 104 C50 60 110 54 160 94 C210 134 270 150 320 96" fill="none" stroke="#C9A25E" stroke-width="3"/>
-    </symbol>
-    <symbol id="perahu" viewBox="0 0 200 92">
-      <path d="M58 54 Q62 22 100 18 Q138 22 142 54 Z" fill="#C9A25E"/>
-      <path d="M6 52 Q100 98 194 52 Q182 72 100 76 Q18 72 6 52 Z" fill="#6B1626"/>
-      <path d="M16 59 Q100 90 184 59" fill="none" stroke="#C9A25E" stroke-width="2"/>
-    </symbol>
-    <symbol id="tepak" viewBox="0 0 120 84">
-      <path d="M38 26 Q44 4 62 8 Q56 24 38 26Z" fill="#2E4A3F"/><path d="M58 26 Q70 8 84 14 Q74 26 58 26Z" fill="#3F6455"/>
-      <path d="M10 26 L110 26 L106 35 L14 35 Z" fill="#C9A25E"/><path d="M14 35 L106 35 L97 70 L23 70 Z" fill="#6B1626"/>
-      <path d="M30 58 L36 52 L42 58 L48 52 L54 58 L60 52 L66 58 L72 52 L78 58 L84 52 L90 58" fill="none" stroke="#DCC394" stroke-width="1.2"/>
-      <path d="M24 70 L30 78 M96 70 L90 78" stroke="#B48A45" stroke-width="3" stroke-linecap="round"/>
-    </symbol>
-    <symbol id="limas" viewBox="0 0 320 230">
-      <path d="M160 14 L210 56 L110 56 Z" fill="#3A0F17" stroke="#C9A25E" stroke-width="2"/>
-      <path d="M110 56 L210 56 L250 92 L70 92 Z" fill="#4A1220" stroke="#C9A25E" stroke-width="2"/>
-      <path d="M154 18 C146 10 146 4 152 1 M166 18 C174 10 174 4 168 1 M110 56 C102 52 100 44 105 40 M210 56 C218 52 220 44 215 40" fill="none" stroke="#E3CC9A" stroke-width="2"/>
-      <rect x="78" y="92" width="164" height="54" fill="#5A1420"/>
-      <path d="M100 100 h24 v40 h-24z M148 100 h24 v40 h-24z M196 100 h24 v40 h-24z" fill="none" stroke="#C9A25E" stroke-width="1.5"/>
-      <rect x="56" y="146" width="208" height="12" fill="#3A0F17" stroke="#C9A25E" stroke-width="1.5"/>
-      <path d="M70 158 V196 M100 158 V196 M130 158 V196 M190 158 V196 M220 158 V196 M250 158 V196" stroke="#8E6A34" stroke-width="4"/>
-      <path d="M140 158 L180 158 L196 214 L124 214 Z" fill="#3A0F17" stroke="#C9A25E" stroke-width="1.5"/>
-      <path d="M134 176 H186 M130 190 H190 M126 204 H194" stroke="#C9A25E" stroke-width="1"/>
-    </symbol>
     <symbol id="couple" viewBox="0 0 200 230">
       <path d="M58 6 L66 28 L74 6 L82 28 L90 6 L88 40 L60 40 Z" fill="url(#goldfill)"/>
       <circle cx="74" cy="56" r="17" fill="#E9D9C9"/>
@@ -250,12 +207,12 @@ form { display: grid; gap: 16px; }
   <!-- 0 · INTRO -->
   <section class="room intro show" style="opacity:1" aria-label="Pembuka">
     <div class="set">
-      <div class="cut fly" data-fly="1,-1" data-asset="kain songket" style="right:-22cqw;top:6cqh;width:70cqw;height:29cqw;transform:rotate(-14deg)"><svg viewBox="0 0 340 140"><use href="#ribbon"/></svg></div>
-      <div class="cut fly" data-fly="1,-1" data-asset="kipas" style="right:6cqw;top:17cqh;width:24cqw;height:18cqw;transform:rotate(18deg)"><svg viewBox="0 0 120 92"><use href="#kipas"/></svg></div>
-      <div class="cut fly" data-fly="1,-1" data-asset="melati" style="right:30cqw;top:9cqh;width:9cqw;height:9cqw"><svg viewBox="0 0 100 100"><use href="#melati"/></svg></div>
-      <div class="cut fly" data-fly="-1,1" data-asset="teratai" style="left:-6cqw;bottom:9cqh;width:44cqw;height:31cqw;transform:rotate(6deg)"><svg viewBox="0 0 120 84"><use href="#teratai"/></svg></div>
-      <div class="cut fly" data-fly="-1,1" data-asset="tanjak" style="left:30cqw;bottom:6cqh;width:26cqw;height:17cqw;transform:rotate(-10deg)"><svg viewBox="0 0 120 80"><use href="#tanjak"/></svg></div>
-      <div class="cut fly" data-fly="-1,1" data-asset="melati" style="left:8cqw;bottom:34cqh;width:7cqw;height:7cqw"><svg viewBox="0 0 100 100"><use href="#melati"/></svg></div>
+      <div class="cut fly" data-fly="1,-1" data-asset="kain songket" style="right:-24cqw;top:4cqh;width:74cqw;height:40cqw;transform:rotate(-10deg)"><img data-src="songket-kain.webp" alt=""></div>
+      <div class="cut fly" data-fly="1,-1" data-asset="kipas" style="right:4cqw;top:19cqh;width:28cqw;height:20cqw;transform:rotate(16deg)"><img data-src="kipas.webp" alt=""></div>
+      <div class="cut fly" data-fly="1,-1" data-asset="melati" style="right:46cqw;top:7cqh;width:11cqw;height:13cqw;transform:rotate(-12deg)"><img data-src="melati.webp" alt=""></div>
+      <div class="cut fly" data-fly="-1,1" data-asset="teratai" style="left:-8cqw;bottom:8cqh;width:48cqw;height:32cqw;transform:rotate(6deg)"><img data-src="teratai.webp" alt=""></div>
+      <div class="cut fly" data-fly="-1,1" data-asset="tanjak" style="left:38cqw;bottom:5cqh;width:20cqw;height:26cqw;transform:rotate(-8deg)"><img data-src="tanjak.webp" alt=""></div>
+      <div class="cut fly" data-fly="-1,1" data-asset="melati" style="left:10cqw;bottom:36cqh;width:8cqw;height:10cqw;transform:rotate(20deg)"><img data-src="melati.webp" alt=""></div>
       <div class="center">
         <p class="eyebrow">Undangan Pernikahan</p>
         <h1 id="intro-title">Salsabila <em>&amp;</em> Rizky</h1>
@@ -269,9 +226,9 @@ form { display: grid; gap: 16px; }
   <section class="room" aria-label="Mempelai">
     <div class="set">
       <div class="panel" data-pat="songket" data-asset="motif songket (tile)" style="left:16cqw;top:16cqh;width:68cqw;height:44cqh"></div>
-      <div class="lamp" style="left:28cqw;height:12cqh"><i></i><b></b></div>
-      <div class="lamp" style="left:50cqw;height:8cqh"><i></i><b></b></div>
-      <div class="lamp" style="left:72cqw;height:12cqh"><i></i><b></b></div>
+      <div class="pendant" data-asset="lampu gantung" style="left:28cqw;height:24cqh"><img data-src="lampu.webp" alt=""></div>
+      <div class="pendant" style="left:50cqw;height:17cqh"><img data-src="lampu.webp" alt=""></div>
+      <div class="pendant" style="left:72cqw;height:24cqh"><img data-src="lampu.webp" alt=""></div>
       <div class="floor" style="bottom:28cqh;width:90cqw;height:14cqh"></div>
       <div class="cut" data-asset="cut-out mempelai berbusana Aesan Gede" style="left:27cqw;bottom:31cqh;width:46cqw;height:53cqw"><svg viewBox="0 0 200 230"><use href="#couple"/></svg></div>
       <div class="copy">
@@ -291,7 +248,7 @@ form { display: grid; gap: 16px; }
       <div class="panel" data-pat="ukiran" style="right:-8cqw;top:10cqh;width:26cqw;height:52cqh"></div>
       <div class="spot" style="left:10cqw;width:80cqw;height:66cqh"></div>
       <div class="floor" style="bottom:33cqh;width:96cqw;height:12cqh"></div>
-      <div class="cut" data-asset="cut-out Rumah Limas" style="left:10cqw;top:24cqh;width:80cqw;height:57.5cqw"><svg viewBox="0 0 320 230"><use href="#limas"/></svg></div>
+      <div class="cut" data-asset="cut-out Rumah Limas" style="left:8cqw;top:22cqh;width:84cqw;height:60.5cqw"><img data-src="limas.webp" alt=""></div>
       <div class="copy">
         <p class="eyebrow">Sabtu, 12 Desember 2026</p>
         <div class="two">
@@ -325,9 +282,9 @@ form { display: grid; gap: 16px; }
   <section class="room" aria-label="Konfirmasi kehadiran">
     <div class="set">
       <div class="panel" id="bloom-target" data-pat="bunga" data-asset="motif bunga (tile)" style="left:14cqw;top:12cqh;width:72cqw;height:46cqh"></div>
-      <div class="lamp" style="left:50cqw;height:9cqh"><i></i><b></b></div>
+      <div class="pendant" data-asset="lampu gantung" style="left:50cqw;height:20cqh"><img data-src="lampu.webp" alt=""></div>
       <div class="floor" style="bottom:33cqh;width:80cqw;height:12cqh"></div>
-      <div class="cut" data-asset="cut-out tepak sirih" style="left:28cqw;bottom:35cqh;width:44cqw;height:31cqw"><svg viewBox="0 0 120 84"><use href="#tepak"/></svg></div>
+      <div class="cut" data-asset="cut-out tepak sirih" style="left:29cqw;bottom:34cqh;width:42cqw;height:39cqw"><img data-src="tepak.webp" alt=""></div>
       <div class="copy">
         <p class="eyebrow">Konfirmasi Kehadiran</p>
         <h3>Kami menanti kehadiranmu</h3>
@@ -344,7 +301,7 @@ form { display: grid; gap: 16px; }
       <div class="lantern" style="left:70cqw;top:56cqh;animation-delay:3s"></div>
       <div class="lantern" style="left:44cqw;top:58cqh;animation-delay:6s"></div>
       <div class="wave" style="top:56cqh;height:12cqh;opacity:.5"><svg viewBox="0 0 600 120" preserveAspectRatio="none"><path d="M0 50 C100 20 200 80 300 50 S500 20 600 50 L600 120 L0 120 Z" fill="#3A2A22"/></svg></div>
-      <div class="cut bob" data-asset="cut-out perahu kajang" style="left:22cqw;top:50cqh;width:56cqw;height:26cqw;animation:bob 4.5s ease-in-out infinite alternate"><svg viewBox="0 0 200 92"><use href="#perahu"/></svg></div>
+      <div class="cut bob" data-asset="cut-out perahu kajang" style="left:17cqw;top:55.5cqh;width:66cqw;height:15cqw;animation:bob 4.5s ease-in-out infinite alternate"><img data-src="perahu.webp" alt=""></div>
       <div class="wave" style="top:60cqh;height:40cqh;animation-direction:alternate-reverse"><svg viewBox="0 0 600 120" preserveAspectRatio="none"><path d="M0 20 C80 5 180 35 300 18 S520 5 600 20 L600 120 L0 120 Z" fill="#1E1416"/></svg></div>
       <div class="copy">
         <p class="eyebrow">Terima kasih</p>
@@ -398,26 +355,26 @@ form { display: grid; gap: 16px; }
   var gates = {}; stage.querySelectorAll('.gate').forEach(function (g) { gates[g.dataset.gate] = g; });
   var NAMES = ['Pembuka', 'Mempelai', 'Acara', 'Galeri', 'Konfirmasi', 'Penutup'];
 
-  /* ---- placeholder motifs (later: generated seamless tiles) ---- */
+  /* ---- generated assets: local file → repo public/, published artifact → its own files ---- */
+  var BASE = location.protocol === 'file:' ? '../../public/templates/limusong/' : 'limusong/';
   function url(svg) { return 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")'; }
-  function S(w, h, body) { return "<svg xmlns='http://www.w3.org/2000/svg' width='" + w + "' height='" + h + "'>" + body + '</svg>'; }
-  function ring(cx, cy, r, n, dot, fill) { var s = ''; for (var i = 0; i < n; i++) { var a = i / n * Math.PI * 2; s += "<circle cx='" + (cx + r * Math.cos(a)).toFixed(1) + "' cy='" + (cy + r * Math.sin(a)).toFixed(1) + "' r='" + dot + "' fill='" + fill + "'/>"; } return s; }
-  function flower(cx, cy, r, petal, core) { var s = ''; for (var i = 0; i < 5; i++) s += "<ellipse cx='" + cx + "' cy='" + (cy - r * .55) + "' rx='" + r * .32 + "' ry='" + r * .55 + "' fill='" + petal + "' transform='rotate(" + i * 72 + ' ' + cx + ' ' + cy + ")'/>"; return s + "<circle cx='" + cx + "' cy='" + cy + "' r='" + r * .18 + "' fill='" + core + "'/>"; }
-  function scales(cx, cy) { var s = '', cols = ['#E3CC9A', '#120A0B']; for (var k = 0; k < 6; k++) s += "<circle cx='" + cx + "' cy='" + cy + "' r='" + (40 - k * 6.5) + "' fill='" + cols[k % 2] + "'/>"; return s; }
-  var MOTIF = {
-    songket: { size: 40, img: url(S(40, 40, "<rect width='40' height='40' fill='#6B1626'/><path d='M20 5 L35 20 L20 35 L5 20Z' fill='none' stroke='#C9A25E' stroke-width='1.4'/><path d='M20 12 L28 20 L20 28 L12 20Z' fill='none' stroke='#C9A25E'/><path d='M20 17 L23 20 L20 23 L17 20Z' fill='#E3CC9A'/><circle r='2.4' fill='#C9A25E'/><circle cx='40' r='2.4' fill='#C9A25E'/><circle cy='40' r='2.4' fill='#C9A25E'/><circle cx='40' cy='40' r='2.4' fill='#C9A25E'/>")) },
-    ukiran: { size: 96, img: url(S(96, 96, "<rect width='96' height='96' fill='#3E0C15'/><g fill='none' stroke='#C9A25E' stroke-width='2' stroke-linecap='round'><path d='M0 48 C16 20 32 20 48 48 S80 76 96 48'/><path d='M24 31 c-9 -2 -11 9 -3 10 c5 1 6 -5 2 -6'/><path d='M72 65 c9 2 11 -9 3 -10 c-5 -1 -6 5 -2 6'/></g><path d='M48 48 c6 -14 18 -16 24 -10 c-7 2 -15 4 -24 10z M48 48 c-6 14 -18 16 -24 10 c7 -2 15 -4 24 -10z' fill='#C9A25E'/><circle cx='12' cy='84' r='2' fill='#E3CC9A'/><circle cx='84' cy='12' r='2' fill='#E3CC9A'/>")) },
-    jumputan: { size: 64, img: url(S(64, 64, "<rect width='64' height='64' fill='#5E1A3A'/>" + ring(32, 32, 18, 14, 2, '#F5EEE6') + ring(32, 32, 9, 8, 1.6, '#E3CC9A') + "<path d='M32 28 L36 32 L32 36 L28 32Z' fill='#F5EEE6'/>" + ring(0, 0, 18, 14, 2, '#F5EEE6') + ring(64, 0, 18, 14, 2, '#F5EEE6') + ring(0, 64, 18, 14, 2, '#F5EEE6') + ring(64, 64, 18, 14, 2, '#F5EEE6'))) },
-    bunga: { size: 120, img: url(S(120, 120, "<rect width='120' height='120' fill='#1F3A31'/><path d='M30 30 q30 10 60 50 M90 80 q-40 10 -60 30' fill='none' stroke='#3F6455' stroke-width='3'/>" + flower(30, 30, 22, '#E7C4BC', '#C9A25E') + flower(90, 80, 26, '#F5EEE6', '#C9A25E') + flower(92, 18, 9, '#C9A25E', '#6B1626') + flower(22, 96, 11, '#D9A49C', '#F5EEE6') + flower(60, 64, 7, '#E3CC9A', '#6B1626'))) },
-    musi: { size: 80, h: 40, img: url(S(80, 40, "<rect width='80' height='40' fill='#120A0B'/>" + scales(40, 0) + scales(0, 20) + scales(80, 20) + scales(40, 40))) }
+  function tile(name) { return 'url("' + BASE + 'motif-' + name + '.webp")'; }
+  var MOTIF = {   /* size = on-screen width of one tile, px */
+    songket: { size: 230, img: tile('songket') },
+    ukiran: { size: 300, img: tile('ukiran') },
+    jumputan: { size: 250, img: tile('jumputan') },
+    bunga: { size: 330, img: tile('bunga') },
+    musi: { size: 380, h: 95, img: tile('musi') }
   };
+  stage.querySelectorAll('img[data-src]').forEach(function (im) { im.src = BASE + im.dataset.src; });
+  Object.keys(MOTIF).forEach(function (k) { new Image().src = BASE + 'motif-' + k + '.webp'; });   /* warm the gates */
   function paint(el, key, scale) {
     var m = MOTIF[key]; var s = (scale || 1) * m.size;
     el.style.backgroundImage = m.img;
     el.style.backgroundSize = s + 'px ' + (m.h ? m.h / m.size * s : s) + 'px';
   }
   stage.querySelectorAll('[data-pat]').forEach(function (el) { paint(el, el.dataset.pat); });
-  Object.keys(gates).forEach(function (k) { gates[k].querySelectorAll('.pat').forEach(function (p) { paint(p, gates[k].dataset.motif, 1.6); }); });
+  Object.keys(gates).forEach(function (k) { gates[k].querySelectorAll('.pat').forEach(function (p) { paint(p, gates[k].dataset.motif, 1.25); }); });
   /* gallery placeholder photos */
   var PH = ['radial-gradient(circle at 35% 30%, #F0D6CD, #B9676C 52%, #6B1626 92%)', 'radial-gradient(circle at 60% 30%, #F1E3C4, #C49A57 55%, #6E5A2E 95%)', 'radial-gradient(circle at 45% 35%, #DCE5DA, #6F8A7B 55%, #2E4A3F 95%)'];
   stage.querySelectorAll('.photo').forEach(function (p, i) { p.style.background = PH[i % 3]; p.style.borderRadius = '50%'; p.style.boxShadow = '0 0 0 1px rgba(227,204,154,.5), 0 30px 50px -20px #000'; });
@@ -480,7 +437,7 @@ form { display: grid; gap: 16px; }
       sh.style.opacity = 1; await titleIn(g); await wait(1100); titleOut(g, 450);
       var panel = to.querySelector('#bloom-target'), r = panel.getBoundingClientRect();
       var s = r.width / vw(), insetB = Math.max(0, vh() - r.height / s), rad = r.width / 2 / s;
-      paint(panel, 'bunga', 1.6 * s); panel.style.backgroundPosition = '0 0';
+      paint(panel, 'bunga', 1.25 * s); panel.style.backgroundPosition = '0 0';
       await tween(1300, function (k) {
         var sc = lerp(1, s, k);
         g.style.transform = 'translate(' + lerp(0, r.left, k) + 'px,' + lerp(0, r.top, k) + 'px) scale(' + sc + ')';
@@ -526,9 +483,9 @@ form { display: grid; gap: 16px; }
   var hint = document.getElementById('hint'), hintText = document.getElementById('hint-text');
   function lightUp(room) {
     room.classList.add('lit');
-    room.querySelectorAll('.lamp').forEach(function (l, i) { setTimeout(function () { l.classList.add('on'); }, 200 + i * 260); });
+    room.querySelectorAll('.lamp, .pendant').forEach(function (l, i) { setTimeout(function () { l.classList.add('on'); }, 200 + i * 260); });
   }
-  function darken(room) { room.classList.remove('lit'); room.querySelectorAll('.lamp').forEach(function (l) { l.classList.remove('on'); }); }
+  function darken(room) { room.classList.remove('lit'); room.querySelectorAll('.lamp, .pendant').forEach(function (l) { l.classList.remove('on'); }); }
   function showHint() {
     if (cur === 0) { hint.classList.remove('on'); return; }
     hintText.textContent = cur === rooms.length - 1 ? 'Ulangi dari awal' : 'Gulir untuk lanjut';
